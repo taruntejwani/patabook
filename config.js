@@ -1,4 +1,4 @@
 window.PATABOOK_SUPABASE = {
-  url: "",
-  anonKey: ""
+  url: "https://YOUR_PROJECT.supabase.co",
+  anonKey: "YOUR_ANON_KEY"
 };
