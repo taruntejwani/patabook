@@ -1,0 +1,26 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PataBook</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;color:#172033}.wrap{max-width:760px;margin:auto;padding:18px}header{height:66px;display:flex;align-items:center;justify-content:space-between}.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#172033;font-weight:800;font-size:22px}.pin{width:28px;height:28px;border-radius:9px 9px 9px 2px;background:#1261d6;transform:rotate(-45deg)}.card{border:1px solid #e8edf4;border-radius:16px;padding:18px}h1{margin:0 0 8px;font-size:28px}.meta{color:#687386;margin-bottom:14px}.actions{display:flex;gap:8px}.actions a{flex:1;text-align:center;text-decoration:none;border-radius:10px;padding:12px;font-weight:700;background:#f1f6ff;color:#1261d6}.actions a.wh{background:#eefbf3;color:#16834b}.note{color:#8a94a6}.lang{border:1px solid #dce4ef;background:#fff;border-radius:999px;padding:6px 10px;font-weight:700}</style></head><body><header class="wrap"><a class="logo" href="/"><span class="pin"></span>PataBook</a><button class="lang" id="langBtn" type="button">English</button></header><main class="wrap" id="box"><p class="note">Loading...</p></main><script src="config.js"></script><script>
+const T={hi:{back:"होम",call:"कॉल",wa:"WhatsApp",none:"Business nahi mila.",need:"config.js me anon key daalo."},en:{back:"Home",call:"Call",wa:"WhatsApp",none:"Business not found.",need:"Add the anon key in config.js."}};
+let lang=localStorage.getItem("pb-lang")||"hi";
+function t(k){return T[lang][k];}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&","<":"<",">":">","\"":""","'":"&#39;"}[c]));}
+document.getElementById("langBtn").onclick=()=>{lang=lang==="hi"?"en":"hi";localStorage.setItem("pb-lang",lang);document.getElementById("langBtn").textContent=lang==="hi"?"English":"हिन्दी";load();};
+document.getElementById("langBtn").textContent=lang==="hi"?"English":"हिन्दी";
+async function load(){
+  const box=document.getElementById("box");
+  const slug=new URLSearchParams(location.search).get("slug");
+  const c=window.PATABOOK_SUPABASE||{};
+  if(!c.url||!c.anonKey){box.innerHTML='<p class="note">'+esc(t("need"))+'</p>';return;}
+  const url=new URL(c.url.replace(/\/$/,"")+"/rest/v1/businesses");
+  url.searchParams.set("select","name,slug,phone,whatsapp,city,category,address");
+  url.searchParams.set("slug","eq."+slug);
+  url.searchParams.set("limit","1");
+  const res=await fetch(url,{headers:{apikey:c.anonKey,Authorization:"Bearer "+c.anonKey}});
+  const rows=await res.json();
+  const b=rows[0];
+  if(!b){box.innerHTML='<p class="note">'+esc(t("none"))+'</p>';return;}
+  const wa=String(b.whatsapp||"").replace(/\D/g,"");
+  document.title=b.name+" · PataBook";
+  box.innerHTML=`<article class="card"><h1>${esc(b.name)}</h1><div class="meta">${esc(b.category)} · ${esc(b.city)}</div><p>${esc(b.address)}</p><div class="actions"><a href="tel:${esc(b.phone)}">${esc(t("call"))}</a><a class="wh" href="https://wa.me/${wa}">${esc(t("wa"))}</a></div></article>`;
+}
+load();
+</script></body></html>
