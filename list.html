@@ -207,7 +207,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
       </div>
     </form>
 
-    <p class="chk" id="chkLine"><span id="chkQ">पहले से रजिस्टर किया है?</span> <button type="button" id="chkBtn">स्टेटस देखें</button></p>
+    <p class="chk" id="chkLine"><span id="chkQ">पहले से रजिस्टर किया है?</span> <button type="button" id="chkBtn">मेरी दुकान देखें</button></p>
     <div class="st" id="stBox" hidden></div>
     <div class="done" id="done">
       <div class="big">🎉</div>
@@ -811,16 +811,16 @@ function showCheck(msg){
   $("ckPh").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("ckGo").click();}};
   $("stNew").onclick=()=>showForm();
 }
-$("chkBtn").onclick=()=>showCheck();
+$("chkBtn").onclick=()=>{location.href="mybusiness.html";};   /* नंबर डालकर किसी की भी दुकान का status देखना बंद (privacy) */
 /* ---------- लॉगिन (ईमेल OTP) ---------- */
 const LXT={
   hi:{rate:"बहुत बार कोशिश हुई। थोड़ी देर बाद फिर से भेजें।",setup:"अभी रजिस्ट्रेशन चालू नहीं है। थोड़ी देर बाद कोशिश करें।",autoc:"📍 आपकी location से शहर चुना गया: {c} (बदल सकते हैं)",
       locH:"दुकान का पता लिखें",locHint:"भारत में कहीं भी — शहर / गाँव का नाम लिखना शुरू करें और list से चुनें, राज्य और ज़िला अपने-आप भर जाएँगे (न भरें तो खुद चुनें)। फिर और पूरा पता साफ़ लिखें (दुकान नंबर, रोड, लैंडमार्क)। ठेला / लारी हो तो वह जहाँ लगती है वह जगह लिखें।",
       mlk:"Google Maps का link (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (list में न हो तो ➕ से लिखें)।",areaL:"इलाका / Area (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है",
-      chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना FREE डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का poster शेयर करें",chkB:"स्टेटस देखें",
+      chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना FREE डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का poster शेयर करें",chkB:"मेरी दुकान देखें",
       st_h:"बधाई हो! आपका रजिस्ट्रेशन हो गया 🎊",st_h2:"आपका रजिस्ट्रेशन मिल गया है",st_pend:"Pending — जाँच चल रही है",
       st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द Live कर देगी।",st_left:"मिनट बाकी",
-      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ <b>30 मिनट</b> के अंदर आपकी दुकान PataBook पर Live हो जाएगी।<br>🔄 यह पेज बंद हो जाए तो दोबारा खोलकर <b>“स्टेटस देखें”</b> में अपना मोबाइल नंबर डालें।",
+      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ <b>30 मिनट</b> के अंदर आपकी दुकान PataBook पर Live हो जाएगी।<br>🔄 यह पेज बंद हो जाए तो इसी फ़ोन पर यह पेज दोबारा खोलें — स्टेटस अपने-आप दिखेगा।",
       st_over:"⏳ <b>बस थोड़ी देर और!</b> आपकी दुकान जाँच में है और जल्द Live होगी। यह पेज अपने-आप अपडेट हो जाएगा।",st_over_s:"जल्द Live",
       st_ref:"स्टेटस फिर से देखें",st_new:"+ नई दुकान जोड़ें",
       st_live_p:"✅ Live",st_live_h:"आपकी दुकान Live हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
@@ -832,10 +832,10 @@ const LXT={
   en:{rate:"Too many attempts. Please try again in a little while.",setup:"Registration is not open right now. Please try again later.",autoc:"📍 City picked from your location: {c} (you can change it)",
       locH:"Write your shop address",locHint:"Anywhere in India — start typing your city / village and pick it from the list; state and district fill in automatically (choose them if they don’t). Then the full address clearly (shop no., road, landmark). For a stall/cart, write where it stands.",
       mlk:"Google Maps link (optional)",cityL:"City / Village *",distL:"District *",stateL:"State *",e_city2:"Write the city / village name (letters only).",e_dist:"Choose the district (not in list? use ➕ to write it).",areaL:"Area (optional)",addrL:"Full address *",addrPh:"Shop no., road, landmark — or where your stall/cart stands",
-      chkQ:"Already registered?",st_card:"Share your FREE digital visiting card",st_card_err:"Could not make the card right now, please try again.",st_fest:"share your shop poster",chkB:"Check status",
+      chkQ:"Already registered?",st_card:"Share your FREE digital visiting card",st_card_err:"Could not make the card right now, please try again.",st_fest:"share your shop poster",chkB:"See My Shop",
       st_h:"Congratulations! You are registered 🎊",st_h2:"We have your registration",st_pend:"Pending — under review",
       st_sub:"has been added to PataBook. Our team will review it and make it live soon.",st_left:"minutes left",
-      st_info:"✅ Nothing more to do.<br>⏱️ Your shop goes live on PataBook within <b>30 minutes</b>.<br>🔄 If this page closes, open it again, tap <b>“Check status”</b> and enter your mobile number.",
+      st_info:"✅ Nothing more to do.<br>⏱️ Your shop goes live on PataBook within <b>30 minutes</b>.<br>🔄 If this page closes, open it again on this phone — the status will show automatically.",
       st_over:"⏳ <b>Just a little longer!</b> Your shop is being reviewed and will be live soon. This page updates by itself.",st_over_s:"Live soon",
       st_ref:"Check status again",st_new:"+ Add a new shop",
       st_live_p:"✅ Live",st_live_h:"Your shop is live! 🎉",st_live_s:"is now visible to everyone on PataBook.",st_see:"See your shop ›",
