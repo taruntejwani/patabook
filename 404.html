@@ -19,10 +19,16 @@ a.s{background:#eef2fb;color:#174ea6}
 <body>
 <div class="c">
   <div class="big">🔍</div>
-  <h1>यह पेज नहीं मिला</h1>
-  <p>हो सकता है यह link पुराना हो या बदल गया हो।<br>This page could not be found.</p>
-  <a href="/">🏠 PataBook होम</a>
-  <a class="s" href="/search.html">दुकान खोजें</a>
+  <h1 id="h">यह पेज नहीं मिला</h1>
+  <p id="p">हो सकता है यह link पुराना हो या बदल गया हो।</p>
+  <a href="/" id="a1">🏠 PataBook होम</a>
+  <a class="s" href="/search.html" id="a2">दुकान खोजें</a>
+</div>
+<script>
+try{if(localStorage.getItem('pb-lang')==='en'){document.documentElement.lang='en';document.title='Page not found — PataBook';
+h.textContent='This page could not be found';p.textContent='The link may be old or may have changed.';a1.textContent='🏠 PataBook Home';a2.textContent='Search shops';}}catch(e){}
+</script>
+<div>
 </div>
 </body>
 </html>

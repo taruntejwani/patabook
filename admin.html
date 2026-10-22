@@ -178,7 +178,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function gate(kind, extra) {
     $('panel').hidden = true;
     var h = kind === 'login'
-      ? '<div class="msg"><h2>🔒 Admin लॉगिन</h2><p>अपने admin email या admin मोबाइल नंबर से लॉगिन करें।</p><a href="' + PBA.loginUrl('admin.html') + '">✉️ Email से लॉगिन करें</a>' + (PBA.mobile && PBA.mobile.enabled() ? ' <a href="admin-login.html" style="margin-top:8px;background:#0b2f73">📱 Mobile OTP से लॉगिन करें</a>' : '') + '</div>'
+      ? (function(){var en=false;try{en=localStorage.getItem('pb-lang')==='en'}catch(e){}return '<div class="msg"><h2>'+(en?'🔒 Admin login':'🔒 Admin लॉगिन')+'</h2><p>'+(en?'Log in with your admin email or admin mobile number.':'अपने admin email या admin मोबाइल नंबर से लॉगिन करें।')+'</p><a href="' + PBA.loginUrl('admin.html') + '">'+(en?'✉️ Log in with Email':'✉️ Email से लॉगिन करें')+'</a>' + (PBA.mobile && PBA.mobile.enabled() ? ' <a href="admin-login.html" style="margin-top:8px;background:#0b2f73">'+(en?'📱 Log in with Mobile OTP':'📱 Mobile OTP से लॉगिन करें')+'</a>' : '') + '</div>'})()
       : kind === 'noadmin'
       ? '<div class="msg"><h2>⛔ अनुमति नहीं</h2><p>यह email admin सूची में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '. Supabase में <b>pb_admins</b> में यह email जोड़ें।</p></div>'
       : '<div class="msg"><h2>⚠️ Admin सेटअप बाकी</h2><p class="err">' + esc(extra || '') + '</p><p>Supabase में <b>sql-02-admin-and-search.sql</b> चलाएँ।</p></div>';
