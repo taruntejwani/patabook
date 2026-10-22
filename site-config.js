@@ -10,7 +10,7 @@ window.PB_SITE = {
   grievanceName: '',    // शिकायत अधिकारी (Grievance Officer) का नाम
   grievanceEmail: '',   // शिकायत अधिकारी का email (खाली हो तो ऊपर वाला email)
   city: 'Gandhidham, Kutch, Gujarat',
-  updated: '13 October 2026',
+  updated: '22 October 2026',
 
   /* AI Poster: 'PataBook AI' Worker का पता (जैसे 'https://patabook-ai.XXXX.workers.dev'). खाली रहे तो AI बटन नहीं दिखेगा। */
   aiUrl: 'https://patabook-ai.tejwani512.workers.dev',

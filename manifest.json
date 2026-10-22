@@ -1,7 +1,8 @@
 {
+  "id": "/index.html?source=app",
   "name": "PataBook – Business Directory",
   "short_name": "PataBook",
-  "description": "अपने शहर के बिज़नेस, एक ही जगह।",
+  "description": "PataBook – find local shops and services in your city: call, WhatsApp and get directions. अपने शहर के बिज़नेस, एक ही जगह।",
   "start_url": "/index.html?source=app",
   "scope": "/",
   "display": "standalone",
@@ -33,5 +34,13 @@
       "platform": "webapp",
       "url": "https://patabook.in/manifest.json"
     }
-  ]
+  ],
+  "lang": "hi",
+  "dir": "ltr",
+  "categories": [
+    "business",
+    "shopping",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false
 }
