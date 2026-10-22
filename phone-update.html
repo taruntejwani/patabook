@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>मोबाइल नंबर अपडेट — PataBook</title>
+<link rel="icon" href="pin.png">
+<meta name="theme-color" content="#1a73e8">
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#e8f1ff 0%,#fff 42%);color:#12141c;min-height:100vh}
+.wrap{max-width:520px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.back{border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:#0b2f73;text-decoration:none}
+.brand{font-weight:800;font-size:18px;color:#0b2f73}
+.card{background:#fff;border:1px solid #e4eaf5;border-radius:20px;padding:22px 18px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
+h1{font-size:21px;color:#0b2f73;margin:0 0 6px;line-height:1.35}
+.shop{font-weight:700;margin:0 0 4px}
+.addr{color:#5b6475;font-size:13.5px;margin:0 0 12px}
+.banner{background:#fff4e5;color:#7a3b00;border:1px solid #ffd8a8;border-radius:14px;padding:12px 14px;font-weight:700;line-height:1.5;margin:0 0 16px}
+.lbl{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:#3c4043}
+.ph{display:flex;align-items:center;border:2px solid #dfe1e5;border-radius:14px;overflow:hidden;background:#fff}
+.ph span{padding:0 10px 0 14px;font-size:17px;color:#5f6368}
+.ph:focus-within,input:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
+input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:17px;outline:0;font-family:inherit;background:#fff}
+.ph input{border:0;box-shadow:none!important;padding-left:0}
+#code{letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:16px;font-family:inherit;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.6}
+.btn.sec{background:#eef2fb;color:#174ea6}
+.links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+.links button{border:0;background:none;color:#1a73e8;font-weight:600;font-size:14px;cursor:pointer;padding:4px 0;font-family:inherit}
+.links button:disabled{color:#9aa0a6}
+.err{color:#c5221f;font-size:14px;margin-top:10px;min-height:18px;line-height:1.5}
+.ok{background:#e6f4ea;color:#137333;border-radius:12px;padding:14px;line-height:1.55;font-size:15px;font-weight:600}
+.help{font-size:13.5px;color:#5b6475;line-height:1.6}
+.help h2{font-size:15px;color:#0b2f73;margin:0 0 6px}
+.help ol{padding-left:20px;margin:6px 0 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><a class="back" href="mybusiness.html">← मेरी दुकान</a><div class="brand">PataBook</div></div>
+
+ <div class="card" id="loading"><p class="help">…</p></div>
+
+ <!-- Not logged in -->
+ <div class="card" id="needLogin" hidden>
+  <h1>पहले लॉगिन करें</h1>
+  <p class="help">दुकान का मोबाइल नंबर सिर्फ दुकान का मालिक बदल सकता है। जिस ईमेल से आपकी दुकान जुड़ी है, उससे लॉगिन करें।</p>
+  <a class="btn" id="loginBtn" href="login.html">ईमेल से लॉगिन करें →</a>
+ </div>
+
+ <!-- Logged in but not the owner of this shop -->
+ <div class="card" id="notOwner" hidden>
+  <h1>यह दुकान आपके ईमेल से नहीं जुड़ी</h1>
+  <p class="help">सुरक्षा के लिए, किसी दुकान का नंबर सिर्फ वही बदल सकता है जिसका ईमेल उस दुकान के मालिक के रूप में जुड़ा हो।</p>
+ </div>
+
+ <!-- Main flow -->
+ <div class="card" id="main" hidden>
+  <p class="shop" id="shopName"></p>
+  <p class="addr" id="shopAddr"></p>
+  <div class="banner">अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।</div>
+
+  <form id="s1" novalidate>
+   <label class="lbl" for="phone">नया मोबाइल नंबर (इसी नंबर पर OTP आएगा)</label>
+   <div class="ph"><span>+91</span><input id="phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" placeholder="98765 43210"></div>
+   <div class="err" id="e1"></div>
+   <button class="btn" type="submit" id="send">OTP भेजें</button>
+  </form>
+
+  <form id="s2" hidden novalidate>
+   <p class="help" id="sentTo"></p>
+   <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+   <div class="err" id="e2"></div>
+   <button class="btn" type="submit" id="verify">Verify करके नंबर बदलें</button>
+   <div class="links"><button type="button" id="resend">OTP फिर भेजें</button><button type="button" id="change">नंबर बदलें</button></div>
+  </form>
+
+  <div id="s3" hidden>
+   <div class="ok" id="doneTxt"></div>
+   <a class="btn" href="mybusiness.html">मेरी दुकान पर जाएँ</a>
+   <a class="btn sec" id="viewShop" href="#">दुकान का पेज देखें</a>
+  </div>
+ </div>
+
+ <!-- Alternative ownership verification -->
+ <div class="card help" id="alt" hidden>
+  <h2>पुराना नंबर बंद है या आपके पास नहीं है?</h2>
+  <p>पुराने नंबर की ज़रूरत नहीं है। आपकी पहचान आपके <b>मालिक वाले ईमेल लॉगिन</b> से होती है, और OTP सिर्फ <b>नए</b> नंबर पर आता है।</p>
+  <h2 style="margin-top:12px">दुकान आपके ईमेल से नहीं जुड़ी है?</h2>
+  <ol>
+   <li><a href="contact.html">Contact / Support</a> पेज पर "दुकान की जानकारी ठीक करें" चुनें।</li>
+   <li>दुकान का नाम, Business ID (अगर है), पता और वह ईमेल लिखें जिससे आप लॉगिन करते हैं।</li>
+   <li>PataBook टीम दुकान पर जाकर या दस्तावेज़ (जैसे दुकान का बोर्ड/बिल/GST/Udyam) देखकर मालिकाना हक की पुष्टि करेगी, फिर आपका ईमेल दुकान से जोड़ेगी।</li>
+   <li>उसके बाद इसी पेज से नए नंबर पर OTP verify करके नंबर बदलें।</li>
+  </ol>
+  <p style="margin-top:8px">पुष्टि होने तक कोई भी दूसरा व्यक्ति आपकी दुकान पर अपना नंबर नहीं जोड़ सकता।</p>
+ </div>
+</div>
+<script>
+(function(){
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id);
+const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
+let phone="",timer=null;
+function only(id){["loading","needLogin","notOwner","main"].forEach(x=>$(x).hidden=x!==id);$("alt").hidden=id==="loading"||id==="needLogin";}
+function step(n){$("s1").hidden=n!==1;$("s2").hidden=n!==2;$("s3").hidden=n!==3;}
+function clean(v){let d=String(v||"").replace(/\D/g,"");if(d.length===12&&d.startsWith("91"))d=d.slice(2);if(d.length===11&&d.startsWith("0"))d=d.slice(1);return /^[6-9]\d{9}$/.test(d)?d:"";}
+function msg(e){
+  const c=e&&e.code;
+  if(c==="bad_phone")return "सही 10 अंकों का मोबाइल नंबर लिखें।";
+  if(c==="bad_code")return "6 अंकों का OTP लिखें।";
+  if(c==="resend_too_soon")return (e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।";
+  if(c==="rate_limited_mobile")return "इस नंबर पर आज के OTP पूरे हो गए। कल फिर कोशिश करें।";
+  if(c==="rate_limited_ip")return "बहुत ज़्यादा कोशिशें हुईं। लगभग एक घंटे बाद कोशिश करें।";
+  if(c==="sms_failed")return "SMS नहीं भेजा जा सका। थोड़ी देर बाद कोशिश करें।";
+  if(c==="invalid_otp")return "OTP गलत है।"+(e.attempts_left?" "+e.attempts_left+" कोशिश बाकी।":"");
+  if(c==="otp_expired"||c==="otp_expired_or_missing")return "OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।";
+  if(c==="too_many_attempts")return "3 बार गलत OTP डाला गया। नया OTP मँगाएँ।";
+  if(c==="login_required")return "लॉगिन की समय-सीमा खत्म हो गई। दोबारा लॉगिन करें।";
+  if(c==="not_owner")return "यह दुकान आपके ईमेल से नहीं जुड़ी।";
+  if(c==="phone_in_use")return "यह नंबर पहले से किसी दूसरी दुकान पर है। कोई दूसरा नंबर डालें या Support से संपर्क करें।";
+  if(c==="update_failed"||c==="shop_not_found"||c==="owner_check_failed")return "नंबर अपडेट नहीं हो सका। थोड़ी देर बाद कोशिश करें।";
+  if(c==="otp_not_configured"||c==="server_not_configured"||c==="origin_not_allowed")return "यह सुविधा अभी चालू नहीं है।";
+  return "कुछ गड़बड़ हुई। इंटरनेट जाँचकर फिर कोशिश करें।";
+}
+function cool(sec){
+  let left=sec||60;const b=$("resend");b.disabled=true;clearInterval(timer);
+  const tick=()=>{b.textContent="OTP फिर भेजें"+(left>0?" ("+left+")":"");if(left--<=0){clearInterval(timer);b.disabled=false;}};
+  tick();timer=setInterval(tick,1000);
+}
+async function send(){
+  $("e1").textContent="";$("e2").textContent="";
+  if(!phone){$("e1").textContent=msg({code:"bad_phone"});step(1);return;}
+  const b=$("send");b.disabled=true;
+  try{
+    const j=await PBA.mobile.shopSend(slug,phone);
+    $("sentTo").textContent="+91 "+phone+" पर 6 अंकों का OTP भेजा गया है। यह 5 मिनट तक चलेगा।";
+    step(2);$("code").value="";setTimeout(()=>$("code").focus(),50);cool(j.resend_after);
+  }catch(e){
+    const t=msg(e);if($("s2").hidden)$("e1").textContent=t;else $("e2").textContent=t;
+    if(e.code==="login_required")location.href=PBA.loginUrl("phone-update.html?slug="+encodeURIComponent(slug));
+  }finally{b.disabled=false;}
+}
+$("s1").onsubmit=e=>{e.preventDefault();phone=clean($("phone").value);send();};
+$("resend").onclick=()=>send();
+$("change").onclick=()=>{step(1);$("phone").focus();};
+$("s2").onsubmit=async e=>{
+  e.preventDefault();
+  const c=$("code").value.replace(/\D/g,"");
+  if(c.length!==6){$("e2").textContent=msg({code:"bad_code"});return;}
+  const b=$("verify");b.disabled=true;$("e2").textContent="";
+  try{
+    await PBA.mobile.shopVerify(slug,phone,c);
+    $("doneTxt").textContent="✅ आपकी दुकान का मोबाइल नंबर +91 "+phone+" पर अपडेट हो गया।";
+    $("viewShop").href="business.html?slug="+encodeURIComponent(slug);document.querySelector(".banner").hidden=true;
+    step(3);
+  }catch(x){$("e2").textContent=msg(x);b.disabled=false;}
+};
+(async function start(){
+  only("loading");
+  $("loginBtn").href=PBA.loginUrl("phone-update.html?slug="+encodeURIComponent(slug));
+  if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
+  if(!PBA.mobile||!PBA.mobile.enabled()){only("main");$("e1").textContent=msg({code:"otp_not_configured"});$("send").disabled=true;return;}
+  const s=await PBA.session();
+  if(!s){only("needLogin");return;}
+  try{
+    const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
+    const rows=r.ok?await r.json():[];
+    const b=(Array.isArray(rows)?rows:[]).find(x=>x&&x.slug===slug);
+    if(!b){only("notOwner");return;}
+    $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";
+    only("main");step(1);
+  }catch(e){only("main");$("e1").textContent=msg({});}
+})();
+})();
+</script>
+</body>
+</html>

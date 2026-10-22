@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>मेरी दुकान — PataBook</title>
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="i18n.js"></script>
+<script src="pb-auth.js"></script>
+<script src="site-config.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--green:#1e9e57}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#e8f1ff 0%,#fff 42%);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:560px;margin:0 auto;padding:12px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--navy)}
+.brand{display:flex;align-items:center;gap:6px;font-weight:800;font-size:18px;color:var(--navy)}
+.brand img{width:22px}
+#pbLang{margin-inline-start:auto}
+h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 2px 14px}
+.who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#e8f5e9;color:#1b5e20;border-radius:12px;padding:9px 12px;font-size:13.5px;margin-bottom:14px}
+.who button{margin-inline-start:auto;color:var(--blue);font-weight:600;font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
+.card h2{font-size:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.st{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px}
+.st.live{background:#e6f4ea;color:#137333}.st.pend{background:#fff4e5;color:#b54708}
+.addr{color:var(--muted);font-size:13.5px;margin-top:4px;overflow-wrap:anywhere}
+
+/* नंबर स्विच: ON = रंगीन, OFF = ब्लैक एंड व्हाइट */
+.phone{margin-top:14px;display:flex;align-items:center;gap:12px;border-radius:16px;padding:12px;background:linear-gradient(135deg,#e7f8ee,#e8f1ff);border:1px solid #cfe8da;transition:filter .25s,background .25s}
+.phone.off{filter:grayscale(1);background:#f2f2f2;border-color:#ddd}
+.phone .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;background:linear-gradient(145deg,#25d366,#1a73e8);color:#fff;flex:none}
+.phone .tx{flex:1;min-width:0}
+.phone .tx b{display:block;font-size:15px}
+.phone .tx small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.sw{position:relative;width:58px;height:32px;border-radius:999px;background:linear-gradient(90deg,#25d366,#1a73e8);flex:none;transition:background .25s}
+.sw::after{content:"";position:absolute;top:3px;left:29px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:left .2s}
+.sw[aria-checked="false"]{background:#9a9a9a}
+.sw[aria-checked="false"]::after{left:3px}
+.sw:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.sw:disabled{opacity:.6;cursor:wait}
+.row2{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.row2 a{flex:1;text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:700;font-size:14px;color:var(--blue);background:#fff}
+.err{color:#b42318;font-size:13px;margin-top:8px;min-height:1px}
+
+.gate,.empty{text-align:center;padding:26px 18px}
+.gate .big,.empty .big{font-size:42px}
+.gate h2,.empty h2{justify-content:center;margin:6px 0 8px;font-size:19px}
+.gate p,.empty p{color:var(--muted);line-height:1.55;margin-bottom:16px;font-size:14.5px}
+.btn{display:block;background:var(--blue);color:#fff;font-weight:800;border-radius:14px;padding:14px;font-size:16px}
+.btn.y{background:#ffd21f;color:var(--ink)}
+.note{color:var(--muted);text-align:center;padding:20px}
+.planbn{display:flex;align-items:center;gap:12px;margin:0 0 14px;border-radius:18px;padding:13px 14px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff}
+.planbn .ic{font-size:24px}.planbn .tx{flex:1;min-width:0}.planbn b{display:block;font-size:15px}.planbn small{display:block;opacity:.85;font-size:12.5px}
+.planbn .go{font-size:22px}
+</style>
+<script src="pb-track.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html" id="backT">← वापस</a>
+    <a class="brand" href="index.html"><img src="pin.png" alt="">PataBook</a>
+    <span id="pbLang"></span>
+  </div>
+
+  <h1 id="h1">मेरी दुकान</h1>
+  <p class="sub" id="sub">अपनी दुकान की जानकारी और नंबर यहां से संभालें।</p>
+
+  <div class="card gate" id="gate" hidden>
+    <div class="big">🔐</div>
+    <h2 id="gH">पहले लॉगिन करें</h2>
+    <p id="gP">जिस ईमेल से आपने दुकान जोड़ी थी, उसी से लॉगिन करें।</p>
+    <a class="btn" href="login.html?next=mybusiness.html" id="gB">ईमेल से लॉगिन करें →</a>
+  </div>
+
+  <div class="who" id="who" hidden><span id="whoT"></span><button type="button" id="out"></button></div>
+  <a class="planbn" href="plan.html"><span class="ic" aria-hidden="true">⭐</span><span class="tx"><b id="pbT">₹99 प्लान में क्या मिलेगा? देखें</b><small id="pbS">Dashboard और Marketing Studio · जल्द शुरू होगा</small></span><span class="go" aria-hidden="true">›</span></a>
+  <div id="list"><p class="note">…</p></div>
+</div>
+
+<script>
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TX={
+ hi:{back:"← वापस",h1:"मेरी दुकान",sub:"अपनी दुकान की जानकारी और नंबर यहां से संभालें।",gH:"पहले लॉगिन करें",gP:"जिस ईमेल से आपने दुकान जोड़ी थी, उसी से लॉगिन करें।",gB:"ईमेल से लॉगिन करें →",
+     who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",live:"Live",pend:"जांच बाकी (Pending)",
+     on_b:"नंबर सबको दिख रहा है",on_s:"ग्राहक सीधे Call और WhatsApp कर सकते हैं",off_b:"नंबर बंद है",off_s:"आपकी दुकान के पेज पर नंबर नहीं दिखेगा",
+     pend_s:"दुकान Live होने के बाद यह नियम लागू होगा",view:"दुकान का पेज देखें",add:"नई दुकान जोड़ें",
+     e_none_h:"आपके ईमेल से कोई दुकान नहीं जुड़ी",e_none_p:"नई दुकान जोड़ें। अगर आपकी दुकान पहले से PataBook पर है, तो PataBook Admin से अपना ईमेल जुड़वाएं।",
+     e_setup:"यह सुविधा अभी शुरू हो रही है। थोड़ी देर बाद दोबारा खोलें।",e_net:"लोड नहीं हो पाया। इंटरनेट जांचकर दोबारा खोलें।",e_sw:"नहीं बदल पाया। दोबारा कोशिश करें।",sw_l:"नंबर दिखाएं",pbT:"₹99 प्लान में क्या मिलेगा? देखें",pbS:"Dashboard और Marketing Studio · जल्द शुरू होगा"},
+ en:{back:"← Back",h1:"My Shop",sub:"Manage your shop details and number here.",gH:"Log in first",gP:"Log in with the email you used to add your shop.",gB:"Log in with email →",
+     who:"✅ Logged in as {e}",out:"Log out",live:"Live",pend:"Under review (Pending)",
+     on_b:"Number is visible to everyone",on_s:"Customers can Call and WhatsApp you directly",off_b:"Number is hidden",off_s:"Your number will not show on your shop page",
+     pend_s:"This applies once your shop is Live",view:"View shop page",add:"Add a new shop",
+     e_none_h:"No shop is linked to your email",e_none_p:"Add a new shop. If your shop is already on PataBook, ask the PataBook Admin to link your email.",
+     e_setup:"This feature is just starting. Please open again in a while.",e_net:"Could not load. Check your internet and open again.",e_sw:"Could not change. Try again.",sw_l:"Show number",pbT:"What does the ₹99 plan include? See",pbS:"Dashboard and Marketing Studio · coming soon"}
+};
+const L=()=>(window.PB&&PB.lang&&PB.lang()==="en")?"en":"hi";
+const tx=(k,v)=>String(TX[L()][k]).replace("{e}",v||"");
+let ME=null,ROWS=null,ERR="";
+
+async function rpc(fn,args){
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));e.status=r.status;throw e;}
+  return j;
+}
+function phoneBlock(b,i){
+  const on=b.show_phone!==false;
+  return '<div class="phone'+(on?"":" off")+'" id="ph'+i+'"><span class="ic" aria-hidden="true">📞</span>'+
+    '<span class="tx"><b>'+esc(tx(on?"on_b":"off_b"))+'</b><small>'+esc(b.is_active?tx(on?"on_s":"off_s"):tx("pend_s"))+(b.phone?' · '+esc(b.phone):'')+'</small></span>'+
+    '<button type="button" class="sw" role="switch" aria-checked="'+on+'" aria-label="'+esc(tx("sw_l"))+'" data-i="'+i+'"></button></div><div class="err" id="er'+i+'"></div>';
+}
+function draw(){
+  PB.apply();
+  ["h1","sub","gH","gP","gB","pbT","pbS"].forEach(k=>$(k).textContent=tx(k));$("backT").textContent=tx("back");
+  document.title=tx("h1")+" — PataBook";
+  $("gate").hidden=!!ME;$("who").hidden=!ME;
+  if(!ME){$("list").innerHTML="";return;}
+  $("whoT").textContent=tx("who",ME.email);$("out").textContent=tx("out");
+  const list=$("list");
+  if(ERR){list.innerHTML='<p class="note">'+esc(tx(ERR))+'</p>';return;}
+  if(!ROWS){list.innerHTML='<p class="note">…</p>';return;}
+  if(!ROWS.length){
+    list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx("e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
+  }
+  list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
+    (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
+    (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
+    phoneBlock(b,i)+
+    '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
+    (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
+    '</div></div>').join("")+
+    '<a class="btn y" href="list.html" style="text-align:center;margin-top:6px">'+esc(tx("add"))+' ›</a>';
+}
+$("list").addEventListener("click",async e=>{
+  const sw=e.target.closest(".sw");if(!sw)return;
+  const i=+sw.dataset.i,b=ROWS[i],want=!(b.show_phone!==false);
+  sw.disabled=true;$("er"+i).textContent="";
+  try{const v=await rpc("pb_set_show_phone",{p_slug:b.slug,p_on:want});b.show_phone=(v===false)?false:want;draw();}
+  catch(x){sw.disabled=false;$("er"+i).textContent=tx("e_sw");}
+});
+$("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
+async function start(){
+  ME=await PBA.session();draw();
+  if(!ME)return;
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";}
+  catch(e){
+    if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
+    else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";
+  }
+  draw();
+}
+PB.mount($("pbLang"));
+PB.onChange(draw);
+start();
+</script>
+</body>
+</html>

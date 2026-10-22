@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a73e8">
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<title>PataBook Map – दुकानें और रास्ता</title>
+<script>
+/* Mapbox (best quality) पहले; Mapbox बंद/सीमा पार हो तो अपने-आप मुफ़्त नक्शा */
+var PB_USE_MAPBOX = true;
+var PB_LIBS = {
+  mapbox: ['https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.css', 'https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.js'],
+  free: ['https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css', 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js']
+};
+(function () {
+  var freeUntil = 0; try { freeUntil = +localStorage.getItem('pb-free-until') || 0; } catch (e) {}
+  window.PB_PROVIDER = PB_USE_MAPBOX && freeUntil < Date.now() ? 'mapbox' : 'free';
+  function load(kind, fail) {
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = PB_LIBS[kind][0]; document.head.appendChild(l);
+    var sc = document.createElement('script'); sc.src = PB_LIBS[kind][1];
+    sc.onload = function () { if (kind === 'mapbox') window.maplibregl = window.mapboxgl; window.PB_PROVIDER = kind; window.__libReady = true; if (window.PBMAIN) window.PBMAIN(); };
+    sc.onerror = fail;
+    document.head.appendChild(sc);
+  }
+  var giveUp = function () { window.__libReady = true; if (window.PBMAIN) window.PBMAIN(); };
+  if (window.PB_PROVIDER === 'mapbox') load('mapbox', function () { load('free', giveUp); });
+  else load('free', giveUp);
+})();
+</script>
+<script src="i18n.js"></script>
+<script src="map-i18n.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--top:calc(10px + env(safe-area-inset-top))}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#f3f1ec}
+#map{position:absolute;inset:0}
+button,input,select{font:inherit}button{cursor:pointer}
+[hidden]{display:none!important}
+
+/* ---------- ऊपर: नाम + शहर ---------- */
+.top{position:absolute;z-index:6;top:var(--top);left:10px;right:10px;display:flex;align-items:center;gap:8px;background:#ffffffee;border-radius:16px;padding:7px 8px 7px 10px;box-shadow:0 8px 28px #102a4322;backdrop-filter:blur(10px)}
+.back{font-size:22px;line-height:1;padding:4px 4px 4px 0;color:var(--navy);text-decoration:none}
+.brand{flex:1;min-width:0;display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink)}
+.brand img{width:24px;height:auto;flex:none}
+.brand b{display:block;font-size:16px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}.brand b span{color:var(--blue)}
+.cityw{position:relative;flex:none}
+.cityw select{appearance:none;-webkit-appearance:none;border:1px solid #d0d5dd;border-radius:10px;background:#fff;padding:8px 26px 8px 10px;font-size:13px;font-weight:700;color:#344054;max-width:132px}
+.cityw::after{content:"▾";position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;color:#667085;pointer-events:none}
+
+/* ---------- खोज ---------- */
+.sbar{position:absolute;z-index:6;top:calc(var(--top) + 60px);left:10px;right:10px;display:flex;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:0 6px 0 12px;box-shadow:0 6px 22px #102a4326;height:46px}
+.sbar svg{width:20px;height:20px;flex:none;fill:#667085}
+.sbar input{flex:1;min-width:0;border:0;outline:0;font-size:16px;background:transparent;color:var(--ink)}
+.sbar button{border:0;background:none;font-size:20px;color:#667085;padding:6px 8px}
+.sres{position:absolute;z-index:7;top:calc(var(--top) + 110px);left:10px;right:10px;max-height:52vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 10px 30px #102a4330}
+.sres .h{padding:9px 14px 4px;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.sres a{display:flex;align-items:center;gap:11px;padding:10px 14px;border-top:1px solid #f1f3f6;color:var(--ink);text-decoration:none;cursor:pointer}
+.sres a:active,.sres a:hover{background:#f1f6ff}
+.sres .ic{width:32px;height:32px;flex:none;border-radius:10px;display:grid;place-items:center;background:#eff4ff}
+.sres .ic img{width:20px}.sres .ic svg{width:18px;height:18px;fill:#fff}
+.sres b{display:block;font-size:14.5px}.sres small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.sres .none{padding:14px;font-size:13px;color:var(--muted)}
+
+/* ---------- फ़िल्टर ---------- */
+.chips{position:absolute;z-index:5;top:calc(var(--top) + 112px);left:0;right:0;display:flex;gap:7px;overflow-x:auto;padding:2px 10px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:#fff;padding:7px 12px 7px 8px;font-size:13px;font-weight:700;color:#344054;box-shadow:0 3px 12px #102a4322;white-space:nowrap}
+.chips button i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center}
+.chips button i svg{width:12px;height:12px;fill:#fff}
+.chips button.on{background:var(--navy);color:#fff}
+
+/* ---------- दाएँ बटन ---------- */
+.fab{position:absolute;z-index:5;right:12px;bottom:calc(40px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px;transition:bottom .25s}
+.fab button{width:48px;height:48px;border-radius:15px;border:0;background:#fff;box-shadow:0 6px 20px #102a4330;display:grid;place-items:center;font-weight:900;font-size:14px;color:var(--navy)}
+.fab button svg{width:24px;height:24px}
+.fab button.on{background:var(--blue);color:#fff}.fab button.on svg path{fill:#fff}.fab button.on svg path{fill:#fff}
+.recenter{position:absolute;z-index:11;left:50%;transform:translateX(-50%);bottom:calc(40px + env(safe-area-inset-bottom));border:0;border-radius:999px;background:#1a73e8;color:#fff;font-weight:800;font-size:14px;padding:12px 20px;box-shadow:0 8px 24px #1a73e866}
+body.nav .recenter{bottom:calc(100px + env(safe-area-inset-bottom))}
+body.route:not(.nav) .recenter{bottom:calc(var(--sheet,260px) + 14px)}
+.basic{position:absolute;z-index:6;left:50%;transform:translateX(-50%);top:calc(var(--top) + 158px);display:flex;align-items:center;gap:8px;background:#fffffff2;border-radius:999px;padding:6px 6px 6px 12px;font-size:12px;font-weight:700;color:#344054;box-shadow:0 4px 14px #102a4325;white-space:nowrap}
+.basic button{border:0;border-radius:999px;background:#1a73e8;color:#fff;font-weight:800;font-size:12px;padding:6px 10px}
+body.nav .basic,body.route .basic{display:none}
+.status{position:absolute;z-index:8;left:50%;transform:translateX(-50%);top:calc(var(--top) + 160px);max-width:calc(100% - 40px);background:#101828e6;color:#fff;border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;box-shadow:0 6px 20px #102a4333;text-align:center}
+.status.warn{background:#b42318ee}.status:empty{display:none}
+
+/* ---------- कार्ड (popup) ---------- */
+.maplibregl-popup-content{border-radius:16px;padding:0;box-shadow:0 10px 30px #102a4335;font-family:inherit;overflow:hidden}
+.maplibregl-popup-close-button{font-size:20px;width:30px;height:30px;color:#667085}
+.pc{display:flex;gap:11px;padding:13px 14px 10px}
+.pc .ic{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center}
+.pc .ic svg{width:22px;height:22px;fill:#fff}.pc .ic img{width:28px;height:auto}
+.pt{font-weight:800;font-size:15px;line-height:1.25;padding-right:18px}
+.ps{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.pa{font-size:11.5px;color:#b54708;margin-top:4px}
+.pv{display:inline-block;font-size:10px;font-weight:800;color:#1a73e8;background:#eaf2ff;border-radius:999px;padding:2px 6px;margin-left:4px}
+.pb{display:flex;gap:6px;padding:0 14px 13px}
+.pb a,.pb button{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:800;border-radius:10px;padding:10px 6px;border:0}
+.pb .dir{background:var(--blue);color:#fff}.pb .pro{background:#eff4ff;color:var(--blue)}
+
+/* ---------- रास्ते की शीट ---------- */
+.sheet{position:absolute;z-index:9;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -10px 34px #102a4330;padding:12px 14px calc(12px + env(safe-area-inset-bottom));max-height:62vh;display:flex;flex-direction:column}
+.sh-head{display:flex;align-items:flex-start;gap:10px}
+.sh-t{flex:1;min-width:0}.sh-t small{display:block;font-size:12px;color:var(--muted)}
+.sh-t b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-head button{border:0;background:#f2f4f7;border-radius:10px;width:34px;height:34px;font-size:16px;color:#344054}
+.modes{display:flex;gap:7px;margin-top:10px}
+.modes button{flex:1;border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:9px 4px;font-size:13px;font-weight:700;color:#344054}
+.modes button.on{border-color:var(--blue);background:#eff4ff;color:var(--blue)}
+.sum{margin-top:10px;font-size:13px;color:var(--muted)}.sum b{font-size:20px;color:#1a73e8;margin-right:6px}
+.sum .err{color:#b42318;font-weight:700}
+.acts{display:flex;gap:8px;margin-top:10px;align-items:center}
+.acts .go{flex:1;border:0;border-radius:12px;background:var(--blue);color:#fff;font-weight:800;font-size:15px;padding:13px}
+.acts .go:disabled{opacity:.5}
+.acts .tog{border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:12px 12px;font-weight:700;font-size:13px;color:#344054}
+.gm{display:block;text-align:center;font-size:11.5px;color:var(--muted);margin-top:8px}
+.steps{list-style:none;margin:10px 0 0;padding:0;overflow:auto;border-top:1px solid #f1f3f6}
+.steps li{display:flex;gap:11px;align-items:center;padding:9px 2px;border-bottom:1px solid #f1f3f6;font-size:13.5px}
+.steps .a{width:30px;height:30px;flex:none;border-radius:9px;background:#f2f4f7;display:grid;place-items:center;font-size:17px;font-weight:900;color:var(--navy)}
+.steps small{display:block;color:var(--muted);font-size:11.5px}
+body.route .fab{bottom:calc(var(--sheet,260px) + 12px)}
+body.route .chips,body.route .sres,body.srch .chips{display:none}
+
+/* ---------- नेविगेशन ---------- */
+.navb{position:absolute;z-index:10;top:var(--top);left:10px;right:10px;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;border-radius:18px;padding:12px 12px 12px 14px;box-shadow:0 10px 30px #0006}
+.navb .arw{width:52px;height:52px;flex:none;border-radius:14px;background:#ffffff26;display:grid;place-items:center;font-size:32px;font-weight:900}
+.navb .ntx{flex:1;min-width:0}.navb .ntx b{display:block;font-size:24px;line-height:1.1}.navb .ntx span{display:block;font-size:15px;line-height:1.3;margin-top:2px}
+.navb button{border:0;background:#ffffff26;color:#fff;border-radius:12px;width:44px;height:44px;font-size:20px}
+.navb .nbtns{display:flex;flex-direction:column;gap:6px;flex:none}.navb .lgb{width:44px;height:30px;font-size:12px;font-weight:800;border-radius:10px}
+.lgb{border:1px solid #d0d5dd;background:#fff;color:#0b2f73;border-radius:10px;height:36px;padding:0 8px;font-size:12.5px;font-weight:800;flex:none;white-space:nowrap;cursor:pointer}
+.lgp{position:fixed;z-index:40;width:210px;max-height:56vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid #e4eaf5;border-radius:14px;box-shadow:0 12px 34px #0b2f7333;padding:5px}
+.lgp button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;border:0;background:none;padding:8px 10px;border-radius:9px;font:inherit;font-size:14.5px;color:#12141c;text-align:start;cursor:pointer}
+.lgp button.on{background:#e8f1ff;color:#0b2f73;font-weight:800}.lgp small{font-size:10.5px;color:#7a8396}
+body.nav .recenter{font-size:16px;padding:14px 24px;box-shadow:0 10px 30px #0b2f7388;animation:rcIn .25s ease-out}
+@media (max-width:420px){.cityw select{max-width:124px;padding-right:22px;font-size:12.5px}.top .lgb{padding:0 6px;font-size:12px}.top{gap:6px}}
+@keyframes rcIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+.navf{position:absolute;z-index:10;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:12px 12px 12px 16px;box-shadow:0 10px 30px #102a4335}
+.navf div{flex:1}.navf b{display:block;font-size:20px;color:#0b2f73}.navf small{font-size:13px;color:var(--muted)}
+.navf button{border:0;background:#d92d20;color:#fff;font-weight:800;border-radius:12px;padding:12px 18px;font-size:15px}
+body.nav .top,body.nav .sbar,body.nav .sres,body.nav .chips,body.nav .sheet,body.nav .maplibregl-ctrl-top-right{display:none!important}
+body.nav .fab{bottom:calc(96px + env(safe-area-inset-bottom))}
+
+/* ---------- मेरी लोकेशन ---------- */
+.me{position:relative;width:22px;height:22px}
+.me .dot{position:absolute;inset:0;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 1px 6px #0005}
+.me .halo{position:absolute;inset:-10px;border-radius:50%;background:#1a73e833;animation:halo 2s ease-out infinite}
+.me .cone{position:absolute;left:50%;bottom:50%;width:46px;height:46px;margin-left:-23px;transform-origin:50% 100%;background:radial-gradient(circle at 50% 100%,#1a73e877,transparent 70%);clip-path:polygon(50% 100%,15% 0,85% 0);display:none}
+.me.head .cone{display:block}
+@keyframes halo{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.me .vh{display:none}
+.me.veh .dot,.me.veh .halo,.me.veh .cone{display:none!important}
+.me.veh .vh{display:block;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 4px #0006)}
+.me.veh .vh svg{display:block}
+.me.veh .vh .wk{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid #1a73e8;font-size:24px;line-height:1}
+.viapt{width:16px;height:16px;border-radius:50%;background:#f59f00;border:3px solid #fff;box-shadow:0 1px 6px #0006}
+.via{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:#8a5a00;background:#fff7e6;border:1px solid #ffe2a8;border-radius:10px;padding:6px 10px}
+.via b{color:#0b2f73;font-size:13px}.via button{margin-inline-start:auto;border:0;background:#fff;border:1px solid #ffd27a;color:#8a5a00;border-radius:999px;padding:4px 10px;font-weight:800;font-size:12px;cursor:pointer}
+.tiphint{font-size:12px;color:#5b6475;margin-top:6px}
+.startpt{width:18px;height:18px;border-radius:50%;background:#4dabf7;border:3px solid #fff;box-shadow:0 1px 6px #0005}
+
+/* ---------- लोडिंग स्क्रीन ---------- */
+.splash{position:fixed;inset:0;z-index:50;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:opacity .45s ease}
+.splash.hide{opacity:0;pointer-events:none}
+.vis{width:min(280px,72vw)}
+.art{position:relative;width:100%;aspect-ratio:830/640}
+.art .map{position:absolute;left:0;top:39.8%;width:100%;height:auto;mix-blend-mode:multiply}
+.art .pin{position:absolute;left:40.8%;top:31.6%;width:22%;height:auto;transform-origin:50% 100%;animation:pbjump 1.7s ease-in-out infinite}
+.art .ring{position:absolute;left:48.3%;top:64.8%;width:7%;height:5%;border:3px solid #e53935;border-radius:50%;opacity:0;animation:pbring 1.7s ease-out infinite}
+@keyframes pbjump{0%,100%{transform:translateY(0) scale(1,1)}12%{transform:translateY(0) scale(1.05,.94)}45%{transform:translateY(-14%) scale(.98,1.03)}62%{transform:translateY(0) scale(1.04,.94)}75%{transform:translateY(-3%) scale(1,1)}}
+@keyframes pbring{0%,55%{opacity:0;transform:scale(.4)}62%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+@media (prefers-reduced-motion:reduce){.art .pin,.art .ring,.me .halo{animation:none}}
+.sname{margin-top:10px;font-size:24px;font-weight:900;letter-spacing:.3px}.sname span{color:var(--blue)}
+.ssub{margin-top:4px;font-size:13px;color:var(--muted)}
+.dots::after{content:"";animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+.maplibregl-ctrl-top-right{top:calc(var(--top) + 158px)!important}
+.maplibregl-ctrl-group{border-radius:12px!important;box-shadow:0 4px 14px #102a4325!important}
+.maplibregl-ctrl-group button{width:36px!important;height:36px!important}
+@media(min-width:760px){
+ .top,.sbar,.sres{width:400px;right:auto;left:18px}
+ .chips{left:420px;top:calc(var(--top) + 64px)}
+ .sheet{width:420px;left:18px;bottom:18px;border-radius:20px;max-height:70vh}
+ body.route .fab{bottom:30px}
+ .navb,.navf{width:440px;left:18px;right:auto}
+ .maplibregl-ctrl-top-right{top:10px!important}
+}
+.mapboxgl-popup-content{border-radius:16px;padding:0;box-shadow:0 10px 30px #102a4335;font-family:inherit;overflow:hidden}
+.mapboxgl-popup-close-button{font-size:20px;width:30px;height:30px;color:#667085}
+body.nav .top,body.nav .sbar,body.nav .sres,body.nav .chips,body.nav .sheet,body.nav .mapboxgl-ctrl-top-right{display:none!important}
+.mapboxgl-ctrl-top-right{top:calc(var(--top) + 158px)!important}
+.mapboxgl-ctrl-group{border-radius:12px!important;box-shadow:0 4px 14px #102a4325!important}
+.mapboxgl-ctrl-group button{width:36px!important;height:36px!important}
+ .mapboxgl-ctrl-top-right{top:10px!important}
+.mapboxgl-ctrl-logo{margin:0 0 2px 2px!important}
+</style>
+<script src="pb-guard.js" defer></script>
+<script src="pb-track.js"></script>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="vis"><div class="art" aria-hidden="true">
+    <img class="map" src="map.png" alt="">
+    <i class="ring"></i>
+    <img class="pin" src="pin.png" alt="">
+  </div></div>
+  <div class="sname">Pata<span>Book</span></div>
+  <div class="ssub dots" data-t="loading">मैप लोड हो रहा है</div>
+</div>
+
+<div id="map"></div>
+
+<header class="top">
+  <a class="back" href="index.html" aria-label="Home">←</a>
+  <a class="brand" href="index.html"><img src="pin.png" alt=""><b>Pata<span>Book</span> Map</b></a>
+  <button type="button" class="lgb" data-lg aria-label="Language">🌐 <span class="lgt">हि</span> ▾</button>
+  <label class="cityw"><select id="city" aria-label="City"></select></label>
+</header>
+<div class="lgp" id="lgp" hidden></div>
+
+<form class="sbar" id="sform" autocomplete="off" onsubmit="return false">
+  <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg>
+  <input id="q" type="text" enterkeyhint="search" data-tp="search_ph" placeholder="दुकान, जगह या पता खोजें">
+  <button type="button" id="qx" hidden aria-label="Clear">✕</button>
+</form>
+<div class="sres" id="sres" hidden></div>
+
+<nav class="chips" id="chips" aria-label="Filter"></nav>
+
+<div class="fab">
+  <button id="tilt" class="on" aria-label="3D / 2D">3D</button>
+  <button id="sat" aria-label="Satellite / Map"><svg viewBox="0 0 24 24"><path fill="#0b2f73" d="M12 2 2 7l10 5 10-5zm-7.6 8.7L2 12l10 5 10-5-2.4-1.3L12 14.5zm0 5L2 17l10 5 10-5-2.4-1.3L12 19.5z"/></svg></button>
+  <button id="locate" aria-label="My location"><svg viewBox="0 0 24 24"><path fill="#1a73e8" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 3h-2.06A7 7 0 0 0 13 5.06V3h-2v2.06A7 7 0 0 0 5.06 11H3v2h2.06A7 7 0 0 0 11 18.94V21h2v-2.06A7 7 0 0 0 18.94 13H21zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></button>
+</div>
+<button type="button" class="recenter" id="recenter" hidden><span id="rcIco">⌖</span> <span id="rcTxt" data-t="recenter">वापस मेरी जगह</span></button>
+<div class="basic" id="basic" hidden><span data-t="basic">बेसिक नक्शा</span><button type="button" id="premium" data-t="premium_on">Premium चालू करें</button></div>
+<div class="status" id="status"></div>
+
+<section class="sheet" id="sheet" hidden>
+  <div class="sh-head"><div class="sh-t"><small data-t="route_to">यहाँ तक रास्ता</small><b id="rTo"></b></div><button type="button" id="rClose" aria-label="Close">✕</button></div>
+  <div class="modes" id="modes">
+    <button type="button" data-m="car" class="on">🚗 <span data-t="car">कार</span></button>
+    <button type="button" data-m="bike">🛵 <span data-t="bike">बाइक</span></button>
+    <button type="button" data-m="walk">🚶 <span data-t="walk">पैदल</span></button>
+  </div>
+  <div class="sum" id="rSum"></div>
+  <div class="acts"><button type="button" class="go" id="rGo" disabled>▶ <span data-t="start_nav">चलना शुरू करें</span></button><button type="button" class="tog" id="rTog" data-t="steps">स्टेप्स</button></div>
+  <ol class="steps" id="rSteps" hidden></ol>
+</section>
+
+<div class="navb" id="navb" hidden>
+  <div class="arw" id="nArw">↑</div>
+  <div class="ntx"><b id="nDist"></b><span id="nTxt"></span></div>
+  <div class="nbtns"><button type="button" id="nVoice" aria-label="Voice">🔊</button><button type="button" class="lgb" data-lg aria-label="Language"><span class="lgt">हि</span>▾</button></div>
+</div>
+<div class="navf" id="navf" hidden>
+  <div><b id="nRem"></b><small id="nEta"></small></div>
+  <button type="button" id="nStop" data-t="stop">रोकें</button>
+</div>
+
+<script>
+window.PBMAIN = function () {
+if (window.__pbStarted) return; window.__pbStarted = true;
+/* =========================================================
+   सेटिंग (सिर्फ़ public key — कोई secret नहीं)
+   ========================================================= */
+var SB_URL = 'https://kkvbpzysktozghnxplxv.supabase.co';
+var SB_KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
+var CITIES = [
+  ['Gandhidham', 70.1337, 23.0753], ['Adipur', 70.0930, 23.0717], ['Anjar', 70.0283, 23.1137], ['Bhuj', 69.6669, 23.2420],
+  ['Mundra', 69.7219, 22.8390], ['Mandvi', 69.3530, 22.8330], ['Nakhatrana', 69.2650, 23.3440],
+  ['Bhachau', 70.3430, 23.2960], ['Rapar', 70.6420, 23.5730], ['Naliya', 68.8260, 23.2600], ['Dayapar', 68.9020, 23.6340]
+];
+var CITY = [CITIES[0][1], CITIES[0][2]];
+var START = { center: CITY, zoom: 15, pitch: 0, bearing: 0 };
+var KUTCH_BBOX = '68.0,22.3,71.8,24.8';
+/* सैटेलाइट फ़ोटो: maptiler.com की मुफ़्त key यहाँ डालें (Allowed HTTP origins में सिर्फ़ patabook.in रखें) */
+var MAPTILER_KEY = 'DOK09vUDXZe60CxC5iW5';
+/* Mapbox public token (सिर्फ़ patabook.in पर चलने के लिए बँधा) */
+var MAPBOX_TOKEN = 'pk.eyJ1IjoicGF0YWJvb2syMDI2IiwiYSI6ImNtdjFvMjdzYTA3OXIyeHF2ODhscWJsY2EifQ.c5lJKV3f8SIwTsKYTwimJg';
+var MB = false;   // नीचे तय होता है
+var FONT = ['Noto Sans Regular'], FONT_B = ['Noto Sans Bold'], FONT_I = ['Noto Sans Italic'];
+/* मुफ़्त routing (OpenStreetMap / FOSSGIS) */
+var OSRM = { car: 'https://routing.openstreetmap.de/routed-car/route/v1/driving/', bike: 'https://routing.openstreetmap.de/routed-car/route/v1/driving/', walk: 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/' };
+var PHOTON = 'https://photon.komoot.io/api/';
+var MB_DIR = { car: 'driving-traffic', bike: 'driving-traffic', walk: 'walking' };
+
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+/* =========================================================
+   भाषा — पूरा पेज एक ही भाषा में (English चुनें तो English, बाकी हिंदी)
+   ========================================================= */
+var TX = {
+  hi: { loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
+    start_nav: 'चलना शुरू करें', steps: 'स्टेप्स', gmaps: 'Google Maps में भी खोलें', stop: 'रोकें', all: 'सभी', health: 'अस्पताल', worship: 'मंदिर',
+    food: 'खाना', hotel: 'होटल', fuel: 'पेट्रोल', bank: 'बैंक', school: 'स्कूल', shop: 'दुकान', travel: 'बस/रेल',
+    nolib: 'मैप लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।', pb_n: '{n} PataBook दुकानें मैप पर', pb_fail: 'PataBook दुकानें लोड नहीं हुईं',
+    finding: 'आपकी लोकेशन ढूँढ रहे हैं…', loc_fail: 'लोकेशन नहीं मिली। फोन में Location चालू करें और अनुमति दें।', follow: 'चलने वाला मोड: नक्शा आपकी दिशा में घूमेगा',
+    directions: 'रास्ता देखें', profile: 'प्रोफ़ाइल', approx: 'जगह पते से अंदाज़े से लगाई गई है', routing: 'रास्ता बना रहे हैं…',
+    route_fail: 'रास्ता नहीं बन सका। इंटरनेट जाँचकर दोबारा कोशिश करें।', no_route: 'इन दोनों जगहों के बीच सड़क का रास्ता नहीं मिला।',
+    tap_start: 'लोकेशन नहीं मिली — नक्शे पर अपनी शुरुआत की जगह टैप करें', addr_fail: 'यह पता नक्शे पर नहीं मिला', est: 'ट्रैफ़िक के बिना अंदाज़ा',
+    arrived: 'आप पहुँच गए', reroute: 'नया रास्ता बना रहे हैं', pb: 'PataBook दुकानें', places: 'जगहें', none: 'कुछ नहीं मिला',
+    rem: 'बाकी', m: 'मी.', km: 'किमी', min: 'मिनट', hr: 'घंटा', in_m: '{d} बाद', now: 'अब', voice_on: 'आवाज़ चालू', voice_off: 'आवाज़ बंद', shop_t: 'दुकान', nokey: 'सैटेलाइट फ़ोटो के लिए MapTiler key अभी नहीं डाली गई है' },
+  en: { loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
+    start_nav: 'Start', steps: 'Steps', gmaps: 'Also open in Google Maps', stop: 'Stop', all: 'All', health: 'Hospital', worship: 'Temple',
+    food: 'Food', hotel: 'Hotel', fuel: 'Petrol', bank: 'Bank', school: 'School', shop: 'Shops', travel: 'Bus/Rail',
+    nolib: 'Map library did not load. Check internet.', pb_n: '{n} PataBook shops on map', pb_fail: 'Could not load PataBook shops',
+    finding: 'Finding your location…', loc_fail: 'Location not found. Turn on Location and allow it.', follow: 'Follow mode: map turns with you',
+    directions: 'Directions', profile: 'Profile', approx: 'Location estimated from address', routing: 'Finding route…',
+    route_fail: 'Could not get a route. Check internet and try again.', no_route: 'No road route found between these places.',
+    tap_start: 'Location not found — tap your starting point on the map', addr_fail: 'Address not found on map', est: 'estimate without traffic',
+    arrived: 'You have arrived', reroute: 'Finding a new route', pb: 'PataBook shops', places: 'Places', none: 'Nothing found',
+    rem: 'left', m: 'm', km: 'km', min: 'min', hr: 'h', in_m: 'In {d}', now: 'Now', voice_on: 'Voice on', voice_off: 'Voice off', shop_t: 'Shop', nokey: 'Satellite needs a MapTiler key (not added yet)' }
+};
+TX.hi.recenter = 'वापस मेरी जगह'; TX.en.recenter = 'Back to my location';
+TX.hi.call = 'कॉल'; TX.en.call = 'Call'; TX.hi.via_on = 'चुनी हुई जगह से होकर'; TX.en.via_on = 'Via the point you tapped'; TX.hi.via_off = '✕ सीधा रास्ता'; TX.en.via_off = '✕ Direct route'; TX.hi.via_tip = '👆 दूसरा रास्ता देखना हो तो map पर किसी सड़क को छुएँ'; TX.en.via_tip = '👆 Tap any road on the map to see another route'; TX.hi.via_more = 'सीधे रास्ते से {d} ज़्यादा'; TX.en.via_more = '{d} more than the direct route'; TX.hi.via_less = 'सीधे रास्ते से {d} कम'; TX.en.via_less = '{d} less than the direct route'; TX.hi.call_login = 'नंबर देखने के लिए लॉगिन करें'; TX.en.call_login = 'Log in to see the number'; TX.hi.call_limit = 'आज की सीमा पूरी हो गई'; TX.en.call_limit = 'Daily limit reached'; TX.hi.call_fail = 'नंबर नहीं मिल सका'; TX.en.call_fail = 'Could not get the number';
+TX.hi.basic = 'बेसिक नक्शा'; TX.en.basic = 'Basic map'; TX.hi.premium_on = 'Premium चालू करें'; TX.en.premium_on = 'Turn on Premium';
+TX.hi.sat_zoom = 'ज़्यादा ज़ूम पर साफ़ नक्शा दिखाया गया'; TX.en.sat_zoom = 'Switched to map for a clearer close view';
+TX.hi.start = 'चलना शुरू करें'; TX.hi.start_on = '{r} पर चलना शुरू करें'; TX.hi.rb = 'गोल चक्कर से {n} रास्ता लें'; TX.hi.rb0 = 'गोल चक्कर से निकलें';
+TX.en.start = 'Start'; TX.en.start_on = 'Start on {r}'; TX.en.rb = 'At the roundabout take the {n} exit'; TX.en.rb0 = 'Exit the roundabout';
+if (window.MAP_TX) Object.keys(MAP_TX).forEach(function (k) { TX[k] = MAP_TX[k]; });
+(function () { var NB = { hi: 'रास्ते पर वापस', en: 'Back to route', gu: 'રસ્તા પર પાછા', mr: 'मार्गावर परत', bn: 'রাস্তায় ফিরুন', ta: 'வழிக்குத் திரும்பு', te: 'మార్గానికి తిరిగి', kn: 'ದಾರಿಗೆ ಹಿಂತಿರುಗಿ', ml: 'വഴിയിലേക്ക് മടങ്ങുക', pa: 'ਰਸਤੇ ਤੇ ਵਾਪਸ', ur: 'راستے پر واپس', or: 'ରାସ୍ତାକୁ ଫେରନ୍ତୁ', as: 'পথলৈ উভতি যাওক', ne: 'बाटोमा फर्कनुहोस्', sd: 'رستي تي واپس' };
+  Object.keys(NB).forEach(function (k) { if (TX[k]) TX[k].nav_back = NB[k]; }); })();
+/* जो शब्द किसी भाषा में न हों: देवनागरी/गुजराती/पंजाबी → हिंदी, कश्मीरी/सिंधी → उर्दू, बाकी → English */
+var FB = { mr: 'hi', ne: 'hi', mai: 'hi', doi: 'hi', kok: 'hi', sa: 'hi', brx: 'hi', 'sd-deva': 'hi', gu: 'hi', pa: 'hi', ks: 'ur', sd: 'ur' };
+function lang() { var c = window.PB && PB.lang && PB.lang(); return c && TX[c] ? c : 'hi'; }
+function T(k, v, L) {
+  L = L || lang();
+  var a = TX[L] || {}, b = TX[FB[L] || 'en'] || {}, s = a[k] != null ? a[k] : b[k] != null ? b[k] : TX.hi[k] != null ? TX.hi[k] : k;
+  if (v && typeof s === 'string') Object.keys(v).forEach(function (x) { s = s.replace('{' + x + '}', v[x]); });
+  return s;
+}
+function applyTexts() {
+  document.documentElement.lang = lang();
+  document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = T(el.dataset.t); });
+  document.querySelectorAll('[data-tp]').forEach(function (el) { el.placeholder = T(el.dataset.tp); });
+}
+var stTimer = null;
+function status(t, warn, ms) {
+  var el = $('status'); el.textContent = t || ''; el.classList.toggle('warn', !!warn);
+  clearTimeout(stTimer); if (t && ms !== 0) stTimer = setTimeout(function () { el.textContent = ''; }, ms || (warn ? 6000 : 3500));
+}
+function fmtDist(m, L) { return m < 1000 ? (Math.round(m / 10) * 10) + ' ' + T('m', null, L) : (m / 1000).toFixed(m < 10000 ? 1 : 0) + ' ' + T('km', null, L); }
+function fmtTime(s, L) { var m = Math.max(1, Math.round(s / 60)); if (m < 60) return m + ' ' + T('min', null, L); return Math.floor(m / 60) + ' ' + T('hr', null, L) + ' ' + (m % 60) + ' ' + T('min', null, L); }
+
+/* =========================================================
+   लोगो (icons)
+   ========================================================= */
+var G = {
+  hospital: 'M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z',
+  pharmacy: 'M14.6 3.4a4.8 4.8 0 0 1 6 6l-11.2 11.2a4.8 4.8 0 0 1-6.8-6.8zM9.2 9.4l5.4 5.4 4.6-4.6a2.6 2.6 0 0 0-3.7-3.7l-6.3 6.3',
+  temple: 'M11.3 1h1.4v2.2l3.3 1.1-3.3 1.1V6l3.8 5H7.5l3.8-5zM6 12h12l1.4 3H4.6zM4 16h16v6h-5v-4h-6v4H4z',
+  mosque: 'M12 3.5c3.2 2.4 5.3 4.2 5.3 7.2H6.7c0-3 2.1-4.8 5.3-7.2zM6.5 11.7h11V21h-3.8v-3.5a1.7 1.7 0 0 0-3.4 0V21H6.5zM2.5 8.5 3.75 6 5 8.5V21H2.5zM19 8.5 20.25 6l1.25 2.5V21H19z',
+  church: 'M11 1h2v3h3v2h-3v3.2l6 4.3V22h-4.5v-4.5a2.5 2.5 0 0 0-5 0V22H5v-8.5l6-4.3V6H8V4h3z',
+  gurudwara: 'M12 5.5c3 2 5 3.6 5 6.5H7c0-2.9 2-4.5 5-6.5zM6.5 13h11v8h-3.8v-3.3a1.7 1.7 0 0 0-3.4 0V21H6.5zM12 2a1.2 1.2 0 1 1 0 2.4A1.2 1.2 0 0 1 12 2zM19.5 2h1v19h-1zM20.5 2l3 1.6-3 1.6z',
+  restaurant: 'M6 2h1.4v6h1.2V2H10v6h1.2V2h1.4v7.2a2.6 2.6 0 0 1-2 2.55V22H8.4V11.75a2.6 2.6 0 0 1-2-2.55V2zM15.5 2C18 3 19 6 19 9.5V13h-2v9h-2.2V2z',
+  cafe: 'M4 8h12v5.5A5.5 5.5 0 0 1 10.5 19h-1A5.5 5.5 0 0 1 4 13.5zM16 9h1.5a3.2 3.2 0 0 1 0 6.4H16v-2h1.5a1.2 1.2 0 0 0 0-2.4H16zM3 20h14v2H3zM8 2.5c1 1 1 2 0 3h1.4c1-1 1-2 0-3zM11 2.5c1 1 1 2 0 3h1.4c1-1 1-2 0-3z',
+  hotel: 'M2 5h2.2v8H20a2 2 0 0 1 2 2v5h-2.2v-2.4H4.2V20H2zM8 7.2a2.3 2.3 0 1 1 0 4.6 2.3 2.3 0 0 1 0-4.6zM11.5 7.5H18a2.5 2.5 0 0 1 2.5 2.5v1.8h-9z',
+  school: 'M12 3 1 9l11 6 9-4.9V17h2V9zM5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z',
+  bank: 'M12 1.5 2 6.5V9h20V6.5zM4 10.5h2.8V17H4zM10.6 10.5h2.8V17h-2.8zM17.2 10.5H20V17h-2.8zM2 18.5h20V22H2z',
+  fuel: 'M4 3h10v18H4zM6.2 5.2v5h5.6v-5zM15 7.5l1.4-1.4 3.6 3.6V18a2 2 0 0 1-4 0v-3.5h-1v-2h3V18h0a.1.1 0 0 0 0 0V10.5z',
+  bus: 'M5 2.5h14a2 2 0 0 1 2 2V17h-1.2v2.2a1.3 1.3 0 0 1-2.6 0V17H6.8v2.2a1.3 1.3 0 0 1-2.6 0V17H3V4.5a2 2 0 0 1 2-2zM5.2 5.5v5.6h13.6V5.5zM7 12.8a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zm10 0a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z',
+  rail: 'M7 1.5h10a3 3 0 0 1 3 3v10a3 3 0 0 1-2 2.8L20.4 21h-2.6l-2-3H8.2l-2 3H3.6L6 17.3a3 3 0 0 1-2-2.8v-10a3 3 0 0 1 3-3zM6.3 4.5v5.5h11.4V4.5zM8 12a1.6 1.6 0 1 0 0 3.2A1.6 1.6 0 0 0 8 12zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z',
+  park: 'M12 1.5 18 9h-2.5l4 5.5H14V22h-4v-7.5H4.5l4-5.5H6z',
+  shop: 'M5 7h14l1.2 15H3.8zM8.3 7a3.7 3.7 0 0 1 7.4 0h-2a1.7 1.7 0 0 0-3.4 0z',
+  grocery: 'M1.5 3h3.3l.7 2.5H22l-2.4 9H7.8L4.3 5H1.5zM8.5 17.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm9 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  car: 'M5 10.5 6.7 6A2.2 2.2 0 0 1 8.8 4.5h6.4A2.2 2.2 0 0 1 17.3 6l1.7 4.5a2.2 2.2 0 0 1 2 2.2V18h-2v2h-2.6v-2H7.6v2H5v-2H3v-5.3a2.2 2.2 0 0 1 2-2.2zm2.3 0h9.4l-1.2-3.4H8.5zM6.6 12.3a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2zm10.8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z',
+  police: 'M12 1.5 20.5 5v6.2c0 5.2-3.6 9.7-8.5 11.3-4.9-1.6-8.5-6.1-8.5-11.3V5zM12 6.5l1.5 3 3.3.5-2.4 2.3.6 3.3L12 14l-3 1.6.6-3.3-2.4-2.3 3.3-.5z',
+  cinema: 'M3 4h18v16H3zM5 6v2h2V6zm0 5v2h2v-2zm0 5v2h2v-2zM17 6v2h2V6zm0 5v2h2v-2zm0 5v2h2v-2zM9 6v12h6V6z',
+  office: 'M9 3h6a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3V5a2 2 0 0 1 2-2zm0 3h6V5H9z',
+  home: 'M12 2.5 22 11h-3v10h-5v-6h-4v6H5V11H2z',
+  star: 'M12 1.8l3.1 6.4 7 .9-5.1 4.9 1.3 7L12 17.6 5.7 21l1.3-7L1.9 9.1l7-.9z',
+  post: 'M2 5h20v14H2zM4.4 7 12 12.6 19.6 7zM4 9.2V17h16V9.2l-8 5.8z'
+};
+/* रंग: हर प्रकार का अपना */
+var C = {
+  hospital: '#e5383b', pharmacy: '#f0506e', temple: '#ff7a00', mosque: '#2b9348', church: '#7048e8', gurudwara: '#f2c230',
+  restaurant: '#f08c00', cafe: '#a0522d', hotel: '#d6336c', school: '#1c7ed6', bank: '#0c8599', fuel: '#495057',
+  bus: '#3b5bdb', rail: '#3b5bdb', park: '#2f9e44', shop: '#7950f2', grocery: '#7950f2', car: '#4263eb',
+  police: '#364fc7', cinema: '#c2255c', office: '#5c677d', home: '#5c677d', star: '#e8590c', post: '#e8590c'
+};
+/* हिंदी नाम (कार्ड में) */
+var NAME_HI = {
+  hospital: 'अस्पताल / क्लिनिक', pharmacy: 'मेडिकल स्टोर', temple: 'मंदिर', mosque: 'मस्जिद', church: 'चर्च', gurudwara: 'गुरुद्वारा',
+  restaurant: 'रेस्टोरेंट', cafe: 'चाय / कैफ़े', hotel: 'होटल', school: 'स्कूल / कॉलेज', bank: 'बैंक / ATM', fuel: 'पेट्रोल पंप',
+  bus: 'बस स्टैंड', rail: 'रेलवे स्टेशन', park: 'पार्क', shop: 'दुकान', grocery: 'किराना / सुपरमार्केट', car: 'गाड़ी / गैरेज',
+  police: 'पुलिस', cinema: 'सिनेमा', office: 'ऑफ़िस', home: 'सेवा', star: 'देखने लायक जगह', post: 'पोस्ट ऑफ़िस'
+};
+function svg(k, fill) { return '<svg viewBox="0 0 24 24"><path fill="' + (fill || '#fff') + '" fill-rule="evenodd" d="' + G[k] + '"/></svg>'; }
+function loadImg(src) { return new Promise(function (ok, no) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = no; i.src = src; }); }
+function glyphImg(k) { return loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" fill-rule="evenodd" d="' + G[k] + '"/></svg>')); }
+
+/* गोल लोगो (छोटी जगहें) और टियरड्रॉप पिन (बड़ी जगहें) — 2x HD */
+var R = 3;
+function roundBadge(g, color, d) {
+  var pad = 4, s = (d + pad * 2) * R, cv = document.createElement('canvas'); cv.width = cv.height = s;
+  var x = cv.getContext('2d'), c = s / 2, r = d / 2 * R;
+  x.shadowColor = 'rgba(16,24,40,.35)'; x.shadowBlur = 3 * R; x.shadowOffsetY = 1 * R;
+  x.beginPath(); x.arc(c, c, r, 0, 7); x.fillStyle = '#fff'; x.fill();
+  x.shadowColor = 'transparent';
+  x.beginPath(); x.arc(c, c, r - 2 * R, 0, 7); x.fillStyle = color; x.fill();
+  var gs = d * 0.56 * R; x.drawImage(g, c - gs / 2, c - gs / 2, gs, gs);
+  return x.getImageData(0, 0, s, s);
+}
+function pinBadge(g, color, w) {
+  var h = w * 1.3, pad = 4, W = (w + pad * 2) * R, H = (h + pad * 2) * R, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  var x = cv.getContext('2d'), cx = W / 2, r = w / 2 * R, cy = pad * R + r, tip = pad * R + h * R;
+  function shape(rr, inset) {
+    x.beginPath();
+    x.moveTo(cx, tip - inset * 1.4);
+    x.bezierCurveTo(cx - rr * 0.35, cy + rr * 1.05, cx - rr, cy + rr * 0.55, cx - rr, cy);
+    x.arc(cx, cy, rr, Math.PI, 0);
+    x.bezierCurveTo(cx + rr, cy + rr * 0.55, cx + rr * 0.35, cy + rr * 1.05, cx, tip - inset * 1.4);
+    x.closePath();
+  }
+  x.shadowColor = 'rgba(16,24,40,.4)'; x.shadowBlur = 4 * R; x.shadowOffsetY = 2 * R;
+  shape(r, 0); x.fillStyle = '#fff'; x.fill();
+  x.shadowColor = 'transparent';
+  shape(r - 2.2 * R, 2.2 * R);
+  var gr = x.createLinearGradient(0, cy - r, 0, tip); gr.addColorStop(0, color); gr.addColorStop(1, shade(color, -28)); x.fillStyle = gr; x.fill();
+  var gs = w * 0.58 * R; x.drawImage(g, cx - gs / 2, cy - gs / 2, gs, gs);
+  return x.getImageData(0, 0, W, H);
+}
+function shade(hex, p) { var n = parseInt(hex.slice(1), 16), f = function (v) { return Math.max(0, Math.min(255, v + p)); }; return 'rgb(' + f(n >> 16) + ',' + f(n >> 8 & 255) + ',' + f(n & 255) + ')'; }
+/* PataBook नीला P पिन + कोने पर कैटेगरी का लोगो */
+function pbPin(pin, g, color) {
+  var w = 34, h = w * pin.height / pin.width, pad = 6, W = (w + pad * 2 + 6) * R, H = (h + pad * 2) * R, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  var x = cv.getContext('2d');
+  x.shadowColor = 'rgba(16,24,40,.35)'; x.shadowBlur = 4 * R; x.shadowOffsetY = 2 * R;
+  x.drawImage(pin, pad * R, pad * R, w * R, h * R);
+  x.shadowColor = 'transparent';
+  if (g) {
+    var d = 17 * R, bx = (pad + w - 4) * R, by = (pad + 2) * R;
+    x.beginPath(); x.arc(bx, by, d / 2, 0, 7); x.fillStyle = '#fff'; x.fill();
+    x.beginPath(); x.arc(bx, by, d / 2 - 1.6 * R, 0, 7); x.fillStyle = color; x.fill();
+    var gs = d * 0.6; x.drawImage(g, bx - gs / 2, by - gs / 2, gs, gs);
+  }
+  return x.getImageData(0, 0, W, H);
+}
+window.__PB_ICONS = { G: G, C: C, glyphImg: glyphImg, roundBadge: roundBadge, pinBadge: pinBadge, pbPin: pbPin, loadImg: loadImg };   // जाँच के लिए
+var NAME_EN = { hospital: 'Hospital / Clinic', pharmacy: 'Medical store', temple: 'Temple', mosque: 'Mosque', church: 'Church', gurudwara: 'Gurudwara',
+  restaurant: 'Restaurant', cafe: 'Tea / Cafe', hotel: 'Hotel', school: 'School / College', bank: 'Bank / ATM', fuel: 'Petrol pump',
+  bus: 'Bus stand', rail: 'Railway station', park: 'Park', shop: 'Shop', grocery: 'Grocery / Supermarket', car: 'Car / Garage',
+  police: 'Police', cinema: 'Cinema', office: 'Office', home: 'Service', star: 'Place to see', post: 'Post office' };
+Object.keys(NAME_HI).forEach(function (k) { TX.hi['t_' + k] = NAME_HI[k]; TX.en['t_' + k] = NAME_EN[k]; });
+function typeName(k) { return T('t_' + k); }
+
+var CLASS_ICON = [
+  'hospital', 'hospital', 'pharmacy', 'pharmacy', 'dentist', 'hospital', 'doctors', 'hospital',
+  'restaurant', 'restaurant', 'fast_food', 'restaurant', 'food_court', 'restaurant', 'cafe', 'cafe', 'ice_cream', 'cafe', 'bakery', 'cafe', 'bar', 'cafe', 'beer', 'cafe',
+  'lodging', 'hotel',
+  'school', 'school', 'college', 'school', 'kindergarten', 'school', 'university', 'school', 'library', 'school',
+  'bank', 'bank', 'atm', 'bank',
+  'fuel', 'fuel', 'bus', 'bus', 'railway', 'rail',
+  'park', 'park', 'garden', 'park', 'playground', 'park', 'stadium', 'park', 'sports', 'park', 'swimming', 'park',
+  'shop', 'shop', 'clothing_store', 'shop', 'jewelry', 'shop', 'mobile_phone', 'shop', 'electronics', 'shop', 'furniture', 'shop', 'hardware', 'shop', 'gift', 'shop', 'books', 'shop', 'stationery', 'shop', 'shoes', 'shop',
+  'grocery', 'grocery', 'supermarket', 'grocery', 'convenience', 'grocery', 'marketplace', 'grocery',
+  'car', 'car', 'car_repair', 'car', 'bicycle', 'car', 'motorcycle', 'car',
+  'police', 'police', 'cinema', 'cinema', 'theatre', 'cinema',
+  'town_hall', 'office', 'office', 'office', 'post', 'post', 'attraction', 'star', 'monument', 'star', 'castle', 'star', 'harbor', 'star'
+];
+var NAME = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name']];
+var LNAME = ['downcase', ['coalesce', ['get', 'name'], '']];
+function has() { var a = ['any']; for (var i = 0; i < arguments.length; i++) a.push(['in', arguments[i], LNAME]); return a; }
+var WORSHIP = ['case',
+  has('masjid', 'mosque', 'dargah', 'jama'), 'mosque',
+  has('church', 'chapel'), 'church',
+  has('gurudwara', 'gurdwara', 'gurudwara'), 'gurudwara',
+  'temple'];
+var ICON_KEY = ['case', ['==', ['get', 'class'], 'place_of_worship'], WORSHIP, ['match', ['get', 'class']].concat(CLASS_ICON, ['none'])];
+/* बड़ी जगहें: अस्पताल, रेलवे, बस स्टैंड, धार्मिक स्थल, देखने लायक */
+var MAJOR = ['any',
+  ['match', ['get', 'class'], ['hospital', 'railway', 'place_of_worship', 'attraction', 'harbor', 'stadium', 'town_hall'], true, false],
+  ['==', ['get', 'subclass'], 'bus_station']];
+/* Mapbox की जगहें (maki icon नाम) → हमारा लोगो */
+var MAKI_ICON = [
+  'hospital', 'hospital', 'doctor', 'hospital', 'dentist', 'hospital', 'pharmacy', 'pharmacy',
+  'restaurant', 'restaurant', 'restaurant-pizza', 'restaurant', 'restaurant-noodle', 'restaurant', 'restaurant-seafood', 'restaurant', 'fast-food', 'restaurant',
+  'cafe', 'cafe', 'bakery', 'cafe', 'ice-cream', 'cafe', 'bar', 'cafe', 'beer', 'cafe', 'teahouse', 'cafe',
+  'lodging', 'hotel', 'school', 'school', 'college', 'school', 'library', 'school',
+  'bank', 'bank', 'fuel', 'fuel', 'charging-station', 'fuel', 'bus', 'bus', 'rail', 'rail', 'rail-metro', 'rail', 'rail-light', 'rail',
+  'park', 'park', 'garden', 'park', 'playground', 'park', 'pitch', 'park', 'stadium', 'park', 'swimming', 'park',
+  'shop', 'shop', 'clothing-store', 'shop', 'jewelry-store', 'shop', 'mobile-phone', 'shop', 'furniture', 'shop', 'hardware', 'shop', 'shoe', 'shop', 'gift', 'shop', 'optician', 'shop', 'laundry', 'shop', 'hairdresser', 'shop',
+  'grocery', 'grocery', 'convenience', 'grocery', 'alcohol-shop', 'grocery',
+  'car', 'car', 'car-repair', 'car', 'car-rental', 'car', 'bicycle', 'car', 'parking', 'car',
+  'police', 'police', 'cinema', 'cinema', 'theatre', 'cinema', 'town-hall', 'office', 'embassy', 'office', 'post', 'post',
+  'attraction', 'star', 'monument', 'star', 'museum', 'star', 'castle', 'star', 'harbor', 'star'
+];
+var WORSHIP_MAKI = ['place-of-worship', 'religious-muslim', 'religious-christian', 'religious-jewish', 'religious-buddhist', 'religious-shinto'];
+function mbKeyExpr() {
+  var ln = ['downcase', ['coalesce', ['get', 'name_en'], ['get', 'name'], '']];
+  var hasN = function () { var a = ['any']; for (var i = 0; i < arguments.length; i++) a.push(['in', arguments[i], ln]); return a; };
+  var w = ['case', ['==', ['get', 'maki'], 'religious-muslim'], 'mosque', ['==', ['get', 'maki'], 'religious-christian'], 'church',
+    hasN('masjid', 'mosque', 'dargah'), 'mosque', hasN('church'), 'church', hasN('gurudwara', 'gurdwara'), 'gurudwara', 'temple'];
+  return ['case', ['match', ['get', 'maki'], WORSHIP_MAKI, true, false], w, ['match', ['get', 'maki']].concat(MAKI_ICON, ['none'])];
+}
+function useMapboxData() {
+  NAME = ['coalesce', ['get', 'name_en'], ['get', 'name']];
+  ICON_KEY = mbKeyExpr();
+  MAJOR = ['any', ['match', ['get', 'maki'], ['hospital', 'rail', 'rail-metro', 'attraction', 'monument', 'stadium', 'town-hall', 'harbor'].concat(WORSHIP_MAKI), true, false],
+    ['==', ['get', 'class'], 'landmark']];
+  FONT = ['DIN Pro Regular', 'Arial Unicode MS Regular']; FONT_B = ['DIN Pro Bold', 'Arial Unicode MS Bold']; FONT_I = ['DIN Pro Italic', 'Arial Unicode MS Regular'];
+}
+function iconKeyMB(p) {
+  var n = String(p.name_en || p.name || '').toLowerCase();
+  if (WORSHIP_MAKI.indexOf(p.maki) >= 0) {
+    if (p.maki === 'religious-muslim' || /masjid|mosque|dargah/.test(n)) return 'mosque';
+    if (p.maki === 'religious-christian' || /church/.test(n)) return 'church';
+    if (/gurudwara|gurdwara/.test(n)) return 'gurudwara';
+    return 'temple';
+  }
+  for (var i = 0; i < MAKI_ICON.length; i += 2) if (MAKI_ICON[i] === p.maki) return MAKI_ICON[i + 1];
+  return 'star';
+}
+var GROUPS = [
+  { id: 'all', icon: 'star', color: '#0b2f73' },
+  { id: 'health', icon: 'hospital', keys: ['hospital', 'pharmacy'], pb: ['Health'] },
+  { id: 'worship', icon: 'temple', keys: ['temple', 'mosque', 'church', 'gurudwara'], pb: [] },
+  { id: 'food', icon: 'restaurant', keys: ['restaurant', 'cafe'], pb: ['Food'] },
+  { id: 'hotel', icon: 'hotel', keys: ['hotel'], pb: ['Hotel'] },
+  { id: 'fuel', icon: 'fuel', keys: ['fuel'], pb: [] },
+  { id: 'bank', icon: 'bank', keys: ['bank'], pb: [] },
+  { id: 'school', icon: 'school', keys: ['school'], pb: ['Education'] },
+  { id: 'shop', icon: 'shop', keys: ['shop', 'grocery', 'car'], pb: ['Shopping', 'Automobile', 'Home', 'Professional'] },
+  { id: 'travel', icon: 'bus', keys: ['bus', 'rail'], pb: [] }
+];
+var PB_CAT = { Automobile: 'car', Food: 'restaurant', Health: 'hospital', Shopping: 'shop', Education: 'school', Home: 'home', Professional: 'office', Hotel: 'hotel' };
+
+/* =========================================================
+   नक्शे का स्टाइल — असली रंग
+   ========================================================= */
+function cls() { return ['match', ['get', 'class'], Array.prototype.slice.call(arguments), true, false]; }
+function zw(a) { return ['interpolate', ['exponential', 1.5], ['zoom']].concat(a); }
+var ROADS = [
+  // [id, classes, किनारा, रंग, चौड़ाई (zoom के हिसाब से), minzoom]
+  ['path', ['path', 'track'], null, '#f06595', [14, .8, 18, 2.4], 14],
+  ['service', ['service'], '#cfc6b6', '#ffffff', [13, .4, 15, 1.6, 18, 7], 13],
+  ['minor', ['minor'], '#c9bfae', '#ffffff', [12, .5, 14, 2, 16, 5, 18, 12], 12],
+  ['tertiary', ['tertiary'], '#a9b84a', '#e9f59a', [10, .7, 13, 2.4, 16, 7.5, 18, 16], 10],
+  ['secondary', ['secondary'], '#d4a514', '#ffd84d', [9, .8, 13, 3, 16, 9, 18, 19], 8],
+  ['primary', ['primary'], '#d26a12', '#ffa041', [7, .9, 12, 3.2, 16, 10, 18, 22], 7],
+  ['trunk', ['trunk'], '#bf4a16', '#ff7a45', [5, .9, 12, 3.8, 16, 11, 18, 24], 5],
+  ['motorway', ['motorway'], '#a8261c', '#ec4a3c', [5, 1, 12, 4, 16, 12, 18, 26], 5]
+];
+function buildStyle() {
+  var L = [
+    { id: 'bg', type: 'background', paint: { 'background-color': '#f3f1ec' } },
+    { id: 'landuse-res', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('residential', 'suburb', 'neighbourhood'), paint: { 'fill-color': '#f4eee4' } },
+    { id: 'landuse-com', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('commercial', 'retail'), paint: { 'fill-color': '#ffe3cf' } },
+    { id: 'landuse-ind', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('industrial', 'garages'), paint: { 'fill-color': '#ecdcf6' } },
+    { id: 'landuse-rail', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('railway', 'bus_station'), paint: { 'fill-color': '#e2e6f3' } },
+    { id: 'landuse-health', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('hospital'), paint: { 'fill-color': '#ffd6da' } },
+    { id: 'landuse-edu', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('school', 'college', 'university', 'kindergarten'), paint: { 'fill-color': '#fff0b0' } },
+    { id: 'landuse-worship', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('religious'), paint: { 'fill-color': '#ffe0c2' } },
+    { id: 'landuse-sport', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('stadium', 'pitch', 'playground', 'track'), paint: { 'fill-color': '#c6efbf' } },
+    { id: 'landuse-cem', type: 'fill', source: 'om', 'source-layer': 'landuse', filter: cls('cemetery'), paint: { 'fill-color': '#d3e6c8' } },
+    { id: 'landcover-sand', type: 'fill', source: 'om', 'source-layer': 'landcover', filter: cls('sand', 'rock'), paint: { 'fill-color': '#f4ead2' } },
+    { id: 'landcover-farm', type: 'fill', source: 'om', 'source-layer': 'landcover', filter: cls('farmland'), paint: { 'fill-color': '#eef0d8' } },
+    { id: 'landcover-wet', type: 'fill', source: 'om', 'source-layer': 'landcover', filter: cls('wetland'), paint: { 'fill-color': '#dcecea' } },
+    { id: 'landcover-grass', type: 'fill', source: 'om', 'source-layer': 'landcover', filter: cls('grass'), paint: { 'fill-color': '#d4ecc0' } },
+    { id: 'landcover-wood', type: 'fill', source: 'om', 'source-layer': 'landcover', filter: cls('wood', 'forest'), paint: { 'fill-color': '#bfe0a6' } },
+    { id: 'park', type: 'fill', source: 'om', 'source-layer': 'park', paint: { 'fill-color': '#b9e8a0', 'fill-outline-color': '#9fd884' } },
+    { id: 'water', type: 'fill', source: 'om', 'source-layer': 'water', paint: { 'fill-color': '#86c8f4' } },
+    { id: 'waterway', type: 'line', source: 'om', 'source-layer': 'waterway', paint: { 'line-color': '#9fd3f5', 'line-width': zw([10, .6, 16, 3]) } },
+    { id: 'aeroway', type: 'line', source: 'om', 'source-layer': 'aeroway', minzoom: 11, paint: { 'line-color': '#d5d0dc', 'line-width': zw([11, 1, 16, 18]) } },
+    { id: 'building-flat', type: 'fill', source: 'om', 'source-layer': 'building', minzoom: 14, paint: { 'fill-color': '#e9e0d2', 'fill-outline-color': '#d3c6b2' } }
+  ];
+  ROADS.forEach(function (r) {
+    var f = ['all', ['==', ['geometry-type'], 'LineString'], cls.apply(null, r[1])];
+    if (r[2]) L.push({ id: 'road-' + r[0] + '-case', type: 'line', source: 'om', 'source-layer': 'transportation', minzoom: r[5], filter: f,
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': r[2], 'line-width': zw(r[4].map(function (v, i) { return i % 2 ? v * 1.35 + 1 : v; })) } });
+  });
+  ROADS.forEach(function (r) {
+    var f = ['all', ['==', ['geometry-type'], 'LineString'], cls.apply(null, r[1])];
+    var paint = { 'line-color': r[3], 'line-width': zw(r[4]) };
+    if (r[0] === 'path') paint['line-dasharray'] = [2, 1.5];
+    L.push({ id: 'road-' + r[0], type: 'line', source: 'om', 'source-layer': 'transportation', minzoom: r[5], filter: f,
+      layout: { 'line-cap': r[0] === 'path' ? 'butt' : 'round', 'line-join': 'round' }, paint: paint });
+  });
+  L.push(
+    { id: 'rail', type: 'line', source: 'om', 'source-layer': 'transportation', minzoom: 8, filter: cls('rail', 'transit'), paint: { 'line-color': '#8f969e', 'line-width': zw([8, .8, 16, 3.2]) } },
+    { id: 'rail-dash', type: 'line', source: 'om', 'source-layer': 'transportation', minzoom: 12, filter: cls('rail', 'transit'), paint: { 'line-color': '#ffffff', 'line-width': zw([12, .5, 16, 2]), 'line-dasharray': [3, 3] } },
+    { id: 'water-name', type: 'symbol', source: 'om', 'source-layer': 'water_name', layout: { 'text-field': NAME, 'text-font': FONT_I, 'text-size': 12 }, paint: { 'text-color': '#3b82b8', 'text-halo-color': '#fff', 'text-halo-width': 1.2 } },
+    { id: 'road-name', type: 'symbol', source: 'om', 'source-layer': 'transportation_name', minzoom: 13,
+      filter: cls('motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor'),
+      layout: { 'symbol-placement': 'line', 'text-field': NAME, 'text-font': FONT, 'text-size': ['interpolate', ['linear'], ['zoom'], 13, 10, 17, 13], 'text-max-angle': 30, 'symbol-spacing': 280 },
+      paint: { 'text-color': '#5e574b', 'text-halo-color': '#ffffff', 'text-halo-width': 1.6 } },
+    { id: 'place-small', type: 'symbol', source: 'om', 'source-layer': 'place', minzoom: 12, filter: cls('suburb', 'neighbourhood', 'quarter', 'hamlet', 'village'),
+      layout: { 'text-field': NAME, 'text-font': FONT_B, 'text-size': ['interpolate', ['linear'], ['zoom'], 12, 11, 16, 14], 'text-transform': 'uppercase', 'text-letter-spacing': .08, 'text-max-width': 8 },
+      paint: { 'text-color': '#7a7468', 'text-halo-color': '#f3f1ec', 'text-halo-width': 1.5 } },
+    { id: 'place-city', type: 'symbol', source: 'om', 'source-layer': 'place', filter: cls('city', 'town'),
+      layout: { 'text-field': NAME, 'text-font': FONT_B, 'text-size': ['interpolate', ['linear'], ['zoom'], 8, 13, 13, 20] },
+      paint: { 'text-color': '#2b2a27', 'text-halo-color': '#fff', 'text-halo-width': 2 } }
+  );
+  return {
+    version: 8,
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    sources: { om: { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>' } },
+    layers: L
+  };
+}
+function addSatellite(st) {
+  if (!MAPTILER_KEY) return st;
+  st.sources.sat = { type: 'raster', url: 'https://api.maptiler.com/tiles/satellite-v2/tiles.json?key=' + encodeURIComponent(MAPTILER_KEY), tileSize: 512 };
+  st.layers.splice(1, 0, { id: 'sat', type: 'raster', source: 'sat', layout: { visibility: 'none' }, paint: { 'raster-fade-duration': 200 } });
+  return st;
+}
+
+/* =========================================================
+   लोडिंग स्क्रीन
+   ========================================================= */
+var t0 = Date.now(), hidden = false;
+function hideSplash() {
+  if (hidden) return; hidden = true;
+  setTimeout(function () { $('splash').classList.add('hide'); setTimeout(function () { $('splash').remove(); }, 500); }, Math.max(0, 1300 - (Date.now() - t0)));
+}
+setTimeout(hideSplash, 10000);
+applyTexts();
+if (!window.maplibregl) { status(T('nolib'), true, 0); hideSplash(); return; }
+
+/* =========================================================
+   मैप
+   ========================================================= */
+MB = window.PB_PROVIDER === 'mapbox' && !!window.mapboxgl;
+var satPref = null; try { satPref = localStorage.getItem('pb-sat'); } catch (e) {}
+var MB_STYLE = { map: 'mapbox://styles/mapbox/standard', sat: 'mapbox://styles/mapbox/standard-satellite' };
+function lightNow() { var h = new Date().getHours() + new Date().getMinutes() / 60; return h < 5.5 || h >= 19.5 ? 'night' : h < 7.5 ? 'dawn' : h >= 17.75 ? 'dusk' : 'day'; }
+var MB_CONFIG = { lightPreset: lightNow(), showPointOfInterestLabels: true, show3dObjects: true, show3dBuildings: true, show3dTrees: true, show3dLandmarks: true, show3dFacades: true, showTransitLabels: true, showPlaceLabels: true, showRoadLabels: true,
+  colorMotorways: '#ec4a3c', colorTrunks: '#ff8a3d' };
+var map, tilted = MB;
+if (MB) {
+  useMapboxData();
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+  map = new mapboxgl.Map({ container: 'map', style: satPref === '1' ? MB_STYLE.sat : MB_STYLE.map, config: { basemap: MB_CONFIG },
+    center: START.center, zoom: 16, pitch: 58, bearing: -17, maxPitch: 75, minZoom: 3, projection: 'mercator', attributionControl: false, antialias: true });
+} else {
+  map = new maplibregl.Map({
+    container: 'map', style: addSatellite(buildStyle()), center: START.center, zoom: START.zoom, pitch: START.pitch, bearing: START.bearing,
+    maxPitch: 60, minZoom: 3, attributionControl: false, pixelRatio: Math.min(window.devicePixelRatio || 1, 2.5)
+  });
+}
+map.addControl(new maplibregl.NavigationControl({ visualizePitch: false, showZoom: true }), 'top-right');
+map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+/* Mapbox/OSM की लंबी credit पट्टी खुलते ही बंद करो: सिर्फ छोटा (i) बटन + mapbox लोगो रहे (शर्तों के अनुसार ज़रूरी) */
+function pbCollapseAttrib() {
+  document.querySelectorAll('.mapboxgl-ctrl-attrib, .maplibregl-ctrl-attrib').forEach(function (el) {
+    el.classList.remove('mapboxgl-compact-show', 'maplibregl-compact-show');
+    if (el.tagName === 'DETAILS') el.removeAttribute('open');
+  });
+}
+map.once('idle', pbCollapseAttrib);
+setTimeout(pbCollapseAttrib, 1500); setTimeout(pbCollapseAttrib, 4000);
+map.on('error', function (e) {
+  var er = (e && e.error) || {}, msg = String(er.message || ''), st = er.status || 0;
+  console.warn('map:', st, msg);
+  /* Mapbox ने मना किया (token / सीमा / account बंद) → मुफ़्त नक्शे पर चले जाओ */
+  if (MB && (st === 401 || st === 402 || st === 403 || st === 429 || /unauthori|forbidden|access token|too many/i.test(msg))) toFree(st === 429 ? 24 : 6);
+});
+function toFree(hours) {
+  try { if (sessionStorage.getItem('pb-fell')) return; sessionStorage.setItem('pb-fell', '1'); localStorage.setItem('pb-free-until', String(Date.now() + hours * 36e5)); } catch (e) { return; }
+  location.reload();
+}
+
+var currentGroup = 'all', ready = false;
+map.on('load', function () {
+  setupIcons().then(function () {
+    overlay();
+    bindOnce();
+    if (MB) { satOn = satPref === '1'; $('sat').classList.toggle('on', satOn); }
+    else if (MAPTILER_KEY) setSat(satPref !== '0');
+    drawChips();
+    ready = true;
+    hideSplash();
+    loadBusinesses();
+    handleUrl();
+  }).catch(function (e) { console.warn(e); hideSplash(); });
+});
+
+/* हमारी परतें (लोगो, रंग, रास्ता, PataBook पिन) — नक्शा बदलने पर दोबारा लगती हैं */
+function addL(layer, before, slot) {
+  if (map.getLayer(layer.id)) return;
+  if (MB) { layer.slot = slot || 'top'; map.addLayer(layer); }
+  else map.addLayer(layer, before && map.getLayer(before) ? before : undefined);
+}
+function overlay() {
+  ensureImages();
+  if (MB && !map.getSource('mbs')) map.addSource('mbs', { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' });
+  addRouteLayers();
+  addGlow();
+  addPoiLayers();
+  if (BIZ.length) addBizLayers();
+  if (currentGroup !== 'all' || MB) applyGroupFilter();
+  if (route && route.data && map.getSource('route')) map.getSource('route').setData({ type: 'Feature', geometry: route.data.geometry, properties: {} });
+}
+var bound = false;
+function bindOnce() {
+  if (bound) return; bound = true;
+  ['poi-minor', 'poi-major'].forEach(function (id) {
+    map.on('click', id, function (e) { if (picking) return; poiCard(e.features[0], e.lngLat); });
+    pointer(id);
+  });
+}
+var bizBound = false;
+function bindBiz() {
+  if (bizBound) return; bizBound = true;
+  map.on('click', 'pb-pin', function (e) { if (picking) return; var b = BIZ[e.features[0].properties.i]; if (b) bizCard(b); });
+  map.on('click', 'pb-cluster', function (e) {
+    var f = e.features[0], go = function (z) { map.easeTo({ center: f.geometry.coordinates, zoom: z + .5 }); };
+    var r = map.getSource('pb').getClusterExpansionZoom(f.properties.cluster_id, function (err, z) { if (!err) go(z); });
+    if (r && r.then) r.then(go);
+  });
+  pointer('pb-pin'); pointer('pb-cluster');
+}
+var IMGS = {};
+function ensureImages() { Object.keys(IMGS).forEach(function (n) { if (!map.hasImage(n)) map.addImage(n, IMGS[n], { pixelRatio: R }); }); }
+function setupIcons() {
+  var keys = Object.keys(G);
+  return Promise.all([Promise.all(keys.map(glyphImg)), loadImg('pin.png')]).then(function (res) {
+    var imgs = res[0], pin = res[1], byKey = {};
+    keys.forEach(function (k, i) {
+      byKey[k] = imgs[i];
+      IMGS['r-' + k] = roundBadge(imgs[i], C[k], 26);
+      IMGS['p-' + k] = pinBadge(imgs[i], C[k], 32);
+    });
+    IMGS['pb-'] = pbPin(pin, null);
+    Object.keys(PB_CAT).forEach(function (cat) { var k = PB_CAT[cat]; IMGS['pb-' + cat] = pbPin(pin, byKey[k], C[k]); });
+  });
+}
+
+/* ---------- OpenStreetMap की जगहें ---------- */
+function groupFilter() {
+  if (currentGroup === 'all') return true;
+  var g = GROUPS.filter(function (x) { return x.id === currentGroup; })[0];
+  return ['in', ICON_KEY, ['literal', g.keys]];
+}
+function applyGroupFilter() {
+  var f = groupFilter();
+  if (MB) {
+    var vis = currentGroup === 'all' ? 'none' : 'visible';
+    ['poi-minor', 'poi-major'].forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis); });
+    if (map.getLayer('poi-glow')) map.setLayoutProperty('poi-glow', 'visibility', 'none');
+    try { map.setConfigProperty('basemap', 'showPointOfInterestLabels', currentGroup === 'all'); } catch (e) {}
+  }
+  map.setFilter('poi-minor', ['all', ['!=', ICON_KEY, 'none'], ['!', MAJOR], f]);
+  map.setFilter('poi-major', ['all', ['!=', ICON_KEY, 'none'], MAJOR, f]);
+  map.setFilter('poi-glow', ['all', ['!=', ICON_KEY, 'none'], f]);
+}
+/* हर जगह के चारों ओर उसका हल्का रंग */
+function plainColors() { var a = []; Object.keys(C).forEach(function (k) { a.push(k, C[k]); }); return a; }
+function poiSrc() { return MB ? { source: 'mbs', 'source-layer': 'poi_label' } : { source: 'om', 'source-layer': 'poi' }; }
+var SORTK = function () { return MB ? ['coalesce', ['get', 'filterrank'], ['get', 'sizerank'], 99] : ['coalesce', ['get', 'rank'], 99]; };
+function addGlow() {
+  addL(Object.assign({ id: 'poi-glow', type: 'circle', minzoom: 14.5,
+    filter: ['!=', ICON_KEY, 'none'],
+    paint: { 'circle-color': ['match', ICON_KEY].concat(plainColors(), ['#888']),
+      'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 14.5, 7, 16, 16, 18, 52],
+      'circle-opacity': .2, 'circle-blur': .35, 'circle-stroke-width': 1.5,
+      'circle-stroke-color': ['match', ICON_KEY].concat(plainColors(), ['#888']), 'circle-stroke-opacity': .45, 'circle-pitch-alignment': 'map' } }, poiSrc()), 'poi-minor');
+}
+/* सैटेलाइट (असली फ़ोटो) ↔ रंगीन नक्शा */
+var satOn = false;
+var FILL_LAYERS = ['landuse-res', 'landuse-com', 'landuse-ind', 'landuse-rail', 'landuse-health', 'landuse-edu', 'landuse-worship', 'landuse-sport', 'landuse-cem',
+  'landcover-sand', 'landcover-farm', 'landcover-wet', 'landcover-grass', 'landcover-wood', 'park', 'water', 'waterway', 'aeroway', 'building-flat'];
+function setSat(on) {
+  if (!map.getLayer('sat')) return;
+  satOn = on;
+  map.setLayoutProperty('sat', 'visibility', on ? 'visible' : 'none');
+  FILL_LAYERS.forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'none' : 'visible'); });
+  ROADS.forEach(function (r) {
+    var small = r[0] === 'minor' || r[0] === 'service' || r[0] === 'path';
+    map.setPaintProperty('road-' + r[0], 'line-opacity', on ? (small ? .55 : .9) : 1);
+    if (map.getLayer('road-' + r[0] + '-case')) map.setPaintProperty('road-' + r[0] + '-case', 'line-opacity', on ? .35 : 1);
+  });
+  ['road-name', 'place-small', 'place-city', 'water-name'].forEach(function (id) {
+    map.setPaintProperty(id, 'text-color', on ? '#ffffff' : (id === 'road-name' ? '#5e574b' : id === 'place-small' ? '#7a7468' : id === 'water-name' ? '#3b82b8' : '#2b2a27'));
+    map.setPaintProperty(id, 'text-halo-color', on ? 'rgba(0,0,0,.75)' : '#ffffff');
+  });
+  map.setPaintProperty('poi-glow', 'circle-opacity', on ? .32 : .2);
+  $('sat').classList.toggle('on', on);
+  try { localStorage.setItem('pb-sat', on ? '1' : '0'); } catch (e) {}
+}
+function flatColors() { var a = []; Object.keys(C).forEach(function (k) { a.push(k, shade(C[k], -30)); }); return a; }
+function addPoiLayers() {
+  var known = ['!=', ICON_KEY, 'none'];
+  var text = { 'text-field': NAME, 'text-font': FONT_B, 'text-anchor': 'top', 'text-max-width': 9, 'text-optional': true };
+  addL(Object.assign({ id: 'poi-minor', type: 'symbol', minzoom: 15,
+    filter: ['all', known, ['!', MAJOR]],
+    layout: Object.assign({ 'icon-image': ['concat', 'r-', ICON_KEY], 'icon-size': ['interpolate', ['linear'], ['zoom'], 15, .82, 18, 1.05],
+      'symbol-sort-key': SORTK(), 'icon-padding': 2, 'text-size': ['step', ['zoom'], 0, 16, 11.5], 'text-offset': [0, 1.15] }, text),
+    paint: { 'text-color': ['match', ICON_KEY].concat(flatColors(), ['#444']), 'text-halo-color': '#fff', 'text-halo-width': 1.6 } }, poiSrc()));
+  addL(Object.assign({ id: 'poi-major', type: 'symbol', minzoom: 12.5,
+    filter: ['all', known, MAJOR],
+    layout: Object.assign({ 'icon-image': ['concat', 'p-', ICON_KEY], 'icon-anchor': 'bottom', 'icon-size': ['interpolate', ['linear'], ['zoom'], 13, .8, 17, 1.08],
+      'symbol-sort-key': SORTK(), 'text-size': ['interpolate', ['linear'], ['zoom'], 13, 11, 17, 13.5], 'text-offset': [0, .25] }, text),
+    paint: { 'text-color': ['match', ICON_KEY].concat(flatColors(), ['#333']), 'text-halo-color': '#fff', 'text-halo-width': 2 } }, poiSrc()));
+}
+function pointer(id) {
+  map.on('mouseenter', id, function () { map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', id, function () { map.getCanvas().style.cursor = ''; });
+}
+function iconKeyJS(p) {
+  if (p['class'] === 'place_of_worship') {
+    var n = String(p.name || '').toLowerCase();
+    if (/masjid|mosque|dargah|jama/.test(n)) return 'mosque';
+    if (/church|chapel/.test(n)) return 'church';
+    if (/gurudwara|gurdwara/.test(n)) return 'gurudwara';
+    return 'temple';
+  }
+  for (var i = 0; i < CLASS_ICON.length; i += 2) if (CLASS_ICON[i] === p['class']) return CLASS_ICON[i + 1];
+  return 'star';
+}
+
+/* ---------- कार्ड ---------- */
+var cardDest = null, popup = null;
+function showCard(ll, html, dest) {
+  cardDest = dest;
+  if (popup) popup.remove();
+  popup = new maplibregl.Popup({ offset: 24, maxWidth: '290px' }).setLngLat(ll).setHTML(html).addTo(map);
+}
+function poiCard(f, ll) {
+  var p = f.properties, key = p.maki !== undefined ? iconKeyMB(p) : iconKeyJS(p);
+  var c = f.geometry && f.geometry.type === 'Point' ? f.geometry.coordinates : [ll.lng, ll.lat];
+  var name = p.name_en || p['name:latin'] || p.name || typeName(key);
+  showCard(c, '<div class="pc"><span class="ic" style="background:' + C[key] + '">' + svg(key) + '</span><div><div class="pt">' + esc(name) + '</div>' +
+    '<div class="ps">' + esc(typeName(key)) + (p.name && p.name !== name ? ' · ' + esc(p.name) : '') + '</div></div></div>' +
+    '<div class="pb"><button type="button" class="dir" data-go="1">📍 ' + esc(T('directions')) + '</button></div>', { ll: c, name: name });
+}
+function bizCard(b) {
+  var link = b.slug ? '<a class="pro" href="business.html?slug=' + encodeURIComponent(b.slug) + '">' + esc(T('profile')) + '</a>' : '';
+  showCard(b.ll, '<div class="pc"><span class="ic" style="background:#eff4ff"><img src="pin.png" alt=""></span><div><div class="pt">' + esc(b.name) + (b.v ? '<span class="pv">✓ Verified</span>' : '') + '</div>' +
+    (b.category || b.address ? '<div class="ps">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '</div>' : '') +
+    (b.approx ? '<div class="pa">⚠ ' + esc(T('approx')) + '</div>' : '') + '</div></div>' +
+    '<div class="pb"><button type="button" class="dir" data-go="1">📍 ' + esc(T('directions')) + '</button>' + link + '</div>' +
+    (b.slug ? '<div class="pb" id="callRow"><button type="button" class="pro" data-call="' + esc(b.slug) + '">📞 ' + esc(T('call')) + '</button></div>' : ''), { ll: b.ll, name: b.name, addr: b.address });
+}
+/* लॉगिन किए ग्राहक को मैप से ही कॉल / WhatsApp (नंबर सिर्फ़ लॉगिन के बाद, पहले जैसा) */
+document.addEventListener('click', function (e) {
+  var c = e.target.closest('[data-call]'); if (!c) return;
+  var slug = c.getAttribute('data-call');
+  if (!window.PBA || !PBA.current()) { location.href = window.PBA ? PBA.loginUrl('business.html?slug=' + encodeURIComponent(slug)) : 'business.html?slug=' + encodeURIComponent(slug); return; }
+  c.disabled = true;
+  PBA.contact(slug).then(function (x) {
+    var p = String((x && (x.phone || x.whatsapp)) || '').replace(/\D/g, '').slice(-10), w = String((x && (x.whatsapp || x.phone)) || '').replace(/\D/g, '').slice(-10);
+    if (!p) throw new Error('none');
+    var row = c.parentNode;
+    row.innerHTML = '<a class="dir" href="tel:+91' + p + '">📞 ' + p + '</a>' + (w ? '<a class="pro" href="https://wa.me/91' + w + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
+  }).catch(function (er) {
+    c.disabled = false;
+    if (/login|JWT|expired/i.test(er.message || '') || er.status === 401) { location.href = PBA.loginUrl('business.html?slug=' + encodeURIComponent(slug)); return; }
+    status(/daily limit/i.test(er.message || '') ? T('call_limit') : T('call_fail'), true);
+  });
+});
+document.addEventListener('click', function (e) {
+  if (e.target.closest('[data-go]') && cardDest) { if (popup) popup.remove(); openRoute(cardDest); }
+});
+
+/* ---------- फ़िल्टर ---------- */
+function drawChips() {
+  $('chips').innerHTML = GROUPS.map(function (g) {
+    return '<button type="button" data-g="' + g.id + '" class="' + (g.id === currentGroup ? 'on' : '') + '"><i style="background:' + (g.color || C[g.icon]) + '">' + svg(g.icon) + '</i>' + esc(T(g.id)) + '</button>';
+  }).join('');
+}
+$('chips').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b || !ready) return;
+  currentGroup = b.dataset.g; drawChips();
+  applyGroupFilter();
+  refreshBiz();
+  if (map.getZoom() < 14.5) map.easeTo({ zoom: 15 });
+};
+
+/* ---------- शहर ---------- */
+$('city').innerHTML = CITIES.map(function (c, i) { return '<option value="' + i + '">' + c[0] + '</option>'; }).join('');
+$('city').onchange = function () { var c = CITIES[+this.value]; stopFollow(); map.flyTo({ center: [c[1], c[2]], zoom: 14.6, pitch: tilted ? 55 : 0, duration: 1400 }); };
+
+/* =========================================================
+   पते से जगह (Photon / OpenStreetMap) — याद रखा जाता है ताकि बार-बार न पूछें
+   ========================================================= */
+function cacheGet(k) { try { var v = JSON.parse(localStorage.getItem('pbgeo:' + k) || 'null'); if (v && Date.now() - v.t < 30 * 864e5) return v; } catch (e) {} return null; }
+function cacheSet(k, ll) { try { localStorage.setItem('pbgeo:' + k, JSON.stringify({ t: Date.now(), ll: ll })); } catch (e) {} }
+function photon(q, limit) {
+  var c = map.getCenter();
+  var u = PHOTON + '?q=' + encodeURIComponent(q) + '&limit=' + (limit || 1) + '&lat=' + c.lat.toFixed(4) + '&lon=' + c.lng.toFixed(4) + '&bbox=' + KUTCH_BBOX;
+  return fetch(u).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) { return j.features || []; });
+}
+function mbGeo(q, limit) {
+  var c = map.getCenter();
+  var u = 'https://api.mapbox.com/search/geocode/v6/forward?q=' + encodeURIComponent(q) + '&country=in&limit=' + (limit || 1) + '&proximity=' + c.lng.toFixed(4) + ',' + c.lat.toFixed(4) +
+    '&bbox=' + KUTCH_BBOX + '&language=en&access_token=' + MAPBOX_TOKEN;
+  return fetch(u).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) { return j.features || []; });
+}
+function geocode(addr) {
+  addr = String(addr || '').trim(); if (!addr) return Promise.resolve(null);
+  var hit = cacheGet(addr); if (hit) return Promise.resolve(hit.ll);
+  if (MB) return mbGeo(addr, 1).then(function (fs) {
+    var ft = fs.length && fs[0].properties ? fs[0].properties.feature_type : '';
+    if (fs.length && ft !== 'region' && ft !== 'district' && ft !== 'country') { cacheSet(addr, fs[0].geometry.coordinates); return fs[0].geometry.coordinates; }
+    return geoFree(addr);
+  }).catch(function () { return geoFree(addr); });
+  return geoFree(addr);
+}
+function geoFree(addr) {
+  var parts = addr.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  var tries = [addr]; if (parts.length > 2) tries.push(parts.slice(-2).join(', ')); if (parts.length > 1) tries.push(parts[parts.length - 1]);
+  var i = 0;
+  function next() {
+    if (i >= tries.length) { cacheSet(addr, null); return null; }
+    return photon(tries[i++], 1).then(function (fs) {
+      if (fs.length) { var ll = fs[0].geometry.coordinates; cacheSet(addr, ll); return ll; }
+      return next();
+    });
+  }
+  return next();
+}
+
+/* =========================================================
+   PataBook दुकानें — location न हो तो पते से अपने-आप
+   ========================================================= */
+var BIZ = [], bizShown = false;
+function loadBusinesses() {
+  var q = new URLSearchParams({ select: 'name,slug,address,category,latitude,longitude,is_verified', is_active: 'eq.true', deleted_at: 'is.null', limit: '1000' });
+  fetch(SB_URL + '/rest/v1/businesses?' + q.toString(), { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (rows) {
+      BIZ = rows.map(function (b) {
+        var lat = +b.latitude, lng = +b.longitude, ok = b.latitude != null && b.longitude != null && isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+        return { name: b.name || T('shop_t'), slug: b.slug || '', address: b.address || '', category: b.category || '', v: !!b.is_verified, ll: ok ? [lng, lat] : null, approx: false };
+      });
+      addBizLayers();
+      var exact = BIZ.filter(function (b) { return b.ll; }).length;
+      if (exact) status(T('pb_n', { n: exact }));
+      geocodeMissing();
+    })
+    .catch(function (e) { status(T('pb_fail') + ' (' + e.message + ')', true); });
+}
+function geocodeMissing() {
+  var todo = BIZ.filter(function (b) { return !b.ll && b.address; }).slice(0, 60), i = 0, fresh = 0;
+  (function step() {
+    if (i >= todo.length) { if (fresh) refreshBiz(); return; }
+    var b = todo[i++], cached = cacheGet(b.address);
+    geocode(b.address).then(function (ll) {
+      if (ll) { b.ll = ll; b.approx = true; fresh++; if (fresh % 5 === 1) refreshBiz(); }
+    }).catch(function () {}).then(function () { setTimeout(step, cached ? 0 : 1100); });   // मुफ़्त सेवा: हर सेकंड एक
+  })();
+}
+function bizFeatures() {
+  var g = GROUPS.filter(function (x) { return x.id === currentGroup; })[0];
+  return BIZ.filter(function (b) { return b.ll && (currentGroup === 'all' || (g.pb || []).indexOf(b.category) >= 0); }).map(function (b) {
+    return { type: 'Feature', geometry: { type: 'Point', coordinates: b.ll }, properties: { i: BIZ.indexOf(b), name: b.name, cat: PB_CAT[b.category] ? b.category : '' } };
+  });
+}
+function refreshBiz() { if (bizShown && map.getSource('pb')) map.getSource('pb').setData({ type: 'FeatureCollection', features: bizFeatures() }); }
+function addBizLayers() {
+  if (!map.getSource('pb')) map.addSource('pb', { type: 'geojson', data: { type: 'FeatureCollection', features: bizFeatures() }, cluster: true, clusterRadius: 44, clusterMaxZoom: 15 });
+  addL({ id: 'pb-cluster', type: 'circle', source: 'pb', filter: ['has', 'point_count'],
+    paint: { 'circle-color': '#1a73e8', 'circle-radius': ['step', ['get', 'point_count'], 17, 10, 21, 50, 27], 'circle-stroke-width': 3, 'circle-stroke-color': '#fff', 'circle-pitch-alignment': 'viewport' } });
+  addL({ id: 'pb-count', type: 'symbol', source: 'pb', filter: ['has', 'point_count'],
+    layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': FONT_B, 'text-size': 13, 'text-allow-overlap': true }, paint: { 'text-color': '#fff' } });
+  addL({ id: 'pb-pin', type: 'symbol', source: 'pb', filter: ['!', ['has', 'point_count']],
+    layout: { 'icon-image': ['concat', 'pb-', ['get', 'cat']], 'icon-anchor': 'bottom', 'icon-allow-overlap': true, 'icon-size': ['interpolate', ['linear'], ['zoom'], 12, .8, 17, 1.05],
+      'text-field': ['get', 'name'], 'text-font': FONT_B, 'text-size': ['step', ['zoom'], 0, 15, 12], 'text-anchor': 'top', 'text-offset': [0, .3], 'text-optional': true, 'text-max-width': 9 },
+    paint: { 'text-color': '#0b2f73', 'text-halo-color': '#fff', 'text-halo-width': 2 } });
+  bizShown = true;
+  bindBiz();
+}
+
+/* =========================================================
+   खोज: PataBook दुकानें + OpenStreetMap की जगहें
+   ========================================================= */
+var sTimer = null, sSeq = 0;
+$('q').addEventListener('input', function () {
+  var v = this.value.trim(); $('qx').hidden = !v;
+  clearTimeout(sTimer);
+  if (!v) { $('sres').hidden = true; document.body.classList.remove('srch'); return; }
+  sTimer = setTimeout(function () { runSearch(v); }, 350);
+});
+$('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); clearTimeout(sTimer); runSearch(this.value.trim()); } });
+function hideRes() { $('sres').hidden = true; document.body.classList.remove('srch'); }
+$('qx').onclick = function () { $('q').value = ''; this.hidden = true; hideRes(); };
+map.on('click', hideRes);
+var SR = [];
+function runSearch(v) {
+  if (!v) return;
+  var my = ++sSeq, lv = v.toLowerCase();
+  var pb = BIZ.filter(function (b) { return (b.name + ' ' + b.address + ' ' + b.category).toLowerCase().indexOf(lv) >= 0; }).slice(0, 6);
+  SR = pb.map(function (b) { return { kind: 'pb', b: b }; });
+  draw(false);
+  /* पूरे 10 अंकों का मोबाइल नंबर लिखा हो → उसी नंबर वाली PataBook दुकान (सर्वर पर जाँच, नंबर वापस नहीं आता) */
+  var dg = v.replace(/\D/g, '');
+  if (dg.length >= 10 && dg.length <= 13 && dg.replace(/\d/g, '') === '' && v.replace(/[\d\s+()-]/g, '') === '') {
+    fetch(SB_URL + '/rest/v1/rpc/pb_find_by_phone', { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_phone: dg }) })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        if (my !== sSeq || !Array.isArray(rows)) return;
+        rows.forEach(function (x) {
+          var known = BIZ.filter(function (b) { return b.slug && b.slug === x.slug; })[0];
+          var lat = +x.latitude, lng = +x.longitude, ll = x.latitude != null && isFinite(lat) && isFinite(lng) ? [lng, lat] : null;
+          var b = known || { name: x.name, slug: x.slug, address: x.address || '', category: x.category || '', v: false, ll: ll, approx: false };
+          SR.unshift({ kind: 'pb', b: b });
+        });
+        draw(true);
+      }).catch(function () {});
+    return;
+  }
+  if (v.length < 3) return;
+  if (MB) mbGeo(v, 4).then(function (fs) {
+    if (my !== sSeq) return;
+    fs.forEach(function (f) {
+      var p = f.properties || {}; if (p.feature_type === 'region' || p.feature_type === 'country') return;
+      SR.push({ kind: 'pl', ll: f.geometry.coordinates, name: p.name || v, sub: p.place_formatted || '', key: 'home' });
+    });
+    draw(true);
+  }).catch(function () {});
+  photon(v, 12).then(function (fs) {
+    if (my !== sSeq) return;
+    var cc = map.getCenter(), here = [cc.lng, cc.lat];
+    fs.forEach(function (f) { f.d = hav(here, f.geometry.coordinates); });
+    fs = fs.filter(function (f) { return f.d < 60000; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 7);
+    fs.forEach(function (f) {
+      var p = f.properties || {};
+      SR.push({ kind: 'pl', ll: f.geometry.coordinates, name: p.name || p.street || v,
+        sub: [fmtDist(f.d), p.street && p.name ? p.street : '', p.district, p.city || p.county].filter(Boolean).join(' · '), key: plKey(p) });
+    });
+    draw(true);
+  }).catch(function () { if (my === sSeq) draw(true); });
+  function draw(done) {
+    var h = '', pbRows = SR.filter(function (r) { return r.kind === 'pb'; }), pl = SR.filter(function (r) { return r.kind === 'pl'; });
+    if (pbRows.length) h += '<div class="h">' + esc(T('pb')) + '</div>' + pbRows.map(function (r) {
+      return '<a data-r="' + SR.indexOf(r) + '"><span class="ic"><img src="pin.png" alt=""></span><span><b>' + esc(r.b.name) + '</b><small>' + esc([r.b.category, r.b.address].filter(Boolean).join(' · ')) + '</small></span></a>';
+    }).join('');
+    if (pl.length) h += '<div class="h">' + esc(T('places')) + '</div>' + pl.map(function (r) {
+      return '<a data-r="' + SR.indexOf(r) + '"><span class="ic" style="background:' + C[r.key] + '">' + svg(r.key) + '</span><span><b>' + esc(r.name) + '</b><small>' + esc(r.sub) + '</small></span></a>';
+    }).join('');
+    if (!h && done) h = '<div class="none">' + esc(T('none')) + '</div>';
+    $('sres').innerHTML = h; $('sres').hidden = !h; document.body.classList.toggle('srch', !!h);
+  }
+}
+function plKey(p) {
+  var v = p.osm_value || '', k = p.osm_key || '';
+  if (v === 'place_of_worship') return iconKeyJS({ 'class': 'place_of_worship', name: p.name });
+  for (var i = 0; i < CLASS_ICON.length; i += 2) if (CLASS_ICON[i] === v) return CLASS_ICON[i + 1];
+  if (k === 'shop') return 'shop'; if (k === 'highway' || k === 'place') return 'star';
+  return 'star';
+}
+$('sres').onclick = function (e) {
+  var a = e.target.closest('[data-r]'); if (!a) return;
+  var r = SR[+a.dataset.r]; hideRes(); $('q').blur();
+  if (r.kind === 'pb') {
+    var b = r.b;
+    var go = function () { map.flyTo({ center: b.ll, zoom: 17, pitch: tilted ? 55 : 0, duration: 1100 }); bizCard(b); };
+    if (b.ll) go(); else geocode(b.address).then(function (ll) { if (ll) { b.ll = ll; b.approx = true; refreshBiz(); go(); } else status(T('addr_fail'), true); });
+  } else {
+    map.flyTo({ center: r.ll, zoom: 17, pitch: tilted ? 55 : 0, duration: 1100 });
+    showCard(r.ll, '<div class="pc"><span class="ic" style="background:' + C[r.key] + '">' + svg(r.key) + '</span><div><div class="pt">' + esc(r.name) + '</div><div class="ps">' + esc(r.sub) + '</div></div></div>' +
+      '<div class="pb"><button type="button" class="dir" data-go="1">📍 ' + esc(T('directions')) + '</button></div>', { ll: r.ll, name: r.name });
+  }
+};
+
+/* =========================================================
+   मेरी लोकेशन (एक ही GPS सब काम में)
+   ========================================================= */
+var myPos = null, me = null, meEl = null, watchId = null, heading = null, moveHeading = null, mode = 0;
+function meMarker(ll) {
+  if (!me) {
+    meEl = document.createElement('div'); meEl.className = 'me'; meEl.innerHTML = '<i class="halo"></i><i class="cone"></i><i class="dot"></i><i class="vh"></i>';
+    me = new maplibregl.Marker({ element: meEl, rotationAlignment: 'map', pitchAlignment: 'map' }).setLngLat(ll).addTo(map);
+  } else me.setLngLat(ll);
+}
+function setHeading(h) { heading = h; if (meEl && !nav) { meEl.classList.add('head'); me.setRotation(h); } }
+function onOrient(e) {
+  var h = e.webkitCompassHeading != null ? e.webkitCompassHeading : (e.absolute && e.alpha != null ? 360 - e.alpha : null);
+  if (h == null) return; setHeading(h);
+  if (mode === 2 && !nav) map.easeTo({ bearing: h, duration: 300 });
+}
+var compassOn = false;
+function startCompass() {
+  if (compassOn) return; compassOn = true;
+  var add = function () { window.addEventListener('deviceorientationabsolute', onOrient, true); window.addEventListener('deviceorientation', onOrient, true); };
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(function (s) { if (s === 'granted') add(); }).catch(function () {});
+  } else add();
+}
+var posWaiters = [];
+function ensureWatch() {
+  if (watchId != null || !navigator.geolocation) return;
+  watchId = navigator.geolocation.watchPosition(function (p) {
+    var ll = [p.coords.longitude, p.coords.latitude], prev = myPos;
+    myPos = ll; meMarker(ll);
+    if (p.coords.heading != null && isFinite(p.coords.heading) && p.coords.speed > 1) moveHeading = p.coords.heading;
+    else if (prev && hav(prev, ll) > 4) moveHeading = bearingTo(prev, ll);
+    posWaiters.splice(0).forEach(function (w) { w.ok(ll); });
+    if (nav) navTick(ll);
+    else if (mode === 2) map.easeTo({ center: ll, duration: 600 });
+  }, function () {
+    posWaiters.splice(0).forEach(function (w) { w.no(); });
+    navigator.geolocation.clearWatch(watchId); watchId = null;
+    if (mode) { status(T('loc_fail'), true); mode = 0; $('locate').classList.remove('on'); }
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
+  startCompass();
+}
+function getPos() {
+  if (myPos) return Promise.resolve(myPos);
+  if (!navigator.geolocation) return Promise.reject();
+  return new Promise(function (ok, no) { posWaiters.push({ ok: ok, no: no }); ensureWatch(); setTimeout(function () { no(); }, 16000); });
+}
+function stopFollow() { if (mode === 2) { mode = 1; $('locate').classList.remove('on'); } }
+$('locate').onclick = function () {
+  if (!navigator.geolocation) { status(T('loc_fail'), true); return; }
+  if (mode === 0) {
+    status(T('finding'));
+    mode = 1;
+    getPos().then(function (ll) { status(''); map.flyTo({ center: ll, zoom: 16.5, pitch: tilted ? 55 : 0, duration: 1200 }); }, function () {});
+  } else if (mode === 1) {
+    mode = 2; this.classList.add('on'); status(T('follow'));
+    if (myPos) map.easeTo({ center: myPos, zoom: 17.2, pitch: tilted ? 60 : 0, bearing: heading != null ? heading : map.getBearing(), duration: 900 });
+  } else {
+    mode = 1; this.classList.remove('on'); map.easeTo({ bearing: 0, pitch: tilted ? 55 : 0, duration: 700 });
+  }
+};
+/* सैटेलाइट फ़ोटो बहुत पास से धुंधली होती है → अपने-आप साफ़ नक्शा */
+map.on('zoomend', function () { if (MB && satOn && map.getZoom() > 18.3) { $('sat').click(); status(T('sat_zoom')); } });
+/* Mapbox से मुफ़्त नक्शे पर आए हों तो बताओ, और Premium फिर से चालू करने का बटन */
+(function () {
+  var until = 0; try { until = +localStorage.getItem('pb-free-until') || 0; } catch (e) {}
+  if (!MB && window.PB_USE_MAPBOX && until > Date.now()) $('basic').hidden = false;
+  $('premium').onclick = function () { try { localStorage.removeItem('pb-free-until'); sessionStorage.removeItem('pb-fell'); } catch (e) {} location.reload(); };
+})();
+/* आप उँगली से नक्शा हिलाएँ/ज़ूम करें तो वह अपने-आप वापस नहीं जाएगा */
+/* नेविगेशन में नक्शा छुआ → "रास्ते पर वापस" बटन; 10 सेकंड कुछ न करें तो अपने-आप वापस */
+var rcTimer = null;
+function showRecenter() {
+  var t = $('rcTxt'), k = nav ? 'nav_back' : 'recenter';
+  t.dataset.t = k; t.textContent = T(k); $('rcIco').textContent = nav ? '⬆' : '⌖';
+  $('recenter').hidden = false;
+}
+function armResume() {
+  clearTimeout(rcTimer);
+  if (nav && !nav.follow) rcTimer = setTimeout(function () { if (nav && !nav.follow) $('recenter').click(); }, 10000);
+}
+['dragstart', 'zoomstart', 'rotatestart', 'pitchstart'].forEach(function (ev) {
+  map.on(ev, function (e) {
+    if (!e.originalEvent) return;
+    if (nav) { if (nav.follow) { nav.follow = false; showRecenter(); } armResume(); }
+    else if (mode === 2) { stopFollow(); showRecenter(); }
+  });
+});
+['dragend', 'zoomend', 'rotateend', 'pitchend'].forEach(function (ev) { map.on(ev, function (e) { if (e.originalEvent && nav && !nav.follow) armResume(); }); });
+$('recenter').onclick = function () {
+  this.hidden = true; clearTimeout(rcTimer);
+  if (nav) { nav.follow = true; if (myPos) navTick(myPos, true); else if (route) map.easeTo({ center: route.from, zoom: 17.6, pitch: tilted ? 65 : 0, duration: 800 }); return; }
+  if (myPos) { mode = 2; $('locate').classList.add('on'); map.easeTo({ center: myPos, zoom: 17, bearing: heading != null ? heading : map.getBearing(), duration: 800 }); }
+};
+$('tilt').classList.toggle('on', tilted); $('tilt').textContent = tilted ? '3D' : '2D';
+$('tilt').onclick = function () {
+  tilted = !tilted;
+  if (tilted && !MB) map.setMaxPitch(60);
+  map.easeTo({ pitch: tilted ? 58 : 0, bearing: tilted ? map.getBearing() : 0, duration: 800 });
+  this.textContent = tilted ? '3D' : '2D'; this.classList.toggle('on', tilted);
+};
+$('sat').onclick = function () {
+  if (MB) {
+    satOn = !satOn; $('sat').classList.toggle('on', satOn);
+    try { localStorage.setItem('pb-sat', satOn ? '1' : '0'); } catch (e) {}
+    map.once('style.load', function () { overlay(); });
+    map.setStyle(satOn ? MB_STYLE.sat : MB_STYLE.map, { config: { basemap: MB_CONFIG } });
+    return;
+  }
+  if (!MAPTILER_KEY) { status(T('nokey'), true); return; }
+  setSat(!satOn);
+};
+
+/* =========================================================
+   रास्ता (Directions) — अपने मैप पर
+   ========================================================= */
+function hav(a, b) { var R0 = 6371000, r = Math.PI / 180, dLat = (b[1] - a[1]) * r, dLng = (b[0] - a[0]) * r, x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a[1] * r) * Math.cos(b[1] * r) * Math.sin(dLng / 2) * Math.sin(dLng / 2); return 2 * R0 * Math.asin(Math.sqrt(x)); }
+function bearingTo(a, b) { var r = Math.PI / 180, y = Math.sin((b[0] - a[0]) * r) * Math.cos(b[1] * r), x = Math.cos(a[1] * r) * Math.sin(b[1] * r) - Math.sin(a[1] * r) * Math.cos(b[1] * r) * Math.cos((b[0] - a[0]) * r); return (Math.atan2(y, x) / r + 360) % 360; }
+function distToLine(p, line) {
+  var k = Math.cos(p[1] * Math.PI / 180) * 111320, best = Infinity;
+  for (var i = 1; i < line.length; i++) {
+    var ax = (line[i - 1][0] - p[0]) * k, ay = (line[i - 1][1] - p[1]) * 110540, bx = (line[i][0] - p[0]) * k, by = (line[i][1] - p[1]) * 110540;
+    var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / L2)) : 0;
+    var x = ax + t * dx, y = ay + t * dy, d = Math.sqrt(x * x + y * y); if (d < best) best = d;
+  }
+  return best;
+}
+function addRouteLayers() {
+  if (!map.getSource('route')) map.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  addL({ id: 'route-case', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': '#0b2f73', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 6, 18, 16] } }, 'poi-glow', 'middle');
+  addL({ id: 'route-line', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': '#1a73e8', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 3.5, 18, 11] } }, 'poi-glow', 'middle');
+}
+var route = null, rMode = 'car', startMk = null, endMk = null, picking = false;
+function openRoute(dest) {
+  clearVia();
+  route = { to: dest.ll, name: dest.name || '', from: null, data: null, via: null };
+  $('rTo').textContent = route.name;
+  $('sheet').hidden = false; document.body.classList.add('route'); sheetH();
+  $('rSteps').hidden = true; $('rGo').disabled = true;
+  $('rSum').textContent = T('finding');
+  if (endMk) endMk.remove();
+  endMk = new maplibregl.Marker({ color: '#e5383b' }).setLngLat(dest.ll).addTo(map);
+  getPos().then(function (ll) { route.from = ll; calcRoute(false); }, pickStart);
+}
+function pickStart() {
+  picking = true; $('rSum').innerHTML = '<span class="err">' + esc(T('tap_start')) + '</span>'; status(T('tap_start'), true, 0); sheetH();
+  map.once('click', function (e) {
+    setTimeout(function () { picking = false; }, 0); status('');
+    if (!route) return;
+    route.from = [e.lngLat.lng, e.lngLat.lat]; calcRoute(false);
+  });
+}
+function calcRoute(re) {
+  if (!route || !route.from) return;
+  if (!re) $('rSum').textContent = T('routing');
+  var P = function (p) { return p[0].toFixed(6) + ',' + p[1].toFixed(6); };
+  var pts = P(route.from) + ';' + (route.via ? P(route.via) + ';' : '') + P(route.to);
+  var free = OSRM[rMode] + pts + '?overview=full&geometries=geojson&steps=true';
+  var u = MB ? 'https://api.mapbox.com/directions/v5/mapbox/' + MB_DIR[rMode] + '/' + pts + '?overview=full&geometries=geojson&steps=true&access_token=' + MAPBOX_TOKEN : free;
+  var seq = route.seq = (route.seq || 0) + 1;
+  var get = function (url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+  return get(u).catch(function (e) { if (u !== free) return get(free); throw e; }).then(function (j) {
+    if (!route || seq !== route.seq) return;
+    if (j.code !== 'Ok' || !j.routes || !j.routes.length) { $('rSum').innerHTML = '<span class="err">' + esc(T('no_route')) + '</span>'; return; }
+    var rt = j.routes[0];
+    if (rMode === 'bike') rt.duration = rt.duration * 0.85;
+    route.data = rt;
+    if (!route.via) route.base = rt.duration;                      /* सीधे रास्ते का समय — तुलना के लिए */
+    route.steps = [];
+    rt.legs.forEach(function (l, li) { l.steps.forEach(function (s) {
+      if (s.maneuver && s.maneuver.type === 'arrive' && li < rt.legs.length - 1) return;   /* बीच की जगह पर "पहुँच गए" नहीं */
+      route.steps.push(s); }); });
+    map.getSource('route').setData({ type: 'Feature', geometry: rt.geometry, properties: {} });
+    map.setPaintProperty('route-line', 'line-dasharray', rMode === 'walk' ? [0.6, 1.4] : null);
+    if (startMk) startMk.remove();
+    if (!myPos || hav(myPos, route.from) > 30) { var el = document.createElement('div'); el.className = 'startpt'; startMk = new maplibregl.Marker({ element: el }).setLngLat(route.from).addTo(map); } else startMk = null;
+    fillSheet();
+    if (!re && !nav) fitRoute();
+  }).catch(function () { if (route && seq === route.seq) $('rSum').innerHTML = '<span class="err">' + esc(T('route_fail')) + '</span>'; });
+}
+function fitRoute() {
+  var c = route.data.geometry.coordinates, b = new maplibregl.LngLatBounds(c[0], c[0]);
+  c.forEach(function (p) { b.extend(p); });
+  var mob = innerWidth < 760;
+  map.fitBounds(b, { padding: { top: mob ? 90 : 60, bottom: mob ? $('sheet').offsetHeight + 30 : 60, left: mob ? 40 : 460, right: 70 }, pitch: tilted ? 40 : 0, bearing: 0, duration: 900, maxZoom: 17 });
+}
+function fillSheet() {
+  var rt = route.data;
+  var diff = route.via && route.base ? rt.duration - route.base : 0, dtxt = '';
+  if (route.via && Math.abs(diff) >= 60) dtxt = ' · ' + T(diff > 0 ? 'via_more' : 'via_less', { d: fmtTime(Math.abs(diff)) });
+  $('rSum').innerHTML = '<b>' + esc(fmtTime(rt.duration)) + '</b>' + esc(fmtDist(rt.distance)) + ' · ' + esc(T('est')) +
+    (route.via ? '<div class="via"><span>🟠 <b>' + esc(T('via_on')) + '</b>' + esc(dtxt) + '</span><button type="button" id="viaX">' + esc(T('via_off')) + '</button></div>'
+               : '<div class="tiphint">' + esc(T('via_tip')) + '</div>');
+  var vx = $('viaX'); if (vx) vx.onclick = function () { clearVia(); calcRoute(false); };
+  $('rSteps').innerHTML = route.steps.map(function (s) {
+    var t = instr(s); return '<li><span class="a">' + arrow(s) + '</span><span>' + esc(t) + (s.distance > 0 && s.maneuver.type !== 'arrive' ? '<small>' + esc(fmtDist(s.distance)) + '</small>' : '') + '</span></li>';
+  }).join('');
+  $('rGo').disabled = false; sheetH();
+}
+function sheetH() { setTimeout(function () { document.body.style.setProperty('--sheet', $('sheet').offsetHeight + 'px'); }, 30); }
+$('rTog').onclick = function () { $('rSteps').hidden = !$('rSteps').hidden; sheetH(); };
+$('modes').onclick = function (e) {
+  var b = e.target.closest('[data-m]'); if (!b) return;
+  rMode = b.dataset.m; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+  if (route && route.from) calcRoute(false);
+};
+function closeRoute() {
+  route = null; picking = false; $('sheet').hidden = true; document.body.classList.remove('route');
+  map.getSource('route').setData({ type: 'FeatureCollection', features: [] });
+  if (startMk) startMk.remove(); if (endMk) endMk.remove(); startMk = endMk = null; status('');
+  clearVia();
+}
+/* ---- दूसरा रास्ता: map पर कहीं भी छुएँ → रास्ता उस जगह से होकर, नया समय ---- */
+var viaMk = null;
+function clearVia() { if (viaMk) viaMk.remove(); viaMk = null; if (route) route.via = null; }
+map.on('click', function (e) {
+  if (!route || !route.from || !route.data || nav || picking || $('sheet').hidden) return;
+  try {   /* दुकान / जगह के निशान पर छुआ हो तो उनका card खुलेगा, रास्ता नहीं बदलेगा */
+    var lys = ['pb-pin', 'pb-cluster', 'poi-minor', 'poi-major'].filter(function (l) { return map.getLayer(l); });
+    if (lys.length && map.queryRenderedFeatures(e.point, { layers: lys }).length) return;
+  } catch (x) {}
+  var ll = [e.lngLat.lng, e.lngLat.lat];
+  if (hav(ll, route.to) < 40 || hav(ll, route.from) < 40) return;
+  route.via = ll;
+  if (viaMk) viaMk.remove();
+  var el = document.createElement('div'); el.className = 'viapt';
+  viaMk = new maplibregl.Marker({ element: el }).setLngLat(ll).addTo(map);
+  calcRoute(true);
+});
+$('rClose').onclick = closeRoute;
+
+/* ---------- मोड़ की भाषा ---------- */
+var DIR = {
+  hi: { left: 'बाएँ मुड़ें', right: 'दाएँ मुड़ें', 'slight left': 'हल्का बाएँ मुड़ें', 'slight right': 'हल्का दाएँ मुड़ें', 'sharp left': 'तेज़ बाएँ मुड़ें', 'sharp right': 'तेज़ दाएँ मुड़ें', straight: 'सीधे चलते रहें', uturn: 'यू-टर्न लें' },
+  en: { left: 'Turn left', right: 'Turn right', 'slight left': 'Keep slightly left', 'slight right': 'Keep slightly right', 'sharp left': 'Turn sharp left', 'sharp right': 'Turn sharp right', straight: 'Continue straight', uturn: 'Make a U-turn' }
+};
+var ORD = { hi: ['पहला', 'दूसरा', 'तीसरा', 'चौथा', 'पाँचवाँ', 'छठा'], en: ['1st', '2nd', '3rd', '4th', '5th', '6th'] };
+var DKEY = { left: 'dir_left', right: 'dir_right', 'slight left': 'dir_sl', 'slight right': 'dir_sr', 'sharp left': 'dir_shl', 'sharp right': 'dir_shr', straight: 'dir_st', uturn: 'dir_ut' };
+['hi', 'en'].forEach(function (L) {
+  var d = DIR[L]; TX[L].dir_left = d.left; TX[L].dir_right = d.right; TX[L].dir_sl = d['slight left']; TX[L].dir_sr = d['slight right'];
+  TX[L].dir_shl = d['sharp left']; TX[L].dir_shr = d['sharp right']; TX[L].dir_st = d.straight; TX[L].dir_ut = d.uturn; TX[L].ord = ORD[L];
+});
+function instr(s, L) {
+  L = L || lang();
+  var m = s.maneuver, ty = m.type, mod = m.modifier || 'straight', nm = s.name ? (L === 'en' ? ' onto ' : ' — ') + s.name : '';
+  if (ty === 'depart') return s.name ? T('start_on', { r: s.name }, L) : T('start', null, L);
+  if (ty === 'arrive') return (route && route.name ? route.name + ' — ' : '') + T('arrived', null, L);
+  if (/roundabout|rotary/.test(ty)) {
+    var ord = T('ord', null, L), ex = m.exit && Array.isArray(ord) ? ord[Math.min(m.exit, 6) - 1] : null;
+    return (ex ? T('rb', { n: ex }, L) : T('rb0', null, L)) + nm;
+  }
+  if ((ty === 'continue' || ty === 'new name') && mod === 'straight') return T('dir_st', null, L) + nm;
+  return T(DKEY[mod] || 'dir_st', null, L) + nm;
+}
+function arrow(s) {
+  var m = s.maneuver, t = m.type, mod = m.modifier || 'straight';
+  if (t === 'arrive') return '🏁'; if (t === 'depart') return '⬆';
+  if (/roundabout|rotary/.test(t)) return '⟳';
+  return { left: '↰', right: '↱', 'slight left': '↖', 'slight right': '↗', 'sharp left': '↰', 'sharp right': '↱', straight: '↑', uturn: '↶' }[mod] || '↑';
+}
+
+/* =========================================================
+   नेविगेशन — Google जैसा चलना, हिंदी आवाज़
+   ========================================================= */
+var nav = null, voice = true, wake = null;
+var SPEECH = { hi: 'hi-IN', en: 'en-IN', gu: 'gu-IN', mr: 'mr-IN', bn: 'bn-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', ml: 'ml-IN', or: 'or-IN', as: 'as-IN',
+  pa: 'pa-IN', ur: 'ur-IN', ne: 'ne-NP', sd: 'sd-IN', 'sd-deva': 'sd-IN', ks: 'ks-IN', mai: 'mai-IN', kok: 'kok-IN', doi: 'doi-IN', sa: 'sa-IN', brx: 'brx-IN', sat: 'sat-IN', mni: 'mni-IN' };
+var DEVA = { hi: 1, mr: 1, ne: 1, mai: 1, kok: 1, doi: 1, sa: 1, brx: 1, 'sd-deva': 1 };
+function voiceFor(tag) {
+  var p = tag.split('-')[0], vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+  return vs.filter(function (v) { return v.lang && v.lang.toLowerCase().replace('_', '-').split('-')[0] === p; })[0] || null;
+}
+try { if (window.speechSynthesis) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = function () {}; } } catch (e) {}
+function speakFn(build) {
+  if (!voice || !window.speechSynthesis) return;
+  try {
+    var L = lang(), tag = SPEECH[L] || 'hi-IN', v = voiceFor(tag), useL = L, known = speechSynthesis.getVoices().length > 0;
+    if (!v && known) { tag = 'hi-IN'; v = voiceFor('hi-IN'); if (!DEVA[L]) useL = 'hi'; }
+    var u = new SpeechSynthesisUtterance(build(useL)); u.lang = tag; if (v) u.voice = v; u.rate = 1;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function speak(t) {
+  if (!voice || !window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(t); u.lang = lang() === 'en' ? 'en-IN' : 'hi-IN'; u.rate = 1; speechSynthesis.speak(u); } catch (e) {}
+}
+/* नेविगेशन में नीले बिंदु की जगह गाड़ी: car / bike / पैदल (ऊपर से देखी हुई, रास्ते की दिशा में घूमती) */
+var VEH = {
+  car: '<svg width="30" height="50" viewBox="0 0 30 50" aria-hidden="true"><rect x="3" y="2" width="24" height="46" rx="9" fill="#1a73e8" stroke="#fff" stroke-width="2.5"/>' +
+       '<path d="M7 15 Q15 9 23 15 L22 21 H8 Z" fill="#0b2f73"/><rect x="8" y="33" width="14" height="6" rx="2" fill="#0b2f73"/>' +
+       '<rect x="5" y="6" width="5" height="3" rx="1.5" fill="#ffe066"/><rect x="20" y="6" width="5" height="3" rx="1.5" fill="#ffe066"/></svg>',
+  bike: '<svg width="22" height="46" viewBox="0 0 22 46" aria-hidden="true"><rect x="7" y="1" width="8" height="8" rx="3" fill="#333" stroke="#fff" stroke-width="1.5"/>' +
+        '<rect x="7" y="37" width="8" height="8" rx="3" fill="#333" stroke="#fff" stroke-width="1.5"/><rect x="5" y="8" width="12" height="31" rx="6" fill="#1a73e8" stroke="#fff" stroke-width="2"/>' +
+        '<rect x="1" y="11" width="20" height="3" rx="1.5" fill="#0b2f73"/><circle cx="11" cy="24" r="4" fill="#ffd21f" stroke="#0b2f73" stroke-width="1.5"/></svg>',
+  walk: '<span class="wk">🚶</span>'
+};
+function setVeh(on) {
+  if (!meEl) return;
+  meEl.classList.toggle('veh', !!on);
+  var v = meEl.querySelector('.vh'); if (v) v.innerHTML = on ? (VEH[rMode] || VEH.car) : '';
+}
+$('rGo').onclick = function () {
+  setTimeout(function () { setVeh(true); }, 0);
+  if (!route || !route.data) return;
+  nav = { step: 1, said: {}, off: 0, last: 0, follow: true }; $('recenter').hidden = true;
+  document.body.classList.add('nav'); $('navb').hidden = false; $('navf').hidden = false;
+  if (popup) popup.remove();
+  ensureWatch();
+  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
+  var first = route.steps[1] || route.steps[0];
+  var s0 = route.steps[0];
+  speakFn(function (L) { return instr(s0, L) + '. ' + T('in_m', { d: fmtDist(s0.distance, L) }, L) + ' ' + instr(first, L); });
+  if (myPos) navTick(myPos); else { var c = route.from, s1 = snapAhead(c, route.data.geometry.coordinates); map.easeTo({ center: c, bearing: s1.br != null ? s1.br : map.getBearing(), zoom: 17.6, pitch: tilted ? 65 : 0, duration: 900, padding: { top: Math.round(innerHeight * 0.45), bottom: 0, left: 0, right: 0 } }); paintBanner(first, route.steps[0].distance); }
+};
+function paintBanner(s, d) {
+  $('nArw').textContent = arrow(s); $('nDist').textContent = fmtDist(d); $('nTxt').textContent = instr(s);
+}
+/* रास्ते पर सबसे पास का बिंदु + आगे ~35 मीटर वाले रास्ते की दिशा */
+function snapAhead(p, line) {
+  var k = Math.cos(p[1] * Math.PI / 180) * 111320, best = Infinity, bi = 1, bt = 0;
+  for (var i = 1; i < line.length; i++) {
+    var ax = (line[i - 1][0] - p[0]) * k, ay = (line[i - 1][1] - p[1]) * 110540, bx = (line[i][0] - p[0]) * k, by = (line[i][1] - p[1]) * 110540;
+    var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / L2)) : 0;
+    var x = ax + t * dx, y = ay + t * dy, d = x * x + y * y; if (d < best) { best = d; bi = i; bt = t; }
+  }
+  var a = line[bi - 1], b = line[bi], sp = [a[0] + (b[0] - a[0]) * bt, a[1] + (b[1] - a[1]) * bt];
+  var left = 35, cur = sp, j = bi, ahead = b;
+  while (j < line.length) { var seg = hav(cur, line[j]); if (seg >= left) { var f = left / seg; ahead = [cur[0] + (line[j][0] - cur[0]) * f, cur[1] + (line[j][1] - cur[1]) * f]; break; } left -= seg; cur = line[j]; ahead = line[j]; j++; }
+  return { pt: sp, off: Math.sqrt(best), br: hav(sp, ahead) > 2 ? bearingTo(sp, ahead) : null };
+}
+function navTick(ll, jump) {
+  if (!nav || !route || !route.data) return;
+  var line = route.data.geometry.coordinates, now = Date.now();
+  if (hav(ll, route.to) < 25) { paintBanner(route.steps[route.steps.length - 1], 0); speakFn(function (L) { return T('arrived', null, L); }); status(T('arrived')); stopNav(); return; }
+  var off = distToLine(ll, line);
+  if (off > 45) { nav.off++; if (nav.off >= 2 && now - nav.last > 12000) { nav.last = now; nav.off = 0; status(T('reroute')); speakFn(function (L) { return T('reroute', null, L); }); route.from = ll; clearVia(); calcRoute(true).then(function () { if (nav) { nav.step = 1; nav.said = {}; } }); } }
+  else nav.off = 0;
+  var s = route.steps[nav.step];
+  while (s && hav(ll, s.maneuver.location) < 18 && nav.step < route.steps.length - 1) { nav.step++; s = route.steps[nav.step]; }
+  if (!s) return;
+  var d = hav(ll, s.maneuver.location);
+  paintBanner(s, d);
+  var key = nav.step;
+  if (d < 170 && d > 45 && !nav.said[key + 'f']) { nav.said[key + 'f'] = 1; speakFn(function (L) { return T('in_m', { d: fmtDist(d, L) }, L) + ' ' + instr(s, L); }); }
+  if (d <= 40 && !nav.said[key + 'n']) { nav.said[key + 'n'] = 1; speakFn(function (L) { return T('now', null, L) + ' ' + instr(s, L); }); }
+  var rem = d; for (var i = nav.step; i < route.steps.length; i++) rem += i === nav.step ? 0 : route.steps[i].distance;
+  $('nRem').textContent = fmtTime(route.data.duration * Math.min(1, rem / Math.max(1, route.data.distance)));
+  $('nEta').textContent = fmtDist(rem) + ' ' + T('rem');
+  /* दिशा रास्ते से (कंपास से नहीं) → आगे वाला रास्ता हमेशा स्क्रीन पर सामने/ऊपर */
+  var sn = snapAhead(ll, line), on = sn.off < 30, c = on ? sn.pt : ll;
+  var br = on && sn.br != null ? sn.br : (moveHeading != null ? moveHeading : (sn.br != null ? sn.br : map.getBearing()));
+  if (me) { me.setLngLat(c); me.setRotation(br); if (meEl) { meEl.classList.add('head'); if (!meEl.classList.contains('veh')) setVeh(true); } }
+  if (nav.follow) map.easeTo({ center: c, bearing: br, pitch: tilted ? 65 : 0, zoom: 17.6, duration: jump ? 700 : 1000, padding: { top: Math.round(innerHeight * 0.45), bottom: 0, left: 0, right: 0 } });
+}
+function stopNav() {
+  setVeh(false);
+  nav = null; clearTimeout(rcTimer); $('recenter').hidden = true; document.body.classList.remove('nav'); $('navb').hidden = true; $('navf').hidden = true;
+  try { if (wake) wake.release(); } catch (e) {} wake = null;
+  map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 }, pitch: tilted ? 55 : 0, duration: 600 });
+  if (route && route.data) fitRoute();
+}
+$('nStop').onclick = function () { if (window.speechSynthesis) speechSynthesis.cancel(); stopNav(); };
+$('nVoice').onclick = function () { voice = !voice; this.textContent = voice ? '🔊' : '🔇'; status(T(voice ? 'voice_on' : 'voice_off')); if (!voice && window.speechSynthesis) speechSynthesis.cancel(); };
+
+/* =========================================================
+   दूसरे पेज से आए: map.html?to=lat,lng&n=नाम  या  ?q=पता&n=नाम
+   ========================================================= */
+function handleUrl() {
+  var P = new URLSearchParams(location.search), n = (P.get('n') || '').slice(0, 120), a = (P.get('a') || '').slice(0, 200);
+  var to = (P.get('to') || '').split(',').map(Number);
+  if (to.length === 2 && isFinite(to[0]) && isFinite(to[1]) && Math.abs(to[0]) <= 90 && Math.abs(to[1]) <= 180) {
+    var ll = [to[1], to[0]];
+    map.jumpTo({ center: ll, zoom: 16 });
+    openRoute({ ll: ll, name: n || a });
+    return;
+  }
+  var q = (P.get('q') || '').slice(0, 200);
+  if (q) {
+    status(T('routing'));
+    geocode(q).then(function (ll) {
+      if (!ll) { status(T('addr_fail'), true); $('q').value = n || q; runSearch(n || q); return; }
+      map.jumpTo({ center: ll, zoom: 16 });
+      openRoute({ ll: ll, name: n || q });
+    }).catch(function () { status(T('route_fail'), true); });
+  }
+}
+
+/* छोटा भाषा बटन (ऊपर + नेविगेशन पट्टी) */
+function langShort() { var c = lang(), L = (window.PB && PB.langs || []).filter(function (x) { return x[0] === (PB.lang && PB.lang()); })[0]; return L ? Array.from(L[1]).slice(0, L[0] === 'en' ? 2 : 2).join('') : (c === 'en' ? 'En' : 'हि'); }
+function paintLangBtns() { var s = langShort(); document.querySelectorAll('.lgt').forEach(function (e) { e.textContent = s; }); }
+(function () {
+  var P = $('lgp');
+  document.querySelectorAll('[data-lg]').forEach(function (b) {
+    b.onclick = function (e) {
+      e.stopPropagation();
+      if (!P.hidden) { P.hidden = true; return; }
+      var cur = window.PB && PB.lang && PB.lang();
+      P.innerHTML = ((window.PB && PB.langs) || []).map(function (L) { return '<button type="button" data-l="' + L[0] + '"' + (L[0] === cur ? ' class="on"' : '') + '><span>' + L[1] + '</span><small>' + L[2] + '</small></button>'; }).join('');
+      var r = b.getBoundingClientRect(), w = 210;
+      P.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px'; P.style.top = (r.bottom + 6) + 'px';
+      P.hidden = false;
+    };
+  });
+  P.onclick = function (e) { var x = e.target.closest('[data-l]'); if (!x) return; e.stopPropagation(); P.hidden = true; if (window.PB && PB.set) PB.set(x.dataset.l); };
+  document.addEventListener('click', function () { P.hidden = true; });
+  paintLangBtns();
+})();
+if (window.PB && PB.onChange) PB.onChange(function () { applyTexts(); paintLangBtns(); if (!$('recenter').hidden) showRecenter(); if (nav && route && route.data) { var sx = route.steps[nav.step]; if (sx) paintBanner(sx, myPos ? hav(myPos, sx.maneuver.location) : sx.distance); } drawChips(); if (route && route.data) fillSheet(); });
+};
+if (window.__libReady) window.PBMAIN();
+</script>
+</body>
+</html>

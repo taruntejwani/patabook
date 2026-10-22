@@ -1,23 +1,797 @@
-<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dukan jodo · PataBook</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;color:#172033;background:#fff}a{color:#1261d6;text-decoration:none}.wrap{max-width:560px;margin:auto;padding:18px}header{height:66px;display:flex;align-items:center;justify-content:space-between}.logo{font-weight:800;font-size:22px;color:#172033}.logo span{color:#1261d6}.lang{border:1px solid #dce4ef;background:#fff;border-radius:999px;padding:6px 10px;font-weight:700}h1{font-size:28px;margin:8px 0 6px}.lead{color:#687386;margin:0 0 16px}form{display:grid;gap:10px}label{display:grid;gap:4px;font-size:13px;font-weight:700;color:#3c4043}input,select,textarea{border:1px solid #dfe1e5;border-radius:12px;padding:12px;font:inherit;font-weight:500}textarea{min-height:80px}button.send{border:0;background:#1a73e8;color:#fff;border-radius:12px;padding:14px;font-weight:700;font-size:16px}.note{color:#687386;font-size:14px}.ok{color:#16834a}</style></head><body><header class="wrap"><a class="logo" href="/">Pata<span>Book</span></a><button class="lang" id="langBtn" type="button">English</button></header><main class="wrap"><h1 data-i="title">Dukan jodo</h1><p class="lead" data-i="lead">Naam, sheher aur phone daalo. Listing review ke baad dikhegi.</p><form id="f"><label data-i="lname">Dukan ka naam<input name="name" required></label><label data-i="lcity">Sheher<select name="city"><option>Gandhidham</option><option>Adipur</option><option>Anjar</option><option>Bhuj</option><option>Mundra</option><option>Mandvi</option><option>Nakhatrana</option></select></label><label data-i="lcat">Category<select name="category"><option>Automobile</option><option>Food</option><option>Health</option><option>Shopping</option><option>Education</option><option>Home</option><option>Professional</option><option>Hotel</option></select></label><label data-i="lphone">Phone<input name="phone" inputmode="tel" required></label><label data-i="lwa">WhatsApp<input name="whatsapp" inputmode="tel"></label><label data-i="laddr">Pata<textarea name="address"></textarea></label><button class="send" type="submit" data-i="send">Bhejo</button></form><p class="note" id="msg"></p></main><script src="config.js"></script><script>
-const T={hi:{title:"Dukan jodo",lead:"Naam, sheher aur phone daalo. Listing review ke baad dikhegi.",lname:"Dukan ka naam",lcity:"Sheher",lcat:"Category",lphone:"Phone",lwa:"WhatsApp",laddr:"Pata",send:"Bhejo",ok:"Mil gaya. Review ke baad PataBook pe dikhegi.",fail:"Abhi save nahi hua",need:"config.js me anon key daalo.",btn:"English"},en:{title:"List your shop",lead:"Add name, city and phone. It shows after review.",lname:"Shop name",lcity:"City",lcat:"Category",lphone:"Phone",lwa:"WhatsApp",laddr:"Address",send:"Submit",ok:"Received. It will show on PataBook after review.",fail:"Could not save yet",need:"Add the anon key in config.js.",btn:"हिन्दी"}};
-let lang=localStorage.getItem("pb-lang")||"hi";
-function t(k){return T[lang][k];}
-function apply(){document.documentElement.lang=lang==="en"?"en":"hi";document.querySelector("[data-i=title]").textContent=t("title");document.querySelector("[data-i=lead]").textContent=t("lead");document.querySelector("[data-i=send]").textContent=t("send");document.getElementById("langBtn").textContent=t("btn");["lname","lcity","lcat","lphone","lwa","laddr"].forEach(k=>{document.querySelector("[data-i="+k+"]").childNodes[0].textContent=t(k);});}
-document.getElementById("langBtn").onclick=()=>{lang=lang==="hi"?"en":"hi";localStorage.setItem("pb-lang",lang);apply();};
-function slug(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now().toString(36);}
-document.getElementById("f").onsubmit=async e=>{
-  e.preventDefault();
-  const msg=document.getElementById("msg");
-  const c=window.PATABOOK_SUPABASE||{};
-  if(!c.url||!c.anonKey){msg.textContent=t("need");return;}
-  const fd=new FormData(e.target);
-  const body={name:fd.get("name"),slug:slug(fd.get("name")),city:fd.get("city"),category:fd.get("category"),phone:fd.get("phone"),whatsapp:fd.get("whatsapp")||fd.get("phone"),address:fd.get("address"),is_active:false};
-  msg.textContent="...";
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>दुकान जोड़ें — PataBook</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PataBook">
+<script src="i18n.js"></script>
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f7ff;color:#202124;min-height:100vh}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.back{background:#fff;border:1px solid #dadce0;border-radius:20px;padding:8px 14px;cursor:pointer;font-size:14px;white-space:nowrap}
+.brand{font-size:22px;font-weight:800;color:#174ea6}
+.prog{height:6px;background:#dbe5fb;border-radius:6px;overflow:hidden;margin-bottom:8px}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1a73e8,#34a853);border-radius:6px;transition:width .35s}
+.count{font-size:13px;color:#5f6368;margin-bottom:14px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:22px;padding:26px 22px;box-shadow:0 6px 24px #1a73e81a;overflow:hidden}
+.step{display:none;animation:in .3s ease}
+.step.on{display:block}
+@keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.emoji{font-size:40px;line-height:1;margin-bottom:10px}
+.step h1{font-size:23px;line-height:1.3;margin:0 0 6px}
+.hint{color:#5f6368;margin:0 0 18px;line-height:1.5;font-size:15px}
+input,textarea,select.in{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:17px;outline:0;font-family:inherit;background:#fff}
+textarea{min-height:96px;resize:vertical}
+input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.lbl{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:#3c4043}
+.hsv{display:flex;gap:10px;align-items:center;margin-top:14px;background:#eef6ff;border:1px solid #d6e6ff;border-radius:12px;padding:12px;font-size:15px;font-weight:600;color:#0b2f73;cursor:pointer}
+.hsv input{width:20px;height:20px;accent-color:#1a73e8;flex:none}
+.err{color:#c5221f;font-size:14px;margin-top:8px;min-height:18px}
+.btns{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff}
+.btn:disabled{opacity:.6}
+.btn.sec{flex:0 0 auto;background:#eef2fb;color:#174ea6;padding:15px 20px}
+.btn.skip{background:#fff;color:#5f6368;border:1px solid #dadce0}
+.loc{display:block;width:100%;border:2px dashed #1a73e8;background:#e8f0fe;color:#174ea6;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer}
+.locok{display:none;margin-top:12px;background:#e6f4ea;color:#137333;border-radius:12px;padding:12px 14px;line-height:1.5;font-size:15px}
+.locok a{color:#0b5a28}
+.or{text-align:center;color:#80868b;font-size:13px;margin:14px 0}
+.cat{background:#e8f0fe;color:#174ea6;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:15px;line-height:1.5}
+.cat .cl{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.cat small{display:block;color:#5f6368;font-size:13px;margin-top:2px}
+.cat b{font-size:17px;color:#0b2f73}
+.chg{flex:0 0 auto;border:1px solid #1a73e8;background:#fff;color:#1a73e8;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+.pscrim{position:fixed;inset:0;background:rgba(10,20,40,.45);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+.pscrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;width:min(560px,100%);height:86vh;background:#fff;z-index:50;border-radius:22px 22px 0 0;transform:translate(-50%,100%);transition:transform .25s ease;display:flex;flex-direction:column;visibility:hidden;box-shadow:0 -8px 30px rgba(0,0,0,.15)}
+.sheet.on{transform:translate(-50%,0);visibility:visible}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px}
+.sh b{font-size:18px;color:#0b2f73}
+.sh button{border:0;background:none;font-size:24px;line-height:1;padding:4px 8px;cursor:pointer}
+.sb{padding:4px 16px 10px}
+.sb input{padding:11px 14px;font-size:16px}
+.sl{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 30px}
+.sec{font-size:12px;font-weight:700;letter-spacing:.4px;color:#5f6368;background:#f4f7ff;padding:8px 18px;margin-top:4px}
+.pr{display:flex;align-items:center;gap:10px;width:100%;text-align:start;border:0;border-bottom:1px solid #eef1f6;background:#fff;padding:13px 18px;font-family:inherit;cursor:pointer;color:#202124}
+.pr:active{background:#f1f6ff}
+.pr span{flex:1;min-width:0}
+.pr b{display:block;font-size:16px;font-weight:600;line-height:1.3}
+.pr small{display:block;color:#5f6368;font-size:12.5px;margin-top:2px}
+.pr i{font-style:normal;color:#9aa6bd;font-size:22px}
+.pb2{border:0;background:none;color:#1a73e8;font-weight:700;font-size:14px;padding:12px 18px 4px;cursor:pointer}
+.of{padding:10px 18px}
+.of select{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit}
+.note{color:#70757a;font-size:14px;padding:12px 18px}
+.cat{display:none}
+.sum{background:#f8faff;border:1px solid #e5e7eb;border-radius:14px;padding:4px 14px;margin:14px 0 0;font-size:14px}
+.sum div{padding:9px 0;border-bottom:1px solid #eef0f3;display:flex;gap:10px;justify-content:space-between}
+.sum div:last-child{border:0}
+.sum span{color:#70757a;flex:0 0 auto}
+.sum b{text-align:right;word-break:break-word}
+.done{text-align:center;display:none;padding:10px 0}
+.done .big{font-size:56px}
+.done h2{margin:8px 0}
+.done p{color:#3c4043;line-height:1.6}
+.hp{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+[hidden]{display:none!important}
+.mlk{margin-top:12px;font-size:14px;color:#5f6368}.mlk summary{cursor:pointer;padding:6px 0;color:#174ea6;font-weight:600}.mlk input{margin-top:8px}
+.autoc{display:block;color:#137333;font-size:12.5px;margin-top:5px;min-height:16px}
+.chk{color:#174ea6;font-weight:700;font-size:14px;text-align:center;margin:14px 0 0}.chk button{border:0;background:none;color:#1a73e8;font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.st{text-align:center;padding:6px 0}
+.st .big{font-size:54px;line-height:1.1}
+.st h2{margin:8px 0 4px;font-size:24px;color:#0b2f73}
+.st .sub{color:#3c4043;line-height:1.6;margin:0 0 14px;font-size:15.5px}
+.st .pill{display:inline-block;border-radius:999px;padding:7px 16px;font-weight:800;font-size:15px;margin-bottom:12px}
+.st .pill.p{background:#fff4e5;color:#b54708}.st .pill.l{background:#e7f8ee;color:#0d6b2e}
+.clock{position:relative;width:190px;height:190px;margin:6px auto 12px}
+.clock svg{width:100%;height:100%;transform:rotate(-90deg)}
+.clock .t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.clock .t b{font-size:40px;font-variant-numeric:tabular-nums;color:#0b2f73;letter-spacing:1px}
+.clock .t small{color:#5f6368;font-size:13px}
+.st .info{background:#f4f7ff;border:1px solid #e3e9f7;border-radius:14px;padding:12px 14px;text-align:start;font-size:14.5px;line-height:1.6;margin:10px 0}
+.st .info b{color:#0b2f73}
+.st a.btn,.st button.btn{display:block;width:100%;text-decoration:none;margin-top:10px}
+.st .lnk{display:block;margin:12px auto 0;border:0;background:none;color:#1a73e8;font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
+.ck input{text-align:center;font-size:20px;letter-spacing:2px;margin:6px 0 4px}
+.gate{text-align:center;padding:26px 18px}.gate .big{font-size:40px}.gate h2{margin:6px 0 8px;font-size:20px}.gate p{color:#5b6475;margin:0 0 16px;line-height:1.5}
+.gate a.btn{display:block;text-decoration:none}
+.who{background:#e8f5e9;color:#1b5e20;border-radius:12px;padding:9px 12px;font-size:13.5px;margin:0 0 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.who button{margin-inline-start:auto;border:0;background:none;color:#1a73e8;font-weight:600;cursor:pointer;font-size:13px}
+</style>
+<script src="pb-track.js"></script>
+<script src="pb-card.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><button class="back" type="button" onclick="location.href='index.html'" data-i="back">← वापस</button><div class="brand">PataBook</div><span id="pbLang" style="margin-inline-start:auto"></span></div>
+  <div id="pw"><div class="prog"><i id="bar"></i></div><div class="count" id="cnt"></div></div>
+
+  <div class="card gate" id="gate" hidden>
+    <div class="big">🔐</div>
+    <h2 id="gateH">दुकान जोड़ने से पहले लॉगिन करें</h2>
+    <p id="gateP">आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।</p>
+    <a class="btn" id="gateBtn" href="login.html?next=list.html">ईमेल से लॉगिन करें →</a>
+  </div>
+  <div class="who" id="who" hidden><span id="whoTxt"></span><button type="button" id="whoOut"></button></div>
+
+  <div class="card" id="mainCard">
+    <form id="f" autocomplete="off" onsubmit="return false">
+      <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <!-- 1: दुकान का नाम -->
+      <div class="step" data-s="shop">
+        <div class="emoji">🏪</div>
+        <h1 data-i="shop_h">आपकी दुकान / बिज़नेस का नाम क्या है?</h1>
+        <p class="hint" data-i="shop_hint">जैसा बोर्ड पर लिखा है, वैसा लिखें।</p>
+        <input id="shop" data-ip="shop_ph" placeholder="जैसे: श्री कृष्णा कार वॉश" maxlength="80">
+        <div class="err"></div>
+      </div>
+
+      <!-- 2: मालिक का नाम -->
+      <div class="step" data-s="owner">
+        <div class="emoji">🙋</div>
+        <h1 data-i="owner_h">आपका नाम क्या है?</h1>
+        <p class="hint" id="ownerHint">दुकान के मालिक या संचालक का नाम।</p>
+        <input id="owner" data-ip="owner_ph" placeholder="आपका पूरा नाम" maxlength="60">
+        <div class="err"></div>
+      </div>
+
+      <!-- 3: location + पता (एक ही पेज) -->
+      <div class="step" data-s="addr">
+        <div class="emoji">🏠</div>
+        <h1 id="locH">दुकान का पता लिखें</h1>
+        <p class="hint" id="locHint">दुकान या ठेले पर हों तो बटन दबाएँ — ग्राहकों को सीधा रास्ता मिलेगा। बाकी सब वैकल्पिक है, सिर्फ़ शहर चुनना ज़रूरी है।</p>
+        <div class="row" style="margin-top:16px">
+          <div><label class="lbl" id="stateL">राज्य *</label><select id="state" class="in"><option selected>Gujarat</option><option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option><option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option></select></div>
+          <div><label class="lbl" id="distL">ज़िला *</label><select id="distSel" class="in"></select><input id="district" autocomplete="off" placeholder="ज़िले का नाम" style="margin-top:8px" hidden></div>
+        </div>
+        <div class="row">
+          <div><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" list="cityList" autocomplete="off" placeholder="Gandhidham"><datalist id="cityList"></datalist></div>
+          <div><label class="lbl" id="areaL">इलाका / Area (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div>
+        </div>
+        <label class="lbl" id="addrL">पूरा पता *</label>
+        <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
+        <div class="err"></div>
+      </div>
+
+      <!-- 5: काम -->
+      <div class="step" data-s="svc">
+        <div class="emoji">🛠️</div>
+        <h1 data-i="svc_h">आप क्या काम / सामान बेचते हैं?</h1>
+        <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही category खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
+        <textarea id="services" data-ip="svc_ph" placeholder="जैसे: car wash, polish, interior cleaning"></textarea>
+        <div class="cat" id="cat"></div>
+        <label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)</span></label>
+        <div class="err"></div>
+      </div>
+
+      <!-- 6: मोबाइल + submit -->
+      <div class="step" data-s="phone">
+        <div class="emoji">📞</div>
+        <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
+        <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर call / WhatsApp करेंगे।</p>
+        <input id="phone" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
+        <p class="hint" id="pubNote" style="margin:10px 0 0;font-size:13.5px">🔓 यह नंबर PataBook पर सबको दिखेगा। बाद में "मेरी दुकान" पेज से इसे बंद कर सकते हैं।</p>
+        <div class="err"></div>
+        <div class="sum" id="sum"></div>
+      </div>
+
+      <div class="btns" id="btns">
+        <button type="button" class="btn sec" id="prev" data-i="prev">← पीछे</button>
+        <button type="button" class="btn skip" id="skip" style="display:none" data-i="skip">छोड़ें</button>
+        <button type="button" class="btn" id="next">आगे →</button>
+      </div>
+    </form>
+
+    <p class="chk" id="chkLine"><span id="chkQ">पहले से रजिस्टर किया है?</span> <button type="button" id="chkBtn">स्टेटस देखें</button></p>
+    <div class="st" id="stBox" hidden></div>
+    <div class="done" id="done">
+      <div class="big">🎉</div>
+      <h2 data-i="thanks">धन्यवाद!</h2>
+      <p id="doneTxt"></p>
+      <button class="btn" style="margin-top:12px" onclick="location.href='index.html'" data-i="openpb">PataBook खोलें</button>
+    </div>
+  </div>
+</div>
+
+<footer style="padding:0 16px 18px"><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav></footer>
+<div class="pscrim" id="pscrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Category चुनें">
+  <div class="sh"><b data-i="sheet_t">Category चुनें</b><button type="button" id="sclose" aria-label="Close">✕</button></div>
+  <div class="sb"><input id="sq" autocomplete="off" data-ip="sq_ph" placeholder="खोजें: जैसे plumber, school, कपड़े"></div>
+  <div class="sl" id="sl"></div>
+</div>
+
+<script>
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id);
+const T=(k,v)=>PB.t(k,v);
+const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const steps=[...document.querySelectorAll(".step")];
+let i=0,coords=null,sending=false;
+
+/* ---------- Category: Supabase "categories" table ki ASLI 78 categories (export 09-10-2026).
+   Public us table ko padh nahi sakta, isliye ID + naam yahan hain. Nayi category database me jodo to yahan bhi jodna. ---------- */
+/* [id, naam, businesses.category me jaane wala key] */
+const GROUPS=[[1,"Health & Medical","Health"],[2,"Education","Education"],[3,"Entertainment & Events","Professional"],[4,"Shopping","Shopping"],
+[5,"Manufacturing","Professional"],[6,"Food & Restaurant","Food"],[7,"Wholesale & Suppliers","Professional"],[8,"Finance & Insurance","Professional"],
+[9,"Automobile","Automobile"],[10,"Hotels & Stay","Hotel"],[11,"Travel & Transport","Professional"],[12,"Home Services","Home"],
+[13,"Professional Services","Professional"],[14,"Beauty & Personal Care","Other"],[15,"Real Estate","Professional"]];
+/* badi category ke aam shabd (sirf group pehchanne ke liye) */
+const GROUP_WORDS={1:"health medical healthcare clinic hospital",2:"education study school college class classes teaching padhai",
+3:"event events entertainment party function wedding shaadi",4:"shopping retail mall",5:"manufacturer manufacturing factory industry industrial production",
+6:"food restaurant dhaba khana snacks eatery catering tiffin",7:"wholesale wholesaler supplier trader trading bulk",8:"finance insurance loan money",
+9:"car bike auto automobile vehicle motor scooter motorcycle gaadi two-wheeler",10:"stay lodge hotel rooms accommodation",11:"travel transport tour logistics",
+12:"home house repair maintenance",13:"professional consultant",14:"beauty grooming makeup",15:"property land plot flat real estate"};
+/* group ke khas phrase: inse pura group chuna jaata hai (jaise car care products -> Automobile), kisi ek service ki jagah */
+const GROUP_PHRASES={9:"car care,car care product,car care products,dashboard polish,tyre polish,car polish,car shampoo,polish,shampoo,coolant"};
+/* [id, naam, group, khas shabd / phrase (comma se alag)] */
+const CATS=[
+[16,"Doctor",1,"doctor,physician,dr,general practitioner,mbbs"],[17,"Hospital",1,"hospital,nursing home"],[18,"Diagnostic Centre",1,"diagnostic,lab,laboratory,pathology,blood test,x ray,xray,scan,sonography,mri"],
+[19,"Medical Store",1,"medical,medical store,pharmacy,chemist,medicine,medicines,druggist"],[20,"Dental Clinic",1,"dental,dentist,teeth,tooth"],
+[21,"College",2,"college,university,degree"],[22,"Tuition Classes",2,"tuition,home tuition"],[23,"Coaching Centre",2,"coaching,competitive exam,classes"],
+[24,"Computer Classes",2,"computer class,computer classes,computer course,computer training,tally,coding"],[25,"School",2,"school,play school,kindergarten,nursery"],
+[26,"Wedding Planner",3,"wedding,wedding planner,marriage,shaadi"],[27,"Event Planner",3,"event,events,event planner,decoration,decor,tent,dj,party"],[28,"Photography",3,"photo,photography,photographer,studio,video,videography"],
+[29,"Furniture Store",4,"furniture,sofa,bed"],[30,"Footwear Store",4,"footwear,shoe,shoes,chappal,sandal"],[31,"Grocery Store",4,"grocery,kirana,general store,provision"],
+[32,"Clothing Store",4,"cloth,clothing,clothes,garment,garments,fashion,saree,boutique,tailor"],[33,"Electronics Store",4,"electronic,electronics,tv,fridge,appliance,appliances"],
+[34,"Mobile Shop",4,"mobile,mobile shop,phone,smartphone,sim,recharge"],
+[35,"Plastic Manufacturer",5,"plastic,plastics"],[36,"Chemical Manufacturer",5,"chemical,chemicals,detergent"],[37,"Engineering Manufacturer",5,"engineering,fabrication,machine,machinery,workshop"],
+[38,"Cafe",6,"cafe,coffee,tea,chai,tea stall"],[39,"Hotel Restaurant",6,"hotel restaurant"],[40,"Fast Food",6,"fast food,pizza,burger,chinese,snacks,pav bhaji"],
+[41,"Bakery",6,"bakery,cake,cakes,bread"],[42,"Restaurant",6,"restaurant,dhaba,thali,dining"],[43,"Sweet Shop",6,"sweet,sweets,mithai,farsan,namkeen"],
+[44,"Supplier",7,"supplier,suppliers,supply"],[45,"Distributor",7,"distributor,distribution,agency"],[46,"Wholesale Dealer",7,"wholesale,wholesaler,wholesale dealer"],
+[47,"Insurance Agent",8,"insurance,lic,policy"],[48,"Loan Consultant",8,"loan,loans,finance,emi"],[49,"Bank",8,"bank,atm"],
+[50,"Auto Parts",9,"auto parts,spare parts,spare,spares,accessories,car accessories,bike accessories,battery,lubricant,engine oil"],[51,"Bike Dealer",9,"bike dealer,bike showroom,two wheeler showroom,scooter showroom"],
+[52,"Car Wash",9,"car wash,wash,washing,detailing,car detailing,car spa,foam wash"],[53,"Car Service",9,"car service,car repair,garage,mechanic,servicing,denting,painting car"],
+[54,"Car Dealer",9,"car dealer,car showroom,used car,second hand car"],[55,"Tyre Shop",9,"tyre,tyres,tire,tires,puncture,wheel alignment"],
+[56,"Guest House",10,"guest house,guesthouse,lodge,dharamshala,pg,paying guest"],[57,"Hotel",10,"hotel,rooms"],[58,"Resort",10,"resort,farmhouse,farm house"],
+[59,"Taxi Service",11,"taxi,cab,car rental,rickshaw"],[60,"Truck Transport",11,"truck,transport,transporter,tempo,goods"],[61,"Courier Service",11,"courier,parcel,delivery"],
+[62,"Travel Agency",11,"travel,travels,tour,tours,ticket,booking,travel agent"],
+[63,"AC Service",12,"ac,ac service,ac repair,air conditioner,air conditioning"],[64,"Carpenter",12,"carpenter,woodwork,carpentry"],[65,"Plumber",12,"plumber,plumbing,pipe,tap"],
+[66,"Painter",12,"painter,paint,painting,wall paint"],[67,"Electrician",12,"electrician,electrical,wiring,bijli"],
+[68,"Lawyer",13,"lawyer,advocate,legal,vakil,notary"],[69,"Interior Designer",13,"interior,interior design,interior designer"],[70,"CA",13,"ca,chartered accountant,accountant,gst,tax,income tax,audit"],
+[71,"Architect",13,"architect,architecture"],[72,"Digital Marketing",13,"digital marketing,marketing,seo,social media,advertising,website,web design"],
+[73,"Salon",14,"salon,saloon,hair,haircut,barber"],[74,"Spa",14,"spa,massage"],[75,"Beauty Parlour",14,"beauty parlour,parlour,parlor,beauty,makeup,bridal"],
+[76,"Real Estate Consultant",15,"real estate,real estate consultant,property consultant"],[77,"Builder",15,"builder,construction,developer,contractor"],[78,"Property Dealer",15,"property,property dealer,plot,flat,land,broker"]];
+const GNAME=Object.fromEntries(GROUPS.map(g=>[g[0],g[1]])),GKEY=Object.fromEntries(GROUPS.map(g=>[g[0],g[2]]));
+const VALID_IDS=new Set(GROUPS.map(g=>g[0]).concat(CATS.map(c=>c[0])));
+/* sql-06 के बाद जुड़ी नई Home Service कैटेगरी (ID डेटाबेस से) */
+const NEW_CAT_WORDS={"appliance-repair":"appliance,appliance repair,washing machine,fridge,refrigerator,microwave,tv repair,mixer",
+  "ro-water-purifier-repair":"ro,ro repair,water purifier,purifier,aquaguard,water filter",
+  "cleaning-services":"cleaning,home cleaning,deep cleaning,sofa cleaning,bathroom cleaning,pest control,safai",
+  "other-home-services":"home service,home services,repair,handyman"};
+const OTHER_LABEL="Other (जोड़ी गई)";
+const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
+const words=s=>String(s||"").toLowerCase().split(/[^a-z0-9ऀ-ॿ]+/).filter(w=>w.length>1);
+const stem=w=>w.length>3&&/[^s]s$/.test(w)?w.slice(0,-1):w;          /* products -> product */
+function toks(txt){
+  const out=new Set();
+  words(txt).forEach(w=>{out.add(stem(w));(ALIAS[w]||"").split(" ").filter(Boolean).forEach(a=>out.add(stem(a)));});
+  return out;
+}
+const phr=s=>s.split(",").map(p=>p.trim().toLowerCase().split(/[\s-]+/).filter(Boolean).map(stem)).filter(p=>p.length);
+const CATP=CATS.map(c=>({c,ps:phr(c[3]+","+c[1].replace(/&/g," "))}));
+/* ---- database की सारी categories (sql-08 के बाद 30 main → group → काम) ---- */
+const SUBG={};            /* group id -> {name, main} */
+const KEYMAP={"Repair, Maintenance & Technical Services":"Home","Building Materials, Construction & Infrastructure":"Home","Pets & Animal Services":"Shopping",
+  "Telecom & Internet":"Shopping","Sports & Recreation":"Education"};
+let CATS_READY=false;
+(async function(){
   try{
-    const res=await fetch(c.url.replace(/\/$/,"")+"/rest/v1/businesses",{method:"POST",headers:{apikey:c.anonKey,Authorization:"Bearer "+c.anonKey,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)});
-    if(!res.ok){const j=await res.json().catch(()=>({}));msg.textContent=j.message||t("fail");return;}
-    msg.className="note ok";msg.textContent=t("ok");e.target.reset();
-  }catch(err){msg.textContent=t("fail");}
+    /* Supabase एक बार में 1000 लाइनें देता है → 1000-1000 के हिस्सों में सारी लाएँ */
+    const page=async off=>{const r=await fetch(SB+"/rest/v1/rpc/pb_public_categories?order=id.asc&limit=1000&offset="+off,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:"{}"});
+      if(!r.ok)throw new Error(r.status);return r.json();};
+    let raw=[];
+    for(let off=0;off<40000;off+=4000){
+      const parts=await Promise.all([0,1000,2000,3000].map(d=>page(off+d)));
+      parts.forEach(p=>{raw=raw.concat(p);});
+      if(parts[3].length<1000)break;
+    }
+    const seen=new Set();
+    const all=raw.filter(c=>c&&c.id!=null&&c.name&&!seen.has(c.id)&&seen.add(c.id)),byId={},kids={};
+    all.forEach(c=>{byId[c.id]=c;if(c.parent_id!=null)(kids[c.parent_id]=kids[c.parent_id]||[]).push(c);});
+    const mainOf=c=>{let x=c,n=0;while(x&&x.parent_id!=null&&n<5){x=byId[x.parent_id];n++;}return x;};
+    /* नई main categories */
+    all.filter(c=>c.parent_id==null).sort((a,b)=>a.name.localeCompare(b.name)).forEach(m=>{
+      if(GNAME[m.id])return;
+      const key=KEYMAP[m.name]||"Professional";
+      GROUPS.push([m.id,m.name,key]);GNAME[m.id]=m.name;GKEY[m.id]=key;VALID_IDS.add(m.id);
+      GW[m.id]=new Set(words(m.name.replace(/&/g," ")).map(stem));
+    });
+    all.forEach(c=>{
+      if(c.parent_id==null)return;
+      const m=mainOf(c);if(!m||!GNAME[m.id])return;
+      if(kids[c.id]&&c.parent_id===m.id){SUBG[c.id]={name:c.name,main:m.id};VALID_IDS.add(c.id);return;}   /* group */
+      if(VALID_IDS.has(c.id))return;                                                                  /* पुरानी 78 पहले से हैं */
+      const grp=c.parent_id!==m.id&&byId[c.parent_id]?byId[c.parent_id].name:"";
+      const extra=NEW_CAT_WORDS[c.slug]||"";
+      const row=[c.id,c.name,m.id,extra,grp];
+      CATS.push(row);CATP.push({c:row,ps:phr((extra?extra+",":"")+c.name.replace(/&/g," "))});VALID_IDS.add(c.id);
+    });
+    CATS_READY=true;
+    if(sheet.classList.contains("on"))drawSheet();
+  }catch(e){}
+})();
+const GP=Object.entries(GROUP_PHRASES).map(([g,s])=>({g:+g,ps:phr(s)}));
+const GW=Object.fromEntries(Object.entries(GROUP_WORDS).map(([g,s])=>[g,new Set(s.split(/\s+/).map(stem))]));
+const asSel=(id,auto)=>{
+  if(SUBG[id]){const g=SUBG[id].main;return {id,typ:SUBG[id].name,main:GNAME[g],grp:"",db_key:GKEY[g],group:g,auto:!!auto};}
+  const c=CATS.find(x=>x[0]===id);const g=c?c[2]:id;
+  return {id,typ:c?c[1]:GNAME[g],main:GNAME[g],grp:c&&c[4]?c[4]:"",db_key:GKEY[g],group:g,auto:!!auto};};
+/* नाम के किसी भी हिस्से से खोज (जैसे "ceramic", "puncture") */
+function nameSearch(q,n){
+  q=q.toLowerCase();const a=[],b=[];
+  CATS.forEach(c=>{const nm=c[1].toLowerCase();if(nm.startsWith(q)||nm.split(/[\s&/-]+/).some(w=>w.startsWith(q)))a.push(c);else if(nm.includes(q))b.push(c);});
+  Object.keys(SUBG).forEach(id=>{const nm=SUBG[id].name.toLowerCase();if(nm.includes(q))b.push([+id]);});
+  const seen=new Set();return a.concat(b).filter(c=>!seen.has(c[0])&&seen.add(c[0])).slice(0,n||25).map(c=>asSel(c[0],false));
+}
+/* sabhi categories ko score do */
+function scoreAll(txt){
+  const t=toks(txt);if(!t.size)return {cats:[],groups:[],gph:[]};
+  const full=String(txt||"").trim().toLowerCase();
+  const cats=CATP.map(({c,ps})=>{let s=0;ps.forEach(p=>{if(p.every(w=>t.has(w)))s=Math.max(s,p.length*2);});
+    if(full===c[1].toLowerCase())s+=3;return {id:c[0],g:c[2],s};}).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  const groups=GROUPS.map(g=>{let s=0;GW[g[0]].forEach(w=>{if(t.has(w))s++;});
+    if(full===g[1].toLowerCase())s+=3;return {id:g[0],s};}).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  const gph=GP.map(({g,ps})=>{let s=0;ps.forEach(p=>{if(p.every(w=>t.has(w)))s=Math.max(s,p.length*2);});return {id:g,s};}).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  return {cats,groups,gph};
+}
+/* sahi category chuno; shak ho to null (customer khud chunega) */
+function decide(txt){
+  const {cats,groups,gph}=scoreAll(txt);
+  /* product / group phrase sabse mazboot ho to poora group (Tyre Polish != Tyre Shop) */
+  if(gph.length&&(!cats.length||gph[0].s>=cats[0].s))return gph[0].id;
+  if(cats.length){
+    const top=cats[0].s,best=cats.filter(x=>x.s===top);
+    if(best.length===1)return best[0].id;
+    const gs=new Set(best.map(x=>x.g));
+    if(gs.size===1)return [...gs][0];                       /* ek hi group ki 2 khas category -> group */
+    return null;                                            /* alag-alag group -> anumaan nahi */
+  }
+  if(groups.length&&(groups.length===1||groups[0].s>groups[1].s))return groups[0].id;
+  return null;
+}
+function suggestions(txt,n){
+  const {cats,groups}=scoreAll(txt);
+  const ids=[...cats.map(x=>x.id),...groups.map(x=>x.id)];
+  return [...new Set(ids)].slice(0,n||8).map(id=>asSel(id,false));
+}
+function categoryIdFor(S){return S&&VALID_IDS.has(S.id)?S.id:null;}
+function rpc(fn,args){
+  return fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(args)})
+    .then(r=>{if(!r.ok)throw new Error("rpc "+r.status);return r.json();});
+}
+
+/* ---------- selected category ---------- */
+let sel=null,manual=false,sug=[],timer=null;
+const pathOf=e=>[e.main,e.grp,e.typ].filter((x,k,a)=>x&&a.indexOf(x)===k).join(" → ");
+function refresh(){
+  if(manual)return;
+  const svc=$("services").value,nm=$("shop").value;
+  const id=decide(svc)||(svc.trim()?null:decide(nm))||decide(svc+" "+nm);
+  sel=id?asSel(id,true):null;
+  sug=suggestions(svc+" "+nm,5);
+  showCat();
+}
+function showCat(){
+  const el=$("cat");el.style.display="block";
+  if(sel){
+    const sub=sel.typ===sel.main?"":sel.main;
+    el.innerHTML='<div class="cl"><div>'+(manual?T("cat_mine"):T("cat_auto"))+'<br><b>'+esc(sel.typ)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><button type="button" class="chg" id="chg">'+T("change")+'</button></div>';
+  }else{
+    el.innerHTML='<div class="cl"><div>'+T("cat_none")+'<small>'+T("cat_none2")+'</small></div><button type="button" class="chg" id="chg">'+T("choose")+'</button></div>';
+  }
+  $("chg").onclick=()=>openSheet();
+}
+function later(){clearTimeout(timer);timer=setTimeout(refresh,300);}
+$("services").addEventListener("input",()=>{if(!manual)later();});
+$("shop").addEventListener("input",()=>{if(steps[i]&&steps[i].dataset.s==="svc"&&!manual)later();});
+
+/* ---------- category chunne ki list (bottom sheet): sirf asli 78 categories ---------- */
+let view={v:"main"};
+const sheet=$("sheet"),sl=$("sl"),sq=$("sq");
+function openSheet(){view={v:"main"};sq.value="";sheet.classList.add("on");$("pscrim").classList.add("on");document.body.style.overflow="hidden";drawSheet();}
+function closeSheet(){sheet.classList.remove("on");$("pscrim").classList.remove("on");document.body.style.overflow="";}
+function pick(e){sel=e;manual=true;closeSheet();showCat();if(steps[i].dataset.s==="svc")setErr("");if(steps[i].dataset.s==="phone")summary();}
+function row(attrs,title,sub,arrow){return '<button type="button" class="pr" '+attrs+'><span><b>'+esc(title)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><i>'+(arrow==null?"›":arrow)+'</i></button>';}
+const catRow=s=>row('data-c="'+s.id+'"',s.typ,s.typ===s.main?"":[s.main,s.grp].filter(Boolean).join(" › "),"");
+const otherRow=(sub)=>row('data-other="1"',T("o_row"),sub||T("o_sub"),"+");
+function drawSheet(){
+  const q=sq.value.trim();
+  if(view.v==="other"){
+    sl.innerHTML='<div class="of"><p class="hint">'+T("o_hint")+'</p><label class="lbl">'+T("o_name")+'</label><input id="onm" maxlength="60" placeholder="'+esc(T("o_name_ph"))+'" value="'+esc(view.pre||"")+'"><label class="lbl" style="margin-top:12px">'+T("o_main")+'</label><select id="omain"><option value="">—</option>'+GROUPS.map(g=>'<option value="'+g[0]+'"'+(g[0]===view.g?" selected":"")+'>'+esc(g[1])+'</option>').join("")+'</select><div class="err" id="oerr"></div><button type="button" class="btn" id="osave" style="width:100%;margin-top:10px">'+T("o_save")+'</button></div>';
+    return;
+  }
+  if(q.length>=2){
+    const seen=new Set(),r=nameSearch(q,25).concat(suggestions(q,10)).filter(x=>!seen.has(x.id)&&seen.add(x.id)).slice(0,30);
+    sl.innerHTML=(r.length?r.map(catRow).join(""):'<p class="note">'+T("nocat",{q:esc(q)})+'</p>')+otherRow(T("o_addq",{q:q}));
+    return;
+  }
+  if(view.v==="main"){
+    let h="";
+    if(sug.length)h+='<div class="sec">'+T("sugg")+'</div>'+sug.slice(0,5).map(catRow).join("");
+    h+='<div class="sec">'+T("allcats")+'</div>'+GROUPS.map(g=>row('data-gr="'+g[0]+'"',g[1],T("types",{n:CATS.filter(c=>c[2]===g[0]).length}))).join("")+otherRow();
+    sl.innerHTML=h;sl.scrollTop=0;return;
+  }
+  if(view.v==="group"){
+    const g=view.g,subs=Object.keys(SUBG).filter(id=>SUBG[id].main===g).map(Number).sort((a,b)=>SUBG[a].name.localeCompare(SUBG[b].name));
+    const direct=CATS.filter(c=>c[2]===g&&!c[4]);
+    sl.innerHTML='<button type="button" class="pb2" data-back="main">'+T("back_all")+'</button><div class="sec">'+esc(GNAME[g])+'</div>'+
+      subs.map(id=>row('data-sg="'+id+'"',SUBG[id].name,T("types",{n:CATS.filter(c=>c[2]===g&&c[4]===SUBG[id].name).length}))).join("")+
+      (direct.length&&subs.length?'<div class="sec">'+(PB.lang&&PB.lang()==="en"?"Popular":"लोकप्रिय")+'</div>':"")+
+      direct.map(c=>row('data-c="'+c[0]+'"',c[1],"","")).join("")+
+      row('data-c="'+g+'"',T("g_whole",{g:GNAME[g]}),"","")+otherRow(T("o_incat"));
+    sl.scrollTop=0;return;
+  }
+  if(view.v==="sub"){
+    const sg=view.sg,g=SUBG[sg].main;
+    sl.innerHTML='<button type="button" class="pb2" data-gr="'+g+'">‹ '+esc(GNAME[g])+'</button><div class="sec">'+esc(SUBG[sg].name)+'</div>'+
+      CATS.filter(c=>c[2]===g&&c[4]===SUBG[sg].name).map(c=>row('data-c="'+c[0]+'"',c[1],"","")).join("")+
+      row('data-c="'+sg+'"',T("g_whole",{g:SUBG[sg].name}),"","")+otherRow(T("o_incat"));
+    sl.scrollTop=0;
+  }
+}
+sq.addEventListener("input",()=>{if(view.v==="other")view={v:"main"};clearTimeout(sq._t);sq._t=setTimeout(drawSheet,150);});
+sl.addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  const d=b.dataset;
+  if(b.id==="osave"){saveOther();return;}
+  if(d.other){const q=sq.value.trim();view={v:"other",pre:q.length>=2?q:"",g:view.g||null};sq.value="";drawSheet();return;}
+  if(d.back){view={v:"main"};drawSheet();return;}
+  if(d.gr!=null){view={v:"group",g:+d.gr};drawSheet();return;}
+  if(d.sg!=null){view={v:"sub",sg:+d.sg};drawSheet();return;}
+  if(d.c!=null){pick(asSel(+d.c,false));return;}
+});
+$("sclose").onclick=closeSheet;$("pscrim").onclick=closeSheet;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheet.classList.contains("on"))closeSheet();});
+
+/* "Other": list me naam nahi -> naam likho + asli badi category chuno (category_id = us badi category ki ID) */
+const OK_NAME=/^[\p{L}\p{N}\p{M}][\p{L}\p{N}\p{M} &.,'()\/+-]{2,59}$/u;
+function saveOther(){
+  const name=$("onm").value.trim().replace(/\s+/g," "),g=+$("omain").value,err=$("oerr");
+  if(!OK_NAME.test(name)||/https?:|www\./i.test(name)){err.textContent=T("o_err");return;}
+  if(!GNAME[g]){err.textContent=T("e_cat");return;}
+  rpc("pb_add_other",{nm:name,mc:GNAME[g]}).catch(()=>{});
+  pick({id:g,typ:name,main:GNAME[g],grp:OTHER_LABEL,db_key:GKEY[g],group:g,auto:false});
+}
+
+function phoneClean(){return $("phone").value.replace(/[\s-]/g,"");}
+function validPhone(p){return /^(\+?91)?[6-9]\d{9}$/.test(p);}
+function mapUrl(){if(!$("maplink"))return "";   /* location वाला हिस्सा हटा दिया गया (KYC में बाद में) */
+  if(coords)return "https://www.google.com/maps?q="+coords.lat+","+coords.lng;
+  const l=$("maplink").value.trim();
+  return /^https?:\/\/(www\.)?(google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(l)?l:"";
+}
+
+function render(){
+  steps.forEach((s,k)=>s.classList.toggle("on",k===i));
+  $("bar").style.width=((i+1)/steps.length*100)+"%";
+  $("cnt").textContent=T("q_n",{a:i+1,b:steps.length});
+  $("prev").style.visibility=i===0?"hidden":"visible";
+  const key=steps[i].dataset.s;
+  if(window.PBT)PBT.once("reg",(i+1)+"-"+key);   /* traffic: रजिस्ट्रेशन कहाँ तक पहुँचा */
+  $("skip").style.display=key==="loc"?"block":"none";   /* category zaroori: svc step skip nahi */
+  $("next").textContent=i===steps.length-1?T("submit"):T("next");
+  if(key==="owner"){const n=$("shop").value.trim();$("ownerHint").textContent=n?T("owner_hint_n",{n:n}):T("owner_hint");}
+  if(key==="svc"){if(!manual&&!sel)refresh();else showCat();}
+  if(key==="phone")summary();
+  const inp=steps[i].querySelector("input,textarea");if(inp&&key!=="loc"&&key!=="addr")setTimeout(()=>inp.focus({preventScroll:true}),50);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function setErr(m){steps[i].querySelector(".err").textContent=m||"";}
+
+function check(){
+  const key=steps[i].dataset.s;setErr("");
+  if(key==="shop"&&$("shop").value.trim().length<2){setErr(T("e_shop"));return false;}
+  if(key==="owner"&&$("owner").value.trim().length<2){setErr(T("e_owner"));return false;}
+  if(key==="addr"){
+    const cv=$("city").value.trim();
+    if(cv.length<2||/[0-9<>@\/\\:;{}=_|]/.test(cv)){setErr(LX("e_city2"));$("city").focus();return false;}
+    const kc=knownCity(cv);if(kc){$("city").value=kc;const inf=CITY_INFO[kc]||{};if(inf.state)$("state").value=inf.state;if(inf.district)setDist(inf.district);}
+    const dv=distVal();if(dv.length<2||/[<>@\/\\:;{}=_|]/.test(dv)){setErr(LX("e_dist"));(!$("distSel").hidden&&$("distSel").value!==DIST_OTHER?$("distSel"):$("district")).focus();return false;}
+    if($("address").value.trim().length<5){setErr(T("e_addr"));$("address").focus();return false;}   /* पूरा पता ज़रूरी */
+  }
+  if(key==="svc"&&!categoryIdFor(sel)){setErr(T("e_cat"));openSheet();return false;}
+  if(key==="phone"&&!validPhone(phoneClean())){setErr(T("e_phone"));return false;}
+  if(key==="phone"&&!categoryIdFor(sel)){i=steps.findIndex(x=>x.dataset.s==="svc");render();setErr(T("e_cat"));return false;}
+  return true;
+}
+
+function summary(){
+  const m=mapUrl();
+  const rows=[[T("s_shop"),$("shop").value.trim()],[T("s_name"),$("owner").value.trim()],[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
+  $("sum").innerHTML=rows.map(r=>"<div><span>"+r[0]+"</span><b>"+esc(r[1])+"</b></div>").join("");
+}
+
+$("next").onclick=()=>{
+  if(!check())return;
+  if(i<steps.length-1){i++;render();}else submit();
 };
-apply();
-</script></body></html>
+$("skip").onclick=()=>{setErr("");i++;render();};
+$("prev").onclick=()=>{if(i>0){i--;render();}};
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"&&!sending){e.preventDefault();$("next").click();}
+});
+
+function slugify(n,city){const b=(n+" "+city).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"business";return b.slice(0,50)+"-"+Math.random().toString(36).slice(2,7);}
+
+/* Supabase "cities" table ki ASLI IDs (export 09-10-2026, 10 rows, sab is_active). Public us table ko padh nahi sakta.
+   Naya shahar database me jodo to yahan aur upar <select id="city"> me bhi jodna. */
+const CITY_IDS={"Anjar": 6, "Bhachau": 8, "Bhuj": 4, "Dayapar": 9, "Gandhidham": 3, "Mandvi": 5, "Mundra": 2, "Nakhatrana": 1, "Naliya": 7, "Rapar": 10};
+/* शहर अब लिखकर: list वाले शहर सुझाव में आते हैं; नया शहर/गाँव लिखें तो server उसे "नया शहर" बनाकर जोड़ता है (sql-12) */
+const CITY_INFO={};Object.keys(CITY_IDS).forEach(n=>CITY_INFO[n]={district:"Kutch",state:"Gujarat"});
+const normCity=v=>String(v||"").toLowerCase().replace(/\s+/g,"");
+function knownCity(v){const k=normCity(v);return Object.keys(CITY_IDS).find(n=>normCity(n)===k)||null;}
+function fillCityList(){const dl=$("cityList");if(!dl)return;dl.innerHTML=Object.keys(CITY_IDS).sort((a,b)=>a.localeCompare(b)).map(n=>'<option value="'+n.replace(/"/g,"&quot;")+'">').join("");}
+fillCityList();
+/* राज्य चुनते ही उस राज्य के ज़िले (28 राज्य, 741 ज़िले — PataBook_India_Districts_Master)। list में न हो / केंद्र शासित प्रदेश हो तो लिखें */
+const DISTRICTS={"Andhra Pradesh":["Alluri Sitharama Raju","Anakapalli","Ananthapuramu","Annamayya","Bapatla","Chittoor","Dr. B.R. Ambedkar Konaseema","East Godavari","Eluru","Guntur","Kakinada","Krishna","Kurnool","Markapuram","Nandyal","NTR","Palnadu","Parvathipuram Manyam","Polavaram","Prakasam","Sri Potti Sriramulu Nellore","Sri Sathya Sai","Srikakulam","Tirupati","Visakhapatnam","Vizianagaram","West Godavari","YSR Kadapa"],"Arunachal Pradesh":["Anjaw","Bichom","Changlang","Dibang Valley","East Kameng","East Siang","Itanagar Capital Region","Kamle","Keyi Panyor","Kra Daadi","Kurung Kumey","Leparada","Lohit","Longding","Lower Dibang Valley","Lower Siang","Lower Subansiri","Namsai","Pakke Kessang","Papum Pare","Shi Yomi","Siang","Tawang","Tirap","Upper Siang","Upper Subansiri","West Kameng","West Siang"],"Assam":["Bajali","Baksa","Barpeta","Biswanath","Bongaigaon","Cachar","Charaideo","Chirang","Darrang","Dhemaji","Dhubri","Dibrugarh","Dima Hasao","Goalpara","Golaghat","Hailakandi","Hojai","Jorhat","Kamrup","Kamrup Metropolitan","Karbi Anglong","Kokrajhar","Lakhimpur","Majuli","Morigaon","Nagaon","Nalbari","Sivasagar","Sonitpur","South Salmara-Mankachar","Sribhumi (formerly Karimganj)","Tamulpur","Tinsukia","Udalguri","West Karbi Anglong"],"Bihar":["Araria","Arwal","Aurangabad","Banka","Begusarai","Bhagalpur","Bhojpur","Buxar","Darbhanga","East Champaran (Purvi Champaran)","Gaya","Gopalganj","Jamui","Jehanabad","Kaimur (Bhabua)","Katihar","Khagaria","Kishanganj","Lakhisarai","Madhepura","Madhubani","Munger","Muzaffarpur","Nalanda","Nawada","Patna","Purnia","Rohtas","Saharsa","Samastipur","Saran","Sheikhpura","Sheohar","Sitamarhi","Siwan","Supaul","Vaishali","West Champaran (Paschim Champaran)"],"Chhattisgarh":["Balod","Baloda Bazar-Bhatapara","Balrampur-Ramanujganj","Bastar","Bemetara","Bijapur","Bilaspur","Dakshin Bastar Dantewada","Dhamtari","Durg","Gariyaband","Gaurela-Pendra-Marwahi","Janjgir-Champa","Jashpur","Kabeerdham","Khairagarh-Chhuikhadan-Gandai","Kondagaon","Korba","Korea","Mahasamund","Manendragarh-Chirmiri-Bharatpur (MCB)","Mohla-Manpur-Ambagarh Chouki","Mungeli","Narayanpur","Raigarh","Raipur","Rajnandgaon","Sakti","Sarangarh-Bilaigarh","Sukma","Surajpur","Surguja","Uttar Bastar Kanker"],"Goa":["North Goa","South Goa"],"Gujarat":["Ahmedabad","Amreli","Anand","Aravalli","Banaskantha","Bharuch","Bhavnagar","Botad","Chhota Udaipur","Dahod","Dang","Devbhumi Dwarka","Gandhinagar","Gir Somnath","Jamnagar","Junagadh","Kheda","Kutch","Mahisagar","Mehsana","Morbi","Narmada","Navsari","Panchmahal","Patan","Porbandar","Rajkot","Sabarkantha","Surat","Surendranagar","Tapi","Vadodara","Valsad","Vav-Tharad"],"Haryana":["Ambala","Bhiwani","Charkhi Dadri","Faridabad","Fatehabad","Gurugram","Hansi","Hisar","Jhajjar","Jind","Kaithal","Karnal","Kurukshetra","Mahendragarh","Nuh","Palwal","Panchkula","Panipat","Rewari","Rohtak","Sirsa","Sonipat","Yamunanagar"],"Himachal Pradesh":["Bilaspur","Chamba","Hamirpur","Kangra","Kinnaur","Kullu","Lahaul and Spiti","Mandi","Shimla","Sirmaur","Solan","Una"],"Jharkhand":["Bokaro","Chatra","Deoghar","Dhanbad","Dumka","East Singhbhum","Garhwa","Giridih","Godda","Gumla","Hazaribagh","Jamtara","Khunti","Koderma","Latehar","Lohardaga","Pakur","Palamu","Ramgarh","Ranchi","Sahibganj","Saraikela-Kharsawan","Simdega","West Singhbhum"],"Karnataka":["Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru South","Bengaluru Urban","Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayanagara","Vijayapura","Yadgiri"],"Kerala":["Alappuzha","Ernakulam","Idukki","Kannur","Kasaragod","Kollam","Kottayam","Kozhikode","Malappuram","Palakkad","Pathanamthitta","Thiruvananthapuram","Thrissur","Wayanad"],"Madhya Pradesh":["Agar-Malwa","Alirajpur","Anuppur","Ashoknagar","Balaghat","Barwani","Betul","Bhind","Bhopal","Burhanpur","Chhatarpur","Chhindwara","Damoh","Datia","Dewas","Dhar","Dindori","Guna","Gwalior","Harda","Indore","Jabalpur","Jhabua","Katni","Khandwa","Khargone","Maihar","Mandla","Mandsaur","Mauganj","Morena","Narmadapuram","Narsinghpur","Neemuch","Niwari","Pandhurna","Panna","Raisen","Rajgarh","Ratlam","Rewa","Sagar","Satna","Sehore","Seoni","Shahdol","Shajapur","Sheopur","Shivpuri","Sidhi","Singrouli","Tikamgarh","Ujjain","Umaria","Vidisha"],"Maharashtra":["Ahilyanagar","Akola","Amravati","Beed","Bhandara","Buldhana","Chandrapur","Chhatrapati Sambhajinagar","Dharashiv","Dhule","Gadchiroli","Gondia","Hingoli","Jalgaon","Jalna","Kolhapur","Latur","Mumbai City","Mumbai Suburban","Nagpur","Nanded","Nandurbar","Nashik","Palghar","Parbhani","Pune","Raigad","Ratnagiri","Sangli","Satara","Sindhudurg","Solapur","Thane","Wardha","Washim","Yavatmal"],"Manipur":["Bishnupur","Chandel","Churachandpur","Imphal East","Imphal West","Jiribam","Kakching","Kamjong","Kangpokpi","Noney","Pherzawl","Senapati","Tamenglong","Tengnoupal","Thoubal","Ukhrul"],"Meghalaya":["East Garo Hills","East Jaintia Hills","East Khasi Hills","Eastern West Khasi Hills","North Garo Hills","Ri-Bhoi","South Garo Hills","South West Garo Hills","South West Khasi Hills","West Garo Hills","West Jaintia Hills","West Khasi Hills"],"Mizoram":["Aizawl","Champhai","Hnahthial","Khawzawl","Kolasib","Lawngtlai","Lunglei","Mamit","Saiha","Saitual","Serchhip"],"Nagaland":["Chumoukedima","Dimapur","Kiphire","Kohima","Longleng","Meluri","Mokokchung","Mon","Niuland","Noklak","Peren","Phek","Shamator","Tseminyu","Tuensang","Wokha","Zunheboto"],"Odisha":["Angul","Balangir","Balasore","Bargarh","Bhadrak","Boudh","Cuttack","Deogarh","Dhenkanal","Gajapati","Ganjam","Jagatsinghpur","Jajpur","Jharsuguda","Kalahandi","Kandhamal","Kendrapara","Kendujhar","Khordha","Koraput","Malkangiri","Mayurbhanj","Nabarangpur","Nayagarh","Nuapada","Puri","Rayagada","Sambalpur","Subarnapur","Sundargarh"],"Punjab":["Amritsar","Barnala","Bathinda","Faridkot","Fatehgarh Sahib","Fazilka","Ferozepur","Gurdaspur","Hoshiarpur","Jalandhar","Kapurthala","Ludhiana","Malerkotla","Mansa","Moga","Pathankot","Patiala","Rupnagar","Sahibzada Ajit Singh Nagar (Mohali)","Sangrur","Shaheed Bhagat Singh Nagar (Nawanshahr)","Sri Muktsar Sahib","Tarn Taran"],"Rajasthan":["Ajmer","Alwar","Balotra","Banswara","Baran","Barmer","Beawar","Bharatpur","Bhilwara","Bikaner","Bundi","Chittorgarh","Churu","Dausa","Deeg","Dholpur","Didwana-Kuchaman","Dungarpur","Hanumangarh","Jaipur","Jaipur Rural","Jaisalmer","Jalore","Jhalawar","Jhunjhunu","Jodhpur","Jodhpur Rural","Karauli","Khairthal-Tijara","Kota","Kotputli-Behror","Nagaur","Pali","Phalodi","Pratapgarh","Rajsamand","Salumbar","Sawai Madhopur","Sikar","Sirohi","Sri Ganganagar","Tonk","Udaipur"],"Sikkim":["Gangtok","Gyalshing","Mangan","Namchi","Pakyong","Soreng"],"Tamil Nadu":["Ariyalur","Chengalpattu","Chennai","Coimbatore","Cuddalore","Dharmapuri","Dindigul","Erode","Kallakurichi","Kancheepuram","Kanniyakumari","Karur","Krishnagiri","Madurai","Mayiladuthurai","Nagapattinam","Namakkal","Nilgiris","Perambalur","Pudukkottai","Ramanathapuram","Ranipet","Salem","Sivaganga","Tenkasi","Thanjavur","Theni","Thoothukudi","Tiruchirappalli","Tirunelveli","Tirupathur","Tiruppur","Tiruvallur","Tiruvannamalai","Tiruvarur","Vellore","Viluppuram","Virudhunagar"],"Tripura":["Dhalai","Gomati","Khowai","North Tripura","Sepahijala","South Tripura","Unakoti","West Tripura"],"Telangana":["Adilabad","Bhadradri Kothagudem","Hanumakonda","Hyderabad","Jagtial","Jangaon","Jayashankar Bhupalpally","Jogulamba Gadwal","Kamareddy","Karimnagar","Khammam","Kumuram Bheem Asifabad","Mahabubabad","Mahabubnagar","Mancherial","Medak","Medchal-Malkajgiri","Mulugu","Nagarkurnool","Nalgonda","Narayanpet","Nirmal","Nizamabad","Peddapalli","Rajanna Sircilla","Rangareddy","Sangareddy","Siddipet","Suryapet","Vikarabad","Wanaparthy","Warangal","Yadadri Bhuvanagiri"],"Uttar Pradesh":["Agra","Aligarh","Ambedkar Nagar","Amethi","Amroha","Auraiya","Ayodhya","Azamgarh","Baghpat","Bahraich","Ballia","Balrampur","Banda","Barabanki","Bareilly","Basti","Bhadohi","Bijnor","Budaun","Bulandshahr","Chandauli","Chitrakoot","Deoria","Etah","Etawah","Farrukhabad","Fatehpur","Firozabad","Gautam Buddha Nagar","Ghaziabad","Ghazipur","Gonda","Gorakhpur","Hamirpur","Hapur","Hardoi","Hathras","Jalaun","Jaunpur","Jhansi","Kannauj","Kanpur Dehat","Kanpur Nagar","Kasganj","Kaushambi","Kushinagar","Lakhimpur Kheri","Lalitpur","Lucknow","Maharajganj","Mahoba","Mainpuri","Mathura","Mau","Meerut","Mirzapur","Moradabad","Muzaffarnagar","Pilibhit","Pratapgarh","Prayagraj","Raebareli","Rampur","Saharanpur","Sambhal","Sant Kabir Nagar","Shahjahanpur","Shamli","Shravasti","Siddharthnagar","Sitapur","Sonbhadra","Sultanpur","Unnao","Varanasi"],"Uttarakhand":["Almora","Bageshwar","Chamoli","Champawat","Dehradun","Haridwar","Nainital","Pauri Garhwal","Pithoragarh","Rudraprayag","Tehri Garhwal","Udham Singh Nagar","Uttarkashi"],"West Bengal":["Alipurduar","Bankura","Birbhum","Cooch Behar","Dakshin Dinajpur","Darjeeling","Hooghly","Howrah","Jalpaiguri","Jhargram","Kalimpong","Kolkata","Malda","Murshidabad","Nadia","North 24 Parganas","Paschim Bardhaman","Paschim Medinipur","Purba Bardhaman","Purba Medinipur","Purulia","South 24 Parganas","Uttar Dinajpur"]};
+const DIST_OTHER="__other";
+function fillDistricts(keep){
+  const st=$("state").value,L=DISTRICTS[st]||[],ds=$("distSel"),inp=$("district"),en=PB.lang&&PB.lang()==="en";
+  if(!L.length){ds.hidden=true;inp.hidden=false;if(!keep)inp.value="";return;}
+  ds.hidden=false;
+  ds.innerHTML='<option value="">'+(en?"Choose district":"ज़िला चुनें")+'</option>'+L.map(n=>'<option value="'+n.replace(/"/g,"&quot;")+'">'+n+(n==="Kutch"?" (Kachchh)":"")+'</option>').join("")+
+    '<option value="'+DIST_OTHER+'">'+(en?"➕ Not in list — write it":"➕ list में नहीं है — लिखें")+'</option>';
+  const cur=keep?inp.value.trim():"";
+  const hit=cur&&L.find(n=>n.toLowerCase()===cur.toLowerCase()||(n==="Kutch"&&/^ka?c+h+$|^kutch$/i.test(cur)));
+  if(hit){ds.value=hit;inp.hidden=true;inp.value=hit;}
+  else if(cur){ds.value=DIST_OTHER;inp.hidden=false;}
+  else{ds.value="";inp.hidden=true;inp.value="";}
+}
+function distVal(){const ds=$("distSel");return (!ds.hidden&&ds.value&&ds.value!==DIST_OTHER?ds.value:$("district").value).trim();}
+function setDist(v){$("district").value=v||"";fillDistricts(true);}
+$("state").addEventListener("change",()=>fillDistricts(false));
+$("distSel").addEventListener("change",()=>{const o=$("distSel").value===DIST_OTHER;$("district").hidden=!o;$("district").value=o?"":$("distSel").value;if(o)$("district").focus();});
+fillDistricts(false);
+$("city").addEventListener("change",()=>{const k=knownCity($("city").value);if(!k)return;$("city").value=k;const inf=CITY_INFO[k]||{};
+  if(inf.state)$("state").value=inf.state;if(inf.district&&(!distVal()||inf.state))setDist(inf.district);});
+/* sql-05 के बाद: शहरों की असली सूची (नए शहर जैसे Adipur अपने-आप जुड़ते हैं) */
+(async function(){
+  try{
+    const r=await fetch(SB+"/rest/v1/rpc/pb_public_cities",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:"{}"});
+    if(!r.ok)return;
+    const list=await r.json();
+    (Array.isArray(list)?list:[]).forEach(c=>{
+      if(!c||!c.name||c.id==null)return;
+      CITY_IDS[c.name]=c.id;CITY_INFO[c.name]={district:c.district||(CITY_INFO[c.name]||{}).district||"",state:c.state||(CITY_INFO[c.name]||{}).state||""};
+    });
+    fillCityList();
+  }catch(e){}
+})();
+/* AI Worker से जानकारी साफ़ करवाना (9 सेकंड में जवाब न आए तो छोड़ देते हैं) */
+async function aiClean(o){
+  const base=(window.PB_SITE&&PB_SITE.aiUrl)||"";if(!base)return null;
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),9000);
+  try{
+    const r=await fetch(base.replace(/\/$/,"")+"/clean",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(o),signal:ctl.signal});
+    if(!r.ok)return null;const j=await r.json();return j&&j.name?j:null;
+  }catch(e){return null;}finally{clearTimeout(tm);}
+}
+async function submit(){
+  if(sending)return;
+  if($("hp").value){$("f").style.display="none";$("pw").style.display="none";$("done").style.display="block";$("doneTxt").textContent=T("thanks");return;}
+  const ses=await PBA.session().catch(()=>null);   /* लॉगिन ज़रूरी नहीं; हो तो दुकान उसके नाम भी जुड़ जाती है */
+  sending=true;const btn=$("next");btn.disabled=true;btn.textContent=T("sending");setErr("");
+  const S=sel,d=S?[S.db_key,S.typ]:["Other",""],city=$("city").value.trim(),phone=phoneClean(),m=mapUrl();
+  let name=$("shop").value.trim(),area=$("area").value.trim(),addr=$("address").value.trim(),svc=$("services").value.trim();
+  /* ✨ AI: ग्राहक ने गलत खाने में जो लिखा (जैसे नाम की जगह पूरा पता) उसे सही खानों में सजाकर रखता है। AI न चले तो जो लिखा वही जाता है। */
+  btn.textContent="✨ AI आपकी जानकारी सुधार रहा है…";
+  const cl=await aiClean({shop:name,owner:$("owner").value.trim(),city:city,area:area,address:addr,services:svc,category:S?pathOf(S):""});
+  btn.textContent=T("sending");
+  if(cl){
+    const words=t=>String(t).toLowerCase().split(/[^\p{L}\p{M}\p{N}]+/u).filter(w=>w.length>1);
+    const src=words(name),got=words(cl.name||"");
+    const sane=got.length&&got.filter(w=>src.some(x=>x===w||x.indexOf(w)>-1||w.indexOf(x)>-1)).length>=Math.ceil(got.length*0.6)&&(cl.name||"").length>=2&&(cl.name||"").length<=60;
+    if(sane){name=cl.name;if(cl.area)area=cl.area;if(cl.address)addr=cl.address;if(cl.services)svc=cl.services;}
+  }
+  const desc=[
+    "Owner: "+$("owner").value.trim(),
+    svc?"Services: "+svc:"",
+    d[1]?"Subcategory: "+d[1]:"",
+    S?"Category: "+pathOf(S):"",
+    m?"Map: "+m:"",
+    coords?"Coordinates: "+coords.lat+","+coords.lng:""
+  ].filter(Boolean).join("\n");
+  const kc=knownCity(city),cityId=kc?CITY_IDS[kc]:null;   /* list वाला शहर → id; नया शहर → नाम + ज़िला + राज्य (server जोड़ता है) */
+  const catId=categoryIdFor(S);
+  if(catId==null){   /* category_id NOT NULL hai: asli ID ke bina database me mat bhejo */
+    setErr(T("e_catid"));btn.disabled=false;btn.textContent=T("submit");sending=false;return;
+  }
+  /* हर नई दुकान पहले Pending (is_active=false) — admin approval के बाद ही दिखेगी */
+  const row={name,slug:slugify(name,city),phone,whatsapp:phone,category:d[0],address:[area,addr,city].filter(Boolean).join(", "),description:desc+"\nCity: "+city+(area?"\nArea: "+area:""),is_active:false};
+  if(cityId!=null)row.city_id=cityId;
+  row.city_name=kc||city;row.district=distVal();row.state=$("state").value;
+  row.category_id=catId;
+  if(coords){row.latitude=coords.lat;row.longitude=coords.lng;}
+  if($("homeSvc").checked)row.home_service=true;
+  const fail=e=>{setErr(e);btn.disabled=false;btn.textContent=T("submit");sending=false;};
+  try{
+    /* नया तरीका: pb_register_open — बिना लॉगिन / बिना OTP; दुकान हमेशा Pending; एक मोबाइल = एक दुकान */
+    const hdr={apikey:KEY,Authorization:"Bearer "+(ses?ses.access_token:KEY),"Content-Type":"application/json"};
+    let rr=await fetch(SB+"/rest/v1/rpc/pb_register_open",{method:"POST",headers:hdr,body:JSON.stringify({p:row})});
+    if(rr.status===404&&ses)rr=await fetch(SB+"/rest/v1/rpc/pb_submit_business",{method:"POST",headers:hdr,body:JSON.stringify({p:row})});   /* SQL अभी न चला हो */
+    let j=null;try{j=await rr.json();}catch(_){}
+    if(rr.ok){done(name,S,d,{phone:phone,slug:(j&&j.slug)||row.slug,created_at:j&&j.created_at,now:j&&j.now});return;}
+    const rt=(j&&(j.message||j.msg))||"";
+    if(/limit1|limit2|duplicate|already/i.test(rt))return fail(LX("limit2"));
+    if(/too many|rate/i.test(rt))return fail(LX("rate"));
+    if(/bad address/i.test(rt))return fail(T("e_addr"));
+    if(/bad phone/i.test(rt))return fail(T("e_phone"));
+    if(/bad city|bad state|bad district/i.test(rt))return fail(LX("e_city2"));
+    if(/bad category/i.test(rt))return fail(T("e_cat"));
+    if(rr.status===404)return fail(LX("setup"));
+    throw new Error(rt||("HTTP "+rr.status));
+  }catch(x){
+    fail(T("send_err",{e:x.message}));
+  }
+}
+/* ---------- रजिस्ट्रेशन के बाद: बधाई + 30 मिनट का टाइमर + मोबाइल नंबर से स्टेटस ---------- */
+const WAIT_MIN=30;
+let stTimer=null,stPoll=null,ST=null;
+function phone10(p){return String(p||"").replace(/\D/g,"").slice(-10);}
+function saveReg(r){try{localStorage.setItem("pb-reg",JSON.stringify(r));}catch(_){}}
+function loadReg(){try{return JSON.parse(localStorage.getItem("pb-reg")||"null");}catch(_){return null;}}
+function done(name,S,d,info){
+  const now=Date.now(),srv=info&&info.now?Date.parse(info.now):now,cr=info&&info.created_at?Date.parse(info.created_at):srv;
+  const reg={phone:phone10(info&&info.phone),slug:info&&info.slug,name:name,created:cr,skew:now-srv};
+  saveReg(reg);
+  if(window.PBT)PBT.once("reg",(steps.length+1)+"-done");
+  showStatus({status:"pending",name:name,slug:reg.slug,created:cr,skew:reg.skew,fresh:true});
+  pollStatus(reg.phone);
+}
+function showForm(){
+  clearInterval(stTimer);clearInterval(stPoll);
+  $("stBox").hidden=true;$("f").style.display="";$("pw").style.display="";$("chkLine").hidden=false;
+  i=0;render();
+}
+function hideForm(){$("f").style.display="none";$("pw").style.display="none";$("done").style.display="none";$("chkLine").hidden=true;$("stBox").hidden=false;}
+function fmt(ms){ms=Math.max(0,ms);const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;}
+/* Live होने पर: अपना डिजिटल विज़िटिंग कार्ड (pb-card.js) */
+async function openMyCard(sl,fest){
+  const btn=$("stCard");if(btn)btn.disabled=true;
+  try{
+    const u=SB+"/rest/v1/businesses?select=name,slug,address,description,category,business_code&slug=eq."+encodeURIComponent(sl)+"&limit=1";
+    const r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});const b=(await r.json())[0];if(!b)throw new Error("x");
+    const ln=k=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
+    const reg=loadReg()||{};
+    PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:ln("Subcategory"),owner:ln("Owner"),address:b.address,city:ln("City"),phone:reg.phone||"",code:b.business_code||"",fest:!!fest});
+  }catch(e){alert(LX("st_card_err"));}
+  if(btn)btn.disabled=false;
+}
+function showStatus(x){
+  ST=x;hideForm();clearInterval(stTimer);
+  const box=$("stBox"),nm=esc(x.name||"");
+  if(x.status==="live"){
+    box.innerHTML='<div class="big">✅</div><span class="pill l">'+LX("st_live_p")+'</span><h2>'+LX("st_live_h")+'</h2><p class="sub"><b>'+nm+'</b> '+LX("st_live_s")+'</p>'+
+      (x.slug?'<button type="button" class="btn" id="stCard" style="width:100%;background:linear-gradient(90deg,#25d366,#1a73e8);margin-bottom:10px">📇 '+LX("st_card")+'</button>':'')+
+      (x.slug?'<a class="btn" href="business.html?slug='+encodeURIComponent(x.slug)+'">'+LX("st_see")+'</a>':'')+
+      '<button type="button" class="lnk" id="stNew">'+LX("st_new")+'</button>';
+    const cb=$("stCard");if(cb)cb.onclick=()=>openMyCard(x.slug);
+    const showF=()=>{const lb=window.PBCard&&PBCard.festLabel();if(!lb||!x.slug||$("stFest"))return;const bt=document.createElement("button");bt.type="button";bt.id="stFest";bt.className="btn";
+      bt.style.cssText="width:100%;margin-bottom:10px;background:linear-gradient(90deg,#ff8a00,#e52e71,#7b2ff7)";bt.textContent=lb+" — "+LX("st_fest");bt.onclick=()=>openMyCard(x.slug,true);cb.after(bt);};
+    if(cb){if(window.PBCard)showF();else addEventListener("load",showF);}
+  }else if(x.status==="removed"){
+    box.innerHTML='<div class="big">ℹ️</div><h2>'+LX("st_rm_h")+'</h2><p class="sub">'+LX("st_rm_s")+'</p><button type="button" class="btn" id="stNew">'+LX("st_new")+'</button>';
+  }else{
+    const R=54,C=2*Math.PI*R;
+    box.innerHTML='<div class="big">🎉</div><h2>'+LX(x.fresh?"st_h":"st_h2")+'</h2><span class="pill p">⏳ '+LX("st_pend")+'</span>'+
+      '<p class="sub"><b>'+nm+'</b> '+LX("st_sub")+'</p>'+
+      '<div class="clock"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="'+R+'" fill="none" stroke="#e8eefb" stroke-width="10"/><circle id="ring" cx="60" cy="60" r="'+R+'" fill="none" stroke="#1a73e8" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="0"/></svg>'+
+      '<div class="t"><b id="tm">30:00</b><small id="tmS">'+LX("st_left")+'</small></div></div>'+
+      '<div class="info" id="stInfo">'+LX("st_info")+'</div>'+
+      '<button type="button" class="btn sec" id="stRef" style="width:100%">🔄 '+LX("st_ref")+'</button>'+
+      '<button type="button" class="lnk" id="stNew">'+LX("st_new")+'</button>';
+    const end=x.created+WAIT_MIN*60000;
+    const tick=()=>{
+      const left=end-(Date.now()-(x.skew||0)),tm=$("tm");if(!tm)return;
+      tm.textContent=fmt(left);
+      $("ring").setAttribute("stroke-dashoffset",(C*(1-Math.max(0,left)/(WAIT_MIN*60000))).toFixed(1));
+      if(left<=0){tm.textContent="00:00";$("tmS").textContent=LX("st_over_s");$("stInfo").innerHTML=LX("st_over");clearInterval(stTimer);}
+    };
+    tick();stTimer=setInterval(tick,1000);
+    $("stRef").onclick=()=>checkPhone(loadReg()&&loadReg().phone,true);
+  }
+  const nb=$("stNew");if(nb)nb.onclick=()=>{try{localStorage.removeItem("pb-reg");}catch(_){}showForm();};
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+async function regStatus(ph){
+  const r=await fetch(SB+"/rest/v1/rpc/pb_reg_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_phone:ph})});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function checkPhone(ph,quiet){
+  ph=phone10(ph);
+  if(!/^[6-9]\d{9}$/.test(ph)){const e=$("ckErr");if(e)e.textContent=T("e_phone");return;}
+  let j;
+  try{j=await regStatus(ph);}catch(e){const er=$("ckErr");if(er)er.textContent=LX("ck_fail");else if(!quiet)alert(LX("ck_fail"));return;}
+  if(!j||j.status==="none"){const er=$("ckErr");if(er)er.textContent=LX("ck_none");else showCheck(LX("ck_none"));return;}
+  const skew=j.now?Date.now()-Date.parse(j.now):0,cr=Date.parse(j.created_at);
+  saveReg({phone:ph,slug:j.slug,name:j.name,created:cr,skew:skew});
+  showStatus({status:j.status,name:j.name,slug:j.slug,created:cr,skew:skew});
+  if(j.status==="pending")pollStatus(ph);
+}
+function pollStatus(ph){clearInterval(stPoll);stPoll=setInterval(async()=>{
+  try{const j=await regStatus(ph);if(j&&j.status&&j.status!=="pending"&&ST&&ST.status==="pending"){clearInterval(stPoll);checkPhone(ph,true);}}catch(_){}
+},45000);}
+function showCheck(msg){
+  hideForm();clearInterval(stTimer);
+  $("stBox").innerHTML='<div class="big">🔎</div><h2>'+LX("ck_h")+'</h2><p class="sub">'+LX("ck_s")+'</p><div class="ck"><input id="ckPh" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX"></div><div class="err" id="ckErr">'+(msg?esc(msg):"")+'</div>'+
+    '<button type="button" class="btn" id="ckGo">'+LX("ck_b")+'</button><button type="button" class="lnk" id="stNew">'+LX("st_new")+'</button>';
+  const r=loadReg();if(r&&r.phone)$("ckPh").value=r.phone;
+  $("ckGo").onclick=()=>{$("ckErr").textContent="";checkPhone($("ckPh").value);};
+  $("ckPh").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("ckGo").click();}};
+  $("stNew").onclick=()=>showForm();
+}
+$("chkBtn").onclick=()=>showCheck();
+/* ---------- लॉगिन (ईमेल OTP) ---------- */
+const LXT={
+  hi:{rate:"बहुत बार कोशिश हुई। थोड़ी देर बाद फिर से भेजें।",setup:"अभी रजिस्ट्रेशन चालू नहीं है। थोड़ी देर बाद कोशिश करें।",autoc:"📍 आपकी location से शहर चुना गया: {c} (बदल सकते हैं)",
+      locH:"दुकान का पता लिखें",locHint:"भारत में कहीं भी — पहले राज्य और ज़िला चुनें, फिर अपना शहर / गाँव लिखें और पूरा पता साफ़ लिखें (दुकान नंबर, रोड, लैंडमार्क)। ठेला / लारी हो तो वह जहाँ लगती है वह जगह लिखें।",
+      mlk:"Google Maps का link (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (list में न हो तो ➕ से लिखें)।",areaL:"इलाका / Area (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है",
+      chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना FREE डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का poster शेयर करें",chkB:"स्टेटस देखें",
+      st_h:"बधाई हो! आपका रजिस्ट्रेशन हो गया 🎊",st_h2:"आपका रजिस्ट्रेशन मिल गया है",st_pend:"Pending — जाँच चल रही है",
+      st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द Live कर देगी।",st_left:"मिनट बाकी",
+      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ <b>30 मिनट</b> के अंदर आपकी दुकान PataBook पर Live हो जाएगी।<br>🔄 यह पेज बंद हो जाए तो दोबारा खोलकर <b>“स्टेटस देखें”</b> में अपना मोबाइल नंबर डालें।",
+      st_over:"⏳ <b>बस थोड़ी देर और!</b> आपकी दुकान जाँच में है और जल्द Live होगी। यह पेज अपने-आप अपडेट हो जाएगा।",st_over_s:"जल्द Live",
+      st_ref:"स्टेटस फिर से देखें",st_new:"+ नई दुकान जोड़ें",
+      st_live_p:"✅ Live",st_live_h:"आपकी दुकान Live हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
+      st_rm_h:"यह रजिस्ट्रेशन हटा दिया गया है",st_rm_s:"ज़्यादा जानकारी के लिए PataBook से संपर्क करें, या नई दुकान फिर से जोड़ें।",
+      ck_h:"रजिस्ट्रेशन का स्टेटस देखें",ck_s:"जिस मोबाइल नंबर से दुकान जोड़ी थी, वह डालें।",ck_b:"स्टेटस देखें",ck_none:"इस नंबर से कोई रजिस्ट्रेशन नहीं मिला।",ck_fail:"अभी स्टेटस नहीं मिल सका। थोड़ी देर बाद कोशिश करें।",
+      g_h:"दुकान जोड़ने से पहले लॉगिन करें",limit2:"इस मोबाइल नंबर से पहले ही एक दुकान जुड़ी है। एक नंबर से सिर्फ 1 दुकान जोड़ सकते हैं।",many:"इस ईमेल से बहुत सारी दुकानें जुड़ चुकी हैं। मदद के लिए PataBook से संपर्क करें।",pub:"🔓 यह नंबर PataBook पर सबको दिखेगा। बाद में \"मेरी दुकान\" पेज से इसे बंद कर सकते हैं।",mine:"मेरी दुकान देखें ›",g_p:"आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।",g_b:"ईमेल से लॉगिन करें →",who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",
+      pending:"जाँच (approval) के बाद आपकी दुकान PataBook पर दिखेगी।",
+      loc_hint:"दुकान पर हों तो बटन दबाकर location जोड़ें, ताकि ग्राहक सीधे रास्ता देख सकें। हर दुकान जाँच के बाद चालू होती है।"},
+  en:{rate:"Too many attempts. Please try again in a little while.",setup:"Registration is not open right now. Please try again later.",autoc:"📍 City picked from your location: {c} (you can change it)",
+      locH:"Write your shop address",locHint:"Anywhere in India — choose your state and district, write your city / village, then the full address clearly (shop no., road, landmark). For a stall/cart, write where it stands.",
+      mlk:"Google Maps link (optional)",cityL:"City / Village *",distL:"District *",stateL:"State *",e_city2:"Write the city / village name (letters only).",e_dist:"Choose the district (not in list? use ➕ to write it).",areaL:"Area (optional)",addrL:"Full address *",addrPh:"Shop no., road, landmark — or where your stall/cart stands",
+      chkQ:"Already registered?",st_card:"Share your FREE digital visiting card",st_card_err:"Could not make the card right now, please try again.",st_fest:"share your shop poster",chkB:"Check status",
+      st_h:"Congratulations! You are registered 🎊",st_h2:"We have your registration",st_pend:"Pending — under review",
+      st_sub:"has been added to PataBook. Our team will review it and make it live soon.",st_left:"minutes left",
+      st_info:"✅ Nothing more to do.<br>⏱️ Your shop goes live on PataBook within <b>30 minutes</b>.<br>🔄 If this page closes, open it again, tap <b>“Check status”</b> and enter your mobile number.",
+      st_over:"⏳ <b>Just a little longer!</b> Your shop is being reviewed and will be live soon. This page updates by itself.",st_over_s:"Live soon",
+      st_ref:"Check status again",st_new:"+ Add a new shop",
+      st_live_p:"✅ Live",st_live_h:"Your shop is live! 🎉",st_live_s:"is now visible to everyone on PataBook.",st_see:"See your shop ›",
+      st_rm_h:"This registration was removed",st_rm_s:"Contact PataBook for details, or add your shop again.",
+      ck_h:"Check registration status",ck_s:"Enter the mobile number you used to add the shop.",ck_b:"Check status",ck_none:"No registration found for this number.",ck_fail:"Could not get the status right now. Please try again shortly.",
+      g_h:"Log in before adding a shop",limit2:"A shop is already added with this mobile number. Only 1 shop is allowed per number.",many:"This email already has many shops. Contact PataBook for help.",pub:"🔓 This number will be visible to everyone on PataBook. You can turn it off later from the \"My Shop\" page.",mine:"See my shop ›",g_p:"We will email you an OTP code. Enter it and you will come right back here.",g_b:"Log in with email →",who:"✅ Logged in as {e}",out:"Log out",
+      pending:"Your shop will appear on PataBook after review.",
+      loc_hint:"If you are at the shop, tap the button to add its location so customers get direct directions. Every shop goes live after review."}
+};
+function LX(k){const L=(window.PB&&PB.lang&&PB.lang()==="en")?"en":"hi";return LXT[L][k];}
+let ME=null;
+function gateText(){
+  $("gateH").textContent=LX("g_h");$("gateP").textContent=LX("g_p");$("gateBtn").textContent=LX("g_b");
+  if(ME){$("whoTxt").textContent=LX("who").replace("{e}",ME.email||"");$("whoOut").textContent=LX("out");}
+}
+async function checkLogin(){
+  ME=await PBA.session();
+  $("gate").hidden=true;$("mainCard").hidden=false;$("who").hidden=!ME;   /* लॉगिन अब ज़रूरी नहीं */
+  gateText();
+}
+$("whoOut").onclick=async()=>{await PBA.logout();checkLogin();};
+checkLogin();
+function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()==="en")?"🏠 I visit customers\u2019 homes to provide service (Home Service)":"🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
+PB.apply();fixHint();document.title=T("addshop")+" — PataBook";
+PB.mount($("pbLang"));
+PB.onChange(()=>{
+  PB.apply();fixHint();gateText();document.title=T("addshop")+" — PataBook";
+  if(!sending)render();
+  if(steps[i]&&steps[i].dataset.s==="svc")showCat();
+  if(sheet.classList.contains("on"))drawSheet();
+});
+render();
+/* पेज दोबारा खुला और पहले रजिस्ट्रेशन किया था → सीधे स्टेटस */
+(function(){const r=loadReg();if(r&&r.phone){if(r.created)showStatus({status:"pending",name:r.name,slug:r.slug,created:r.created,skew:r.skew||0});checkPhone(r.phone,true);}})();
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home Services — PataBook</title>
+<meta name="description" content="PataBook Home Services: Electrician, Plumber, AC Repair, Carpenter और दूसरे सेवा देने वालों को घर पर बुलाएं।">
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="i18n.js"></script>
+<script src="pb-guard.js" defer></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--soft:#eef5ff;--green:#137333}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#e8f1ff 0%,#fff 38%);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button,select{font:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:620px;margin:0 auto;padding:12px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--navy)}
+.brand{display:flex;align-items:center;gap:6px;font-weight:800;font-size:18px;color:var(--navy)}
+.brand img{width:22px}
+#pbLang{margin-inline-start:auto}
+h1{font-size:24px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.sub{color:var(--muted);font-size:14.5px;margin:4px 0 16px;line-height:1.5}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:6px 2px 8px}
+.cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (min-width:520px){.cats{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.cat{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 6px;cursor:pointer;text-align:center;font-size:12.5px;font-weight:600;line-height:1.25;min-width:0}
+.cat i{font-style:normal;font-size:24px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft)}
+.cat.on{border-color:var(--blue);background:var(--soft);color:var(--navy)}
+.cat:focus-visible,.city:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.cityrow{display:flex;gap:10px;align-items:center;margin:16px 0 6px}
+.city{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;font-size:15px}
+.cnt{color:var(--muted);font-size:13.5px;margin:10px 2px}
+.list{display:grid;gap:10px}
+.prov{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 6px 16px rgba(26,115,232,.06)}
+.prov h3{font-size:17px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.vf{font-size:11.5px;font-weight:800;color:var(--green);background:#e6f4ea;border-radius:999px;padding:2px 8px}
+.meta{color:var(--muted);font-size:13.5px;margin-top:4px;overflow-wrap:anywhere}
+.bid{font-size:11px;color:#8a93a3;margin-top:6px;letter-spacing:.03em}
+.acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.acts a,.acts button{flex:1;min-width:130px;text-align:center;border-radius:12px;padding:11px;font-weight:700;font-size:14px}
+.go{background:var(--blue);color:#fff}
+.book{background:#e4e8ef;color:#667085;border:0;cursor:not-allowed}
+.note{color:var(--muted);text-align:center;padding:22px 10px;font-size:14.5px;line-height:1.55}
+.join{margin-top:22px;text-align:center;font-size:14px;color:var(--muted)}
+.join a{display:inline-block;margin-top:8px;background:#ffd21f;color:var(--ink);font-weight:800;border-radius:999px;padding:11px 22px}
+</style>
+<script src="pb-track.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html" id="tBack">← वापस</a>
+    <a class="brand" href="index.html"><img src="pin.png" alt="">PataBook</a>
+    <span id="pbLang"></span>
+  </div>
+
+  <h1><span aria-hidden="true">🏠</span><span id="tH">Home Services</span></h1>
+  <p class="sub" id="tSub">Electrician, Plumber, AC Repair, Carpenter और दूसरे सेवा देने वालों को घर पर बुलाएं।</p>
+
+  <div class="lbl" id="tCat">सेवा चुनें</div>
+  <div class="cats" id="cats"></div>
+
+  <div class="cityrow">
+    <select class="city" id="city" aria-label="City"><option value="">…</option></select>
+  </div>
+
+  <div class="cnt" id="cnt"></div>
+  <div class="list" id="list"></div>
+
+  <div class="join"><span id="tJoin">क्या आप घर जाकर सेवा देते हैं?</span><br><a href="list.html" id="tJoinB">अपनी सेवा PataBook पर जोड़ें ›</a></div>
+</div>
+
+<script>
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const L=()=>(window.PB&&PB.lang&&PB.lang()==="en")?"en":"hi";
+const TX={
+ hi:{tBack:"← वापस",tH:"Home Services",tSub:"Electrician, Plumber, AC Repair, Carpenter और दूसरे सेवा देने वालों को घर पर बुलाएं।",tCat:"सेवा चुनें",
+     tJoin:"क्या आप घर जाकर सेवा देते हैं?",tJoinB:"अपनी सेवा PataBook पर जोड़ें ›",all:"सभी सेवाएं",allCity:"सभी शहर",
+     found:"{n} सेवा देने वाले मिले",none:"अभी इस सेवा/शहर में कोई Home Service देने वाला नहीं जुड़ा है।",err:"लोड नहीं हो पाया। इंटरनेट जांचकर दोबारा खोलें।",
+     setup:"Home Services जल्द शुरू हो रही हैं।",view:"प्रोफाइल, Call, WhatsApp ›",book:"🏠 बुक करें — जल्द",vf:"✔ Verified",serves:"सेवा क्षेत्र भी"},
+ en:{tBack:"← Back",tH:"Home Services",tSub:"Call an Electrician, Plumber, AC Repair, Carpenter or other service provider to your home.",tCat:"Choose a service",
+     tJoin:"Do you visit homes to provide service?",tJoinB:"Add your service to PataBook ›",all:"All services",allCity:"All cities",
+     found:"{n} providers found",none:"No home service provider has joined for this service/city yet.",err:"Could not load. Check your internet and open again.",
+     setup:"Home Services are starting soon.",view:"Profile, Call, WhatsApp ›",book:"🏠 Book — coming soon",vf:"✔ Verified",serves:"Also serves"}
+};
+const tx=(k,v)=>String(TX[L()][k]).replace("{n}",v);
+const ICON={"ac-service":"❄️","carpenter":"🪚","plumber":"🚰","painter":"🎨","electrician":"💡","appliance-repair":"🔌","ro-water-purifier-repair":"💧","cleaning-services":"🧽","other-home-services":"🛠️"};
+const FALLBACK=[{id:67,name:"Electrician",slug:"electrician"},{id:65,name:"Plumber",slug:"plumber"},{id:63,name:"AC Service",slug:"ac-service"},{id:64,name:"Carpenter",slug:"carpenter"},{id:66,name:"Painter",slug:"painter"}];
+let CATS=[],SEL=null,CITY="",seq=0,READY=true;
+
+async function rpc(fn,args){
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));e.status=r.status;throw e;}
+  return j;
+}
+function drawCats(){
+  const order=["electrician","plumber","ac-service","carpenter","painter","appliance-repair","ro-water-purifier-repair","cleaning-services","other-home-services"];
+  const list=[...CATS].sort((a,b)=>(order.indexOf(a.slug)+99)%99-(order.indexOf(b.slug)+99)%99);
+  $("cats").innerHTML='<button type="button" class="cat'+(SEL==null?" on":"")+'" data-id=""><i aria-hidden="true">🏠</i>'+esc(tx("all"))+'</button>'+
+    list.map(c=>'<button type="button" class="cat'+(SEL===c.id?" on":"")+'" data-id="'+c.id+'"><i aria-hidden="true">'+(ICON[c.slug]||"🛠️")+'</i>'+esc(c.name)+'</button>').join("");
+}
+function drawText(){
+  PB.apply();
+  ["tBack","tH","tSub","tCat","tJoin","tJoinB"].forEach(k=>$(k).textContent=tx(k));
+  const o=$("city").options[0];if(o)o.textContent=tx("allCity");
+  document.title=tx("tH")+" — PataBook";
+  drawCats();
+}
+async function search(){
+  const my=++seq,list=$("list");
+  if(!READY){$("cnt").textContent="";list.innerHTML='<p class="note">'+esc(tx("setup"))+'</p>';return;}
+  $("cnt").textContent="…";list.innerHTML="";
+  try{
+    const rows=await rpc("pb_home_providers",{p_category_id:SEL,p_city_id:CITY?+CITY:null})||[];
+    if(my!==seq)return;
+    $("cnt").textContent=rows.length?tx("found",rows.length):"";
+    list.innerHTML=rows.length?rows.map(p=>'<div class="prov"><h3>'+esc(p.name)+(p.is_verified?' <span class="vf">'+esc(tx("vf"))+'</span>':'')+'</h3>'+
+      '<div class="meta">🛠️ '+esc(p.category||"")+' · 📍 '+esc(p.city||"")+(p.serves?' · '+esc(tx("serves"))+': '+esc(p.serves):'')+'</div>'+
+      (p.address?'<div class="meta">'+esc(p.address)+'</div>':'')+
+      (p.business_code?'<div class="bid">Business ID: '+esc(p.business_code)+'</div>':'')+
+      '<div class="acts"><a class="go" href="business.html?slug='+encodeURIComponent(p.slug)+'">'+esc(tx("view"))+'</a><button type="button" class="book" disabled>'+esc(tx("book"))+'</button></div></div>').join("")
+      :'<p class="note">'+esc(tx("none"))+'</p>';
+  }catch(e){
+    if(my!==seq)return;
+    $("cnt").textContent="";
+    if(e.status===404||/function|schema cache/i.test(e.message)){READY=false;list.innerHTML='<p class="note">'+esc(tx("setup"))+'</p>';}
+    else list.innerHTML='<p class="note">'+esc(tx("err"))+'</p>';
+  }
+}
+$("cats").addEventListener("click",e=>{const b=e.target.closest(".cat");if(!b)return;SEL=b.dataset.id?+b.dataset.id:null;drawCats();search();});
+$("city").addEventListener("change",e=>{CITY=e.target.value;search();});
+async function start(){
+  try{CATS=(await rpc("pb_public_categories")||[]).filter(c=>c.parent_id===12);}catch(e){CATS=FALLBACK;}
+  if(!CATS.length)CATS=FALLBACK;
+  try{
+    const cs=await rpc("pb_public_cities")||[];
+    $("city").innerHTML='<option value="">'+esc(tx("allCity"))+'</option>'+cs.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join("");
+  }catch(e){$("city").innerHTML='<option value="">'+esc(tx("allCity"))+'</option>';}
+  const q=new URLSearchParams(location.search);
+  if(q.get("cat"))SEL=+q.get("cat")||null;
+  drawText();search();
+}
+PB.mount($("pbLang"));
+PB.onChange(drawText);
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PataBook – Search · Business Directory</title>
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PataBook">
+<script src="i18n.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--yellow:#ffd21f;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--green:#188038}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#f5f8fe;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button,select{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:10px;height:60px}
+.back{font-size:22px;line-height:1;padding:6px 8px 6px 0;color:var(--navy)}
+.brand{display:flex;align-items:center;gap:8px;line-height:1}
+.brand img{width:28px;height:auto;display:block}
+.brand .col{display:flex;flex-direction:column}
+.brand b{font-size:21px;font-weight:800;letter-spacing:-.5px}
+.brand b span{color:var(--blue)}
+.brand small{font-size:6.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-top:3px;white-space:nowrap}
+.sp{flex:1}
+.mapic{width:36px;height:36px;flex:none;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:#fff}.mapic svg{width:21px;height:21px;display:block}
+
+.add{background:var(--blue);color:#fff;font-weight:600;border-radius:999px;padding:8px 13px;font-size:13px;white-space:nowrap}
+
+/* search box : index jaisa */
+.sbox{margin:16px 0 6px}
+.search{display:flex;flex-wrap:wrap;gap:6px;background:#fff;border:1px solid var(--line);border-radius:28px;padding:6px;box-shadow:0 8px 24px rgba(26,115,232,.12)}
+.search .f{display:flex;align-items:center;gap:8px;flex:1 1 100%;padding:8px 12px;color:var(--muted)}
+.search input,.search select{border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);width:100%;min-width:0}
+.search .f.loc{flex:1 1 55%;border-top:1px solid var(--line)}
+.search .go{flex:1 1 35%;background:var(--blue);color:#fff;font-weight:700;font-size:16px;border-radius:22px;padding:11px 18px}
+.hint{font-size:12.5px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
+
+.count{font-size:14px;font-weight:700;margin:16px 0 8px;color:var(--navy)}
+.list{display:flex;flex-direction:column;gap:12px;padding-bottom:30px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;box-shadow:0 2px 10px rgba(11,47,115,.05)}
+.info h2{font-size:17px;font-weight:700;line-height:1.3}
+.info h2 a:hover{color:var(--blue)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:11.5px;border-radius:999px;padding:3px 9px;background:#f1f4fa;color:#3c4659}
+.tag.city{background:#e8f1ff;color:var(--navy);font-weight:600}
+.tag.ver{background:#e3f7ea;color:var(--green)}
+.addr{margin-top:8px;font-size:13.5px;color:#3c4043;line-height:1.5}
+.acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.acts a{font-size:13px;font-weight:600;border-radius:999px;padding:8px 14px;border:1px solid var(--line);background:#fff}
+.acts a.call{background:var(--blue);border-color:var(--blue);color:#fff}
+.acts a.wa{background:var(--green);border-color:var(--green);color:#fff}
+.empty{background:#fff;border:1px dashed #c8d6ee;border-radius:16px;padding:26px 18px;text-align:center;color:var(--muted)}
+.empty p{margin-bottom:12px;line-height:1.6}
+.empty .btn{display:inline-block;background:var(--yellow);color:var(--ink);font-weight:700;border-radius:999px;padding:10px 18px;margin:4px}
+.note{color:var(--muted);padding:20px 0;text-align:center}
+footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12px}
+@media(min-width:760px){
+ .search{flex-wrap:nowrap;border-radius:999px}
+ .search .f{flex:1 1 auto}
+ .search .f.loc{flex:0 0 190px;border-top:0;border-inline-start:1px solid var(--line)}
+ .search .go{flex:0 0 120px}
+}
+@media(max-width:480px){.nav{gap:6px}.add{padding:7px 10px;font-size:12px;max-width:34vw;overflow:hidden;text-overflow:ellipsis}.brand .col{display:none}}
+</style>
+<script src="pb-guard.js" defer></script>
+<script src="pb-track.js"></script>
+</head>
+<body>
+
+<header>
+ <div class="wrap nav">
+  <a class="back" href="index.html" aria-label="Home">←</a>
+  <a class="brand" href="index.html">
+   <img src="pin.png" alt="">
+   <div class="col"><b>Pata<span>Book</span></b><small>Business Directory</small></div>
+  </a>
+  <div class="sp"></div>
+  <a class="mapic" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg></a>
+  <span id="pbLang"></span>
+  <a class="add" href="list.html" data-i="addshop">दुकान जोड़ें</a>
+ </div>
+</header>
+
+<main class="wrap">
+ <form class="sbox" id="sform" autocomplete="off">
+  <div class="search">
+   <label class="f"><input id="q" type="search" enterkeyhint="search" data-ip="ph" placeholder="क्या ढूंढ रहे हैं?"></label>
+   <label class="f loc">
+    <span aria-hidden="true" style="font-size:15px">📍</span><input id="city" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist>
+   </label>
+   <button class="go" type="submit" data-i="search">खोजें</button>
+  </div>
+  <p class="hint" data-i="s_hint"></p>
+ </form>
+
+ <div class="count" id="count"></div>
+ <div class="list" id="list"></div>
+</main>
+
+<footer><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav>© PataBook · Business Directory · www.PataBook.in</footer>
+
+<script>
+function pbDir(b){const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.address||"");if(b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude))return "map.html?to="+(+b.latitude)+","+(+b.longitude)+"&n="+n+"&a="+a;return b.address?"map.html?q="+a+"&n="+n:"";}
+
+const SB="https://kkvbpzysktozghnxplxv.supabase.co";
+const KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const H={apikey:KEY,Authorization:"Bearer "+KEY};
+const T=(k,v)=>PB.t(k,v);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+/* Hindi / Hinglish shabd -> English (database ki category English me hai) */
+const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
+const CATHI={"ऑटोमोबाइल":"Automobile","खाना":"Food","स्वास्थ्य":"Health","शॉपिंग":"Shopping","शिक्षा":"Education","होम":"Home","प्रोफेशनल":"Professional","होटल":"Hotel"};
+
+/* query ko words me todo; har word ke liye alag roop (alias) */
+function terms(q){
+  const ws=String(q||"").toLowerCase().replace(/[,()*\\"'%:;]/g," ").split(/\s+/).filter(w=>w.length>=2||/^\d+$/.test(w)).slice(0,5);
+  return ws.map(w=>{
+    const alt=[w];
+    (ALIAS[w]||"").split(" ").filter(Boolean).slice(0,3).forEach(a=>alt.includes(a)||alt.push(a));
+    if(CATHI[w])alt.push(CATHI[w].toLowerCase());
+    if(w.length>4&&/[a-z]s$/.test(w))alt.push(w.slice(0,-1));       /* "plumbers" -> "plumber" */
+    return {w,alt,pin:/^\d{6}$/.test(w),num:/^\d+$/.test(w)};
+  });
+}
+function group(t){
+  const f=t.num?["address","description"]:["name","category","description","address"];
+  const parts=[];t.alt.forEach(a=>f.forEach(c=>parts.push(c+".ilike.*"+a+"*")));
+  return "or("+parts.join(",")+")";
+}
+
+/* description se jaankari */
+const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
+function cityOf(b){return line(b,"City")||String(b.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";}
+function catOf(b){return line(b,"Subcategory")||b.category||"";}
+
+/* sabse sahi result upar */
+function score(b,ts){
+  const n=String(b.name||"").toLowerCase(),c=(catOf(b)+" "+(b.category||"")).toLowerCase(),
+        p=(cityOf(b)+" "+line(b,"Area")+" "+(b.address||"")).toLowerCase(),d=String(b.description||"").toLowerCase();
+  let s=0;
+  ts.forEach(t=>{let best=0;t.alt.forEach(a=>{
+    if(n.startsWith(a))best=Math.max(best,10);else if(n.includes(a))best=Math.max(best,7);
+    if(c.includes(a))best=Math.max(best,6);if(p.includes(a))best=Math.max(best,5);if(d.includes(a))best=Math.max(best,3);
+  });s+=best;});
+  return s+(b.is_verified?1:0);
+}
+
+let reqN=0;
+async function run(push){
+  const q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim(),list=$("list"),cnt=$("count");
+  if(push){const u=new URL(location.href);u.searchParams.set("q",q);city?u.searchParams.set("city",city):u.searchParams.delete("city");history.replaceState(null,"",u);}
+  const ts=terms(q);
+  if(!ts.length&&!city){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
+  const n=++reqN;
+  cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';
+  const u=new URL(SB+"/rest/v1/businesses");
+  u.searchParams.set("select","name,slug,address,description,category,is_verified,latitude,longitude");   /* phone/whatsapp nahi: sirf login ke baad business page par */
+  u.searchParams.set("is_active","eq.true");
+  u.searchParams.set("deleted_at","is.null");
+  u.searchParams.set("limit","60");
+  const gs=ts.map(group);
+  const cid=city&&(window.PB_CITY_IDS||{})[city.toLowerCase()];                 /* Approve हुआ शहर: city_id से भी (पते में शहर न लिखा हो तब भी मिले) */
+  if(city)gs.push("or("+(cid?"city_id.eq."+cid+",":"")+"address.ilike.*"+city+"*,description.ilike.*"+city+"*)");
+  if(gs.length===1)u.searchParams.set("or",gs[0].slice(3,-1));else u.searchParams.set("and","("+gs.join(",")+")");
+  try{
+    const r=await fetch(u,{headers:H});const data=await r.json();
+    if(n!==reqN)return;
+    if(!r.ok)throw new Error(data&&data.message||"x");
+    const rows=data.map(b=>(b._s=score(b,ts),b)).sort((a,b)=>b._s-a._s||String(a.name).localeCompare(b.name));
+    render(rows,q,city);
+  }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p>';}}
+}
+function render(rows,q,city){
+  const list=$("list"),label=[q,city].filter(Boolean).join(" · ");
+  $("count").textContent=rows.length?T("found",{n:rows.length})+" · "+T("s_for",{q:label}):"";
+  if(label&&window.PBT)PBT.once(rows.length?"search":"search0",label);   /* traffic: क्या खोजा, नतीजा मिला या नहीं */
+  if(!rows.length){
+    list.innerHTML='<div class="empty"><p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
+    return;
+  }
+  list.innerHTML=rows.map(b=>{
+    const dir=pbDir(b);
+    const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
+    return '<article class="card"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
+      (cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
+      '</div></div>'+(b.address?'<p class="addr">'+esc(b.address)+'</p>':'')+
+      '<div class="acts"><a class="call" href="'+(PBA.current()?link+"#contact":esc(PBA.loginUrl(link)))+'">'+esc(PBA.current()?"📞 "+T("c_title"):T("lock_short"))+'</a>'+
+      (dir?'<a href="'+esc(dir)+'">'+esc(T("dir"))+'</a>':'')+
+      '<a href="'+link+'">'+esc(T("details"))+'</a></div></article>';
+  }).join("");
+}
+
+const P=new URLSearchParams(location.search);
+$("q").value=P.get("q")||"";
+if(P.get("city"))$("city").value=P.get("city");
+$("sform").onsubmit=e=>{e.preventDefault();$("q").blur();run(true);};
+$("city").onchange=()=>run(true);
+window.PB_CITY_RERUN=()=>{if($("city").value.trim())run(false);};
+PB.apply();PB.mount($("pbLang"));
+PB.onChange(()=>{PB.apply();run(false);});
+run(false);
+if(!P.get("q"))$("q").focus();
+</script>
+<script>
+/* Admin में Approve हुए सारे शहर (किसी भी राज्य के) — लिखते समय सुझाव में */
+(function(){var dl=document.getElementById("cityDL");if(!dl)return;
+  fetch("https://kkvbpzysktozghnxplxv.supabase.co/rest/v1/rpc/pb_public_cities",{method:"POST",headers:{apikey:"sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8",Authorization:"Bearer sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8","Content-Type":"application/json"},body:"{}"})
+  .then(function(r){return r.ok?r.json():[];}).then(function(L){
+    if(!Array.isArray(L))return;var have={};[].forEach.call(dl.options,function(o){have[o.value.toLowerCase()]=1;});
+    window.PB_CITY_IDS=window.PB_CITY_IDS||{};L.forEach(function(c){if(c&&c.name&&c.id!=null)PB_CITY_IDS[String(c.name).toLowerCase()]=c.id;});
+    L.forEach(function(c){if(!c||!c.name||have[String(c.name).toLowerCase()])return;var o=document.createElement("option");o.value=c.name;if(c.state&&c.state!=="Gujarat")o.label=c.name+" ("+c.state+")";dl.appendChild(o);have[String(c.name).toLowerCase()]=1;});
+    if(window.PB_CITY_RERUN)PB_CITY_RERUN();
+  }).catch(function(){});
+})();
+</script>
+</body>
+</html>

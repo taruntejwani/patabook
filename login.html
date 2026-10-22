@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — PataBook</title>
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="robots" content="noindex">
+<script src="i18n.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f7ff;color:#202124;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.back{background:#fff;border:1px solid #dadce0;border-radius:20px;padding:8px 14px;cursor:pointer;font-size:14px;white-space:nowrap;font-family:inherit;color:inherit}
+.brand{font-size:22px;font-weight:800;color:#174ea6}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:22px;padding:26px 22px;box-shadow:0 6px 24px #1a73e81a}
+.emoji{font-size:40px;line-height:1;margin-bottom:10px}
+h1{font-size:23px;line-height:1.3;margin:0 0 6px}
+.hint{color:#5f6368;margin:0 0 18px;line-height:1.5;font-size:15px}
+.lbl{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:#3c4043}
+input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:17px;outline:0;font-family:inherit;background:#fff}
+input:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
+#code{letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:16px;font-family:inherit;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.6}
+.btn.sec{background:#eef2fb;color:#174ea6}
+.links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+.links button{border:0;background:none;color:#1a73e8;font-weight:600;font-size:14px;cursor:pointer;padding:4px 0;font-family:inherit}
+.links button:disabled{color:#9aa0a6}
+.err{color:#c5221f;font-size:14px;margin-top:10px;min-height:18px;line-height:1.5}
+.ok{background:#e6f4ea;color:#137333;border-radius:12px;padding:12px 14px;line-height:1.5;font-size:15px;margin-bottom:6px;word-break:break-word}
+[hidden]{display:none!important}
+</style>
+<script src="pb-track.js"></script>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><button class="back" type="button" id="backBtn" data-i="back">← वापस</button><div class="brand">PataBook</div><span id="pbLang" style="margin-inline-start:auto"></span></div>
+ <div class="card">
+
+  <!-- 1: email -->
+  <form id="s1" autocomplete="on">
+   <div class="emoji">🔒</div>
+   <h1 data-i="l_title">लॉगिन करें</h1>
+   <p class="hint" data-i="l_sub"></p>
+   <label class="lbl" for="email" data-i="l_email">Email</label>
+   <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@gmail.com" required>
+   <div class="err" id="e1"></div>
+   <button class="btn" type="submit" id="send" data-i="l_send">Code भेजें</button>
+  </form>
+
+  <!-- 2: code -->
+  <form id="s2" hidden autocomplete="off">
+   <div class="emoji">✉️</div>
+   <h1 data-i="l_code">Code डालें</h1>
+   <p class="hint" id="sentTo"></p>
+   <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••">
+   <div class="err" id="e2"></div>
+   <button class="btn" type="submit" id="verify" data-i="l_verify">Verify करें</button>
+   <div class="links"><button type="button" id="resend" data-i="l_resend">Code फिर भेजें</button><button type="button" id="change" data-i="l_change">Email बदलें</button></div>
+  </form>
+
+  <!-- 3: logged in -->
+  <div id="s3" hidden>
+   <div class="ok" id="who"></div>
+   <a class="btn" id="cont" href="index.html" data-i="l_back">आगे बढ़ें</a>
+   <button class="btn sec" type="button" id="out" data-i="l_out">Logout</button>
+  </div>
+
+ </div>
+</div>
+<footer style="padding:0 16px 18px"><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav></footer>
+<script>
+const $=id=>document.getElementById(id);
+const T=(k,v)=>PB.t(k,v);
+/* sirf isi site ka page (open redirect nahi) */
+function safeNext(){
+  const n=new URLSearchParams(location.search).get("next")||"";
+  return /^[a-z0-9_-]+\.html(\?[^#]*)?$/i.test(n)?n:"index.html";
+}
+const next=safeNext();
+let email="",timer=null,left=0;
+function show(n){["s1","s2","s3"].forEach((id,i)=>$(id).hidden=i!==n-1);}
+function errText(e){
+  if(e&&(e.status===429||/rate|seconds|too many/i.test(e.message)))return T("l_wait");
+  if(e&&(e.status===400||e.status===401||e.status===403)&&/token|otp|expired|invalid/i.test(e.message))return T("l_bad_code");
+  return T("err");
+}
+function cool(){
+  left=60;$("resend").disabled=true;clearInterval(timer);
+  timer=setInterval(()=>{left--;$("resend").textContent=T("l_resend")+(left>0?" ("+left+")":"");if(left<=0){clearInterval(timer);$("resend").disabled=false;}},1000);
+}
+async function loggedIn(s){
+  $("who").textContent=T("l_in",{e:s.email||""});
+  $("cont").href=next;show(3);
+}
+async function send(){
+  $("e1").textContent="";$("e2").textContent="";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){$("e1").textContent=T("l_bad_email");show(1);return;}
+  const b=$("send");b.disabled=true;
+  try{
+    await PBA.sendOtp(email,next);
+    $("sentTo").textContent=T("l_sent",{e:email});
+    show(2);$("code").value="";setTimeout(()=>$("code").focus(),50);cool();
+  }catch(e){
+    const msg=errText(e);if($("s2").hidden)$("e1").textContent=msg;else $("e2").textContent=msg;
+  }finally{b.disabled=false;}
+}
+$("s1").onsubmit=e=>{e.preventDefault();email=$("email").value.trim().toLowerCase();send();};
+$("resend").onclick=()=>send();
+$("change").onclick=()=>{show(1);$("email").focus();};
+$("s2").onsubmit=async e=>{
+  e.preventDefault();
+  const c=$("code").value.replace(/\D/g,"");
+  if(c.length<6){$("e2").textContent=T("l_bad_code");return;}
+  const b=$("verify");b.disabled=true;$("e2").textContent="";
+  try{await PBA.verifyOtp(email,c);location.replace(next);}
+  catch(x){$("e2").textContent=errText(x)===T("err")?T("l_bad_code"):errText(x);b.disabled=false;}
+};
+$("out").onclick=async()=>{await PBA.logout();show(1);};
+$("backBtn").onclick=()=>{history.length>1?history.back():location.href="index.html";};
+
+PB.apply();PB.mount($("pbLang"));
+PB.onChange(()=>{PB.apply();if(email)$("sentTo").textContent=T("l_sent",{e:email});const s=PBA.current();if(s&&!$("s3").hidden)$("who").textContent=T("l_in",{e:s.email||""});});
+(async()=>{
+  const fromLink=PBA.fromUrl();                 /* email ke link se aaye */
+  if(fromLink){location.replace(next);return;}
+  const s=await PBA.session();
+  if(s){if(new URLSearchParams(location.search).get("next"))location.replace(next);else loggedIn(s);}
+  else{show(1);}
+})();
+</script>
+</body>
+</html>

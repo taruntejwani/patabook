@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact Us – PataBook</title>
+<meta name="description" content="Contact PataBook">
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="i18n.js"></script>
+<script src="site-config.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#f6f8fc;-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:var(--blue)}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.nav{display:flex;align-items:center;gap:10px;height:60px}
+.back{font-size:22px;line-height:1;padding:6px 8px 6px 0;color:var(--navy);text-decoration:none}
+.brand{display:flex;align-items:center;gap:8px;line-height:1;text-decoration:none;color:var(--ink)}
+.brand img{width:28px;height:auto}
+.brand b{font-size:21px;font-weight:800;letter-spacing:-.5px}.brand b span{color:var(--blue)}
+.sp{flex:1}
+main{padding:22px 0 30px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:14px}
+h1{font-size:24px;line-height:1.25;margin-bottom:4px}
+.upd{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+h2{font-size:17px;margin:18px 0 6px;color:var(--navy)}
+p,li{font-size:15px}
+ul{padding-left:20px;margin:4px 0}
+li{margin:3px 0}
+.note{background:#fffaeb;border:1px solid #fedf89;color:#7a4b00;border-radius:12px;padding:10px 12px;font-size:13.5px;margin-top:10px}
+.ct{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #eef1f6}
+.ct:last-child{border:0}
+.ct i{font-style:normal;font-size:22px;width:30px;text-align:center}
+.ct small{display:block;color:var(--muted);font-size:12.5px}
+.ct b{font-size:15.5px;word-break:break-word}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns a{text-decoration:none;font-weight:800;font-size:14px;border-radius:12px;padding:11px 16px;background:var(--blue);color:#fff}
+.btns a.alt{background:#eff4ff;color:var(--blue)}
+.pending{color:#b54708;font-weight:700}
+footer{padding:16px;text-align:center;color:var(--muted);font-size:12.5px}
+.legal{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-bottom:6px}
+.legal a{color:var(--muted);text-decoration:none}
+[data-l]{display:none}
+html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
+.cf label{display:block;font-size:13px;font-weight:700;color:#344054;margin:12px 0 5px}
+.cf input,.cf select,.cf textarea{width:100%;box-sizing:border-box;border:1.5px solid #d0d5dd;border-radius:12px;padding:11px 12px;font:inherit;font-size:16px;background:#fff;color:#12141c}
+.cf textarea{min-height:150px;resize:vertical;line-height:1.5}
+.cf input:focus,.cf select:focus,.cf textarea:focus{outline:0;border-color:#1a73e8;box-shadow:0 0 0 3px #1a73e822}
+.cf .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:520px){.cf .row2{grid-template-columns:1fr}}
+.cf .cnt{text-align:right;font-size:12px;color:#5b6475;margin-top:4px}
+.cf .err{color:#b42318;font-size:14px;min-height:18px;margin-top:8px}
+.cf button{width:100%;margin-top:12px;border:0;border-radius:12px;background:#1a73e8;color:#fff;font:inherit;font-size:16px;font-weight:800;padding:14px;cursor:pointer}
+.cf button:disabled{opacity:.6}
+.cf .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.okbox{text-align:center;padding:10px 0}.okbox .big{font-size:46px}.okbox h3{margin:6px 0;color:#0b2f73}.okbox .tk{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-weight:800;font-size:18px;background:#eaf2ff;color:#0b2f73;border-radius:10px;padding:6px 14px;margin:8px 0}
+.okbox button{width:auto;margin-top:10px;background:#eef2f8;color:#0b2f73;padding:10px 18px}
+</style>
+<script src="pb-track.js"></script>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="back" href="index.html" aria-label="Home">←</a>
+  <a class="brand" href="index.html"><img src="pin.png" alt=""><b>Pata<span>Book</span></b></a>
+  <div class="sp"></div>
+  <span id="pbLang"></span>
+</div></header>
+<main class="wrap">
+
+<div class="card">
+<div data-l="hi"><h1>संपर्क करें</h1><p>सवाल, सुधार या लिस्टिंग हटाने के लिए हमसे संपर्क करें।</p></div>
+<div data-l="en"><h1>Contact Us</h1><p>Contact us for questions, corrections or listing removal.</p></div>
+<div style="margin-top:8px"><div class="ct" data-if="owner"><i>🏢</i><div><small>PataBook</small><b data-s="owner"></b></div></div>
+<div class="ct" data-if="email"><i>✉️</i><div><small>Email</small><b data-s="email"></b></div></div>
+<div class="ct" data-if="phone"><i>📞</i><div><small>Mobile / WhatsApp</small><b data-s="phone"></b></div></div>
+<div class="ct" data-if="address"><i>📍</i><div><small>Address</small><b data-s="address"></b></div></div></div>
+<div class="btns">
+  <a href="#" id="wa" target="_blank" rel="noopener">WhatsApp</a>
+  <a class="alt" href="list.html">+ Add your business</a>
+</div>
+</div>
+<div class="card" id="support">
+<div data-l="hi"><h2 style="margin-top:0">📩 Complaint &amp; Support</h2><p>शिकायत, सुझाव, दुकान की जानकारी ठीक करवानी हो या हटवानी हो — यहाँ लिखें। हम जल्द आपसे संपर्क करेंगे।</p></div>
+<div data-l="en"><h2 style="margin-top:0">📩 Complaint &amp; Support</h2><p>Complaints, suggestions, listing corrections or removal — write to us here. We will contact you soon.</p></div>
+<form class="cf" id="cf" onsubmit="return false" autocomplete="on">
+  <input class="hp" id="cfHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="row2">
+    <div><label for="cfName" id="lName">आपका नाम *</label><input id="cfName" maxlength="80" autocomplete="name"></div>
+    <div><label for="cfMob" id="lMob">मोबाइल नंबर *</label><input id="cfMob" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX" autocomplete="tel-national"></div>
+  </div>
+  <div class="row2">
+    <div><label for="cfMail" id="lMail">Email (वैकल्पिक)</label><input id="cfMail" type="email" maxlength="120" autocomplete="email"></div>
+    <div><label for="cfTopic" id="lTopic">विषय</label><select id="cfTopic"></select></div>
+  </div>
+  <label for="cfMsg" id="lMsg">आपका संदेश / शिकायत *</label>
+  <textarea id="cfMsg" maxlength="5000"></textarea>
+  <div class="cnt" id="cfCnt">0 / 5000</div>
+  <div class="err" id="cfErr"></div>
+  <button type="button" id="cfGo">भेजें</button>
+</form>
+<div class="okbox" id="cfOk" hidden></div>
+</div>
+<div class="card">
+<div data-l="hi"><h2 style="margin-top:0">शिकायत अधिकारी (Grievance Officer)</h2><p class="gnone">शिकायत ऊपर दिए <b>Complaint &amp; Support</b> बॉक्स से भेजें।</p><p class="gyes">नाम: <b data-s="grievanceName"></b><br>Email: <b data-s="grievanceEmail"></b></p><p class="upd">शिकायत की पावती 24 घंटे में और समाधान 15 दिनों में करने का प्रयास किया जाता है।</p></div>
+<div data-l="en"><h2 style="margin-top:0">Grievance Officer</h2><p class="gnone">Please send complaints using the <b>Complaint &amp; Support</b> box above.</p><p class="gyes">Name: <b data-s="grievanceName"></b><br>Email: <b data-s="grievanceEmail"></b></p><p class="upd">We aim to acknowledge complaints within 24 hours and resolve them within 15 days.</p></div>
+</div>
+<div class="card">
+<div data-l="hi"><h2 style="margin-top:0">अपनी दुकान की जानकारी बदलनी या हटानी है?</h2><p>ऊपर दिए <b>Complaint &amp; Support</b> बॉक्स में "दुकान की जानकारी ठीक करें" या "दुकान हटवाएँ" चुनें और दुकान का नाम लिखें।</p></div>
+<div data-l="en"><h2 style="margin-top:0">Change or remove your listing?</h2><p>Use the <b>Complaint &amp; Support</b> box above — choose "Listing correction" or "Remove listing" and write the shop name.</p></div>
+</div>
+</main>
+<footer>
+  <nav class="legal"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms &amp; Conditions</a><a href="contact.html">Contact Us</a></nav>
+  © PataBook · Business Directory · www.PataBook.in
+</footer>
+<script>
+(function () {
+  var S = window.PB_SITE || {};
+  function val(k) { return String(S[k] || '').trim(); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function lang() { return window.PB && PB.lang && PB.lang() === 'en' ? 'en' : 'hi'; }
+  var SOON = { hi: 'जल्द जोड़ा जाएगा', en: 'Will be added soon' };
+  function fill() {
+    var L = lang(); document.documentElement.lang = L;
+    document.querySelectorAll('[data-s]').forEach(function (el) {
+      var k = el.getAttribute('data-s'), v = val(k) || (k === 'grievanceEmail' ? val('email') : '');
+      if (!v) { el.innerHTML = '<span class="pending">' + SOON[L] + '</span>'; return; }
+      if (k === 'email' || k === 'grievanceEmail') el.innerHTML = '<a href="mailto:' + esc(v) + '">' + esc(v) + '</a>';
+      else if (k === 'phone') el.innerHTML = '<a href="tel:+91' + esc(v.replace(/\D/g, '').slice(-10)) + '">' + esc(v) + '</a>';
+      else el.textContent = v;
+    });
+    document.querySelectorAll('[data-if]').forEach(function (el) { el.style.display = val(el.getAttribute('data-if')) ? '' : 'none'; });
+    var gy = !!val('grievanceName');
+    document.querySelectorAll('.gyes').forEach(function (e) { e.style.display = gy ? '' : 'none'; });
+    document.querySelectorAll('.gnone').forEach(function (e) { e.style.display = gy ? 'none' : ''; });
+    formText();
+    var p = val('phone').replace(/\D/g, '').slice(-10), w = document.getElementById('wa');
+    if (w) { if (p.length === 10) w.href = 'https://wa.me/91' + p; else w.style.display = 'none'; }
+  }
+  /* ---- Complaint & Support फ़ॉर्म → Supabase pb_send_message ---- */
+  var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
+  var FT = {
+    hi: { name: 'आपका नाम *', mob: 'मोबाइल नंबर *', mail: 'Email (वैकल्पिक)', topic: 'विषय', msg: 'आपका संदेश / शिकायत *', go: 'भेजें', sending: 'भेजा जा रहा है…',
+      ph: 'अपनी बात विस्तार से लिखें — दुकान का नाम, जगह, क्या समस्या है…',
+      t: { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान की जानकारी ठीक करें', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' },
+      e_name: 'अपना नाम लिखें', e_mob: '10 अंकों का सही मोबाइल नंबर लिखें', e_mail: 'Email सही नहीं है (या खाली छोड़ दें)', e_msg: 'संदेश कम से कम 5 अक्षर का लिखें',
+      e_rate: 'बहुत सारे संदेश भेजे जा चुके हैं। थोड़ी देर बाद फिर कोशिश करें।', e_fail: 'अभी नहीं भेजा जा सका। थोड़ी देर बाद फिर कोशिश करें।',
+      ok_h: 'आपका संदेश मिल गया!', ok_p: 'हम जल्द आपसे संपर्क करेंगे। अपना शिकायत नंबर संभाल कर रखें:', ok_new: 'नया संदेश लिखें' },
+    en: { name: 'Your name *', mob: 'Mobile number *', mail: 'Email (optional)', topic: 'Topic', msg: 'Your message / complaint *', go: 'Send', sending: 'Sending…',
+      ph: 'Describe it in detail — shop name, place, what the problem is…',
+      t: { complaint: 'Complaint', support: 'Help / Question', correction: 'Correct listing details', removal: 'Remove listing', suggestion: 'Suggestion', other: 'Other' },
+      e_name: 'Enter your name', e_mob: 'Enter a valid 10-digit mobile number', e_mail: 'Email is not valid (or leave it empty)', e_msg: 'Write at least 5 characters',
+      e_rate: 'Too many messages sent. Please try again later.', e_fail: 'Could not send right now. Please try again shortly.',
+      ok_h: 'We got your message!', ok_p: 'We will contact you soon. Keep your complaint number:', ok_new: 'Write a new message' } };
+  var $ = function (id) { return document.getElementById(id); };
+  function formText() {
+    var t = FT[lang()], cur = $('cfTopic').value || 'complaint';
+    $('lName').textContent = t.name; $('lMob').textContent = t.mob; $('lMail').textContent = t.mail; $('lTopic').textContent = t.topic; $('lMsg').textContent = t.msg;
+    $('cfMsg').placeholder = t.ph; if (!$('cfGo').disabled) $('cfGo').textContent = t.go;
+    $('cfTopic').innerHTML = Object.keys(t.t).map(function (k) { return '<option value="' + k + '">' + t.t[k] + '</option>'; }).join(''); $('cfTopic').value = cur;
+  }
+  $('cfMsg').addEventListener('input', function () { $('cfCnt').textContent = this.value.length + ' / 5000'; });
+  $('cfGo').onclick = async function () {
+    var t = FT[lang()], b = this, err = $('cfErr');
+    if ($('cfHp').value) return;
+    var name = $('cfName').value.trim(), mob = $('cfMob').value.replace(/\D/g, '').slice(-10), mail = $('cfMail').value.trim(), msg = $('cfMsg').value.trim();
+    err.textContent = '';
+    if (name.length < 2) { err.textContent = t.e_name; $('cfName').focus(); return; }
+    if (!/^[6-9]\d{9}$/.test(mob)) { err.textContent = t.e_mob; $('cfMob').focus(); return; }
+    if (mail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { err.textContent = t.e_mail; $('cfMail').focus(); return; }
+    if (msg.length < 5) { err.textContent = t.e_msg; $('cfMsg').focus(); return; }
+    b.disabled = true; b.textContent = t.sending;
+    try {
+      var r = await fetch(SB + '/rest/v1/rpc/pb_send_message', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p: { name: name, mobile: mob, email: mail, topic: $('cfTopic').value, message: msg } }) });
+      var j = null; try { j = await r.json(); } catch (x) {}
+      if (!r.ok) { var m = (j && (j.message || j.msg)) || ''; throw new Error(/rate/i.test(m) ? t.e_rate : /mobile/i.test(m) ? t.e_mob : /email/i.test(m) ? t.e_mail : /message/i.test(m) ? t.e_msg : /name/i.test(m) ? t.e_name : t.e_fail); }
+      $('cf').hidden = true;
+      $('cfOk').innerHTML = '<div class="big">✅</div><h3>' + t.ok_h + '</h3><p>' + t.ok_p + '</p><div class="tk">' + esc((j && j.ticket) || '') + '</div><br><button type="button" id="cfNew">' + t.ok_new + '</button>';
+      $('cfOk').hidden = false;
+      $('cfNew').onclick = function () { $('cfMsg').value = ''; $('cfCnt').textContent = '0 / 5000'; $('cfOk').hidden = true; $('cf').hidden = false; };
+    } catch (x) { err.textContent = x.message || t.e_fail; }
+    b.disabled = false; b.textContent = t.go;
+  };
+  if (window.PB) { PB.mount(document.getElementById('pbLang')); PB.onChange(function () { PB.apply(); fill(); }); PB.apply(); }
+  fill();
+})();
+</script>
+</body>
+</html>
