@@ -19,6 +19,8 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-s
 .top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .back{background:#fff;border:1px solid #dadce0;border-radius:20px;padding:8px 14px;cursor:pointer;font-size:14px;white-space:nowrap}
 .brand{font-size:22px;font-weight:800;color:#174ea6}
+.top .brand{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pbLang{flex:none}
+@media(max-width:360px){.top{gap:8px}.top .back{padding:7px 10px;font-size:13px}.top .brand{font-size:19px}}
 .prog{height:6px;background:#dbe5fb;border-radius:6px;overflow:hidden;margin-bottom:8px}
 .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1a73e8,#34a853);border-radius:6px;transition:width .35s}
 .count{font-size:13px;color:#5f6368;margin-bottom:14px}
@@ -581,10 +583,17 @@ $("otpCode").addEventListener("input",async()=>{
 });
 $("next").onclick=()=>{
   if(!check())return;
-  if(i<steps.length-1){i++;render();}else submit();
+  if(i<steps.length-1){i++;history.pushState({pbst:i},"",location.pathname+location.search);render();}else submit();
 };
+
+/* Phone का back बटन: form में पिछले सवाल पर जाए, page से बाहर न निकले */
+window.addEventListener("popstate",e=>{
+  if($("done")&&$("done").style.display==="block")return;   /* जमा हो चुका */
+  const st=e.state&&typeof e.state.pbst==="number"?e.state.pbst:0;
+  if(st!==i){i=Math.max(0,Math.min(st,steps.length-1));setErr("");render();}
+});
 $("skip").onclick=()=>{setErr("");i++;render();};
-$("prev").onclick=()=>{if(i>0){i--;render();}};
+$("prev").onclick=()=>{if(history.state&&history.state.pbst>0){history.back();return;}if(i>0){i--;render();}};
 document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"&&!sending){e.preventDefault();$("next").click();}
 });

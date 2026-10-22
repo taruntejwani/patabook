@@ -106,6 +106,7 @@ async function load(){
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";
     render();loadContact();
+    if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
 function render(){

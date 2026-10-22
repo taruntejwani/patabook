@@ -307,7 +307,7 @@ function render(){
       ${b.address?`<p class="addr"><i aria-hidden="true" style="font-style:normal">📍</i><span>${esc(b.address)}</span></p>`:""}
       ${d?`<p class="desc">${esc(d)}</p>`:""}
       <div class="acts">
-        <a class="call" href="${PBA.current()?blink+"#contact":esc(PBA.loginUrl(blink))}">${esc("📞 "+T("c_title"))}</a>
+        <a class="call" href="${blink}#contact">${esc("📞 "+T("c_title"))}</a>
         ${dir?`<a href="${esc(dir)}">🧭 ${L.map}</a>`:`<span></span>`}
         <a href="${blink}">${L.details} ›</a>
       </div>

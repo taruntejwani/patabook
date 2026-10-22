@@ -347,7 +347,24 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
+  function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
+  var NAV = false;
+  function navMark(id) {
+    if (NAV) return;
+    var st = history.state || {};
+    if (id === 'home') { if (st.pbv) history.replaceState(null, '', location.pathname); return; }
+    if (st.pbv) history.replaceState({ pbv: id }, '', location.pathname + '#' + id);
+    else history.pushState({ pbv: id }, '', location.pathname + '#' + id);
+  }
+  if (location.hash) history.replaceState(null, '', location.pathname);
+  window.addEventListener('popstate', function (e) {
+    var st = e.state || {};
+    if (!$('md').hidden) { $('md').hidden = true; if (st.pbm) return; }
+    if (st.pbm) return;
+    NAV = true; try { if (st.pbv && st.pbv !== 'home') view(st.pbv); else showHome(); } finally { NAV = false; }
+  });
   async function showHome() {
     view('home');
     var c = null, note = '';
@@ -386,7 +403,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     view('panel'); load();
   };
   $('hRef').onclick = showHome;
-  document.addEventListener('click', function (e) { if (e.target.closest('[data-home]')) { $('md').hidden = true; showHome(); } });
+  document.addEventListener('click', function (e) { if (e.target.closest('[data-home]')) { $('md').hidden = true; if (history.state && (history.state.pbv || history.state.pbm)) { history.go(history.state.pbm ? -2 : -1); return; } showHome(); } });
   /* ---- शिकायत / संदेश: Excel जैसी table ---- */
   var mStatus = 'new', MROWS = [], mTimer = null;
   function fmtD(s) { var d = new Date(s); return isNaN(d) ? '' : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
@@ -419,18 +436,18 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       (m.email ? '<a class="lnk" href="mailto:' + esc(m.email) + '?subject=' + encodeURIComponent('PataBook ' + (m.ticket || '')) + '">✉ Email</a>' : '') +
       (m.status !== 'done' ? '<button class="ok" data-ms="done">✔ निपटा दिया</button>' : '<button class="hold" data-ms="new">↩ फिर से नया करें</button>') +
       '<button class="del" data-ms="del">🗑 हटाएँ</button><button class="lnk" data-ms="close">बंद करें</button></div>';
-    $('md').hidden = false;
+    $('md').hidden = false; if (!(history.state && history.state.pbm)) history.pushState({ pbm: 1, pbv: (history.state && history.state.pbv) || 'msgs' }, '', location.pathname + '#msg');
     $('mdBox').onclick = async function (ev) {
       var b = ev.target.closest('[data-ms]'); if (!b) return;
       var a = b.dataset.ms;
-      if (a === 'close') { $('md').hidden = true; return; }
+      if (a === 'close') { closeMd(); return; }
       if (a === 'del' && !confirm('यह संदेश हमेशा के लिए हटाएँ?')) return;
       b.disabled = true;
-      try { await rpc('pb_admin_message_set', { p_id: m.id, p_status: a === 'del' ? 'read' : a, p_delete: a === 'del' }); $('md').hidden = true; showMsgs(); }
+      try { await rpc('pb_admin_message_set', { p_id: m.id, p_status: a === 'del' ? 'read' : a, p_delete: a === 'del' }); closeMd(); showMsgs(); }
       catch (x) { b.disabled = false; alert('नहीं हो सका: ' + x.message); }
     };
   }
-  $('md').onclick = function (e) { if (e.target === $('md')) $('md').hidden = true; };
+  $('md').onclick = function (e) { if (e.target === $('md')) closeMd(); };
   $('mXl').onclick = function () {
     var head = ['#', 'Date', 'Ticket', 'Name', 'Mobile', 'Email', 'Topic', 'Status', 'Message'];
     var q = function (v) { v = String(v == null ? '' : v); return '"' + v.replace(/"/g, '""') + '"'; };

@@ -194,7 +194,7 @@ function render(rows,q,city){
     return '<article class="card"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
       (cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
       '</div></div>'+(b.address?'<p class="addr">'+esc(b.address)+'</p>':'')+
-      '<div class="acts"><a class="call" href="'+(PBA.current()?link+"#contact":esc(PBA.loginUrl(link)))+'">'+esc(PBA.current()?"📞 "+T("c_title"):T("lock_short"))+'</a>'+
+      '<div class="acts"><a class="call" href="'+link+'#contact">'+esc("📞 "+T("c_title"))+'</a>'+
       (dir?'<a href="'+esc(dir)+'">'+esc(T("dir"))+'</a>':'')+
       '<a href="'+link+'">'+esc(T("details"))+'</a></div></article>';
   }).join("");
