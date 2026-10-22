@@ -4,3 +4,5 @@
 /vehicle-list /category.html?cat=Automobile 301
 /patabook-team-dealers.html / 301
 /patabook-team-dealers / 301
+/plan.html /mybusiness.html 302
+/plan /mybusiness.html 302

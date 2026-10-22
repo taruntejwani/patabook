@@ -92,7 +92,6 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
   </div>
 
   <div class="who" id="who" hidden><span id="whoT"></span><button type="button" id="out"></button></div>
-  <a class="planbn" href="plan.html"><span class="ic" aria-hidden="true">⭐</span><span class="tx"><b id="pbT">₹99 प्लान में क्या मिलेगा? देखें</b><small id="pbS">Dashboard और Marketing Studio · जल्द शुरू होगा</small></span><span class="go" aria-hidden="true">›</span></a>
   <div id="list"><p class="note">…</p></div>
 </div>
 
@@ -188,7 +187,7 @@ async function uploadLogo(i,file){
 }
 function draw(){
   PB.apply();
-  ["h1","sub","gH","gP","gB","pbT","pbS"].forEach(k=>$(k).textContent=tx(k));$("backT").textContent=tx("back");
+  ["h1","sub","gH","gP","gB","pbT","pbS"].forEach(k=>{const e=$(k);if(e)e.textContent=tx(k);});$("backT").textContent=tx("back");
   document.title=tx("h1")+" — PataBook";
   $("gate").hidden=!!ME;$("who").hidden=!ME;
   if(!ME){$("list").innerHTML="";return;}
