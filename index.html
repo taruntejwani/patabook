@@ -163,6 +163,17 @@ footer{padding:14px 16px 18px;text-align:center;color:var(--muted);font-size:12p
  .ltag{font-size:13px} .lsub{font-size:16px}
 }
 @media(max-height:760px) and (max-width:760px){.vis{width:min(240px,64%)}}
+/* मोबाइल: compact standard size — छोटा logo, ऊपर की खाली जगह कम, search एक लाइन में */
+@media(max-width:759px){
+ .vis{width:min(190px,52%);margin-top:-4px}
+ .art{margin-top:-17%}
+ .vis .ltag,.vis .lsub{width:max-content;max-width:92vw;position:relative;left:50%;transform:translateX(-50%);white-space:nowrap}
+ .locchip{padding:6px 10px}
+ .searchbox{margin-top:14px}
+ .search{flex-direction:row;align-items:center;gap:6px;border-radius:16px;padding:6px}
+ .search .f{flex:1 1 auto;width:auto;min-height:44px;padding:6px 10px}
+ .search .go{flex:0 0 auto;width:auto;min-height:44px;padding:10px 18px;border-radius:12px;font-size:15px}
+}
 /* बड़ी स्क्रीन (tablet / computer): दुकानों की पट्टी पूरी चौड़ाई में, किनारों पर कटे नहीं */
 @media (min-width:600px){
   html,body{overflow-x:hidden;overflow-x:clip}
