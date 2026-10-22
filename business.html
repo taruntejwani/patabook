@@ -130,7 +130,6 @@ function render(){
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
    '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div></section>'+
    '<button type="button" id="cardBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px;margin:0 0 12px;font:inherit;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,#25d366,#1a73e8);box-shadow:0 6px 16px rgba(26,115,232,.25)">📤 '+((PB.lang&&PB.lang()==="en")?"Share this shop":"यह दुकान शेयर करें")+'</button>'+
-   '<button type="button" id="festBtn" hidden style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px;margin:0 0 12px;font:inherit;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,#ff8a00,#e52e71,#7b2ff7);box-shadow:0 6px 16px rgba(229,46,113,.28)"></button>'+
    '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()==="en")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()==="en")?"Terms":"नियम")+'</a></p>'+
    '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>';
   drawContact();
@@ -138,11 +137,6 @@ function render(){
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
   if(cbtn)cbtn.onclick=()=>{if(!window.PBCard)return;
     PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
-  /* त्योहार poster — त्योहार के दिनों में अपने-आप दिखता है */
-  const fb=document.getElementById("festBtn"),showF=()=>{if(!window.PBCard||!fb)return;const lb=PBCard.festLabel();if(!lb)return;
-    fb.hidden=false;fb.style.display="flex";const lg=PB.lang&&PB.lang();fb.textContent=lb+" — "+(lg==="en"?"share poster":lg==="gu"?"poster શેર કરો":"poster शेयर करें");
-    fb.onclick=()=>PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true,fest:true});};
-  if(window.PBCard)showF();else addEventListener("load",showF);
 }
 function lockHTML(){
   const go=esc(PBA.loginUrl("business.html?slug="+encodeURIComponent(slug)));
