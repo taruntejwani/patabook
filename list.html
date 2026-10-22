@@ -566,7 +566,7 @@ $("otpSend").onclick=async()=>{
   const b=$("otpSend");b.disabled=true;
   try{const st=await regStatus(p);
     if(st&&st.status&&st.status!=="none"){b.disabled=false;
-      otpMsg((EN()?"A shop is already added with this number":"इस नंबर से पहले से दुकान जुड़ी है")+(st.name?": "+st.name:"")+(EN()?". Use another number or tap “Check status” below.":"। दूसरा नंबर डालें या नीचे “स्टेटस देखें” दबाएँ।"),true);return;}
+      otpMsg(EN()?"This number is already in use. Please enter another number.":"यह नंबर पहले से इस्तेमाल हो चुका है। दूसरा नंबर डालें।",true);return;}
   }catch(_){/* status न मिले तो भी OTP भेजो; database अंत में फिर जाँचेगा */}
   try{const j=await otpCall("/send",{purpose:"register",phone:p});
     regPhone="";$("otpCode").disabled=false;$("otpCode").value="";setTimeout(()=>$("otpCode").focus(),50);
