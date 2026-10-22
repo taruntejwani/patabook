@@ -3,12 +3,12 @@
    यहाँ कभी कोई Secret / service_role key न डालें (यह फाइल सबको दिखती है)। */
 window.PB_SITE = {
   /* संपर्क (Contact Us, Privacy, Terms में दिखेगा) */
-  owner: '',            // मालिक / कंपनी का नाम, जैसे 'XYZ Enterprises'
-  email: '',            // संपर्क email
+  owner: 'Tarun Tejwani',            // मालिक / कंपनी का नाम, जैसे 'XYZ Enterprises'
+  email: 'patabook.in@gmail.com',            // संपर्क email
   phone: '',            // संपर्क मोबाइल (10 अंक)
-  address: '',          // पूरा पता
-  grievanceName: '',    // शिकायत अधिकारी (Grievance Officer) का नाम
-  grievanceEmail: '',   // शिकायत अधिकारी का email (खाली हो तो ऊपर वाला email)
+  address: 'Apnanagar, Gandhidham, Kutch, Gujarat – 370201',          // पूरा पता
+  grievanceName: 'Tarun Tejwani',    // शिकायत अधिकारी (Grievance Officer) का नाम
+  grievanceEmail: 'patabook.in@gmail.com',   // शिकायत अधिकारी का email (खाली हो तो ऊपर वाला email)
   city: 'Gandhidham, Kutch, Gujarat',
   updated: '22 October 2026',
 
