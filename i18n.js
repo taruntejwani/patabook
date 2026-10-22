@@ -236,8 +236,19 @@ var isMobile=isIOS||/android|mobile/i.test(navigator.userAgent);
 if("serviceWorker" in navigator&&location.protocol!=="file:"){
   window.addEventListener("load",function(){navigator.serviceWorker.register(BASE+"sw.js").catch(function(){});});
 }
-window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;showApp();});
-window.addEventListener("appinstalled",function(){hideApp(true);});
+/* App पहले से install है? तो patti कभी न दिखे। ✕ दबाया तो 30 दिन तक न दिखे। */
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function markInstalled(){lsSet("pb-app-installed","1");hideApp();}
+function appBlocked(){
+  if(lsGet("pb-app-installed")==="1")return true;
+  var until=+(lsGet("pb-app-x-until")||0);return until>Date.now();
+}
+if(isStandalone())lsSet("pb-app-installed","1");   /* app के अंदर से खोला गया = install है */
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;
+  if(lsGet("pb-app-installed")==="1")lsSet("pb-app-installed","");   /* browser फिर install offer कर रहा = app हटाया जा चुका */
+  showApp();});
+window.addEventListener("appinstalled",function(){markInstalled();});
 var acss=".pba{display:flex;align-items:center;gap:10px;background:#0b2f73;color:#fff;padding:9px 12px;font-family:inherit;position:relative;z-index:60}"+
 ".pba img{width:34px;height:34px;border-radius:9px;flex:none;background:#fff}"+
 ".pba .tx{flex:1;min-width:0;line-height:1.25}.pba b{display:block;font-size:14px}.pba small{display:block;font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"+
@@ -247,8 +258,7 @@ var acss=".pba{display:flex;align-items:center;gap:10px;background:#0b2f73;color
 ".pba-h[hidden]{display:none}.pba-h span{flex:1}.pba-h button{flex:none;border:0;background:#1a73e8;color:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}";
 function appEl(){return document.getElementById("pbApp");}
 function showApp(){
-  if(!isMobile||isStandalone())return;
-  try{if(sessionStorage.getItem("pb-app-x"))return;}catch(e){}
+  if(!isMobile||isStandalone()||appBlocked())return;
   if(!document.body){document.addEventListener("DOMContentLoaded",showApp);return;}
   if(appEl())return;
   if(!document.getElementById("pbAppCss")){var st2=document.createElement("style");st2.id="pbAppCss";st2.textContent=acss;document.head.appendChild(st2);}
@@ -257,11 +267,11 @@ function showApp(){
   document.body.insertBefore(w,document.body.firstChild);
   appText();
   w.querySelector(".ib").onclick=function(){
-    if(deferred){deferred.prompt();deferred.userChoice.then(function(r){if(r&&r.outcome==="accepted")hideApp(true);deferred=null;});return;}
+    if(deferred){deferred.prompt();deferred.userChoice.then(function(r){if(r&&r.outcome==="accepted")markInstalled();deferred=null;});return;}
     var h=w.querySelector(".pba-h");h.hidden=false;h.querySelector("span").textContent=t(isIOS?"app_ios":"app_gen");
   };
   w.querySelector(".pba-h button").onclick=function(){w.querySelector(".pba-h").hidden=true;};
-  w.querySelector(".x").onclick=function(){try{sessionStorage.setItem("pb-app-x","1");}catch(e){}hideApp();};
+  w.querySelector(".x").onclick=function(){lsSet("pb-app-x-until",String(Date.now()+30*864e5));hideApp();};
 }
 function hideApp(){var w=appEl();if(w)w.remove();}
 function appText(){
@@ -269,7 +279,17 @@ function appText(){
   w.querySelectorAll("[data-a]").forEach(function(el){el.textContent=t(el.getAttribute("data-a"));});
   var h=w.querySelector(".pba-h");if(h&&!h.hidden)h.querySelector("span").textContent=t(isIOS?"app_ios":"app_gen");
 }
-showApp();
+/* पहली बार: Android Chrome जैसे browsers खुद बताते हैं कि app install है या नहीं */
+(function startApp(){
+  if(!isMobile||isStandalone()||appBlocked())return;
+  if(isIOS)return showApp();                                   /* iPhone: browser ऐसा कुछ नहीं बताता */
+  var check=navigator.getInstalledRelatedApps?navigator.getInstalledRelatedApps().catch(function(){return [];}):Promise.resolve([]);
+  check.then(function(apps){
+    if(apps&&apps.length){markInstalled();return;}
+    if("onbeforeinstallprompt" in window)return;               /* install हो सकता है तभी browser event भेजेगा → तब patti */
+    showApp();                                                  /* बाकी browsers: ✕ वाला नियम लागू */
+  });
+})();
 
 window.PB={t:t,apply:apply,set:set,mount:mount,onChange:function(f){subs.push(f);},lang:function(){return cur;},langs:LANGS};
 })();
