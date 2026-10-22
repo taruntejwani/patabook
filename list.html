@@ -182,7 +182,10 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
         <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर call / WhatsApp करेंगे।</p>
         <input id="phone" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
-        <p class="hint" id="pubNote" style="margin:10px 0 0;font-size:13.5px">🔓 यह नंबर PataBook पर सबको दिखेगा। बाद में "मेरी दुकान" पेज से इसे बंद कर सकते हैं।</p>
+        <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
+        <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
+        <label class="hsv" for="spN" style="margin-top:8px"><input type="radio" name="showPh" id="spN" value="0"> <span id="spNt">🔒 नहीं, नंबर छिपा रहे</span></label>
+        <p class="hint" id="spNote" style="margin:8px 0 0;font-size:12.5px">बाद में "मेरी दुकान" पेज से कभी भी बदल सकते हैं।</p>
         <div class="err"></div>
         <div class="sum" id="sum"></div>
       </div>
@@ -615,6 +618,7 @@ async function submit(){
   row.category_id=catId;
   if(coords){row.latitude=coords.lat;row.longitude=coords.lng;}
   if($("homeSvc").checked)row.home_service=true;
+  row.show_phone=!($("spN")&&$("spN").checked);   /* दुकानदार की पसंद: नंबर दिखे या छिपे */
   const fail=e=>{setErr(e);btn.disabled=false;btn.textContent=T("submit");sending=false;};
   try{
     /* नया तरीका: pb_register_open — बिना लॉगिन / बिना OTP; दुकान हमेशा Pending; एक मोबाइल = एक दुकान */
@@ -748,7 +752,7 @@ const LXT={
       st_live_p:"✅ Live",st_live_h:"आपकी दुकान Live हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
       st_rm_h:"यह रजिस्ट्रेशन हटा दिया गया है",st_rm_s:"ज़्यादा जानकारी के लिए PataBook से संपर्क करें, या नई दुकान फिर से जोड़ें।",
       ck_h:"रजिस्ट्रेशन का स्टेटस देखें",ck_s:"जिस मोबाइल नंबर से दुकान जोड़ी थी, वह डालें।",ck_b:"स्टेटस देखें",ck_none:"इस नंबर से कोई रजिस्ट्रेशन नहीं मिला।",ck_fail:"अभी स्टेटस नहीं मिल सका। थोड़ी देर बाद कोशिश करें।",
-      g_h:"दुकान जोड़ने से पहले लॉगिन करें",limit2:"इस मोबाइल नंबर से पहले ही एक दुकान जुड़ी है। एक नंबर से सिर्फ 1 दुकान जोड़ सकते हैं।",many:"इस ईमेल से बहुत सारी दुकानें जुड़ चुकी हैं। मदद के लिए PataBook से संपर्क करें।",pub:"🔓 यह नंबर PataBook पर सबको दिखेगा। बाद में \"मेरी दुकान\" पेज से इसे बंद कर सकते हैं।",mine:"मेरी दुकान देखें ›",g_p:"आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।",g_b:"ईमेल से लॉगिन करें →",who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",
+      g_h:"दुकान जोड़ने से पहले लॉगिन करें",limit2:"इस मोबाइल नंबर से पहले ही एक दुकान जुड़ी है। एक नंबर से सिर्फ 1 दुकान जोड़ सकते हैं।",many:"इस ईमेल से बहुत सारी दुकानें जुड़ चुकी हैं। मदद के लिए PataBook से संपर्क करें।",pub:"📞 क्या आपका नंबर ग्राहकों को दिखे?",mine:"मेरी दुकान देखें ›",g_p:"आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।",g_b:"ईमेल से लॉगिन करें →",who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",
       pending:"जाँच (approval) के बाद आपकी दुकान PataBook पर दिखेगी।",
       loc_hint:"दुकान पर हों तो बटन दबाकर location जोड़ें, ताकि ग्राहक सीधे रास्ता देख सकें। हर दुकान जाँच के बाद चालू होती है।"},
   en:{rate:"Too many attempts. Please try again in a little while.",setup:"Registration is not open right now. Please try again later.",autoc:"📍 City picked from your location: {c} (you can change it)",
@@ -763,7 +767,7 @@ const LXT={
       st_live_p:"✅ Live",st_live_h:"Your shop is live! 🎉",st_live_s:"is now visible to everyone on PataBook.",st_see:"See your shop ›",
       st_rm_h:"This registration was removed",st_rm_s:"Contact PataBook for details, or add your shop again.",
       ck_h:"Check registration status",ck_s:"Enter the mobile number you used to add the shop.",ck_b:"Check status",ck_none:"No registration found for this number.",ck_fail:"Could not get the status right now. Please try again shortly.",
-      g_h:"Log in before adding a shop",limit2:"A shop is already added with this mobile number. Only 1 shop is allowed per number.",many:"This email already has many shops. Contact PataBook for help.",pub:"🔓 This number will be visible to everyone on PataBook. You can turn it off later from the \"My Shop\" page.",mine:"See my shop ›",g_p:"We will email you an OTP code. Enter it and you will come right back here.",g_b:"Log in with email →",who:"✅ Logged in as {e}",out:"Log out",
+      g_h:"Log in before adding a shop",limit2:"A shop is already added with this mobile number. Only 1 shop is allowed per number.",many:"This email already has many shops. Contact PataBook for help.",pub:"📞 Should customers see your number?",mine:"See my shop ›",g_p:"We will email you an OTP code. Enter it and you will come right back here.",g_b:"Log in with email →",who:"✅ Logged in as {e}",out:"Log out",
       pending:"Your shop will appear on PataBook after review.",
       loc_hint:"If you are at the shop, tap the button to add its location so customers get direct directions. Every shop goes live after review."}
 };
@@ -780,7 +784,7 @@ async function checkLogin(){
 }
 $("whoOut").onclick=async()=>{await PBA.logout();checkLogin();};
 checkLogin();
-function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()==="en")?"🏠 I visit customers\u2019 homes to provide service (Home Service)":"🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
+function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const en=(PB.lang&&PB.lang()==="en");[["spYt",en?"✅ Yes, show it to everyone (customers can Call / WhatsApp)":"✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)"],["spNt",en?"🔒 No, keep my number hidden":"🔒 नहीं, नंबर छिपा रहे"],["spNote",en?"You can change this anytime from the \u201cMy Shop\u201d page.":"बाद में \"मेरी दुकान\" पेज से कभी भी बदल सकते हैं।"]].forEach(x=>{const e=$(x[0]);if(e)e.textContent=x[1];});const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()==="en")?"🏠 I visit customers\u2019 homes to provide service (Home Service)":"🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
 PB.apply();fixHint();document.title=T("addshop")+" — PataBook";
 PB.mount($("pbLang"));
 PB.onChange(()=>{
