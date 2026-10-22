@@ -565,7 +565,7 @@ $("otpSend").onclick=async()=>{
   const p=ph10();if(!/^[6-9]\d{9}$/.test(p)){otpMsg(otpErr({code:"bad_phone"}),true);return;}
   const b=$("otpSend");b.disabled=true;
   try{const st=await regStatus(p);
-    if(st&&st.status&&st.status!=="none"){b.disabled=false;
+    if(st&&(st.status==="live"||st.status==="pending")){b.disabled=false;
       otpMsg(EN()?"This number is already in use. Please enter another number.":"यह नंबर पहले से इस्तेमाल हो चुका है। दूसरा नंबर डालें।",true);return;}
   }catch(_){/* status न मिले तो भी OTP भेजो; database अंत में फिर जाँचेगा */}
   try{const j=await otpCall("/send",{purpose:"register",phone:p});
@@ -795,8 +795,10 @@ async function checkPhone(ph,quiet){
   try{j=await regStatus(ph);}catch(e){const er=$("ckErr");if(er)er.textContent=LX("ck_fail");else if(!quiet)alert(LX("ck_fail"));return;}
   if(!j||j.status==="none"){const er=$("ckErr");if(er)er.textContent=LX("ck_none");else showCheck(LX("ck_none"));return;}
   const skew=j.now?Date.now()-Date.parse(j.now):0,cr=Date.parse(j.created_at);
-  saveReg({phone:ph,slug:j.slug,name:j.name,created:cr,skew:skew});
-  showStatus({status:j.status,name:j.name,slug:j.slug,created:cr,skew:skew});
+  /* database अब दुकान का नाम/slug नहीं बताता (privacy) — इसी फ़ोन पर सेव नाम/slug इस्तेमाल करो */
+  const old=loadReg()||{},same=old.phone===ph,nm=j.name||(same?old.name:""),sl=j.slug||(same?old.slug:"");
+  saveReg({phone:ph,slug:sl,name:nm,created:cr,skew:skew});
+  showStatus({status:j.status,name:nm,slug:j.status==="live"?sl:"",created:cr,skew:skew});
   if(j.status==="pending")pollStatus(ph);
 }
 function pollStatus(ph){clearInterval(stPoll);stPoll=setInterval(async()=>{
