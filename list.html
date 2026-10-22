@@ -134,6 +134,22 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
       <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <!-- 1: दुकान का नाम -->
+      <div class="step" data-s="phone">
+        <div class="emoji">📞</div>
+        <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
+        <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर call / WhatsApp करेंगे।</p>
+        <input id="phone" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
+        <div class="otpb" id="otpBox">
+          <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
+          <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।</p>
+        </div>
+        <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
+        <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
+        <label class="hsv" for="spN" style="margin-top:8px"><input type="radio" name="showPh" id="spN" value="0"> <span id="spNt">🔒 नहीं, नंबर छिपा रहे</span></label>
+        <p class="hint" id="spNote" style="margin:8px 0 0;font-size:12.5px">बाद में "मेरी दुकान" पेज से कभी भी बदल सकते हैं।</p>
+        <div class="err"></div>
+      </div>
+
       <div class="step" data-s="shop">
         <div class="emoji">🏪</div>
         <h1 data-i="shop_h">आपकी दुकान / बिज़नेस का नाम क्या है?</h1>
@@ -178,26 +194,10 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <div class="cat" id="cat"></div>
         <label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)</span></label>
         <div class="err"></div>
-      </div>
-
-      <!-- 6: मोबाइल + submit -->
-      <div class="step" data-s="phone">
-        <div class="emoji">📞</div>
-        <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
-        <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर call / WhatsApp करेंगे।</p>
-        <input id="phone" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
-        <div class="otpb" id="otpBox">
-          <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
-          <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।</p>
-        </div>
-        <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
-        <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
-        <label class="hsv" for="spN" style="margin-top:8px"><input type="radio" name="showPh" id="spN" value="0"> <span id="spNt">🔒 नहीं, नंबर छिपा रहे</span></label>
-        <p class="hint" id="spNote" style="margin:8px 0 0;font-size:12.5px">बाद में "मेरी दुकान" पेज से कभी भी बदल सकते हैं।</p>
-        <div class="err"></div>
         <div class="sum" id="sum"></div>
       </div>
 
+      <!-- 6: मोबाइल + submit -->
       <div class="btns" id="btns">
         <button type="button" class="btn sec" id="prev" data-i="prev">← पीछे</button>
         <button type="button" class="btn skip" id="skip" style="display:none" data-i="skip">छोड़ें</button>
@@ -495,7 +495,7 @@ function render(){
   $("next").textContent=i===steps.length-1?T("submit"):T("next");
   if(key==="owner"){const n=$("shop").value.trim();$("ownerHint").textContent=n?T("owner_hint_n",{n:n}):T("owner_hint");}
   if(key==="svc"){if(!manual&&!sel)refresh();else showCat();}
-  if(key==="phone")summary();
+  if(i===steps.length-1)summary();
   const inp=steps[i].querySelector("input,textarea");if(inp&&key!=="loc"&&key!=="addr")setTimeout(()=>inp.focus({preventScroll:true}),50);
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -515,7 +515,6 @@ function check(){
   if(key==="svc"&&!categoryIdFor(sel)){setErr(T("e_cat"));openSheet();return false;}
   if(key==="phone"&&!validPhone(phoneClean())){setErr(T("e_phone"));return false;}
   if(key==="phone"&&OTP_URL&&(!regToken||regPhone!==ph10())){setErr(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
-  if(key==="phone"&&!categoryIdFor(sel)){i=steps.findIndex(x=>x.dataset.s==="svc");render();setErr(T("e_cat"));return false;}
   return true;
 }
 
@@ -555,6 +554,10 @@ $("phone").addEventListener("input",()=>{if(regToken&&ph10()!==regPhone)otpReset
 $("otpSend").onclick=async()=>{
   const p=ph10();if(!/^[6-9]\d{9}$/.test(p)){otpMsg(otpErr({code:"bad_phone"}),true);return;}
   const b=$("otpSend");b.disabled=true;
+  try{const st=await regStatus(p);
+    if(st&&st.status&&st.status!=="none"){b.disabled=false;
+      otpMsg((EN()?"A shop is already added with this number":"इस नंबर से पहले से दुकान जुड़ी है")+(st.name?": "+st.name:"")+(EN()?". Use another number or tap “Check status” below.":"। दूसरा नंबर डालें या नीचे “स्टेटस देखें” दबाएँ।"),true);return;}
+  }catch(_){/* status न मिले तो भी OTP भेजो; database अंत में फिर जाँचेगा */}
   try{const j=await otpCall("/send",{purpose:"register",phone:p});
     regPhone="";$("otpCode").disabled=false;$("otpCode").value="";setTimeout(()=>$("otpCode").focus(),50);
     otpMsg(EN()?"OTP sent to +91 "+p+". Enter it above.":"+91 "+p+" पर OTP भेजा गया है। ऊपर डालें।");otpCool(j.resend_after);
