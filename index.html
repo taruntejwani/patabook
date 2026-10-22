@@ -553,5 +553,46 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   requestAnimationFrame(tick);
 })();
 </script>
+<script>
+/* शहर लिखते ही सुझाव: "Jaipur · Rajasthan" (database के शहर + भारत के बड़े शहर) */
+(function(){
+  var inp=document.getElementById("city"),chip=inp&&inp.closest(".locchip");if(!inp||!chip)return;
+  inp.removeAttribute("list");                                  /* browser वाली अपनी list नहीं, हमारी सुंदर list */
+  var BIG="Mumbai|Maharashtra;Pune|Maharashtra;Nagpur|Maharashtra;Nashik|Maharashtra;Aurangabad|Maharashtra;Thane|Maharashtra;Navi Mumbai|Maharashtra;Kolhapur|Maharashtra;Solapur|Maharashtra;Delhi|Delhi;New Delhi|Delhi;Bengaluru|Karnataka;Mysuru|Karnataka;Mangaluru|Karnataka;Hubballi|Karnataka;Belagavi|Karnataka;Hyderabad|Telangana;Warangal|Telangana;Chennai|Tamil Nadu;Coimbatore|Tamil Nadu;Madurai|Tamil Nadu;Tiruchirappalli|Tamil Nadu;Salem|Tamil Nadu;Kolkata|West Bengal;Howrah|West Bengal;Durgapur|West Bengal;Siliguri|West Bengal;Ahmedabad|Gujarat;Surat|Gujarat;Vadodara|Gujarat;Rajkot|Gujarat;Bhavnagar|Gujarat;Jamnagar|Gujarat;Gandhinagar|Gujarat;Junagadh|Gujarat;Anand|Gujarat;Nadiad|Gujarat;Morbi|Gujarat;Mehsana|Gujarat;Navsari|Gujarat;Vapi|Gujarat;Bharuch|Gujarat;Porbandar|Gujarat;Palanpur|Gujarat;Surendranagar|Gujarat;Jaipur|Rajasthan;Jodhpur|Rajasthan;Udaipur|Rajasthan;Kota|Rajasthan;Ajmer|Rajasthan;Bikaner|Rajasthan;Alwar|Rajasthan;Bhilwara|Rajasthan;Barmer|Rajasthan;Jaisalmer|Rajasthan;Lucknow|Uttar Pradesh;Kanpur|Uttar Pradesh;Agra|Uttar Pradesh;Varanasi|Uttar Pradesh;Prayagraj|Uttar Pradesh;Meerut|Uttar Pradesh;Ghaziabad|Uttar Pradesh;Noida|Uttar Pradesh;Bareilly|Uttar Pradesh;Aligarh|Uttar Pradesh;Moradabad|Uttar Pradesh;Gorakhpur|Uttar Pradesh;Jhansi|Uttar Pradesh;Mathura|Uttar Pradesh;Ayodhya|Uttar Pradesh;Bhopal|Madhya Pradesh;Indore|Madhya Pradesh;Gwalior|Madhya Pradesh;Jabalpur|Madhya Pradesh;Ujjain|Madhya Pradesh;Sagar|Madhya Pradesh;Patna|Bihar;Gaya|Bihar;Bhagalpur|Bihar;Muzaffarpur|Bihar;Ranchi|Jharkhand;Jamshedpur|Jharkhand;Dhanbad|Jharkhand;Bokaro|Jharkhand;Raipur|Chhattisgarh;Bhilai|Chhattisgarh;Bilaspur|Chhattisgarh;Bhubaneswar|Odisha;Cuttack|Odisha;Rourkela|Odisha;Puri|Odisha;Visakhapatnam|Andhra Pradesh;Vijayawada|Andhra Pradesh;Guntur|Andhra Pradesh;Tirupati|Andhra Pradesh;Nellore|Andhra Pradesh;Kurnool|Andhra Pradesh;Thiruvananthapuram|Kerala;Kochi|Kerala;Kozhikode|Kerala;Thrissur|Kerala;Kollam|Kerala;Kannur|Kerala;Chandigarh|Chandigarh;Ludhiana|Punjab;Amritsar|Punjab;Jalandhar|Punjab;Patiala|Punjab;Bathinda|Punjab;Mohali|Punjab;Gurugram|Haryana;Faridabad|Haryana;Panipat|Haryana;Ambala|Haryana;Hisar|Haryana;Rohtak|Haryana;Karnal|Haryana;Dehradun|Uttarakhand;Haridwar|Uttarakhand;Rishikesh|Uttarakhand;Haldwani|Uttarakhand;Shimla|Himachal Pradesh;Manali|Himachal Pradesh;Dharamshala|Himachal Pradesh;Srinagar|Jammu and Kashmir;Jammu|Jammu and Kashmir;Leh|Ladakh;Guwahati|Assam;Silchar|Assam;Dibrugarh|Assam;Shillong|Meghalaya;Imphal|Manipur;Agartala|Tripura;Aizawl|Mizoram;Kohima|Nagaland;Itanagar|Arunachal Pradesh;Gangtok|Sikkim;Panaji|Goa;Margao|Goa;Puducherry|Puducherry;Port Blair|Andaman and Nicobar Islands;Daman|Dadra and Nagar Haveli and Daman and Diu;Silvassa|Dadra and Nagar Haveli and Daman and Diu";
+  var L=[],seen={};
+  function add(n,s){n=String(n||"").trim();if(!n)return;var k=n.toLowerCase();if(seen[k]){if(s&&!L[seen[k]-1][1])L[seen[k]-1][1]=s;return;}L.push([n,s||""]);seen[k]=L.length;}
+  var dl=document.getElementById("cityDL");
+  function fromDL(){if(dl)[].forEach.call(dl.options,function(o){add(o.value,/\((.+)\)$/.test(o.label||"")?RegExp.$1:(o.label?"":"Gujarat"));});}
+  fromDL();BIG.split(";").forEach(function(x){var p=x.split("|");add(p[0],p[1]);});
+  fetch("https://kkvbpzysktozghnxplxv.supabase.co/rest/v1/rpc/pb_public_cities",{method:"POST",headers:{apikey:"sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8",Authorization:"Bearer sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8","Content-Type":"application/json"},body:"{}"})
+    .then(function(r){return r.ok?r.json():[];}).then(function(a){(Array.isArray(a)?a:[]).forEach(function(c){c&&add(c.name,c.state);});}).catch(function(){});
+  var st=document.createElement("style");
+  st.textContent=".locchip{position:relative}.csug{position:absolute;left:0;top:calc(100% + 6px);z-index:80;min-width:250px;max-width:86vw;background:#fff;border:1px solid #e4eaf5;border-radius:14px;box-shadow:0 12px 30px rgba(11,47,115,.18);overflow:hidden;display:none}.csug.on{display:block}.csug button{display:flex;width:100%;align-items:center;gap:10px;border:0;background:#fff;text-align:left;padding:11px 14px;font:inherit;font-size:15px;color:#12141c;cursor:pointer;border-bottom:1px solid #f1f3f7}.csug button:last-child{border-bottom:0}.csug button:hover,.csug button.hi{background:#f1f6ff}.csug b{font-weight:700}.csug small{margin-inline-start:auto;color:#5b6475;font-size:12.5px;white-space:nowrap}.csug i{font-style:normal}";
+  document.head.appendChild(st);
+  var box=document.createElement("div");box.className="csug";box.setAttribute("role","listbox");chip.appendChild(box);
+  var cur=[],hi=-1;
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function show(){
+    var q=inp.value.trim().toLowerCase();
+    if(!q){box.className="csug";return;}
+    var a=L.filter(function(c){return c[0].toLowerCase().indexOf(q)===0;}),b=L.filter(function(c){var n=c[0].toLowerCase();return n.indexOf(q)>0;});
+    cur=a.concat(b).slice(0,8);hi=-1;
+    if(!cur.length||(cur.length===1&&cur[0][0].toLowerCase()===q)){box.className="csug";return;}
+    box.innerHTML=cur.map(function(c,i){return '<button type="button" data-i="'+i+'"><i aria-hidden="true">📍</i><b>'+esc(c[0])+'</b>'+(c[1]?'<small>'+esc(c[1])+'</small>':'')+'</button>';}).join("");
+    box.className="csug on";
+  }
+  function pick(i){var c=cur[i];if(!c)return;inp.value=c[0];box.className="csug";inp.dispatchEvent(new Event("change",{bubbles:true}));inp.blur();}
+  inp.addEventListener("input",show);inp.addEventListener("focus",function(){if(inp.value)inp.select();});
+  inp.addEventListener("keydown",function(e){
+    if(!box.classList.contains("on"))return;
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();hi=(hi+(e.key==="ArrowDown"?1:-1)+cur.length)%cur.length;[].forEach.call(box.children,function(x,j){x.classList.toggle("hi",j===hi);});}
+    else if(e.key==="Enter"&&hi>=0){e.preventDefault();pick(hi);}
+    else if(e.key==="Escape"){box.className="csug";}
+  });
+  box.addEventListener("mousedown",function(e){e.preventDefault();});
+  box.addEventListener("click",function(e){var x=e.target.closest("[data-i]");if(x)pick(+x.dataset.i);});
+  document.addEventListener("click",function(e){if(!chip.contains(e.target))box.className="csug";});
+})();
+</script>
 </body>
 </html>
