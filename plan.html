@@ -149,9 +149,9 @@ footer a{color:var(--blue);font-weight:600}
     <div class="card">
       <span class="sample" id="t_sample2">नमूना</span>
       <div class="posters">
-        <div class="pst p1"><div class="body"><small>DIWALI OFFER</small><b>Shree Fashion</b><em>20% OFF</em><span>नई कलेक्शन</span></div><div class="pft"><img src="pin.png" alt="">patabook.in</div></div>
-        <div class="pst p2"><div class="body"><small>SPECIAL MENU</small><b>Annapurna Thali</b><em>₹149</em><span>आज की थाली</span></div><div class="pft"><img src="pin.png" alt="">patabook.in</div></div>
-        <div class="pst p3"><div class="body"><small>CAR WASH</small><b>Sparkle Car Care</b><em>₹299</em><span>फोम वॉश</span></div><div class="pft"><img src="pin.png" alt="">patabook.in</div></div>
+        <div class="pst p1"><div class="body"><small>DIWALI OFFER</small><b>Shree Fashion</b><em>20% OFF</em><span data-hi="नई कलेक्शन" data-en="New Collection">नई कलेक्शन</span></div><div class="pft"><img src="pin.png" alt="">patabook.in</div></div>
+        <div class="pst p2"><div class="body"><small>SPECIAL MENU</small><b>Annapurna Thali</b><em>₹149</em><span data-hi="आज की थाली" data-en="Today’s Thali">आज की थाली</span></div><div class="pft"><img src="pin.png" alt="">patabook.in</div></div>
+        <div class="pst p3"><div class="body"><small>CAR WASH</small><b>Sparkle Car Care</b><em>₹299</em><span data-hi="फोम वॉश" data-en="Foam Wash">फोम वॉश</span></div><div class="pft"><img src="pin.png" alt="">patabook.in</div></div>
       </div>
       <ul class="feat" id="feat"></ul>
       <div class="bizcard">
@@ -228,6 +228,10 @@ function draw(){
   chart();
 }
 PB.mount($("pbLang"));PB.onChange(draw);draw();qr();
+</script>
+<script>
+(function(){function f(){var en=!(window.PB&&PB.lang&&PB.lang()==="hi");document.querySelectorAll("[data-en][data-hi]").forEach(function(e){e.textContent=en?e.getAttribute("data-en"):e.getAttribute("data-hi");});}
+f();if(window.PB&&PB.onChange)PB.onChange(f);})();
 </script>
 </body>
 </html>

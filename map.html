@@ -1473,5 +1473,11 @@ if (window.PB && PB.onChange) PB.onChange(function () { applyTexts(); paintLangB
 };
 if (window.__libReady) window.PBMAIN();
 </script>
+<script>
+/* भाषा बटन: नक्शा load हो या न हो, चुनी भाषा तुरंत दिखे */
+(function(){function paint(){try{var c=PB.lang(),L=(PB.langs||[]).filter(function(x){return x[0]===c;})[0];var t=L?Array.from(L[1]).slice(0,2).join(""):(c==="en"?"En":"हि");
+document.querySelectorAll(".lgt").forEach(function(e){e.textContent=t;});}catch(e){}}
+paint();if(window.PB&&PB.onChange)PB.onChange(paint);})();
+</script>
 </body>
 </html>
