@@ -97,7 +97,9 @@ async function load(){
   u.searchParams.set("select",COLS+",business_code,home_service");
   u.searchParams.set("slug","eq."+slug);u.searchParams.set("limit","1");
   try{
+    u.searchParams.set("select",COLS+",business_code,home_service,logo_url");
     let r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    if(!r.ok){u.searchParams.set("select",COLS+",business_code,home_service");r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* logo column से पहले */
     if(!r.ok){u.searchParams.set("select",COLS+",business_code");r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* sql-06 से पहले */
     if(!r.ok){u.searchParams.set("select",COLS);r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* sql-05 से पहले */
     const rows=await r.json();
@@ -118,7 +120,7 @@ function render(){
   ].filter(r=>r[1]);
   const web=/^https?:\/\//i.test(b.website||"")?b.website:"";
   document.getElementById("app").innerHTML=
-   '<section class="card"><h1>'+esc(b.name)+'</h1><div class="tags">'+
+   '<section class="card"><div style="display:flex;align-items:center;gap:14px">'+(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" style="flex:none;width:64px;height:64px;border-radius:16px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5">':'')+'<h1 style="min-width:0">'+esc(b.name)+'</h1></div><div class="tags">'+
      (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'</span>':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()==="en")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+

@@ -50,6 +50,15 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .row2{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .row2 a{flex:1;text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:700;font-size:14px;color:var(--blue);background:#fff}
 .err{color:#b42318;font-size:13px;margin-top:8px;min-height:1px}
+.lg{display:flex;align-items:center;gap:12px;margin-top:12px;border:1px dashed #c8d6ee;border-radius:14px;padding:10px}
+.lg .pv{flex:none;width:56px;height:56px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:#eef3fc;font-size:22px;font-weight:800;color:var(--navy)}
+.lg .pv img{width:100%;height:100%;object-fit:cover;background:#fff}
+.lg .lt{flex:1;min-width:0;font-size:13px;color:var(--muted);line-height:1.4}
+.lg .lt b{display:block;color:var(--ink);font-size:14px}
+.lg .lb{display:flex;flex-direction:column;gap:6px;flex:none}
+.lg .lb button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:700;color:var(--blue)}
+.lg .lb button.rm{color:#b42318}
+.lg .lb button:disabled{opacity:.6}
 
 .gate,.empty{text-align:center;padding:26px 18px}
 .gate .big,.empty .big{font-size:42px}
@@ -121,6 +130,62 @@ function phoneBlock(b,i){
     '<span class="tx"><b>'+esc(tx(on?"on_b":"off_b"))+'</b><small>'+esc(b.is_active?tx(on?"on_s":"off_s"):tx("pend_s"))+(b.phone?' · '+esc(b.phone):'')+'</small></span>'+
     '<button type="button" class="sw" role="switch" aria-checked="'+on+'" aria-label="'+esc(tx("sw_l"))+'" data-i="'+i+'"></button></div><div class="err" id="er'+i+'"></div>';
 }
+
+/* ---------- दुकान का Logo ---------- */
+const LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+let LOGOS={},LOGO_OK=true;
+function logoBlock(b,i){
+  if(!LOGO_OK)return "";
+  const u=LOGOS[b.slug]||"",en=L()==="en";
+  const ini=String(b.name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  return '<div class="lg"><div class="pv">'+(LOGO_RX.test(u)?'<img src="'+esc(u)+'" alt="">':esc(ini))+'</div>'+
+    '<div class="lt"><b>'+(en?"Shop logo":"दुकान का Logo")+'</b>'+(en?"Shows on your shop card and page. Square photo works best.":"आपकी दुकान के card और page पर दिखेगा। चौकोर फोटो सबसे अच्छी।")+'<div class="err" id="le'+i+'"></div></div>'+
+    '<div class="lb"><button type="button" data-lg="up" data-i="'+i+'">🖼️ '+(u?(en?"Change":"बदलें"):(en?"Add logo":"Logo लगाएँ"))+'</button>'+
+    (u?'<button type="button" class="rm" data-lg="rm" data-i="'+i+'">'+(en?"Remove":"हटाएँ")+'</button>':'')+
+    '<input type="file" accept="image/*" hidden id="lf'+i+'"></div></div>';
+}
+async function loadLogos(){
+  if(!ROWS||!ROWS.length)return;
+  const slugs=ROWS.map(b=>'"'+String(b.slug).replace(/"/g,'')+'"').join(",");
+  try{
+    const r=await fetch(SB+"/rest/v1/businesses?select=slug,logo_url&slug=in.("+encodeURIComponent(slugs)+")",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    if(!r.ok){LOGO_OK=false;return;}            /* logo column अभी नहीं बना */
+    (await r.json()).forEach(x=>{LOGOS[x.slug]=x.logo_url||"";});
+  }catch(e){LOGO_OK=false;}
+}
+function squareImage(file){
+  return new Promise((res,rej)=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const S=320,c=document.createElement("canvas");c.width=S;c.height=S;
+      const x=c.getContext("2d"),m=Math.min(img.width,img.height);
+      x.fillStyle="#fff";x.fillRect(0,0,S,S);
+      x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S);
+      URL.revokeObjectURL(url);
+      c.toBlob(bl=>{
+        if(bl&&bl.type==="image/webp")return res(bl);
+        c.toBlob(b2=>b2?res(b2):rej(new Error("img")),"image/jpeg",0.85);
+      },"image/webp",0.85);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};
+    img.src=url;
+  });
+}
+async function uploadLogo(i,file){
+  const b=ROWS[i],en=L()==="en",er=$("le"+i);er.textContent="";
+  if(!/^image\//.test(file.type)){er.textContent=en?"Please choose a photo.":"कृपया फोटो चुनें।";return;}
+  er.style.color="var(--muted)";er.textContent=en?"Uploading…":"Upload हो रहा है…";
+  try{
+    ME=await PBA.session();if(!ME)throw new Error("login");
+    const blob=await squareImage(file),ext=blob.type==="image/webp"?"webp":"jpg";
+    const path=encodeURIComponent(b.slug)+"/logo-"+Date.now()+"."+ext;
+    const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
+    if(!up.ok)throw new Error("upload "+up.status);
+    const pub=SB+"/storage/v1/object/public/shop-logos/"+path;
+    await rpc("pb_set_logo",{p_slug:b.slug,p_url:pub});
+    LOGOS[b.slug]=pub;draw();
+  }catch(x){er.style.color="";er.textContent=en?"Could not upload the logo. Try again.":"Logo upload नहीं हो सका। दोबारा कोशिश करें।";}
+}
 function draw(){
   PB.apply();
   ["h1","sub","gH","gP","gB","pbT","pbS"].forEach(k=>$(k).textContent=tx(k));$("backT").textContent=tx("back");
@@ -137,7 +202,7 @@ function draw(){
   list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    phoneBlock(b,i)+
+    phoneBlock(b,i)+logoBlock(b,i)+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
@@ -150,11 +215,22 @@ $("list").addEventListener("click",async e=>{
   try{const v=await rpc("pb_set_show_phone",{p_slug:b.slug,p_on:want});b.show_phone=(v===false)?false:want;draw();}
   catch(x){sw.disabled=false;$("er"+i).textContent=tx("e_sw");}
 });
+$("list").addEventListener("click",async e=>{
+  const bt=e.target.closest("[data-lg]");if(!bt)return;
+  const i=+bt.dataset.i,b=ROWS[i];
+  if(bt.dataset.lg==="up"){const f=$("lf"+i);f.onchange=()=>{if(f.files&&f.files[0])uploadLogo(i,f.files[0]);};f.click();return;}
+  if(bt.dataset.lg==="rm"){
+    if(!confirm(L()==="en"?"Remove this logo?":"यह Logo हटाएँ?"))return;
+    bt.disabled=true;
+    try{await rpc("pb_set_logo",{p_slug:b.slug,p_url:null});LOGOS[b.slug]="";draw();}
+    catch(x){bt.disabled=false;$("le"+i).textContent=L()==="en"?"Could not remove. Try again.":"हटाया नहीं जा सका।";}
+  }
+});
 $("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
   ME=await PBA.session();draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";}
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();}
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";
