@@ -106,7 +106,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();loadContact();
+    render();loadContact();loadVac();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -133,14 +133,31 @@ function render(){
    (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')+
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
    '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div></section>'+
+   '<section class="card" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
    '<button type="button" id="cardBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px;margin:0 0 12px;font:inherit;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,#25d366,#1a73e8);box-shadow:0 6px 16px rgba(26,115,232,.25)">📤 '+((PB.lang&&PB.lang()==="en")?"Share this shop":"यह दुकान शेयर करें")+'</button>'+
    '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()==="en")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()==="en")?"Terms":"नियम")+'</a></p>'+
+   (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
    '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>';
-  drawContact();
+  drawContact();drawVac();
   const cbtn=document.getElementById("cardBtn");
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
   if(cbtn)cbtn.onclick=()=>{if(!window.PBCard)return;
     PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
+}
+/* इस दुकान की चालू vacancies (₹499 plan वाली) */
+let VAC=null;
+async function loadVac(){
+  if(!(window.PB_SITE&&PB_SITE.jobs))return;
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_public_jobs",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_city:null,p_q:null,p_slug:slug})});
+    VAC=r.ok?await r.json():[];}catch(e){VAC=[];}
+  drawVac();
+}
+function drawVac(){
+  const sec=document.getElementById("vac"),box=document.getElementById("vbox");if(!sec||!box)return;
+  if(!VAC||!VAC.length){sec.hidden=true;return;}
+  const en=PB.lang&&PB.lang()==="en";sec.hidden=false;
+  box.innerHTML=VAC.map(j=>'<div style="border:1px solid #e4eaf5;border-radius:12px;padding:10px 12px;margin-top:8px"><b style="color:#0b2f73">'+esc(j.title)+'</b><div style="font-size:13px;color:#5b6475;margin-top:3px;line-height:1.5">'+[j.salary&&("💰 "+esc(j.salary)),j.timing&&("🕘 "+esc(j.timing)),"👥 "+(j.openings||1)].filter(Boolean).join(" · ")+'</div></div>').join("")+
+    '<a href="jobs.html?city=&q='+encodeURIComponent(B.name||"")+'#job-'+VAC[0].id+'" style="display:block;text-align:center;margin-top:10px;font-weight:700;color:#1a73e8;text-decoration:none">'+(en?"Apply / contact on the Jobs page ›":"नौकरी पेज पर देखें / संपर्क करें ›")+'</a>';
 }
 function lockHTML(){
   const go=esc(PBA.loginUrl("business.html?slug="+encodeURIComponent(slug)));

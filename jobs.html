@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="PataBook नौकरी — अपने शहर की दुकानों में खाली नौकरियाँ (Helper, Driver, Salesman…) देखें और सीधे दुकान से बात करें। Local shop jobs in your city.">
+<title>💼 नौकरी / Jobs — PataBook</title>
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<script src="i18n.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#e8f1ff 0%,#fff 38%);color:#12141c;min-height:100vh}
+.wrap{max-width:720px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.back{border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:#0b2f73;text-decoration:none;white-space:nowrap}
+.brand{font-weight:800;font-size:18px;color:#0b2f73;flex:1;text-decoration:none}
+#pbLang{flex:none}
+h1{font-size:22px;color:#0b2f73;margin:6px 0 4px}
+.sub{color:#5b6475;font-size:14px;margin:0 0 12px;line-height:1.55}
+.warn{background:#fff4e5;border:1px solid #ffd8a8;color:#7a3b00;border-radius:14px;padding:10px 12px;font-size:13.5px;line-height:1.55;font-weight:600;margin-bottom:12px}
+.bar{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:10px}
+.bar input{border:2px solid #dfe1e5;border-radius:12px;padding:11px 12px;font-size:15px;font-family:inherit;min-width:0;outline:0;background:#fff}
+.bar input:focus{border-color:#1a73e8}
+.bar button{border:0;border-radius:12px;background:#1a73e8;color:#fff;font-weight:700;padding:0 16px;font-size:15px;font-family:inherit;cursor:pointer}
+@media(max-width:480px){.bar{grid-template-columns:1fr 1fr}.bar button{grid-column:1/-1;padding:11px}}
+.cnt{font-size:13px;color:#5b6475;margin:4px 2px 8px}
+.job{background:#fff;border:1px solid #e4eaf5;border-radius:18px;padding:14px 16px;margin-bottom:10px;box-shadow:0 4px 14px rgba(26,115,232,.06)}
+.job h3{margin:0;font-size:17.5px;color:#0b2f73}
+.job .shop{font-weight:700;margin-top:4px;font-size:14.5px}.job .shop a{color:#174ea6;text-decoration:none}
+.job .m{font-size:13.5px;color:#3c4043;margin-top:6px;line-height:1.6}
+.job .d{font-size:13.5px;color:#5b6475;margin-top:6px;line-height:1.55;white-space:pre-line}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.acts a,.acts button{flex:1;min-width:120px;text-align:center;border:0;border-radius:12px;padding:10px;font-weight:700;font-size:14.5px;text-decoration:none;cursor:pointer;font-family:inherit}
+.c{background:#1a73e8;color:#fff}.w{background:#25d366;color:#fff}.v{background:#eef2fb;color:#174ea6}
+.empty{text-align:center;color:#5b6475;padding:30px 10px;line-height:1.6}
+.empty a{color:#1a73e8;font-weight:700}
+.sk{position:fixed;inset:0;background:#0007;display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.sheet{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 18px 26px}
+.sheet h2{margin:0 0 6px;color:#0b2f73;font-size:19px}
+.sheet input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:13px;font-size:17px;font-family:inherit;margin-top:10px;outline:0}
+.sheet input:focus{border-color:#1a73e8}
+.sheet .btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;background:#1a73e8;color:#fff;margin-top:12px;font-family:inherit;cursor:pointer}
+.sheet .btn.sec{background:#eef2fb;color:#174ea6}
+.err{color:#c5221f;font-size:14px;margin-top:8px;min-height:18px}
+.left{font-size:12.5px;color:#137333;font-weight:700;margin-top:6px}
+.owner{display:block;text-align:center;margin:18px 0 0;color:#174ea6;font-weight:700;text-decoration:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><a class="back" href="index.html" id="back">←</a><a class="brand" href="index.html">PataBook</a><span id="pbLang"></span></div>
+ <h1 id="h1"></h1>
+ <p class="sub" id="sub"></p>
+ <div class="warn" id="warn"></div>
+ <form class="bar" id="f">
+  <input id="city" autocomplete="off">
+  <input id="q" type="search">
+  <button id="go"></button>
+ </form>
+ <div class="cnt" id="cnt"></div>
+ <div id="list"></div>
+ <a class="owner" href="search.html" id="ownerLink"></a>
+</div>
+
+<div class="sk" id="sk" hidden>
+ <div class="sheet">
+  <h2 id="skH"></h2>
+  <p class="sub" id="skP"></p>
+  <div id="sk1">
+   <input id="sph" type="tel" inputmode="numeric" maxlength="14" placeholder="98765 43210">
+   <button class="btn" id="sks"></button>
+  </div>
+  <div id="sk2" hidden>
+   <p class="sub" id="skSent"></p>
+   <input id="skc" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" style="letter-spacing:.3em;text-align:center;font-weight:700">
+   <button class="btn" id="skv"></button>
+  </div>
+  <div class="err" id="ske"></div>
+  <button class="btn sec" id="skx"></button>
+ </div>
+</div>
+<script>
+(function(){
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id);
+let EN=false;try{EN=localStorage.getItem("pb-lang")==="en";}catch(e){}
+const T=(hi,en)=>EN?en:hi;
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SK="pb-seek";
+function seekTok(){try{const o=JSON.parse(localStorage.getItem(SK)||"null");return o&&o.exp>Date.now()?o.t:"";}catch(e){return "";}}
+function setSeek(t){try{if(t)localStorage.setItem(SK,JSON.stringify({t:t,exp:Date.now()+29*864e5}));else localStorage.removeItem(SK);}catch(e){}}
+async function rpc(fn,args){
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok)throw new Error((j&&(j.message||j.msg))||("HTTP "+r.status));
+  return j;
+}
+function ago(s){const d=(Date.now()-new Date(s))/864e5;if(d<1)return T("आज","today");if(d<2)return T("कल","yesterday");return T(Math.floor(d)+" दिन पहले",Math.floor(d)+" days ago");}
+
+$("back").textContent=T("← होम","← Home");
+$("h1").textContent=T("💼 नौकरी — दुकानों में खाली जगह","💼 Jobs — vacancies at local shops");
+$("sub").textContent=T("अपने शहर की दुकानों में कौन-सी नौकरी खाली है, देखें और सीधे दुकान से बात करें।","See which local shops are hiring and talk to the shop directly.");
+$("warn").textContent=T("⚠️ PataBook और कोई भी सही दुकानदार नौकरी के लिए कभी पैसे नहीं माँगता। कोई “फीस / रजिस्ट्रेशन” के नाम पर पैसे माँगे तो न दें और Contact पेज पर शिकायत करें।","⚠️ PataBook and genuine shopkeepers never ask for money for a job. If anyone asks for a “fee / registration”, don’t pay and report it on the Contact page.");
+$("city").placeholder=T("शहर (जैसे Gandhidham)","City (e.g. Gandhidham)");$("q").placeholder=T("काम (जैसे Helper, Driver)","Work (e.g. Helper, Driver)");
+$("go").textContent=T("खोजें","Search");
+$("ownerLink").textContent=T("🏪 दुकानदार हैं? अपनी दुकान खोलकर “💼 Vacancy” दबाएँ →","🏪 Shop owner? Open your shop page and tap “💼 Vacancy” →");
+$("skH").textContent=T("📱 मोबाइल नंबर verify करें","📱 Verify your mobile number");
+$("skP").textContent=T("दुकानदार से बात करने के लिए एक बार OTP से अपना नंबर verify करें (30 दिन चलेगा)। आप रोज़ ज़्यादा से ज़्यादा 5 दुकानों से संपर्क कर सकते हैं।","Verify your number once with OTP to contact shops (valid 30 days). You can contact up to 5 shops a day.");
+$("sks").textContent=T("OTP भेजें","Send OTP");$("skv").textContent=T("Verify करें","Verify");$("skx").textContent=T("बंद करें","Close");
+
+let city="";try{city=localStorage.getItem("pb-city")||"";}catch(e){}
+if(!city)city=(window.PB_SITE&&PB_SITE.city||"").split(",")[0].trim();
+const qs=new URLSearchParams(location.search);if(qs.has("city"))city=qs.get("city");
+$("city").value=city;$("q").value=qs.get("q")||"";
+let JOBS=[],used=[];
+async function search(){
+  $("cnt").textContent=T("लोड हो रहा है…","Loading…");$("list").innerHTML="";
+  try{JOBS=await rpc("pb_public_jobs",{p_city:$("city").value.trim()||null,p_q:$("q").value.trim()||null,p_slug:null})||[];}
+  catch(e){$("cnt").textContent=T("जानकारी नहीं मिल सकी। थोड़ी देर बाद कोशिश करें।","Could not load. Please try later.");return;}
+  $("cnt").textContent=JOBS.length?T(JOBS.length+(JOBS.length===1?" नौकरी":" नौकरियाँ"),JOBS.length+(JOBS.length===1?" job":" jobs")):"";
+  if(!JOBS.length){$("list").innerHTML='<div class="empty">'+T("अभी यहाँ कोई vacancy नहीं है।<br>दूसरा शहर या काम खोजकर देखें।","No vacancies here right now.<br>Try another city or work.")+'</div>';return;}
+  render();
+}
+function render(){
+  $("list").innerHTML=JOBS.map(j=>'<div class="job" id="job-'+j.id+'"><h3>'+esc(j.title)+'</h3>'+
+    '<div class="shop">🏪 <a href="business.html?slug='+encodeURIComponent(j.slug)+'">'+esc(j.shop)+'</a></div>'+
+    '<div class="m">'+[j.salary&&("💰 "+esc(j.salary)),j.timing&&("🕘 "+esc(j.timing)),"👥 "+T(j.openings+" लोग",j.openings+" people"),"📍 "+esc([j.address,j.city].filter(Boolean).join(", ")),"🗓 "+ago(j.created_at)].filter(Boolean).join("<br>")+'</div>'+
+    (j.details?'<div class="d">'+esc(j.details)+'</div>':'')+
+    '<div class="acts" id="a-'+j.id+'">'+(j.has_phone?'<button class="c" data-c="'+j.id+'">📞 '+T("दुकान से बात करें","Contact shop")+'</button>':'')+
+    '<a class="v" href="business.html?slug='+encodeURIComponent(j.slug)+'">'+T("दुकान देखें","View shop")+'</a></div></div>').join("");
+  if(location.hash){const el=document.querySelector(location.hash);if(el)el.scrollIntoView();}
+}
+$("f").onsubmit=e=>{e.preventDefault();try{if($("city").value.trim())localStorage.setItem("pb-city",$("city").value.trim());}catch(_){}search();};
+
+/* ---- संपर्क: OTP verified, रोज़ 5 ---- */
+let pendingJob=null;
+async function contact(id){
+  const t=seekTok();if(!t){pendingJob=id;openSheet();return;}
+  const box=$("a-"+id);
+  try{const r=await rpc("pb_job_contact",{p_token:t,p_job_id:id});
+    const ph=r.phone,wa=r.whatsapp||ph;
+    box.innerHTML='<a class="c" href="tel:+91'+ph+'">📞 Call +91 '+ph+'</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+wa+'?text='+encodeURIComponent(T("नमस्ते, PataBook पर आपकी vacancy देखी — ","Hello, I saw your vacancy on PataBook — ")+(JOBS.find(x=>x.id===id)||{}).title)+'">💬 WhatsApp</a>'+
+      '<div class="left" style="flex-basis:100%">'+T("आज "+r.left+" दुकानों से और संपर्क कर सकते हैं।","You can contact "+r.left+" more shops today.")+'</div>';
+  }catch(e){
+    if(/login required/i.test(e.message)){setSeek("");pendingJob=id;openSheet();return;}
+    alert(/daily limit/i.test(e.message)?T("आज के 5 संपर्क पूरे हो गए। कल फिर कोशिश करें।","You have used today’s 5 contacts. Try again tomorrow."):/no phone/i.test(e.message)?T("इस दुकान ने नंबर छिपा रखा है — दुकान पर जाकर मिलें।","This shop keeps its number hidden — please visit the shop."):T("यह vacancy अब उपलब्ध नहीं है।","This vacancy is no longer available."));
+  }
+}
+$("list").onclick=e=>{const b=e.target.closest("[data-c]");if(b)contact(+b.dataset.c);};
+function openSheet(){$("sk").hidden=false;$("sk1").hidden=false;$("sk2").hidden=true;$("ske").textContent="";setTimeout(()=>$("sph").focus(),50);}
+$("skx").onclick=()=>{$("sk").hidden=true;pendingJob=null;};
+function ph10(){let d=$("sph").value.replace(/\D/g,"");if(d.length===12&&d.startsWith("91"))d=d.slice(2);if(d.length===11&&d.startsWith("0"))d=d.slice(1);return /^[6-9]\d{9}$/.test(d)?d:"";}
+function otpErr(e){const c=e&&e.code;
+  if(c==="resend_too_soon")return T((e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।","Request again after "+(e.retry_after||60)+" seconds.");
+  if(c==="rate_limited_mobile")return T("इस नंबर पर आज के OTP पूरे हो गए।","Today's OTP limit for this number is used up.");
+  if(c==="rate_limited_ip")return T("बहुत ज़्यादा कोशिशें हुईं। बाद में कोशिश करें।","Too many attempts. Try later.");
+  if(c==="invalid_otp")return T("OTP गलत है।","Wrong OTP.");
+  if(c==="captcha_failed"||c==="captcha_required")return T("“मैं रोबोट नहीं हूँ” जाँच पूरी नहीं हुई। पेज रीफ़्रेश करें।","The robot check did not complete. Refresh the page.");
+  if(c==="otp_expired"||c==="otp_expired_or_missing"||c==="too_many_attempts")return T("नया OTP मँगाएँ।","Request a new OTP.");
+  return T("कुछ गड़बड़ हुई। फिर कोशिश करें।","Something went wrong. Try again.");}
+$("sks").onclick=async()=>{const p=ph10();if(!p){$("ske").textContent=T("सही 10 अंकों का मोबाइल नंबर लिखें।","Enter a correct 10-digit mobile number.");return;}
+  $("sks").disabled=true;$("ske").textContent="";
+  try{await PBA.otp("/send",{purpose:"seeker",phone:p});$("sk1").hidden=true;$("sk2").hidden=false;$("skSent").textContent=T("+91 "+p+" पर OTP भेजा गया है।","OTP sent to +91 "+p+".");setTimeout(()=>$("skc").focus(),50);}
+  catch(e){$("ske").textContent=otpErr(e);}
+  $("sks").disabled=false;};
+async function verify(){const c=$("skc").value.replace(/\D/g,"");if(c.length!==6)return;
+  $("skv").disabled=true;$("ske").textContent="";
+  try{const j=await PBA.otp("/verify",{purpose:"seeker",phone:ph10(),code:c});setSeek(j.seeker_token);$("sk").hidden=true;if(pendingJob)contact(pendingJob);pendingJob=null;}
+  catch(e){$("ske").textContent=otpErr(e);$("skc").value="";}
+  $("skv").disabled=false;}
+$("skv").onclick=verify;$("skc").addEventListener("input",()=>{const c=$("skc").value.replace(/\D/g,"");$("skc").value=c;if(c.length===6)verify();});
+
+try{PB.mount($("pbLang"));PB.onChange(()=>location.reload());}catch(e){}
+search();
+})();
+</script>
+</body>
+</html>

@@ -20,6 +20,9 @@ window.PB_SITE = {
   otpUrl: 'https://patabook-admin-otp-staging.tejwani512.workers.dev',
 
   /* "मैं रोबोट नहीं हूँ" जाँच (Cloudflare Turnstile) की Site Key — यह public होती है। Secret Key सिर्फ Worker में। */
-  turnstileKey: '0x4AAAAAAFh2ET1CgatdIOGP'
+  turnstileKey: '0x4AAAAAAFh2ET1CgatdIOGP',
+
+  /* 💼 Vacancy / नौकरी (₹499 plan). Database SQL + Razorpay keys लगने के बाद ही true करें। */
+  jobs: false
 
 };

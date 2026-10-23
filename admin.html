@@ -149,6 +149,12 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="ctTabs"><button data-c="new" class="on">🟡 नए</button><button data-c="active">✅ चालू</button><button data-c="all">सभी</button></div>
     <div id="ctList"></div>
   </div>
+  <div id="jobv" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>💼 Vacancy / नौकरी</h2><button class="xl" id="jPlan">➕ Plan दें</button></div>
+    <div class="mtabs" id="jTabs"><button data-j="jobs" class="on">💼 Vacancies</button><button data-j="pay">💳 Payments</button></div>
+    <div id="jBody"></div>
+  </div>
   <div class="md" id="md" hidden><div class="bx" id="mdBox"></div></div>
   <div id="panel" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
@@ -351,7 +357,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -387,7 +393,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['live', '✅', '#e7f8ee', 'Live दुकानें', n(c.live), 'वेबसाइट पर दिख रहीं', 0],
       ['cats', '🗂', '#f1ebfb', 'Categories', n(c.cat_main), (c.cat_all != null ? 'main · कुल ' + c.cat_all + ' काम' : 'main categories'), 0],
       ['traffic', '📊', '#e6f6f4', 'Traffic (आज के लोग)', n(c.uv_today), (c.live_now != null ? '🟢 अभी ' + c.live_now + ' लोग साइट पर' : 'sql-11 चलाएँ'), 0],
-      ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए Approve करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0]
+      ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए Approve करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0],
+      ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', '₹499', 'Vacancies और payments', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
@@ -402,6 +409,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'cats') return showCats();
     if (t === 'traffic') return showStats();
     if (t === 'cities') return showCities();
+    if (t === 'jobs') return showJobs();
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
@@ -590,6 +598,47 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var CT = [], CTF = 'new';
   $('ctTabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; CTF = b.dataset.c; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawCities(); };
   function showCities() { view('cityv'); loadCities(); }
+  /* ---- Vacancy / नौकरी (₹499 plan) ---- */
+  var JTAB = 'jobs', JDATA = null;
+  function showJobs() { view('jobv'); loadJobs(); }
+  async function loadJobs() {
+    $('jBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    try { JDATA = await rpc('pb_admin_jobs', {}); drawJobs(); }
+    catch (e) { $('jBody').innerHTML = '<div class="msg"><b>Vacancy वाला हिस्सा अभी चालू नहीं है</b><p>Supabase में sql-09-jobs-vacancy.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+  }
+  function drawJobs() {
+    var d = JDATA || {}, now = new Date();
+    if (JTAB === 'pay') {
+      var P = d.payments || [], tot = P.filter(function (p) { return p.status === 'paid'; }).reduce(function (a, p) { return a + p.amount; }, 0);
+      $('jBody').innerHTML = '<p class="cnt">कुल मिले: ₹' + (tot / 100).toLocaleString('en-IN') + ' · ' + P.length + ' payments</p>' + (P.length ? P.map(function (p) {
+        return '<div class="cty"><h3>' + esc(p.shop) + ' <span class="bid">' + (p.status === 'paid' ? '✅ Paid' : '⏳ अधूरा') + '</span></h3><p class="meta">₹' + (p.amount / 100) + ' · ' + fmtD(p.paid_at || p.created_at) + (p.payment_id ? ' · ' + esc(p.payment_id) : '') + '</p></div>';
+      }).join('') : '<p class="cnt">अभी कोई payment नहीं</p>');
+      return;
+    }
+    var J = d.jobs || [];
+    $('jBody').innerHTML = J.length ? J.map(function (j) {
+      var planOn = j.plan_until && new Date(j.plan_until) > now, live = j.status === 'live' && new Date(j.expires_at) > now && planOn;
+      return '<div class="cty"><h3>' + esc(j.title) + ' <span class="bid">' + (live ? '✅ दिख रही' : j.status === 'hidden' ? '🙈 छिपाई' : '⏸ बंद') + '</span></h3>' +
+        '<p class="meta">🏪 <a href="business.html?slug=' + encodeURIComponent(j.slug) + '" target="_blank">' + esc(j.shop) + '</a> · ' + [j.salary, j.timing].filter(Boolean).map(esc).join(' · ') + '<br>Plan: ' + (planOn ? fmtD(j.plan_until) + ' तक' : 'खत्म') + ' · डाली: ' + fmtD(j.created_at) + '</p>' +
+        (j.details ? '<p class="meta">' + esc(j.details) + '</p>' : '') +
+        '<div class="acts">' + (j.status === 'hidden' ? '<button data-ja="show" data-id="' + j.id + '">👁 दिखाएँ</button>' : '<button data-ja="hide" data-id="' + j.id + '">🙈 छिपाएँ</button>') +
+        '<button class="del" data-ja="delete" data-id="' + j.id + '">🗑 हटाएँ</button></div></div>';
+    }).join('') : '<p class="cnt">अभी कोई vacancy नहीं</p>';
+  }
+  $('jTabs').onclick = function (e) { var b = e.target.closest('[data-j]'); if (!b) return; JTAB = b.dataset.j; $('jTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawJobs(); };
+  $('jBody').onclick = async function (e) {
+    var b = e.target.closest('[data-ja]'); if (!b) return;
+    if (b.dataset.ja === 'delete' && !confirm('यह vacancy हमेशा के लिए हटाएँ?')) return;
+    b.disabled = true;
+    try { await rpc('pb_admin_job_set', { p_id: +b.dataset.id, p_action: b.dataset.ja }); } catch (x) { alert('गलती: ' + x.message); }
+    loadJobs();
+  };
+  $('jPlan').onclick = async function () {
+    var sl = prompt('दुकान का slug (दुकान के link में ?slug= के बाद वाला हिस्सा):'); if (!sl) return;
+    var dd = prompt('कितने दिन का plan दें? (जैसे 30; हटाने के लिए -30)', '30'); if (!dd) return;
+    try { var u = await rpc('pb_admin_plan_add', { p_slug: sl.trim().toLowerCase(), p_days: parseInt(dd, 10) }); alert('✅ Plan अब ' + fmtD(u) + ' तक'); loadJobs(); }
+    catch (x) { alert('गलती: ' + x.message); }
+  };
   async function loadCities() {
     $('ctList').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
     try { CT = await rpc('pb_admin_cities', {}) || []; }

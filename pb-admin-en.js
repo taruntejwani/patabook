@@ -6,6 +6,27 @@
   if (!en) return;
   document.documentElement.lang = 'en';
   var D = {
+    'दुकान का slug (दुकान के link में ?slug= के बाद वाला हिस्सा):': 'Shop slug (the part after ?slug= in the shop link):',
+    'कितने दिन का plan दें? (जैसे 30; हटाने के लिए -30)': 'Give a plan for how many days? (e.g. 30; -30 to remove)',
+    'Supabase में sql-09-jobs-vacancy.sql चलाएँ।': 'Run sql-09-jobs-vacancy.sql in Supabase.',
+    'Vacancy वाला हिस्सा अभी चालू नहीं है': 'The vacancy section is not on yet',
+    'यह vacancy हमेशा के लिए हटाएँ?': 'Delete this vacancy forever?',
+    'अभी कोई payment नहीं': 'No payments yet',
+    'अभी कोई vacancy नहीं': 'No vacancies yet',
+    'Vacancies और payments': 'Vacancies and payments',
+    'Vacancy / नौकरी': 'Vacancy / Jobs',
+    '✅ Plan अब': '✅ Plan now till',
+    '➕ Plan दें': '➕ Give plan',
+    '✅ दिख रही': '✅ Live',
+    '🙈 छिपाएँ': '🙈 Hide',
+    '👁 दिखाएँ': '👁 Show',
+    '🙈 छिपाई': '🙈 Hidden',
+    'कुल मिले:': 'Total received:',
+    '⏳ अधूरा': '⏳ Incomplete',
+    '⏸ बंद': '⏸ Off',
+    'डाली:': 'Posted:',
+    'खत्म': 'ended',
+    ' तक': '',
     /* लंबे वाक्य पहले */
     'दुकानदार भारत का कोई भी शहर / गाँव लिख सकते हैं। नया नाम आते ही वह यहाँ': 'Shopkeepers can type any city / village in India. A new name shows up here as',
     'बनकर दिखता है — 3 अक्षर का कोड डालकर Approve करें': '— approve it with a 3-letter code',

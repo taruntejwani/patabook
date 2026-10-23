@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Vacancy — PataBook</title>
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<script src="i18n.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#e8f1ff 0%,#fff 42%);color:#12141c;min-height:100vh}
+.wrap{max-width:560px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.back{border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:#0b2f73;text-decoration:none;white-space:nowrap}
+.brand{font-weight:800;font-size:18px;color:#0b2f73;flex:1}
+#pbLang{flex:none}
+.card{background:#fff;border:1px solid #e4eaf5;border-radius:20px;padding:20px 18px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
+h1{font-size:21px;color:#0b2f73;margin:0 0 6px;line-height:1.35}
+h2{font-size:17px;color:#0b2f73;margin:0 0 10px}
+.sub{color:#5b6475;font-size:14px;line-height:1.6;margin:0 0 12px}
+.lbl{display:block;font-size:13px;font-weight:600;margin:12px 0 6px;color:#3c4043}
+input,textarea{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px 14px;font-size:16px;outline:0;font-family:inherit;background:#fff}
+textarea{min-height:80px;resize:vertical}
+input:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
+#code{letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-size:16.5px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:14px;font-family:inherit;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.6}
+.btn.sec{background:#eef2fb;color:#174ea6}
+.btn.pay{background:linear-gradient(90deg,#12a150,#1a73e8)}
+.err{color:#c5221f;font-size:14px;margin-top:10px;min-height:18px;line-height:1.5}
+.plan{border-radius:16px;padding:14px;font-weight:700;line-height:1.6}
+.plan.on{background:#e6f4ea;color:#137333}.plan.off{background:#fff4e5;color:#7a3b00;border:1px solid #ffd8a8}
+.price{font-size:30px;font-weight:800;color:#0b2f73}.price small{font-size:14px;color:#5b6475;font-weight:600}
+.feat{margin:8px 0 0;padding-left:20px;color:#3c4043;font-size:14px;line-height:1.7}
+.job{border:1px solid #e4eaf5;border-radius:14px;padding:12px 14px;margin-top:10px}
+.job b{font-size:16px;color:#0b2f73}.job .m{font-size:13.5px;color:#5b6475;margin-top:4px;line-height:1.5}
+.job .a{display:flex;gap:8px;margin-top:8px}
+.job .a button{border:1px solid #d0d5dd;background:#fff;border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.job .a .del{color:#b42318;border-color:#fecdca}
+.pill{display:inline-block;font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.pill.l{background:#e6f4ea;color:#137333}.pill.x{background:#f2f4f7;color:#667085}
+.note{font-size:12.5px;color:#5b6475;line-height:1.6;margin-top:10px}
+.links{display:flex;justify-content:space-between;margin-top:12px}
+.links button{border:0;background:none;color:#1a73e8;font-weight:600;font-size:14px;cursor:pointer;padding:4px 0;font-family:inherit}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><a class="back" id="backLink" href="index.html">←</a><div class="brand">PataBook</div><span id="pbLang"></span></div>
+
+ <div class="card" id="loading"><p class="sub">…</p></div>
+
+ <div class="card" id="noShop" hidden>
+  <h1 id="nsH"></h1><p class="sub" id="nsP"></p>
+  <a class="btn" href="search.html" id="nsB"></a>
+ </div>
+
+ <!-- Step 1: OTP on the shop's own number -->
+ <div class="card" id="login" hidden>
+  <h1 id="lgH"></h1>
+  <p class="sub" id="lgP"></p>
+  <button class="btn" id="send"></button>
+  <form id="s2" hidden novalidate>
+   <p class="sub" id="sentTo" style="margin-top:12px"></p>
+   <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+   <button class="btn" type="submit" id="verify"></button>
+   <div class="links"><button type="button" id="resend"></button></div>
+  </form>
+  <div class="err" id="e1"></div>
+  <p class="note" id="lgNote"></p>
+ </div>
+
+ <!-- Step 2: plan + vacancies -->
+ <div id="panel" hidden>
+  <div class="card">
+   <h1 id="shopName"></h1>
+   <div id="planBox"></div>
+   <div class="err" id="ePay"></div>
+  </div>
+  <div class="card" id="formCard" hidden>
+   <h2 id="fH"></h2>
+   <form id="jf" novalidate>
+    <input type="hidden" id="jid">
+    <label class="lbl" for="jt" id="lT"></label><input id="jt" maxlength="80">
+    <div class="row2">
+     <div><label class="lbl" for="js" id="lS"></label><input id="js" maxlength="60"></div>
+     <div><label class="lbl" for="jo" id="lO"></label><input id="jo" type="number" min="1" max="99" value="1" inputmode="numeric"></div>
+    </div>
+    <label class="lbl" for="jtm" id="lTm"></label><input id="jtm" maxlength="60">
+    <label class="lbl" for="jd" id="lD"></label><textarea id="jd" maxlength="600"></textarea>
+    <div class="err" id="eJ"></div>
+    <button class="btn" type="submit" id="jSave"></button>
+    <button class="btn sec" type="button" id="jCancel" hidden></button>
+   </form>
+  </div>
+  <div class="card" id="listCard" hidden>
+   <h2 id="myH"></h2>
+   <div id="myJobs"></div>
+  </div>
+  <button class="btn sec" id="logout"></button>
+ </div>
+</div>
+<script>
+(function(){
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id);
+let EN=false;try{EN=localStorage.getItem("pb-lang")==="en";}catch(e){}
+const T=(hi,en)=>EN?en:hi;
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
+const TK="pb-own-"+slug;
+const PRICE=499;
+function getTok(){try{const o=JSON.parse(localStorage.getItem(TK)||"null");return o&&o.exp>Date.now()?o.t:"";}catch(e){return "";}}
+function setTok(t){try{if(t)localStorage.setItem(TK,JSON.stringify({t:t,exp:Date.now()+11.5*3600e3}));else localStorage.removeItem(TK);}catch(e){}}
+function show(id){["loading","noShop","login","panel"].forEach(x=>$(x).hidden=x!==id);}
+async function rpc(fn,args){
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));throw e;}
+  return j;
+}
+function fmtD(s){const d=new Date(s);return isNaN(d)?"":d.toLocaleDateString(EN?"en-IN":"hi-IN",{day:"numeric",month:"short",year:"numeric"});}
+function otpErr(e){const c=e&&e.code;
+  if(c==="resend_too_soon")return T((e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।","Request again after "+(e.retry_after||60)+" seconds.");
+  if(c==="rate_limited_mobile")return T("आज के OTP पूरे हो गए। कल फिर कोशिश करें।","Today's OTP limit is used up. Try tomorrow.");
+  if(c==="rate_limited_ip")return T("बहुत ज़्यादा कोशिशें हुईं। लगभग एक घंटे बाद कोशिश करें।","Too many attempts. Try again in about an hour.");
+  if(c==="invalid_otp")return T("OTP गलत है।","Wrong OTP.")+(e.attempts_left?T(" "+e.attempts_left+" कोशिश बाकी।"," "+e.attempts_left+" tries left."):"");
+  if(c==="otp_expired"||c==="otp_expired_or_missing"||c==="too_many_attempts")return T("OTP की समय-सीमा खत्म / गलत कोशिशें पूरी। नया OTP मँगाएँ।","The OTP expired or too many wrong tries. Request a new OTP.");
+  if(c==="captcha_failed"||c==="captcha_required")return T("“मैं रोबोट नहीं हूँ” जाँच पूरी नहीं हुई। पेज रीफ़्रेश करके फिर कोशिश करें।","The “I’m not a robot” check did not complete. Refresh and try again.");
+  if(c==="sms_failed")return T("SMS नहीं भेजा जा सका। थोड़ी देर बाद कोशिश करें।","The SMS could not be sent. Try again later.");
+  if(c==="shop_not_found")return T("यह दुकान नहीं मिली।","Shop not found.");
+  if(c==="payments_off")return T("Payment अभी चालू नहीं है। थोड़ी देर बाद कोशिश करें।","Payments are not on yet. Please try later.");
+  return T("कुछ गड़बड़ हुई। इंटरनेट जाँचकर फिर कोशिश करें।","Something went wrong. Check your internet and try again.");
+}
+
+/* ---------- static text ---------- */
+$("backLink").textContent=T("← दुकान","← Shop");$("backLink").href=slug?"business.html?slug="+encodeURIComponent(slug):"index.html";
+$("nsH").textContent=T("दुकान नहीं मिली","Shop not found");$("nsP").textContent=T("अपनी दुकान का पेज खोलकर वहाँ “💼 Vacancy” बटन दबाएँ।","Open your shop page and tap the “💼 Vacancy” button there.");$("nsB").textContent=T("अपनी दुकान खोजें","Find your shop");
+$("lgH").textContent=T("💼 Vacancy डालें","💼 Post a vacancy");
+$("lgP").textContent=T("यह हिस्सा सिर्फ दुकान के मालिक के लिए है। दुकान जिस मोबाइल नंबर से जुड़ी है, उसी पर OTP आएगा।","This is only for the shop owner. The OTP goes to the mobile number registered with the shop.");
+$("send").textContent=T("दुकान के नंबर पर OTP भेजें","Send OTP to the shop's number");
+$("verify").textContent=T("Verify करें","Verify");$("resend").textContent=T("OTP फिर भेजें","Resend OTP");
+$("lgNote").textContent=T("दुकान का नंबर बदल गया है? पहले “मेरी दुकान” से नंबर बदलें।","Shop number changed? First update it from “My Shop”.");
+$("fH").textContent=T("➕ नई vacancy","➕ New vacancy");
+$("lT").textContent=T("काम / पद *  (जैसे: हेल्पर, ड्राइवर, सेल्समैन)","Job / position *  (e.g. Helper, Driver, Salesman)");
+$("lS").textContent=T("तनख्वाह","Salary");$("js").placeholder=T("जैसे ₹9,000/महीना","e.g. ₹9,000/month");
+$("lO").textContent=T("कितने लोग","Openings");
+$("lTm").textContent=T("काम का समय","Work timing");$("jtm").placeholder=T("जैसे सुबह 10 – शाम 7","e.g. 10 am – 7 pm");
+$("lD").textContent=T("और जानकारी (अनुभव, उम्र, जगह…)","More details (experience, age, place…)");
+$("jSave").textContent=T("Vacancy डालें","Post vacancy");$("jCancel").textContent=T("रद्द करें","Cancel");
+$("myH").textContent=T("मेरी vacancies","My vacancies");$("logout").textContent=T("बाहर निकलें","Log out");
+
+/* ---------- OTP login ---------- */
+let sending=false;
+async function sendOtp(){
+  if(sending)return;sending=true;$("e1").textContent="";$("send").disabled=true;$("resend").disabled=true;
+  try{const j=await PBA.otp("/send",{purpose:"shop_owner",slug:slug});
+    $("s2").hidden=false;$("send").hidden=true;
+    $("sentTo").textContent=T("दुकान के नंबर "+(j.phone_hint||"")+" पर OTP भेजा गया है।","OTP sent to the shop's number "+(j.phone_hint||"")+".");
+    setTimeout(()=>$("code").focus(),50);
+  }catch(e){$("e1").textContent=otpErr(e);$("send").disabled=false;}
+  sending=false;$("resend").disabled=false;
+}
+$("send").onclick=sendOtp;$("resend").onclick=sendOtp;
+$("s2").onsubmit=async ev=>{ev.preventDefault();const c=$("code").value.replace(/\D/g,"");if(c.length!==6){$("e1").textContent=T("6 अंकों का OTP डालें।","Enter the 6-digit OTP.");return;}
+  $("verify").disabled=true;$("e1").textContent="";
+  try{const j=await PBA.otp("/verify",{purpose:"shop_owner",slug:slug,code:c});setTok(j.owner_token);await load();}
+  catch(e){$("e1").textContent=otpErr(e);$("code").value="";}
+  $("verify").disabled=false;};
+$("code").addEventListener("input",()=>{const c=$("code").value.replace(/\D/g,"");$("code").value=c;if(c.length===6)$("s2").requestSubmit();});
+
+/* ---------- panel ---------- */
+let S=null;
+async function load(){
+  const t=getTok();if(!t){show("login");return;}
+  try{S=await rpc("pb_vac_session",{p_token:t});}catch(e){if(/login required/i.test(e.message)){setTok("");show("login");return;}$("e1").textContent=otpErr(e);show("login");return;}
+  show("panel");
+  $("shopName").textContent=S.name||"";
+  const until=S.plan_until?new Date(S.plan_until):null,on=until&&until>new Date(S.now||Date.now());
+  let h="";
+  if(on){
+    h='<div class="plan on">✅ '+T("Vacancy plan चालू है — "+fmtD(S.plan_until)+" तक","Vacancy plan active — till "+fmtD(S.plan_until))+'</div>'+
+      '<button class="btn sec" id="payBtn">'+T("🔁 Plan 30 दिन और बढ़ाएँ — ₹"+PRICE,"🔁 Extend plan 30 days — ₹"+PRICE)+'</button>';
+  }else{
+    h='<div class="plan off">'+T(until?"⏳ आपका plan "+fmtD(S.plan_until)+" को खत्म हो गया। आपकी vacancies अभी किसी को नहीं दिख रहीं।":"Vacancy डालने के लिए plan लें।",until?"⏳ Your plan ended on "+fmtD(S.plan_until)+". Your vacancies are not visible now.":"Get a plan to post vacancies.")+'</div>'+
+      '<p class="price" style="margin:14px 0 0">₹'+PRICE+' <small>'+T("/ 30 दिन","/ 30 days")+'</small></p>'+
+      '<ul class="feat"><li>'+T("जितनी चाहें उतनी vacancy","Post as many vacancies as you like")+'</li><li>'+T("PataBook के “💼 नौकरी” पेज और आपकी दुकान के पेज पर दिखेगी","Shown on PataBook’s “💼 Jobs” page and on your shop page")+'</li><li>'+T("नौकरी ढूँढने वाले OTP से verified लोग ही आपको call करेंगे","Only OTP-verified job seekers can call you")+'</li></ul>'+
+      '<button class="btn pay" id="payBtn">'+T("💳 ₹"+PRICE+" देकर plan लें","💳 Get plan for ₹"+PRICE)+'</button>'+
+      '<p class="note">'+T("UPI / Card / Net Banking — Razorpay से सुरक्षित भुगतान। Plan 30 दिन चलता है, अपने-आप दोबारा नहीं कटता।","UPI / Card / Net Banking — secure payment by Razorpay. The plan runs for 30 days and does not auto-renew.")+'</p>';
+  }
+  if(S.is_active===false)h+='<p class="note">⚠️ '+T("आपकी दुकान अभी Pending है — admin के approve करने के बाद ही vacancies दिखेंगी।","Your shop is still pending — vacancies show only after the admin approves the shop.")+'</p>';
+  $("planBox").innerHTML=h;$("payBtn").onclick=pay;
+  $("formCard").hidden=!on;
+  const jobs=S.jobs||[];$("listCard").hidden=!jobs.length;
+  $("myJobs").innerHTML=jobs.map(j=>{const live=on&&j.status==="live"&&new Date(j.expires_at)>new Date();
+    return '<div class="job"><b>'+esc(j.title)+'</b><span class="pill '+(live?"l":"x")+'">'+(live?T("दिख रही","Live"):j.status==="hidden"?T("admin ने छिपाई","Hidden by admin"):T("बंद","Off"))+'</span>'+
+      '<div class="m">'+[j.salary&&("💰 "+esc(j.salary)),j.timing&&("🕘 "+esc(j.timing)),"👥 "+(j.openings||1)].filter(Boolean).join(" · ")+'<br>'+T("डाली: ","Posted: ")+fmtD(j.created_at)+' · '+T("दिखेगी: ","Shows till: ")+fmtD(j.expires_at)+'</div>'+
+      '<div class="a">'+(on?'<button data-e="'+j.id+'">✏️ '+T("बदलें","Edit")+'</button>':'')+'<button class="del" data-d="'+j.id+'">🗑 '+T("हटाएँ","Delete")+'</button></div></div>';}).join("");
+}
+$("myJobs").onclick=async e=>{
+  const ed=e.target.closest("[data-e]"),dl=e.target.closest("[data-d]");
+  if(ed){const j=(S.jobs||[]).find(x=>String(x.id)===ed.dataset.e);if(!j)return;
+    $("jid").value=j.id;$("jt").value=j.title||"";$("js").value=j.salary||"";$("jo").value=j.openings||1;$("jtm").value=j.timing||"";$("jd").value=j.details||"";
+    $("fH").textContent=T("✏️ Vacancy बदलें","✏️ Edit vacancy");$("jSave").textContent=T("बदलाव सेव करें","Save changes");$("jCancel").hidden=false;
+    $("formCard").scrollIntoView({behavior:"smooth"});}
+  if(dl){if(!confirm(T("यह vacancy हटाएँ?","Delete this vacancy?")))return;
+    try{await rpc("pb_vac_delete",{p_token:getTok(),p_id:+dl.dataset.d});await load();}catch(x){alert(otpErr(x));}}
+};
+function resetForm(){$("jf").reset();$("jid").value="";$("jo").value=1;$("fH").textContent=T("➕ नई vacancy","➕ New vacancy");$("jSave").textContent=T("Vacancy डालें","Post vacancy");$("jCancel").hidden=true;$("eJ").textContent="";}
+$("jCancel").onclick=resetForm;
+$("jf").onsubmit=async ev=>{ev.preventDefault();$("eJ").textContent="";
+  const p={id:$("jid").value||null,title:$("jt").value.trim(),salary:$("js").value.trim(),openings:$("jo").value,timing:$("jtm").value.trim(),details:$("jd").value.trim()};
+  if(p.title.length<2){$("eJ").textContent=T("काम / पद का नाम लिखें।","Write the job / position.");$("jt").focus();return;}
+  $("jSave").disabled=true;
+  try{await rpc("pb_vac_save",{p_token:getTok(),p:p});resetForm();await load();}
+  catch(x){$("eJ").textContent=/plan required/i.test(x.message)?T("पहले plan लें।","Get a plan first."):/too many/i.test(x.message)?T("एक साथ 100 से ज़्यादा vacancy नहीं।","Max 100 vacancies at a time."):/login required/i.test(x.message)?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(x);
+    if(/login required/i.test(x.message)){setTok("");show("login");}}
+  $("jSave").disabled=false;};
+$("logout").onclick=()=>{setTok("");location.reload();};
+
+/* ---------- Razorpay ---------- */
+function loadRz(){return new Promise((res,rej)=>{if(window.Razorpay)return res();const s=document.createElement("script");s.src="https://checkout.razorpay.com/v1/checkout.js";s.onload=res;s.onerror=()=>rej(new Error("x"));document.head.appendChild(s);});}
+async function pay(){
+  const b=$("payBtn");b.disabled=true;$("ePay").textContent="";
+  try{
+    const o=await PBA.otp("/pay/order",{token:getTok()});
+    await loadRz();
+    const rz=new Razorpay({key:o.key_id,order_id:o.order_id,amount:o.amount,currency:o.currency||"INR",name:"PataBook",description:T("Vacancy plan — 30 दिन","Vacancy plan — 30 days"),
+      notes:{slug:slug},theme:{color:"#1a73e8"},
+      handler:async function(r){
+        $("ePay").textContent=T("Payment की जाँच हो रही है…","Checking the payment…");
+        try{await PBA.otp("/pay/verify",{order_id:r.razorpay_order_id,payment_id:r.razorpay_payment_id,signature:r.razorpay_signature});$("ePay").textContent="";await load();
+          alert(T("✅ Plan चालू हो गया! अब vacancy डालें।","✅ Plan activated! You can now post vacancies."));}
+        catch(x){$("ePay").textContent=T("Payment मिल गया है, plan कुछ मिनट में चालू हो जाएगा। पेज refresh करके देखें।","Payment received; the plan will activate within a few minutes. Refresh the page to check.");}
+      },
+      modal:{ondismiss:function(){b.disabled=false;}}});
+    rz.on("payment.failed",function(){$("ePay").textContent=T("Payment नहीं हुआ। दोबारा कोशिश करें — पैसे कटे हों तो अपने-आप वापस आ जाएँगे।","Payment failed. Please try again — any deducted amount is refunded automatically.");b.disabled=false;});
+    rz.open();
+  }catch(e){$("ePay").textContent=e&&e.code==="login_required"?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(e);b.disabled=false;
+    if(e&&e.code==="login_required"){setTok("");show("login");}}
+}
+
+/* ---------- start ---------- */
+try{PB.mount($("pbLang"));PB.onChange(()=>location.reload());}catch(e){}
+if(!slug){show("noShop");return;}
+load();
+})();
+</script>
+</body>
+</html>
