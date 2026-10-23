@@ -17,6 +17,9 @@ window.PB_SITE = {
 
   /* Mobile OTP Worker (Fast2SMS). STAGING: नीचे staging Worker का पता है।
      Production में यह पता तभी बदलें जब staging के सारे tests पास हों। खाली रहे तो Mobile OTP बटन नहीं दिखेगा। */
-  otpUrl: 'https://patabook-admin-otp-staging.tejwani512.workers.dev'
+  otpUrl: 'https://patabook-admin-otp-staging.tejwani512.workers.dev',
+
+  /* "मैं रोबोट नहीं हूँ" जाँच (Cloudflare Turnstile) की Site Key — यह public होती है। Secret Key सिर्फ Worker में। */
+  turnstileKey: '0x4AAAAAAFh2ET1CgatdIOGP'
 
 };
