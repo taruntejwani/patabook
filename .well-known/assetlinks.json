@@ -1,8 +1,13 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "in.patabook.app",
-        "sha256_cert_fingerprints": ["C0:34:1F:F8:79:D3:52:DA:C1:FE:62:09:D5:DD:11:A5:B1:4F:9B:6A:1F:CB:E0:C5:D2:42:FA:54:AC:68:3A:FB"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.patabook.app",
+      "sha256_cert_fingerprints": [
+        "16:D7:BA:32:39:9C:9A:ED:C4:53:FB:0E:8D:A1:B8:DA:3A:9B:45:A8:75:33:B6:AC:D8:5A:95:C6:45:A0:35:AE",
+        "C0:34:1F:F8:79:D3:52:DA:C1:FE:62:09:D5:DD:11:A5:B1:4F:9B:6A:1F:CB:E0:C5:D2:42:FA:54:AC:68:3A:FB"
+      ]
+    }
+  }
+]
