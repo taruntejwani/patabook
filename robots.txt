@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /mybusiness.html
+Disallow: /phone-update.html
+Disallow: /login.html
+
+Sitemap: https://patabook.in/sitemap.xml

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://patabook.in/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://patabook.in/search.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://patabook.in/map.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://patabook.in/list.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/homeservices.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://patabook.in/contact.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://patabook.in/privacy.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://patabook.in/terms.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Automobile</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Education</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Food</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Health</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Home</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Hotel</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Professional</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/category.html?cat=Shopping</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+</urlset>

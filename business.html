@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="PataBook पर दुकान की जानकारी — पता, Call, WhatsApp और रास्ता। Local business details on PataBook.">
 <title>PataBook — Business</title>
 <link rel="icon" href="pin.png">
 <link rel="manifest" href="manifest.json">
@@ -104,7 +105,7 @@ async function load(){
     if(!r.ok){u.searchParams.set("select",COLS);r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* sql-05 से पहले */
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
-    B=rows[0];document.title=B.name+" — PataBook";
+    B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
     render();loadContact();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
