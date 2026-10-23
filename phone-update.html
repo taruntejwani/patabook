@@ -119,6 +119,7 @@ function msg(e){
   if(c==="resend_too_soon")return (window.PB_EN?"Request again after "+(e.retry_after||60)+" seconds.":(e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।");
   if(c==="rate_limited_mobile")return (window.PB_EN?"Today\u2019s OTP limit for this number is used up. Try tomorrow.":"इस नंबर पर आज के OTP पूरे हो गए। कल फिर कोशिश करें।");
   if(c==="rate_limited_ip")return (window.PB_EN?"Too many attempts. Try again in about an hour.":"बहुत ज़्यादा कोशिशें हुईं। लगभग एक घंटे बाद कोशिश करें।");
+  if(c==="captcha_failed"||c==="captcha_required")return (window.PB_EN?"The \u201cI\u2019m not a robot\u201d check did not complete. Refresh the page and try again.":"\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज रीफ़्रेश करके फिर कोशिश करें।");
   if(c==="sms_failed")return (window.PB_EN?"The SMS could not be sent. Try again in a while.":"SMS नहीं भेजा जा सका। थोड़ी देर बाद कोशिश करें।");
   if(c==="invalid_otp")return (window.PB_EN?"Wrong OTP.":"OTP गलत है।")+(e.attempts_left?(window.PB_EN?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");
   if(c==="otp_expired"||c==="otp_expired_or_missing")return (window.PB_EN?"The OTP has expired. Request a new OTP.":"OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।");

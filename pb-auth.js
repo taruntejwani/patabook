@@ -63,11 +63,43 @@ function loginUrl(next){return "login.html?next="+encodeURIComponent(next||(loca
    Worker sirf OTP check karta hai. Session Supabase khud deta hai (token_hash verify),
    aur admin hai ya nahi, yeh Supabase ke pb_admins / admin functions hi tay karte hain. */
 function otpBase(){return String((window.PB_SITE&&window.PB_SITE.otpUrl)||"").replace(/\/$/,"");}
+/* "मैं रोबोट नहीं हूँ" जाँच (Cloudflare Turnstile) — site-config.js में turnstileKey हो तभी चलती है.
+   ज़्यादातर लोगों को कुछ दिखता भी नहीं; शक होने पर ही एक छोटा box आता है. */
+var TS_KEY=String((window.PB_SITE&&window.PB_SITE.turnstileKey)||""),tsWid=null,tsWait=null,tsLoad=null;
+function tsScript(){
+  if(window.turnstile)return Promise.resolve();
+  if(tsLoad)return tsLoad;
+  tsLoad=new Promise(function(res,rej){var sc=document.createElement("script");
+    sc.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";sc.async=true;
+    sc.onload=function(){res();};sc.onerror=function(){tsLoad=null;rej(new Error("captcha_failed"));};
+    document.head.appendChild(sc);});
+  return tsLoad;
+}
+async function captchaToken(anchor){
+  if(!TS_KEY)return "";
+  try{await tsScript();}catch(e){var e1=new Error("captcha_failed");e1.code="captcha_failed";throw e1;}
+  return new Promise(function(res,rej){
+    var fail=function(){var p=tsWait;tsWait=null;if(p){var e2=new Error("captcha_failed");e2.code="captcha_failed";p.rej(e2);}};
+    if(tsWid===null){
+      var box=document.getElementById("pbCaptcha");
+      if(!box){box=document.createElement("div");box.id="pbCaptcha";box.style.cssText="display:flex;justify-content:center;margin:10px 0";
+        if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else document.body.appendChild(box);}
+      var lg="hi";try{if(localStorage.getItem("pb-lang")==="en")lg="en";}catch(e){}
+      tsWid=window.turnstile.render(box,{sitekey:TS_KEY,execution:"execute",appearance:"interaction-only",language:lg,
+        callback:function(t){var p=tsWait;tsWait=null;if(p)p.res(t);},"error-callback":fail,"timeout-callback":fail});
+    }
+    tsWait={res:res,rej:rej};
+    try{window.turnstile.reset(tsWid);}catch(e){}
+    window.turnstile.execute(tsWid);
+    setTimeout(function(){if(tsWait&&tsWait.res===res)fail();},90000);
+  });
+}
 async function otpCall(path,body,withSession){
   var base=otpBase();if(!base){var e0=new Error("otp_not_configured");e0.code="otp_not_configured";throw e0;}
   var h={"Content-Type":"application/json"};
   if(withSession){var s=await session();if(!s){var e1=new Error("login_required");e1.code="login_required";e1.status=401;throw e1;}h.Authorization="Bearer "+s.access_token;}
-  var r=await fetch(base+path,{method:"POST",headers:h,body:JSON.stringify(body||{}),cache:"no-store"});
+  body=body||{};if(path==="/send"&&TS_KEY)body.ts=await captchaToken(document.activeElement);
+  var r=await fetch(base+path,{method:"POST",headers:h,body:JSON.stringify(body),cache:"no-store"});
   var j=null;try{j=await r.json();}catch(e){}
   if(!r.ok||!j||!j.ok){var err=new Error((j&&j.error)||("HTTP "+r.status));err.status=r.status;err.code=(j&&j.error)||"";err.retry_after=j&&j.retry_after;err.attempts_left=j&&j.attempts_left;throw err;}
   return j;
@@ -86,5 +118,5 @@ var mobile={
   shopSend:function(slug,phone){return otpCall("/send",{purpose:"shop_phone",slug:slug,phone:phone},true);},
   shopVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"shop_phone",slug:slug,phone:phone,code:code},true);}
 };
-window.PBA={sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile};
+window.PBA={captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile};
 })();

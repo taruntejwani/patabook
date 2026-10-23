@@ -537,12 +537,14 @@ function otpErr(e){const c=e&&e.code,en=EN();
   if(c==="resend_too_soon")return en?"Request again after "+(e.retry_after||60)+" seconds.":(e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।";
   if(c==="rate_limited_mobile")return en?"Today's OTP limit for this number is used up. Try tomorrow.":"इस नंबर पर आज के OTP पूरे हो गए। कल फिर कोशिश करें।";
   if(c==="rate_limited_ip")return en?"Too many attempts. Try again in about an hour.":"बहुत ज़्यादा कोशिशें हुईं। लगभग एक घंटे बाद कोशिश करें।";
+  if(c==="captcha_failed"||c==="captcha_required")return en?"The \u201cI\u2019m not a robot\u201d check did not complete. Refresh the page and try again.":"\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज रीफ़्रेश करके फिर कोशिश करें।";
   if(c==="sms_failed")return en?"The SMS could not be sent. Try again in a while.":"SMS नहीं भेजा जा सका। थोड़ी देर बाद कोशिश करें।";
   if(c==="invalid_otp")return (en?"Wrong OTP.":"OTP गलत है।")+(e.attempts_left?(en?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");
   if(c==="otp_expired"||c==="otp_expired_or_missing")return en?"The OTP has expired. Request a new OTP.":"OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।";
   if(c==="too_many_attempts")return en?"Wrong OTP entered 3 times. Request a new OTP.":"3 बार गलत OTP डाला गया। नया OTP मँगाएँ।";
   return en?"Something went wrong. Check your internet and try again.":"कुछ गड़बड़ हुई। इंटरनेट जाँचकर फिर कोशिश करें।";}
 async function otpCall(path,body){
+  if(path==="/send"&&window.PBA&&PBA.captchaToken)body.ts=await PBA.captchaToken($("otpMsg"));   /* robot जाँच (turnstileKey हो तभी) */
   const r=await fetch(OTP_URL+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store"});
   let j=null;try{j=await r.json();}catch(_){}
   if(!r.ok||!j||!j.ok){const e=new Error((j&&j.error)||"x");e.code=(j&&j.error)||"";e.retry_after=j&&j.retry_after;e.attempts_left=j&&j.attempts_left;throw e;}
