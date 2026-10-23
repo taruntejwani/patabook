@@ -155,6 +155,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="jTabs"><button data-j="jobs" class="on">💼 Vacancies</button><button data-j="pay">💳 Payments</button></div>
     <div id="jBody"></div>
   </div>
+  <div id="repv" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>🚩 दुकानों की शिकायतें</h2></div>
+    <p class="cnt">लोग दुकान के page पर "🚩 शिकायत करें" दबाकर यहाँ शिकायत भेजते हैं (Google Play का नियम)। दुकान खोलकर जाँचें — गलत हो तो दुकान को Pending करें या हटाएँ, फिर शिकायत को "✔ निपट गई" करें।</p>
+    <div class="mtabs" id="rTabs"><button data-r="new" class="on">🆕 नई</button><button data-r="done">✔ निपट गई</button></div>
+    <div id="rBody"></div>
+  </div>
   <div class="md" id="md" hidden><div class="bx" id="mdBox"></div></div>
   <div id="panel" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
@@ -357,7 +364,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -394,12 +401,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['cats', '🗂', '#f1ebfb', 'Categories', n(c.cat_main), (c.cat_all != null ? 'main · कुल ' + c.cat_all + ' काम' : 'main categories'), 0],
       ['traffic', '📊', '#e6f6f4', 'Traffic (आज के लोग)', n(c.uv_today), (c.live_now != null ? '🟢 अभी ' + c.live_now + ' लोग साइट पर' : 'sql-11 चलाएँ'), 0],
       ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए Approve करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0],
-      ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', '₹499', 'Vacancies और payments', 0]
+      ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', '₹499', 'Vacancies और payments', 0],
+      ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
+    repBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -410,6 +419,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'traffic') return showStats();
     if (t === 'cities') return showCities();
     if (t === 'jobs') return showJobs();
+    if (t === 'reports') return showReports();
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
@@ -598,6 +608,42 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var CT = [], CTF = 'new';
   $('ctTabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; CTF = b.dataset.c; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawCities(); };
   function showCities() { view('cityv'); loadCities(); }
+  /* ---- 🚩 दुकानों की शिकायतें (sql-10) ---- */
+  var RTAB = 'new', RDATA = [];
+  var RREASON = { wrong_info: 'गलत जानकारी', closed: 'दुकान बंद / मौजूद नहीं', fake: 'नकली / धोखाधड़ी', offensive: 'आपत्तिजनक फोटो / शब्द', other: 'कुछ और' };
+  async function repBadge() {
+    try {
+      var R = await rpc('pb_admin_reports', {}) || [], n = R.filter(function (r) { return r.status === 'new'; }).length;
+      var b = document.querySelector('#tiles [data-t="reports"]'); if (!b) return;
+      b.querySelector('b').textContent = R.length;
+      b.querySelector('small').textContent = n + ' नई';
+      if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
+    } catch (e) { var t = document.querySelector('#tiles [data-t="reports"] small'); if (t) t.textContent = 'sql-10 चलाएँ'; }
+  }
+  function showReports() { view('repv'); loadReports(); }
+  async function loadReports() {
+    $('rBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    try { RDATA = await rpc('pb_admin_reports', {}) || []; drawReports(); }
+    catch (e) { if (e.message === 'login') return; $('rBody').innerHTML = '<div class="msg"><b>शिकायत वाला हिस्सा अभी चालू नहीं है</b><p>Supabase में sql-10-shop-reports.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+  }
+  function drawReports() {
+    var L = RDATA.filter(function (r) { return r.status === RTAB; });
+    $('rBody').innerHTML = '<p class="cnt">' + L.length + ' शिकायतें</p>' + (L.length ? L.map(function (r) {
+      return '<div class="cty"><h3>' + esc(RREASON[r.reason] || r.reason) + ' <span class="bid">' + (r.live ? '✅ Live दुकान' : '⏸ Live नहीं') + '</span></h3>' +
+        '<p class="meta">🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> · ' + fmtD(r.created_at) + '</p>' +
+        (r.note ? '<p class="meta">💬 ' + esc(r.note) + '</p>' : '') +
+        '<div class="acts">' + (r.status === 'new' ? '<button data-ra="done" data-id="' + r.id + '">✔ निपट गई</button>' : '<button data-ra="new" data-id="' + r.id + '">↩ फिर से नई</button>') +
+        '<button class="del" data-ra="delete" data-id="' + r.id + '">🗑 हटाएँ</button></div></div>';
+    }).join('') : '<p class="cnt">' + (RTAB === 'new' ? 'कोई नई शिकायत नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
+  }
+  $('rTabs').onclick = function (e) { var b = e.target.closest('[data-r]'); if (!b) return; RTAB = b.dataset.r; $('rTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawReports(); };
+  $('rBody').onclick = async function (e) {
+    var b = e.target.closest('[data-ra]'); if (!b) return;
+    if (b.dataset.ra === 'delete' && !confirm('यह शिकायत हमेशा के लिए हटाएँ?')) return;
+    b.disabled = true;
+    try { await rpc('pb_admin_report_set', { p_id: +b.dataset.id, p_action: b.dataset.ra }); } catch (x) { alert('गलती: ' + x.message); }
+    loadReports();
+  };
   /* ---- Vacancy / नौकरी (₹499 plan) ---- */
   var JTAB = 'jobs', JDATA = null;
   function showJobs() { view('jobv'); loadJobs(); }

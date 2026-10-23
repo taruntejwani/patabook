@@ -137,12 +137,56 @@ function render(){
    '<button type="button" id="cardBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px;margin:0 0 12px;font:inherit;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,#25d366,#1a73e8);box-shadow:0 6px 16px rgba(26,115,232,.25)">📤 '+((PB.lang&&PB.lang()==="en")?"Share this shop":"यह दुकान शेयर करें")+'</button>'+
    '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()==="en")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()==="en")?"Terms":"नियम")+'</a></p>'+
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
-   '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>';
+   '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>'+
+   '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>';
   drawContact();drawVac();
+  const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
   if(cbtn)cbtn.onclick=()=>{if(!window.PBCard)return;
     PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
+}
+/* शिकायत / Report (Google Play नियम: users गलत/नकली listing की शिकायत कर सकें) — admin पैनल में जाती है */
+function openReport(){
+  const en=PB.lang&&PB.lang()==="en",L=(h,e)=>en?e:h;
+  const R=[["wrong_info",L("गलत जानकारी (नंबर / पता / नाम)","Wrong information (number / address / name)")],
+           ["closed",L("दुकान बंद हो गई / मौजूद नहीं","Shop closed / does not exist")],
+           ["fake",L("नकली या धोखाधड़ी","Fake or fraud")],
+           ["offensive",L("गलत / आपत्तिजनक फोटो या शब्द","Offensive photo or text")],
+           ["other",L("कुछ और","Something else")]];
+  const old=document.getElementById("repSheet");if(old)old.remove();
+  const w=document.createElement("div");w.id="repSheet";
+  w.setAttribute("style","position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center");
+  w.innerHTML='<form style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px 20px;box-sizing:border-box;max-height:90vh;overflow:auto">'+
+    '<h2 style="margin:0 0 4px;font-size:18px;color:#0b2f73">🚩 '+esc(L("शिकायत करें","Report this listing"))+'</h2>'+
+    '<p style="margin:0 0 10px;font-size:13px;color:#5b6475">'+esc(B&&B.name||"")+'</p>'+
+    R.map((r,i)=>'<label style="display:flex;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid #eef1f6;font-size:15px;cursor:pointer"><input type="radio" name="rr" value="'+r[0]+'"'+(i?'':' required')+'>'+esc(r[1])+'</label>').join("")+
+    '<textarea id="repNote" maxlength="500" rows="3" placeholder="'+esc(L("कुछ और बताना हो तो लिखें (ज़रूरी नहीं)","Add details (optional)"))+'" style="width:100%;box-sizing:border-box;margin-top:8px;border:1px solid #d0d7e2;border-radius:10px;padding:10px;font:inherit;font-size:14px"></textarea>'+
+    '<p id="repMsg" style="min-height:18px;margin:8px 0;font-size:13.5px"></p>'+
+    '<div style="display:flex;gap:10px"><button type="button" id="repX" style="flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer">'+esc(L("बंद करें","Cancel"))+'</button>'+
+    '<button type="submit" id="repGo" style="flex:1;border:0;background:#d92d20;color:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer">'+esc(L("शिकायत भेजें","Send report"))+'</button></div></form>';
+  document.body.appendChild(w);
+  const close=()=>w.remove();
+  w.addEventListener("click",e=>{if(e.target===w)close();});
+  w.querySelector("#repX").onclick=close;
+  w.querySelector("form").onsubmit=async e=>{
+    e.preventDefault();
+    const sel=w.querySelector('input[name="rr"]:checked'),msg=w.querySelector("#repMsg"),go=w.querySelector("#repGo");
+    if(!sel){msg.style.color="#b42318";msg.textContent=L("कारण चुनें","Choose a reason");return;}
+    go.disabled=true;msg.style.color="#5b6475";msg.textContent="…";
+    try{
+      const r=await fetch(SB+"/rest/v1/rpc/pb_report_add",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({p_slug:slug,p_reason:sel.value,p_note:w.querySelector("#repNote").value||null})});
+      if(r.ok){msg.style.color="#137333";msg.textContent="✅ "+L("शिकायत मिल गई। हमारी टीम जाँच करेगी, धन्यवाद।","Thanks — our team will review this listing.");go.style.display="none";w.querySelector("#repX").textContent=L("ठीक है","OK");return;}
+      let m="";try{const j=await r.json();m=(j&&j.message)||"";}catch(_){}
+      if(/too many/i.test(m)){msg.style.color="#b42318";msg.textContent=L("आज बहुत शिकायतें भेजी जा चुकी हैं, कल कोशिश करें।","Too many reports today, please try tomorrow.");go.disabled=false;return;}
+      throw new Error(m||r.status);
+    }catch(err){
+      msg.style.color="#b42318";
+      msg.innerHTML=esc(L("अभी नहीं भेज पाए। ईमेल करें: ","Could not send. Please email: "))+'<a href="mailto:patabook.in@gmail.com?subject='+encodeURIComponent("Report: "+(B&&B.name||slug))+'">patabook.in@gmail.com</a>';
+      go.disabled=false;
+    }
+  };
 }
 /* इस दुकान की चालू vacancies (₹499 plan वाली) */
 let VAC=null;
