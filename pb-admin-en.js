@@ -6,6 +6,11 @@
   if (!en) return;
   document.documentElement.lang = 'en';
   var D = {
+    "इस browser में notification नहीं चलता। Chrome में admin खोलें।": "Notifications do not work in this browser. Open admin in Chrome.",
+    "site-config.js में otpUrl नहीं है।": "otpUrl is missing in site-config.js.",
+    "Notification की अनुमति नहीं मिली। Chrome में 🔒 (address bar) → Permissions → Notifications → Allow करें, फिर दोबारा 🔔 दबाएँ।": "Notification permission was not given. In Chrome tap 🔒 (address bar) → Permissions → Notifications → Allow, then tap 🔔 again.",
+    "पहले admin login करें।": "Please log in as admin first.",
+    "Notification चालू है": "Notifications are on",
     "लोग दुकान के page पर \"🚩 शिकायत करें\" दबाकर यहाँ शिकायत भेजते हैं (Google Play का नियम)। दुकान खोलकर जाँचें — गलत हो तो दुकान को Pending करें या हटाएँ, फिर शिकायत को \"✔ निपट गई\" करें।": "People send reports here by tapping \"🚩 Report\" on a shop page (Google Play rule). Open the shop and check it — if it is wrong, set the shop to Pending or delete it, then mark the report \"✔ Resolved\".",
     "🚩 दुकानों की शिकायतें": "🚩 Shop reports",
     "दुकानों की शिकायतें": "Shop reports",

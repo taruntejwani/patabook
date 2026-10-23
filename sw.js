@@ -10,3 +10,19 @@ self.addEventListener("fetch",e=>{
     return res;
   }).catch(()=>caches.match(r).then(m=>m||caches.match("index.html"))));
 });
+/* Admin push notification (सिर्फ admin ने "🔔 Notification चालू करें" दबाया हो तब आता है) */
+self.addEventListener("push",e=>{
+  let d={};try{d=e.data?e.data.json():{};}catch(_){d={body:e.data?e.data.text():""};}
+  e.waitUntil(self.registration.showNotification(d.title||"PataBook",{
+    body:d.body||"",icon:"icon-192.png",badge:"icon-192.png",tag:d.tag||"pb",renotify:true,
+    vibrate:[200,100,200],data:{url:d.url||"/admin.html"}
+  }));
+});
+self.addEventListener("notificationclick",e=>{
+  e.notification.close();
+  const u=new URL((e.notification.data&&e.notification.data.url)||"/admin.html",self.location.origin).href;
+  e.waitUntil(self.clients.matchAll({type:"window",includeUncontrolled:true}).then(cs=>{
+    for(const c of cs){if(c.url.split("#")[0]===u.split("#")[0]&&"focus" in c){c.navigate(u).catch(()=>{});return c.focus();}}
+    return self.clients.openWindow(u);
+  }));
+});

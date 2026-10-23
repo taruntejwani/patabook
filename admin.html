@@ -118,7 +118,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 <main class="wrap">
   <div id="gate"></div>
   <div id="home" hidden>
-    <div class="hh"><h2>📊 Dashboard</h2><button class="backd" id="hRef" style="margin:0">🔄</button></div>
+    <div class="hh"><h2>📊 Dashboard</h2><span style="display:flex;gap:8px"><button class="backd" id="hBell" style="margin:0">🔔</button><button class="backd" id="hRef" style="margin:0">🔄</button></span></div>
+    <p class="cnt" id="bellNote" hidden></p>
     <div class="tiles" id="tiles"></div>
     <p class="cnt" id="hNote"></p>
   </div>
@@ -182,6 +183,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var START = location.hash;
   var status = 'pending', sess = null, rows = [], timer = null, OWN = null, CODES = {}, HOME = null, CITIES = null;
 
   async function rpc(fn, args) {
@@ -360,7 +362,46 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!sess) return gate('login');
     $('who').textContent = sess.email || ''; $('out').hidden = false;
     showHome();
+    if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
+    bellState();
   })();
+  /* ---- 🔔 Push notification: नई दुकान / शिकायत / संदेश पर इस फ़ोन में घंटी ---- */
+  function otpBase() { return String((window.PB_SITE && PB_SITE.otpUrl) || '').replace(/\/$/, ''); }
+  function bellOK() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function u8(k) { var s = k.replace(/-/g, '+').replace(/_/g, '/'); s += '==='.slice((s.length + 3) % 4); var r = atob(s), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+  function bellNote(t, bad) { var n = $('bellNote'); n.hidden = !t; n.textContent = t || ''; n.style.color = bad ? '#b42318' : '#137333'; }
+  async function bellState() {
+    if (!bellOK()) return;
+    try { var reg = await navigator.serviceWorker.getRegistration(); var sub = reg && await reg.pushManager.getSubscription();
+      if (sub && Notification.permission === 'granted') { $('hBell').textContent = '🔔✅'; $('hBell').title = 'Notification चालू है'; } } catch (e) {}
+  }
+  async function bellPost(path, body) {
+    var s = await PBA.session(); if (!s) throw new Error('login');
+    var r = await fetch(otpBase() + path, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.access_token }, body: JSON.stringify(body || {}) });
+    var j = null; try { j = await r.json(); } catch (e) {}
+    if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+    return j;
+  }
+  $('hBell').onclick = async function () {
+    var b = this;
+    if (!bellOK()) return bellNote('इस browser में notification नहीं चलता। Chrome में admin खोलें।', true);
+    if (!otpBase()) return bellNote('site-config.js में otpUrl नहीं है।', true);
+    b.disabled = true; bellNote('…');
+    try {
+      var perm = await Notification.requestPermission();
+      if (perm !== 'granted') { bellNote('Notification की अनुमति नहीं मिली। Chrome में 🔒 (address bar) → Permissions → Notifications → Allow करें, फिर दोबारा 🔔 दबाएँ।', true); return; }
+      var reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+      var kr = await fetch(otpBase() + '/push/key'); var kj = await kr.json(); if (!kj.ok) throw new Error('key');
+      var sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(kj.key) });
+      var r = await bellPost('/push/subscribe', { sub: sub.toJSON() });
+      var t = await bellPost('/push/test', {});
+      b.textContent = '🔔✅';
+      bellNote('✅ Notification चालू! अभी एक test घंटी आनी चाहिए। (' + r.devices + ' फ़ोन जुड़े)' + (t.sent ? '' : ' — test नहीं पहुँचा, 1 मिनट बाद दोबारा 🔔 दबाएँ'));
+    } catch (e) {
+      bellNote(/not_admin|login/.test(e.message) ? 'पहले admin login करें।' : 'चालू नहीं हो पाया: ' + e.message, true);
+    } finally { b.disabled = false; }
+  };
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
