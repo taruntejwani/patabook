@@ -716,8 +716,8 @@ async function submit(){
     fail(T("send_err",{e:x.message}));
   }
 }
-/* ---------- रजिस्ट्रेशन के बाद: बधाई + 30 मिनट का टाइमर + मोबाइल नंबर से स्टेटस ---------- */
-const WAIT_MIN=30;
+/* ---------- रजिस्ट्रेशन के बाद: बधाई + 24 घंटे का टाइमर + मोबाइल नंबर से स्टेटस ---------- */
+const WAIT_MIN=24*60;   /* admin जाँच के लिए 24 घंटे (रात/छुट्टी में भी वादा सच रहे) */
 let stTimer=null,stPoll=null,ST=null;
 function phone10(p){return String(p||"").replace(/\D/g,"").slice(-10);}
 function saveReg(r){try{localStorage.setItem("pb-reg",JSON.stringify(r));}catch(_){}}
@@ -736,7 +736,8 @@ function showForm(){
   i=0;render();
 }
 function hideForm(){$("f").style.display="none";$("pw").style.display="none";$("done").style.display="none";$("chkLine").hidden=true;$("stBox").hidden=false;}
-function fmt(ms){ms=Math.max(0,ms);const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;}
+const p2=n=>(n<10?"0":"")+n;
+function fmt(ms){ms=Math.max(0,ms);if(ms>=3600000){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return p2(h)+":"+p2(m);}const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return p2(m)+":"+p2(s);}
 /* Live होने पर: अपना डिजिटल विज़िटिंग कार्ड (pb-card.js) */
 async function openMyCard(sl,fest){
   const btn=$("stCard");if(btn)btn.disabled=true;
@@ -768,14 +769,14 @@ function showStatus(x){
     box.innerHTML='<div class="big">🎉</div><h2>'+LX(x.fresh?"st_h":"st_h2")+'</h2><span class="pill p">⏳ '+LX("st_pend")+'</span>'+
       '<p class="sub"><b>'+nm+'</b> '+LX("st_sub")+'</p>'+
       '<div class="clock"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="'+R+'" fill="none" stroke="#e8eefb" stroke-width="10"/><circle id="ring" cx="60" cy="60" r="'+R+'" fill="none" stroke="#1a73e8" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="0"/></svg>'+
-      '<div class="t"><b id="tm">30:00</b><small id="tmS">'+LX("st_left")+'</small></div></div>'+
+      '<div class="t"><b id="tm">24:00</b><small id="tmS">'+LX("st_left")+'</small></div></div>'+
       '<div class="info" id="stInfo">'+LX("st_info")+'</div>'+
       '<button type="button" class="btn sec" id="stRef" style="width:100%">🔄 '+LX("st_ref")+'</button>'+
       '<button type="button" class="lnk" id="stNew">'+LX("st_new")+'</button>';
     const end=x.created+WAIT_MIN*60000;
     const tick=()=>{
       const left=end-(Date.now()-(x.skew||0)),tm=$("tm");if(!tm)return;
-      tm.textContent=fmt(left);
+      tm.textContent=fmt(left);if(left>0)$("tmS").textContent=LX(left>=3600000?"st_left_h":"st_left");
       $("ring").setAttribute("stroke-dashoffset",(C*(1-Math.max(0,left)/(WAIT_MIN*60000))).toFixed(1));
       if(left<=0){tm.textContent="00:00";$("tmS").textContent=LX("st_over_s");$("stInfo").innerHTML=LX("st_over");clearInterval(stTimer);}
     };
@@ -823,8 +824,8 @@ const LXT={
       mlk:"Google Maps का link (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (list में न हो तो ➕ से लिखें)।",areaL:"इलाका / Area (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है",
       chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना FREE डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का poster शेयर करें",chkB:"मेरी दुकान देखें",
       st_h:"बधाई हो! आपका रजिस्ट्रेशन हो गया 🎊",st_h2:"आपका रजिस्ट्रेशन मिल गया है",st_pend:"Pending — जाँच चल रही है",
-      st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द Live कर देगी।",st_left:"मिनट बाकी",
-      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ <b>30 मिनट</b> के अंदर आपकी दुकान PataBook पर Live हो जाएगी।<br>🔄 यह पेज बंद हो जाए तो इसी फ़ोन पर यह पेज दोबारा खोलें — स्टेटस अपने-आप दिखेगा।",
+      st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द Live कर देगी।",st_left:"मिनट बाकी",st_left_h:"घंटे बाकी",
+      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ हमारी टीम जाँच करके <b>24 घंटे</b> के अंदर आपकी दुकान PataBook पर Live कर देगी (अक्सर इससे जल्दी)।<br>🔄 यह पेज बंद हो जाए तो इसी फ़ोन पर यह पेज दोबारा खोलें — स्टेटस अपने-आप दिखेगा।",
       st_over:"⏳ <b>बस थोड़ी देर और!</b> आपकी दुकान जाँच में है और जल्द Live होगी। यह पेज अपने-आप अपडेट हो जाएगा।",st_over_s:"जल्द Live",
       st_ref:"स्टेटस फिर से देखें",st_new:"+ नई दुकान जोड़ें",
       st_live_p:"✅ Live",st_live_h:"आपकी दुकान Live हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
@@ -838,8 +839,8 @@ const LXT={
       mlk:"Google Maps link (optional)",cityL:"City / Village *",distL:"District *",stateL:"State *",e_city2:"Write the city / village name (letters only).",e_dist:"Choose the district (not in list? use ➕ to write it).",areaL:"Area (optional)",addrL:"Full address *",addrPh:"Shop no., road, landmark — or where your stall/cart stands",
       chkQ:"Already registered?",st_card:"Share your FREE digital visiting card",st_card_err:"Could not make the card right now, please try again.",st_fest:"share your shop poster",chkB:"See My Shop",
       st_h:"Congratulations! You are registered 🎊",st_h2:"We have your registration",st_pend:"Pending — under review",
-      st_sub:"has been added to PataBook. Our team will review it and make it live soon.",st_left:"minutes left",
-      st_info:"✅ Nothing more to do.<br>⏱️ Your shop goes live on PataBook within <b>30 minutes</b>.<br>🔄 If this page closes, open it again on this phone — the status will show automatically.",
+      st_sub:"has been added to PataBook. Our team will review it and make it live soon.",st_left:"minutes left",st_left_h:"hours left",
+      st_info:"✅ Nothing more to do.<br>⏱️ Our team reviews it and your shop goes live on PataBook within <b>24 hours</b> (often sooner).<br>🔄 If this page closes, open it again on this phone — the status will show automatically.",
       st_over:"⏳ <b>Just a little longer!</b> Your shop is being reviewed and will be live soon. This page updates by itself.",st_over_s:"Live soon",
       st_ref:"Check status again",st_new:"+ Add a new shop",
       st_live_p:"✅ Live",st_live_h:"Your shop is live! 🎉",st_live_s:"is now visible to everyone on PataBook.",st_see:"See your shop ›",
