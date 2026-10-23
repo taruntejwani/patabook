@@ -101,12 +101,16 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 .cty .meta{font-size:12.5px}.cty .acts{margin-top:8px;align-items:center}
 .cty input,.cty select{border:1px solid #d0d5dd;border-radius:10px;padding:8px 10px;font-size:14px;background:#fff}
 .cty input.cd{width:78px;text-transform:uppercase;font-weight:800;letter-spacing:.08em}
+.nav .brand{flex:none}.nav .who{flex:1;text-align:right}#pbLang{flex:none}
+@media(max-width:520px){#pbLang #pblBtnTxt{display:none}.nav{gap:6px}.brand b{font-size:17px}}
 </style>
 <script src="i18n.js"></script>
+<script src="pb-admin-en.js"></script>
 </head>
 <body>
 <header><div class="wrap nav">
   <a class="brand" href="index.html"><img src="pin.png" alt=""><b>Pata<span>Book</span></b></a>
+  <span id="pbLang"></span>
   <span class="tag">ADMIN</span>
   <span class="who" id="who"></span>
   <button class="out" id="out" hidden>Logout</button>
@@ -626,5 +630,6 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   };
 })();
 </script>
+<script>try{PB.mount(document.getElementById("pbLang"));PB.onChange(function(){location.reload();});}catch(e){}</script>
 </body>
 </html>
