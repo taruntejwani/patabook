@@ -118,6 +118,7 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .sug i{font-style:normal;font-size:20px}
 .sug a.shop{background:#f8fbff}.sug a.shop b{display:block;font-size:15.5px;color:#0b2f73;line-height:1.25}.sug a.shop span{flex:1;min-width:0}
 .sug a.shop em{display:block;font-style:normal;font-size:12.5px;color:#70757a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug a.shop i{flex:none;width:34px;text-align:center}.sug .slg{flex:none;width:34px;height:34px;border-radius:10px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5}.sug small.km{flex:none;margin-inline-start:6px;background:#e8f0fe;color:#1a73e8;font-weight:800;font-size:12px;border-radius:999px;padding:3px 9px;white-space:nowrap}
 .sug .sh{font-size:11.5px;font-weight:800;letter-spacing:.04em;color:#5b6475;background:#f4f7ff;padding:7px 16px}
 
 /* home services button */
@@ -432,12 +433,23 @@ const ALL=[];SUBS.forEach(c=>{ALL.push({n:c[0],cat:c[0],e:c[1],k:c[0].toLowerCas
 /* ---- सुझाव: 3 अक्षर लिखते ही दुकानों के नाम + category ---- */
 const SBU=window.PATABOOK_SUPABASE.url,SKEY=window.PATABOOK_SUPABASE.anonKey;
 let shopReq=0,shopTimer=null,SHOPS=[];
+/* सुझाव में दुकान का logo + दूरी (दूरी तभी, जब ग्राहक ने पहले से location की इजाज़त दी हो — लिखते समय popup नहीं) */
+let SUG_COLS="slug,name,address,latitude,longitude,logo_url",MYPOS=null;
+const SUG_LOGO=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+function sugPos(){try{if(!navigator.geolocation||!navigator.permissions)return;navigator.permissions.query({name:"geolocation"}).then(st=>{if(st.state!=="granted")return;
+  navigator.geolocation.getCurrentPosition(p=>{MYPOS=[p.coords.latitude,p.coords.longitude];if(SHOPS.length)drawSug();},()=>{},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});}).catch(()=>{});}catch(e){}}
+function sugKm(b){const la=+b.latitude,ln=+b.longitude;if(!MYPOS||!la||!ln)return "";
+  const R=6371,r=Math.PI/180,dLa=(la-MYPOS[0])*r,dLn=(ln-MYPOS[1])*r,a=Math.sin(dLa/2)**2+Math.cos(MYPOS[0]*r)*Math.cos(la*r)*Math.sin(dLn/2)**2,km=2*R*Math.asin(Math.sqrt(a));
+  return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
+function sugD(b){const la=+b.latitude,ln=+b.longitude;if(!MYPOS||!la||!ln)return 1e9;return (la-MYPOS[0])**2+((ln-MYPOS[1])*Math.cos(la*Math.PI/180))**2;}
+sugPos();document.addEventListener("pb-city-auto",sugPos);
 function drawSug(){
   const v=document.getElementById("q").value.trim().toLowerCase(),box=document.getElementById("sug"),en=PB.lang&&PB.lang()==="en";
   if(!v){box.className="sug";box.innerHTML="";return;}
   const m=ALL.filter(x=>x.k.split(/[\s&]+/).some(w=>w.startsWith(v))).slice(0,SHOPS.length?4:8);
   let h="";
-  if(SHOPS.length)h+='<div class="sh">'+(en?"SHOPS":"दुकानें")+'</div>'+SHOPS.map(b=>`<a class="shop" data-slug="${esc(b.slug)}"><i>🏪</i><span><b>${esc(b.name)}</b><em>📍 ${esc(b.address||"")}</em></span></a>`).join("");
+  if(SHOPS.length)h+='<div class="sh">'+(en?"SHOPS":"दुकानें")+'</div>'+SHOPS.map(b=>{const d=sugKm(b),lg=SUG_LOGO.test(b.logo_url||"");
+    return `<a class="shop" data-slug="${esc(b.slug)}">${lg?`<img class="slg" src="${esc(b.logo_url)}" alt="" loading="lazy">`:'<i>🏪</i>'}<span><b>${esc(b.name)}</b><em>📍 ${esc(b.address||"")}</em></span>${d?`<small class="km">${d}</small>`:""}</a>`;}).join("");
   if(m.length)h+=(SHOPS.length?'<div class="sh">'+(en?"CATEGORIES":"कैटेगरी")+'</div>':"")+m.map(x=>`<a data-n="${esc(x.n)}"><i>${x.e}</i>${esc(x.n)}<small>${x.n===x.cat?"":esc(x.cat)}</small></a>`).join("");
   box.innerHTML=h;box.className=h?"sug on":"sug";
 }
@@ -450,13 +462,14 @@ function showSug(){
   shopTimer=setTimeout(async()=>{
     const n=++shopReq,city=document.getElementById("city").value;
     try{
-      const u=SBU+"/rest/v1/businesses?select=slug,name,address&is_active=eq.true&deleted_at=is.null&limit=8&name=ilike."+encodeURIComponent("*"+clean+"*");
-      const r=await fetch(u,{headers:{apikey:SKEY,Authorization:"Bearer "+SKEY}});
+      const q="&is_active=eq.true&deleted_at=is.null&limit=8&name=ilike."+encodeURIComponent("*"+clean+"*"),H2={headers:{apikey:SKEY,Authorization:"Bearer "+SKEY}};
+      let r=await fetch(SBU+"/rest/v1/businesses?select="+SUG_COLS+q,H2);
+      if(!r.ok&&SUG_COLS.includes("logo_url")){SUG_COLS="slug,name,address,latitude,longitude";r=await fetch(SBU+"/rest/v1/businesses?select="+SUG_COLS+q,H2);}   /* logo column न हो तो */
       if(!r.ok||n!==shopReq)return;
       let rows=await r.json();
       const lc=clean.toLowerCase(),cy=city.toLowerCase();
       rows.sort((a,b)=>{const sa=(String(a.name).toLowerCase().startsWith(lc)?2:0)+(cy&&String(a.address||"").toLowerCase().includes(cy)?1:0),
-                                sb=(String(b.name).toLowerCase().startsWith(lc)?2:0)+(cy&&String(b.address||"").toLowerCase().includes(cy)?1:0);return sb-sa;});
+                                sb=(String(b.name).toLowerCase().startsWith(lc)?2:0)+(cy&&String(b.address||"").toLowerCase().includes(cy)?1:0);return (sb-sa)||(sugD(a)-sugD(b));});
       SHOPS=rows.slice(0,6);drawSug();
     }catch(e){}
   },250);
