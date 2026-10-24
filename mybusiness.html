@@ -130,6 +130,26 @@ function phoneBlock(b,i){
     '<button type="button" class="sw" role="switch" aria-checked="'+on+'" aria-label="'+esc(tx("sw_l"))+'" data-i="'+i+'"></button></div><div class="err" id="er'+i+'"></div>';
 }
 
+/* ---------- 💼 Vacancy available ON/OFF (मुफ़्त; 30 दिन बाद अपने आप बंद) ---------- */
+let VAC={},VAC_OK=true;
+function vacBlock(b,i){
+  if(!VAC_OK)return "";
+  const u=VAC[b.slug],on=!!u,en=L()==="en";
+  const till=on?new Date(u).toLocaleDateString(en?"en-IN":"hi-IN",{day:"numeric",month:"short"}):"";
+  return '<div class="phone'+(on?"":" off")+'" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span>'+
+    '<span class="tx"><b>'+(en?"Vacancy available":"Vacancy available (नौकरी खाली है)")+'</b><small>'+
+    (on?(en?"Shows on your shop page · auto-off on "+till:"दुकान के पेज पर दिख रहा है · "+till+" को अपने आप बंद"):(en?"Turn ON if you need staff":"स्टाफ चाहिए तो ON करें"))+'</small></span>'+
+    '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div><div class="err" id="ve'+i+'"></div>';
+}
+async function loadVac(){
+  if(!ROWS||!ROWS.length)return;
+  try{
+    const r=await fetch(SB+"/rest/v1/rpc/pb_vacancy_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:ROWS.map(b=>b.slug)})});
+    if(!r.ok){VAC_OK=false;return;}   /* sql-13 अभी नहीं चली */
+    VAC=await r.json()||{};
+  }catch(e){VAC_OK=false;}
+}
+
 /* ---------- दुकान का Logo ---------- */
 const LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
 let LOGOS={},LOGO_OK=true;
@@ -201,13 +221,20 @@ function draw(){
   list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    phoneBlock(b,i)+logoBlock(b,i)+
+    phoneBlock(b,i)+vacBlock(b,i)+logoBlock(b,i)+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
     '<a class="btn y" href="list.html" style="text-align:center;margin-top:6px">'+esc(tx("add"))+' ›</a>';
 }
 $("list").addEventListener("click",async e=>{
+  const vs=e.target.closest(".sw.vac");
+  if(vs){
+    const i=+vs.dataset.v,b=ROWS[i],want=!VAC[b.slug];vs.disabled=true;$("ve"+i).textContent="";
+    try{ME=await PBA.session();const v=await rpc("pb_set_vacancy",{p_slug:b.slug,p_on:want});if(v&&v.open)VAC[b.slug]=v.until;else delete VAC[b.slug];draw();}
+    catch(x){vs.disabled=false;$("ve"+i).textContent=tx("e_sw");}
+    return;
+  }
   const sw=e.target.closest(".sw");if(!sw)return;
   const i=+sw.dataset.i,b=ROWS[i],want=!(b.show_phone!==false);
   sw.disabled=true;$("er"+i).textContent="";
@@ -229,7 +256,7 @@ $("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
   ME=await PBA.session();draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();}
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();}
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";

@@ -106,7 +106,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();loadContact();loadVac();
+    render();loadContact();loadVac();loadVacFlag();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -152,6 +152,7 @@ function render(){
    '</div>'+(rows.length?'':'<p class="desc">'+esc(T("b_def"))+'</p>')+
    (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')+
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
+   '<div id="vacFlag" style="display:none;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px"></div>'+
    '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div></section>'+
    '<section class="card" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
    '<button type="button" id="cardBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px;margin:0 0 12px;font:inherit;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,#25d366,#1a73e8);box-shadow:0 6px 16px rgba(26,115,232,.25)">📤 '+((PB.lang&&PB.lang()==="en")?"Share this shop":"यह दुकान शेयर करें")+'</button>'+
@@ -159,7 +160,7 @@ function render(){
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
    '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>';
-  drawContact();drawVac();
+  drawContact();drawVac();drawVacFlag();
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
@@ -207,6 +208,19 @@ function openReport(){
       go.disabled=false;
     }
   };
+}
+/* 💼 मुफ़्त "Vacancy available" switch (sql-13) */
+let VACF=null;
+async function loadVacFlag(){
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_vacancy_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:[slug]})});
+    if(!r.ok)return;const j=await r.json();VACF=j&&j[slug]?j[slug]:null;}catch(e){return;}
+  drawVacFlag();
+}
+function drawVacFlag(){
+  const el=document.getElementById("vacFlag");if(!el)return;
+  if(!VACF){el.style.display="none";return;}
+  const en=PB.lang&&PB.lang()==="en";el.style.display="flex";
+  el.innerHTML='<b>💼 '+(en?"Vacancy available":"नौकरी खाली है (Vacancy)")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span>';
 }
 /* इस दुकान की चालू vacancies (₹499 plan वाली) */
 let VAC=null;
