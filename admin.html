@@ -170,6 +170,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="pTabs"><button data-p="pending" class="on">⏳ बाकी</button><button data-p="done">✔ हो चुकी</button></div>
     <div id="pBody"></div>
   </div>
+  <div id="hsv" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>🏠 Home Service की requests</h2></div>
+    <p class="cnt">दुकानदार ने "मेरी दुकान" में Home Service का switch ON किया है। जाँच लें कि यह असली दुकान / फ़र्म है (पता, GST, बिज़नेस का प्रकार)। ✅ Approve करने पर दुकान Home Services पेज पर दिखेगी। दुकानदार खुद OFF करे तो तुरंत बंद हो जाती है।</p>
+    <div class="mtabs" id="hTabs"><button data-h="pending" class="on">⏳ बाकी</button><button data-h="done">✔ हो चुकी</button></div>
+    <div id="hBody"></div>
+  </div>
   <div id="edv" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
     <div class="hh"><h2>✏️ दुकानदारों ने जानकारी बदली</h2></div>
@@ -406,7 +413,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!sess) return gate('login');
     $('who').textContent = sess.email || ''; $('out').hidden = false;
     showHome();
-    if (START === '#edv') showEdits(); else if (START === '#phv') showPhReq(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
+    if (START === '#edv') showEdits(); else if (START === '#phv') showPhReq(); else if (START === '#hsv') showHsReq(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
     bellState();
   })();
   /* ---- 🔔 Push notification: नई दुकान / शिकायत / संदेश पर इस फ़ोन में घंटी ---- */
@@ -449,7 +456,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -489,13 +496,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', 'बंद', '₹499 plan अभी बंद है', 0],
       ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0],
       ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0],
-      ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0]
+      ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
+      ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
-    repBadge(); phBadge(); edBadge();
+    repBadge(); phBadge(); edBadge(); hsBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -509,6 +517,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'reports') return showReports();
     if (t === 'phreq') return showPhReq();
     if (t === 'edits') return showEdits();
+    if (t === 'hsreq') return showHsReq();
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
@@ -769,6 +778,45 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try { await rpc('pb_admin_phone_decide', { p_id: +b.dataset.id, p_approve: ok }); }
     catch (x) { alert(/phone in use/i.test(x.message) ? 'यह नया नंबर अब किसी दूसरी दुकान पर है — Approve नहीं हो सकता।' : 'गलती: ' + x.message); }
     loadPhReq();
+  };
+  /* ---- 🏠 Home Service requests (sql-22) ---- */
+  var HTAB = 'pending', HDATA = [];
+  async function hsBadge() {
+    var b = document.querySelector('#tiles [data-t="hsreq"]'); if (!b) return;
+    try {
+      var R = await rpc('pb_admin_home_requests', {}) || [], n = R.filter(function (r) { return r.status === 'pending'; }).length;
+      b.querySelector('b').textContent = n;
+      b.querySelector('small').textContent = n ? n + ' Approve करनी बाकी' : 'कोई बाकी नहीं';
+      if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
+    } catch (e) { b.querySelector('small').textContent = 'sql-22 चलाएँ'; }
+  }
+  function showHsReq() { view('hsv'); loadHsReq(); }
+  async function loadHsReq() {
+    $('hBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    try { HDATA = await rpc('pb_admin_home_requests', {}) || []; drawHsReq(); }
+    catch (e) { if (e.message === 'login') return; $('hBody').innerHTML = '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 22_home_service_requests.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+  }
+  function drawHsReq() {
+    var L = HDATA.filter(function (r) { return HTAB === 'pending' ? r.status === 'pending' : r.status !== 'pending'; });
+    $('hBody').innerHTML = '<p class="cnt">' + L.length + ' requests</p>' + (L.length ? L.map(function (r) {
+      return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ Pending दुकान') + '</span></h3>' +
+        (r.address ? '<p class="meta">📍 ' + esc(r.address) + '</p>' : '') +
+        '<p class="meta">' + esc(r.category || '') + (r.type ? ' · ' + esc(r.type) : ' · प्रकार नहीं भरा') + (r.gst ? ' · 🧾 GST है' : '') + '</p>' +
+        '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + (r.status === 'approved' ? '✅ Approve किया' : '❌ Reject किया') + (r.decided_at ? ' ' + fmtD(r.decided_at) : '') : '') + '</p>' +
+        (r.status === 'pending' ? '<div class="acts"><button data-ha="1" data-id="' + r.id + '" data-slug="' + esc(r.slug) + '" style="background:#137333;color:#fff">✅ Approve — Home Service चालू</button><button class="del" data-ha="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
+    }).join('') : '<p class="cnt">' + (HTAB === 'pending' ? 'कोई request बाकी नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
+  }
+  $('hTabs').onclick = function (e) { var b = e.target.closest('[data-h]'); if (!b) return; HTAB = b.dataset.h; $('hTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawHsReq(); };
+  $('hBody').onclick = async function (e) {
+    var b = e.target.closest('[data-ha]'); if (!b) return;
+    var ok = b.dataset.ha === '1';
+    if (!confirm(ok ? 'इस दुकान की Home Service चालू करें? (दुकान Home Services पेज पर दिखेगी)' : 'यह request Reject करें?')) return;
+    b.disabled = true;
+    try {
+      if (ok) { try { await rpc('pb_admin_set_home_service', { p_slug: b.dataset.slug, p_on: true, p_city_ids: [] }); } catch (x) {} }   /* पुराना admin switch भी (और शहर बाद में दुकानों की list से) */
+      await rpc('pb_admin_home_decide', { p_id: +b.dataset.id, p_approve: ok });
+    } catch (x) { alert('गलती: ' + x.message); }
+    loadHsReq();
   };
   /* ---- ✏️ दुकानदारों ने जानकारी बदली (sql-16) ---- */
   var EDATA = [], ESEEN = 0;

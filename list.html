@@ -240,7 +240,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही category खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
         <textarea id="services" data-ip="svc_ph" placeholder="जैसे: car wash, polish, interior cleaning"></textarea>
         <div class="cat" id="cat"></div>
-        <label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)</span></label>
+        <label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (Home Service)</span></label>
         <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (Home Delivery)</span></label>
         <div class="err"></div>
         <div class="sum" id="sum"></div>
@@ -1015,7 +1015,11 @@ async function checkLogin(){
 }
 $("whoOut").onclick=async()=>{await PBA.logout();checkLogin();};
 checkLogin();
-function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const en=(PB.lang&&PB.lang()==="en");[["spYt",en?"✅ Yes, show it to everyone (customers can Call / WhatsApp)":"✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)"],["spNt",en?"🔒 No, keep my number hidden":"🔒 नहीं, नंबर छिपा रहे"],["spNote",en?"You can change this anytime from the \u201cMy Shop\u201d page.":"बाद में \"मेरी दुकान\" पेज से कभी भी बदल सकते हैं।"]].forEach(x=>{const e=$(x[0]);if(e)e.textContent=x[1];});const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()==="en")?"🏠 I visit customers\u2019 homes to provide service (Home Service)":"🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");$("district").placeholder=(PB.lang&&PB.lang()==="en")?"District name":"ज़िले का नाम";try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
+/* Home Service सिर्फ दुकान / फ़र्म के लिए — नौकरी / फ्रीलांसर / कारीगर को checkbox नहीं */
+function hsvByType(){const t=$("btype"),c=$("homeSvc");if(!t||!c)return;const ind=["Employee (Job)","Freelancer / Self-employed","Skilled Worker"].includes(t.value);
+  const l=c.closest("label");if(l)l.style.display=ind?"none":"";if(ind)c.checked=false;}
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="btype")hsvByType();});
+function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const en=(PB.lang&&PB.lang()==="en");[["spYt",en?"✅ Yes, show it to everyone (customers can Call / WhatsApp)":"✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)"],["spNt",en?"🔒 No, keep my number hidden":"🔒 नहीं, नंबर छिपा रहे"],["spNote",en?"You can change this anytime from the \u201cMy Shop\u201d page.":"बाद में \"मेरी दुकान\" पेज से कभी भी बदल सकते हैं।"]].forEach(x=>{const e=$(x[0]);if(e)e.textContent=x[1];});const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()==="en")?"🏠 Our shop provides service at customers\u2019 homes (Home Service)":"🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");$("district").placeholder=(PB.lang&&PB.lang()==="en")?"District name":"ज़िले का नाम";try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
 PB.apply();fixHint();btypeFill();document.title=T("addshop")+" — PataBook";
 PB.mount($("pbLang"));
 PB.onChange(()=>{

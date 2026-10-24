@@ -198,6 +198,19 @@ function phoneBlock(b,i){
 
 /* ---------- 💼 Vacancy available ON/OFF (मुफ़्त; 30 दिन बाद अपने आप बंद) ---------- */
 let VAC={},VAC_OK=true;
+/* 🏠 Home Service (sql-22): ON = Admin की मंज़ूरी की request; OFF = तुरंत बंद। अकेले व्यक्ति (नौकरी / फ्रीलांसर / कारीगर) को नहीं दिखता */
+let HOME=null;
+async function loadHome(){try{HOME=await rpc("pb_my_home_status")||{};}catch(e){HOME=null;}}   /* sql-22 अभी नहीं चली तो यह हिस्सा नहीं दिखेगा */
+function homeBlock(b,i){
+  if(!HOME)return "";const st=HOME[b.slug]||"off";if(st==="no")return "";
+  const en=L()==="en",on=st==="on",pend=st==="pending";
+  return '<div class="phone'+(on||pend?"":" off")+'" style="margin-top:10px"><span class="ic" aria-hidden="true">🏠</span>'+
+    '<span class="tx"><b>'+(en?"Home Service":"Home Service (घर पर सेवा)")+'</b><small>'+
+    (on?(en?"Your shop shows on the Home Services page":"आपकी दुकान Home Services पेज पर दिख रही है")
+      :pend?(en?"⏳ Waiting for PataBook approval":"⏳ PataBook की मंज़ूरी का इंतज़ार")
+      :(en?"Turn ON if your shop sends staff to customers' homes":"आपकी दुकान ग्राहक के घर जाकर सेवा देती है तो ON करें"))+'</small></span>'+
+    '<button type="button" class="sw home" role="switch" aria-checked="'+(on||pend)+'" aria-label="Home Service" data-h="'+i+'"></button></div><div class="err" id="he'+i+'"></div>';
+}
 function vacBlock(b,i){
   if(!VAC_OK)return "";
   const u=VAC[b.slug],on=!!u,en=L()==="en";
@@ -371,7 +384,7 @@ function draw(){
   list.innerHTML=notifBlock()+ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    profBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+logoBlock(b,i)+
+    profBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i)+logoBlock(b,i)+
     '<a class="edbtn" href="edit.html?slug='+encodeURIComponent(b.slug)+'"><span>✏️</span><span><b>'+(L()==="en"?"Edit details":"जानकारी बदलें")+'</b><small>'+(L()==="en"?"Timings, WhatsApp, PIN, delivery, email, website, services":"समय, WhatsApp, PIN, डिलीवरी, ईमेल, वेबसाइट, सेवाएँ")+'</small></span><i>›</i></a>'+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
@@ -380,6 +393,15 @@ function draw(){
     (PINST?'<button type="button" class="delacc" id="delAcc">🗑️ '+(L()==="en"?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
 }
 $("list").addEventListener("click",async e=>{
+  const hs=e.target.closest(".sw.home");
+  if(hs){
+    const i=+hs.dataset.h,b=ROWS[i],cur=(HOME&&HOME[b.slug])||"off",want=cur==="off",en=L()==="en";$("he"+i).textContent="";
+    if(want&&!confirm(en?"Home Service means your shop sends its own trusted staff to the customer's home, and your shop is responsible for them. PataBook will check and approve. Continue?":"Home Service का मतलब: आपकी दुकान अपने भरोसेमंद आदमी को ग्राहक के घर भेजेगी, और उनकी ज़िम्मेदारी आपकी दुकान की होगी। PataBook जाँच करके मंज़ूरी देगा। आगे बढ़ें?"))return;
+    hs.disabled=true;
+    try{ME=await PBA.session();const v=await rpc("pb_owner_home_service",{p_slug:b.slug,p_on:want});HOME[b.slug]=(v&&v.state)||"off";draw();}
+    catch(x){hs.disabled=false;$("he"+i).textContent=/individual/.test(x.message||"")?(en?"Home Service is only for shops / firms.":"Home Service सिर्फ दुकान / फ़र्म के लिए है।"):tx("e_sw");}
+    return;
+  }
   const vs=e.target.closest(".sw.vac");
   if(vs){
     const i=+vs.dataset.v,b=ROWS[i],want=!VAC[b.slug];vs.disabled=true;$("ve"+i).textContent="";
@@ -527,7 +549,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();await loadEvents();await loadProf();await bellState();
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
