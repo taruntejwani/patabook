@@ -19,7 +19,7 @@ var D={
 en:{
 lang:"Language",
 search:"Search",ph:"What are you looking for?",loading:"Searching...",none:"No business found.",fail:"Search failed",net:"Network error",
-joinq:"Is your business on PataBook?",joinbtn:"Add your business",allcats:"All Categories",qc_h:"Choose a category",myshop:"My Shop",myshop_btn:"Open My Shop",myshop_bar:"My Shop",myshop_sub:"You are logged in — manage your shop",
+joinq:"Is your business on PataBook?",joinbtn:"Add your business",allcats:"All Categories",qc_h:"Choose a category",myshop:"My Shop",myshop_btn:"Login",myshop_bar:"My Shop",myshop_sub:"You are logged in — manage your shop",
 c_Automobile:"Automobile",c_Food:"Food",c_Health:"Health",c_Shopping:"Shopping",c_Education:"Education",c_Home:"Home Services",c_Professional:"Professional",c_Hotel:"Hotel",
 addshop:"List your shop",near:"Shops near you",within:"within {r}",all:"All",found:"{n} shops found",nearest:"nearest first",
 locating:"Finding your location…",using:"📍 From your location",denied:"Location unavailable — choose a city:",retry:"Try again",
@@ -59,7 +59,7 @@ e_cat:"Please choose your business category.",e_catid:"Category could not be con
 hi:{
 lang:"भाषा",
 search:"खोजें",ph:"क्या ढूंढ रहे हैं?",loading:"खोज रहे हैं...",none:"कोई बिज़नेस नहीं मिला।",fail:"खोज रुक गई",net:"नेटवर्क त्रुटि",
-joinq:"क्या आपने अपना बिज़नेस PataBook पर जोड़ा?",joinbtn:"अपना बिज़नेस जोड़ें",allcats:"सभी कैटेगरी",qc_h:"कैटेगरी चुनें",myshop:"मेरी दुकान",myshop_btn:"मेरी दुकान खोलें",myshop_bar:"मेरी दुकान",myshop_sub:"आप लॉगिन हैं — अपनी दुकान संभालें",
+joinq:"क्या आपने अपना बिज़नेस PataBook पर जोड़ा?",joinbtn:"अपना बिज़नेस जोड़ें",allcats:"सभी कैटेगरी",qc_h:"कैटेगरी चुनें",myshop:"मेरी दुकान",myshop_btn:"Login",myshop_bar:"मेरी दुकान",myshop_sub:"आप लॉगिन हैं — अपनी दुकान संभालें",
 c_Automobile:"ऑटोमोबाइल",c_Food:"खाना",c_Health:"स्वास्थ्य",c_Shopping:"शॉपिंग",c_Education:"शिक्षा",c_Home:"होम सर्विस",c_Professional:"प्रोफेशनल",c_Hotel:"होटल",
 addshop:"दुकान जोड़ें",near:"आपके पास की दुकानें",within:"{r} के अंदर",all:"सभी",found:"{n} दुकानें मिलीं",nearest:"सबसे पास से शुरू",
 locating:"आपकी location ढूंढ रहे हैं…",using:"📍 आपकी location से",denied:"Location नहीं मिली — शहर चुनें:",retry:"फिर कोशिश करें",
