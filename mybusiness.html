@@ -129,7 +129,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
     <p id="gP">जिस मोबाइल नंबर से आपने दुकान जोड़ी थी, वही नंबर डालें। उस पर OTP आएगा।</p>
     <form id="mF" class="mf" hidden autocomplete="on">
       <div class="mrow"><span class="cc">+91</span><input id="mPh" type="tel" inputmode="numeric" maxlength="16" autocomplete="tel-national" placeholder="98XXXXXXXX"></div>
-      <div id="mPinW" hidden><input id="mPin" type="password" maxlength="64" autocomplete="current-password" placeholder="पासवर्ड"></div>
+      <div id="mPinW" hidden><input id="mPin" type="password" maxlength="64" autocomplete="current-password" placeholder="पासवर्ड"><button class="lnk" type="button" id="mForgot" style="display:block;margin:6px 0 0 auto;padding:4px 0">पासवर्ड भूल गए?</button></div>
       <div id="mOtpW" hidden><input id="mOtp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"><small id="mHint"></small></div>
       <div id="pbCaptcha" style="display:flex;justify-content:center;margin:2px 0 8px"></div>   <!-- "मैं robot नहीं हूँ" वाला box यहीं दिखे -->
       <div class="err" id="mErr"></div>
@@ -337,9 +337,10 @@ function draw(){
   $("mF").hidden=!mOn;$("gP").textContent=tx(mOn?"gP":"gPe");$("gB").className=mOn?"lnk":"btn";
   const en0=L()==="en";mVis();
   $("mGo").textContent=M.mode==="pin"?(en0?"Log in →":"लॉगिन करें →"):tx(M.sent?"m_go":"m_send");$("mBack").textContent=tx("m_back");
-  $("mMode").textContent=M.mode==="pin"?(en0?"No password yet / forgot it? Log in with OTP →":"पासवर्ड नहीं बनाया / भूल गए? OTP से लॉगिन करें →"):(en0?"🔐 Log in with mobile number + password →":"🔐 मोबाइल नंबर + पासवर्ड से लॉगिन करें →");
+  $("mMode").textContent=M.mode==="pin"?(en0?"No password yet? Log in with OTP →":"पासवर्ड नहीं बनाया? OTP से लॉगिन करें →"):(en0?"🔐 Log in with mobile number + password →":"🔐 मोबाइल नंबर + पासवर्ड से लॉगिन करें →");
   $("gP").textContent=M.mode==="pin"?(en0?"Enter your shop's mobile number and your password.":"दुकान का मोबाइल नंबर और अपना पासवर्ड डालें।"):$("gP").textContent;
-  $("mPin").placeholder=en0?"Password":"पासवर्ड";
+  $("mPin").placeholder=en0?"Password":"पासवर्ड";$("mForgot").textContent=en0?"Forgot password?":"पासवर्ड भूल गए?";
+  if(M.forgot&&M.mode==="otp")$("gP").textContent=en0?"Forgot password? Enter your shop's mobile number — log in with OTP, then create a new 5-digit password.":"पासवर्ड भूल गए? दुकान का मोबाइल नंबर डालें — OTP से लॉगिन करें, फिर नया 5 अंक का पासवर्ड बनाएँ।";
   if(M.sent)$("mHint").textContent=tx("m_hint","+91 "+M.phone);$("backT").textContent=tx("back");
   document.title=tx("h1")+" — PataBook";
   $("gate").hidden=!!ME;$("who").hidden=!ME;
@@ -401,7 +402,7 @@ $("list").addEventListener("click",async e=>{
 });
 /* ---- मोबाइल नंबर + OTP से login ---- */
 let PINMODE=false;try{PINMODE=localStorage.getItem("pb-has-pin")==="1";}catch(e){}
-const M={sent:false,phone:"",mode:PINMODE?"pin":"otp"};
+const M={sent:false,phone:"",mode:PINMODE?"pin":"otp",forgot:false};
 let PINST=null;   /* {has_pin} — login के बाद */
 function phoneOf(s){const m=/^m([6-9]\d{9})@phone\.patabook\.in$/.exec((s&&s.email)||"");return m?m[1]:"";}
 function mErr(e){
@@ -425,7 +426,12 @@ function mVis(){   /* पासवर्ड वाला / OTP वाला ह�
   $("mPinW").hidden=!pin;$("mOtpW").hidden=pin||!M.sent;$("mBack").hidden=pin||!M.sent;$("mPh").readOnly=!pin&&M.sent;
   const cap=$("pbCaptcha");if(cap)cap.style.display=pin?"none":"flex";
 }
-$("mMode").onclick=()=>{M.mode=M.mode==="pin"?"otp":"pin";M.sent=false;$("mOtp").value="";$("mPin").value="";$("mErr").textContent="";mShow();(M.mode==="pin"&&$("mPh").value.length===10?$("mPin"):$("mPh")).focus();};
+/* पासवर्ड भूल गए → OTP से लॉगिन → तुरंत नया पासवर्ड */
+$("mForgot").onclick=()=>{
+  M.forgot=true;M.mode="otp";M.sent=false;$("mPin").value="";$("mOtp").value="";$("mErr").textContent="";mShow();
+  if(/^[6-9]\d{9}$/.test($("mPh").value))$("mF").requestSubmit();else $("mPh").focus();
+};
+$("mMode").onclick=()=>{M.forgot=false;M.mode=M.mode==="pin"?"otp":"pin";M.sent=false;$("mOtp").value="";$("mPin").value="";$("mErr").textContent="";mShow();(M.mode==="pin"&&$("mPh").value.length===10?$("mPin"):$("mPh")).focus();};
 /* पासवर्ड पर कोई नियम नहीं — अंक, शब्द, कुछ भी */
 $("mBack").onclick=()=>{M.sent=false;$("mOtp").value="";$("mErr").textContent="";mShow();$("mPh").focus();};
 $("mPh").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").replace(/^(91|0)(?=[6-9]\d{9}$)/,"").slice(0,10);});
@@ -452,7 +458,10 @@ $("mF").addEventListener("submit",async e=>{
   const code=$("mOtp").value.replace(/\D/g,"");
   if(!/^\d{6}$/.test(code)){$("mErr").textContent=tx("m_bad_otp");return;}
   go.disabled=true;
-  try{await PBA.mobile.ownerVerify(M.phone,code);M.sent=false;$("mOtp").value="";$("mOtpW").hidden=true;$("mBack").hidden=true;$("mPh").readOnly=false;go.disabled=false;await start();}
+  try{await PBA.mobile.ownerVerify(M.phone,code);M.sent=false;$("mOtp").value="";$("mOtpW").hidden=true;$("mBack").hidden=true;$("mPh").readOnly=false;go.disabled=false;await start();
+    if(M.forgot){M.forgot=false;const en=L()==="en",n=$("pinNew");   /* भूले थे → सीधे नया पासवर्ड वाले box पर */
+      if(n){$("pinBox").scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>n.focus(),400);
+        $("pinMsg").textContent=en?"✅ Logged in with OTP. Now create a new 5-digit password.":"✅ OTP से लॉगिन हो गया। अब नया 5 अंक का पासवर्ड बनाएँ।";}}}
   catch(x){go.disabled=false;$("mErr").textContent=mErr(x);}
 });
 $("list").addEventListener("click",e=>{   /* "Logo भरें" → उसी card का logo वाला हिस्सा */
