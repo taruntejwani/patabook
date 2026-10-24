@@ -160,6 +160,8 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
         <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select>
         <input id="shop" data-ip="shop_ph" placeholder="जैसे: श्री कृष्णा कार वॉश" maxlength="80">
+        <label for="web" id="webL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span></label>
+        <input id="web" type="url" inputmode="url" autocomplete="url" placeholder="जैसे: www.meridukaan.com" maxlength="200">
         <div class="err"></div>
       </div>
 
@@ -509,6 +511,7 @@ function setErr(m){steps[i].querySelector(".err").textContent=m||"";}
 function check(){
   const key=steps[i].dataset.s;setErr("");
   if(key==="shop"&&$("shop").value.trim().length<2){setErr(T("e_shop"));return false;}
+  if(key==="shop"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){setErr(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
   if(key==="owner"&&$("owner").value.trim().length<2){setErr(T("e_owner"));return false;}
   if(key==="addr"){
     const cv=$("city").value.trim();
@@ -525,7 +528,7 @@ function check(){
 
 function summary(){
   const m=mapUrl();
-  const rows=[[T("s_shop"),$("shop").value.trim()],...($("btype")&&$("btype").value?[[EN()?"Business type":"बिज़नेस का प्रकार",$("btype").selectedOptions[0].textContent]]:[]),[T("s_name"),$("owner").value.trim()],[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
+  const rows=[[T("s_shop"),$("shop").value.trim()],...($("btype")&&$("btype").value?[[EN()?"Business type":"बिज़नेस का प्रकार",$("btype").selectedOptions[0].textContent]]:[]),...($("web")&&webNorm($("web").value)?[[EN()?"Website":"वेबसाइट",webNorm($("web").value)]]:[]),[T("s_name"),$("owner").value.trim()],[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
   $("sum").innerHTML=rows.map(r=>"<div><span>"+r[0]+"</span><b>"+esc(r[1])+"</b></div>").join("");
 }
 
@@ -538,12 +541,16 @@ const BTYPES=[
  ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (Manufacturer)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Worker","जॉब वर्कर (Job Work)"],["Assembler","असेंबलर"]]],
  ["🚚 थोक / बीच के व्यापारी","🚚 Trade (bulk)",[["Importer","इम्पोर्टर"],["Exporter","एक्सपोर्टर"],["C&F / Super Stockist","C&F / सुपर स्टॉकिस्ट"],["Distributor","डिस्ट्रीब्यूटर"],["Wholesaler","होलसेलर (थोक)"],["Stockist","स्टॉकिस्ट"],["Authorised Dealer","अधिकृत डीलर"],["Trader / Commission Agent","ट्रेडर / दलाल"]]],
  ["🏪 ग्राहक तक","🏪 To customers",[["Retailer","रिटेलर (दुकान)"],["Showroom","शोरूम"],["Franchise","फ्रैंचाइज़ी"],["Online Seller","ऑनलाइन विक्रेता"],["Hawker / Street Vendor","फेरीवाला / ठेला"]]],
- ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (Service)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]]
+ ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (Service)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]],
+ ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled Worker)"]]]
 ];
+function webNorm(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);if(!/\.[a-z]{2,}$/i.test(u.hostname))return null;return u.href.slice(0,200);}catch(e){return null;}}
 function btypeFill(){
   const sel=$("btype");if(!sel)return;const v=sel.value,en=EN();
   sel.innerHTML='<option value="">'+(en?"Choose ▾ (optional)":"चुनें ▾ (ज़रूरी नहीं)")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
   sel.value=v;
+  const wl=$("webL");if(wl)wl.innerHTML=en?'🌐 Your website / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(if any)</span>':'🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span>';
+  const wi=$("web");if(wi)wi.placeholder=en?"e.g. www.myshop.com":"जैसे: www.meridukaan.com";
   const L=$("btypeL");if(L)L.innerHTML=en?'Business type <span style="font-weight:400;color:#5f6368">(optional)</span>':'बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span>';
 }
 function ph10(){const d=phoneClean().replace(/\D/g,"");return d.length>10?d.slice(-10):d;}
@@ -691,6 +698,7 @@ async function submit(){
   const desc=[
     "Owner: "+$("owner").value.trim(),
     $("btype")&&$("btype").value?"Type: "+$("btype").value:"",
+    $("web")&&webNorm($("web").value)?"Website: "+webNorm($("web").value):"",
     svc?"Services: "+svc:"",
     d[1]?"Subcategory: "+d[1]:"",
     S?"Category: "+pathOf(S):"",
