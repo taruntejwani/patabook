@@ -87,7 +87,9 @@ function loginUrl(next){return "login.html?next="+encodeURIComponent(next||(loca
 function otpBase(){return String((window.PB_SITE&&window.PB_SITE.otpUrl)||"").replace(/\/$/,"");}
 /* "मैं रोबोट नहीं हूँ" जाँच (Cloudflare Turnstile) — site-config.js में turnstileKey हो तभी चलती है.
    ज़्यादातर लोगों को कुछ दिखता भी नहीं; शक होने पर ही एक छोटा box आता है. */
-var TS_KEY=String((window.PB_SITE&&window.PB_SITE.turnstileKey)||""),tsWid=null,tsWait=null,tsLoad=null;
+/* key हर बार ताज़ा पढ़ो — कुछ पेजों में site-config.js इस फाइल के बाद load होती है (मेरी दुकान में यही गड़बड़ थी) */
+function tsKey(){return String((window.PB_SITE&&window.PB_SITE.turnstileKey)||"");}
+var tsWid=null,tsWait=null,tsLoad=null;
 function tsScript(){
   if(window.turnstile)return Promise.resolve();
   if(tsLoad)return tsLoad;
@@ -98,7 +100,7 @@ function tsScript(){
   return tsLoad;
 }
 async function captchaToken(anchor){
-  if(!TS_KEY)return "";
+  if(!tsKey())return "";
   try{await tsScript();}catch(e){var e1=new Error("captcha_failed");e1.code="captcha_failed";throw e1;}
   return new Promise(function(res,rej){
     var fail=function(){var p=tsWait;tsWait=null;if(p){var e2=new Error("captcha_failed");e2.code="captcha_failed";p.rej(e2);}};
@@ -107,7 +109,7 @@ async function captchaToken(anchor){
       if(!box){box=document.createElement("div");box.id="pbCaptcha";box.style.cssText="display:flex;justify-content:center;margin:10px 0";
         if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else document.body.appendChild(box);}
       var lg="hi";try{if(localStorage.getItem("pb-lang")==="en")lg="en";}catch(e){}
-      tsWid=window.turnstile.render(box,{sitekey:TS_KEY,execution:"execute",appearance:"interaction-only",language:lg,
+      tsWid=window.turnstile.render(box,{sitekey:tsKey(),execution:"execute",appearance:"interaction-only",language:lg,
         callback:function(t){var p=tsWait;tsWait=null;if(p)p.res(t);},"error-callback":fail,"timeout-callback":fail});
     }
     tsWait={res:res,rej:rej};
@@ -120,7 +122,7 @@ async function otpCall(path,body,withSession){
   var base=otpBase();if(!base){var e0=new Error("otp_not_configured");e0.code="otp_not_configured";throw e0;}
   var h={"Content-Type":"application/json"};
   if(withSession){var s=await session();if(!s){var e1=new Error("login_required");e1.code="login_required";e1.status=401;throw e1;}h.Authorization="Bearer "+s.access_token;}
-  body=body||{};if(path==="/send"&&TS_KEY)body.ts=await captchaToken(document.activeElement);
+  body=body||{};if(path==="/send"&&tsKey())body.ts=await captchaToken(document.activeElement);
   var r=await fetch(base+path,{method:"POST",headers:h,body:JSON.stringify(body),cache:"no-store"});
   var j=null;try{j=await r.json();}catch(e){}
   if(!r.ok||!j||!j.ok){var err=new Error((j&&j.error)||("HTTP "+r.status));err.status=r.status;err.code=(j&&j.error)||"";err.retry_after=j&&j.retry_after;err.attempts_left=j&&j.attempts_left;throw err;}
