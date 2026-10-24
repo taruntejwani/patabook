@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>जानकारी बदलें — PataBook</title>
+<link rel="icon" href="pin.png">
+<meta name="theme-color" content="#1a73e8">
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#e8f1ff 0%,#fff 42%);color:#12141c;min-height:100vh}
+.wrap{max-width:520px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.back{border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:#0b2f73;text-decoration:none}
+.brand{font-weight:800;font-size:18px;color:#0b2f73}
+.card{background:#fff;border:1px solid #e4eaf5;border-radius:20px;padding:18px 16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
+h1{font-size:21px;color:#0b2f73;margin:0 0 4px;line-height:1.35}
+.shop{font-weight:700;margin:0 0 2px}
+.addr{color:#5b6475;font-size:13.5px;margin:0}
+h2{font-size:15.5px;color:#0b2f73;margin:0 0 10px}
+.lbl{display:block;font-size:13.5px;font-weight:600;margin:12px 0 6px;color:#3c4043}
+.lbl:first-of-type{margin-top:0}
+.hint{font-size:12.5px;color:#5b6475;margin:4px 0 0;line-height:1.45}
+input,select,textarea{width:100%;border:2px solid #dfe1e5;border-radius:12px;padding:12px;font-size:16px;outline:0;font-family:inherit;background:#fff;color:#12141c}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
+.two{display:flex;gap:10px}.two>div{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;margin-top:4px;cursor:pointer}
+.chk input{width:22px;height:22px;flex:none}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:6px;font-family:inherit;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.6}
+.btn.sec{background:#eef2fb;color:#174ea6;margin-top:10px}
+.save{position:sticky;bottom:0;padding:10px 0 4px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 30%)}
+.err{color:#c5221f;font-size:14px;margin:8px 0 0;min-height:0;line-height:1.5;font-weight:600}
+.err:empty{display:none}
+.ok{background:#e6f4ea;color:#137333;border-radius:12px;padding:14px;line-height:1.55;font-size:15px;font-weight:600}
+.note{background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5;margin-top:10px}
+.muted{color:#5b6475;text-align:center;padding:30px 10px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><a class="back" href="mybusiness.html" data-en="← My Shop">← मेरी दुकान</a><div class="brand">PataBook</div></div>
+
+ <p class="muted" id="loading">…</p>
+ <div class="card" id="needLogin" hidden>
+  <h1 data-en="Log in first">पहले लॉगिन करें</h1>
+  <p class="addr" data-en="Open My Shop and log in with your shop's mobile number.">"मेरी दुकान" खोलकर दुकान के मोबाइल नंबर से लॉगिन करें।</p>
+  <a class="btn" href="mybusiness.html" data-en="Open My Shop">मेरी दुकान खोलें</a>
+ </div>
+ <div class="card" id="notOwner" hidden>
+  <h1 data-en="This shop is not in your account">यह दुकान आपके खाते में नहीं है</h1>
+  <a class="btn" href="mybusiness.html" data-en="Open My Shop">मेरी दुकान खोलें</a>
+ </div>
+ <div class="card" id="setup" hidden>
+  <h1 data-en="Coming soon">यह सुविधा जल्द शुरू होगी</h1>
+  <p class="addr" data-en="Please try again after some time.">थोड़ी देर बाद दोबारा खोलें।</p>
+ </div>
+
+ <form id="main" hidden autocomplete="off" novalidate>
+  <div class="card">
+   <h1 data-en="✏️ Edit details">✏️ जानकारी बदलें</h1>
+   <p class="shop" id="shopName"></p><p class="addr" id="shopAddr"></p>
+   <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name, address and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम, पता और category सिर्फ PataBook Admin बदल सकते हैं।</p>
+  </div>
+
+  <div class="card">
+   <h2 data-en="🏷️ Business type">🏷️ बिज़नेस का प्रकार</h2>
+   <select id="btype"></select>
+  </div>
+
+  <div class="card">
+   <h2 data-en="🕘 Timings">🕘 दुकान का समय</h2>
+   <div class="two">
+    <div><label class="lbl" for="openT" data-en="Opens at">खुलने का समय</label><input id="openT" type="time"></div>
+    <div><label class="lbl" for="closeT" data-en="Closes at">बंद होने का समय</label><input id="closeT" type="time"></div>
+   </div>
+   <label class="lbl" for="offDay" data-en="Weekly off">हफ़्ते की छुट्टी</label>
+   <select id="offDay"></select>
+  </div>
+
+  <div class="card">
+   <h2 data-en="📞 Other numbers">📞 दूसरे नंबर</h2>
+   <label class="lbl" for="wa" data-en="💬 WhatsApp number (if different from main number)">💬 WhatsApp नंबर (अगर मुख्य नंबर से अलग है)</label>
+   <input id="wa" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
+   <label class="lbl" for="ph2" data-en="☎️ Another number">☎️ दूसरा नंबर</label>
+   <input id="ph2" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
+   <p class="note" id="hidNote" hidden data-en="Your number is hidden (switch OFF in My Shop), so these numbers will not show either.">आपका नंबर छिपा है ("मेरी दुकान" में स्विच OFF), इसलिए ये नंबर भी नहीं दिखेंगे।</p>
+   <p class="hint" data-en="To change your main number, use “📱 Change number” in My Shop.">मुख्य नंबर बदलने के लिए "मेरी दुकान" में "📱 नंबर बदलें" दबाएँ।</p>
+  </div>
+
+  <div class="card">
+   <h2 data-en="📍 PIN and delivery">📍 PIN और डिलीवरी</h2>
+   <label class="lbl" for="pin" data-en="PIN code">PIN कोड</label>
+   <input id="pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंक / 6 digits">
+   <label class="chk" style="margin-top:14px"><input id="homeDel" type="checkbox"><span data-en="🚚 We do home delivery">🚚 हम होम डिलीवरी करते हैं</span></label>
+  </div>
+
+  <div class="card">
+   <h2 data-en="🌐 Online">🌐 ऑनलाइन</h2>
+   <label class="lbl" for="email" data-en="Email">ईमेल</label>
+   <input id="email" type="email" inputmode="email" placeholder="name@gmail.com">
+   <label class="lbl" for="web" data-en="Website / Instagram / Facebook link">वेबसाइट / Instagram / Facebook link</label>
+   <input id="web" type="url" inputmode="url" placeholder="www.example.com">
+  </div>
+
+  <div class="card">
+   <h2 data-en="🛠️ What you sell / services">🛠️ आप क्या बेचते हैं / कौन-सी सेवाएँ</h2>
+   <textarea id="svc" maxlength="500" data-en-ph="e.g. Car shampoo, dashboard polish, wholesale supply" placeholder="जैसे: कार शैम्पू, डैशबोर्ड पॉलिश, थोक सप्लाई"></textarea>
+  </div>
+
+  <div class="save">
+   <div class="err" id="err"></div>
+   <button class="btn" type="submit" id="saveBtn" data-en="Save">सेव करें</button>
+  </div>
+ </form>
+
+ <div class="card" id="done" hidden>
+  <div class="ok" data-en="✅ Saved. Your shop page now shows the new details.">✅ सेव हो गया। आपकी दुकान के पेज पर नई जानकारी दिख रही है।</div>
+  <a class="btn" style="margin-top:14px" id="viewShop" href="#" data-en="View shop page">दुकान का पेज देखें</a>
+  <a class="btn sec" href="mybusiness.html" data-en="Back to My Shop">मेरी दुकान पर वापस</a>
+ </div>
+</div>
+<script>
+/* English चुनी हो तो data-en वाले हिस्से English में */
+(function(){var en=false;try{en=localStorage.getItem("pb-lang")==="en";}catch(e){}window.PB_EN=en;if(!en)return;
+document.documentElement.lang="en";document.title="Edit details — PataBook";
+document.querySelectorAll("[data-en]").forEach(function(el){el.textContent=el.getAttribute("data-en");});
+document.querySelectorAll("[data-en-ph]").forEach(function(el){el.placeholder=el.getAttribute("data-en-ph");});})();
+</script>
+<script>
+(function(){
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const $=id=>document.getElementById(id),EN=!!window.PB_EN;
+const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
+/* बिज़नेस के प्रकार — "दुकान जोड़ें" form (list.html) वाली ही list */
+const BTYPES=[
+ ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (Manufacturer)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Worker","जॉब वर्कर (Job Work)"],["Assembler","असेंबलर"]]],
+ ["🚚 थोक / बीच के व्यापारी","🚚 Trade (bulk)",[["Importer","इम्पोर्टर"],["Exporter","एक्सपोर्टर"],["C&F / Super Stockist","C&F / सुपर स्टॉकिस्ट"],["Distributor","डिस्ट्रीब्यूटर"],["Wholesaler","होलसेलर (थोक)"],["Stockist","स्टॉकिस्ट"],["Authorised Dealer","अधिकृत डीलर"],["Trader / Commission Agent","ट्रेडर / दलाल"]]],
+ ["🏪 ग्राहक तक","🏪 To customers",[["Retailer","रिटेलर (दुकान)"],["Showroom","शोरूम"],["Franchise","फ्रैंचाइज़ी"],["Online Seller","ऑनलाइन विक्रेता"],["Hawker / Street Vendor","फेरीवाला / ठेला"]]],
+ ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (Service)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]],
+ ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled Worker)"]]]
+];
+const DAYS=[["","कोई छुट्टी नहीं (सातों दिन खुला)","No weekly off (open all 7 days)"],["Sunday","रविवार","Sunday"],["Monday","सोमवार","Monday"],["Tuesday","मंगलवार","Tuesday"],["Wednesday","बुधवार","Wednesday"],["Thursday","गुरुवार","Thursday"],["Friday","शुक्रवार","Friday"],["Saturday","शनिवार","Saturday"]];
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function fill(){
+  $("btype").innerHTML='<option value="">'+(EN?"— Choose —":"— चुनें —")+'</option>'+BTYPES.map(g=>'<optgroup label="'+esc(EN?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+esc(o[0])+'">'+esc(EN?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
+  $("offDay").innerHTML=DAYS.map(d=>'<option value="'+d[0]+'">'+esc(EN?d[2]:d[1])+'</option>').join("");
+}
+function only(id){["loading","needLogin","notOwner","setup","main","done"].forEach(x=>$(x).hidden=x!==id);}
+const line=(d,k)=>{const m=String(d||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
+const n10=v=>{const d=String(v||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;};
+function webNorm(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);if(!/\.[a-z]{2,}$/i.test(u.hostname))return null;return u.href.slice(0,200);}catch(e){return null;}}
+let S=null;
+async function rpc(fn,args){
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+S.access_token,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));e.status=r.status;throw e;}
+  return j;
+}
+function errText(m){
+  m=String(m||"");
+  const f={"bad Hours":["खुलने और बंद होने का समय दोनों चुनें।","Choose both opening and closing time."],"bad Website":["Website का link सही लिखें (जैसे www.example.com)।","Enter a correct website link (like www.example.com)."],
+    "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
+    "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
+    "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
+    "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."]};
+  for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
+  return EN?"Could not save. Check your internet and try again.":"सेव नहीं हो सका। इंटरनेट जाँचकर दोबारा कोशिश करें।";
+}
+$("pin").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,6);});
+$("main").addEventListener("submit",async e=>{
+  e.preventDefault();$("err").textContent="";
+  const o=$("openT").value,c=$("closeT").value;
+  if((o&&!c)||(!o&&c)){$("err").textContent=errText("bad Hours");return;}
+  const wa=n10($("wa").value),p2=n10($("ph2").value),pin=$("pin").value.trim(),web=webNorm($("web").value),em=$("email").value.trim();
+  if(wa&&!/^[6-9]\d{9}$/.test(wa)){$("err").textContent=errText("bad WhatsApp");$("wa").focus();return;}
+  if(p2&&!/^[6-9]\d{9}$/.test(p2)){$("err").textContent=errText("bad Phone2");$("ph2").focus();return;}
+  if(pin&&!/^[1-9]\d{5}$/.test(pin)){$("err").textContent=errText("bad PIN");$("pin").focus();return;}
+  if(web===null){$("err").textContent=errText("bad Website");$("web").focus();return;}
+  if(em&&!/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(em)){$("err").textContent=errText("bad Email");$("email").focus();return;}
+  const p={Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim()};
+  const b=$("saveBtn");b.disabled=true;
+  try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);}
+  catch(x){$("err").textContent=errText(x.message);}
+  b.disabled=false;
+});
+(async function start(){
+  fill();only("loading");
+  if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
+  S=await PBA.session();if(!S){only("needLogin");return;}
+  try{
+    const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
+    if(!b){only("notOwner");return;}
+    $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";
+    const d=await rpc("pb_my_details",{p_slug:slug}),ds=(d&&d.description)||"";
+    const t=line(ds,"Type");if(t&&![...$("btype").options].some(x=>x.value===t))$("btype").insertAdjacentHTML("beforeend",'<option value="'+esc(t)+'">'+esc(t)+'</option>');
+    $("btype").value=t;
+    const h=line(ds,"Hours").match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);if(h){$("openT").value=h[1];$("closeT").value=h[2];}
+    $("offDay").value=line(ds,"Closed");
+    $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
+    $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");
+    $("hidNote").hidden=!(d&&d.show_phone===false);
+    only("main");
+  }catch(e){
+    if(e.status===401||/JWT|expired/i.test(e.message)){only("needLogin");return;}
+    only(/function|schema cache|not found/i.test(e.message)||e.status===404?"setup":"notOwner");
+  }
+})();
+})();
+</script>
+</body>
+</html>

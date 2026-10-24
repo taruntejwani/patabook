@@ -50,6 +50,15 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .row2{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .row2 a{flex:1;text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:700;font-size:14px;color:var(--blue);background:#fff}
 .err{color:#b42318;font-size:13px;margin-top:8px;min-height:1px}
+.nt{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
+.nt .bh{display:flex;align-items:center;gap:12px}.nt .bh .ic{font-size:26px}.nt .bh .tx{flex:1;min-width:0}.nt .bh b{display:block;font-size:15px}.nt .bh small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.4}
+.nt .bb{flex:none;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:10px 12px;font-size:13.5px}.nt .bb.on{background:#e6f4ea;color:#137333}.nt .bb:disabled{opacity:.6}
+.nt .bn{font-size:13px;margin-top:8px;line-height:1.45}.nt .bn:empty{display:none}
+.ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
+.ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
+.wk{margin-top:10px;font-size:13px;color:#0b2f73;background:#eef4ff;border-radius:12px;padding:8px 12px;font-weight:600}
+.edbtn{display:flex;align-items:center;gap:12px;margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff8e1,#ffefc2);border:1px solid #ffd76a}
+.edbtn>span:first-child{font-size:24px}.edbtn>span:nth-child(2){flex:1;min-width:0}.edbtn b{display:block;font-size:15px}.edbtn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}.edbtn i{font-style:normal;font-size:22px;color:#b07d00}
 .lg{display:flex;align-items:center;gap:12px;margin-top:12px;border:1px dashed #c8d6ee;border-radius:14px;padding:10px}
 .lg .pv{flex:none;width:56px;height:56px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:#eef3fc;font-size:22px;font-weight:800;color:var(--navy)}
 .lg .pv img{width:100%;height:100%;object-fit:cover;background:#fff}
@@ -167,7 +176,29 @@ function vacBlock(b,i){
     (on?(en?"Shows on your shop page · auto-off on "+till:"दुकान के पेज पर दिख रहा है · "+till+" को अपने आप बंद"):(en?"Turn ON if you need staff":"स्टाफ चाहिए तो ON करें"))+'</small></span>'+
     '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div><div class="err" id="ve'+i+'"></div>';
 }
-let PREQ={};
+let PREQ={},EVS=null,BELL="";
+async function loadEvents(){try{EVS=await rpc("pb_my_events");}catch(e){EVS=null;}}   /* sql-17 अभी नहीं चली तो यह हिस्सा नहीं दिखेगा */
+function ago(t){const m=Math.round((Date.now()-new Date(t).getTime())/60000),en=L()==="en";if(m<60)return en?(m<=1?"just now":m+" min ago"):(m<=1?"अभी":m+" मिनट पहले");const h=Math.round(m/60);if(h<24)return en?h+" hr ago":h+" घंटे पहले";const d=Math.round(h/24);return en?d+" days ago":d+" दिन पहले";}
+function bellOK(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&!!(PBA.mobile&&PBA.mobile.enabled());}
+function otpBase(){return String((window.PB_SITE&&PB_SITE.otpUrl)||"").replace(/\/$/,"");}
+function u8(k){let s=k.replace(/-/g,"+").replace(/_/g,"/");s+="===".slice((s.length+3)%4);const r=atob(s),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+async function bellState(){
+  if(!bellOK())return;
+  try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();BELL=(sub&&Notification.permission==="granted"&&localStorage.getItem("pb-own-bell")==="1")?"on":"";}catch(e){}
+}
+function notifBlock(){
+  if(!EVS)return "";
+  const en=L()==="en",ev=(EVS.events||[]).slice(0,5);
+  return '<div class="nt"><div class="bh"><span class="ic">🔔</span><span class="tx"><b>'+(en?"Notifications on your phone":"फ़ोन पर सूचनाएँ")+'</b><small>'+(en?"When your shop goes Live, a customer taps Call, and a weekly report every Monday.":"दुकान Live होने पर, ग्राहक के Call दबाने पर, और हर सोमवार हफ़्ते की रिपोर्ट।")+'</small></span>'+
+    (bellOK()?'<button type="button" class="bb'+(BELL?" on":"")+'" id="bellBtn">'+(BELL?(en?"✅ On":"✅ चालू"):(en?"Turn on":"चालू करें"))+'</button>':'')+'</div><div class="bn" id="bellNote"></div>'+
+    (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
+    '</div>';
+}
+function weekLine(b){
+  const w=EVS&&EVS.week&&EVS.week[b.slug];if(!w)return "";
+  const en=L()==="en";
+  return '<div class="wk">📊 '+(en?"Last 7 days: ":"पिछले 7 दिन: ")+'👀 '+(w.view||0)+(en?" views":" ने देखा")+' · 📞 '+(w.call||0)+' Call · 💬 '+(w.wa||0)+' WhatsApp</div>';
+}
 async function loadPreq(){
   try{PREQ=await rpc("pb_my_phone_requests")||{};}catch(e){PREQ={};}   /* sql-15 अभी नहीं चली तो कुछ नहीं दिखेगा */
 }
@@ -245,7 +276,8 @@ function draw(){
   document.title=tx("h1")+" — PataBook";
   $("gate").hidden=!!ME;$("who").hidden=!ME;
   if(!ME){$("list").innerHTML="";return;}
-  const ph=phoneOf(ME);
+  /* मोबाइल login: नंबर Approve होकर बदल गया हो तो दुकान का अभी वाला नंबर दिखाओ */
+  const ph=phoneOf(ME)?((ROWS&&ROWS.length===1&&String(ROWS[0].phone||"").replace(/\D/g,"").slice(-10))||phoneOf(ME)):"";
   $("whoT").textContent=ph?tx("who_ph",ph):tx("who",ME.email);$("out").textContent=tx("out");
   const list=$("list");
   if(ERR){list.innerHTML='<p class="note">'+esc(tx(ERR))+'</p>';return;}
@@ -253,10 +285,11 @@ function draw(){
   if(!ROWS.length){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
-  list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
+  list.innerHTML=notifBlock()+ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+logoBlock(b,i)+
+    weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+logoBlock(b,i)+
+    '<a class="edbtn" href="edit.html?slug='+encodeURIComponent(b.slug)+'"><span>✏️</span><span><b>'+(L()==="en"?"Edit details":"जानकारी बदलें")+'</b><small>'+(L()==="en"?"Timings, WhatsApp, PIN, delivery, email, website, services":"समय, WhatsApp, PIN, डिलीवरी, ईमेल, वेबसाइट, सेवाएँ")+'</small></span><i>›</i></a>'+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
@@ -321,11 +354,28 @@ $("mF").addEventListener("submit",async e=>{
   try{await PBA.mobile.ownerVerify(M.phone,code);M.sent=false;$("mOtp").value="";$("mOtpW").hidden=true;$("mBack").hidden=true;$("mPh").readOnly=false;go.disabled=false;await start();}
   catch(x){go.disabled=false;$("mErr").textContent=mErr(x);}
 });
+$("list").addEventListener("click",async e=>{
+  const b=e.target.closest("#bellBtn");if(!b)return;
+  const en=L()==="en",note=t=>{const n=$("bellNote");if(n){n.textContent=t||"";n.style.color="";}};
+  b.disabled=true;note("…");
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){note(en?"Permission was not given. In Chrome tap 🔒 in the address bar → Permissions → Notifications → Allow, then tap again.":"अनुमति नहीं मिली। Chrome में ऊपर 🔒 → Permissions → Notifications → Allow करें, फिर दोबारा दबाएँ।");b.disabled=false;return;}
+    const reg=await navigator.serviceWorker.register("sw.js");await navigator.serviceWorker.ready;
+    const kj=await (await fetch(otpBase()+"/push/key")).json();if(!kj.ok)throw new Error("key");
+    let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(kj.key)});
+    ME=await PBA.session();
+    const post=async(p,body)=>{const r=await fetch(otpBase()+p,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+ME.access_token},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>null);if(!r.ok||!j||!j.ok)throw new Error((j&&j.error)||"HTTP "+r.status);return j;};
+    await post("/push/owner/subscribe",{sub:sub.toJSON()});await post("/push/owner/test",{});
+    try{localStorage.setItem("pb-own-bell","1");}catch(x){}
+    BELL="on";draw();note(en?"✅ Turned on! A test notification should arrive now.":"✅ चालू हो गया! अभी एक test घंटी आनी चाहिए।");
+  }catch(x){b.disabled=false;note(en?"Could not turn on. Try again in a while.":"चालू नहीं हो पाया। थोड़ी देर बाद दोबारा कोशिश करें।");}
+});
 $("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
   ME=await PBA.session();draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();}
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();await loadEvents();await bellState();}
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";

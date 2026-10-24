@@ -170,6 +170,12 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="pTabs"><button data-p="pending" class="on">⏳ बाकी</button><button data-p="done">✔ हो चुकी</button></div>
     <div id="pBody"></div>
   </div>
+  <div id="edv" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>✏️ दुकानदारों ने जानकारी बदली</h2></div>
+    <p class="cnt">दुकानदार "मेरी दुकान" से समय, WhatsApp, PIN, सेवाएँ जैसी जानकारी खुद बदल सकते हैं — बदलाव तुरंत दिखता है। कुछ गलत लगे तो "↩ पुराना वापस" दबाएँ।</p>
+    <div id="eBody"></div>
+  </div>
   <div class="md" id="md" hidden><div class="bx" id="mdBox"></div></div>
   <div id="panel" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
@@ -243,7 +249,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function ownLine(b) {
     if (!OWN) return '';
     var o = ownOf(b);
-    return '<div class="meta">👤 मालिक: ' + (o.owner_email ? esc(o.owner_email) : '<i>जुड़ा नहीं</i>') + ' · 📞 नंबर: ' + (o.show_phone === false ? '<b style="color:#667085">OFF (छिपा)</b>' : '<b style="color:#137333">ON (सबको दिखे)</b>') + '</div>';
+    var pm = /^m([6-9]\d{9})@phone\.patabook\.in$/.exec(o.owner_email || '');
+    return '<div class="meta">👤 मालिक: ' + (pm ? '📱 मोबाइल login (' + pm[1] + ')' : o.owner_email ? esc(o.owner_email) : '<i>जुड़ा नहीं — दुकान के नंबर से मोबाइल login करते ही जुड़ जाएगी</i>') + ' · 📞 नंबर: ' + (o.show_phone === false ? '<b style="color:#667085">OFF (छिपा)</b>' : '<b style="color:#137333">ON (सबको दिखे)</b>') + '</div>';
   }
   function phBtn(b, i) {
     var on = ownOf(b).show_phone !== false;
@@ -283,6 +290,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (live ? '<button class="hold" data-a="hold" data-i="' + i + '">⏸ Pending करें</button>' : '<button class="ok" data-a="ok" data-i="' + i + '">✅ Approve</button>') +
         '<button class="del" data-a="del" data-i="' + i + '">🗑 हटाएँ</button>' +
         (OWN ? phBtn(b, i) + '<button class="lnk" data-a="own" data-i="' + i + '">👤 मालिक</button>' : '') +
+        '<button class="lnk" data-a="setph" data-i="' + i + '">📱 नंबर बदलें</button>' +
+        '<button class="lnk" data-a="fix" data-i="' + i + '">✍️ सुधार माँगें</button>' +
         (HOME ? hsBtn(b, i) : '') +
         (b.slug ? '<a class="lnk" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">प्रोफ़ाइल</a>' : '') +
         (mapLink ? '<a class="lnk" href="' + mapLink + '" target="_blank">मैप</a>' : '') +
@@ -344,11 +353,29 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     }
     if (a === 'own') {
       var cur = ownOf(r).owner_email || '';
-      var em = prompt('"' + r.name + '" के मालिक का ईमेल लिखें (मालिक ने PataBook पर इस ईमेल से एक बार लॉगिन किया हो)। खाली छोड़ें तो मालिक हट जाएगा।', cur);
+      var em = prompt('"' + r.name + '" के मालिक का ईमेल लिखें (मालिक ने PataBook पर इस ईमेल से एक बार लॉगिन किया हो)।\n\nखाली छोड़कर OK दबाएँ तो दुकान किसी के नाम नहीं रहेगी — फिर दुकान के नंबर (' + (String(r.phone || '').replace(/\D/g, '').slice(-10) || '—') + ') से "मेरी दुकान" में मोबाइल OTP login करते ही दुकान उसी की हो जाएगी।', cur);
       if (em === null) return;
       b.disabled = true;
       try { await rpc('pb_admin_set_owner', { p_slug: r.slug, p_email: em.trim() }); load(); }
       catch (x) { b.disabled = false; alert(/user not found/i.test(x.message) ? 'यह ईमेल नहीं मिला। मालिक पहले PataBook पर इस ईमेल से एक बार लॉगिन करे।' : 'नहीं हो सका: ' + x.message); }
+      return;
+    }
+    if (a === 'setph') {
+      var np = prompt('"' + r.name + '" का नया मोबाइल नंबर (10 अंक)।\nसिर्फ तब बदलें जब आपने दुकानदार से बात करके पक्का कर लिया हो (जैसे SIM खो गया)।\nअभी का नंबर: ' + (String(r.phone || '').replace(/\D/g, '').slice(-10) || '—'), '');
+      if (np === null) return;
+      np = np.replace(/\D/g, '').slice(-10);
+      if (!/^[6-9]\d{9}$/.test(np)) { alert('10 अंकों का सही मोबाइल नंबर लिखें।'); return; }
+      b.disabled = true;
+      try { await rpc('pb_admin_set_phone', { p_slug: r.slug, p_phone: np }); alert('✅ नंबर बदल गया: ' + np + '\nअब दुकानदार इसी नंबर से "मेरी दुकान" में login कर सकता है।'); load(); }
+      catch (x) { b.disabled = false; alert(/phone in use/i.test(x.message) ? 'यह नंबर पहले से किसी दूसरी दुकान पर है।' : /function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-16 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
+      return;
+    }
+    if (a === 'fix') {
+      var note = prompt('"' + r.name + '" के दुकानदार को क्या सुधारना है? (यह message उसके फ़ोन पर notification बनकर जाएगा, अगर उसने "मेरी दुकान" में सूचनाएँ चालू की हैं)\nजैसे: दुकान की सही फोटो/Logo लगाएँ, पता पूरा लिखें', '');
+      if (note === null || !note.trim()) return;
+      b.disabled = true;
+      try { var fx = await rpc('pb_admin_ask_fix', { p_slug: r.slug, p_note: note.trim() }); alert(fx && fx.has_owner === false ? 'Message सहेज लिया। (दुकानदार ने अभी login नहीं किया है — login करते ही "मेरी दुकान" में दिखेगा)' : '✅ दुकानदार को भेज दिया।'); b.disabled = false; }
+      catch (x) { b.disabled = false; alert(/function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-17 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
       return;
     }
     if (a === 'del' && !confirm('"' + r.name + '" को हटाएँ?')) return;
@@ -369,7 +396,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!sess) return gate('login');
     $('who').textContent = sess.email || ''; $('out').hidden = false;
     showHome();
-    if (START === '#phv') showPhReq(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
+    if (START === '#edv') showEdits(); else if (START === '#phv') showPhReq(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
     bellState();
   })();
   /* ---- 🔔 Push notification: नई दुकान / शिकायत / संदेश पर इस फ़ोन में घंटी ---- */
@@ -412,7 +439,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -451,13 +478,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए Approve करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0],
       ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', '₹499', 'Vacancies और payments', 0],
       ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0],
-      ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0]
+      ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0],
+      ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
-    repBadge(); phBadge();
+    repBadge(); phBadge(); edBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -470,6 +498,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'jobs') return showJobs();
     if (t === 'reports') return showReports();
     if (t === 'phreq') return showPhReq();
+    if (t === 'edits') return showEdits();
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
@@ -730,6 +759,48 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try { await rpc('pb_admin_phone_decide', { p_id: +b.dataset.id, p_approve: ok }); }
     catch (x) { alert(/phone in use/i.test(x.message) ? 'यह नया नंबर अब किसी दूसरी दुकान पर है — Approve नहीं हो सकता।' : 'गलती: ' + x.message); }
     loadPhReq();
+  };
+  /* ---- ✏️ दुकानदारों ने जानकारी बदली (sql-16) ---- */
+  var EDATA = [], ESEEN = 0;
+  try { ESEEN = +localStorage.getItem('pb-ed-seen') || 0; } catch (e) {}
+  async function edBadge() {
+    var b = document.querySelector('#tiles [data-t="edits"]'); if (!b) return;
+    try {
+      var R = await rpc('pb_admin_detail_edits', {}) || [], n = R.filter(function (r) { return r.id > ESEEN; }).length;
+      b.querySelector('b').textContent = R.length;
+      b.querySelector('small').textContent = n ? n + ' नए बदलाव' : 'दुकानदारों ने खुद बदली';
+      if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
+    } catch (e) { b.querySelector('small').textContent = 'sql-16 चलाएँ'; }
+  }
+  function showEdits() { view('edv'); loadEdits(); }
+  async function loadEdits() {
+    $('eBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    try { EDATA = await rpc('pb_admin_detail_edits', {}) || []; drawEdits(); }
+    catch (e) { if (e.message === 'login') return; $('eBody').innerHTML = '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 16_owner_edit_and_admin_phone.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+  }
+  function diffLines(a, b) {
+    var A = String(a || '').split('\n'), B = String(b || '').split('\n'), out = [];
+    B.forEach(function (l) { if (l && A.indexOf(l) < 0) out.push('<div style="color:#137333">+ ' + esc(l) + '</div>'); });
+    A.forEach(function (l) { if (l && B.indexOf(l) < 0) out.push('<div style="color:#b42318;text-decoration:line-through">− ' + esc(l) + '</div>'); });
+    return out.join('') || '<div class="meta">(कोई फ़र्क नहीं)</div>';
+  }
+  function drawEdits() {
+    var mx = 0;
+    $('eBody').innerHTML = '<p class="cnt">' + EDATA.length + ' बदलाव</p>' + (EDATA.length ? EDATA.map(function (r) {
+      mx = Math.max(mx, r.id);
+      return '<div class="cty' + (r.id > ESEEN ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a></h3>' +
+        '<p class="meta">' + fmtD(r.created_at) + (r.reverted_at ? ' · ↩ वापस किया ' + fmtD(r.reverted_at) : '') + '</p>' +
+        '<div style="font-size:13.5px;line-height:1.5;margin-top:6px;word-break:break-word">' + diffLines(r.old_desc, r.new_desc) + '</div>' +
+        (!r.reverted_at && r.latest ? '<div class="acts"><button class="del" data-er="' + r.id + '">↩ पुराना वापस</button></div>' : '') + '</div>';
+    }).join('') : '<p class="cnt">अभी कोई बदलाव नहीं</p>');
+    if (mx > ESEEN) { ESEEN = mx; try { localStorage.setItem('pb-ed-seen', String(mx)); } catch (e) {} }
+  }
+  $('eBody').onclick = async function (e) {
+    var b = e.target.closest('[data-er]'); if (!b) return;
+    if (!confirm('इस दुकान की जानकारी बदलाव से पहले जैसी कर दें?')) return;
+    b.disabled = true;
+    try { await rpc('pb_admin_edit_revert', { p_id: +b.dataset.er }); } catch (x) { alert('नहीं हो सका: ' + x.message); }
+    loadEdits();
   };
   /* ---- Vacancy / नौकरी (₹499 plan) ---- */
   var JTAB = 'jobs', JDATA = null;

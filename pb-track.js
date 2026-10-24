@@ -57,10 +57,19 @@
     if (!timer) timer = setTimeout(flush, first ? 1800 : 600);
   }
   window.PBT = { ev: ev, once: function (k, v) { ev(k, v, true); } };
+  /* दुकानदार के लिए गिनती + "ग्राहक ने Call दबाया" सूचना (sql-17)। सिर्फ दुकान का slug जाता है। */
+  function ping(slug, kind) {
+    if (off || !slug) return;
+    try {
+      fetch(SB + '/rest/v1/rpc/pb_owner_ping', { method: 'POST', keepalive: true,
+        headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_slug: String(slug).slice(0, 120), p_kind: kind }) }).catch(function () {});
+    } catch (e) {}
+  }
 
   ev('pv', page());
   var slug = new URLSearchParams(location.search).get('slug');
-  if (page() === 'business' && slug) ev('shop', slug, true);
+  if (page() === 'business' && slug) { ev('shop', slug, true); ping(slug, 'view'); }
 
   /* Call / WhatsApp / रास्ता — कौन-सी दुकान का */
   function slugNear(a) {
@@ -78,7 +87,7 @@
     else if (/wa\.me\/\+?\d|api\.whatsapp\.com\/send\?phone=\d/i.test(h)) k = 'wa';   /* share वाले link नहीं */
     else if (/map\.html\?(to|q)=/i.test(h)) k = 'dir';
     if (!k) return;
-    var s = slugNear(a); if (s) { ev(k, s); flush(); }
+    var s = slugNear(a); if (s) { ev(k, s); flush(); ping(s, k); }
   }, true);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && Q.length) flush(); });
 })();

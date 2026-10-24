@@ -49,6 +49,8 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
 .btn:disabled{opacity:.6}
 .btn.sec{flex:0 0 auto;background:#eef2fb;color:#174ea6;padding:15px 20px}
 .btn.skip{background:#fff;color:#5f6368;border:1px solid #dadce0}
+.later{display:block;margin:14px auto 0;background:none;border:0;color:#1a73e8;font-weight:700;font-size:15px;cursor:pointer;padding:6px 10px;font-family:inherit}
+.later small{display:block;font-weight:500;color:#5f6368;font-size:12.5px;margin-top:2px}
 .loc{display:block;width:100%;border:2px dashed #1a73e8;background:#e8f0fe;color:#174ea6;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer}
 .locok{display:none;margin-top:12px;background:#e6f4ea;color:#137333;border-radius:12px;padding:12px 14px;line-height:1.5;font-size:15px}
 .locok a{color:#0b5a28}
@@ -249,6 +251,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <button type="button" class="btn skip" id="skip" style="display:none" data-i="skip">छोड़ें</button>
         <button type="button" class="btn" id="next">आगे →</button>
       </div>
+      <button type="button" class="later" id="later" hidden>बाकी बाद में भरें →</button>
     </form>
 
     <p class="chk" id="chkLine"><span id="chkQ">पहले से रजिस्टर किया है?</span> <button type="button" id="chkBtn">मेरी दुकान देखें</button></p>
@@ -538,6 +541,9 @@ function render(){
   const key=steps[i].dataset.s;
   if(window.PBT)PBT.once("reg",(i+1)+"-"+key);   /* traffic: रजिस्ट्रेशन कहाँ तक पहुँचा */
   $("skip").style.display=key==="loc"?"block":"none";   /* category zaroori: svc step skip nahi */
+  /* WhatsApp / समय / ईमेल वाले खाने ज़रूरी नहीं: सीधे आखिरी (काम/category) वाले सवाल पर जा सकते हैं */
+  const opt=key==="contact"||key==="hours"||key==="online";$("later").hidden=!opt;
+  if(opt)$("later").innerHTML=(EN()?"Fill the rest later →":"बाकी बाद में भरें →")+"<small>"+(EN()?"You can add these anytime from “My Shop → ✏️ Edit details”":"ये सब कभी भी \"मेरी दुकान → ✏️ जानकारी बदलें\" से भर सकते हैं")+"</small>";
   $("next").textContent=i===steps.length-1?T("submit"):T("next");
   if(key==="owner"){const n=$("shop").value.trim();$("ownerHint").textContent=n?T("owner_hint_n",{n:n}):T("owner_hint");}
   if(key==="svc"){if(!manual&&!sel)refresh();else showCat();}
@@ -683,6 +689,11 @@ window.addEventListener("popstate",e=>{
   if(st!==i){i=Math.max(0,Math.min(st,steps.length-1));setErr("");render();}
 });
 $("skip").onclick=()=>{setErr("");i++;render();};
+$("later").onclick=()=>{   /* सीधे "काम / category" वाले आखिरी सवाल पर (वह ज़रूरी है) */
+  if(!check())return;
+  const t=steps.findIndex(s=>s.dataset.s==="svc");if(t<=i)return;
+  setErr("");i=t;history.pushState({pbst:i},"",location.pathname+location.search);render();
+};
 $("prev").onclick=()=>{if(history.state&&history.state.pbst>0){history.back();return;}if(i>0){i--;render();}};
 document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"&&!sending){e.preventDefault();$("next").click();}

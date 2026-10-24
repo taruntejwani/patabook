@@ -69,6 +69,7 @@ h1{font-size:30px;font-weight:800;letter-spacing:-.4px;margin-top:4px}
 .tag{font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 9px;background:#eef3fc;color:#2c4a7c}
 .tag.ver{background:#e3f7ea;color:var(--green)}
 .tag.rt{background:#fff6dc;color:#8a6200}
+.tag.hire{background:#fff1e6;color:#b54708;font-weight:800}
 .dist{flex:none;align-self:flex-start;text-align:center;font-weight:800;color:var(--blue);font-size:13.5px;line-height:1.1;background:#eef5ff;border-radius:12px;padding:6px 8px}
 .dist small{display:block;font-weight:600;color:var(--muted);font-size:10px;margin-top:2px}
 .addr{display:flex;gap:6px;margin:10px 0 0;font-size:13.5px;color:#3c4043;line-height:1.45}
@@ -274,6 +275,17 @@ function logoHTML(b){
   return `<div class="logo" style="background:${LOGO_BG[h%LOGO_BG.length]}" aria-hidden="true">${esc(initials(b.name))}</div>`;
 }
 function initials(n){const w=String(n||"").trim().split(/\s+/).filter(Boolean);return ((w[0]||"?")[0]+(w[1]?w[1][0]:"")).toUpperCase();}
+/* 💼 जिन दुकानों ने "मेरी दुकान" में Vacancy ON किया है (sql-13) — search में निशान */
+let HIRE={},HIRE_KEY="";
+async function loadHire(vis){
+  const sl=vis.map(b=>b.slug).filter(Boolean).slice(0,50),key=sl.join(",");
+  if(!sl.length||key===HIRE_KEY)return;HIRE_KEY=key;
+  try{
+    const r=await fetch(SB+"/rest/v1/rpc/pb_vacancy_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:sl})});
+    if(!r.ok)return;const j=await r.json()||{};
+    if(Object.keys(j).length){HIRE=Object.assign({},HIRE,j);render();}
+  }catch(e){}
+}
 function render(){
   const list=document.getElementById("list");
   const vis=rows.filter(b=>!subSel||b._sub===subSel);
@@ -288,6 +300,7 @@ function render(){
     if(w)w.onclick=e=>{e.preventDefault();radius=nextR;drawRadius();load();};
     return;
   }
+  loadHire(vis);
   list.innerHTML=vis.map((b,i)=>{
     const blink="business.html?slug="+encodeURIComponent(b.slug||"");
     const dir=pbDir(b);
@@ -300,6 +313,7 @@ function render(){
           <div class="tags">
             ${b._sub?`<span class="tag">${esc(b._sub)}</span>`:`<span class="tag">${esc(b.category)}</span>`}
             ${b.is_verified?`<span class="tag ver">${L.ver}</span>`:""}
+            ${HIRE[b.slug]?`<span class="tag hire">💼 ${PB.lang&&PB.lang()==="en"?"Hiring":"नौकरी खाली है"}</span>`:""}
             ${b.rating?`<span class="tag rt">★ ${esc(b.rating)}${b.review_count?" ("+esc(b.review_count)+")":""}</span>`:""}
           </div>
         </div>

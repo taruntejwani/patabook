@@ -10,7 +10,7 @@ self.addEventListener("fetch",e=>{
     return res;
   }).catch(()=>caches.match(r).then(m=>m||caches.match("index.html"))));
 });
-/* Admin push notification (सिर्फ admin ने "🔔 Notification चालू करें" दबाया हो तब आता है) */
+/* Push notification: admin (🔔 Admin panel) और दुकानदार ("मेरी दुकान" → सूचनाएँ चालू करें) दोनों के लिए */
 self.addEventListener("push",e=>{
   let d={};try{d=e.data?e.data.json():{};}catch(_){d={body:e.data?e.data.text():""};}
   e.waitUntil(self.registration.showNotification(d.title||"PataBook",{
