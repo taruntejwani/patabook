@@ -2,15 +2,11 @@
    English + Hindi yahin hai. Baaki 22 bhashayen lang/<code>.js me hain aur sirf chunne par load hoti hain.
    Browser / Google translate band hai (translate="no"). */
 (function(){
-var LANGS=[
+var LANGS=[   /* ज़्यादा इस्तेमाल होने वाली भाषाएँ + सिन्धी (देवनागरी) */
  ["en","English","English"],["hi","हिन्दी","Hindi"],
  ["sd-deva","सिन्धी (देवनागरी)","Sindhi (Devanagari)"],
  ["gu","ગુજરાતી","Gujarati"],["mr","मराठी","Marathi"],["bn","বাংলা","Bengali"],["ta","தமிழ்","Tamil"],
- ["te","తెలుగు","Telugu"],["kn","ಕನ್ನಡ","Kannada"],["ml","മലയാളം","Malayalam"],["or","ଓଡ଼ିଆ","Odia"],
- ["as","অসমীয়া","Assamese"],["mai","मैथिली","Maithili"],["pa","ਪੰਜਾਬੀ","Punjabi"],["sa","संस्कृतम्","Sanskrit"],
- ["ur","اردو","Urdu"],["sd","سنڌي (عربي)","Sindhi (Arabic)"],["ks","کٲشُر","Kashmiri"],["ne","नेपाली","Nepali"],
- ["kok","कोंकणी","Konkani"],["doi","डोगरी","Dogri"],["brx","बड़ो","Bodo"],["sat","ᱥᱟᱱᱛᱟᱲᱤ","Santali"],
- ["mni","ꯃꯩꯇꯩꯂꯣꯟ","Manipuri (Meitei)"]
+ ["te","తెలుగు","Telugu"]
 ];
 var RTL={ur:1,sd:1,ks:1};
 var FONTS={sat:"Noto+Sans+Ol+Chiki",mni:"Noto+Sans+Meetei+Mayek"};
@@ -100,7 +96,9 @@ e_cat:"कृपया अपने बिज़नेस की category चु
 
 function known(c){for(var k=0;k<LANGS.length;k++)if(LANGS[k][0]===c)return true;return false;}
 var cur=null;try{cur=localStorage.getItem("pb-lang");}catch(e){}
-if(!known(cur))cur="en";
+if(!known(cur)){   /* हटाई गई भाषा पहले चुनी थी: देवनागरी वाली → हिन्दी, बाकी → English */
+  var dv={mai:1,ne:1,kok:1,doi:1,brx:1,sa:1};cur=dv[cur]?"hi":"en";try{localStorage.setItem("pb-lang",cur);}catch(e){}
+}
 
 var html=document.documentElement;
 html.setAttribute("translate","no");
