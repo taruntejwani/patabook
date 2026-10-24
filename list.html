@@ -279,7 +279,10 @@ const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r
 const $=id=>document.getElementById(id);
 const T=(k,v)=>PB.t(k,v);
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const steps=[...document.querySelectorAll(".step")];
+/* WhatsApp / समय / ईमेल-वेबसाइट वाले सवाल दुकान जोड़ते समय नहीं पूछते — दुकान जल्दी जुड़ जाए।
+   ये बाद में "मेरी दुकान" में प्रोफ़ाइल पूरी करते समय भरवाए जाते हैं (edit.html)। */
+const LATER_STEPS=["contact","hours","online"];
+const steps=[...document.querySelectorAll(".step")].filter(s=>!LATER_STEPS.includes(s.dataset.s));
 let i=0,coords=null,sending=false;
 
 /* ---------- Category: Supabase "categories" table ki ASLI 78 categories (export 09-10-2026).
