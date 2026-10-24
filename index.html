@@ -138,8 +138,9 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .quickcats{width:100%;margin:16px 0 0}
 .quickcats h2{font-size:15px;font-weight:800;color:var(--navy);margin:0 2px 10px}
 .quickcats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
-.quickcat{min-width:0;min-height:88px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:0 3px 12px rgba(26,115,232,.06);font-size:11.5px;font-weight:700;line-height:1.25;color:var(--navy)}
+.quickcat{min-width:0;min-height:88px;padding:10px 2px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:0 3px 12px rgba(26,115,232,.06);font-size:11.5px;font-weight:700;line-height:1.25;color:var(--navy)}
 .quickcat:active,.quickcat:hover{border-color:var(--blue);background:#f4f8ff}
+.quickcat>span:last-child{display:block;max-width:100%;overflow:hidden}
 .quickcat-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#e8f1ff;font-size:23px}
 @media(min-width:460px){.quickcats-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.quickcat{font-size:12px}}
 
@@ -255,16 +256,16 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   <section class="quickcats" aria-label="Shop categories">
     <h2 data-i="qc_h">कैटेगरी चुनें</h2>
     <div class="quickcats-grid">
-      <a class="quickcat" href="category.html?cat=Automobile"><span class="quickcat-icon" aria-hidden="true">🚗</span><span>Auto</span></a>
-      <a class="quickcat" href="category.html?cat=Shopping&amp;sub=Mobile%20%26%20Electronics"><span class="quickcat-icon" aria-hidden="true">📱</span><span>Mobile</span></a>
-      <a class="quickcat" href="category.html?cat=Shopping&amp;sub=Mobile%20%26%20Electronics"><span class="quickcat-icon" aria-hidden="true">💬</span><span>Message / Communication</span></a>
-      <a class="quickcat" href="category.html?cat=Food"><span class="quickcat-icon" aria-hidden="true">🍽️</span><span>Food</span></a>
-      <a class="quickcat" href="category.html?cat=Health"><span class="quickcat-icon" aria-hidden="true">🏥</span><span>Health</span></a>
-      <a class="quickcat" href="category.html?cat=Education"><span class="quickcat-icon" aria-hidden="true">🎓</span><span>Education</span></a>
-      <a class="quickcat" href="category.html?cat=Home"><span class="quickcat-icon" aria-hidden="true">🏠</span><span>Home Services</span></a>
-      <a class="quickcat" href="category.html?cat=Shopping"><span class="quickcat-icon" aria-hidden="true">🛍️</span><span>Shopping</span></a>
-      <a class="quickcat" href="category.html?cat=Professional"><span class="quickcat-icon" aria-hidden="true">💼</span><span>Professional</span></a>
-      <a class="quickcat" href="category.html?cat=Hotel"><span class="quickcat-icon" aria-hidden="true">🏨</span><span>Hotel</span></a>
+      <a class="quickcat" href="category.html?cat=Automobile"><span class="quickcat-icon" aria-hidden="true">🚗</span><span lang="en">Auto</span></a>
+      <a class="quickcat" href="category.html?cat=Shopping&amp;sub=Mobile%20%26%20Electronics"><span class="quickcat-icon" aria-hidden="true">📱</span><span lang="en">Mobile</span></a>
+      <a class="quickcat" href="category.html?cat=Shopping&amp;sub=Mobile%20%26%20Electronics"><span class="quickcat-icon" aria-hidden="true">💬</span><span lang="en">Message / Communi&shy;cation</span></a>
+      <a class="quickcat" href="category.html?cat=Food"><span class="quickcat-icon" aria-hidden="true">🍽️</span><span lang="en">Food</span></a>
+      <a class="quickcat" href="category.html?cat=Health"><span class="quickcat-icon" aria-hidden="true">🏥</span><span lang="en">Health</span></a>
+      <a class="quickcat" href="category.html?cat=Education"><span class="quickcat-icon" aria-hidden="true">🎓</span><span lang="en">Education</span></a>
+      <a class="quickcat" href="category.html?cat=Home"><span class="quickcat-icon" aria-hidden="true">🏠</span><span lang="en">Home Services</span></a>
+      <a class="quickcat" href="category.html?cat=Shopping"><span class="quickcat-icon" aria-hidden="true">🛍️</span><span lang="en">Shopping</span></a>
+      <a class="quickcat" href="category.html?cat=Professional"><span class="quickcat-icon" aria-hidden="true">💼</span><span lang="en">Profes&shy;sional</span></a>
+      <a class="quickcat" href="category.html?cat=Hotel"><span class="quickcat-icon" aria-hidden="true">🏨</span><span lang="en">Hotel</span></a>
     </div>
   </section>
 
@@ -552,9 +553,13 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
     d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
   b.addEventListener("click",go);if(g)g.addEventListener("click",go);b.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e);});
 })();
+/* category के नाम खाने से बाहर न जाएँ: लंबा शब्द हो तो अक्षर थोड़े छोटे (शब्द नहीं टूटता) */
+function fitQC(){document.querySelectorAll(".quickcat>span:last-child").forEach(el=>{el.style.fontSize="";let f=parseFloat(getComputedStyle(el).fontSize),n=0;
+  while(el.scrollWidth>el.clientWidth+0.5&&f>9.5&&n++<12){f-=0.5;el.style.fontSize=f+"px";}el.style.overflowWrap=el.scrollWidth>el.clientWidth+0.5?"anywhere":"";});}
+addEventListener("resize",fitQC);addEventListener("load",fitQC);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitQC);
 PB.mount(document.getElementById("pbLang"));
 PB.onChange(applyLang);
-applyLang();
+applyLang();fitQC();PB.onChange(()=>setTimeout(fitQC,0));
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();document.getElementById("sug").className="sug";searchNow();}});
 </script>
 <script>
