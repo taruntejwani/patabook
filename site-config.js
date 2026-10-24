@@ -22,7 +22,8 @@ window.PB_SITE = {
   /* "मैं रोबोट नहीं हूँ" जाँच (Cloudflare Turnstile) की Site Key — यह public होती है। Secret Key सिर्फ Worker में। */
   turnstileKey: '0x4AAAAAAFh2ET1CgatdIOGP',
 
-  /* 💼 Vacancy / नौकरी (₹499 plan). Database SQL + Razorpay keys लगने के बाद ही true करें। */
+  /* 💼 ₹499 Vacancy plan: अभी बंद (24 Oct 2026 — Play Store billing नियम की वजह से)। false रहने तक vacancy.html / jobs.html नहीं खुलते।
+     मुफ़्त "Vacancy available" स्विच (मेरी दुकान) इससे अलग है और चालू रहता है। */
   jobs: false
 
 };
