@@ -113,6 +113,19 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <textarea id="svc" maxlength="500" data-en-ph="e.g. Car shampoo, dashboard polish, wholesale supply" placeholder="जैसे: कार शैम्पू, डैशबोर्ड पॉलिश, थोक सप्लाई"></textarea>
   </div>
 
+  <div class="card" id="gstCard">
+   <h2 data-en="🧾 GST / Udyam (MSME) number">🧾 GST / उद्यम (MSME) नंबर</h2>
+   <p class="hint" style="margin:-4px 0 6px" data-en="Optional. Your shop page shows a “GST Registered” / “MSME” badge — customers trust it more. Don’t have one? Leave empty.">ज़रूरी नहीं। दुकान के पेज पर "GST रजिस्टर्ड" / "MSME" का निशान दिखेगा — ग्राहकों का भरोसा बढ़ता है। नहीं है तो खाली छोड़ें।</p>
+   <label class="lbl" for="gst" data-en="GST number (15 letters)">GST नंबर (15 अक्षर)</label>
+   <input id="gst" type="text" maxlength="20" autocapitalize="characters" spellcheck="false" placeholder="24ABCDE1234F1Z5" style="text-transform:uppercase;letter-spacing:.06em">
+   <label class="lbl" for="udyam" data-en="Udyam (MSME) number">उद्यम (MSME) नंबर</label>
+   <input id="udyam" type="text" maxlength="24" autocapitalize="characters" spellcheck="false" placeholder="UDYAM-GJ-03-0012345" style="text-transform:uppercase;letter-spacing:.04em">
+  </div>
+
+  <a class="card" id="locLink" href="#" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
+   <span style="font-size:26px">📍</span><span style="flex:1"><b style="display:block;font-size:15.5px;color:#0b2f73" data-en="Shop location on map">नक्शे पर दुकान की location</b><small style="color:#5b6475" data-en="Set it while standing at your shop — customers get the exact way">दुकान पर खड़े होकर लगाएँ — ग्राहकों को सही रास्ता मिलेगा</small></span><span style="font-size:22px;color:#1a73e8">›</span>
+  </a>
+
   <div class="save">
    <div class="err" id="err"></div>
    <button class="btn" type="submit" id="saveBtn" data-en="Save">सेव करें</button>
@@ -156,6 +169,9 @@ const line=(d,k)=>{const m=String(d||"").match(new RegExp("^"+k+":\\s*(.+)$","mi
 const n10=v=>{const d=String(v||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;};
 function webNorm(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);if(!/\.[a-z]{2,}$/i.test(u.hostname))return null;return u.href.slice(0,200);}catch(e){return null;}}
 let S=null;
+/* GST नंबर: ढाँचा + आखिरी जाँच-अंक (database भी यही जाँचता है) */
+function gstOk(g){if(!/^[0-3]\d[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(g))return false;const cs="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";let s=0;
+  for(let i=0;i<14;i++){const p=cs.indexOf(g[i])*(i%2?2:1);s+=Math.floor(p/36)+p%36;}return cs[(36-s%36)%36]===g[14];}
 async function rpc(fn,args){
   const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+S.access_token,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
   let j=null;try{j=await r.json();}catch(e){}
@@ -168,6 +184,8 @@ function errText(m){
     "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
     "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
+    "bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
+    "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."]};
   for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
   return EN?"Could not save. Check your internet and try again.":"सेव नहीं हो सका। इंटरनेट जाँचकर दोबारा कोशिश करें।";
@@ -183,7 +201,10 @@ $("main").addEventListener("submit",async e=>{
   if(pin&&!/^[1-9]\d{5}$/.test(pin)){$("err").textContent=errText("bad PIN");$("pin").focus();return;}
   if(web===null){$("err").textContent=errText("bad Website");$("web").focus();return;}
   if(em&&!/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(em)){$("err").textContent=errText("bad Email");$("email").focus();return;}
-  const p={Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim()};
+  const gst=$("gst").value.replace(/\s/g,"").toUpperCase(),udy=$("udyam").value.replace(/\s/g,"").toUpperCase();
+  if(gst&&!gstOk(gst)){$("err").textContent=errText("bad GST");$("gst").focus();return;}
+  if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
+  const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim()};
   const b=$("saveBtn");b.disabled=true;
   try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);}
   catch(x){$("err").textContent=errText(x.message);}
@@ -205,6 +226,8 @@ $("main").addEventListener("submit",async e=>{
     $("offDay").value=line(ds,"Closed");
     $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
     $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");
+    $("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
+    if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
     $("hidNote").hidden=!(d&&d.show_phone===false);
     only("main");
   }catch(e){

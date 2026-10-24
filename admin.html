@@ -292,6 +292,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (OWN ? phBtn(b, i) + '<button class="lnk" data-a="own" data-i="' + i + '">👤 मालिक</button>' : '') +
         '<button class="lnk" data-a="setph" data-i="' + i + '">📱 नंबर बदलें</button>' +
         '<button class="lnk" data-a="fix" data-i="' + i + '">✍️ सुधार माँगें</button>' +
+        (line(b.description, 'GST') ? '<button class="' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'phon' : 'lnk') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
         (b.slug ? '<a class="lnk" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">प्रोफ़ाइल</a>' : '') +
         (mapLink ? '<a class="lnk" href="' + mapLink + '" target="_blank">मैप</a>' : '') +
@@ -368,6 +369,15 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       b.disabled = true;
       try { await rpc('pb_admin_set_phone', { p_slug: r.slug, p_phone: np }); alert('✅ नंबर बदल गया: ' + np + '\nअब दुकानदार इसी नंबर से "मेरी दुकान" में login कर सकता है।'); load(); }
       catch (x) { b.disabled = false; alert(/phone in use/i.test(x.message) ? 'यह नंबर पहले से किसी दूसरी दुकान पर है।' : /function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-16 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
+      return;
+    }
+    if (a === 'gst') {
+      var g = line(r.description, 'GST'), isV = /^yes$/i.test(line(r.description, 'GST-Verified'));
+      if (!isV && !confirm('GST: ' + g + '\n\nसरकारी वेबसाइट (services.gst.gov.in → Search Taxpayer) पर यह नंबर खोजें। नाम और पता इस दुकान से मिलता है?\n\nOK = हाँ, सही है → दुकान के पेज पर "✅ GST Verified" दिखेगा।')) { try { window.open('https://services.gst.gov.in/services/searchtp', '_blank'); } catch (x) {} return; }
+      if (isV && !confirm('"GST Verified" का निशान हटाएँ?')) return;
+      b.disabled = true;
+      try { await rpc('pb_admin_gst_verify', { p_slug: r.slug, p_on: !isV }); load(); }
+      catch (x) { b.disabled = false; alert(/function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-19 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
       return;
     }
     if (a === 'fix') {

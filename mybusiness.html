@@ -62,6 +62,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
 .wk{margin-top:10px;font-size:13px;color:#0b2f73;background:#eef4ff;border-radius:12px;padding:8px 12px;font-weight:600}
+.pf{display:flex;align-items:center;gap:14px;margin-top:12px;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:12px}
+.pf .ring{flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center}
+.pf .ring span{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;color:var(--navy)}
+.pf .pt{flex:1;min-width:0}.pf .pt b{display:block;font-size:15.5px;color:var(--navy)}.pf .pt small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.4}
+.pm{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pm a{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;border-bottom:1px solid var(--line);background:#fff}.pm a:last-child{border-bottom:0}
+.pm a span:nth-child(2){flex:1;min-width:0}.pm a i{font-style:normal;color:var(--blue);font-weight:800;font-size:13px}
 .edbtn{display:flex;align-items:center;gap:12px;margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff8e1,#ffefc2);border:1px solid #ffd76a}
 .edbtn>span:first-child{font-size:24px}.edbtn>span:nth-child(2){flex:1;min-width:0}.edbtn b{display:block;font-size:15px}.edbtn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}.edbtn i{font-style:normal;font-size:22px;color:#b07d00}
 .lg{display:flex;align-items:center;gap:12px;margin-top:12px;border:1px dashed #c8d6ee;border-radius:14px;padding:10px}
@@ -186,7 +193,34 @@ function vacBlock(b,i){
     (on?(en?"Shows on your shop page · auto-off on "+till:"दुकान के पेज पर दिख रहा है · "+till+" को अपने आप बंद"):(en?"Turn ON if you need staff":"स्टाफ चाहिए तो ON करें"))+'</small></span>'+
     '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div><div class="err" id="ve'+i+'"></div>';
 }
-let PREQ={},EVS=null,BELL="",DEV=null;
+let PREQ={},EVS=null,BELL="",DEV=null,PROF=null;
+async function loadProf(){try{PROF=await rpc("pb_my_profiles");}catch(e){PROF=null;}}   /* sql-19 अभी नहीं चली तो % नहीं दिखेगा */
+/* प्रोफ़ाइल कितनी पूरी: 10 चीज़ें, हर एक 10% */
+function profItems(b,i){
+  const p=PROF&&PROF[b.slug];if(!p)return null;
+  const d=p.d||"",has=k=>new RegExp("^"+k+":\\s*\\S","mi").test(d),en=L()==="en",E="edit.html?slug="+encodeURIComponent(b.slug);
+  return [
+    [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता",""],
+    [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
+    [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
+    [!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","#lgx"+i],
+    [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय",E+"#openT"],
+    [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार",E+"#btype"],
+    [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",E+"#svc"],
+    [has("PIN")||has("Pincode"),"📮",en?"PIN code":"PIN कोड",E+"#pin"],
+    [has("Email")||has("Website"),"🌐",en?"Email or website":"ईमेल या वेबसाइट",E+"#email"],
+    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number":"GST या उद्यम (MSME) नंबर",E+"#gst"]
+  ];
+}
+function profBlock(b,i){
+  const it=profItems(b,i);if(!it)return "";
+  const n=it.filter(x=>x[0]).length,pc=n*10,en=L()==="en",miss=it.filter(x=>!x[0]);
+  const col=pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
+  return '<div class="pf"><div class="ring" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></div>'+
+    '<div class="pt"><b>'+(pc>=100?(en?"🎉 Profile 100% complete!":"🎉 प्रोफ़ाइल 100% पूरी!"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</b>'+
+    '<small>'+(pc>=100?(en?"Great! Customers see full details of your shop.":"बहुत बढ़िया! ग्राहकों को आपकी दुकान की पूरी जानकारी दिख रही है।"):(en?"Complete it — shops with full details get more calls.":"पूरी करें — पूरी जानकारी वाली दुकानों को ज़्यादा Call आते हैं।"))+'</small></div></div>'+
+    (miss.length?'<div class="pm">'+miss.map(x=>'<a href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'')+'><span>'+x[1]+'</span><span>'+esc(x[2])+'</span><i>'+(en?"Add ›":"भरें ›")+'</i></a>').join("")+'</div>':'');
+}
 function kickMsg(){
   let r="";try{r=sessionStorage.getItem("pb-kicked")||"";sessionStorage.removeItem("pb-kicked");}catch(e){}
   if(!r)return;const en=L()==="en";
@@ -236,7 +270,7 @@ function logoBlock(b,i){
   if(!LOGO_OK)return "";
   const u=LOGOS[b.slug]||"",en=L()==="en";
   const ini=String(b.name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  return '<div class="lg"><div class="pv">'+(LOGO_RX.test(u)?'<img src="'+esc(u)+'" alt="">':esc(ini))+'</div>'+
+  return '<div class="lg" id="lgx'+i+'"><div class="pv">'+(LOGO_RX.test(u)?'<img src="'+esc(u)+'" alt="">':esc(ini))+'</div>'+
     '<div class="lt"><b>'+(en?"Shop logo":"दुकान का Logo")+'</b>'+(en?"Shows on your shop card and page. Square photo works best.":"आपकी दुकान के card और page पर दिखेगा। चौकोर फोटो सबसे अच्छी।")+'<div class="err" id="le'+i+'"></div></div>'+
     '<div class="lb"><button type="button" data-lg="up" data-i="'+i+'">🖼️ '+(u?(en?"Change":"बदलें"):(en?"Add logo":"Logo लगाएँ"))+'</button>'+
     (u?'<button type="button" class="rm" data-lg="rm" data-i="'+i+'">'+(en?"Remove":"हटाएँ")+'</button>':'')+
@@ -313,7 +347,7 @@ function draw(){
   list.innerHTML=notifBlock()+ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+logoBlock(b,i)+
+    profBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+logoBlock(b,i)+
     '<a class="edbtn" href="edit.html?slug='+encodeURIComponent(b.slug)+'"><span>✏️</span><span><b>'+(L()==="en"?"Edit details":"जानकारी बदलें")+'</b><small>'+(L()==="en"?"Timings, WhatsApp, PIN, delivery, email, website, services":"समय, WhatsApp, PIN, डिलीवरी, ईमेल, वेबसाइट, सेवाएँ")+'</small></span><i>›</i></a>'+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
@@ -379,6 +413,10 @@ $("mF").addEventListener("submit",async e=>{
   try{await PBA.mobile.ownerVerify(M.phone,code);M.sent=false;$("mOtp").value="";$("mOtpW").hidden=true;$("mBack").hidden=true;$("mPh").readOnly=false;go.disabled=false;await start();}
   catch(x){go.disabled=false;$("mErr").textContent=mErr(x);}
 });
+$("list").addEventListener("click",e=>{   /* "Logo भरें" → उसी card का logo वाला हिस्सा */
+  const a=e.target.closest("[data-scroll]");if(!a)return;e.preventDefault();
+  const t=document.getElementById(a.dataset.scroll);if(t){t.scrollIntoView({behavior:"smooth",block:"center"});t.style.outline="3px solid #1a73e8";setTimeout(()=>t.style.outline="",1800);}
+});
 $("dv").addEventListener("click",async e=>{
   const b=e.target.closest("[data-kick]");if(!b)return;
   if(!confirm(L()==="en"?"Log out your shop from that phone/PC?":"उस फ़ोन/PC से दुकान का login बंद करें?"))return;
@@ -409,7 +447,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();await loadEvents();await bellState();}
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();await loadEvents();await loadProf();await bellState();}
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";
