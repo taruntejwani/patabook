@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PataBook – Business Directory</title>
+<title data-hi-t="PataBook – बिज़नेस डायरेक्टरी">PataBook – Business Directory</title>
 <meta name="description" content="PataBook – Business Directory. अपने शहर के बिज़नेस, एक ही जगह।">
 <link rel="icon" href="pin.png">
 <link rel="manifest" href="manifest.json">
@@ -202,27 +202,27 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <body>
 
 <div class="top">
-  <label class="locchip" title="शहर चुनें"><span aria-hidden="true">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><span class="dd" aria-hidden="true">▾</span></label>
-  <div class="tr"><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
+  <label class="locchip" title="शहर चुनें" data-en-title="Choose city"><span aria-hidden="true">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City" data-hi-al="शहर"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><span class="dd" aria-hidden="true">▾</span></label>
+  <div class="tr"><a class="mapbtn" href="map.html" aria-label="PataBook Map" data-hi-al="PataBook नक्शा"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
   <span id="pbLang"></span></div>
 </div>
 
 <div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" aria-label="All categories">
+<aside class="drawer" id="drawer" aria-label="All categories" data-hi-al="सभी कैटेगरी">
   <div class="dh"><b data-i="allcats">सभी कैटेगरी</b><button id="closeBtn" type="button" aria-label="Close">✕</button></div>
   <div class="dl" id="dl"></div>
 </aside>
 
 <main>
   <a class="mys" id="mysBar" href="mybusiness.html" style="display:none"><span class="ic" aria-hidden="true">🏪</span><span class="tx"><b data-i="myshop_bar">मेरी दुकान</b><small data-i="myshop_sub">आप लॉगिन हैं — अपनी दुकान संभालें</small></span><span class="go" aria-hidden="true">›</span></a>
-  <section class="lb" id="lb" hidden aria-label="PataBook launch">
+  <section class="lb" id="lb" hidden aria-label="PataBook launch" data-hi-al="PataBook की शुरुआत">
     <canvas id="lbFx" aria-hidden="true"></canvas>
-    <button type="button" class="lbx" id="lbX" aria-label="बंद करें">✕</button>
+    <button type="button" class="lbx" id="lbX" aria-label="बंद करें" data-en-al="Close">✕</button>
     <div class="lbt"><span class="lbr">🚀</span> <span id="lbH">आज PataBook का पहला दिन है!</span></div>
     <p id="lbP">सबसे पहले जुड़ने वाले दुकानदार <b>"नई दुकानें"</b> पट्टी में सबसे ऊपर दिखेंगे। आज ही जुड़ें — बिल्कुल FREE।</p>
     <a class="lba" href="list.html" id="lbA">🏪 दुकान जोड़ें ›</a>
   </section>
-  <section class="ns" id="ns" hidden aria-label="New shops">
+  <section class="ns" id="ns" hidden aria-label="New shops" data-hi-al="नई दुकानें">
     <h2><i class="dot"></i><span id="nsT">PataBook पर नई दुकानें</span></h2>
     <div class="nsv" id="nsv"><div class="nst" id="nst"></div></div>
   </section>
@@ -233,8 +233,8 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
       <img class="pin" src="pin.png" alt="">
     </div>
     <img class="wm" src="wordmark.png" alt="PataBook">
-    <div class="ltag">Business Directory</div>
-    <div class="lsub">Find Businesses. Connect. Grow.</div>
+    <div class="ltag" data-hi-t="बिज़नेस डायरेक्टरी">Business Directory</div>
+    <div class="lsub" data-hi-t="दुकानें खोजें। जुड़ें। आगे बढ़ें।">Find Businesses. Connect. Grow.</div>
   </div>
 
   <form class="searchbox" id="sf" onsubmit="return searchNow()">
@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   <div class="sug" id="sug"></div>
 
   <!-- Added: quick category icons; existing text category navigation remains below. -->
-  <section class="quickcats" aria-label="Shop categories">
+  <section class="quickcats" aria-label="Shop categories" data-hi-al="दुकानों की कैटेगरी">
     <h2 data-i="qc_h">कैटेगरी चुनें</h2>
     <div class="quickcats-grid">
       <a class="quickcat" href="category.html?cat=Automobile"><span class="quickcat-icon" aria-hidden="true">🚗</span><span>Auto</span></a>
@@ -369,7 +369,7 @@ function applyLang(){
   }
   function setCityTitle(city){
     const el=document.getElementById("nsT");if(!el)return;
-    el.textContent=city?("Shops in "+city):"Choose your city to see local shops";
+    const en=PB.lang&&PB.lang()==="en";el.textContent=city?(en?"Shops in "+city:city+" की दुकानें"):(en?"Choose your city to see local shops":"अपने शहर की दुकानें देखने के लिए शहर चुनें");
   }
   let ALL_ROWS=[];
   async function load(){
@@ -385,14 +385,14 @@ function applyLang(){
   function refreshCityShops(){
     const city=currentCity();setCityTitle(city);L=ALL_ROWS.filter(b=>inCity(b,city)).slice(0,25);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
-    if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">No shops found for this city yet.</div>';return;}
+    if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">'+(PB.lang&&PB.lang()==="en"?"No shops found for this city yet.":"इस शहर में अभी कोई दुकान नहीं मिली।")+'</div>';return;}
     draw();wire();start();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);
   document.addEventListener("pb-city-auto",refreshCityShops);   /* शहर अपने-आप मिला (GPS / internet) */
   document.getElementById("city")?.addEventListener("input",()=>{clearTimeout(window.__pbCityFilterTimer);window.__pbCityFilterTimer=setTimeout(refreshCityShops,350);});
   load();
-  if(PB.onChange)PB.onChange(()=>{if(L.length)draw();});
+  if(PB.onChange)PB.onChange(()=>{refreshCityShops();});
 })();
 function card(b){return `<a class="item" href="business.html?slug=${encodeURIComponent(b.slug||"")}"><b>${esc(b.name)}</b><small>${esc(b.category)} · ${esc(b.city||b.address||"")}</small></a>`;}
 /* Search ab alag page (search.html) par: naam, category, shahar, gaon ya PIN se */

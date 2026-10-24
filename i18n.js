@@ -134,6 +134,24 @@ function apply(root){
   root.querySelectorAll("[data-i]").forEach(function(el){el.textContent=t(el.getAttribute("data-i"));});
   root.querySelectorAll("[data-ip]").forEach(function(el){el.placeholder=t(el.getAttribute("data-ip"));});
   var b=document.getElementById("pblBtnTxt");if(b)b.textContent=nameOf(cur);
+  biApply(root);
+}
+/* दो-भाषा वाले attributes: data-en-t / data-hi-t (text), -title, -al (aria-label), -ph (placeholder).
+   जो भाषा नहीं लिखी, उसके लिए HTML में लिखा मूल text रहता है। English चुनी → English, बाकी सब → हिन्दी। */
+var BI=[["t",null],["title","title"],["al","aria-label"],["ph","placeholder"]];
+function biApply(root){
+  var en=cur==="en";
+  BI.forEach(function(x){
+    var k=x[0],at=x[1];
+    root.querySelectorAll("[data-en-"+k+"],[data-hi-"+k+"]").forEach(function(el){
+      var get=function(){return at?el.getAttribute(at)||"":el.textContent;};
+      if(!el.hasAttribute("data-en-"+k))el.setAttribute("data-en-"+k,get());
+      if(!el.hasAttribute("data-hi-"+k))el.setAttribute("data-hi-"+k,get());
+      var v=el.getAttribute((en?"data-en-":"data-hi-")+k);
+      if(at)el.setAttribute(at,v);else el.textContent=v;
+    });
+  });
+  var tt=document.querySelector("title[data-en-t],title[data-hi-t]");if(tt)document.title=tt.textContent;
 }
 function nameOf(c){for(var k=0;k<LANGS.length;k++)if(LANGS[k][0]===c)return LANGS[k][1];return c;}
 
@@ -292,4 +310,5 @@ function appText(){
 })();
 
 window.PB={t:t,apply:apply,set:set,mount:mount,onChange:function(f){subs.push(f);},lang:function(){return cur;},langs:LANGS};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){biApply(document);});else biApply(document);
 })();

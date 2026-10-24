@@ -241,6 +241,12 @@ function kickMsg(){
     :(en?"🔒 Your shop was opened on another phone/PC, so this one was logged out (max 2 phones + 1 PC at a time).":"🔒 आपकी दुकान किसी दूसरे फ़ोन/PC पर खुली, इसलिए यहाँ से logout हो गया (एक साथ ज़्यादा से ज़्यादा 2 मोबाइल + 1 PC)।");
   $("kick").hidden=false;
 }
+/* PataBook के संदेश database में हिन्दी में बनते हैं — English चुनी हो तो जाने-पहचाने संदेश English में दिखाओ */
+const EV_EN=[
+ [/^(\S+\s*)?आपकी दुकान Live हो गई!?\s*(\S*)$/,(m)=>(m[1]||"")+"Your shop is Live!"+(m[2]?" "+m[2]:"")],
+ [/^"(.+)" अब PataBook पर सबको दिख रही है।\s*दुकान का पेज खोलकर देखें और दोस्तों को भेजें।?$/,(m)=>'"'+m[1]+'" is now visible to everyone on PataBook. Open your shop page and share it with friends.']
+];
+function evTr(t,en){t=String(t||"");if(!en)return t;for(const[r,f]of EV_EN){const m=r.exec(t.trim());if(m)return f(m);}return t;}
 async function loadEvents(){try{EVS=await rpc("pb_my_events");}catch(e){EVS=null;}}   /* sql-17 अभी नहीं चली तो यह हिस्सा नहीं दिखेगा */
 function ago(t){const m=Math.round((Date.now()-new Date(t).getTime())/60000),en=L()==="en";if(m<60)return en?(m<=1?"just now":m+" min ago"):(m<=1?"अभी":m+" मिनट पहले");const h=Math.round(m/60);if(h<24)return en?h+" hr ago":h+" घंटे पहले";const d=Math.round(h/24);return en?d+" days ago":d+" दिन पहले";}
 function bellOK(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&!!(PBA.mobile&&PBA.mobile.enabled());}
@@ -255,7 +261,7 @@ function notifBlock(){
   const en=L()==="en",ev=(EVS.events||[]).slice(0,5);
   return '<div class="nt"><div class="bh"><span class="ic">🔔</span><span class="tx"><b>'+(en?"Notifications on your phone":"फ़ोन पर सूचनाएँ")+'</b><small>'+(en?"When your shop goes Live, a customer taps Call, and a weekly report every Monday.":"दुकान Live होने पर, ग्राहक के Call दबाने पर, और हर सोमवार हफ़्ते की रिपोर्ट।")+'</small></span>'+
     (bellOK()?'<button type="button" class="bb'+(BELL?" on":"")+'" id="bellBtn">'+(BELL?(en?"✅ On":"✅ चालू"):(en?"Turn on":"चालू करें"))+'</button>':'')+'</div><div class="bn" id="bellNote"></div>'+
-    (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
+    (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(evTr(e.title,en))+'</b>'+(e.body?esc(evTr(e.body,en))+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
     '</div>';
 }
 function weekLine(b){

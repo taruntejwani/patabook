@@ -152,8 +152,8 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <div class="pwb" id="pwBox" hidden>
           <p class="lbl" id="pwH" style="margin:0 0 4px">🔐 अपना पासवर्ड बनाएँ</p>
           <p class="hint" id="pwHint" style="margin:0 0 8px;font-size:13px">अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP की ज़रूरत नहीं।</p>
-          <input id="pw1" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="5 अंक का पासवर्ड">
-          <input id="pw2" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="पासवर्ड दोबारा डालें" style="margin-top:8px">
+          <input id="pw1" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="5 अंक का पासवर्ड" data-en-ph="5-digit password">
+          <input id="pw2" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="पासवर्ड दोबारा डालें" data-en-ph="Re-enter password" style="margin-top:8px">
         </div>
         <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
         <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
@@ -275,7 +275,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
 
 <footer style="padding:0 16px 18px"><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav></footer>
 <div class="pscrim" id="pscrim"></div>
-<div class="sheet" id="sheet" role="dialog" aria-label="Category चुनें">
+<div class="sheet" id="sheet" role="dialog" aria-label="Category चुनें" data-en-al="Choose category">
   <div class="sh"><b data-i="sheet_t">Category चुनें</b><button type="button" id="sclose" aria-label="Close">✕</button></div>
   <div class="sb"><input id="sq" autocomplete="off" data-ip="sq_ph" placeholder="खोजें: जैसे plumber, school, कपड़े"></div>
   <div class="sl" id="sl"></div>
