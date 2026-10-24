@@ -98,6 +98,8 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <label class="lbl" for="pin" data-en="📮 Area postal PIN code">📮 शहर / इलाके का पिन कोड</label>
    <input id="pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंक / 6 digits">
    <p class="hint" data-en="The 6-digit post office code, like 370201 — not your ATM / bank PIN.">डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला PIN नहीं।</p>
+   <label class="lbl" for="lmk" style="margin-top:14px" data-en="🏁 Landmark (a known place nearby)">🏁 पहचान (पास की कोई जानी-मानी जगह)</label>
+   <input id="lmk" type="text" maxlength="80" data-en-ph="e.g. Near Apnanagar Circle" placeholder="जैसे: Apnanagar Circle के पास">
    <label class="chk" style="margin-top:14px"><input id="homeDel" type="checkbox"><span data-en="🚚 We do home delivery">🚚 हम होम डिलीवरी करते हैं</span></label>
   </div>
 
@@ -184,7 +186,7 @@ function errText(m){
   const f={"bad Hours":["खुलने और बंद होने का समय दोनों चुनें।","Choose both opening and closing time."],"bad Website":["Website का link सही लिखें (जैसे www.example.com)।","Enter a correct website link (like www.example.com)."],
     "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
     "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
-    "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
+    "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
     "bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."]};
@@ -205,7 +207,7 @@ $("main").addEventListener("submit",async e=>{
   const gst=$("gst").value.replace(/\s/g,"").toUpperCase(),udy=$("udyam").value.replace(/\s/g,"").toUpperCase();
   if(gst&&!gstOk(gst)){$("err").textContent=errText("bad GST");$("gst").focus();return;}
   if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
-  const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim()};
+  const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
   const b=$("saveBtn");b.disabled=true;
   try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);}
   catch(x){$("err").textContent=errText(x.message);}
@@ -226,7 +228,7 @@ $("main").addEventListener("submit",async e=>{
     const h=line(ds,"Hours").match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);if(h){$("openT").value=h[1];$("closeT").value=h[2];}
     $("offDay").value=line(ds,"Closed");
     $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
-    $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");
+    $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");$("lmk").value=line(ds,"Landmark");
     $("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
     if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
     $("hidNote").hidden=!(d&&d.show_phone===false);

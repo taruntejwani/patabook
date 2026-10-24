@@ -39,6 +39,27 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.3px;line-height:1.25}
 .tag.rt{background:#fff6dc;color:#8a6200}
 .rows{margin-top:14px;border-top:1px solid #eef1f6}
 .row{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #eef1f6;font-size:14.5px;line-height:1.5}
+.bst{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;font-weight:700}.bst i{width:9px;height:9px;border-radius:50%;background:#e53935;flex:none}.bst.op i{background:#1e9e57}.bst.op{color:#137333}
+.addr{display:flex;gap:10px;align-items:flex-start;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:14px}
+.addr .pn{font-size:20px;line-height:1.2}.addr b{display:block;font-size:15.5px;line-height:1.4;font-weight:700;word-break:break-word}.addr small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+.lmk{display:inline-block;margin-top:6px;background:#fff6d6;color:#7a4b00;font-size:12.5px;font-weight:700;border-radius:8px;padding:3px 8px}
+.abtn{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.abtn a,.abtn button{display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:9px 4px;font:inherit;font-size:12.5px;font-weight:700;color:var(--navy);cursor:pointer;text-align:center;text-decoration:none}
+.abtn span{font-size:19px;line-height:1}.abtn .p{background:var(--blue);border-color:var(--blue);color:#fff}
+.smap{position:relative;display:block;height:170px;border-radius:16px;overflow:hidden;margin-top:12px;background:#e5e9ef;border:1px solid var(--line)}
+.smap .tl{position:absolute;display:grid;grid-template-columns:repeat(3,256px)}.smap .tl img{width:256px;height:256px;display:block}
+.smap .mp{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);font-size:36px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
+.smap .ml{position:absolute;left:10px;bottom:10px;background:#fff;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:800;color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.smap .ma{position:absolute;right:6px;bottom:4px;font-size:9.5px;color:#555;background:#ffffffc0;padding:0 4px;border-radius:4px}
+.shr{display:flex;align-items:center;gap:12px;width:100%;background:linear-gradient(135deg,#e3f7ea,#f4fbf6);border:1px solid #c9ead4;border-radius:18px;padding:14px;margin:0 0 10px;text-decoration:none;color:var(--ink)}
+.shr .ic{flex:none;width:44px;height:44px;border-radius:14px;background:#1e9e57;color:#fff;display:grid;place-items:center;font-size:22px}
+.shr b{display:block;font-size:15px}.shr small{color:var(--muted);font-size:12.5px}.shr .go{margin-left:auto;background:#1e9e57;color:#fff;font-weight:800;border-radius:999px;padding:9px 14px;font-size:13.5px;white-space:nowrap}
+.near{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.near::-webkit-scrollbar{display:none}
+.near a{flex:0 0 150px;border:1px solid var(--line);border-radius:16px;padding:11px;background:#fff;text-decoration:none;color:var(--ink)}
+.near .i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:#eef3fd;overflow:hidden}.near .i img{width:100%;height:100%;object-fit:cover}
+.near b{display:block;font-size:13.5px;margin-top:8px;line-height:1.25}.near small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.near em{display:inline-block;font-style:normal;margin-top:6px;background:#e8f0fe;color:var(--blue);font-weight:800;font-size:11.5px;border-radius:999px;padding:2px 8px}
+.ctoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12141c;color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 16px;z-index:999}
 .row span{flex:0 0 112px;color:var(--muted)}
 .row b{font-weight:500;flex:1;min-width:0;word-break:break-word}
 .row a{color:var(--blue);font-weight:600}
@@ -106,7 +127,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();bizDist();loadContact();loadVac();loadVacFlag();
+    render();bizDist();loadNear();loadContact();loadVac();loadVacFlag();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -121,7 +142,7 @@ function hoursText(b){
     a=+m[1].slice(0,2)*60+ +m[1].slice(3),z=+m[2].slice(0,2)*60+ +m[2].slice(3),
     dayOff=off&&now.toLocaleDateString("en-US",{weekday:"long"})===off,
     open=!dayOff&&(a<=z?cur>=a&&cur<z:cur>=a||cur<z);
-    t+=open?(en?"  ·  🟢 Open now":"  ·  🟢 अभी खुला है"):(en?"  ·  🔴 Closed now":"  ·  🔴 अभी बंद है");}
+    }
   if(off)t+=(t?"\n":"")+(en?"🗓️ "+off+" off":"🗓️ "+(DAY_HI[off]||off)+" छुट्टी");
   return t;
 }
@@ -135,6 +156,63 @@ function bizDist(){const el=document.getElementById("bDist");if(!el||!B)return;c
   el.textContent=" · "+t+((PB.lang&&PB.lang()==="en")?" away":" दूर");}
 try{if(navigator.geolocation&&navigator.permissions)navigator.permissions.query({name:"geolocation"}).then(st=>{if(st.state!=="granted")return;
   navigator.geolocation.getCurrentPosition(p=>{MYPOS=[p.coords.latitude,p.coords.longitude];bizDist();},()=>{},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});}).catch(()=>{});}catch(e){}
+
+/* ---- पता: एक साफ़ लाइन (दोहराव हटाकर), खुलने का समय, छोटा नक्शा, पास की दुकानें ---- */
+function tcase(w){return /^[A-Z]{4,}$/.test(w)?w[0]+w.slice(1).toLowerCase():w;}
+function fullAddr(b,city){
+  let parts=String(b.address||"").split(",").map(x=>x.trim().replace(/\s+/g," ")).filter(Boolean);
+  parts=parts.filter((x,i)=>!parts.some((y,j)=>j!==i&&y.length>x.length&&y.toLowerCase().includes(x.toLowerCase()))&&parts.findIndex(y=>y.toLowerCase()===x.toLowerCase())===i);
+  let t=parts.join(", ");const low=()=>t.toLowerCase();
+  [line(b,"Area"),city].forEach(x=>{x=String(x||"").trim();if(x&&!low().includes(x.toLowerCase()))t+=(t?", ":"")+x;});
+  t=t.split(" ").map(tcase).join(" ");
+  const pin=line(b,"PIN")||line(b,"Pincode");if(/^[1-9]\d{5}$/.test(pin)&&!t.includes(pin))t+=" – "+pin;
+  return t;
+}
+function openStatus(b){
+  const en=PB.lang&&PB.lang()==="en",h=line(b,"Hours"),off=line(b,"Closed"),m=h.match(/^(\d{2}):(\d{2})-(\d{2}):(\d{2})$/);if(!m)return null;
+  const a=+m[1]*60+ +m[2],z=+m[3]*60+ +m[4],now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),cur=now.getHours()*60+now.getMinutes();
+  const DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],today=DN[now.getDay()];
+  const isOpen=today!==off&&(a<=z?cur>=a&&cur<z:cur>=a||cur<z);
+  const at=t=>hm12(t),openT=m[1]+":"+m[2],closeT=m[3]+":"+m[4];
+  if(isOpen)return {open:true,t:en?"Open now · closes "+at(closeT):"अभी खुला है · "+at(closeT)+" पर बंद होगा"};
+  if(today!==off&&cur<a)return {open:false,t:en?"Closed now · opens today "+at(openT):"अभी बंद · आज "+at(openT)+" पर खुलेगा"};
+  for(let d=1;d<=7;d++){const dn=DN[(now.getDay()+d)%7];if(dn===off)continue;
+    const when=d===1?(en?"tomorrow":"कल"):(en?dn:(DAY_HI[dn]||dn)+" को");
+    return {open:false,t:en?"Closed now · opens "+when+" "+at(openT):"अभी बंद · "+when+" "+at(openT)+" पर खुलेगा"};}
+  return {open:false,t:en?"Closed now":"अभी बंद"};
+}
+function waLink(b,addr){const u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug);return "https://wa.me/?text="+encodeURIComponent("🏪 "+b.name+"\n📍 "+addr+"\n\n"+((PB.lang&&PB.lang()==="en")?"See details, Call & WhatsApp on PataBook:":"पूरी जानकारी, Call और WhatsApp — PataBook पर:")+"\n"+u);}
+function gmapsUrl(b){const la=+b.latitude,ln=+b.longitude;return "https://www.google.com/maps/search/?api=1&query="+(la&&ln?la+","+ln:encodeURIComponent((b.name||"")+", "+(b.address||"")));}
+function staticMap(b,href){const la=+b.latitude,ln=+b.longitude;if(!la||!ln)return "";
+  const z=16,n=2**z,xf=(ln+180)/360*n,yr=la*Math.PI/180,yf=(1-Math.log(Math.tan(yr)+1/Math.cos(yr))/Math.PI)/2*n,x=Math.floor(xf),y=Math.floor(yf);
+  let t="";for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t+='<img alt="" loading="lazy" src="https://tile.openstreetmap.org/'+z+'/'+(x+dx)+'/'+(y+dy)+'.png">';
+  return '<a class="smap" id="smap" href="'+esc(href||"#")+'" data-fx="'+(xf-x)+'" data-fy="'+(yf-y)+'"><div class="tl">'+t+'</div><span class="mp">📍</span><span class="ml">'+((PB.lang&&PB.lang()==="en")?"Shop on map ›":"नक्शे पर दुकान ›")+'</span><span class="ma">© OpenStreetMap</span></a>';}
+function placeMap(){const m=document.getElementById("smap");if(!m)return;const t=m.querySelector(".tl"),w=m.clientWidth,H=m.clientHeight;
+  t.style.left=(w/2-(256+ +m.dataset.fx*256))+"px";t.style.top=(H/2-(256+ +m.dataset.fy*256))+"px";}
+addEventListener("resize",placeMap);
+function ctoast(s){const d=document.createElement("div");d.className="ctoast";d.textContent=s;document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}
+function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
+function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+const NICO=[["food|restaurant|cafe|sweet|bakery","🍽️"],["auto|car|bike|tyre|garage","🚗"],["health|doctor|hospital|medical|dental|clinic","🏥"],["school|college|tuition|coaching|education","🎓"],["salon|beauty|spa","💇"],["hotel|lodge|guest","🏨"],["electric|plumb|carpenter|painter|home|repair|cleaning","🛠️"],["mobile|electronic","📱"],["cloth|fashion","👗"],["grocery|kirana","🛒"],["manufactur|wholesale|supplier","🏭"]];
+function nico(c){c=String(c||"").toLowerCase();for(const x of NICO)if(new RegExp(x[0]).test(c))return x[1];return "🏪";}
+let NEAR=null;
+async function loadNear(){
+  if(!B)return;const la=+B.latitude,ln=+B.longitude,city=line(B,"City")||String(B.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";
+  const sel="slug,name,address,category,latitude,longitude,logo_url",base=SB+"/rest/v1/businesses?is_active=eq.true&deleted_at=is.null&slug=neq."+encodeURIComponent(B.slug);
+  let u;
+  if(la&&ln)u=base+"&latitude=gte."+(la-0.2)+"&latitude=lte."+(la+0.2)+"&longitude=gte."+(ln-0.2)+"&longitude=lte."+(ln+0.2)+"&limit=60";
+  else if(city)u=base+"&address=ilike."+encodeURIComponent("*"+city.replace(/[*,()%\\:."']/g," ").trim()+"*")+"&limit=12";
+  else return;
+  try{let r=await fetch(u+"&select="+sel,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    if(!r.ok)r=await fetch(u+"&select=slug,name,address,category,latitude,longitude",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    if(!r.ok)return;let a=await r.json();
+    if(la&&ln){a.forEach(x=>{x._km=(+x.latitude&&+x.longitude)?hav(la,ln,+x.latitude,+x.longitude):null;});a=a.filter(x=>x._km!=null).sort((p,q)=>p._km-q._km);}
+    NEAR=a.slice(0,8);drawNear();}catch(e){}
+}
+function drawNear(){const box=document.getElementById("nearBox"),sec=document.getElementById("near");if(!box||!sec)return;
+  if(!NEAR||!NEAR.length){sec.hidden=true;return;}sec.hidden=false;
+  const LG=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  box.innerHTML=NEAR.map(x=>'<a href="business.html?slug='+encodeURIComponent(x.slug)+'"><span class="i">'+(LG.test(x.logo_url||"")?'<img src="'+esc(x.logo_url)+'" alt="" loading="lazy">':nico(x.category))+'</span><b>'+esc(x.name)+'</b><small>'+esc(String(x.address||"").split(",")[0])+'</small>'+(x._km!=null?'<em>'+kmTxt(x._km)+'</em>':'')+'</a>').join("");}
 function render(){
   if(!B)return;
   const b=B,sub=line(b,"Subcategory"),city=line(b,"City")||String(b.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";
@@ -143,14 +221,13 @@ function render(){
     [(PB.lang&&PB.lang()==="en")?"Business type":"बिज़नेस का प्रकार",btypeLabel(line(b,"Type"))],
     [(PB.lang&&PB.lang()==="en")?"Hours":"समय",hoursText(b)],
     [T("s_cat"),[sub,b.category].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(" · ")],
-    [T("s_city"),city],[T("i_area"),line(b,"Area")],
-    ["District",line(b,"District")],["State",line(b,"State")],[(PB.lang&&PB.lang()==="en")?"PIN code":"पिन कोड",line(b,"PIN")||line(b,"Pincode")],
-    [T("i_addr"),b.address],[T("i_svc"),line(b,"Services")],
+    [T("i_svc"),line(b,"Services")],
     ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))?line(b,"GST"):""],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
   const en=PB.lang&&PB.lang()==="en",gst=/^[0-9A-Z]{15}$/.test(line(b,"GST")),gstV=gst&&/^yes$/i.test(line(b,"GST-Verified")),udy=/^UDYAM-/.test(line(b,"Udyam"));
   const wsrc=b.website||line(b,"Website"),web=/^https?:\/\//i.test(wsrc||"")?wsrc:"";
+  const ost=openStatus(b),addr=fullAddr(b,city),lmk=line(b,"Landmark").replace(/[<>]/g,""),sub2=[line(b,"District"),line(b,"State")].filter(Boolean).filter(x=>!addr.toLowerCase().includes(x.toLowerCase())).join(", ");
   document.getElementById("app").innerHTML=
    '<section class="card"><div style="display:flex;align-items:center;gap:14px">'+(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" style="flex:none;width:64px;height:64px;border-radius:16px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5">':'')+'<h1 style="min-width:0">'+esc(b.name)+'</h1></div><div class="tags">'+
      (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+
@@ -159,8 +236,11 @@ function render(){
      (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME (Udyam)":"MSME (उद्यम)")+'</span>':'')+
      (/^yes$/i.test(line(b,"Delivery"))?'<span class="tag" style="background:#fff4e5;color:#874d00">🚚 '+((PB.lang&&PB.lang()==="en")?"Home Delivery":"होम डिलीवरी")+'</span>':'')+
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()==="en")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
-   '</div><div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
-     (map?'<div class="row"><span>'+esc(T("b_map"))+'</span><b><a href="'+esc(map)+'">📍 '+esc(T("dir"))+'</a></b></div>':'')+
+   '</div>'+(ost?'<div class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+
+   (addr?'<div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(sub2?'<small>'+esc(sub2)+'</small>':'')+(lmk?'<span class="lmk">🏁 '+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</span>':'')+'</div></div>'+
+     '<div class="abtn">'+(map?'<a class="p" href="'+esc(map)+'"><span>🧭</span>'+esc(en?"Directions":"रास्ता देखें")+'</a>':'')+'<button type="button" id="cpAddr"><span>📋</span>'+esc(en?"Copy address":"पता copy")+'</button><a href="'+esc(gmapsUrl(b))+'" target="_blank" rel="noopener"><span>🗺️</span>Google Maps</a></div>':'')+
+   staticMap(b,map)+
+   '<div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
      (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(line(b,"Email"))?'<div class="row"><span>Email</span><b><a href="mailto:'+esc(line(b,"Email"))+'">'+esc(line(b,"Email"))+'</a></b></div>':'')+
      (web?'<div class="row"><span>'+esc(T("b_web"))+'</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+
    '</div>'+(rows.length?'':'<p class="desc">'+esc(T("b_def"))+'</p>')+
@@ -169,12 +249,15 @@ function render(){
    '<div id="vacFlag" style="display:none;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px"></div>'+
    '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div></section>'+
    '<section class="card" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
-   '<button type="button" id="cardBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px;margin:0 0 12px;font:inherit;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,#25d366,#1a73e8);box-shadow:0 6px 16px rgba(26,115,232,.25)">📤 '+((PB.lang&&PB.lang()==="en")?"Share this shop":"यह दुकान शेयर करें")+'</button>'+
+   '<a class="shr" id="waShare" href="'+esc(waLink(b,addr))+'" target="_blank" rel="noopener"><span class="ic">📤</span><span><b>'+esc(en?"Send this shop to friends":"यह दुकान दोस्तों को भेजें")+'</b><small>'+esc(en?"Name, address and link on WhatsApp":"नाम, पता और link WhatsApp पर")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></a>'+
+   '<p style="text-align:center;margin:-2px 0 12px"><button type="button" id="cardBtn" style="border:0;background:none;font:inherit;font-size:13.5px;font-weight:700;color:#1a73e8;cursor:pointer">🪪 '+esc(en?"Make a shop card (photo)":"दुकान का कार्ड (फ़ोटो) बनाएँ")+'</button></p>'+
+   '<section class="card" id="near" hidden><h2>📍 '+esc(en?"Other shops nearby":"पास की दूसरी दुकानें")+'</h2><div class="near" id="nearBox"></div></section>'+
    '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()==="en")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()==="en")?"Terms":"नियम")+'</a></p>'+
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
    '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>';
-  drawContact();drawVac();drawVacFlag();
+  drawContact();drawVac();drawVacFlag();drawNear();placeMap();
+  const cp=document.getElementById("cpAddr");if(cp)cp.onclick=()=>{const t=b.name+", "+addr;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
