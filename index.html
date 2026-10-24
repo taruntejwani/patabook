@@ -29,6 +29,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .locchip input{border:0;outline:0;background:transparent;font:inherit;font-size:16px;font-weight:700;color:var(--navy);width:130px;min-width:0;padding:0}
 .locchip input::placeholder{color:var(--muted);font-weight:600}
 .locchip .dd{color:var(--muted);font-size:12px}
+.gpsb{flex:none;width:30px;height:30px;margin:-3px -7px -3px 0;border-radius:50%;border:0;background:#e8f0fe;color:#1a73e8;display:grid;place-items:center;cursor:pointer;padding:0}.gpsb svg{width:18px;height:18px}.gpsb:active{background:#d2e3fc}.gpsb.busy svg{animation:gpsspin 1s linear infinite}@keyframes gpsspin{to{transform:rotate(360deg)}}
 .locchip:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.15)}
 @media(max-width:430px){.top #pblBtnTxt{display:none}.addtop{padding:7px 10px}.top .tr{gap:6px}.top .mapbtn span{display:none}.top .mapbtn{padding:6px 9px}.locchip{max-width:none;flex:1 1 auto}.locchip input{width:100%}}
 .mapbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 13px 6px 8px;font-size:13px;font-weight:700;background:#fff;color:var(--navy)}
@@ -205,7 +206,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <body>
 
 <div class="top">
-  <label class="locchip" title="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="मेरी location से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><span class="dd" aria-hidden="true">▾</span></label>
+  <label class="locchip" title="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="मेरी location से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी location से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></label>
   <div class="tr"><a class="addtop" id="addTop" href="list.html">＋ <span data-i="addtop">दुकान जोड़ें</span></a><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
   <span id="pbLang"></span></div>
 </div>
@@ -513,17 +514,17 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
 })();
 /* 📍 दबाओ = अभी की location से शहर (पहले खुद चुना हो तब भी) */
 (function(){
-  const b=document.getElementById("locBtn"),inp=document.getElementById("city");if(!b||!inp)return;
+  const b=document.getElementById("locBtn"),g=document.getElementById("gpsBtn"),inp=document.getElementById("city");if(!b||!inp)return;
   const en=()=>PB.lang&&PB.lang()==="en";
   function done(c){if(!c)return;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}
     inp.dispatchEvent(new Event("change",{bubbles:true}));document.dispatchEvent(new Event("pb-city-auto"));}
   function msg(t){inp.value="";inp.placeholder=t;}
   function go(e){e.preventDefault();e.stopPropagation();
     if(!navigator.geolocation){msg(en()?"Location not available":"Location नहीं मिली");return;}
-    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"Location ढूँढ रहे हैं…";b.style.opacity=".5";
-    const fail=t=>{b.style.opacity="";inp.value=old;inp.placeholder=ph;if(t)alertBox(t);};
+    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"Location ढूँढ रहे हैं…";b.style.opacity=".5";if(g)g.classList.add("busy");
+    const fail=t=>{b.style.opacity="";if(g)g.classList.remove("busy");inp.value=old;inp.placeholder=ph;if(t)alertBox(t);};
     navigator.geolocation.getCurrentPosition(p=>{
-      b.style.opacity="";inp.placeholder=ph;
+      b.style.opacity="";if(g)g.classList.remove("busy");inp.placeholder=ph;
       const la=p.coords.latitude,ln=p.coords.longitude,LL=window.PB_LL||{};let best=null,bd=1e9;
       Object.keys(LL).forEach(c=>{const dy=(LL[c][0]-la)*111,dx=(LL[c][1]-ln)*111*Math.cos(la*Math.PI/180),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=c;}});
       if(best&&bd<35){done(best);return;}
@@ -536,7 +537,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
   }
   function alertBox(t){let d=document.getElementById("locMsg");if(!d){d=document.createElement("div");d.id="locMsg";d.style.cssText="position:fixed;left:12px;right:12px;top:70px;z-index:99;background:#fff4e5;color:#7a3b00;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.12)";document.body.appendChild(d);}
     d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
-  b.addEventListener("click",go);b.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e);});
+  b.addEventListener("click",go);if(g)g.addEventListener("click",go);b.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e);});
 })();
 PB.mount(document.getElementById("pbLang"));
 PB.onChange(applyLang);
