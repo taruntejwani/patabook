@@ -143,7 +143,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <div class="emoji">📞</div>
         <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
         <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर call / WhatsApp करेंगे।</p>
-        <input id="phone" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
+        <input id="phone" type="tel" inputmode="numeric" maxlength="13" autocomplete="tel-national" placeholder="98XXXXXXXX">
         <div class="otpb" id="otpBox">
           <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
           <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।</p>
@@ -191,6 +191,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
         <label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
         <input id="pin" inputmode="numeric" maxlength="6" placeholder="370201">
+        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला PIN नहीं।</p>
         <div class="err"></div>
       </div>
 
@@ -525,6 +526,14 @@ function saveOther(){
   pick({id:g,typ:name,main:GNAME[g],grp:OTHER_LABEL,db_key:GKEY[g],group:g,auto:false});
 }
 
+/* पिन कोड के पहले 2 अंक राज्य बताते हैं (India Post) — गलत राज्य का पिन पकड़ने के लिए */
+const PIN_ST={"Delhi":"11","Haryana":"12-13","Punjab":"14-16","Chandigarh":"14-16","Himachal Pradesh":"17","Jammu and Kashmir":"18-19","Ladakh":"18-19",
+ "Uttar Pradesh":"20-28","Uttarakhand":"24-26","Rajasthan":"30-34","Gujarat":"36-39","Dadra and Nagar Haveli and Daman and Diu":"36-39",
+ "Maharashtra":"40-44","Goa":"40-40","Madhya Pradesh":"45-48","Chhattisgarh":"46-49","Telangana":"50-50","Andhra Pradesh":"50-53","Karnataka":"56-59",
+ "Tamil Nadu":"60-64","Puducherry":"53-53,60-60,67-67","Kerala":"67-69","Lakshadweep":"68-68","West Bengal":"70-74","Andaman and Nicobar Islands":"74-74","Sikkim":"73-73",
+ "Odisha":"75-77","Assam":"78-78","Arunachal Pradesh":"78-79","Meghalaya":"79-79","Manipur":"79-79","Mizoram":"79-79","Nagaland":"79-79","Tripura":"79-79","Bihar":"80-85","Jharkhand":"80-85"};
+function pinFitsState(pin,st){const r=PIN_ST[st];if(!r)return true;const p=+pin.slice(0,2);
+  return r.split(",").some(x=>{const a=x.split("-").map(Number);return p>=a[0]&&p<=(a[1]||a[0]);});}
 function phoneClean(){return $("phone").value.replace(/[\s-]/g,"");}
 function validPhone(p){return /^(\+?91)?[6-9]\d{9}$/.test(p);}
 function mapUrl(){if(!$("maplink"))return "";   /* location वाला हिस्सा हटा दिया गया (KYC में बाद में) */
@@ -559,6 +568,8 @@ function check(){
   if(key==="contact"){
     for(const id of ["wa","ph2"]){const v=$(id).value.trim();if(v&&!validPhone(v.replace(/[^\d+]/g,""))){setErr(T("e_phone"));$(id).focus();return false;}}
   }
+  if(key==="addr"&&$("pin")&&/^[1-9]\d{5}$/.test($("pin").value.trim())&&!pinFitsState($("pin").value.trim(),$("state").value)){
+    setErr(EN()?"This PIN code is not of "+$("state").value+". Check the post office PIN of your area (or leave it empty).":"यह पिन कोड "+$("state").value+" का नहीं है। अपने इलाके का डाकघर वाला पिन कोड जाँचें (या खाली छोड़ दें)।");$("pin").focus();return false;}
   if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){setErr(EN()?"PIN code must be 6 digits (or leave it empty).":"PIN कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
   if(key==="online"&&$("email").value.trim()&&!/^[^\s@]{1,64}@[^\s@]{1,100}\.[a-z]{2,}$/i.test($("email").value.trim())){setErr(EN()?"The email looks wrong (or leave it empty).":"Email सही नहीं लगता (या खाली छोड़ दें)।");$("email").focus();return false;}
   if(key==="online"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){setErr(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
@@ -611,7 +622,8 @@ function extrasFill(){
   set("onH","Email और वेबसाइट","Email and website");
   set("onHint","अगर है तो लिखें, नहीं तो खाली छोड़कर \"आगे\" दबाएँ।","Add them if you have them, or leave empty and tap Next.");
   set("emL","✉️ Email (वैकल्पिक)","✉️ Email (optional)");
-  set("pinL","PIN कोड (वैकल्पिक)","PIN code (optional)");
+  set("pinL","📮 शहर / इलाके का पिन कोड (वैकल्पिक)","📮 Area postal PIN code (optional)");
+  set("pinH","डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला PIN नहीं।","The 6-digit post office code, like 370201 — not your ATM / bank PIN.");
   set("hdlTxt","🚚 घर पर सामान पहुँचाते हैं (Home Delivery)","🚚 We deliver to your home (Home Delivery)");
   const od=$("offDay");if(od){const v=od.value;od.innerHTML=DAYS.map(d=>'<option value="'+d[0]+'">'+(en?d[2]:d[1])+'</option>').join("");od.value=v;}
 }
@@ -656,7 +668,13 @@ function otpLang(){
   if(!$("otpMsg").style.color)otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");
 }
 otpLang();if(window.PB&&PB.onChange)PB.onChange(otpLang);
-$("phone").addEventListener("input",()=>{if(regToken&&ph10()!==regPhone)otpReset();});
+$("phone").addEventListener("input",e=>{   /* सिर्फ अंक, ज़्यादा से ज़्यादा 10 (+91 / 0 अपने-आप हटे) */
+  let d=e.target.value.replace(/\D/g,"");
+  if(d.length>10&&/^91/.test(d))d=d.length>=12?d.slice(2,12):d;        /* +91 लिखते समय बीच में न कटे */
+  else if(d.length>10&&/^0/.test(d))d=d.slice(1,11);
+  else d=d.slice(0,10);
+  e.target.value=d;
+  if(regToken&&ph10()!==regPhone)otpReset();});
 $("otpSend").onclick=async()=>{
   const p=ph10();if(!/^[6-9]\d{9}$/.test(p)){otpMsg(otpErr({code:"bad_phone"}),true);return;}
   const b=$("otpSend");b.disabled=true;

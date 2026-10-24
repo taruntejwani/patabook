@@ -135,7 +135,7 @@ function render(){
     [(PB.lang&&PB.lang()==="en")?"Hours":"समय",hoursText(b)],
     [T("s_cat"),[sub,b.category].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(" · ")],
     [T("s_city"),city],[T("i_area"),line(b,"Area")],
-    ["District",line(b,"District")],["State",line(b,"State")],["PIN",line(b,"PIN")||line(b,"Pincode")],
+    ["District",line(b,"District")],["State",line(b,"State")],[(PB.lang&&PB.lang()==="en")?"PIN code":"पिन कोड",line(b,"PIN")||line(b,"Pincode")],
     [T("i_addr"),b.address],[T("i_svc"),line(b,"Services")],
     ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))?line(b,"GST"):""],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
