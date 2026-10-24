@@ -160,8 +160,6 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
         <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select>
         <input id="shop" data-ip="shop_ph" placeholder="जैसे: श्री कृष्णा कार वॉश" maxlength="80">
-        <label for="web" id="webL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span></label>
-        <input id="web" type="url" inputmode="url" autocomplete="url" placeholder="जैसे: www.meridukaan.com" maxlength="200">
         <div class="err"></div>
       </div>
 
@@ -189,6 +187,46 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         </div>
         <label class="lbl" id="addrL">पूरा पता *</label>
         <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
+        <label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
+        <input id="pin" inputmode="numeric" maxlength="6" placeholder="370201">
+        <div class="err"></div>
+      </div>
+
+      <!-- नया: WhatsApp + दूसरा नंबर -->
+      <div class="step" data-s="contact">
+        <div class="emoji">💬</div>
+        <h1 id="ctH">WhatsApp और दूसरा नंबर</h1>
+        <p class="hint" id="ctHint">दोनों ज़रूरी नहीं — खाली छोड़कर "आगे" दबा सकते हैं।</p>
+        <label for="wa" id="waL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">💬 WhatsApp नंबर (अगर ऊपर वाले से अलग है)</label>
+        <input id="wa" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
+        <label for="ph2" id="ph2L" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">📞 दूसरा नंबर (वैकल्पिक)</label>
+        <input id="ph2" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX">
+        <div class="err"></div>
+      </div>
+
+      <!-- नया: समय + छुट्टी -->
+      <div class="step" data-s="hours">
+        <div class="emoji">🕘</div>
+        <h1 id="hrH">दुकान कब खुलती है?</h1>
+        <p class="hint" id="hrHint">ग्राहक बिना फ़ोन किए जान लेंगे कि दुकान अभी खुली है या नहीं। ज़रूरी नहीं।</p>
+        <div class="row">
+          <div><label class="lbl" id="opL" for="openT">खुलने का समय</label><input id="openT" type="time" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit"></div>
+          <div><label class="lbl" id="clL" for="closeT">बंद होने का समय</label><input id="closeT" type="time" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit"></div>
+        </div>
+        <label for="offDay" id="offL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">🗓️ हफ़्ते में छुट्टी</label>
+        <select id="offDay" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit"></select>
+        <div class="err"></div>
+      </div>
+
+      <!-- नया: email + website -->
+      <div class="step" data-s="online">
+        <div class="emoji">🌐</div>
+        <h1 id="onH">Email और वेबसाइट</h1>
+        <p class="hint" id="onHint">अगर है तो लिखें, नहीं तो खाली छोड़कर "आगे" दबाएँ।</p>
+        <label for="email" id="emL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">✉️ Email (वैकल्पिक)</label>
+        <input id="email" type="email" inputmode="email" autocomplete="email" maxlength="100" placeholder="name@gmail.com">
+        <label for="web" id="webL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span></label>
+        <input id="web" type="url" inputmode="url" autocomplete="url" placeholder="जैसे: www.meridukaan.com" maxlength="200">
         <div class="err"></div>
       </div>
 
@@ -200,6 +238,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <textarea id="services" data-ip="svc_ph" placeholder="जैसे: car wash, polish, interior cleaning"></textarea>
         <div class="cat" id="cat"></div>
         <label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)</span></label>
+        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (Home Delivery)</span></label>
         <div class="err"></div>
         <div class="sum" id="sum"></div>
       </div>
@@ -511,7 +550,12 @@ function setErr(m){steps[i].querySelector(".err").textContent=m||"";}
 function check(){
   const key=steps[i].dataset.s;setErr("");
   if(key==="shop"&&$("shop").value.trim().length<2){setErr(T("e_shop"));return false;}
-  if(key==="shop"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){setErr(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
+  if(key==="contact"){
+    for(const id of ["wa","ph2"]){const v=$(id).value.trim();if(v&&!validPhone(v.replace(/[^\d+]/g,""))){setErr(T("e_phone"));$(id).focus();return false;}}
+  }
+  if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){setErr(EN()?"PIN code must be 6 digits (or leave it empty).":"PIN कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
+  if(key==="online"&&$("email").value.trim()&&!/^[^\s@]{1,64}@[^\s@]{1,100}\.[a-z]{2,}$/i.test($("email").value.trim())){setErr(EN()?"The email looks wrong (or leave it empty).":"Email सही नहीं लगता (या खाली छोड़ दें)।");$("email").focus();return false;}
+  if(key==="online"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){setErr(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
   if(key==="owner"&&$("owner").value.trim().length<2){setErr(T("e_owner"));return false;}
   if(key==="addr"){
     const cv=$("city").value.trim();
@@ -526,9 +570,10 @@ function check(){
   return true;
 }
 
+function row_show(){return !($("spN")&&$("spN").checked);}   /* नंबर छिपाया है तो दूसरा नंबर / WhatsApp भी public description में नहीं */
 function summary(){
   const m=mapUrl();
-  const rows=[[T("s_shop"),$("shop").value.trim()],...($("btype")&&$("btype").value?[[EN()?"Business type":"बिज़नेस का प्रकार",$("btype").selectedOptions[0].textContent]]:[]),...($("web")&&webNorm($("web").value)?[[EN()?"Website":"वेबसाइट",webNorm($("web").value)]]:[]),[T("s_name"),$("owner").value.trim()],[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
+  const rows=[[T("s_shop"),$("shop").value.trim()],...($("btype")&&$("btype").value?[[EN()?"Business type":"बिज़नेस का प्रकार",$("btype").selectedOptions[0].textContent]]:[]),...($("web")&&webNorm($("web").value)?[[EN()?"Website":"वेबसाइट",webNorm($("web").value)]]:[]),[T("s_name"),$("owner").value.trim()],...($("openT").value&&$("closeT").value?[[EN()?"Hours":"समय",hm($("openT").value)+" – "+hm($("closeT").value)+($("offDay").value?" · "+$("offDay").selectedOptions[0].textContent+(EN()?" off":" छुट्टी"):"")]]:[]),...(n10($("wa").value)?[["WhatsApp",n10($("wa").value)]]:[]),...(n10($("ph2").value)?[[EN()?"Another number":"दूसरा नंबर",n10($("ph2").value)]]:[]),...($("email").value.trim()?[["Email",$("email").value.trim()]]:[]),[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
   $("sum").innerHTML=rows.map(r=>"<div><span>"+r[0]+"</span><b>"+esc(r[1])+"</b></div>").join("");
 }
 
@@ -545,7 +590,27 @@ const BTYPES=[
  ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled Worker)"]]]
 ];
 function webNorm(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);if(!/\.[a-z]{2,}$/i.test(u.hostname))return null;return u.href.slice(0,200);}catch(e){return null;}}
+function n10(v){const d=String(v||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;}
+const DAYS=[["","कोई छुट्टी नहीं (सातों दिन खुला)","No weekly off (open all 7 days)"],["Sunday","रविवार","Sunday"],["Monday","सोमवार","Monday"],["Tuesday","मंगलवार","Tuesday"],["Wednesday","बुधवार","Wednesday"],["Thursday","गुरुवार","Thursday"],["Friday","शुक्रवार","Friday"],["Saturday","शनिवार","Saturday"]];
+function hm(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
+function extrasFill(){
+  const en=EN(),set=(id,h,e)=>{const x=$(id);if(x)x.textContent=en?e:h;},ph=(id,h,e)=>{const x=$(id);if(x)x.placeholder=en?e:h;};
+  set("ctH","WhatsApp और दूसरा नंबर","WhatsApp and another number");
+  set("ctHint","दोनों ज़रूरी नहीं — खाली छोड़कर \"आगे\" दबा सकते हैं।","Both are optional — you can leave them empty and tap Next.");
+  set("waL","💬 WhatsApp नंबर (अगर ऊपर वाले से अलग है)","💬 WhatsApp number (if different from the one above)");
+  set("ph2L","📞 दूसरा नंबर (वैकल्पिक)","📞 Another number (optional)");
+  set("hrH","दुकान कब खुलती है?","When is your shop open?");
+  set("hrHint","ग्राहक बिना फ़ोन किए जान लेंगे कि दुकान अभी खुली है या नहीं। ज़रूरी नहीं।","Customers can see if you are open without calling. Optional.");
+  set("opL","खुलने का समय","Opens at");set("clL","बंद होने का समय","Closes at");set("offL","🗓️ हफ़्ते में छुट्टी","🗓️ Weekly off");
+  set("onH","Email और वेबसाइट","Email and website");
+  set("onHint","अगर है तो लिखें, नहीं तो खाली छोड़कर \"आगे\" दबाएँ।","Add them if you have them, or leave empty and tap Next.");
+  set("emL","✉️ Email (वैकल्पिक)","✉️ Email (optional)");
+  set("pinL","PIN कोड (वैकल्पिक)","PIN code (optional)");
+  set("hdlTxt","🚚 घर पर सामान पहुँचाते हैं (Home Delivery)","🚚 We deliver to your home (Home Delivery)");
+  const od=$("offDay");if(od){const v=od.value;od.innerHTML=DAYS.map(d=>'<option value="'+d[0]+'">'+(en?d[2]:d[1])+'</option>').join("");od.value=v;}
+}
 function btypeFill(){
+  extrasFill();
   const sel=$("btype");if(!sel)return;const v=sel.value,en=EN();
   sel.innerHTML='<option value="">'+(en?"Choose ▾ (optional)":"चुनें ▾ (ज़रूरी नहीं)")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
   sel.value=v;
@@ -699,6 +764,13 @@ async function submit(){
     "Owner: "+$("owner").value.trim(),
     $("btype")&&$("btype").value?"Type: "+$("btype").value:"",
     $("web")&&webNorm($("web").value)?"Website: "+webNorm($("web").value):"",
+    $("email")&&$("email").value.trim()?"Email: "+$("email").value.trim().toLowerCase():"",
+    $("wa")&&n10($("wa").value)&&row_show()?"WhatsApp: "+n10($("wa").value):"",
+    $("ph2")&&n10($("ph2").value)&&row_show()?"Phone2: "+n10($("ph2").value):"",
+    $("openT")&&$("openT").value&&$("closeT").value?"Hours: "+$("openT").value+"-"+$("closeT").value:"",
+    $("offDay")&&$("offDay").value?"Closed: "+$("offDay").value:"",
+    $("pin")&&/^[1-9]\d{5}$/.test($("pin").value.trim())?"PIN: "+$("pin").value.trim():"",
+    $("homeDel")&&$("homeDel").checked?"Delivery: Yes":"",
     svc?"Services: "+svc:"",
     d[1]?"Subcategory: "+d[1]:"",
     S?"Category: "+pathOf(S):"",

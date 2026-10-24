@@ -111,6 +111,20 @@ async function load(){
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
 const BTYPE_HI={"Manufacturer":"🏭 निर्माता (Manufacturer)","Processor / Packer":"🏭 प्रोसेसर / पैकर","Job Worker":"🏭 जॉब वर्कर (Job Work)","Job Work":"🏭 जॉब वर्कर (Job Work)","Assembler":"🏭 असेंबलर","Importer":"🚚 इम्पोर्टर","Exporter":"🚚 एक्सपोर्टर","C&F / Super Stockist":"🚚 C&F / सुपर स्टॉकिस्ट","Distributor":"🚚 डिस्ट्रीब्यूटर","Wholesaler":"📦 होलसेलर (थोक)","Stockist":"🚚 स्टॉकिस्ट","Authorised Dealer":"🚚 अधिकृत डीलर","Trader / Commission Agent":"🚚 ट्रेडर / दलाल","Retailer":"🏪 रिटेलर","Showroom":"🏪 शोरूम","Franchise":"🏪 फ्रैंचाइज़ी","Online Seller":"🏪 ऑनलाइन विक्रेता","Hawker / Street Vendor":"🏪 फेरीवाला","Service Provider":"🛠️ सेवा","Contractor":"🛠️ कॉन्ट्रैक्टर","Consultant / Professional":"🛠️ कंसल्टेंट","Rental / Hire":"🛠️ किराये पर","Repair & Service Centre":"🛠️ रिपेयर / सर्विस सेंटर","Employee (Job)":"👷 नौकरी करते हैं","Freelancer / Self-employed":"👷 फ्रीलांसर / खुद का काम","Skilled Worker":"👷 कारीगर"};
+const DAY_HI={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
+function hm12(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
+function hoursText(b){
+  const en=PB.lang&&PB.lang()==="en",h=line(b,"Hours"),off=line(b,"Closed");
+  const m=h.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);if(!m&&!off)return "";
+  let t=m?hm12(m[1])+" – "+hm12(m[2]):"";
+  if(m){const now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),cur=now.getHours()*60+now.getMinutes(),
+    a=+m[1].slice(0,2)*60+ +m[1].slice(3),z=+m[2].slice(0,2)*60+ +m[2].slice(3),
+    dayOff=off&&now.toLocaleDateString("en-US",{weekday:"long"})===off,
+    open=!dayOff&&(a<=z?cur>=a&&cur<z:cur>=a||cur<z);
+    t+=open?(en?"  ·  🟢 Open now":"  ·  🟢 अभी खुला है"):(en?"  ·  🔴 Closed now":"  ·  🔴 अभी बंद है");}
+  if(off)t+=(t?"\n":"")+(en?"🗓️ "+off+" off":"🗓️ "+(DAY_HI[off]||off)+" छुट्टी");
+  return t;
+}
 function btypeLabel(v){if(!v)return "";if(PB.lang&&PB.lang()==="en")return v;return BTYPE_HI[v]||v;}
 function render(){
   if(!B)return;
@@ -118,6 +132,7 @@ function render(){
   const map=pbDir(b);
   const rows=[
     [(PB.lang&&PB.lang()==="en")?"Business type":"बिज़नेस का प्रकार",btypeLabel(line(b,"Type"))],
+    [(PB.lang&&PB.lang()==="en")?"Hours":"समय",hoursText(b)],
     [T("s_cat"),[sub,b.category].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(" · ")],
     [T("s_city"),city],[T("i_area"),line(b,"Area")],
     ["District",line(b,"District")],["State",line(b,"State")],["PIN",line(b,"PIN")||line(b,"Pincode")],
@@ -128,9 +143,11 @@ function render(){
    '<section class="card"><div style="display:flex;align-items:center;gap:14px">'+(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" style="flex:none;width:64px;height:64px;border-radius:16px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5">':'')+'<h1 style="min-width:0">'+esc(b.name)+'</h1></div><div class="tags">'+
      (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'</span>':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
+     (/^yes$/i.test(line(b,"Delivery"))?'<span class="tag" style="background:#fff4e5;color:#874d00">🚚 '+((PB.lang&&PB.lang()==="en")?"Home Delivery":"होम डिलीवरी")+'</span>':'')+
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()==="en")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
-   '</div><div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join("")+
+   '</div><div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
      (map?'<div class="row"><span>'+esc(T("b_map"))+'</span><b><a href="'+esc(map)+'">📍 '+esc(T("dir"))+'</a></b></div>':'')+
+     (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(line(b,"Email"))?'<div class="row"><span>Email</span><b><a href="mailto:'+esc(line(b,"Email"))+'">'+esc(line(b,"Email"))+'</a></b></div>':'')+
      (web?'<div class="row"><span>'+esc(T("b_web"))+'</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+
    '</div>'+(rows.length?'':'<p class="desc">'+esc(T("b_def"))+'</p>')+
    (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')+
@@ -224,9 +241,11 @@ function drawContact(){
     el.innerHTML='<div class="num" style="filter:grayscale(1);opacity:.6"><div class="l"><small>📱 Mobile</small><b>'+(en?"Not shared":"नंबर बंद है")+'</b></div><a aria-disabled="true" style="pointer-events:none">'+esc(T("call"))+'</a></div>'+
       '<p class="cnote">'+(en?"The shop owner has kept the number private.":"दुकानदार ने अपना नंबर सार्वजनिक नहीं रखा है।")+'</p>';
   }else if(s.k==="ok"){
-    const ph=String(s.phone||"").trim(),wa=String(s.whatsapp||s.phone||"").replace(/\D/g,""),wa2=wa.length===10?"91"+wa:wa;
+    const altWa=B?line(B,"WhatsApp").replace(/\D/g,""):"",ph2=B?line(B,"Phone2").replace(/\D/g,""):"";
+    const ph=String(s.phone||"").trim(),wa=(/^\d{10}$/.test(altWa)?altWa:String(s.whatsapp||s.phone||"")).replace(/\D/g,""),wa2=wa.length===10?"91"+wa:wa;
     el.innerHTML=(ph?'<div class="num"><div class="l"><small>📱 Mobile</small><b>'+esc(ph)+'</b></div><a href="tel:'+esc(ph)+'">'+esc(T("call"))+'</a></div>':'')+
-      (wa2?'<div class="num"><div class="l"><small>💬 WhatsApp</small><b>'+esc(s.whatsapp||s.phone)+'</b></div><a class="w" target="_blank" rel="noopener" href="https://wa.me/'+wa2+'">WhatsApp</a></div>':'')+
+      (/^\d{10}$/.test(ph2)?'<div class="num"><div class="l"><small>📞 '+((PB.lang&&PB.lang()==="en")?"Another number":"दूसरा नंबर")+'</small><b>'+esc(ph2)+'</b></div><a href="tel:'+esc(ph2)+'">'+esc(T("call"))+'</a></div>':'')+
+      (wa2?'<div class="num"><div class="l"><small>💬 WhatsApp</small><b>'+esc(/^\d{10}$/.test(altWa)?altWa:(s.whatsapp||s.phone))+'</b></div><a class="w" target="_blank" rel="noopener" href="https://wa.me/'+wa2+'">WhatsApp</a></div>':'')+
       (!ph&&!wa2?'<p class="cnote">'+esc(T("c_none"))+'</p>':'')+whoLine;
   }else{
     el.innerHTML='<p class="cnote">'+esc(T(s.k==="limit"?"c_limit":"c_setup"))+'</p>'+whoLine;
