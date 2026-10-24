@@ -389,6 +389,7 @@ function applyLang(){
     draw();wire();start();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);
+  document.addEventListener("pb-city-auto",refreshCityShops);   /* शहर अपने-आप मिला (GPS / internet) */
   document.getElementById("city")?.addEventListener("input",()=>{clearTimeout(window.__pbCityFilterTimer);window.__pbCityFilterTimer=setTimeout(refreshCityShops,350);});
   load();
   if(PB.onChange)PB.onChange(()=>{if(L.length)draw();});
@@ -448,31 +449,44 @@ document.getElementById("sug").addEventListener("click",e=>{const a=e.target.clo
 document.getElementById("closeBtn").onclick=()=>openMenu(false);
 document.getElementById("scrim").onclick=()=>openMenu(false);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
-/* ---- शहर अपने-आप: पहले GPS (सबसे पास का शहर, 35 km के अंदर), न मिले तो internet (IP) से; खुद चुना हो तो वही याद रहे ---- */
+/* ---- शहर अपने-आप: पहले GPS (पूरे भारत में — पास का शहर), न मिले तो internet (IP) से; खुद चुना हो तो वही याद रहे ----
+   पहले की गलतियाँ ठीक: (1) चुना हुआ शहर अगर शुरू की छोटी list में नहीं था तो दोबारा खोलने पर गायब हो जाता था;
+   (2) खाना एक बार खाली हो जाए तो हमेशा "सभी जगह" अटका रहता था; (3) GPS सिर्फ कच्छ के 11 शहर पहचानता था। */
 (function(){
   const sel=document.getElementById("city");
   const LL={"Gandhidham":[23.0753,70.1337],"Adipur":[23.0717,70.0886],"Anjar":[23.1132,70.0283],"Bhuj":[23.2420,69.6669],"Mundra":[22.8390,69.7210],"Mandvi":[22.8324,69.3532],
     "Nakhatrana":[23.3474,69.2645],"Bhachau":[23.2964,70.3437],"Rapar":[23.5721,70.6432],"Naliya":[23.2606,68.8269],"Dayapar":[23.6380,68.9010]};
   const opts=()=>[...document.querySelectorAll("#cityDL option")].map(o=>o.value);
-  const canon=c=>{c=String(c||"").trim().toLowerCase();return opts().find(o=>o.toLowerCase()===c)||null;};
-  const has=c=>!!canon(c);
-  let mine=null;try{mine=localStorage.getItem("pb-city");}catch(e){}
-  sel.addEventListener("change",()=>{const k=canon(sel.value);if(k)sel.value=k;else sel.value=sel.value.trim();try{localStorage.setItem("pb-city",sel.value);localStorage.setItem("pb-city-by","me");}catch(e){}});
-  let by=null;try{by=localStorage.getItem("pb-city-by");}catch(e){}
-  if(mine!==null&&by==="me"){sel.value=mine;return;}                             /* ग्राहक ने खुद चुना / लिखा था */
-  if(mine&&has(mine))sel.value=mine;                                            /* पिछली बार अपने-आप मिला था */
-  const set=c=>{c=canon(c);if(c&&!(by==="me")){sel.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","auto");}catch(e){}}};
+  const canon=c=>{c=String(c||"").trim().toLowerCase();return c?(opts().find(o=>o.toLowerCase()===c)||null):null;};
+  const ready=new Promise(res=>{if(window.PB_CITIES_OK)return res();document.addEventListener("pb-cities",res,{once:true});setTimeout(res,5000);});
+  const get=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+  const put=(c,by)=>{try{if(c){localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by",by);}else{localStorage.removeItem("pb-city");localStorage.removeItem("pb-city-by");}}catch(e){}};
+  sel.addEventListener("change",()=>{
+    const v=sel.value.trim();if(!v){put("",null);return;}                 /* खाली = कोई पसंद नहीं; अगली बार फिर अपने-आप */
+    const k=canon(v);sel.value=k||v;put(sel.value,"me");
+  });
+  const mine=get("pb-city"),by=get("pb-city-by");
+  if(!mine&&by)put("",null);                                                  /* पुराना अटका हुआ "खाली" साफ़ */
+  if(mine){sel.value=mine;ready.then(()=>{const k=canon(mine);if(k&&sel.value===mine)sel.value=k;});}   /* list आए या न आए, पिछला शहर तुरंत दिखे */
+  if(mine&&by==="me")return;                                                  /* ग्राहक ने खुद चुना था: वही रहे */
+  const set=c=>{ready.then(()=>{const k=canon(c);if(!k||get("pb-city-by")==="me"||document.activeElement===sel)return;
+    const changed=sel.value!==k;sel.value=k;put(k,"auto");if(changed)document.dispatchEvent(new Event("pb-city-auto"));});};
+  function match(names){return ready.then(()=>{for(const n of names){const k=canon(n);if(k)return k;}return null;});}
   function byIp(){
     fetch("https://get.geojs.io/v1/ip/geo.json",{cache:"no-store"}).then(r=>r.json()).then(d=>{
-      const c=String(d.city||"").toLowerCase();const o=opts().find(v=>v&&c&&(c.includes(v.toLowerCase())||v.toLowerCase().includes(c)));
-      if(o)set(o);
+      const c=String(d.city||"").toLowerCase();if(!c)return;
+      ready.then(()=>{const o=opts().find(v=>v&&(c===v.toLowerCase()||c.includes(v.toLowerCase())||v.toLowerCase().includes(c)));if(o)set(o);});
     }).catch(()=>{});
   }
   function byGps(){
     navigator.geolocation.getCurrentPosition(p=>{
       const la=p.coords.latitude,ln=p.coords.longitude;let best=null,bd=1e9;
-      Object.keys(LL).forEach(c=>{if(!has(c))return;const dy=(LL[c][0]-la)*111,dx=(LL[c][1]-ln)*111*Math.cos(la*Math.PI/180),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=c;}});
-      if(best&&bd<35)set(best);else byIp();
+      Object.keys(LL).forEach(c=>{const dy=(LL[c][0]-la)*111,dx=(LL[c][1]-ln)*111*Math.cos(la*Math.PI/180),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=c;}});
+      if(best&&bd<35){set(best);return;}
+      /* कच्छ से बाहर: GPS से शहर का नाम (मुफ़्त सेवा, सिर्फ जगह के अंक जाते हैं) → PataBook की city list से मिलाओ */
+      fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la.toFixed(4)+"&longitude="+ln.toFixed(4)+"&localityLanguage=en")
+        .then(r=>r.json()).then(d=>match([d.city,d.locality,...((d.localityInfo&&d.localityInfo.administrative)||[]).map(a=>a&&a.name)].filter(Boolean)))
+        .then(k=>{if(k)set(k);else byIp();}).catch(byIp);
     },byIp,{enableHighAccuracy:false,timeout:9000,maximumAge:600000});
   }
   if(!navigator.geolocation){byIp();return;}
@@ -492,7 +506,7 @@ document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){
   .then(function(r){return r.ok?r.json():[];}).then(function(L){
     if(!Array.isArray(L))return;var have={};[].forEach.call(dl.options,function(o){have[o.value.toLowerCase()]=1;});
     L.forEach(function(c){if(!c||!c.name||have[String(c.name).toLowerCase()])return;var o=document.createElement("option");o.value=c.name;if(c.state&&c.state!=="Gujarat")o.label=c.name+" ("+c.state+")";dl.appendChild(o);have[String(c.name).toLowerCase()]=1;});
-  }).catch(function(){});
+  }).catch(function(){}).then(function(){window.PB_CITIES_OK=1;document.dispatchEvent(new Event("pb-cities"));});
 })();
 </script>
 <script>
