@@ -106,7 +106,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();loadContact();loadVac();loadVacFlag();
+    render();bizDist();loadContact();loadVac();loadVacFlag();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -126,6 +126,15 @@ function hoursText(b){
   return t;
 }
 function btypeLabel(v){if(!v)return "";if(PB.lang&&PB.lang()==="en")return v;return BTYPE_HI[v]||v;}
+/* आप से दुकान कितनी दूर — तभी, जब ग्राहक ने पहले से location की इजाज़त दी हो (popup नहीं) */
+let MYPOS=null;
+function bizDist(){const el=document.getElementById("bDist");if(!el||!B)return;const la=+B.latitude,ln=+B.longitude;
+  if(!MYPOS||!la||!ln){el.textContent="";return;}
+  const R=6371,r=Math.PI/180,dLa=(la-MYPOS[0])*r,dLn=(ln-MYPOS[1])*r,a=Math.sin(dLa/2)**2+Math.cos(MYPOS[0]*r)*Math.cos(la*r)*Math.sin(dLn/2)**2,km=2*R*Math.asin(Math.sqrt(a));
+  const t=km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";
+  el.textContent=" · "+t+((PB.lang&&PB.lang()==="en")?" away":" दूर");}
+try{if(navigator.geolocation&&navigator.permissions)navigator.permissions.query({name:"geolocation"}).then(st=>{if(st.state!=="granted")return;
+  navigator.geolocation.getCurrentPosition(p=>{MYPOS=[p.coords.latitude,p.coords.longitude];bizDist();},()=>{},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});}).catch(()=>{});}catch(e){}
 function render(){
   if(!B)return;
   const b=B,sub=line(b,"Subcategory"),city=line(b,"City")||String(b.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";
@@ -144,7 +153,7 @@ function render(){
   const wsrc=b.website||line(b,"Website"),web=/^https?:\/\//i.test(wsrc||"")?wsrc:"";
   document.getElementById("app").innerHTML=
    '<section class="card"><div style="display:flex;align-items:center;gap:14px">'+(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" style="flex:none;width:64px;height:64px;border-radius:16px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5">':'')+'<h1 style="min-width:0">'+esc(b.name)+'</h1></div><div class="tags">'+
-     (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'</span>':'')+
+     (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
      (gst?'<span class="tag" style="background:#e3f7ea;color:#137333">🧾 '+(gstV?(en?"GST Verified ✅":"GST Verified ✅"):(en?"GST Registered":"GST रजिस्टर्ड"))+'</span>':'')+
      (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME (Udyam)":"MSME (उद्यम)")+'</span>':'')+
@@ -294,6 +303,6 @@ async function loadContact(){
   drawContact();
 }
 PB.apply();PB.mount(document.getElementById("pbLang"));
-PB.onChange(()=>{PB.apply();render();});
+PB.onChange(()=>{PB.apply();render();bizDist();});
 load();
 </script></body></html>
