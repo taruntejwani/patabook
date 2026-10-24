@@ -595,7 +595,7 @@ function summary(){
 }
 
 /* ---------- दुकान जोड़ने से पहले मोबाइल OTP ---------- */
-let regToken="",regPhone="",otpTimer=null;
+let regToken="",regPhone="",otpTimer=null,loginTicket="";
 const OTP_URL=String((window.PB_SITE&&PB_SITE.otpUrl)||"").replace(/\/$/,"");
 const EN=()=>!!(window.PB&&PB.lang&&PB.lang()==="en");
 /* बिज़नेस का प्रकार (Manufacturer / Wholesaler / Retailer …) — description में "Type:" line बनकर जाता है */
@@ -695,7 +695,7 @@ $("otpCode").addEventListener("input",async()=>{
       otpMsg(EN()?"✅ Your shop is already on PataBook. Opening My Shop…":"✅ आपकी दुकान पहले से PataBook पर है। मेरी दुकान खोल रहे हैं…");
       await PBA.mobile.useTokenHash(j.token_hash,j.email);clearInterval(otpTimer);location.href="mybusiness.html";return;
     }
-    regToken=j.reg_token;regPhone=p;clearInterval(otpTimer);$("otpBox").classList.add("ok");
+    regToken=j.reg_token;regPhone=p;loginTicket=j.login_ticket||"";clearInterval(otpTimer);$("otpBox").classList.add("ok");
     otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");setErr("");
   }catch(e){
     if(e.code==="admin_owned"||e.code==="owner_missing"){otpMsg(EN()?"A shop is already added with this number. Please contact PataBook to manage it.":"इस नंबर से दुकान पहले से जुड़ी है। उसे संभालने के लिए PataBook से संपर्क करें।",true);$("otpCode").value="";return;}
@@ -861,6 +861,26 @@ function done(name,S,d,info){
   if(window.PBT)PBT.once("reg",(steps.length+1)+"-done");
   showStatus({status:"pending",name:name,slug:reg.slug,created:cr,skew:reg.skew,fresh:true});
   pollStatus(reg.phone);
+  autoLogin();
+}
+/* दुकान जुड़ गई: उसी OTP से "मेरी दुकान" में login (दोबारा OTP नहीं) — Worker v10 */
+async function autoLogin(){
+  const t=loginTicket;loginTicket="";if(!t||!OTP_URL||!window.PBA||!PBA.mobile||!PBA.mobile.useTokenHash)return;
+  try{if(await PBA.session())return;}catch(_){}
+  for(let k=0;k<3;k++){
+    try{
+      const r=await fetch(OTP_URL+"/owner/ticket-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ticket:t}),cache:"no-store"});
+      const j=await r.json().catch(()=>null);
+      if(r.ok&&j&&j.ok&&j.token_hash){
+        await PBA.mobile.useTokenHash(j.token_hash,j.email);
+        const box=$("stBox");if(box){const d=document.createElement("a");d.href="mybusiness.html";d.className="btn";d.style.cssText="display:block;text-align:center;margin-top:12px;background:#137333";
+          d.textContent=EN()?"✅ You are logged in — open My Shop ›":"✅ आप अपनी दुकान में login हैं — मेरी दुकान खोलें ›";box.appendChild(d);}
+        return;
+      }
+      if(!(r.status===404))return;   /* दुकान अभी बन रही है तो थोड़ा रुककर दोबारा */
+    }catch(_){return;}
+    await new Promise(z=>setTimeout(z,1500));
+  }
 }
 function showForm(){
   clearInterval(stTimer);clearInterval(stPoll);
