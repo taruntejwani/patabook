@@ -141,6 +141,10 @@ var mobile={
   adminVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"admin_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
   /* "मेरी दुकान": जिस नंबर से दुकान जोड़ी, उसी नंबर + OTP से login (email ज़रूरी नहीं) */
   ownerSend:function(phone){return otpCall("/send",{purpose:"owner_login",phone:phone},false);},
+  /* मोबाइल नंबर + 6 अंकों का PIN (SMS नहीं) */
+  pinLogin:async function(phone,pin){var j=await otpCall("/owner/pin/login",{phone:phone,pin:pin},false);return verifyTokenHash(j.token_hash,j.email);},
+  pinStatus:function(){return otpCall("/owner/pin/status",{},true);},
+  pinSet:function(pin){return otpCall("/owner/pin/set",{pin:pin},true);},
   /* "दुकान जोड़ें" में पहले से जुड़ा नंबर: Worker ने सीधे login का token दिया */
   useTokenHash:function(th,email){return verifyTokenHash(th,email);},
   ownerVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"owner_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
