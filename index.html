@@ -80,6 +80,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc:nth-child(3n+2){background:linear-gradient(150deg,#0a5c45 0%,#18a077 100%);box-shadow:0 6px 16px rgba(20,148,109,.22)}
 .nsc:nth-child(3n+3){background:linear-gradient(150deg,#6a2c91 0%,#a95bd6 100%);box-shadow:0 6px 16px rgba(155,77,202,.22)}
 .nsc .ic{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:21px}
+.nsc .ic.lg{background:#fff;overflow:hidden;padding:0}.nsc .ic.lg img{width:100%;height:100%;object-fit:cover;display:block}
 .nsc .new{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;background:var(--yellow);color:#12141c;border-radius:999px;padding:1px 6px}
 .nsc b{font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
 .nsc .ad{font-size:11.5px;line-height:1.3;opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -308,8 +309,24 @@ function applyLang(){
   function ico(c){c=String(c||"").toLowerCase();for(const x of ICON)if(new RegExp(x[0]).test(c))return x[1];return "🏪";}
   const en=()=>PB.lang&&PB.lang()==="en";
   let L=[];
+  /* दुकान ने logo लगाया हो तो logo, नहीं तो category वाला icon */
+  const LOGO={},LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  async function loadLogos(){
+    const sl=L.map(b=>b.slug).filter(x=>x&&!(x in LOGO));if(!sl.length)return;
+    try{
+      const r=await fetch(SBU+"/rest/v1/businesses?select=slug,logo_url&slug=in.("+encodeURIComponent(sl.map(x=>'"'+String(x).replace(/"/g,"")+'"').join(","))+")",{headers:H});
+      if(!r.ok)return;
+      (await r.json()).forEach(x=>{LOGO[x.slug]=LOGO_RX.test(x.logo_url||"")?x.logo_url:"";});
+    }catch(e){return;}
+    document.querySelectorAll("#nst .ic[data-s]").forEach(el=>{
+      const u=LOGO[el.dataset.s];if(!u||el.classList.contains("lg"))return;
+      const im=new Image();im.alt="";im.decoding="async";
+      im.onload=()=>{el.textContent="";el.appendChild(im);el.classList.add("lg");};
+      im.src=u;
+    });
+  }
   function cardHTML(b){
-    return '<a class="nsc" href="business.html?slug='+encodeURIComponent(b.slug||"")+'"><span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span><span class="ic">'+ico(b.category)+'</span><b>'+esc(b.name)+'</b><span class="ad">📍 '+esc(b.address||b.city||"")+'</span></a>';
+    return '<a class="nsc" href="business.html?slug='+encodeURIComponent(b.slug||"")+'"><span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span><span class="ic'+(LOGO[b.slug]?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LOGO[b.slug]?'<img src="'+esc(LOGO[b.slug])+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b><span class="ad">📍 '+esc(b.address||b.city||"")+'</span></a>';
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
@@ -386,7 +403,7 @@ function applyLang(){
     const city=currentCity();setCityTitle(city);L=ALL_ROWS.filter(b=>inCity(b,city)).slice(0,25);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
     if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">No shops found for this city yet.</div>';return;}
-    draw();wire();start();
+    draw();wire();start();loadLogos();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);
   document.addEventListener("pb-city-auto",refreshCityShops);   /* शहर अपने-आप मिला (GPS / internet) */
