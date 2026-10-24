@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <body>
 
 <div class="top">
-  <label class="locchip" title="शहर चुनें"><span aria-hidden="true">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><span class="dd" aria-hidden="true">▾</span></label>
+  <label class="locchip" title="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="मेरी location से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><span class="dd" aria-hidden="true">▾</span></label>
   <div class="tr"><a class="addtop" id="addTop" href="list.html">＋ <span data-i="addtop">दुकान जोड़ें</span></a><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
   <span id="pbLang"></span></div>
 </div>
@@ -472,6 +472,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
   const sel=document.getElementById("city");
   const LL={"Gandhidham":[23.0753,70.1337],"Adipur":[23.0717,70.0886],"Anjar":[23.1132,70.0283],"Bhuj":[23.2420,69.6669],"Mundra":[22.8390,69.7210],"Mandvi":[22.8324,69.3532],
     "Nakhatrana":[23.3474,69.2645],"Bhachau":[23.2964,70.3437],"Rapar":[23.5721,70.6432],"Naliya":[23.2606,68.8269],"Dayapar":[23.6380,68.9010]};
+  window.PB_LL=LL;
   const opts=()=>[...document.querySelectorAll("#cityDL option")].map(o=>o.value);
   const canon=c=>{c=String(c||"").trim().toLowerCase();return c?(opts().find(o=>o.toLowerCase()===c)||null):null;};
   const ready=new Promise(res=>{if(window.PB_CITIES_OK)return res();document.addEventListener("pb-cities",res,{once:true});setTimeout(res,5000);});
@@ -509,6 +510,33 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
   if(navigator.permissions&&navigator.permissions.query){
     navigator.permissions.query({name:"geolocation"}).then(st=>{if(st.state==="denied")byIp();else byGps();}).catch(byGps);
   }else byGps();
+})();
+/* 📍 दबाओ = अभी की location से शहर (पहले खुद चुना हो तब भी) */
+(function(){
+  const b=document.getElementById("locBtn"),inp=document.getElementById("city");if(!b||!inp)return;
+  const en=()=>PB.lang&&PB.lang()==="en";
+  function done(c){if(!c)return;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}
+    inp.dispatchEvent(new Event("change",{bubbles:true}));document.dispatchEvent(new Event("pb-city-auto"));}
+  function msg(t){inp.value="";inp.placeholder=t;}
+  function go(e){e.preventDefault();e.stopPropagation();
+    if(!navigator.geolocation){msg(en()?"Location not available":"Location नहीं मिली");return;}
+    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"Location ढूँढ रहे हैं…";b.style.opacity=".5";
+    const fail=t=>{b.style.opacity="";inp.value=old;inp.placeholder=ph;if(t)alertBox(t);};
+    navigator.geolocation.getCurrentPosition(p=>{
+      b.style.opacity="";inp.placeholder=ph;
+      const la=p.coords.latitude,ln=p.coords.longitude,LL=window.PB_LL||{};let best=null,bd=1e9;
+      Object.keys(LL).forEach(c=>{const dy=(LL[c][0]-la)*111,dx=(LL[c][1]-ln)*111*Math.cos(la*Math.PI/180),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=c;}});
+      if(best&&bd<35){done(best);return;}
+      fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la.toFixed(4)+"&longitude="+ln.toFixed(4)+"&localityLanguage=en")
+        .then(r=>r.json()).then(d=>{const c=d.city||d.locality||"";if(c)done(c);else fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।");})
+        .catch(()=>fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।"));
+    },err=>{fail(err&&err.code===1
+      ?(en()?"Location permission is blocked for this site. Allow it in browser settings (🔒 next to the address → Permissions → Location).":"इस site के लिए Location की इजाज़त बंद है। Browser में address के पास 🔒 → Permissions → Location → Allow करें।")
+      :(en()?"Could not get your location. Turn on GPS and try again.":"Location नहीं मिली। GPS चालू करके दोबारा 📍 दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  }
+  function alertBox(t){let d=document.getElementById("locMsg");if(!d){d=document.createElement("div");d.id="locMsg";d.style.cssText="position:fixed;left:12px;right:12px;top:70px;z-index:99;background:#fff4e5;color:#7a3b00;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.12)";document.body.appendChild(d);}
+    d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
+  b.addEventListener("click",go);b.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")go(e);});
 })();
 PB.mount(document.getElementById("pbLang"));
 PB.onChange(applyLang);
