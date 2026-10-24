@@ -30,9 +30,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .locchip input::placeholder{color:var(--muted);font-weight:600}
 .locchip .dd{color:var(--muted);font-size:12px}
 .locchip:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.15)}
-@media(max-width:430px){.top .mapbtn span{display:none}.top .mapbtn{padding:6px 9px}.locchip{max-width:none;flex:1 1 auto}.locchip input{width:100%}}
+@media(max-width:430px){.top #pblBtnTxt{display:none}.addtop{padding:7px 10px}.top .tr{gap:6px}.top .mapbtn span{display:none}.top .mapbtn{padding:6px 9px}.locchip{max-width:none;flex:1 1 auto}.locchip input{width:100%}}
 .mapbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 13px 6px 8px;font-size:13px;font-weight:700;background:#fff;color:var(--navy)}
 .mapbtn svg{width:20px;height:20px;display:block}
+.addtop{display:inline-flex;align-items:center;gap:3px;background:var(--yellow);color:var(--ink);font-weight:800;font-size:13px;border-radius:999px;padding:7px 12px;white-space:nowrap;box-shadow:0 3px 10px rgba(255,210,31,.4);text-decoration:none}
 .menu{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;background:#fff;color:var(--navy)}
 .menu .bars{width:16px;height:12px;display:flex;flex-direction:column;justify-content:space-between}
 .menu .bars i{display:block;height:2px;border-radius:2px;background:var(--navy)}
@@ -198,14 +199,14 @@ window.PATABOOK_SUPABASE={
 <script src="pb-track.js"></script>
 <script>
 /* दुकानदार login है (मोबाइल OTP / ईमेल) तो सबसे ऊपर "मेरी दुकान" का बटन */
-document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";}}catch(e){}});
+document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
 </script>
 </head>
 <body>
 
 <div class="top">
   <label class="locchip" title="शहर चुनें"><span aria-hidden="true">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><span class="dd" aria-hidden="true">▾</span></label>
-  <div class="tr"><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
+  <div class="tr"><a class="addtop" id="addTop" href="list.html">＋ <span data-i="addtop">दुकान जोड़ें</span></a><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
   <span id="pbLang"></span></div>
 </div>
 
@@ -268,13 +269,10 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   <a class="hsbtn" href="homeservices.html"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b id="hsT">Home Services</b><small id="hsS">Electrician, Plumber, AC Repair घर पर बुलाएं</small></span><span aria-hidden="true" class="go">›</span></a>
   <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:10px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / Jobs</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
 
-  <nav class="cats" id="cats" aria-label="Categories"></nav>
 
   <section class="results" id="results"></section>
 
   <section class="join">
-    <p data-i="joinq">क्या आपने अपना बिज़नेस PataBook पर जोड़ा?</p>
-    <a class="cta" href="list.html"><span data-i="joinbtn">अपना बिज़नेस जोड़ें</span> ›</a>
     <a class="cta2" href="mybusiness.html"><span data-i="myshop_btn">Login</span></a>
   </section>
 </main>
@@ -286,7 +284,7 @@ const CATS=["Automobile","Food","Health","Shopping","Education","Home","Professi
 const t=(k,v)=>PB.t(k,v);
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 function drawCats(){
-  document.getElementById("cats").innerHTML=CATS.map(c=>`<a href="category.html?cat=${encodeURIComponent(c)}">${esc(t("c_"+c))}</a>`).join("");
+  /* text category list हटाई — ऊपर icon वाले खाने काफ़ी हैं */
 }
 function drawDrawer(){
   document.getElementById("dl").innerHTML=SUBS.map(c=>{
