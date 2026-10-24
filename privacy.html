@@ -67,7 +67,12 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <ul>
 <li><b>दुकान जोड़ने वाले से:</b> दुकान का नाम, मालिक का नाम, मोबाइल/WhatsApp नंबर, पता, शहर, कैटेगरी, सेवाएँ और (अगर आप दें) दुकान की मैप location।</li>
 <li><b>मोबाइल नंबर की पुष्टि:</b> दुकान जोड़ते समय और नंबर बदलते समय आपके मोबाइल पर SMS से OTP भेजा जाता है। OTP हमारे पास सादे रूप में सेव नहीं होता (सिर्फ उसका सुरक्षित hash, 5 मिनट के लिए), और गलत कोशिशों की सीमा रखी जाती है।</li>
-<li><b>लॉगिन करने वाले से (वैकल्पिक):</b> email पता, email OTP से लॉगिन के लिए। लॉगिन करके दुकान जोड़ने पर वह email दुकान के मालिक के रूप में जुड़ता है, ताकि आप "मेरी दुकान" से नंबर, logo आदि संभाल सकें।</li>
+<li><b>"मेरी दुकान" का लॉगिन:</b> दुकान वाले मोबाइल नंबर और OTP से। चाहें तो दुकानदार अपना पासवर्ड बना सकता है — पासवर्ड हमारे पास सादे रूप में नहीं, सिर्फ एक गुप्त key के साथ बने सुरक्षित hash के रूप में रहता है; 5 बार गलत पासवर्ड पर कुछ देर के लिए रोक लगती है। Email से लॉगिन वैकल्पिक है।</li>
+<li><b>लॉगिन वाले फ़ोन / PC:</b> एक दुकान एक साथ ज़्यादा से ज़्यादा 2 मोबाइल और 1 PC पर खुल सकती है। इसके लिए हम फ़ोन/PC का प्रकार, ब्राउज़र से मिला मॉडल का नाम (जैसे "Android SM-F956B") और आख़िरी इस्तेमाल का समय रखते हैं — IMEI या कोई और पहचान नंबर नहीं। दुकानदार यह list "मेरी दुकान" में देख और हटा सकता है।</li>
+<li><b>दुकान की और जानकारी (वैकल्पिक):</b> बिज़नेस का प्रकार, खुलने-बंद होने का समय, छुट्टी का दिन, दूसरा नंबर / WhatsApp, पिन कोड, होम डिलीवरी, email, वेबसाइट, GST या उद्यम (MSME) नंबर और नक्शे पर दुकान की location (GPS या नक्शे का pin)। यह सब दुकान के पेज पर सबको दिखता है, क्योंकि यह ग्राहकों के लिए ही भरा जाता है।</li>
+<li><b>बदलावों का रिकॉर्ड:</b> दुकानदार जब जानकारी या location बदलता है, तो पुराना और नया रूप सुरक्षित रखा जाता है ताकि PataBook टीम गलत बदलाव वापस कर सके। नंबर बदलने की request (पुराना और नया नंबर) Admin के फ़ैसले तक रखी जाती है।</li>
+<li><b>सूचनाएँ (notification):</b> अगर आप "🔔 सूचनाएँ चालू करें" दबाते हैं, तो आपका ब्राउज़र एक push पता (subscription) देता है, जिसे हम सिर्फ आपको PataBook की सूचना भेजने के लिए रखते हैं। बंद करने या खाता हटाने पर यह मिट जाता है।</li>
+<li><b>दुकान की गिनती:</b> हर दुकान के लिए रोज़ की गिनती — कितनी बार पेज देखा गया, कितनी बार Call / WhatsApp / रास्ता दबाया गया। इसमें देखने वाले का नाम, नंबर या IP नहीं होता। यह गिनती दुकानदार को "मेरी दुकान" और हफ़्ते की रिपोर्ट में दिखती है।</li>
 <li><b>दुकान का logo:</b> अगर मालिक logo/फोटो लगाए, तो वह छोटा करके सेव होता है और दुकान के पेज पर सबको दिखता है।</li>
 <li><b>आपके फोन/ब्राउज़र में:</b> चुनी हुई भाषा और लॉगिन session आपके अपने ब्राउज़र में रहते हैं।</li>
 <li><b>मैप:</b> आपकी location सिर्फ तब ली जाती है जब आप "मेरी लोकेशन" या "रास्ता देखें" दबाते हैं; ग्राहकों की location हम अपने database में सेव नहीं करते।</li>
@@ -78,6 +83,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <li>दुकान को डायरेक्टरी, सर्च और मैप पर दिखाना।</li>
 <li>मोबाइल नंबर OTP से verify करना और नकली/spam लिस्टिंग रोकना (एक मोबाइल नंबर से सिर्फ 1 दुकान)।</li>
 <li>ग्राहक को दुकान तक रास्ता दिखाना और दुकान से संपर्क कराना।</li>
+<li>दुकानदार को लॉगिन कराना, उसकी दुकान सुरक्षित रखना और (अगर उसने चालू किया हो) सूचनाएँ भेजना — जैसे दुकान Live होना, ग्राहक का Call दबाना, हफ़्ते की रिपोर्ट।</li>
 </ul>
 <h2>2A. Vacancy और नौकरी ढूँढने वाले</h2>
 <p>नौकरी ढूँढने वाले से सिर्फ मोबाइल नंबर (OTP verification के लिए) लिया जाता है, और यह गिना जाता है कि उसने किस दिन किन vacancies के लिए संपर्क किया (रोज़ 5 की सीमा के लिए)। उम्मीदवार का नंबर दुकानदार को हम नहीं देते — संपर्क उम्मीदवार खुद Call/WhatsApp से करता है। Vacancy plan के भुगतान की जानकारी (कार्ड/UPI) Razorpay संभालता है; हमारे पास सिर्फ order/payment ID और रकम रहती है।</p>
@@ -87,15 +93,19 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <p>दुकान जोड़ते समय दुकानदार खुद चुनता है कि उसका नंबर ग्राहकों को दिखे या छिपा रहे, और बाद में "मेरी दुकान" से कभी भी ON/OFF कर सकता है। OFF होने पर नंबर किसी को नहीं दिखता। हम किसी का नंबर या जानकारी <b>बेचते नहीं</b>।</p>
 <h2>4. जानकारी किनके साथ साझा होती है</h2>
 <ul>
-<li>Supabase (database, लॉगिन और logo storage), Cloudflare (वेबसाइट और OTP सेवा की hosting), Fast2SMS (OTP वाला SMS भेजने के लिए — सिर्फ मोबाइल नंबर और OTP), Razorpay (Vacancy plan का भुगतान)।</li>
+<li>Supabase (database, लॉगिन और logo storage), Cloudflare (वेबसाइट और OTP सेवा की hosting, और "मैं robot नहीं हूँ" वाली जाँच — Turnstile), Fast2SMS (OTP वाला SMS भेजने के लिए — सिर्फ मोबाइल नंबर और OTP), Razorpay (Vacancy plan का भुगतान)।</li>
+<li>सूचनाएँ आपके ब्राउज़र की push सेवा से जाती हैं (Android पर Google Firebase Cloud Messaging)।</li>
+<li>BigDataCloud — home page पर आपका शहर पहचानने के लिए सिर्फ GPS के अंक (latitude/longitude) भेजे जाते हैं, कोई नाम या नंबर नहीं।</li>
 <li>मैप सेवाएँ: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — मैप, खोज और रास्ते के लिए।</li>
 <li>Google Maps सिर्फ तब, जब आप खुद "Google Maps में खोलें" दबाएँ।</li>
 <li>कानून द्वारा माँगे जाने पर सरकारी संस्था को।</li>
 </ul>
 <h2>5. जानकारी कब तक रहती है</h2>
-<p>दुकान की लिस्टिंग तब तक रहती है जब तक मालिक उसे हटाने को न कहे या हम नियम तोड़ने पर उसे न हटाएँ। OTP का रिकॉर्ड कुछ मिनटों में अपने-आप मिट जाता है।</p>
+<p>दुकान की लिस्टिंग तब तक रहती है जब तक मालिक उसे खुद न हटाए या हम नियम तोड़ने पर उसे न हटाएँ। OTP का रिकॉर्ड कुछ मिनटों में अपने-आप मिट जाता है। लॉगिन वाले फ़ोन/PC की list लॉगआउट या हटाने तक रहती है। सूचनाओं के संदेश "मेरी दुकान" में 30 दिन तक दिखते हैं।</p>
 <h2 id="delete">5A. Account और data हटवाना</h2>
-<p>अपनी दुकान, अपना account (email लॉगिन) या अपनी कोई भी जानकारी हटवाने के लिए <a href="contact.html">Contact Us</a> पेज पर "दुकान हटवाएँ" चुनकर अनुरोध भेजें, या नीचे दिए email पर लिखें। पहचान की पुष्टि के बाद हम 30 दिनों के अंदर दुकान की जानकारी, logo और account से जुड़ा data हटा देते हैं; कानून के अनुसार ज़रूरी रिकॉर्ड ही रखे जाते हैं।</p>
+<p><b>खुद, तुरंत:</b> "मेरी दुकान" में लॉगिन करके सबसे नीचे <b>"🗑️ मेरी दुकान और खाता हटाएँ"</b> दबाएँ। दुकान website/app से हट जाती है; समय, email, GST, logo, location वगैरह मिट जाते हैं; लॉगिन खाता, पासवर्ड, फ़ोन/PC की list और सूचना की सेटिंग भी मिट जाती है। पूरा तरीका: <a href="delete-account.html">patabook.in/delete-account.html</a>।</p>
+<p><b>हमें लिखकर:</b> लॉगिन न हो पाए तो <a href="contact.html">Contact Us</a> पेज से "दुकान हटवाएँ" चुनें या नीचे दिए email पर लिखें। पहचान की पुष्टि के बाद 30 दिनों के अंदर हटा दिया जाता है।</p>
+<p>हटाई गई दुकान का नाम, पता और मोबाइल नंबर हमारे अंदरूनी रिकॉर्ड में रहते हैं (किसी को नहीं दिखते) — धोखाधड़ी रोकने और कानूनी ज़रूरत के लिए; इन्हें भी मिटवाना हो तो email करें। बिना नाम वाली गिनती (कितनी बार देखा गया) रह सकती है।</p>
 <h2>6. आपके अधिकार</h2>
 <p>आप अपनी जानकारी देखने, सुधारने या हटाने का अनुरोध कर सकते हैं। शिकायत मिलने के 24 घंटे में पावती और 15 दिनों में समाधान का प्रयास किया जाएगा।</p>
 <h2>7. बच्चे</h2>
@@ -117,14 +127,19 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <ul>
 <li><b>From shop owners:</b> shop name, owner name, mobile/WhatsApp number, address, city, category, services and (if given) the shop's map location.</li>
 <li><b>Mobile number verification:</b> when you add a shop or change its number, an OTP is sent to your mobile by SMS. We never store the OTP in plain form (only a secure hash, for 5 minutes) and wrong attempts are limited.</li>
-<li><b>From people who log in (optional):</b> email address, for email-OTP login. If you add a shop while logged in, that email is linked as the shop owner so you can manage the number, logo, etc. from "My Shop".</li>
+<li><b>"My Shop" login:</b> with the shop's mobile number and OTP. Owners can optionally set their own password — we never store it in plain form, only as a secure hash made with a secret key; after 5 wrong passwords, password login is paused for a while. Email login is optional.</li>
+<li><b>Logged-in phones / PCs:</b> a shop can be open on at most 2 phones and 1 PC at a time. For this we keep the device type, the model name given by the browser (e.g. "Android SM-F956B") and last-used time — not IMEI or any other device ID. Owners can see and remove this list in "My Shop".</li>
+<li><b>Extra shop details (optional):</b> business type, opening hours, weekly off, another number / WhatsApp, PIN code, home delivery, email, website, GST or Udyam (MSME) number and the shop's map location (GPS or map pin). These are shown publicly on the shop page, since they are filled in for customers.</li>
+<li><b>Change history:</b> when an owner edits details or location, the old and new versions are kept so the PataBook team can undo wrong changes. Number-change requests (old and new number) are kept until Admin decides.</li>
+<li><b>Notifications:</b> if you tap "🔔 Turn on notifications", your browser gives a push address (subscription) that we keep only to send you PataBook notifications. It is removed when you turn it off or delete your account.</li>
+<li><b>Shop counts:</b> daily counts per shop — page views and taps on Call / WhatsApp / Directions — without the visitor's name, number or IP. Owners see these in "My Shop" and the weekly report.</li>
 <li><b>Shop logo:</b> if an owner uploads a logo/photo, it is resized, stored and shown publicly on the shop page.</li>
 <li><b>In your browser:</b> your chosen language and login session stay in your own browser.</li>
 <li><b>Map:</b> your location is used only when you tap "My location" or "Directions"; we do not store visitors' locations in our database.</li>
 <li><b>Traffic counts:</b> to improve the site we keep anonymous counts — which pages open, what is searched, which shop's Call/WhatsApp is tapped, device type and where visitors came from. A random number is kept in your browser for this; your name, phone number or IP address is not stored.</li>
 </ul>
 <h2>2. How we use it</h2>
-<ul><li>To show the shop in the directory, search and map.</li><li>To verify mobile numbers by OTP and stop fake/spam listings (only 1 shop per mobile number).</li><li>To guide customers to the shop and help them contact it.</li></ul>
+<ul><li>To show the shop in the directory, search and map.</li><li>To verify mobile numbers by OTP and stop fake/spam listings (only 1 shop per mobile number).</li><li>To guide customers to the shop and help them contact it.</li><li>To log owners in, keep their shop safe and (if turned on) send notifications — shop went Live, a customer tapped Call, weekly report.</li></ul>
 <h2>2A. Vacancies and job seekers</h2>
 <p>From job seekers we collect only the mobile number (for OTP verification) and a count of which vacancies they contacted on which day (for the 5-a-day limit). We do not give a candidate’s number to shop owners — candidates contact shops themselves by call/WhatsApp. Payment details for the Vacancy plan (card/UPI) are handled by Razorpay; we keep only the order/payment ID and amount.</p>
 <h2>2B. Reporting a listing</h2>
@@ -132,11 +147,13 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <h2>3. Protection of phone numbers</h2>
 <p>When adding a shop, the owner chooses whether the number is shown to customers or kept hidden, and can switch it ON/OFF anytime from "My Shop". When OFF, nobody can see it. We do <b>not sell</b> anyone's number or data.</p>
 <h2>4. Who we share data with</h2>
-<ul><li>Supabase (database, login and logo storage), Cloudflare (hosting of the website and OTP service), Fast2SMS (to send the OTP SMS — only the mobile number and OTP), Razorpay (Vacancy plan payments).</li><li>Map services: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — for maps, search and directions.</li><li>Google Maps only if you choose "Open in Google Maps".</li><li>Government authorities when required by law.</li></ul>
+<ul><li>Supabase (database, login and logo storage), Cloudflare (hosting of the website and OTP service, and the "I am not a robot" check — Turnstile), Fast2SMS (to send the OTP SMS — only the mobile number and OTP), Razorpay (Vacancy plan payments).</li><li>Notifications go through your browser's push service (on Android, Google Firebase Cloud Messaging).</li><li>BigDataCloud — on the home page, only GPS numbers (latitude/longitude) are sent to find your city; no name or number.</li><li>Map services: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — for maps, search and directions.</li><li>Google Maps only if you choose "Open in Google Maps".</li><li>Government authorities when required by law.</li></ul>
 <h2>5. Retention</h2>
-<p>A listing stays until the owner asks to remove it or we remove it for breaking the rules. OTP records expire automatically within minutes.</p>
+<p>A listing stays until the owner deletes it or we remove it for breaking the rules. OTP records expire automatically within minutes. The list of logged-in phones/PCs stays until logout or removal. Notification messages are shown in "My Shop" for 30 days.</p>
 <h2 id="delete-en">5A. Deleting your account and data</h2>
-<p>To delete your shop, your account (email login) or any of your data, send a request from the <a href="contact.html">Contact Us</a> page choosing "Remove listing", or write to the email below. After verifying it is you, we delete the shop details, logo and account data within 30 days, keeping only records required by law.</p>
+<p><b>Yourself, instantly:</b> log in to "My Shop" and tap <b>"🗑️ Delete my shop and account"</b> at the bottom. The shop is removed from the website/app; timings, email, GST, logo, location etc. are erased; the login account, password, phone/PC list and notification settings are deleted too. Full steps: <a href="delete-account.html">patabook.in/delete-account.html</a>.</p>
+<p><b>By writing to us:</b> if you cannot log in, choose "Remove listing" on the <a href="contact.html">Contact Us</a> page or write to the email below. After verifying it is you, we delete it within 30 days.</p>
+<p>A deleted shop's name, address and mobile number stay in our internal records (not shown to anyone) to prevent fraud and for legal needs; email us to erase these too. Anonymous counts (how many views) may remain.</p>
 <h2>6. Your rights</h2>
 <p>You can ask to access, correct or delete your data. We aim to acknowledge complaints within 24 hours and resolve them within 15 days.</p>
 <h2>7. Children</h2>
