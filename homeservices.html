@@ -91,7 +91,10 @@ const TX={
      setup:"Home Services are starting soon.",view:"Profile, Call, WhatsApp ›",book:"🏠 Book — coming soon",vf:"✔ Verified",serves:"Also serves"}
 };
 const tx=(k,v)=>String(TX[L()][k]).replace("{n}",v);
-const ICON={"ac-service":"❄️","carpenter":"🪚","plumber":"🚰","painter":"🎨","electrician":"💡","appliance-repair":"🔌","ro-water-purifier-repair":"💧","cleaning-services":"🧽","other-home-services":"🛠️"};
+const ICON={"ac-service":"❄️","carpenter":"🪚","plumber":"🚰","painter":"🎨","electrician":"💡","appliance-repair":"🔌","ro-water-purifier-repair":"💧","cleaning-services":"🧽","other-home-services":"🧰"};
+/* नाम के हिसाब से icon (नई category बने तो भी सही icon) */
+const ICON_KW=[["laundry|ironing|dhobi","🧺"],["other home","🧰"],["refrigerat","🧊"],["air condition|a\\.c\\.","❄️"],["housekeep|cleaning","🧹"],["construction|mason|civil","🧱"],["electric","⚡"],["garden|outdoor|lawn","🌿"],["interior|furniture|decor","🛋️"],["moving|packers|storage|shifting","🚚"],["pest","🪳"],["plumb|water tank","🚿"],["security|smart home|cctv","📹"],["carpent","🪚"],["paint","🎨"],["appliance","🔌"],["ro |purifier","💧"],["beauty|salon|spa","💇"],["tutor|teacher","📚"],["cook|chef|maid","🍳"],["car wash|vehicle|mechanic","🚗"],["computer|laptop|mobile repair","💻"],["driver","🚕"]];
+function icoOf(c){if(ICON[c.slug])return ICON[c.slug];const n=String(c.name||"").toLowerCase();for(const k of ICON_KW)if(new RegExp(k[0]).test(n))return k[1];return "🛠️";}
 const FALLBACK=[{id:67,name:"Electrician",slug:"electrician"},{id:65,name:"Plumber",slug:"plumber"},{id:63,name:"AC Service",slug:"ac-service"},{id:64,name:"Carpenter",slug:"carpenter"},{id:66,name:"Painter",slug:"painter"}];
 let CATS=[],SEL=null,CITY="",seq=0,READY=true;
 
@@ -105,7 +108,7 @@ function drawCats(){
   const order=["electrician","plumber","ac-service","carpenter","painter","appliance-repair","ro-water-purifier-repair","cleaning-services","other-home-services"];
   const list=[...CATS].sort((a,b)=>(order.indexOf(a.slug)+99)%99-(order.indexOf(b.slug)+99)%99);
   $("cats").innerHTML='<button type="button" class="cat'+(SEL==null?" on":"")+'" data-id=""><i aria-hidden="true">🏠</i>'+esc(tx("all"))+'</button>'+
-    list.map(c=>'<button type="button" class="cat'+(SEL===c.id?" on":"")+'" data-id="'+c.id+'"><i aria-hidden="true">'+(ICON[c.slug]||"🛠️")+'</i>'+esc(c.name)+'</button>').join("");
+    list.map(c=>'<button type="button" class="cat'+(SEL===c.id?" on":"")+'" data-id="'+c.id+'"><i aria-hidden="true">'+icoOf(c)+'</i>'+esc(c.name)+'</button>').join("");
 }
 function drawText(){
   PB.apply();
