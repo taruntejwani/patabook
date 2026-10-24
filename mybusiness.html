@@ -66,6 +66,17 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .gate p,.empty p{color:var(--muted);line-height:1.55;margin-bottom:16px;font-size:14.5px}
 .btn{display:block;background:var(--blue);color:#fff;font-weight:800;border-radius:14px;padding:14px;font-size:16px}
 .btn.y{background:#ffd21f;color:var(--ink)}
+.mf{max-width:340px;margin:0 auto;text-align:left}
+.mf .mrow{display:flex;align-items:center;border:2px solid #d5dbe6;border-radius:14px;background:#fff;margin-bottom:10px;overflow:hidden}
+.mf .mrow:focus-within,.mf #mOtp:focus{border-color:var(--blue)}
+.mf .cc{padding:0 4px 0 14px;font-weight:800;color:var(--muted)}
+.mf input{width:100%;border:0;outline:0;font-size:19px;font-weight:700;padding:13px 12px;letter-spacing:.5px;background:transparent;color:var(--ink)}
+.mf #mOtp{border:2px solid #d5dbe6;border-radius:14px;background:#fff;text-align:center;letter-spacing:8px;font-size:22px;margin-bottom:6px}
+.mf small{display:block;color:var(--muted);font-size:13px;margin-bottom:8px;text-align:center}
+.mf .err{color:#b42318;font-weight:700;font-size:14px;min-height:0;margin-bottom:8px;text-align:center}
+.mf .err:empty{display:none}
+.mf .btn{width:100%;border:0;cursor:pointer}.mf .btn:disabled{opacity:.6}
+.lnk{display:block;margin:14px auto 0;background:none;border:0;color:var(--blue);font-weight:700;font-size:14.5px;cursor:pointer;text-align:center}
 .note{color:var(--muted);text-align:center;padding:20px}
 .planbn{display:flex;align-items:center;gap:12px;margin:0 0 14px;border-radius:18px;padding:13px 14px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff}
 .planbn .ic{font-size:24px}.planbn .tx{flex:1;min-width:0}.planbn b{display:block;font-size:15px}.planbn small{display:block;opacity:.85;font-size:12.5px}
@@ -87,8 +98,15 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
   <div class="card gate" id="gate" hidden>
     <div class="big">🔐</div>
     <h2 id="gH">पहले लॉगिन करें</h2>
-    <p id="gP">जिस ईमेल से आपने दुकान जोड़ी थी, उसी से लॉगिन करें।</p>
-    <a class="btn" href="login.html?next=mybusiness.html" id="gB">ईमेल से लॉगिन करें →</a>
+    <p id="gP">जिस मोबाइल नंबर से आपने दुकान जोड़ी थी, वही नंबर डालें। उस पर OTP आएगा।</p>
+    <form id="mF" class="mf" hidden autocomplete="on">
+      <div class="mrow"><span class="cc">+91</span><input id="mPh" type="tel" inputmode="numeric" maxlength="16" autocomplete="tel-national" placeholder="98XXXXXXXX"></div>
+      <div id="mOtpW" hidden><input id="mOtp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"><small id="mHint"></small></div>
+      <div class="err" id="mErr"></div>
+      <button class="btn" type="submit" id="mGo">OTP भेजें →</button>
+      <button class="lnk" type="button" id="mBack" hidden>नंबर बदलें</button>
+    </form>
+    <a class="lnk" href="login.html?next=mybusiness.html" id="gB">ईमेल से लॉगिन करें →</a>
   </div>
 
   <div class="who" id="who" hidden><span id="whoT"></span><button type="button" id="out"></button></div>
@@ -100,13 +118,21 @@ const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const TX={
- hi:{back:"← वापस",h1:"मेरी दुकान",sub:"अपनी दुकान की जानकारी और नंबर यहां से संभालें।",gH:"पहले लॉगिन करें",gP:"जिस ईमेल से आपने दुकान जोड़ी थी, उसी से लॉगिन करें।",gB:"ईमेल से लॉगिन करें →",
+ hi:{back:"← वापस",h1:"मेरी दुकान",sub:"अपनी दुकान की जानकारी और नंबर यहां से संभालें।",gH:"पहले लॉगिन करें",gP:"जिस मोबाइल नंबर से आपने दुकान जोड़ी थी, वही नंबर डालें। उस पर OTP आएगा।",gB:"ईमेल से लॉगिन करें →",gPe:"जिस ईमेल से आपने दुकान जोड़ी थी, उसी से लॉगिन करें।",
+     m_send:"OTP भेजें →",m_go:"लॉगिन करें →",m_back:"नंबर बदलें",m_hint:"{e} पर भेजा गया 6 अंकों का OTP डालें। SMS न आए तो जाँचें कि दुकान इसी नंबर से जुड़ी है।",m_bad_ph:"10 अंकों का सही मोबाइल नंबर डालें",m_bad_otp:"6 अंकों का OTP डालें",
+     m_wrong:"OTP गलत है। ध्यान से दोबारा डालें।",m_exp:"OTP की समय-सीमा खत्म। नंबर बदलें दबाकर दोबारा भेजें।",m_many:"बहुत बार कोशिश हो गई। थोड़ी देर बाद करें।",m_soon:"थोड़ा रुकें, फिर दोबारा भेजें।",
+     m_noshop:"इस नंबर से कोई दुकान नहीं मिली। जिस नंबर से दुकान जोड़ी थी वही डालें।",m_admin:"यह दुकान Admin के नाम है। PataBook Admin से संपर्क करें।",m_fail:"अभी नहीं हो पाया। दोबारा कोशिश करें।",m_cap:"\"मैं robot नहीं हूँ\" जाँच पूरी करें, फिर दोबारा दबाएँ।",
+     who_ph:"✅ आप 📱 {e} से लॉगिन हैं",ph_none_h:"इस नंबर से कोई दुकान नहीं जुड़ी",
      who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",live:"Live",pend:"जांच बाकी (Pending)",
      on_b:"नंबर सबको दिख रहा है",on_s:"ग्राहक सीधे Call और WhatsApp कर सकते हैं",off_b:"नंबर बंद है",off_s:"आपकी दुकान के पेज पर नंबर नहीं दिखेगा",
      pend_s:"दुकान Live होने के बाद यह नियम लागू होगा",view:"दुकान का पेज देखें",add:"नई दुकान जोड़ें",
      e_none_h:"आपके ईमेल से कोई दुकान नहीं जुड़ी",e_none_p:"नई दुकान जोड़ें। अगर आपकी दुकान पहले से PataBook पर है, तो PataBook Admin से अपना ईमेल जुड़वाएं।",
      e_setup:"यह सुविधा अभी शुरू हो रही है। थोड़ी देर बाद दोबारा खोलें।",e_net:"लोड नहीं हो पाया। इंटरनेट जांचकर दोबारा खोलें।",e_sw:"नहीं बदल पाया। दोबारा कोशिश करें।",sw_l:"नंबर दिखाएं",pbT:"₹99 प्लान में क्या मिलेगा? देखें",pbS:"Dashboard और Marketing Studio · जल्द शुरू होगा"},
- en:{back:"← Back",h1:"My Shop",sub:"Manage your shop details and number here.",gH:"Log in first",gP:"Log in with the email you used to add your shop.",gB:"Log in with email →",
+ en:{back:"← Back",h1:"My Shop",sub:"Manage your shop details and number here.",gH:"Log in first",gP:"Enter the mobile number you used to add your shop. You will get an OTP on it.",gB:"Log in with email →",gPe:"Log in with the email you used to add your shop.",
+     m_send:"Send OTP →",m_go:"Log in →",m_back:"Change number",m_hint:"Enter the 6-digit OTP sent to {e}. No SMS? Check that your shop was added with this number.",m_bad_ph:"Enter a valid 10-digit mobile number",m_bad_otp:"Enter the 6-digit OTP",
+     m_wrong:"Wrong OTP. Please check and enter again.",m_exp:"OTP expired. Tap Change number and send again.",m_many:"Too many tries. Please try after some time.",m_soon:"Please wait a little, then send again.",
+     m_noshop:"No shop found for this number. Enter the number you used to add your shop.",m_admin:"This shop is under Admin. Please contact PataBook Admin.",m_fail:"Could not do it right now. Try again.",m_cap:"Complete the \"I am not a robot\" check, then tap again.",
+     who_ph:"✅ Logged in with 📱 {e}",ph_none_h:"No shop is linked to this number",
      who:"✅ Logged in as {e}",out:"Log out",live:"Live",pend:"Under review (Pending)",
      on_b:"Number is visible to everyone",on_s:"Customers can Call and WhatsApp you directly",off_b:"Number is hidden",off_s:"Your number will not show on your shop page",
      pend_s:"This applies once your shop is Live",view:"View shop page",add:"Add a new shop",
@@ -207,16 +233,21 @@ async function uploadLogo(i,file){
 }
 function draw(){
   PB.apply();
-  ["h1","sub","gH","gP","gB","pbT","pbS"].forEach(k=>{const e=$(k);if(e)e.textContent=tx(k);});$("backT").textContent=tx("back");
+  ["h1","sub","gH","gB","pbT","pbS"].forEach(k=>{const e=$(k);if(e)e.textContent=tx(k);});
+  const mOn=!!(PBA.mobile&&PBA.mobile.enabled&&PBA.mobile.enabled());
+  $("mF").hidden=!mOn;$("gP").textContent=tx(mOn?"gP":"gPe");$("gB").className=mOn?"lnk":"btn";
+  $("mGo").textContent=tx(M.sent?"m_go":"m_send");$("mBack").textContent=tx("m_back");
+  if(M.sent)$("mHint").textContent=tx("m_hint","+91 "+M.phone);$("backT").textContent=tx("back");
   document.title=tx("h1")+" — PataBook";
   $("gate").hidden=!!ME;$("who").hidden=!ME;
   if(!ME){$("list").innerHTML="";return;}
-  $("whoT").textContent=tx("who",ME.email);$("out").textContent=tx("out");
+  const ph=phoneOf(ME);
+  $("whoT").textContent=ph?tx("who_ph",ph):tx("who",ME.email);$("out").textContent=tx("out");
   const list=$("list");
   if(ERR){list.innerHTML='<p class="note">'+esc(tx(ERR))+'</p>';return;}
   if(!ROWS){list.innerHTML='<p class="note">…</p>';return;}
   if(!ROWS.length){
-    list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx("e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
+    list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
   list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
@@ -251,6 +282,40 @@ $("list").addEventListener("click",async e=>{
     try{await rpc("pb_set_logo",{p_slug:b.slug,p_url:null});LOGOS[b.slug]="";draw();}
     catch(x){bt.disabled=false;$("le"+i).textContent=L()==="en"?"Could not remove. Try again.":"हटाया नहीं जा सका।";}
   }
+});
+/* ---- मोबाइल नंबर + OTP से login ---- */
+const M={sent:false,phone:""};
+function phoneOf(s){const m=/^m([6-9]\d{9})@phone\.patabook\.in$/.exec((s&&s.email)||"");return m?m[1]:"";}
+function mErr(e){
+  const c=(e&&e.code)||"";
+  if(c==="invalid_otp")return tx("m_wrong")+(e.attempts_left?" ("+e.attempts_left+")":"");
+  if(c==="otp_expired"||c==="otp_expired_or_missing")return tx("m_exp");
+  if(c==="too_many_attempts"||c==="rate_limited_ip"||c==="rate_limited_mobile")return tx("m_many");
+  if(c==="resend_too_soon")return tx("m_soon")+(e.retry_after?" ("+e.retry_after+"s)":"");
+  if(c==="shop_not_found"||c==="owner_missing")return tx("m_noshop");
+  if(c==="admin_owned")return tx("m_admin");
+  if(c==="captcha_required"||c==="captcha_failed")return tx("m_cap");
+  return tx("m_fail");
+}
+function mShow(){$("mOtpW").hidden=!M.sent;$("mBack").hidden=!M.sent;$("mPh").readOnly=M.sent;draw();}
+$("mBack").onclick=()=>{M.sent=false;$("mOtp").value="";$("mErr").textContent="";mShow();$("mPh").focus();};
+$("mPh").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").replace(/^(91|0)(?=[6-9]\d{9}$)/,"").slice(0,10);});
+$("mOtp").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,6);if(e.target.value.length===6)$("mF").requestSubmit();});
+$("mF").addEventListener("submit",async e=>{
+  e.preventDefault();const go=$("mGo");if(go.disabled)return;$("mErr").textContent="";
+  if(!M.sent){
+    const ph=$("mPh").value.replace(/\D/g,"");
+    if(!/^[6-9]\d{9}$/.test(ph)){$("mErr").textContent=tx("m_bad_ph");return;}
+    go.disabled=true;
+    try{await PBA.mobile.ownerSend(ph);M.sent=true;M.phone=ph;mShow();$("mOtp").focus();}
+    catch(x){$("mErr").textContent=mErr(x);}
+    go.disabled=false;return;
+  }
+  const code=$("mOtp").value.replace(/\D/g,"");
+  if(!/^\d{6}$/.test(code)){$("mErr").textContent=tx("m_bad_otp");return;}
+  go.disabled=true;
+  try{await PBA.mobile.ownerVerify(M.phone,code);M.sent=false;$("mOtp").value="";$("mOtpW").hidden=true;$("mBack").hidden=true;$("mPh").readOnly=false;go.disabled=false;await start();}
+  catch(x){go.disabled=false;$("mErr").textContent=mErr(x);}
 });
 $("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){

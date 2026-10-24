@@ -115,6 +115,9 @@ var mobile={
   enabled:function(){return !!otpBase();},
   adminSend:function(phone){return otpCall("/send",{purpose:"admin_login",phone:phone},false);},
   adminVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"admin_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
+  /* "मेरी दुकान": जिस नंबर से दुकान जोड़ी, उसी नंबर + OTP से login (email ज़रूरी नहीं) */
+  ownerSend:function(phone){return otpCall("/send",{purpose:"owner_login",phone:phone},false);},
+  ownerVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"owner_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
   shopSend:function(slug,phone){return otpCall("/send",{purpose:"shop_phone",slug:slug,phone:phone},true);},
   shopVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"shop_phone",slug:slug,phone:phone,code:code},true);}
 };
