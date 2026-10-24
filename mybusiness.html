@@ -26,7 +26,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 #pbLang{margin-inline-start:auto}
 h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .sub{color:var(--muted);font-size:14px;margin:0 2px 14px}
-.who{background:#e8f5e9;color:#1b5e20;border:1px solid #cdeacf;border-radius:16px;padding:12px 14px;font-size:13.5px;margin-bottom:14px}
+.who{background:#e8f5e9;color:#1b5e20;border:1px solid #cdeacf;border-radius:16px;padding:12px 14px;font-size:13.5px;margin:14px 0}
 .who .wt{display:flex;align-items:center;gap:10px}.who .wt .ok{font-size:22px}.who .wt b{display:block;font-size:15px;color:#14532d}.who .wt small{display:block;color:#2e6b3a;font-size:12.5px;margin-top:1px}
 .who .dv{margin-top:10px;border-top:1px dashed #b9dcbc;padding-top:8px;font-size:13px;color:#24502c}
 .who .dv .d{display:flex;align-items:center;gap:8px;padding:4px 0}.who .dv .d span{flex:1;min-width:0}.who .dv .d button{color:#b42318;font-weight:700;font-size:12.5px;border:1px solid #f1c4c0;background:#fff;border-radius:999px;padding:3px 10px}
@@ -144,13 +144,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
   </div>
 
   <div class="kick" id="kick" hidden></div>
+  <div id="list"><p class="note">…</p></div>
   <div class="who" id="who" hidden>
     <div class="wt"><span class="ok">✅</span><span><b id="whoT"></b><small id="whoS"></small></span></div>
     <div class="pinbox" id="pinBox" hidden></div>
     <div class="dv" id="dv" hidden></div>
     <button type="button" id="out"></button>
   </div>
-  <div id="list"><p class="note">…</p></div>
 </div>
 
 <script>
@@ -254,7 +254,7 @@ async function bellState(){
 }
 function notifBlock(){
   if(!EVS)return "";
-  const en=L()==="en",ev=(EVS.events||[]).slice(0,5);
+  const en=L()==="en",ev=(EVS.events||[]).filter(e=>e.kind!=="live").slice(0,5);
   return '<div class="nt"><div class="bh"><span class="ic">🔔</span><span class="tx"><b>'+(en?"Notifications on your phone":"फ़ोन पर सूचनाएँ")+'</b><small>'+(en?"When your shop goes Live, a customer taps Call, and a weekly report every Monday.":"दुकान Live होने पर, ग्राहक के Call दबाने पर, और हर सोमवार हफ़्ते की रिपोर्ट।")+'</small></span>'+
     (bellOK()?'<button type="button" class="bb'+(BELL?" on":"")+'" id="bellBtn">'+(BELL?(en?"✅ On":"✅ चालू"):(en?"Turn on":"चालू करें"))+'</button>':'')+'</div><div class="bn" id="bellNote"></div>'+
     (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
