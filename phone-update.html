@@ -78,7 +78,7 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
    <p class="help" id="sentTo"></p>
    <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
    <div class="err" id="e2"></div>
-   <button class="btn" type="submit" id="verify" data-en="Verify and change number">Verify करके नंबर बदलें</button>
+   <button class="btn" type="submit" id="verify" data-en="Verify and send request">Verify करके request भेजें</button>
    <div class="links"><button type="button" id="resend" data-en="Resend OTP">OTP फिर भेजें</button><button type="button" id="change" data-en="Change number">नंबर बदलें</button></div>
   </form>
 
@@ -126,6 +126,7 @@ function msg(e){
   if(c==="too_many_attempts")return (window.PB_EN?"Wrong OTP entered 3 times. Request a new OTP.":"3 बार गलत OTP डाला गया। नया OTP मँगाएँ।");
   if(c==="login_required")return (window.PB_EN?"Your login has expired. Please log in again.":"लॉगिन की समय-सीमा खत्म हो गई। दोबारा लॉगिन करें।");
   if(c==="not_owner")return (window.PB_EN?"This shop is not linked to your email.":"यह दुकान आपके ईमेल से नहीं जुड़ी।");
+  if(c==="same_phone")return (window.PB_EN?"This is already your shop\u2019s number.":"यह तो पहले से आपकी दुकान का नंबर है।");
   if(c==="phone_in_use")return (window.PB_EN?"This number is already on another shop. Use a different number or contact Support.":"यह नंबर पहले से किसी दूसरी दुकान पर है। कोई दूसरा नंबर डालें या Support से संपर्क करें।");
   if(c==="update_failed"||c==="shop_not_found"||c==="owner_check_failed")return (window.PB_EN?"The number could not be updated. Try again in a while.":"नंबर अपडेट नहीं हो सका। थोड़ी देर बाद कोशिश करें।");
   if(c==="otp_not_configured"||c==="server_not_configured"||c==="origin_not_allowed")return (window.PB_EN?"This feature is not enabled yet.":"यह सुविधा अभी चालू नहीं है।");
@@ -158,8 +159,11 @@ $("s2").onsubmit=async e=>{
   if(c.length!==6){$("e2").textContent=msg({code:"bad_code"});return;}
   const b=$("verify");b.disabled=true;$("e2").textContent="";
   try{
-    await PBA.mobile.shopVerify(slug,phone,c);
-    $("doneTxt").textContent=(window.PB_EN?"✅ Your shop’s mobile number has been updated to +91 "+phone+".":"✅ आपकी दुकान का मोबाइल नंबर +91 "+phone+" पर अपडेट हो गया।");
+    const r=await PBA.mobile.shopVerify(slug,phone,c);
+    const req=!!(r&&r.requested);
+    $("doneTxt").textContent=req
+      ?(window.PB_EN?"✅ Request sent. Your new number +91 "+phone+" will start showing after PataBook Admin approves it. Until then your old number stays on your shop page.":"✅ Request भेज दी गई। PataBook Admin की मंज़ूरी के बाद आपका नया नंबर +91 "+phone+" दिखने लगेगा। तब तक दुकान के पेज पर पुराना नंबर ही रहेगा।")
+      :(window.PB_EN?"✅ Your shop’s mobile number has been updated to +91 "+phone+".":"✅ आपकी दुकान का मोबाइल नंबर +91 "+phone+" पर अपडेट हो गया।");
     $("viewShop").href="business.html?slug="+encodeURIComponent(slug);document.querySelector(".banner").hidden=true;
     step(3);
   }catch(x){$("e2").textContent=msg(x);b.disabled=false;}

@@ -167,6 +167,10 @@ function vacBlock(b,i){
     (on?(en?"Shows on your shop page · auto-off on "+till:"दुकान के पेज पर दिख रहा है · "+till+" को अपने आप बंद"):(en?"Turn ON if you need staff":"स्टाफ चाहिए तो ON करें"))+'</small></span>'+
     '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div><div class="err" id="ve'+i+'"></div>';
 }
+let PREQ={};
+async function loadPreq(){
+  try{PREQ=await rpc("pb_my_phone_requests")||{};}catch(e){PREQ={};}   /* sql-15 अभी नहीं चली तो कुछ नहीं दिखेगा */
+}
 async function loadVac(){
   if(!ROWS||!ROWS.length)return;
   try{
@@ -252,7 +256,7 @@ function draw(){
   list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    phoneBlock(b,i)+vacBlock(b,i)+logoBlock(b,i)+
+    phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+logoBlock(b,i)+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
@@ -321,7 +325,7 @@ $("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
   ME=await PBA.session();draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();}
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();}
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";

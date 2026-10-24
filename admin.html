@@ -163,6 +163,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="rTabs"><button data-r="new" class="on">🆕 नई</button><button data-r="done">✔ निपट गई</button></div>
     <div id="rBody"></div>
   </div>
+  <div id="phv" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>📱 नंबर बदलने की requests</h2></div>
+    <p class="cnt">दुकानदार ने नया नंबर डालकर उसका OTP दे दिया है (यानी नया नंबर उसी के पास है)। जब तक आप ✅ Approve नहीं करते, website पर पुराना नंबर ही दिखता है।</p>
+    <div class="mtabs" id="pTabs"><button data-p="pending" class="on">⏳ बाकी</button><button data-p="done">✔ हो चुकी</button></div>
+    <div id="pBody"></div>
+  </div>
   <div class="md" id="md" hidden><div class="bx" id="mdBox"></div></div>
   <div id="panel" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
@@ -362,7 +369,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!sess) return gate('login');
     $('who').textContent = sess.email || ''; $('out').hidden = false;
     showHome();
-    if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
+    if (START === '#phv') showPhReq(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
     bellState();
   })();
   /* ---- 🔔 Push notification: नई दुकान / शिकायत / संदेश पर इस फ़ोन में घंटी ---- */
@@ -405,7 +412,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -443,13 +450,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['traffic', '📊', '#e6f6f4', 'Traffic (आज के लोग)', n(c.uv_today), (c.live_now != null ? '🟢 अभी ' + c.live_now + ' लोग साइट पर' : 'sql-11 चलाएँ'), 0],
       ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए Approve करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0],
       ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', '₹499', 'Vacancies और payments', 0],
-      ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0]
+      ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0],
+      ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
-    repBadge();
+    repBadge(); phBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -461,6 +469,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'cities') return showCities();
     if (t === 'jobs') return showJobs();
     if (t === 'reports') return showReports();
+    if (t === 'phreq') return showPhReq();
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
@@ -684,6 +693,43 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     b.disabled = true;
     try { await rpc('pb_admin_report_set', { p_id: +b.dataset.id, p_action: b.dataset.ra }); } catch (x) { alert('गलती: ' + x.message); }
     loadReports();
+  };
+  /* ---- 📱 नंबर बदलने की requests (sql-15) ---- */
+  var PTAB = 'pending', PDATA = [];
+  async function phBadge() {
+    var b = document.querySelector('#tiles [data-t="phreq"]'); if (!b) return;
+    try {
+      var R = await rpc('pb_admin_phone_requests', {}) || [], n = R.filter(function (r) { return r.status === 'pending'; }).length;
+      b.querySelector('b').textContent = n;
+      b.querySelector('small').textContent = n ? n + ' Approve करनी बाकी' : 'कोई बाकी नहीं';
+      if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
+    } catch (e) { b.querySelector('small').textContent = 'sql-15 चलाएँ'; }
+  }
+  function showPhReq() { view('phv'); loadPhReq(); }
+  async function loadPhReq() {
+    $('pBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    try { PDATA = await rpc('pb_admin_phone_requests', {}) || []; drawPhReq(); }
+    catch (e) { if (e.message === 'login') return; $('pBody').innerHTML = '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 15_phone_change_approval.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+  }
+  function drawPhReq() {
+    var L = PDATA.filter(function (r) { return PTAB === 'pending' ? r.status === 'pending' : r.status !== 'pending'; });
+    $('pBody').innerHTML = '<p class="cnt">' + L.length + ' requests</p>' + (L.length ? L.map(function (r) {
+      return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ Pending दुकान') + '</span></h3>' +
+        (r.address ? '<p class="meta">📍 ' + esc(r.address) + '</p>' : '') +
+        '<p class="meta" style="font-size:15px;margin-top:6px">पुराना: <b><a href="tel:' + esc(r.old_phone || '') + '">' + esc(r.old_phone || '—') + '</a></b> → नया: <b><a href="tel:' + esc(r.new_phone) + '">' + esc(r.new_phone) + '</a></b></p>' +
+        '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + (r.status === 'approved' ? '✅ Approve किया' : '❌ Reject किया') + (r.decided_at ? ' ' + fmtD(r.decided_at) : '') : '') + '</p>' +
+        (r.status === 'pending' ? '<div class="acts"><button data-pa="1" data-id="' + r.id + '" style="background:#137333;color:#fff">✅ Approve — नया नंबर चालू करें</button><button class="del" data-pa="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
+    }).join('') : '<p class="cnt">' + (PTAB === 'pending' ? 'कोई request बाकी नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
+  }
+  $('pTabs').onclick = function (e) { var b = e.target.closest('[data-p]'); if (!b) return; PTAB = b.dataset.p; $('pTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawPhReq(); };
+  $('pBody').onclick = async function (e) {
+    var b = e.target.closest('[data-pa]'); if (!b) return;
+    var ok = b.dataset.pa === '1';
+    if (!confirm(ok ? 'नया नंबर website पर चालू कर दें?' : 'यह request Reject करें? (पुराना नंबर ही रहेगा)')) return;
+    b.disabled = true;
+    try { await rpc('pb_admin_phone_decide', { p_id: +b.dataset.id, p_approve: ok }); }
+    catch (x) { alert(/phone in use/i.test(x.message) ? 'यह नया नंबर अब किसी दूसरी दुकान पर है — Approve नहीं हो सकता।' : 'गलती: ' + x.message); }
+    loadPhReq();
   };
   /* ---- Vacancy / नौकरी (₹499 plan) ---- */
   var JTAB = 'jobs', JDATA = null;
