@@ -660,22 +660,28 @@ $("phone").addEventListener("input",()=>{if(regToken&&ph10()!==regPhone)otpReset
 $("otpSend").onclick=async()=>{
   const p=ph10();if(!/^[6-9]\d{9}$/.test(p)){otpMsg(otpErr({code:"bad_phone"}),true);return;}
   const b=$("otpSend");b.disabled=true;
-  try{const st=await regStatus(p);
-    if(st&&(st.status==="live"||st.status==="pending")){b.disabled=false;
-      otpMsg(EN()?"This number is already in use. Please enter another number.":"यह नंबर पहले से इस्तेमाल हो चुका है। दूसरा नंबर डालें।",true);return;}
-  }catch(_){/* status न मिले तो भी OTP भेजो; database अंत में फिर जाँचेगा */}
+  /* इस नंबर से दुकान पहले से जुड़ी हो तो भी OTP भेजो: OTP सही होते ही सीधे "मेरी दुकान" खुलेगी (Worker v9) */
+  let has=false;
+  try{const st=await regStatus(p);has=!!(st&&(st.status==="live"||st.status==="pending"));}catch(_){}
   try{const j=await otpCall("/send",{purpose:"register",phone:p});
     regPhone="";$("otpCode").disabled=false;$("otpCode").value="";setTimeout(()=>$("otpCode").focus(),50);
-    otpMsg(EN()?"OTP sent to +91 "+p+". Enter it above.":"+91 "+p+" पर OTP भेजा गया है। ऊपर डालें।");otpCool(j.resend_after);
+    otpMsg(has?(EN()?"A shop is already added with +91 "+p+". Enter the OTP — your shop (My Shop) will open directly.":"+91 "+p+" से आपकी दुकान पहले से जुड़ी है। OTP डालें — आपकी दुकान (मेरी दुकान) सीधे खुल जाएगी।")
+      :(EN()?"OTP sent to +91 "+p+". Enter it above.":"+91 "+p+" पर OTP भेजा गया है। ऊपर डालें।"));otpCool(j.resend_after);
   }catch(e){otpMsg(otpErr(e),true);b.disabled=false;if(e.code==="resend_too_soon")otpCool(e.retry_after);}
 };
 $("otpCode").addEventListener("input",async()=>{
   const c=$("otpCode").value.replace(/\D/g,"");$("otpCode").value=c;if(c.length!==6)return;
   const p=ph10();$("otpCode").disabled=true;otpMsg(EN()?"Checking…":"जाँच हो रही है…");
   try{const j=await otpCall("/verify",{purpose:"register",phone:p,code:c});
+    if(j.existing&&j.token_hash){   /* दुकान पहले से जुड़ी है → login करके "मेरी दुकान" */
+      otpMsg(EN()?"✅ Your shop is already on PataBook. Opening My Shop…":"✅ आपकी दुकान पहले से PataBook पर है। मेरी दुकान खोल रहे हैं…");
+      await PBA.mobile.useTokenHash(j.token_hash,j.email);clearInterval(otpTimer);location.href="mybusiness.html";return;
+    }
     regToken=j.reg_token;regPhone=p;clearInterval(otpTimer);$("otpBox").classList.add("ok");
     otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");setErr("");
-  }catch(e){otpMsg(otpErr(e),true);$("otpCode").disabled=false;$("otpCode").value="";$("otpCode").focus();}
+  }catch(e){
+    if(e.code==="admin_owned"||e.code==="owner_missing"){otpMsg(EN()?"A shop is already added with this number. Please contact PataBook to manage it.":"इस नंबर से दुकान पहले से जुड़ी है। उसे संभालने के लिए PataBook से संपर्क करें।",true);$("otpCode").value="";return;}
+    otpMsg(otpErr(e),true);$("otpCode").disabled=false;$("otpCode").value="";$("otpCode").focus();}
 });
 $("next").onclick=()=>{
   if(!check())return;

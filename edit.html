@@ -193,6 +193,7 @@ $("main").addEventListener("submit",async e=>{
   fill();only("loading");
   if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
   S=await PBA.session();if(!S){only("needLogin");return;}
+  if(PBA.deviceCheck){const dc=await PBA.deviceCheck().catch(()=>null);if(dc&&dc.ok===false){location.href="mybusiness.html";return;}}
   try{
     const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
     if(!b){only("notOwner");return;}

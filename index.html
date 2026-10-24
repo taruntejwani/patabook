@@ -196,7 +196,7 @@ window.PATABOOK_SUPABASE={
 <script src="pb-track.js"></script>
 <script>
 /* दुकानदार login है (मोबाइल OTP / ईमेल) तो सबसे ऊपर "मेरी दुकान" का बटन */
-document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";}}catch(e){}});
+document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";}}catch(e){}});
 </script>
 </head>
 <body>

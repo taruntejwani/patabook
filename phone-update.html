@@ -51,8 +51,8 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
  <!-- Not logged in -->
  <div class="card" id="needLogin" hidden>
   <h1 data-en="Log in first">पहले लॉगिन करें</h1>
-  <p class="help" data-en="Only the shop owner can change the shop’s mobile number. Log in with the email linked to your shop.">दुकान का मोबाइल नंबर सिर्फ दुकान का मालिक बदल सकता है। जिस ईमेल से आपकी दुकान जुड़ी है, उससे लॉगिन करें।</p>
-  <a class="btn" id="loginBtn" href="login.html" data-en="Log in with email →">ईमेल से लॉगिन करें →</a>
+  <p class="help" data-en="Only the shop owner can change the shop’s mobile number. Log in to My Shop with your shop’s mobile number and OTP.">दुकान का मोबाइल नंबर सिर्फ दुकान का मालिक बदल सकता है। "मेरी दुकान" में दुकान के मोबाइल नंबर और OTP से लॉगिन करें।</p>
+  <a class="btn" id="loginBtn" href="mybusiness.html" data-en="Log in with mobile number →">मोबाइल नंबर से लॉगिन करें →</a>
  </div>
 
  <!-- Logged in but not the owner of this shop -->
@@ -147,7 +147,7 @@ async function send(){
     step(2);$("code").value="";setTimeout(()=>$("code").focus(),50);cool(j.resend_after);
   }catch(e){
     const t=msg(e);if($("s2").hidden)$("e1").textContent=t;else $("e2").textContent=t;
-    if(e.code==="login_required")location.href=PBA.loginUrl("phone-update.html?slug="+encodeURIComponent(slug));
+    if(e.code==="login_required")location.href="mybusiness.html";
   }finally{b.disabled=false;}
 }
 $("s1").onsubmit=e=>{e.preventDefault();phone=clean($("phone").value);send();};
@@ -170,11 +170,12 @@ $("s2").onsubmit=async e=>{
 };
 (async function start(){
   only("loading");
-  $("loginBtn").href=PBA.loginUrl("phone-update.html?slug="+encodeURIComponent(slug));
+  $("loginBtn").href="mybusiness.html";   /* मोबाइल नंबर + OTP वाला login "मेरी दुकान" में है */
   if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
   if(!PBA.mobile||!PBA.mobile.enabled()){only("main");$("e1").textContent=msg({code:"otp_not_configured"});$("send").disabled=true;return;}
   const s=await PBA.session();
   if(!s){only("needLogin");return;}
+  if(PBA.deviceCheck){const dc=await PBA.deviceCheck().catch(()=>null);if(dc&&dc.ok===false){location.href="mybusiness.html";return;}}
   try{
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
     const rows=r.ok?await r.json():[];

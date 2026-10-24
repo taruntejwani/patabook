@@ -46,9 +46,31 @@ async function session(){
   if(s.expires_at-60>Date.now()/1000)return s;
   if(!s.refresh_token){save(null);return null;}
   try{var d=await call("token?grant_type=refresh_token",{refresh_token:s.refresh_token});var n=fromToken(d);n.email=n.email||s.email;save(n);return n;}
-  catch(e){save(null);return null;}
+  catch(e){if(e.status>=400&&e.status<500)save(null);return null;}   /* इंटरनेट न हो तो login मत मिटाओ */
 }
-async function logout(){var s=read();save(null);if(s){try{await call("logout",{},s.access_token);}catch(e){}}}
+/* सिर्फ इसी फ़ोन/PC से logout (scope=local) — दुकानदार के दूसरे फ़ोन का login चलता रहे */
+async function logout(){var s=read();save(null);if(s){try{await call("logout?scope=local",{},s.access_token);}catch(e){}}}
+/* "मेरी दुकान": यह फ़ोन/PC दर्ज करो (एक साथ 2 मोबाइल + 1 PC)। बंद हो चुका login हो तो यहाँ से भी logout। */
+function devKind(){var u=navigator.userAgent||"";return /Mobi|Android|iPhone|iPad|iPod/i.test(u)?"mobile":"pc";}
+function devLabel(){var u=navigator.userAgent||"";
+  if(/iPhone/i.test(u))return "iPhone";if(/iPad/i.test(u))return "iPad";
+  if(/Android/i.test(u)){var m=u.match(/Android[^;)]*;\s*([^;)]+?)(?:\s+Build|\))/);var n=m&&m[1]&&!/^(K|wv|Linux)$/i.test(m[1].trim())?m[1].trim():"";return ("Android "+n).trim().slice(0,40);}
+  if(/Windows/i.test(u))return "Windows PC";if(/Macintosh|Mac OS/i.test(u))return "Mac";if(/CrOS/i.test(u))return "Chromebook";if(/Linux/i.test(u))return "Linux PC";return "";}
+async function deviceCheck(){
+  var s=await session();if(!s)return {ok:false,reason:"login"};
+  var r=await fetch(SB+"/rest/v1/rpc/pb_my_device_check",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:JSON.stringify({p_kind:devKind(),p_label:devLabel()})});
+  if(r.status===404)return {ok:true,tracked:false};   /* sql-18 अभी नहीं चली */
+  var j=null;try{j=await r.json();}catch(e){}
+  if(r.status===401||r.status===403){save(null);return {ok:false,reason:"login"};}
+  if(!r.ok||!j)return {ok:true,tracked:false};        /* जाँच न हो पाए तो दुकानदार को बाहर मत करो */
+  if(j.ok===false){save(null);try{sessionStorage.setItem("pb-kicked",j.reason||"limit");}catch(e){}}
+  return j;
+}
+async function deviceKick(id){
+  var s=await session();if(!s)throw new Error("login");
+  var r=await fetch(SB+"/rest/v1/rpc/pb_my_device_kick",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:JSON.stringify({p_sid:id})});
+  if(!r.ok)throw new Error("HTTP "+r.status);return true;
+}
 /* login ke baad hi number: database function pb_contact (sirf logged-in user) */
 async function contact(slug){
   var s=await session();if(!s){var e0=new Error("login");e0.status=401;throw e0;}
@@ -117,9 +139,11 @@ var mobile={
   adminVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"admin_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
   /* "मेरी दुकान": जिस नंबर से दुकान जोड़ी, उसी नंबर + OTP से login (email ज़रूरी नहीं) */
   ownerSend:function(phone){return otpCall("/send",{purpose:"owner_login",phone:phone},false);},
+  /* "दुकान जोड़ें" में पहले से जुड़ा नंबर: Worker ने सीधे login का token दिया */
+  useTokenHash:function(th,email){return verifyTokenHash(th,email);},
   ownerVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"owner_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
   shopSend:function(slug,phone){return otpCall("/send",{purpose:"shop_phone",slug:slug,phone:phone},true);},
   shopVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"shop_phone",slug:slug,phone:phone,code:code},true);}
 };
-window.PBA={otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile};
+window.PBA={otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
 })();

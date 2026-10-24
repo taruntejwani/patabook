@@ -26,8 +26,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 #pbLang{margin-inline-start:auto}
 h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .sub{color:var(--muted);font-size:14px;margin:0 2px 14px}
-.who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#e8f5e9;color:#1b5e20;border-radius:12px;padding:9px 12px;font-size:13.5px;margin-bottom:14px}
-.who button{margin-inline-start:auto;color:var(--blue);font-weight:600;font-size:13px}
+.who{background:#e8f5e9;color:#1b5e20;border:1px solid #cdeacf;border-radius:16px;padding:12px 14px;font-size:13.5px;margin-bottom:14px}
+.who .wt{display:flex;align-items:center;gap:10px}.who .wt .ok{font-size:22px}.who .wt b{display:block;font-size:15px;color:#14532d}.who .wt small{display:block;color:#2e6b3a;font-size:12.5px;margin-top:1px}
+.who .dv{margin-top:10px;border-top:1px dashed #b9dcbc;padding-top:8px;font-size:13px;color:#24502c}
+.who .dv .d{display:flex;align-items:center;gap:8px;padding:4px 0}.who .dv .d span{flex:1;min-width:0}.who .dv .d button{color:#b42318;font-weight:700;font-size:12.5px;border:1px solid #f1c4c0;background:#fff;border-radius:999px;padding:3px 10px}
+.who #out{display:block;width:100%;margin-top:10px;border:1.5px solid #b42318;color:#b42318;background:#fff;font-weight:800;border-radius:12px;padding:10px;font-size:14.5px}
+.kick{background:#fff4e5;color:#7a3b00;border:1px solid #ffd8a8;border-radius:14px;padding:12px 14px;font-weight:700;line-height:1.5;margin-bottom:12px;font-size:14px}
+.addsm{display:block;text-align:center;margin:8px 0 0;color:var(--blue);font-weight:700;font-size:14px;padding:8px}
 .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
 .card h2{font-size:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .st{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px}
@@ -118,7 +123,12 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
     <a class="lnk" href="login.html?next=mybusiness.html" id="gB">ईमेल से लॉगिन करें →</a>
   </div>
 
-  <div class="who" id="who" hidden><span id="whoT"></span><button type="button" id="out"></button></div>
+  <div class="kick" id="kick" hidden></div>
+  <div class="who" id="who" hidden>
+    <div class="wt"><span class="ok">✅</span><span><b id="whoT"></b><small id="whoS"></small></span></div>
+    <div class="dv" id="dv" hidden></div>
+    <button type="button" id="out"></button>
+  </div>
   <div id="list"><p class="note">…</p></div>
 </div>
 
@@ -176,7 +186,15 @@ function vacBlock(b,i){
     (on?(en?"Shows on your shop page · auto-off on "+till:"दुकान के पेज पर दिख रहा है · "+till+" को अपने आप बंद"):(en?"Turn ON if you need staff":"स्टाफ चाहिए तो ON करें"))+'</small></span>'+
     '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div><div class="err" id="ve'+i+'"></div>';
 }
-let PREQ={},EVS=null,BELL="";
+let PREQ={},EVS=null,BELL="",DEV=null;
+function kickMsg(){
+  let r="";try{r=sessionStorage.getItem("pb-kicked")||"";sessionStorage.removeItem("pb-kicked");}catch(e){}
+  if(!r)return;const en=L()==="en";
+  $("kick").textContent=r==="phone"?(en?"📱 Your shop's mobile number has changed. Log in again with the new number and OTP.":"📱 आपकी दुकान का मोबाइल नंबर बदल गया है। नए नंबर और OTP से दोबारा लॉगिन करें।")
+    :r==="removed"?(en?"🔒 You were logged out from this phone by the shop owner. Log in again if needed.":"🔒 दुकान के मालिक ने इस फ़ोन का login बंद कर दिया। ज़रूरत हो तो दोबारा लॉगिन करें।")
+    :(en?"🔒 Your shop was opened on another phone/PC, so this one was logged out (max 2 phones + 1 PC at a time).":"🔒 आपकी दुकान किसी दूसरे फ़ोन/PC पर खुली, इसलिए यहाँ से logout हो गया (एक साथ ज़्यादा से ज़्यादा 2 मोबाइल + 1 PC)।");
+  $("kick").hidden=false;
+}
 async function loadEvents(){try{EVS=await rpc("pb_my_events");}catch(e){EVS=null;}}   /* sql-17 अभी नहीं चली तो यह हिस्सा नहीं दिखेगा */
 function ago(t){const m=Math.round((Date.now()-new Date(t).getTime())/60000),en=L()==="en";if(m<60)return en?(m<=1?"just now":m+" min ago"):(m<=1?"अभी":m+" मिनट पहले");const h=Math.round(m/60);if(h<24)return en?h+" hr ago":h+" घंटे पहले";const d=Math.round(h/24);return en?d+" days ago":d+" दिन पहले";}
 function bellOK(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&!!(PBA.mobile&&PBA.mobile.enabled());}
@@ -278,7 +296,14 @@ function draw(){
   if(!ME){$("list").innerHTML="";return;}
   /* मोबाइल login: नंबर Approve होकर बदल गया हो तो दुकान का अभी वाला नंबर दिखाओ */
   const ph=phoneOf(ME)?((ROWS&&ROWS.length===1&&String(ROWS[0].phone||"").replace(/\D/g,"").slice(-10))||phoneOf(ME)):"";
-  $("whoT").textContent=ph?tx("who_ph",ph):tx("who",ME.email);$("out").textContent=tx("out");
+  const en=L()==="en";
+  $("whoT").textContent=ph?(en?"Logged in · 📱 +91 "+ph:"लॉगिन हैं · 📱 +91 "+ph):(en?"Logged in · ":"लॉगिन हैं · ")+ME.email;
+  $("whoS").textContent=ph?(en?"Mobile number verified with OTP":"मोबाइल नंबर OTP से verified है"):"";
+  $("out").textContent=en?"🚪 Log out from this phone":"🚪 इस फ़ोन से लॉगआउट करें";
+  const dv=$("dv"),D=(DEV&&DEV.devices)||[];
+  dv.hidden=!D.length;
+  if(D.length)dv.innerHTML='<div style="font-weight:700;margin-bottom:2px">'+(en?"Logged in on (max 2 phones + 1 PC):":"इन पर login चालू है (ज़्यादा से ज़्यादा 2 मोबाइल + 1 PC):")+'</div>'+
+    D.map(d=>'<div class="d"><span>'+(d.kind==="pc"?"💻 ":"📱 ")+esc(d.label||(d.kind==="pc"?"PC":(en?"Phone":"मोबाइल")))+(d.me?' <b>'+(en?"(this one)":"(यही)")+'</b>':'')+'</span>'+(d.me?'':'<button type="button" data-kick="'+esc(d.id)+'">'+(en?"Remove":"हटाएँ")+'</button>')+'</div>').join("");
   const list=$("list");
   if(ERR){list.innerHTML='<p class="note">'+esc(tx(ERR))+'</p>';return;}
   if(!ROWS){list.innerHTML='<p class="note">…</p>';return;}
@@ -293,7 +318,7 @@ function draw(){
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
-    '<a class="btn y" href="list.html" style="text-align:center;margin-top:6px">'+esc(tx("add"))+' ›</a>';
+    '<a class="addsm" href="list.html">➕ '+(L()==="en"?"Have another shop? Add it with a different mobile number ›":"दूसरी दुकान भी है? दूसरे मोबाइल नंबर से जोड़ें ›")+'</a>';
 }
 $("list").addEventListener("click",async e=>{
   const vs=e.target.closest(".sw.vac");
@@ -354,6 +379,12 @@ $("mF").addEventListener("submit",async e=>{
   try{await PBA.mobile.ownerVerify(M.phone,code);M.sent=false;$("mOtp").value="";$("mOtpW").hidden=true;$("mBack").hidden=true;$("mPh").readOnly=false;go.disabled=false;await start();}
   catch(x){go.disabled=false;$("mErr").textContent=mErr(x);}
 });
+$("dv").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-kick]");if(!b)return;
+  if(!confirm(L()==="en"?"Log out your shop from that phone/PC?":"उस फ़ोन/PC से दुकान का login बंद करें?"))return;
+  b.disabled=true;
+  try{await PBA.deviceKick(b.dataset.kick);DEV=await PBA.deviceCheck();draw();}catch(x){b.disabled=false;}
+});
 $("list").addEventListener("click",async e=>{
   const b=e.target.closest("#bellBtn");if(!b)return;
   const en=L()==="en",note=t=>{const n=$("bellNote");if(n){n.textContent=t||"";n.style.color="";}};
@@ -373,7 +404,10 @@ $("list").addEventListener("click",async e=>{
 });
 $("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
-  ME=await PBA.session();draw();
+  ME=await PBA.session();
+  if(ME&&PBA.deviceCheck){DEV=await PBA.deviceCheck().catch(()=>null);if(DEV&&DEV.ok===false){ME=null;DEV=null;}}
+  if(!ME)kickMsg();else $("kick").hidden=true;
+  draw();
   if(!ME)return;
   try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPreq();await loadEvents();await bellState();}
   catch(e){
