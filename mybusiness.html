@@ -206,7 +206,7 @@ function vacBlock(b,i){
 }
 let PREQ={},EVS=null,BELL="",DEV=null,PROF=null;
 async function loadProf(){try{PROF=await rpc("pb_my_profiles");}catch(e){PROF=null;}}   /* sql-19 अभी नहीं चली तो % नहीं दिखेगा */
-/* प्रोफ़ाइल कितनी पूरी: 10 चीज़ें, हर एक 10% */
+/* प्रोफ़ाइल कितनी पूरी: 11 चीज़ें, % = पूरी चीज़ें / कुल */
 function profItems(b,i){
   const p=PROF&&PROF[b.slug];if(!p)return null;
   const d=p.d||"",has=k=>new RegExp("^"+k+":\\s*\\S","mi").test(d),en=L()==="en",E="edit.html?slug="+encodeURIComponent(b.slug);
@@ -215,6 +215,7 @@ function profItems(b,i){
     [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
     [!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","#lgx"+i],
+    [has("WhatsApp"),"💬",en?"WhatsApp number":"WhatsApp नंबर",E+"#wa"],
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय",E+"#openT"],
     [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार",E+"#btype"],
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",E+"#svc"],
@@ -225,7 +226,7 @@ function profItems(b,i){
 }
 function profBlock(b,i){
   const it=profItems(b,i);if(!it)return "";
-  const n=it.filter(x=>x[0]).length,pc=n*10,en=L()==="en",miss=it.filter(x=>!x[0]);
+  const n=it.filter(x=>x[0]).length,pc=Math.round(n/it.length*100),en=L()==="en",miss=it.filter(x=>!x[0]);
   const col=pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
   return '<div class="pf"><div class="ring" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></div>'+
     '<div class="pt"><b>'+(pc>=100?(en?"🎉 Profile 100% complete!":"🎉 प्रोफ़ाइल 100% पूरी!"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</b>'+
