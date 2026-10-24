@@ -99,6 +99,8 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pinbox b{display:block;font-size:14px;color:#14532d}.pinbox small{display:block;color:#2e6b3a;font-size:12.5px;margin:2px 0 8px;line-height:1.4}
 .pinbox .pr{display:flex;gap:8px}.pinbox input{flex:1;min-width:0;border:2px solid #b9dcbc;border-radius:12px;padding:10px;font-size:16px;background:#fff}
 .pinbox button{flex:none;background:#137333;color:#fff;font-weight:800;border-radius:12px;padding:10px 14px;font-size:14px}.pinbox button:disabled{opacity:.6}
+.pinbox .pinrow{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:#14532d}.pinbox .pinrow span{flex:1}
+.pinbox .pinlnk{background:none;border:0;color:var(--blue);font-weight:700;font-size:13.5px;padding:4px 0}
 .pinbox .pm2{font-size:13px;font-weight:700;margin-top:6px}.pinbox .pm2:empty{display:none}
 .mf #mOtp{border:2px solid #d5dbe6;border-radius:14px;background:#fff;text-align:center;letter-spacing:8px;font-size:22px;margin-bottom:6px}
 .mf small{display:block;color:var(--muted);font-size:13px;margin-bottom:8px;text-align:center}
@@ -352,7 +354,9 @@ function draw(){
   $("out").textContent=en?"🚪 Log out from this phone":"🚪 इस फ़ोन से लॉगआउट करें";
   const pb=$("pinBox");pb.hidden=!PINST;
   if(PINST)pb.innerHTML=PINST.has_pin
-    ?'<b>🔐 '+(en?"Password is set":"पासवर्ड बना हुआ है")+'</b><small>'+(en?"Next time log in with mobile number + password — no OTP needed.":"अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें — OTP की ज़रूरत नहीं।")+'</small><div class="pr"><input id="pinNew" type="password" maxlength="64" autocomplete="new-password" placeholder="'+(en?"New password":"नया पासवर्ड")+'"><button type="button" id="pinSave">'+(en?"Change":"बदलें")+'</button></div><div class="pm2" id="pinMsg"></div>'
+    ?(PINOPEN
+      ?'<b>🔐 '+(en?"Change password":"पासवर्ड बदलें")+'</b><div class="pr" style="margin-top:6px"><input id="pinNew" type="password" maxlength="64" autocomplete="new-password" placeholder="'+(en?"New password":"नया पासवर्ड")+'"><button type="button" id="pinSave">'+(en?"Save":"सेव करें")+'</button></div><div class="pm2" id="pinMsg"></div><button type="button" class="pinlnk" id="pinClose">'+(en?"Cancel":"रहने दें")+'</button>'
+      :'<div class="pinrow"><span>🔐 '+(en?"Password is set":"पासवर्ड बना हुआ है")+'</span><button type="button" class="pinlnk" id="pinOpen">'+(en?"Change ›":"बदलें ›")+'</button></div>'+(PINMSG?'<div class="pm2">'+esc(PINMSG)+'</div>':''))
     :'<b>🔐 '+(en?"Create your password":"अपना पासवर्ड बनाएँ")+'</b><small>'+(en?"Anything you like — numbers or words. Then log in anytime with mobile number + password, without OTP.":"जो चाहें रखें — अंक या शब्द, कुछ भी। फिर कभी भी मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP का इंतज़ार नहीं।")+'</small><div class="pr"><input id="pinNew" type="password" maxlength="64" autocomplete="new-password" placeholder="'+(en?"Password":"पासवर्ड")+'"><button type="button" id="pinSave">'+(en?"Save":"सेव करें")+'</button></div><div class="pm2" id="pinMsg"></div>';
   const dv=$("dv"),D=(DEV&&DEV.devices)||[];
   dv.hidden=!D.length;
@@ -403,7 +407,7 @@ $("list").addEventListener("click",async e=>{
 /* ---- मोबाइल नंबर + OTP से login ---- */
 let PINMODE=false;try{PINMODE=localStorage.getItem("pb-has-pin")==="1";}catch(e){}
 const M={sent:false,phone:"",mode:PINMODE?"pin":"otp"};
-let PINST=null;   /* {has_pin} — login के बाद */
+let PINST=null,PINOPEN=false,PINMSG="";   /* {has_pin} — login के बाद */
 function phoneOf(s){const m=/^m([6-9]\d{9})@phone\.patabook\.in$/.exec((s&&s.email)||"");return m?m[1]:"";}
 function mErr(e){
   const c=(e&&e.code)||"";
@@ -482,12 +486,15 @@ $("list").addEventListener("click",async e=>{
     alert(x.message==="admin_cannot"?(en?"Admin account cannot be deleted from here.":"Admin खाता यहाँ से नहीं हटता।"):(en?"Could not delete. Try again or contact PataBook.":"नहीं हटा पाए। दोबारा कोशिश करें या PataBook से संपर्क करें।"));}
 });
 $("who").addEventListener("click",async e=>{
+  if(e.target.closest("#pinOpen")){PINOPEN=true;PINMSG="";draw();const i=$("pinNew");if(i)i.focus();return;}
+  if(e.target.closest("#pinClose")){PINOPEN=false;draw();return;}
   const b=e.target.closest("#pinSave");if(!b)return;
   const en=L()==="en",v=$("pinNew").value.trim(),msg=t=>{$("pinMsg").textContent=t;};
   if([...v].length<4){msg(en?"At least 4 letters or numbers.":"कम से कम 4 अक्षर या अंक।");return;}
   b.disabled=true;msg("…");
-  try{await PBA.mobile.pinSet(v);PINST={has_pin:true};try{localStorage.setItem("pb-has-pin","1");}catch(x){}M.mode="pin";draw();
-    $("pinMsg").textContent=en?"✅ Password saved. Next time: mobile number + password.":"✅ पासवर्ड सेव हो गया। अगली बार: मोबाइल नंबर + पासवर्ड।";}
+  try{await PBA.mobile.pinSet(v);PINST={has_pin:true};PINOPEN=false;try{localStorage.setItem("pb-has-pin","1");}catch(x){}M.mode="pin";
+    PINMSG=en?"✅ Password saved. Next time: mobile number + password.":"✅ पासवर्ड सेव हो गया। अगली बार: मोबाइल नंबर + पासवर्ड।";draw();
+    setTimeout(()=>{PINMSG="";draw();},6000);}
   catch(x){b.disabled=false;msg(en?"Could not save. Try again.":"सेव नहीं हुआ। दोबारा कोशिश करें।");}
 });
 $("dv").addEventListener("click",async e=>{
