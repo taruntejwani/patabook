@@ -42,6 +42,7 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
 .otpb{margin-top:12px;background:#f4f8ff;border:1px solid #d6e6ff;border-radius:14px;padding:12px}
 .otpr{display:flex;gap:8px}.otpr input{flex:1;min-width:0;letter-spacing:.25em;font-weight:700;text-align:center}
 .otpbtn{flex:none;border:0;border-radius:12px;padding:0 14px;background:#1a73e8;color:#fff;font:inherit;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
+.pwb{margin-top:12px;background:#f4f8ff;border:1px solid #d6e6ff;border-radius:14px;padding:12px}
 .otpbtn:disabled{opacity:.55}.otpb.ok{background:#e6f4ea;border-color:#b7e1c1}.otpb.ok .otpr{display:none}
 .err{color:#c5221f;font-size:14px;margin-top:8px;min-height:18px}
 .btns{display:flex;gap:10px;margin-top:20px}
@@ -147,6 +148,12 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <div class="otpb" id="otpBox">
           <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
           <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।</p>
+        </div>
+        <div class="pwb" id="pwBox" hidden>
+          <p class="lbl" id="pwH" style="margin:0 0 4px">🔐 अपना पासवर्ड बनाएँ</p>
+          <p class="hint" id="pwHint" style="margin:0 0 8px;font-size:13px">अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP की ज़रूरत नहीं।</p>
+          <input id="pw1" type="password" maxlength="64" autocomplete="new-password" placeholder="पासवर्ड (कम से कम 4 अक्षर/अंक)">
+          <input id="pw2" type="password" maxlength="64" autocomplete="new-password" placeholder="पासवर्ड दोबारा डालें" style="margin-top:8px">
         </div>
         <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
         <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
@@ -587,6 +594,11 @@ function check(){
   if(key==="svc"&&!categoryIdFor(sel)){setErr(T("e_cat"));openSheet();return false;}
   if(key==="phone"&&!validPhone(phoneClean())){setErr(T("e_phone"));return false;}
   if(key==="phone"&&OTP_URL&&(!regToken||regPhone!==ph10())){setErr(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
+  if(key==="phone"&&OTP_URL){   /* OTP के बाद पासवर्ड बनाना ज़रूरी */
+    const a=$("pw1").value.trim(),b=$("pw2").value.trim();
+    if([...a].length<4){setErr(EN()?"Create a password (at least 4 letters or numbers).":"पासवर्ड बनाएँ (कम से कम 4 अक्षर या अंक)।");$("pw1").focus();return false;}
+    if(a!==b){setErr(EN()?"Both passwords are not the same. Enter them again.":"दोनों पासवर्ड एक जैसे नहीं हैं। दोबारा डालें।");$("pw2").value="";$("pw2").focus();return false;}
+  }
   return true;
 }
 
@@ -658,7 +670,15 @@ async function otpCall(path,body){
   let j=null;try{j=await r.json();}catch(_){}
   if(!r.ok||!j||!j.ok){const e=new Error((j&&j.error)||"x");e.code=(j&&j.error)||"";e.retry_after=j&&j.retry_after;e.attempts_left=j&&j.attempts_left;throw e;}
   return j;}
-function otpReset(){regToken="";regPhone="";$("otpBox").classList.remove("ok");$("otpCode").value="";$("otpCode").disabled=true;
+function pwShow(){
+  const en=EN();$("pwBox").hidden=false;
+  $("pwH").textContent=en?"🔐 Create your password":"🔐 अपना पासवर्ड बनाएँ";
+  $("pwHint").textContent=en?"Next time log in with mobile number + password — no OTP needed.":"अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP की ज़रूरत नहीं।";
+  $("pw1").placeholder=en?"Password (at least 4 letters/numbers)":"पासवर्ड (कम से कम 4 अक्षर/अंक)";
+  $("pw2").placeholder=en?"Re-enter password":"पासवर्ड दोबारा डालें";
+  setTimeout(()=>$("pw1").focus(),50);
+}
+function otpReset(){regToken="";regPhone="";if($("pwBox"))$("pwBox").hidden=true;$("otpBox").classList.remove("ok");$("otpCode").value="";$("otpCode").disabled=true;
   clearInterval(otpTimer);const b=$("otpSend");b.disabled=false;b.textContent=EN()?"Send OTP":"OTP भेजें";
   otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");}
 function otpCool(sec){let left=sec||60;const b=$("otpSend");b.disabled=true;clearInterval(otpTimer);
@@ -671,6 +691,7 @@ function otpLang(){
   if(!$("otpMsg").style.color)otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");
 }
 otpLang();if(window.PB&&PB.onChange)PB.onChange(otpLang);
+if(window.PB&&PB.onChange)PB.onChange(()=>{if(!$("pwBox").hidden)pwShow();});
 $("phone").addEventListener("input",e=>{   /* सिर्फ अंक, ज़्यादा से ज़्यादा 10 (+91 / 0 अपने-आप हटे) */
   let d=e.target.value.replace(/\D/g,"");
   if(d.length>10&&/^91/.test(d))d=d.length>=12?d.slice(2,12):d;        /* +91 लिखते समय बीच में न कटे */
@@ -699,7 +720,7 @@ $("otpCode").addEventListener("input",async()=>{
       await PBA.mobile.useTokenHash(j.token_hash,j.email);clearInterval(otpTimer);location.href="mybusiness.html";return;
     }
     regToken=j.reg_token;regPhone=p;loginTicket=j.login_ticket||"";clearInterval(otpTimer);$("otpBox").classList.add("ok");
-    otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");setErr("");
+    otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");setErr("");pwShow();
   }catch(e){
     if(e.code==="admin_owned"||e.code==="owner_missing"){otpMsg(EN()?"A shop is already added with this number. Please contact PataBook to manage it.":"इस नंबर से दुकान पहले से जुड़ी है। उसे संभालने के लिए PataBook से संपर्क करें।",true);$("otpCode").value="";return;}
     otpMsg(otpErr(e),true);$("otpCode").disabled=false;$("otpCode").value="";$("otpCode").focus();}
@@ -876,6 +897,8 @@ async function autoLogin(){
       const j=await r.json().catch(()=>null);
       if(r.ok&&j&&j.ok&&j.token_hash){
         await PBA.mobile.useTokenHash(j.token_hash,j.email);
+        const pw=$("pw1")?$("pw1").value.trim():"";   /* रजिस्ट्रेशन में बनाया पासवर्ड अब सेव */
+        if([...pw].length>=4){try{await PBA.mobile.pinSet(pw);try{localStorage.setItem("pb-has-pin","1");}catch(_){}}catch(_){}}
         const box=$("stBox");if(box){const d=document.createElement("a");d.href="mybusiness.html";d.className="btn";d.style.cssText="display:block;text-align:center;margin-top:12px;background:#137333";
           d.textContent=EN()?"✅ You are logged in — open My Shop ›":"✅ आप अपनी दुकान में login हैं — मेरी दुकान खोलें ›";box.appendChild(d);}
         return;
