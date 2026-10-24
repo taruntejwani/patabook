@@ -96,7 +96,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .mf #mPin:focus{border-color:var(--blue)}
 .pinbox{margin-top:10px;border-top:1px dashed #b9dcbc;padding-top:10px}
 .pinbox b{display:block;font-size:14px;color:#14532d}.pinbox small{display:block;color:#2e6b3a;font-size:12.5px;margin:2px 0 8px;line-height:1.4}
-.pinbox .pr{display:flex;gap:8px}.pinbox input{flex:1;min-width:0;border:2px solid #b9dcbc;border-radius:12px;padding:10px;font-size:16px;background:#fff}
+.pinbox .pr{display:flex;flex-wrap:wrap;gap:8px}.pinbox .pr button{flex:1 1 100%;padding:10px}.pinbox input{flex:1 1 40%;min-width:0;border:2px solid #b9dcbc;border-radius:12px;padding:10px;font-size:16px;background:#fff}
 .pinbox button{flex:none;background:#137333;color:#fff;font-weight:800;border-radius:12px;padding:10px 14px;font-size:14px}.pinbox button:disabled{opacity:.6}
 .pinbox .pm2{font-size:13px;font-weight:700;margin-top:6px}.pinbox .pm2:empty{display:none}
 .mf #mOtp{border:2px solid #d5dbe6;border-radius:14px;background:#fff;text-align:center;letter-spacing:8px;font-size:22px;margin-bottom:6px}
@@ -352,8 +352,8 @@ function draw(){
   $("out").textContent=en?"🚪 Log out from this phone":"🚪 इस फ़ोन से लॉगआउट करें";
   const pb=$("pinBox");pb.hidden=!PINST;
   if(PINST)pb.innerHTML=PINST.has_pin
-    ?'<b>🔐 '+(en?"Password is set":"पासवर्ड बना हुआ है")+'</b><small>'+(en?"Next time log in with mobile number + password — no OTP needed.":"अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें — OTP की ज़रूरत नहीं।")+'</small><div class="pr"><input id="pinNew" type="password" maxlength="64" autocomplete="new-password" placeholder="'+(en?"New password":"नया पासवर्ड")+'"><button type="button" id="pinSave">'+(en?"Change":"बदलें")+'</button></div><div class="pm2" id="pinMsg"></div>'
-    :'<b>🔐 '+(en?"Create your password":"अपना पासवर्ड बनाएँ")+'</b><small>'+(en?"Anything you like — numbers or words. Then log in anytime with mobile number + password, without OTP.":"जो चाहें रखें — अंक या शब्द, कुछ भी। फिर कभी भी मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP का इंतज़ार नहीं।")+'</small><div class="pr"><input id="pinNew" type="password" maxlength="64" autocomplete="new-password" placeholder="'+(en?"Password":"पासवर्ड")+'"><button type="button" id="pinSave">'+(en?"Save":"सेव करें")+'</button></div><div class="pm2" id="pinMsg"></div>';
+    ?'<b>🔐 '+(en?"Password is set":"पासवर्ड बना हुआ है")+'</b><small>'+(en?"Next time log in with mobile number + password — no OTP needed.":"अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें — OTP की ज़रूरत नहीं।")+'</small><div class="pr"><input id="pinNew" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="'+(en?"New 5-digit password":"नया 5 अंक का पासवर्ड")+'"><input id="pinNew2" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="'+(en?"Re-enter":"दोबारा डालें")+'"><button type="button" id="pinSave">'+(en?"Change":"बदलें")+'</button></div><div class="pm2" id="pinMsg"></div>'
+    :'<b>🔐 '+(en?"Create your password":"अपना पासवर्ड बनाएँ")+'</b><small>'+(en?"A 5-digit number. Then log in anytime with mobile number + password, without OTP.":"5 अंक का नंबर। फिर कभी भी मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP का इंतज़ार नहीं।")+'</small><div class="pr"><input id="pinNew" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="'+(en?"5-digit password":"5 अंक का पासवर्ड")+'"><input id="pinNew2" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="'+(en?"Re-enter":"दोबारा डालें")+'"><button type="button" id="pinSave">'+(en?"Save":"सेव करें")+'</button></div><div class="pm2" id="pinMsg"></div>';
   const dv=$("dv"),D=(DEV&&DEV.devices)||[];
   dv.hidden=!D.length;
   if(D.length)dv.innerHTML='<div style="font-weight:700;margin-bottom:2px">'+(en?"Logged in on (max 2 phones + 1 PC):":"इन पर login चालू है (ज़्यादा से ज़्यादा 2 मोबाइल + 1 PC):")+'</div>'+
@@ -463,7 +463,8 @@ $("list").addEventListener("click",e=>{   /* "Logo भरें" → उसी c
 $("who").addEventListener("click",async e=>{
   const b=e.target.closest("#pinSave");if(!b)return;
   const en=L()==="en",v=$("pinNew").value.trim(),msg=t=>{$("pinMsg").textContent=t;};
-  if([...v].length<4){msg(en?"At least 4 letters or numbers.":"कम से कम 4 अक्षर या अंक।");return;}
+  if(!/^\d{5}$/.test(v)){msg(en?"Password must be exactly 5 digits.":"पासवर्ड ठीक 5 अंक का होना चाहिए।");return;}
+  if(v!==$("pinNew2").value.trim()){msg(en?"Both passwords are not the same.":"दोनों पासवर्ड एक जैसे नहीं हैं।");return;}
   b.disabled=true;msg("…");
   try{await PBA.mobile.pinSet(v);PINST={has_pin:true};try{localStorage.setItem("pb-has-pin","1");}catch(x){}M.mode="pin";draw();
     $("pinMsg").textContent=en?"✅ Password saved. Next time: mobile number + password.":"✅ पासवर्ड सेव हो गया। अगली बार: मोबाइल नंबर + पासवर्ड।";}

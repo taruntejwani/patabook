@@ -152,8 +152,8 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <div class="pwb" id="pwBox" hidden>
           <p class="lbl" id="pwH" style="margin:0 0 4px">🔐 अपना पासवर्ड बनाएँ</p>
           <p class="hint" id="pwHint" style="margin:0 0 8px;font-size:13px">अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP की ज़रूरत नहीं।</p>
-          <input id="pw1" type="password" maxlength="64" autocomplete="new-password" placeholder="पासवर्ड (कम से कम 4 अक्षर/अंक)">
-          <input id="pw2" type="password" maxlength="64" autocomplete="new-password" placeholder="पासवर्ड दोबारा डालें" style="margin-top:8px">
+          <input id="pw1" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="5 अंक का पासवर्ड">
+          <input id="pw2" type="password" inputmode="numeric" maxlength="5" autocomplete="new-password" placeholder="पासवर्ड दोबारा डालें" style="margin-top:8px">
         </div>
         <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
         <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
@@ -596,7 +596,7 @@ function check(){
   if(key==="phone"&&OTP_URL&&(!regToken||regPhone!==ph10())){setErr(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
   if(key==="phone"&&OTP_URL){   /* OTP के बाद पासवर्ड बनाना ज़रूरी */
     const a=$("pw1").value.trim(),b=$("pw2").value.trim();
-    if([...a].length<4){setErr(EN()?"Create a password (at least 4 letters or numbers).":"पासवर्ड बनाएँ (कम से कम 4 अक्षर या अंक)।");$("pw1").focus();return false;}
+    if(!/^\d{5}$/.test(a)){setErr(EN()?"Create a 5-digit password (numbers only).":"5 अंक का पासवर्ड बनाएँ (सिर्फ़ अंक)।");$("pw1").focus();return false;}
     if(a!==b){setErr(EN()?"Both passwords are not the same. Enter them again.":"दोनों पासवर्ड एक जैसे नहीं हैं। दोबारा डालें।");$("pw2").value="";$("pw2").focus();return false;}
   }
   return true;
@@ -674,7 +674,7 @@ function pwShow(){
   const en=EN();$("pwBox").hidden=false;
   $("pwH").textContent=en?"🔐 Create your password":"🔐 अपना पासवर्ड बनाएँ";
   $("pwHint").textContent=en?"Next time log in with mobile number + password — no OTP needed.":"अगली बार मोबाइल नंबर + पासवर्ड से लॉगिन करें, OTP की ज़रूरत नहीं।";
-  $("pw1").placeholder=en?"Password (at least 4 letters/numbers)":"पासवर्ड (कम से कम 4 अक्षर/अंक)";
+  $("pw1").placeholder=en?"5-digit password":"5 अंक का पासवर्ड";
   $("pw2").placeholder=en?"Re-enter password":"पासवर्ड दोबारा डालें";
   setTimeout(()=>$("pw1").focus(),50);
 }
@@ -898,7 +898,7 @@ async function autoLogin(){
       if(r.ok&&j&&j.ok&&j.token_hash){
         await PBA.mobile.useTokenHash(j.token_hash,j.email);
         const pw=$("pw1")?$("pw1").value.trim():"";   /* रजिस्ट्रेशन में बनाया पासवर्ड अब सेव */
-        if([...pw].length>=4){try{await PBA.mobile.pinSet(pw);try{localStorage.setItem("pb-has-pin","1");}catch(_){}}catch(_){}}
+        if(/^\d{5}$/.test(pw)){try{await PBA.mobile.pinSet(pw);try{localStorage.setItem("pb-has-pin","1");}catch(_){}}catch(_){}}
         const box=$("stBox");if(box){const d=document.createElement("a");d.href="mybusiness.html";d.className="btn";d.style.cssText="display:block;text-align:center;margin-top:12px;background:#137333";
           d.textContent=EN()?"✅ You are logged in — open My Shop ›":"✅ आप अपनी दुकान में login हैं — मेरी दुकान खोलें ›";box.appendChild(d);}
         return;
