@@ -157,6 +157,8 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
         <div class="emoji">🏪</div>
         <h1 data-i="shop_h">आपकी दुकान / बिज़नेस का नाम क्या है?</h1>
         <p class="hint" data-i="shop_hint">जैसा बोर्ड पर लिखा है, वैसा लिखें।</p>
+        <label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
+        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select>
         <input id="shop" data-ip="shop_ph" placeholder="जैसे: श्री कृष्णा कार वॉश" maxlength="80">
         <div class="err"></div>
       </div>
@@ -523,7 +525,7 @@ function check(){
 
 function summary(){
   const m=mapUrl();
-  const rows=[[T("s_shop"),$("shop").value.trim()],[T("s_name"),$("owner").value.trim()],[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
+  const rows=[[T("s_shop"),$("shop").value.trim()],...($("btype")&&$("btype").value?[[EN()?"Business type":"बिज़नेस का प्रकार",$("btype").selectedOptions[0].textContent]]:[]),[T("s_name"),$("owner").value.trim()],[T("s_city"),$("city").value.trim()+($("area").value.trim()?" · "+$("area").value.trim():"")+" · "+distVal()+", "+$("state").value],[T("s_cat"),sel?sel.typ+" ("+sel.main+")":T("cat_pb")]];
   $("sum").innerHTML=rows.map(r=>"<div><span>"+r[0]+"</span><b>"+esc(r[1])+"</b></div>").join("");
 }
 
@@ -531,6 +533,19 @@ function summary(){
 let regToken="",regPhone="",otpTimer=null;
 const OTP_URL=String((window.PB_SITE&&PB_SITE.otpUrl)||"").replace(/\/$/,"");
 const EN=()=>!!(window.PB&&PB.lang&&PB.lang()==="en");
+/* बिज़नेस का प्रकार (Manufacturer / Wholesaler / Retailer …) — description में "Type:" line बनकर जाता है */
+const BTYPES=[
+ ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (Manufacturer)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Work","जॉब वर्क / कॉन्ट्रैक्ट"],["Assembler","असेंबलर"]]],
+ ["🚚 थोक / बीच के व्यापारी","🚚 Trade (bulk)",[["Importer","इम्पोर्टर"],["Exporter","एक्सपोर्टर"],["C&F / Super Stockist","C&F / सुपर स्टॉकिस्ट"],["Distributor","डिस्ट्रीब्यूटर"],["Wholesaler","होलसेलर (थोक)"],["Stockist","स्टॉकिस्ट"],["Authorised Dealer","अधिकृत डीलर"],["Trader / Commission Agent","ट्रेडर / दलाल"]]],
+ ["🏪 ग्राहक तक","🏪 To customers",[["Retailer","रिटेलर (दुकान)"],["Showroom","शोरूम"],["Franchise","फ्रैंचाइज़ी"],["Online Seller","ऑनलाइन विक्रेता"],["Hawker / Street Vendor","फेरीवाला / ठेला"]]],
+ ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (Service)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]]
+];
+function btypeFill(){
+  const sel=$("btype");if(!sel)return;const v=sel.value,en=EN();
+  sel.innerHTML='<option value="">'+(en?"Choose ▾ (optional)":"चुनें ▾ (ज़रूरी नहीं)")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
+  sel.value=v;
+  const L=$("btypeL");if(L)L.innerHTML=en?'Business type <span style="font-weight:400;color:#5f6368">(optional)</span>':'बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span>';
+}
 function ph10(){const d=phoneClean().replace(/\D/g,"");return d.length>10?d.slice(-10):d;}
 function otpMsg(t,bad){const m=$("otpMsg");m.textContent=t;m.style.color=bad?"#b42318":"";}
 function otpErr(e){const c=e&&e.code,en=EN();
@@ -675,6 +690,7 @@ async function submit(){
   }
   const desc=[
     "Owner: "+$("owner").value.trim(),
+    $("btype")&&$("btype").value?"Type: "+$("btype").value:"",
     svc?"Services: "+svc:"",
     d[1]?"Subcategory: "+d[1]:"",
     S?"Category: "+pathOf(S):"",
@@ -865,10 +881,10 @@ async function checkLogin(){
 $("whoOut").onclick=async()=>{await PBA.logout();checkLogin();};
 checkLogin();
 function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const en=(PB.lang&&PB.lang()==="en");[["spYt",en?"✅ Yes, show it to everyone (customers can Call / WhatsApp)":"✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)"],["spNt",en?"🔒 No, keep my number hidden":"🔒 नहीं, नंबर छिपा रहे"],["spNote",en?"You can change this anytime from the \u201cMy Shop\u201d page.":"बाद में \"मेरी दुकान\" पेज से कभी भी बदल सकते हैं।"]].forEach(x=>{const e=$(x[0]);if(e)e.textContent=x[1];});const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()==="en")?"🏠 I visit customers\u2019 homes to provide service (Home Service)":"🏠 मैं ग्राहक के घर जाकर सेवा देता हूं (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");$("district").placeholder=(PB.lang&&PB.lang()==="en")?"District name":"ज़िले का नाम";try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
-PB.apply();fixHint();document.title=T("addshop")+" — PataBook";
+PB.apply();fixHint();btypeFill();document.title=T("addshop")+" — PataBook";
 PB.mount($("pbLang"));
 PB.onChange(()=>{
-  PB.apply();fixHint();gateText();document.title=T("addshop")+" — PataBook";
+  PB.apply();fixHint();gateText();btypeFill();document.title=T("addshop")+" — PataBook";
   if(!sending)render();
   if(steps[i]&&steps[i].dataset.s==="svc")showCat();
   if(sheet.classList.contains("on"))drawSheet();
