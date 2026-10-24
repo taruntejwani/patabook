@@ -122,6 +122,7 @@ font(cur);
 
 function t(k,v){
   var s=D[cur]&&D[cur][k];
+  if(s==null&&cur!=="en")s=D.hi[k];   /* दूसरी भाषा में न हो तो हिन्दी — pb-xl.js उसे बदल देता है */
   if(s==null)s=D.en[k];
   if(s==null)return k;
   if(v)s=s.replace(/\{(\w+)\}/g,function(m,x){return v[x]!=null?v[x]:m;});
@@ -165,6 +166,7 @@ function set(c){
   load(c,function(){
     cur=c;try{localStorage.setItem("pb-lang",c);}catch(e){}
     setDoc();font(c);apply();appText();
+    try{document.dispatchEvent(new CustomEvent("pb-lang",{detail:c}));}catch(e){}
     if(subs.length)subs.forEach(function(f){try{f(c);}catch(e){}});
     else location.reload();
   });
