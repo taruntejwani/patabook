@@ -243,6 +243,7 @@
     paint();
   }
   async function editVacancy() {
+    if (window.PBHire && PBHire.editor) return PBHire.editor(O.slug, rpc, function () { location.reload(); });   /* sql-26: पूरी जानकारी */
     var open = false; try { var r = await fetch(SBU + "/rest/v1/rpc/pb_vacancy_status", { method: "POST", headers: { apikey: PK, Authorization: "Bearer " + PK, "Content-Type": "application/json" }, body: JSON.stringify({ p_slugs: [O.slug] }) }); var j = r.ok ? await r.json() : {}; open = !!(j && j[O.slug]); } catch (e) {}
     var s = sheet("💼 " + T("Vacancy (नौकरी खाली है)", "Vacancy available"), '<div class="pbe-row"><div class="t"><b>' + T("स्टाफ़ चाहिए?", "Need staff?") + '</b><small>' + T("ON करने पर आपके page पर “नौकरी खाली है” दिखेगा (30 दिन बाद अपने-आप बंद)", "When ON, your page shows “Vacancy available” (auto-off after 30 days)") + '</small></div><button type="button" class="pbe-sw' + (open ? " on" : "") + '" id="pbeVs" aria-label="Switch"><i></i></button></div><div class="pbe-er" id="pbeVe"></div>', function () { if (s.changed) location.reload(); });
     var sw = s.body.querySelector("#pbeVs");

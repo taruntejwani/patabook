@@ -124,6 +124,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .planbn{display:flex;align-items:center;gap:12px;margin:0 0 14px;border-radius:18px;padding:13px 14px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff}
 .planbn .ic{font-size:24px}.planbn .tx{flex:1;min-width:0}.planbn b{display:block;font-size:15px}.planbn small{display:block;opacity:.85;font-size:12.5px}
 .planbn .go{font-size:22px}
+.vjob{display:block;width:100%;margin-top:8px;border:1.5px dashed #f59e0b;background:#fffbeb;color:#92400e;border-radius:12px;padding:10px 12px;font:inherit;font-size:13.5px;font-weight:800;text-align:left;cursor:pointer}
 </style>
 <script src="pb-track.js"></script>
 </head>
@@ -233,7 +234,8 @@ function vacBlock(b,i){
   return '<div class="phone'+(on?"":" off")+'" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span>'+
     '<span class="tx"><b>'+(en?"Vacancy available":"Vacancy available (नौकरी खाली है)")+'</b><small>'+
     (on?(en?"Shows on your shop page · auto-off on "+till:"दुकान के पेज पर दिख रहा है · "+till+" को अपने आप बंद"):(en?"Turn ON if you need staff":"स्टाफ चाहिए तो ON करें"))+'</small></span>'+
-    '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div><div class="err" id="ve'+i+'"></div>';
+    '<button type="button" class="sw vac" role="switch" aria-checked="'+on+'" aria-label="Vacancy available" data-v="'+i+'"></button></div>'+
+    (on&&window.PBHire?'<button type="button" class="vjob" data-vj="'+i+'">✏️ '+(en?"Job details (what you need)":"नौकरी की जानकारी (कैसा व्यक्ति चाहिए)")+' ›</button>':'')+'<div class="err" id="ve'+i+'"></div>';
 }
 let PREQ={},EVS=null,BELL="",DEV=null,PROF=null;
 async function loadProf(){try{PROF=await rpc("pb_my_profiles");}catch(e){PROF=null;}}   /* sql-19 अभी नहीं चली तो % नहीं दिखेगा */
@@ -506,9 +508,13 @@ $("list").addEventListener("click",async e=>{
     catch(x){hs.disabled=false;$("he"+i).textContent=/individual/.test(x.message||"")?(en?"Home Service is only for shops / firms.":"Home Service सिर्फ दुकान / फ़र्म के लिए है।"):tx("e_sw");}
     return;
   }
+  const vj=e.target.closest("[data-vj]");
+  if(vj&&window.PBHire){const b=ROWS[+vj.dataset.vj];ME=await PBA.session();PBHire.editor(b.slug,rpc,async on=>{try{const j=await rpc("pb_my_vacancy_job",{p_slug:b.slug});if(j&&j.open)VAC[b.slug]=j.until;else delete VAC[b.slug];}catch(_){}draw();});return;}
   const vs=e.target.closest(".sw.vac");
   if(vs){
-    const i=+vs.dataset.v,b=ROWS[i],want=!VAC[b.slug];vs.disabled=true;$("ve"+i).textContent="";
+    const i=+vs.dataset.v,b=ROWS[i],want=!VAC[b.slug];
+    if(want&&window.PBHire){ME=await PBA.session();PBHire.editor(b.slug,rpc,async on=>{try{const j=await rpc("pb_my_vacancy_job",{p_slug:b.slug});if(j&&j.open)VAC[b.slug]=j.until;else delete VAC[b.slug];}catch(_){}draw();});return;}   /* sql-26: ON = पहले जानकारी लिखें */
+    vs.disabled=true;$("ve"+i).textContent="";
     try{ME=await PBA.session();const v=await rpc("pb_set_vacancy",{p_slug:b.slug,p_on:want});if(v&&v.open)VAC[b.slug]=v.until;else delete VAC[b.slug];draw();}
     catch(x){vs.disabled=false;$("ve"+i).textContent=tx("e_sw");}
     return;
@@ -666,6 +672,7 @@ PB.onChange(draw);
 start();
 </script>
 <script src="pb-imgcheck.js"></script>
+<script src="pb-hiring.js"></script>
 <script src="pb-watermark.js"></script>
 <script src="pb-products-owner.js"></script>
 </body>

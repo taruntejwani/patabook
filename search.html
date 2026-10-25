@@ -72,9 +72,12 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 }
 @media(max-width:480px){.nav{gap:6px}.add{padding:7px 10px;font-size:12px;max-width:34vw;overflow:hidden;text-overflow:ellipsis}.brand .col{display:none}}
 .tag.feat{background:#fff6d6;color:#8a6200;font-weight:800}/* Premium: सफ़ेद + हल्का सुनहरा + गहरा navy (सिर्फ़ Premium दुकानों पर) */.tag.prem{background:linear-gradient(135deg,#fdf7e6,#f4e4b8);color:#123568;border:1px solid #e3c983;font-weight:800;letter-spacing:.1px}.tag.prem i{font-style:normal;font-size:.85em;margin-right:3px}.goldname{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.goldname{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}.card.isprem{border-color:#ecdcb0;box-shadow:0 6px 20px rgba(18,53,104,.08),0 1px 3px rgba(181,138,42,.10)}.card.isprem h2 a{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.card.isprem h2 a{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}
+.jobc .jl{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:inherit;padding-bottom:6px}.jobc .jt{min-width:0;flex:1}.jobc h2{font-size:16.5px;margin:0}
+.jobc .jr{margin-top:4px;font-weight:800;color:#c2410c;font-size:14.5px}.jobc .jm{margin-top:2px;font-size:13px;color:#5b6475}.jobc .jm:empty{display:none}
 </style>
 <script src="pb-guard.js" defer></script>
 <script src="pb-track.js"></script>
+<script src="pb-hiring.js"></script>
 </head>
 <body>
 
@@ -166,6 +169,7 @@ async function run(push){
   if(!ts.length&&!city){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
   const n=++reqN;
   cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';
+  if(JOBQ.test(q))return runJobs(q,city,n);   /* "hiring / job / नौकरी" → नौकरी वाली दुकानें (sql-26) */
   const u=new URL(SB+"/rest/v1/businesses");
   u.searchParams.set("select","name,slug,address,description,category,is_verified,latitude,longitude");   /* phone/whatsapp nahi: sirf login ke baad business page par */
   u.searchParams.set("is_active","eq.true");
@@ -183,6 +187,31 @@ async function run(push){
     rows=await premiumFirst(rows);if(n!==reqN)return;
     render(rows,q,city);
   }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p>';}}
+}
+/* 💼 नौकरी वाली दुकानें — पास वाली पहले (location की इजाज़त पहले से हो तो) */
+const JOBQ=/(^|\s)(hiring|hire|vacancy|vacancies|job|jobs|naukri|nokri|नौकरी|नौकरियाँ|नौकरियां|भर्ती|वैकेंसी|जॉब)(\s|$)/i;
+function myPos(){return new Promise(res=>{try{if(!navigator.geolocation||!navigator.permissions)return res(null);
+  navigator.permissions.query({name:"geolocation"}).then(st=>{if(st.state!=="granted")return res(null);
+    navigator.geolocation.getCurrentPosition(p=>res({la:p.coords.latitude,ln:p.coords.longitude}),()=>res(null),{timeout:4000,maximumAge:600000});}).catch(()=>res(null));}catch(e){res(null);}});}
+function kmTo(a,b){const R=6371,r=x=>x*Math.PI/180,dl=r(b.la-a.la),dn=r(b.ln-a.ln),h=Math.sin(dl/2)**2+Math.cos(r(a.la))*Math.cos(r(b.la))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+async function runJobs(q,city,n){
+  const list=$("list"),cnt=$("count"),en=PB.lang&&PB.lang()!=="hi";
+  let rows=[];
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_vacancy_shops",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:"{}"});rows=r.ok?(await r.json()||[]):[];}catch(e){rows=[];}
+  if(n!==reqN)return;
+  if(city){const c=city.toLowerCase();rows=rows.filter(b=>String(b.address||"").toLowerCase().includes(c)||String(cityOf(b)||"").toLowerCase().includes(c));}
+  const me=await myPos();if(n!==reqN)return;
+  rows.forEach(b=>{b._km=me&&+b.latitude&&+b.longitude?kmTo(me,{la:+b.latitude,ln:+b.longitude}):null;});
+  if(me)rows.sort((a,b)=>(a._km==null?1e9:a._km)-(b._km==null?1e9:b._km));
+  cnt.textContent=rows.length?(en?rows.length+" shops are hiring":rows.length+" दुकानों में नौकरी खाली है")+(city?" · "+city:""):"";
+  if(window.PBT)PBT.once(rows.length?"search":"search0",q);
+  if(!rows.length){list.innerHTML='<div class="empty"><p>'+esc(en?"No shop is hiring right now"+(city?" in "+city:"")+".":"अभी"+(city?" "+city+" में":"")+" किसी दुकान में नौकरी खाली नहीं है।")+'</p></div>';return;}
+  list.innerHTML=rows.map(b=>{const link="business.html?slug="+encodeURIComponent(b.slug||"")+"#hiring",ct=cityOf(b);
+    return '<article class="card jobc"><a class="jl" href="'+link+'">'+(window.PBHire?PBHire.tile(52):'💼')+'<div class="jt"><h2>'+esc(b.name)+'</h2>'+
+      (b.role?'<p class="jr">💼 '+esc(b.role)+(b.count?' · '+esc(b.count)+(en?" needed":" लोग चाहिए"):'')+'</p>':'<p class="jr">💼 '+esc(en?"Hiring":"नौकरी खाली है")+'</p>')+
+      '<p class="jm">'+[b.salary?'💰 '+esc(b.salary):'',b.timing?'🕘 '+esc(b.timing):''].filter(Boolean).join(' · ')+'</p>'+
+      '<p class="addr">📍 '+esc(ct||b.address||"")+(b._km!=null?' · '+(b._km<1?Math.round(b._km*1000)+" m":b._km.toFixed(1)+" km")+(en?" away":" दूर"):'')+'</p></div></a>'+
+      '<div class="acts"><a class="call" href="'+link+'">'+esc(en?"💼 See job details":"💼 नौकरी की जानकारी देखें")+'</a></div></article>';}).join("");
 }
 /* 💎 Premium (sql-23): Premium दुकानें सबसे ऊपर — हर बार अलग क्रम (rotation), ताकि सबको बराबर मौका मिले */
 let PREMS={};

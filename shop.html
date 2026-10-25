@@ -410,7 +410,8 @@ async function loadVacFlag(){
 }
 function drawVacFlag(){
   const el=document.getElementById("vacFlag");if(!el)return;
-  if(window.PBHire)PBHire.top(!!VACF&&!(window.PBHide&&PBHide.has("vac")));
+  if(window.PBHire){el.style.display="none";
+    PBHire.top(!!VACF&&!(window.PBHide&&PBHide.has("vac")),{slug:slug,name:B&&B.name,call:phNum(),wa:waNum(),own:()=>OWN,onEdit:()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("vacancy");}});return;}
   if(!VACF){el.style.display="none";return;}
   const en=PB.lang&&PB.lang()!=="hi";el.style.display="flex";
   if(window.PBHire){el.classList.add("pbh");el.innerHTML=PBHire.tile(62)+'<div class="tx"><b>'+(en?"Vacancy available":"नौकरी खाली है")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span></div>';return;}
