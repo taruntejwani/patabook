@@ -160,7 +160,7 @@
         try {
           if (!/^image\//.test(f.type)) throw new Error("type");
           er.textContent = E ? "🔍 AI is checking the photo…" : "🔍 AI फ़ोटो जांच रहा है…";
-          var ck = window.PBImg ? await PBImg.check(f) : { ok: true };
+          keep(); var ck = window.PBImg ? await PBImg.check(f, { slug: b.slug, kind: "product", name: D.name }) : { ok: true };
           if (!ck.ok) { er.textContent = ck.msg; return; }
           er.textContent = E ? "Uploading…" : "Upload हो रहा है…";
           ME = await PBA.session();
@@ -209,7 +209,7 @@
     }
     async function upload(r, f) {
       try {
-        var ck = window.PBImg ? await PBImg.check(f) : { ok: true };
+        var ck = window.PBImg ? await PBImg.check(f, { slug: b.slug, kind: "product", name: r.name }) : { ok: true };
         if (!ck.ok) { r.err = ck.msg; r.prev = ""; r.up = false; keep(); paint(); return; }
         ME = await PBA.session();
         var blob = await resizeImage(f, 800), ext = blob.type === "image/webp" ? "webp" : "jpg";

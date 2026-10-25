@@ -16,12 +16,15 @@
     hate: ["इसमें किसी धर्म / समुदाय के ख़िलाफ़ आपत्तिजनक सामग्री है।", "it has hateful content against a religion or community."],
     qr: ["Payment / UPI QR code की फ़ोटो नहीं लगा सकते (धोखाधड़ी से बचाव)।", "payment / UPI QR code photos are not allowed (fraud safety)."],
     doc: ["ID card / बैंक card / नोटों की फ़ोटो नहीं लगा सकते (आपकी सुरक्षा के लिए)।", "ID cards, bank cards or currency notes are not allowed (for your safety)."],
-    gamble: ["इसमें जुआ / सट्टा से जुड़ी सामग्री है।", "it shows gambling or betting."]
+    gamble: ["इसमें जुआ / सट्टा से जुड़ी सामग्री है।", "it shows gambling or betting."],
+    screen: ["यह mobile / computer की screenshot लग रही है।", "it looks like a phone / computer screenshot."],
+    unrelated: ["यह फ़ोटो आपके product / दुकान से जुड़ी नहीं लग रही।", "it does not look related to your product / shop."],
+    unclear: ["फ़ोटो में चीज़ साफ़ नहीं दिख रही (धुंधली / अंधेरी)। अच्छी रोशनी में साफ़ फ़ोटो लें।", "the item is not clearly visible (blurry / dark). Take a clear photo in good light."]
   };
   function msg(cat) {
     var w = WHY[cat] || WHY.nude, E = en();
-    return E ? "❌ This photo cannot be added: " + w[1] + " Please add a clear photo of your shop or product."
-             : "❌ यह फ़ोटो नहीं लग सकती: " + w[0] + " कृपया अपनी दुकान या product की साफ़ फ़ोटो लगाएँ।";
+    var tail = cat === "unclear" ? "" : (E ? " Please add a clear photo of your shop or product." : " कृपया अपनी दुकान या product की साफ़ फ़ोटो लगाएँ।");
+    return (E ? "❌ This photo cannot be added: " + w[1] : "❌ यह फ़ोटो नहीं लग सकती: " + w[0]) + tail;
   }
   async function ready() {
     if (READY !== null) return READY;
@@ -45,13 +48,34 @@
       img.src = url;
     });
   }
-  async function check(file) {
+  /* दुकान की पहचान (category, sub-category, नाम) — AI को बताने के लिए; एक बार लाकर याद रखते हैं */
+  var SHOP = {};
+  function ln(d, k) { var m = String(d || "").match(new RegExp("^" + k + ":\\s*(.+)$", "mi")); return m ? m[1].trim() : ""; }
+  async function shopInfo(slug) {
+    if (!slug) return {};
+    if (SHOP[slug]) return SHOP[slug];
+    var row = ((typeof ROWS !== "undefined" && ROWS) || []).filter(function (x) { return x && x.slug === slug; })[0] || {};
+    var I = { shop: row.name || "", cat: row.category || "", sub: ln(row.description, "Subcategory"), svc: ln(row.description, "Services") };
+    var sb = typeof SB !== "undefined" ? SB : "", key = typeof KEY !== "undefined" ? KEY : "";
+    if (!I.cat && sb && key) {
+      try {
+        var r = await fetch(sb + "/rest/v1/businesses?select=name,category,description&slug=eq." + encodeURIComponent(slug) + "&limit=1", { headers: { apikey: key, Authorization: "Bearer " + key } });
+        var j = r.ok ? await r.json() : []; if (j && j[0]) { I.shop = I.shop || j[0].name || ""; I.cat = j[0].category || ""; I.sub = ln(j[0].description, "Subcategory"); I.svc = ln(j[0].description, "Services"); }
+      } catch (e) {}
+    }
+    try { I.unit = localStorage.getItem("pb-unit-" + slug) || ""; } catch (e) {}
+    return (SHOP[slug] = I);
+  }
+  /* PBImg.check(file, {slug, kind:"product"|"logo"|"shop", name}) */
+  async function check(file, info) {
     try {
       if (!(await ready())) return { ok: true, skipped: "off" };
+      info = info || {};
+      var I = await shopInfo(info.slug), ctxo = { kind: info.kind || "shop", item: String(info.name || "").slice(0, 80), shop: String(I.shop || "").slice(0, 80), cat: String(I.cat || "").slice(0, 60), sub: String(I.sub || "").slice(0, 60), svc: String(I.svc || "").slice(0, 120), unit: I.unit || "" };
       var data = await small(file);
       var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 15000);
       try {
-        var r = await fetch(base() + "/check-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: data }), signal: ctl.signal });
+        var r = await fetch(base() + "/check-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: data, ctx: ctxo }), signal: ctl.signal });
         var j = await r.json();
         if (j && j.ok === false) return { ok: false, cat: j.cat, msg: msg(j.cat) };
         return { ok: true };
