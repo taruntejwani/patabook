@@ -52,11 +52,12 @@
     ".pbe-on .pbe-pen{display:grid;place-items:center}" +
     ".pbe-on .pbe-t{outline:2px dashed #f5b400;outline-offset:3px;border-radius:16px}" +
     ".pbe-bar{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:#12141c;color:#fff;padding:10px 10px calc(10px + env(safe-area-inset-bottom));display:none;box-shadow:0 -6px 20px rgba(0,0,0,.25)}" +
-    ".pbe-on .pbe-bar{display:block}.pbe-on .dock{display:none!important}" +
+    ".pbe-on .pbe-bar{display:none}" +
+    ".qa>.pbe-pen{top:-18px;right:-4px;z-index:9;opacity:1;background:#ffd21f!important;border:2px solid #fff!important;padding:0!important;width:38px!important;height:38px!important;border-radius:50%!important;font-size:17px!important}" +
     ".pbe-bar .h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:0 4px 8px}.pbe-bar .h b{flex:1}.pbe-bar .h button{border:0;border-radius:999px;padding:7px 13px;font:inherit;font-weight:800;background:#1e9e57;color:#fff;cursor:pointer}" +
     ".pbe-bar .g{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.pbe-bar .g::-webkit-scrollbar{display:none}" +
     ".pbe-bar .g button{flex:none;border:1px solid #3a3f4d;background:#1f2330;color:#fff;border-radius:12px;padding:8px 11px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}" +
-    ".pbe-on{padding-bottom:120px!important}" +
+    
     ".pbe-sc{position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.55);display:flex;align-items:flex-end;justify-content:center}" +
     ".pbe-sh{position:relative;width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;background:#fff;border-radius:22px 22px 0 0;overflow:hidden}" +
     "@media(min-width:640px){.pbe-sc{align-items:center}.pbe-sh{border-radius:22px}}" +
@@ -286,7 +287,7 @@
 
   /* ---------- pencils ---------- */
   var MAP = {
-    shop: [[".hlogo", "logo"], ["#prods", "products"], ["#photos", "photos"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], ["#vacFlag", "vacancy"]],
+    shop: [[".hlogo", "logo"], ["#prods", "products"], ["#photos", "photos"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], [".qa", "numbers"], ["#vacFlag", "vacancy"]],
     biz: [[".lgw", "logo"], ["#prods", "products"], ["#galM", "photos"], ["#det", "details"], ["#contact", "numbers"], ["#vacFlag", "vacancy"]]
   };
   function pens() {
@@ -325,7 +326,7 @@
     var btn = document.createElement("button"); btn.type = "button"; btn.id = "pbeBtn"; btn.className = "pbe-btn"; btn.textContent = "✏️ " + T("Edit", "Edit");
     btn.onclick = function () { toggle(); };
     if (host && lang && lang.parentNode === host) host.insertBefore(btn, lang); else if (host) host.appendChild(btn);
-    bar();
+    /* नीचे वाली काली पट्टी हटा दी — हर हिस्से की पीली ✏️ से बदलें */
     new MutationObserver(function () { if (ON) pens(); }).observe(document.body, { childList: true, subtree: true });
     var keep = false; try { keep = sessionStorage.getItem("pbe-on-" + O.slug) === "1"; } catch (e) {}
     if (keep) toggle(true);
