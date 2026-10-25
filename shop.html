@@ -4,7 +4,7 @@
 <title>Shop — PataBook</title>
 <link rel="icon" href="pin.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b2f73">
+<meta name="theme-color" content="#fbf6ea">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script src="i18n.js"></script>
 <script src="pb-track.js"></script>
@@ -138,13 +138,43 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .shr{font:inherit;text-align:left;cursor:pointer}
 .vflag{display:flex;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px}
 .lnk[hidden]{display:none}.lnk{display:block;text-align:center;margin:6px 0;font-size:14px;font-weight:700;color:var(--blue)}
-.rep{border:0;background:none;padding:6px 10px;font-size:13px;color:#b42318;cursor:pointer}
+.rep{display:block;margin:6px auto 0;border:0;background:none;padding:6px 10px;font-size:13px;color:#b42318;cursor:pointer}
 .pw{text-align:center;color:var(--muted);font-size:12.5px;padding:8px 16px 22px;line-height:1.7}
 .pw a{color:var(--blue);font-weight:700}
 .pw .pb{display:inline-flex;align-items:center;gap:6px;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--navy);font-weight:800}
 .pw .pb img{width:16px;height:auto}
 .note{color:var(--muted);padding:60px 0;text-align:center}
 .ctoast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#12141c;color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 16px;z-index:999}
+
+/* ✨ Premium रंग: off-white + सुनहरा (Home page वाले Premium card जैसा) */
+:root{--gold1:#d4a63d;--gold2:#B58A2A;--gold3:#8E6A1C;--goldline:#ecd9a6;--cream:#fffdf7;--cream2:#fbf3df}
+body{background:linear-gradient(180deg,#fdf9ef 0%,#f8f3e6 100%) fixed}
+.top{background:rgba(255,253,247,.94);border-bottom-color:var(--goldline)}
+.ib{border-color:var(--goldline);background:var(--cream)}
+.tb img,.tb .ini{box-shadow:0 0 0 1.5px #e2b34c}
+.hero{color:#12141c;background:radial-gradient(130% 120% at 80% -10%,#fff6d8 0%,rgba(255,246,216,0) 55%),linear-gradient(160deg,#fffdf7 0%,#fbf6ea 55%,#f4e4b8 100%);border-bottom:1.5px solid #e2b34c}
+.hero .bg{opacity:.10;filter:saturate(.6) sepia(.3)}
+.hero::after{background:radial-gradient(90% 70% at 10% 110%,rgba(226,179,76,.18),transparent 60%)}
+.hname h1{color:var(--gold2)}
+@supports (-webkit-background-clip:text) or (background-clip:text){.hname h1{background:linear-gradient(180deg,var(--gold1) 0%,var(--gold2) 55%,var(--gold3) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}
+.hname .sub{color:#5b6475;opacity:1;font-weight:600}
+.chip{background:#fff;border:1px solid var(--goldline);color:#7a5a14}
+.chip.gold{box-shadow:0 2px 6px rgba(181,138,42,.3)}
+.qa{margin-top:-22px}
+.qa a,.qa button{background:var(--cream);border:1.5px solid var(--goldline);color:#123568;box-shadow:0 6px 18px rgba(181,138,42,.14)}
+.snav{background:rgba(251,246,234,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.snav a{background:var(--cream);border-color:var(--goldline);color:#7a5a14}
+.snav a.on{background:linear-gradient(135deg,#f6e3a8,#d9b257 45%,#B58A2A);color:#123568;border-color:#d9b257}
+section.blk{background:var(--cream);border:1.5px solid var(--goldline);box-shadow:0 6px 20px rgba(181,138,42,.08)}
+h2{color:var(--gold3)}
+.pcd,.num,.addr,.near a{border-color:var(--goldline)}
+.row,.rows{border-color:#f1e6c8}
+.num a{background:linear-gradient(135deg,#e7c36a,#B58A2A);color:#123568}.num a.w{background:var(--green);color:#fff}.num.dir a.d{background:#123568;color:#fff}
+.vbtn a{border-color:var(--goldline);background:var(--cream)}.vbtn a.p{background:linear-gradient(135deg,#e7c36a,#B58A2A);border-color:#d9b257;color:#123568}
+.dock{background:rgba(255,253,247,.96);border-top-color:var(--goldline)}
+.dock a{background:linear-gradient(135deg,#f0d68a,#d9b257 45%,#B58A2A);color:#123568}.dock a.w{background:#25a244;color:#fff}
+.pw .pb{background:var(--cream);border-color:var(--goldline)}
+.shr.crd{background:linear-gradient(135deg,#fdf5df,#fffdf7);border-color:var(--goldline)}.shr.crd .ic,.shr.crd .go{background:linear-gradient(135deg,#e7c36a,#B58A2A);color:#123568}
 </style>
 </head><body>
 
@@ -244,7 +274,9 @@ async function loadContact(){
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_public_contact",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})});
     if(r.ok){const j=await r.json(),c=Array.isArray(j)?j[0]:j;CT=c&&(c.phone||c.whatsapp)?{k:"ok",phone:c.phone,whatsapp:c.whatsapp}:{k:"off"};return;}
   }catch(e){}
+  /* public तरीका नहीं चला: login हो तो पुराने तरीके (pb_contact) से — बिल्कुल business.html जैसा */
   CT={k:"off"};
+  if(window.PBA){try{const s=await PBA.session();if(s){const c=await PBA.contact(slug);if(c&&(c.phone||c.whatsapp))CT={k:"ok",phone:c.phone,whatsapp:c.whatsapp};}}catch(e){}}
 }
 
 function render(){
