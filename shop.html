@@ -84,6 +84,11 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .pbd{padding:10px 10px 11px;display:flex;flex-direction:column;gap:5px;flex:1}.pbd b{font-size:14px;line-height:1.3}
 .pmr{font-size:15px;font-weight:900;color:#137333}.pmr small{font-size:11px;color:var(--muted);font-weight:600}
 .pask{margin-top:auto;border:0;border-radius:12px;padding:9px 6px;background:#25a244;color:#fff;font-weight:800;font-size:13px;cursor:pointer}
+.own2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px auto 6px;max-width:520px;text-align:left}
+.own2>*{display:flex;align-items:center;gap:10px;border:1.5px solid var(--goldline,#ecdcb0);background:#fff;border-radius:16px;padding:11px 12px;font:inherit;color:var(--navy,#123568);text-decoration:none;cursor:pointer;box-shadow:0 4px 12px rgba(181,138,42,.10);min-width:0}
+.own2 .oi{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,#fdf7e6,#f4e4b8);box-shadow:inset 0 0 0 1px #e3c983}
+.pw .own2>*{text-align:left;color:#123568}.pw .own2 a b,.pw .own2 button b{color:#123568}.pw .own2 small{color:#5b6475}
+.own2 b{display:block;font-size:13.5px;line-height:1.25}.own2 small{display:block;font-size:11.5px;color:#5b6475;margin-top:2px}
 .pask.big{width:100%;margin-top:14px;padding:13px;font-size:15px}
 .pbt{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:6px}.pbt .pask{margin-top:0;min-width:0;white-space:nowrap}
 .pshr{display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:9px 6px;font-weight:800;font-size:13px;color:var(--navy);cursor:pointer;min-width:0}
@@ -351,7 +356,8 @@ function render(){
      '<section class="blk" data-pbh="near" id="near" hidden><h2>📍 '+L("पास की दूसरी दुकानें","Other shops nearby")+'</h2><div class="near" id="nearBox"></div></section>'+
    '</div>'+
    '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
-     '<a class="lnk" id="ownBox" hidden href="mybusiness.html">✏️ '+L("आपकी दुकान — यहां से संभालें ›","Your shop — manage it here ›")+'</a>'+
+     '<div class="own2" id="ownBox" hidden><button type="button" id="ownVis"><span class="oi">👁️</span><span><b>'+L("ग्राहक को क्या दिखे","What customers see")+'</b><small>'+L("हिस्से दिखाएँ / छिपाएँ","Show / hide parts")+'</small></span></button>'+
+       '<a href="mybusiness.html"><span class="oi">🏪</span><span><b>'+L("मेरी दुकान","Your shop")+'</b><small>'+L("यहाँ से संभालें ›","Manage it here ›")+'</small></span></a></div>'+
      '<button type="button" class="rep" id="repBtn">🚩 '+L("इस दुकान की शिकायत करें","Report this listing")+'</button><br>'+
      '<a class="pb" href="index.html"><img src="pin.png" alt="">Powered by PataBook</a></div>';
   /* नीचे चिपका Call / WhatsApp */
@@ -462,7 +468,7 @@ async function loadOwner(){
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
     if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
-function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};}
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const wa=waNum(),ph=phNum(),ph2=B?line(B,"Phone2").replace(/\D/g,""):"",altWa=B?line(B,"WhatsApp").replace(/\D/g,""):"";

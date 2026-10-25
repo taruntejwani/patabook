@@ -267,7 +267,9 @@
       var val = VIS.map(function (v) { return v[0]; }).filter(function (k) { return H[k]; }).join(",");
       sv.disabled = true; er.style.color = "#1a73e8"; er.textContent = T("Save हो रहा है…", "Saving…");
       try {
-        await rpc("pb_owner_set_details", { p_slug: O.slug, p: Object.assign(allLines(), { Hide: val }) });
+        /* sql-25: सिर्फ़ Hide line बदलने वाली अलग function; वह न हो तो पुराना तरीका */
+        try { await rpc("pb_owner_set_hide", { p_slug: O.slug, p_keys: val }); }
+        catch (x1) { if (x1.status === 404 || /could not find|PGRST202/i.test(x1.message || "")) await rpc("pb_owner_set_details", { p_slug: O.slug, p: Object.assign(allLines(), { Hide: val }) }); else throw x1; }
         /* पक्का करें कि line सच में save हुई */
         var r = await fetch(SBU + "/rest/v1/businesses?select=description&slug=eq." + encodeURIComponent(O.slug) + "&limit=1", { headers: { apikey: PK, Authorization: "Bearer " + PK } });
         var j = r.ok ? await r.json() : [], d = (j && j[0] && j[0].description) || "", got = window.PBHide ? Object.keys(PBHide.parse(d)).sort().join(",") : val;
@@ -328,5 +330,5 @@
     var keep = false; try { keep = sessionStorage.getItem("pbe-on-" + O.slug) === "1"; } catch (e) {}
     if (keep) toggle(true);
   }
-  window.PBEdit = { start: start };
+  window.PBEdit = { start: start, act: function (k) { if (O && ACT[k]) ACT[k](); } };
 })();
