@@ -86,6 +86,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc .new{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;background:var(--yellow);color:#12141c;border-radius:999px;padding:1px 6px}
 .nsc b{font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
 .nsc .ad{font-size:11.5px;line-height:1.3;opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Premium दुकान: गहरा navy + सुनहरी किनारी + सुनहरा नाम */
+.nsc.pm{background:linear-gradient(150deg,#0d2547 0%,#123568 60%,#1c4a8a 100%);border:1.5px solid #C49A36;box-shadow:0 8px 20px rgba(18,53,104,.35)}
+.nsc.pm:after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#e6cf93,#C49A36,#B58A2A,#e6cf93)}
+.nsc.pm b{color:#f0d68e}.nsc.pm .ic.lg{box-shadow:0 0 0 2px #0d2547,0 0 0 3.5px #C49A36}
+.nsc .pp{position:absolute;top:8px;right:8px;font-size:8.5px;font-weight:900;letter-spacing:.5px;border-radius:999px;padding:1px 7px;color:#123568;background:linear-gradient(135deg,#f6e3a8,#d9b257 45%,#B58A2A);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 
 /* brand */
 main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex;flex-direction:column;align-items:center}
@@ -319,6 +324,17 @@ function applyLang(){
   let L=[];
   /* दुकान ने logo लगाया हो तो logo, नहीं तो category वाला icon */
   const LOGO={},LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  /* Premium दुकानें (Admin से चालू) — पट्टी में navy + सुनहरा card */
+  const PREMS={};
+  async function loadPrem(){
+    if(!(window.PB_SITE&&PB_SITE.premium))return;
+    const sl=L.map(b=>b.slug).filter(Boolean).slice(0,300);if(!sl.length)return;
+    try{const r=await fetch(SBU+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:H,body:JSON.stringify({p_slugs:sl})});if(!r.ok)return;const j=await r.json();if(j&&typeof j==="object")Object.keys(j).forEach(k=>{if(j[k])PREMS[k]=true;});}catch(e){return;}
+    document.querySelectorAll("#nst .ic[data-s]").forEach(el=>{
+      const a=el.closest(".nsc");if(!a||!PREMS[el.dataset.s]||a.classList.contains("pm"))return;
+      a.classList.add("pm");const n=a.querySelector(".new");if(n){n.className="pp";n.textContent="💎 PREMIUM";}
+    });
+  }
   async function loadLogos(){
     const sl=L.map(b=>b.slug).filter(x=>x&&!(x in LOGO));if(!sl.length)return;
     try{
@@ -334,7 +350,7 @@ function applyLang(){
     });
   }
   function cardHTML(b){
-    return '<a class="nsc" href="business.html?slug='+encodeURIComponent(b.slug||"")+'"><span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span><span class="ic'+(LOGO[b.slug]?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LOGO[b.slug]?'<img src="'+esc(LOGO[b.slug])+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b><span class="ad">📍 '+esc(b.address||b.city||"")+'</span></a>';
+    return '<a class="nsc'+(PREMS[b.slug]?' pm':'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?'<span class="pp">💎 PREMIUM</span>':'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LOGO[b.slug]?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LOGO[b.slug]?'<img src="'+esc(LOGO[b.slug])+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b><span class="ad">📍 '+esc(b.address||b.city||"")+'</span></a>';
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
@@ -411,7 +427,7 @@ function applyLang(){
     const city=currentCity();setCityTitle(city);L=ALL_ROWS.filter(b=>inCity(b,city)).slice(0,25);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
     if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">No shops found for this city yet.</div>';return;}
-    draw();wire();start();loadLogos();
+    draw();wire();start();loadLogos();loadPrem();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);
   document.addEventListener("pb-city-auto",refreshCityShops);   /* शहर अपने-आप मिला (GPS / internet) */
