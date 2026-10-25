@@ -2,15 +2,9 @@
    English + Hindi yahin hai. Baaki 22 bhashayen lang/<code>.js me hain aur sirf chunne par load hoti hain.
    Browser / Google translate band hai (translate="no"). */
 (function(){
+/* सिर्फ़ दो भाषाएँ: English और हिन्दी (बाकी lang/*.js अब इस्तेमाल नहीं होतीं) */
 var LANGS=[
- ["en","English","English"],["hi","हिन्दी","Hindi"],
- ["sd-deva","सिन्धी (देवनागरी)","Sindhi (Devanagari)"],
- ["gu","ગુજરાતી","Gujarati"],["mr","मराठी","Marathi"],["bn","বাংলা","Bengali"],["ta","தமிழ்","Tamil"],
- ["te","తెలుగు","Telugu"],["kn","ಕನ್ನಡ","Kannada"],["ml","മലയാളം","Malayalam"],["or","ଓଡ଼ିଆ","Odia"],
- ["as","অসমীয়া","Assamese"],["mai","मैथिली","Maithili"],["pa","ਪੰਜਾਬੀ","Punjabi"],["sa","संस्कृतम्","Sanskrit"],
- ["ur","اردو","Urdu"],["sd","سنڌي (عربي)","Sindhi (Arabic)"],["ks","کٲشُر","Kashmiri"],["ne","नेपाली","Nepali"],
- ["kok","कोंकणी","Konkani"],["doi","डोगरी","Dogri"],["brx","बड़ो","Bodo"],["sat","ᱥᱟᱱᱛᱟᱲᱤ","Santali"],
- ["mni","ꯃꯩꯇꯩꯂꯣꯟ","Manipuri (Meitei)"]
+ ["en","English","English"],["hi","हिन्दी","Hindi"]
 ];
 var RTL={ur:1,sd:1,ks:1};
 var FONTS={sat:"Noto+Sans+Ol+Chiki",mni:"Noto+Sans+Meetei+Mayek"};
@@ -100,7 +94,7 @@ e_cat:"कृपया अपने बिज़नेस की category चु
 
 function known(c){for(var k=0;k<LANGS.length;k++)if(LANGS[k][0]===c)return true;return false;}
 var cur=null;try{cur=localStorage.getItem("pb-lang");}catch(e){}
-if(!known(cur))cur="en";
+if(!known(cur)){if(cur){cur="hi";try{localStorage.setItem("pb-lang","hi");}catch(e){}}else cur="en";}   /* पहले कोई और भाषा चुनी थी → हिन्दी */
 
 var html=document.documentElement;
 html.setAttribute("translate","no");
@@ -120,6 +114,58 @@ function font(c){
 window.PB_L=function(code,dict){D[code]=dict;};
 /* pehli baar: language file ko parser-blocking load karo taaki page seedha usi bhasha me khule */
 if(!D[cur]){document.write('<script src="'+file(cur)+'"><\/script>');}
+
+/* ---- पेज पर सीधे लिखी लाइनें भी चुनी हुई भाषा में: English page पूरा English, हिन्दी page पूरा हिन्दी (lang/xl-<code>.js) ----
+   सिर्फ़ dictionary वाली लाइनें बदलती हैं; दुकान का नाम/पता जैसी बाकी चीज़ें जैसी हैं वैसी रहती हैं। */
+var XL={"en":1,"hi":1},XE=null,XT=[];
+function xlEsc(x){return x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+window.PB_XL=function(code,d){
+  if(code!==cur||!d||!d.m)return;
+  XE={};XT=[];
+  Object.keys(d.m).forEach(function(k){
+    if(!/\{[a-z]\}/.test(k)){XE[k]=d.m[k];return;}
+    var names=[],rx="^"+xlEsc(k).replace(/\\\{([a-z])\\\}/g,function(_,n){names.push(n);return n==="n"?"([\\d.,]+)":"(.+?)";})+"$";
+    XT.push({r:new RegExp(rx),n:names,o:d.m[k]});
+  });
+  xlStart();
+};
+function xlHas(s){return Object.prototype.hasOwnProperty.call(XE,s);}
+function xlCore(s){
+  if(xlHas(s))return XE[s];
+  for(var i=0;i<XT.length;i++){var m=s.match(XT[i].r);if(!m)continue;var o=XT[i].o;
+    XT[i].n.forEach(function(n,j){var v=m[j+1];if(n==="x"&&xlHas(v))v=XE[v];o=o.replace("{"+n+"}",v);});
+    return o;}
+  return null;
+}
+function xlStr(s){
+  if(!s||!/[A-Za-z\u0900-\u097F]/.test(s))return null;
+  var w=s.match(/^(\s*)([\s\S]*?)(\s*)$/),core=w[2];if(!core)return null;
+  var r=xlCore(core);
+  if(r==null){var p=core.match(/^([^A-Za-z0-9\u0900-\u097F]+)([\s\S]+)$/);if(p){var q=xlCore(p[2]);if(q!=null)r=p[1]+q;}}
+  if(r==null){var t=core.match(/^([\s\S]+?)(\s*›)$/);if(t){var q2=xlCore(t[1]);if(q2!=null)r=q2+t[2];}}
+  if(r==null&&core.indexOf(" · ")>0){var ch=false,parts=core.split(" · ").map(function(x){var y=xlCore(x);if(y!=null){ch=true;return y;}return x;});if(ch)r=parts.join(" · ");}
+  return r==null?null:w[1]+r+w[3];
+}
+var XSKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,SELECT:1,CODE:1,NOSCRIPT:1};
+function xlAttr(e){["placeholder","aria-label","title"].forEach(function(a){var v=e.getAttribute&&e.getAttribute(a);if(v){var t=xlStr(v);if(t!=null&&t!==v)e.setAttribute(a,t);}});}
+function xlNode(n){
+  if(n.nodeType===3){var p=n.parentElement;if(!p||XSKIP[p.tagName]||p.closest("[data-noxl]"))return;var v=xlStr(n.nodeValue);if(v!=null&&v!==n.nodeValue)n.nodeValue=v;return;}
+  if(n.nodeType!==1||(n.closest&&n.closest("[data-noxl]")))return;
+  xlAttr(n);if(XSKIP[n.tagName])return;
+  var w=document.createTreeWalker(n,5,null),x;
+  while((x=w.nextNode())){if(x.nodeType===3){var pp=x.parentElement;if(pp&&!XSKIP[pp.tagName]&&!pp.closest("[data-noxl]")){var v2=xlStr(x.nodeValue);if(v2!=null&&v2!==x.nodeValue)x.nodeValue=v2;}}else xlAttr(x);}
+}
+var xlOn=false;
+function xlStart(){
+  if(xlOn||!XE)return;
+  if(!document.body){document.addEventListener("DOMContentLoaded",xlStart);return;}
+  xlOn=true;xlNode(document.body);
+  new MutationObserver(function(ms){ms.forEach(function(m){
+    if(m.type==="characterData"||m.type==="attributes")xlNode(m.target);
+    else m.addedNodes.forEach(function(a){xlNode(a);});
+  });}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","aria-label","title"]});
+}
+if(XL[cur])document.write('<script src="'+BASE+'lang/xl-'+cur+'.js?v=1"><\/script>');
 font(cur);
 
 function t(k,v){
@@ -147,7 +193,8 @@ function load(c,cb){
 function set(c){
   if(!known(c))return;
   load(c,function(){
-    cur=c;try{localStorage.setItem("pb-lang",c);}catch(e){}
+    var prev=cur;cur=c;try{localStorage.setItem("pb-lang",c);}catch(e){}
+    if(prev!==c&&(XL[prev]||XL[c])){location.reload();return;}
     setDoc();font(c);apply();appText();
     if(subs.length)subs.forEach(function(f){try{f(c);}catch(e){}});
     else location.reload();
@@ -184,6 +231,7 @@ var regionLang=null,regionKnown=false;
 function setRegion(code){var l=STATE_LANG[code];regionLang=(l&&known(l))?l:null;regionKnown=!!code;}
 (function(){
   var q=null;try{q=new URLSearchParams(location.search).get("pbregion");}catch(e){}
+  return;   /* अब सिर्फ़ English / हिन्दी — राज्य से भाषा तय करने की ज़रूरत नहीं, बाहर कोई request नहीं */
   if(q){setRegion(codeOf(q));return;}               /* test: ?pbregion=PB */
   var c=null;try{c=JSON.parse(localStorage.getItem("pb-region")||"null");}catch(e){}
   if(c&&c.t&&Date.now()-c.t<7*864e5){setRegion(c.c);return;}
@@ -203,30 +251,15 @@ function btnHTML(code){
   var L=null;for(var k=0;k<LANGS.length;k++)if(LANGS[k][0]===code)L=LANGS[k];
   return '<button type="button" data-l="'+L[0]+'"'+(L[0]===cur?' class="on"':'')+' lang="'+(TAG[L[0]]||L[0])+'"><span>'+L[1]+'</span><small>'+L[2]+'</small></button>';
 }
-/* list: हमेशा English, हिन्दी, सिन्धी (देवनागरी) + राज्य की भाषा (हिन्दी वाले राज्य में सिर्फ़ 3)।
-   राज्य पता न हो तो ગુજરાતી। बाकी भाषाएँ "🌐 ＋" के अंदर। चुनी हुई भाषा कभी अपने-आप नहीं बदलती। */
-var showAll=false;
-function mainLangs(){
-  var m=["en","hi","sd-deva"];
-  var r=regionKnown?regionLang:"gu";
-  if(r&&m.indexOf(r)<0)m.push(r);
-  if(m.indexOf(cur)<0)m.push(cur);
-  return m;
-}
-function listHTML(){
-  var m=mainLangs();
-  var rest=LANGS.map(function(L){return L[0];}).filter(function(c){return m.indexOf(c)<0;});
-  return m.map(btnHTML).join("")+"<hr>"+(showAll?rest.map(btnHTML).join(""):'<button type="button" class="pbl-more" data-more="1" aria-label="More languages"><span>🌐 ＋'+rest.length+'</span><small>›</small></button>');
-}
+function listHTML(){return LANGS.map(function(L){return btnHTML(L[0]);}).join("");}
 function mount(el){
   if(!el)return;
   el.className=(el.className?el.className+" ":"")+"pbl";
   var list=listHTML();
   el.innerHTML='<button type="button" class="pbl-b" aria-haspopup="listbox" aria-label="Language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><span id="pblBtnTxt">'+nameOf(cur)+'</span><i>▾</i></button><div class="pbl-p" role="listbox">'+list+'</div>';
   var btn=el.querySelector(".pbl-b");
-  btn.onclick=function(e){e.stopPropagation();if(!el.classList.contains("on")){showAll=false;el.querySelector(".pbl-p").innerHTML=listHTML();}el.classList.toggle("on");};
+  btn.onclick=function(e){e.stopPropagation();if(!el.classList.contains("on"))el.querySelector(".pbl-p").innerHTML=listHTML();el.classList.toggle("on");};
   el.querySelector(".pbl-p").onclick=function(e){
-    if(e.target.closest("[data-more]")){e.stopPropagation();showAll=true;el.querySelector(".pbl-p").innerHTML=listHTML();return;}
     var b=e.target.closest("[data-l]");if(!b)return;e.stopPropagation();
     el.classList.remove("on");
     el.querySelectorAll("[data-l]").forEach(function(x){x.classList.toggle("on",x===b);});
