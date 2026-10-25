@@ -10,6 +10,7 @@
 <script src="pb-track.js"></script>
 <script src="site-config.js"></script>
 <script src="pb-guard.js" defer></script>
+<script src="pb-card.js" defer></script>
 <style>
 /* दुकानदार की अपनी mini website (shop.html?slug=...) — business.html के "View all" से खुलती है */
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--gold:#B58A2A;--green:#1e9e57;--bg:#f6f8fc}
@@ -123,6 +124,19 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .dock a.w{background:#25a244}
 .dock[hidden]{display:none}
 
+.shr{display:flex;align-items:center;gap:12px;width:100%;background:linear-gradient(135deg,#e3f7ea,#f4fbf6);border:1px solid #c9ead4;border-radius:18px;padding:14px;margin:0 0 10px;text-decoration:none;color:var(--ink)}
+.shr .ic{flex:none;width:44px;height:44px;border-radius:14px;background:#1e9e57;color:#fff;display:grid;place-items:center;font-size:22px}
+.shr b{display:block;font-size:15px}.shr small{color:var(--muted);font-size:12.5px}.shr .go{margin-left:auto;background:#1e9e57;color:#fff;font-weight:800;border-radius:999px;padding:9px 14px;font-size:13.5px;white-space:nowrap}
+.shr.crd{background:linear-gradient(135deg,#e8f0fe,#f4f8ff);border-color:#c6d8fb;font:inherit;text-align:left;cursor:pointer}.shr.crd .ic{background:var(--blue)}.shr.crd .go{background:var(--blue)}
+.near{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.near::-webkit-scrollbar{display:none}
+.near a{flex:0 0 150px;border:1px solid var(--line);border-radius:16px;padding:11px;background:#fff;text-decoration:none;color:var(--ink)}
+.near .i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:#eef3fd;overflow:hidden}.near .i img{width:100%;height:100%;object-fit:cover}
+.near b{display:block;font-size:13.5px;margin-top:8px;line-height:1.25}.near small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.near em{display:inline-block;font-style:normal;margin-top:6px;background:#e8f0fe;color:var(--blue);font-weight:800;font-size:11.5px;border-radius:999px;padding:2px 8px}
+.shr{font:inherit;text-align:left;cursor:pointer}
+.vflag{display:flex;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px}
+.lnk{display:block;text-align:center;margin:6px 0;font-size:14px;font-weight:700;color:var(--blue)}
+.rep{border:0;background:none;padding:6px 10px;font-size:13px;color:#b42318;cursor:pointer}
 .pw{text-align:center;color:var(--muted);font-size:12.5px;padding:8px 16px 22px;line-height:1.7}
 .pw a{color:var(--blue);font-weight:700}
 .pw .pb{display:inline-flex;align-items:center;gap:6px;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--navy);font-weight:800}
@@ -209,9 +223,9 @@ async function load(){
     B=rows[0];
     document.title=B.name+" — "+(B.category||"Shop")+" | PataBook";
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}
-    document.getElementById("backA").href=listingUrl();
     render();
     await Promise.all([loadPrem(),loadContact()]);
+    loadNear();loadVacFlag();
     render();
   }catch(e){app.innerHTML='<p class="note">'+L("इंटरनेट की दिक्कत — दोबारा कोशिश करें।","Connection problem — please try again.")+'</p>';}
 }
@@ -280,8 +294,14 @@ function render(){
      (addr?'<section class="blk" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
        staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'<a href="'+esc(gmapsUrl(b))+'" target="_blank" rel="noopener">🗺️ Google Maps</a></div></section>':'')+
      '<section class="blk" id="contact"><h2>📞 '+L("संपर्क करें","Contact")+'</h2>'+contactHTML()+'</section>'+
+     '<div class="vflag" id="vacFlag" style="display:none"></div>'+
+     '<a class="shr" id="waShare" href="'+esc(waLink(b,addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+L("दोस्त को पता और रास्ता भेजें","Send address & directions to a friend")+'</b><small>'+L("पता और map पर रास्ते का link, WhatsApp पर","Address + map route link on WhatsApp")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></a>'+
+     '<button type="button" class="shr crd" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>'+
+     '<section class="blk" id="near" hidden><h2>📍 '+L("पास की दूसरी दुकानें","Other shops nearby")+'</h2><div class="near" id="nearBox"></div></section>'+
    '</div>'+
-   '<div class="pw">'+L("यह जानकारी दुकानदार ने दी है।","Information provided by the shop owner.")+' <a href="'+esc(listingUrl())+'">'+L("PataBook पर listing देखें ›","View PataBook listing ›")+'</a><br>'+
+   '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
+     '<a class="lnk" href="mybusiness.html">'+L("यह आपकी दुकान है? यहां से संभालें ›","Is this your shop? Manage it ›")+'</a>'+
+     '<button type="button" class="rep" id="repBtn">🚩 '+L("इस दुकान की शिकायत करें","Report this listing")+'</button><br>'+
      '<a class="pb" href="index.html"><img src="pin.png" alt="">Powered by PataBook</a></div>';
   /* नीचे चिपका Call / WhatsApp */
   const dock=document.getElementById("dock");
@@ -293,7 +313,86 @@ function render(){
   const pr=document.getElementById("prods");if(pr)pr.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(P[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)prodAsk(P[+a.dataset.pa]);};
   const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
   document.getElementById("shareQa").onclick=share;
+  document.getElementById("repBtn").onclick=openReport;
+  document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
+  drawVacFlag();drawNear();
   placeMap();spy();
+}
+function waLink(b,addr){const u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),d=pbDir(b);return "https://wa.me/?text="+encodeURIComponent("🏪 "+b.name+"\n📍 "+addr+(d?"\n\n🧭 "+L("रास्ता:","Directions:")+"\nhttps://patabook.in/"+d:"")+"\n\nℹ️ "+L("पूरी जानकारी, Call और WhatsApp:","Full details, Call & WhatsApp:")+"\n"+u);}
+function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
+const NICO=[["food|restaurant|cafe|sweet|bakery","🍽️"],["auto|car|bike|tyre|garage","🚗"],["health|doctor|hospital|medical|dental|clinic","🏥"],["school|college|tuition|coaching|education","🎓"],["salon|beauty|spa","💇"],["hotel|lodge|guest","🏨"],["electric|plumb|carpenter|painter|home|repair|cleaning","🛠️"],["mobile|electronic","📱"],["cloth|fashion","👗"],["grocery|kirana","🛒"],["manufactur|wholesale|supplier","🏭"]];
+function nico(c){c=String(c||"").toLowerCase();for(const x of NICO)if(new RegExp(x[0]).test(c))return x[1];return "🏪";}
+let NEAR=null;
+async function loadNear(){
+  if(!B)return;const la=+B.latitude,ln=+B.longitude,city=line(B,"City")||String(B.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";
+  const sel="slug,name,address,category,latitude,longitude,logo_url",base=SB+"/rest/v1/businesses?is_active=eq.true&deleted_at=is.null&slug=neq."+encodeURIComponent(B.slug);
+  let u;
+  if(la&&ln)u=base+"&latitude=gte."+(la-0.2)+"&latitude=lte."+(la+0.2)+"&longitude=gte."+(ln-0.2)+"&longitude=lte."+(ln+0.2)+"&limit=60";
+  else if(city)u=base+"&address=ilike."+encodeURIComponent("*"+city.replace(/[*,()%\\:."']/g," ").trim()+"*")+"&limit=12";
+  else return;
+  try{let r=await fetch(u+"&select="+sel,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    if(!r.ok)r=await fetch(u+"&select=slug,name,address,category,latitude,longitude",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    if(!r.ok)return;let a=await r.json();
+    if(la&&ln){a.forEach(x=>{x._km=(+x.latitude&&+x.longitude)?hav(la,ln,+x.latitude,+x.longitude):null;});a=a.filter(x=>x._km!=null).sort((p,q)=>p._km-q._km);}
+    NEAR=a.slice(0,8);drawNear();}catch(e){}
+}
+function drawNear(){const box=document.getElementById("nearBox"),sec=document.getElementById("near");if(!box||!sec)return;
+  if(!NEAR||!NEAR.length){sec.hidden=true;return;}sec.hidden=false;
+  const LG=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  box.innerHTML=NEAR.map(x=>'<a href="business.html?slug='+encodeURIComponent(x.slug)+'"><span class="i">'+(LG.test(x.logo_url||"")?'<img src="'+esc(x.logo_url)+'" alt="" loading="lazy">':nico(x.category))+'</span><b>'+esc(x.name)+'</b><small>'+esc(String(x.address||"").split(",")[0])+'</small>'+(x._km!=null?'<em>'+kmTxt(x._km)+'</em>':'')+'</a>').join("");}
+let VACF=null;
+async function loadVacFlag(){
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_vacancy_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:[slug]})});
+    if(!r.ok)return;const j=await r.json();VACF=j&&j[slug]?j[slug]:null;}catch(e){return;}
+  drawVacFlag();
+}
+function drawVacFlag(){
+  const el=document.getElementById("vacFlag");if(!el)return;
+  if(!VACF){el.style.display="none";return;}
+  const en=PB.lang&&PB.lang()==="en";el.style.display="flex";
+  el.innerHTML='<b>💼 '+(en?"Vacancy available":"नौकरी खाली है (Vacancy)")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span>';
+}
+function openReport(){
+  const en=PB.lang&&PB.lang()==="en",L=(h,e)=>en?e:h;
+  const R=[["wrong_info",L("गलत जानकारी (नंबर / पता / नाम)","Wrong information (number / address / name)")],
+           ["closed",L("दुकान बंद हो गई / मौजूद नहीं","Shop closed / does not exist")],
+           ["fake",L("नकली या धोखाधड़ी","Fake or fraud")],
+           ["offensive",L("गलत / आपत्तिजनक फोटो या शब्द","Offensive photo or text")],
+           ["other",L("कुछ और","Something else")]];
+  const old=document.getElementById("repSheet");if(old)old.remove();
+  const w=document.createElement("div");w.id="repSheet";
+  w.setAttribute("style","position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center");
+  w.innerHTML='<form style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px 20px;box-sizing:border-box;max-height:90vh;overflow:auto">'+
+    '<h2 style="margin:0 0 4px;font-size:18px;color:#0b2f73">🚩 '+esc(L("शिकायत करें","Report this listing"))+'</h2>'+
+    '<p style="margin:0 0 10px;font-size:13px;color:#5b6475">'+esc(B&&B.name||"")+'</p>'+
+    R.map((r,i)=>'<label style="display:flex;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid #eef1f6;font-size:15px;cursor:pointer"><input type="radio" name="rr" value="'+r[0]+'"'+(i?'':' required')+'>'+esc(r[1])+'</label>').join("")+
+    '<textarea id="repNote" maxlength="500" rows="3" placeholder="'+esc(L("कुछ और बताना हो तो लिखें (ज़रूरी नहीं)","Add details (optional)"))+'" style="width:100%;box-sizing:border-box;margin-top:8px;border:1px solid #d0d7e2;border-radius:10px;padding:10px;font:inherit;font-size:14px"></textarea>'+
+    '<p id="repMsg" style="min-height:18px;margin:8px 0;font-size:13.5px"></p>'+
+    '<div style="display:flex;gap:10px"><button type="button" id="repX" style="flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer">'+esc(L("बंद करें","Cancel"))+'</button>'+
+    '<button type="submit" id="repGo" style="flex:1;border:0;background:#d92d20;color:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer">'+esc(L("शिकायत भेजें","Send report"))+'</button></div></form>';
+  document.body.appendChild(w);
+  const close=()=>w.remove();
+  w.addEventListener("click",e=>{if(e.target===w)close();});
+  w.querySelector("#repX").onclick=close;
+  w.querySelector("form").onsubmit=async e=>{
+    e.preventDefault();
+    const sel=w.querySelector('input[name="rr"]:checked'),msg=w.querySelector("#repMsg"),go=w.querySelector("#repGo");
+    if(!sel){msg.style.color="#b42318";msg.textContent=L("कारण चुनें","Choose a reason");return;}
+    go.disabled=true;msg.style.color="#5b6475";msg.textContent="…";
+    try{
+      const r=await fetch(SB+"/rest/v1/rpc/pb_report_add",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({p_slug:slug,p_reason:sel.value,p_note:w.querySelector("#repNote").value||null})});
+      if(r.ok){msg.style.color="#137333";msg.textContent="✅ "+L("शिकायत मिल गई। हमारी टीम जाँच करेगी, धन्यवाद।","Thanks — our team will review this listing.");go.style.display="none";w.querySelector("#repX").textContent=L("ठीक है","OK");return;}
+      let m="";try{const j=await r.json();m=(j&&j.message)||"";}catch(_){}
+      if(/too many/i.test(m)){msg.style.color="#b42318";msg.textContent=L("आज बहुत शिकायतें भेजी जा चुकी हैं, कल कोशिश करें।","Too many reports today, please try tomorrow.");go.disabled=false;return;}
+      throw new Error(m||r.status);
+    }catch(err){
+      msg.style.color="#b42318";
+      msg.innerHTML=esc(L("अभी नहीं भेज पाए। ईमेल करें: ","Could not send. Please email: "))+'<a href="mailto:patabook.in@gmail.com?subject='+encodeURIComponent("Report: "+(B&&B.name||slug))+'">patabook.in@gmail.com</a>';
+      go.disabled=false;
+    }
+  };
 }
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
@@ -329,6 +428,7 @@ function spy(){if(IO)IO.disconnect();if(!("IntersectionObserver" in window))retu
     const on=links.find(a=>a.classList.contains("on"));if(on){const bx=on.parentElement;bx.scrollTo({left:on.offsetLeft-bx.clientWidth/2+on.clientWidth/2,behavior:"smooth"});}}});},{rootMargin:"-130px 0px -60% 0px"});
   document.querySelectorAll("section.blk").forEach(s=>IO.observe(s));}
 document.getElementById("shareTop").onclick=share;
+document.getElementById("backA").onclick=e=>{try{if(document.referrer&&new URL(document.referrer).origin===location.origin&&history.length>1){e.preventDefault();history.back();}}catch(_){}};
 if(window.PB){try{PB.apply&&PB.apply();PB.mount&&PB.mount(document.getElementById("pbLang"));PB.onChange&&PB.onChange(()=>render());}catch(e){}}
 load();
 </script></body></html>

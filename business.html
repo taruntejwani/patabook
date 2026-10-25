@@ -141,6 +141,11 @@ let B=null,contactState={k:"loading"};
 async function load(){
   const app=document.getElementById("app");
   if(!slug){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_noslug"))+'</p></div>';return;}
+  /* 💎 Premium दुकान: सीधे उसका अपना web page (shop.html)। पुराना page देखना हो तो &listing=1 */
+  if(!/[?&]listing=1\b/.test(location.search)&&window.PB_SITE&&PB_SITE.premium){
+    try{const pr=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:[slug]})});
+      if(pr.ok){const pj=await pr.json();if(pj&&pj[slug]){location.replace("shop.html?slug="+encodeURIComponent(slug)+location.hash);return;}}}catch(_){}
+  }
   const u=new URL(SB+"/rest/v1/businesses");
   const COLS="name,slug,address,description,category,website,is_verified,rating,review_count,latitude,longitude";
   u.searchParams.set("select",COLS+",business_code,home_service");
