@@ -91,6 +91,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc.pm b{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.nsc.pm b{background:linear-gradient(180deg,#d4a63d,#B58A2A 55%,#8E6A1C);-webkit-background-clip:text;background-clip:text;color:transparent}}
 .nsc.pm .ad{color:#5b6475;opacity:1}.nsc.pm .ic{background:#fdf5e1}.nsc.pm .ic.lg{background:#fff;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #e2b34c}
 .nsc .ppi{position:absolute;top:8px;right:6px;height:17px;width:auto;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}.nsc .pcr{position:absolute;left:33px;top:3px;width:20px;height:20px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+/* 💎 Premium card = 2 cards जितना चौड़ा: बड़ा logo बाएँ, नाम-पता दाएँ */.nsc.pm{width:calc((min(560px,100vw) - 32px - 20px) / 3 * 2 + 10px);display:grid;grid-template-columns:72px minmax(0,1fr);grid-template-rows:auto auto 1fr;column-gap:11px;row-gap:3px;align-content:center;padding:12px}.nsc.pm .ic{width:72px;height:72px;border-radius:18px;grid-row:1/4;align-self:start;margin-top:14px;font-size:36px}.nsc.pm b{grid-column:2;font-size:14.5px;margin-top:22px}.nsc.pm .ad{grid-column:2;font-size:12px}.nsc.pm .ppi{height:21px;top:9px;right:9px}.nsc.pm .pcr{left:68px;top:10px;width:26px;height:26px}
 
 /* brand */
 main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex;flex-direction:column;align-items:center}
@@ -334,6 +335,7 @@ function applyLang(){
       const a=el.closest(".nsc");if(!a||!PREMS[el.dataset.s]||a.classList.contains("pm"))return;
       a.classList.add("pm");const n=a.querySelector(".new");if(n)n.outerHTML='<img class="ppi" src="pb-gold-premium.webp" alt="Gold Premium" width="64" height="17"><img class="pcr" src="pb-crown.webp" alt="" width="20" height="20">';
     });
+    requestAnimationFrame(measure);   /* Premium card चौड़ा हुआ: पट्टी की लंबाई फिर से नापें */
   }
   async function loadLogos(){
     const sl=L.map(b=>b.slug).filter(x=>x&&!(x in LOGO));if(!sl.length)return;
