@@ -35,7 +35,16 @@
     ".pr-tg input{width:22px;height:22px;accent-color:#137333;flex:none}" +
     ".pr-sv{width:100%;margin-top:14px;border:0;border-radius:14px;padding:14px;font:inherit;font-size:15.5px;font-weight:800;background:#1a73e8;color:#fff;cursor:pointer}.pr-sv:disabled{opacity:.6}" +
     ".pr-dl{width:100%;margin-top:8px;border:0;border-radius:14px;padding:12px;font:inherit;font-weight:800;background:#fdecea;color:#c5221f;cursor:pointer}" +
-    ".pr-er{color:#c5221f;font-size:13px;font-weight:700;margin-top:8px;min-height:1px}";
+    ".pr-er{color:#c5221f;font-size:13px;font-weight:700;margin-top:8px;min-height:1px}" +
+    ".pr-mul{width:100%;display:flex;align-items:center;gap:10px;margin-top:8px;border:2px dashed #e2b34c;background:#fffaf0;border-radius:14px;padding:10px 12px;font:inherit;text-align:left;cursor:pointer}" +
+    ".pr-mul i{font-style:normal;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(135deg,#f6e3a8,#d9b257 45%,#B58A2A);flex:none}" +
+    ".pr-mul b{display:block;font-size:14.5px;color:#7a5a14}.pr-mul small{display:block;font-size:12px;color:#5b6475}" +
+    ".mp-r{border:1.5px solid #e4eaf5;border-radius:16px;padding:10px;margin-top:10px;background:#fbfcfe}.mp-r.bad{border-color:#e5484d;background:#fff5f5}.mp-r.ok{border-color:#9ad7ae;background:#f2fbf5}" +
+    ".mp-h{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:#123568;margin-bottom:6px}.mp-h button{border:0;background:#fdecea;border-radius:10px;width:32px;height:30px;cursor:pointer}" +
+    ".mp-g{display:flex;gap:10px}.mp-ph{width:84px;height:84px;flex:none;border-radius:12px;background:#0d0d10;color:#9aa3b5;display:grid;place-items:center;font-size:24px;overflow:hidden;cursor:pointer;position:relative;text-align:center}.mp-ph img{width:100%;height:100%;object-fit:contain}.mp-ph small{position:absolute;bottom:4px;left:0;right:0;font-size:10.5px;color:#fff;font-weight:700}" +
+    ".mp-f{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}.mp-f .pr-in{padding:9px 10px;font-size:14.5px}.mp-two{display:flex;gap:6px}.mp-two .pr-in{min-width:0}" +
+    ".mp-sz{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-top:6px}.mp-sz::-webkit-scrollbar{display:none}.mp-sz button{flex:none;border:1.5px solid #e4eaf5;background:#fff;border-radius:999px;padding:5px 9px;font:inherit;font-weight:700;font-size:12px;cursor:pointer}.mp-sz button.on{background:#123568;border-color:#123568;color:#fff}" +
+    ".mp-e{color:#c5221f;font-size:12px;font-weight:700;margin-top:5px}.mp-add{width:100%;margin-top:10px;border:1.5px dashed #9fc0f5;background:#f4f8ff;border-radius:14px;padding:12px;font:inherit;font-weight:800;color:#123568;cursor:pointer}";
   document.head.appendChild(css);
 
   function en() { return L() === "en"; }
@@ -52,6 +61,7 @@
     var E = en();
     return '<button type="button" class="pr-add" data-padd="' + i + '"' + (list.length >= 20 ? " disabled" : "") + '><i>＋</i><span><b>' + (E ? "Add a product" : "नया Product जोड़ें") + '</b><small>' +
       (E ? "Photo, name, size, price · " + list.length + " / 20" : "फ़ोटो, नाम, size, कीमत · " + list.length + " / 20") + '</small></span></button>' +
+      (list.length < 20 ? '<button type="button" class="pr-mul" data-pmul="' + i + '"><i>📋</i><span><b>' + (E ? "Add many products (Multiple)" : "एक साथ कई Products (Multiple)") + '</b><small>' + (E ? "Photo, name, size, price — add one after another, save all" : "फ़ोटो, नाम, size, कीमत — एक के बाद एक जोड़ें, सब एक साथ Save") + '</small></span></button>' : '') +
       '<div class="pr-l">' + list.map(function (p) {
         var st = !p.show ? '<span class="pr-st hid">🙈 ' + (E ? "Hidden" : "छिपा है") + '</span>' : p.stock ? '<span class="pr-st on">✅ ' + (E ? "Visible" : "दिख रहा है") + '</span>' : '<span class="pr-st out">⛔ ' + (E ? "Out of stock" : "Stock खत्म") + '</span>';
         return '<div class="pr-i' + (p.show ? "" : " hid") + '"><div class="th">' + (IMG_RX.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : "") + '</div>' +
@@ -133,6 +143,75 @@
     document.body.appendChild(sc); paint();
   }
 
+  /* 📋 एक साथ कई Products: हर box में फ़ोटो + नाम + size + कीमत, "एक और" से box जुड़ता जाए, आख़िर में सब Save */
+  function multi(b) {
+    var E = en(), left = 20 - (PRD[b.slug] || []).length;
+    var R = [{ name: "", size: "", mrp: "", img: "", up: false, err: "", ok: false }];
+    var sc = document.createElement("div"); sc.className = "pr-sc";
+    function keep() {
+      sc.querySelectorAll(".mp-r").forEach(function (el) {
+        var k = +el.dataset.k, r = R[k]; if (!r) return;
+        r.name = el.querySelector(".mpN").value; r.mrp = el.querySelector(".mpM").value.replace(/\D/g, "");
+        var cs = el.querySelector(".mpS").value.trim(); r.size = cs;
+      });
+    }
+    function row(r, k) {
+      return '<div class="mp-r' + (r.ok ? " ok" : r.err ? " bad" : "") + '" data-k="' + k + '"><div class="mp-h"><span>' + (r.ok ? "✅ " : "") + "Product " + (k + 1) + '</span>' +
+        (R.length > 1 && !r.ok ? '<button type="button" data-rm="' + k + '" aria-label="Remove">🗑️</button>' : "") + '</div>' +
+        '<div class="mp-g"><label class="mp-ph">' + (r.img ? '<img src="' + esc(r.img) + '" alt="">' : r.up ? "⏳" : "📷") + '<small>' + (r.img ? (E ? "Change" : "बदलें") : (E ? "Photo" : "फ़ोटो")) + '</small>' +
+        '<input type="file" accept="image/*" hidden data-f="' + k + '"></label>' +
+        '<div class="mp-f"><input class="pr-in mpN" maxlength="80" value="' + esc(r.name) + '" placeholder="' + (E ? "Product name" : "Product का नाम") + '">' +
+        '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="Size"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (E ? "Price ₹" : "कीमत ₹") + '"></div></div></div>' +
+        '<div class="mp-sz">' + SIZES.map(function (z) { return '<button type="button" data-sz="' + k + '" class="' + (r.size === z ? "on" : "") + '">' + z + '</button>'; }).join("") + '</div>' +
+        (r.err ? '<div class="mp-e">' + esc(r.err) + '</div>' : "") + '</div>';
+    }
+    function paint() {
+      var todo = R.filter(function (r) { return !r.ok; }).length;
+      sc.innerHTML = '<div class="pr-sh"><div class="pr-hd"><b>📋 ' + (E ? "Add many products" : "एक साथ कई Products") + '</b><button type="button" id="mpX" aria-label="Close">✕</button></div>' +
+        '<small style="color:#5b6475">' + (E ? "Fill photo, name, size and price. Price empty = “Ask price”. You can add " + left + " more." : "फ़ोटो, नाम, size और कीमत भरें। कीमत खाली = “कीमत पूछें”। अभी " + left + " और जोड़ सकते हैं।") + '</small>' +
+        R.map(row).join("") +
+        (R.length < left ? '<button type="button" class="mp-add" id="mpAdd">➕ ' + (E ? "Add one more product" : "एक और Product जोड़ें") + '</button>' : "") +
+        '<div class="pr-er" id="mpE"></div><button type="button" class="pr-sv" id="mpSave"' + (todo ? "" : " disabled") + '>✔ ' + (E ? "Save all (" + todo + ")" : "सब Save करें (" + todo + ")") + '</button></div>';
+    }
+    sc.addEventListener("click", async function (e) {
+      if (e.target === sc || e.target.closest("#mpX")) { if (R.some(function (r) { return !r.ok && (r.name || r.img); }) && !confirm(E ? "Close without saving?" : "बिना Save किए बंद करें?")) return; sc.remove(); refresh(b.slug); return; }
+      var t;
+      if (e.target.closest("#mpAdd")) { keep(); R.push({ name: "", size: "", mrp: "", img: "", up: false, err: "", ok: false }); paint(); var all = sc.querySelectorAll(".mp-r"); all[all.length - 1].scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+      if ((t = e.target.closest("[data-rm]"))) { keep(); R.splice(+t.dataset.rm, 1); paint(); return; }
+      if ((t = e.target.closest("[data-sz]"))) { keep(); var r = R[+t.dataset.sz]; r.size = r.size === t.textContent ? "" : t.textContent; paint(); return; }
+      if (e.target.closest("#mpSave")) {
+        keep(); var btn = sc.querySelector("#mpSave"), er = sc.querySelector("#mpE"), bad = 0;
+        R.forEach(function (r) { if (r.ok) return; r.err = String(r.name || "").trim().length < 2 ? (E ? "Write the name." : "नाम लिखें।") : !r.img ? (r.up ? (E ? "Photo still uploading…" : "फ़ोटो अभी upload हो रही है…") : (E ? "Add a photo." : "फ़ोटो लगाएँ।")) : ""; if (r.err) bad++; });
+        if (bad) { paint(); sc.querySelector("#mpE").textContent = E ? "Fix the red boxes." : "लाल box ठीक करें।"; return; }
+        btn.disabled = true; er.textContent = E ? "Saving…" : "Save हो रहा है…";
+        try { ME = await PBA.session(); } catch (x) {}
+        for (var k = 0; k < R.length; k++) {
+          var r = R[k]; if (r.ok) continue;
+          try { await rpc("pb_product_save", { p_slug: b.slug, p: { id: null, name: r.name.trim(), size: r.size || "", mrp: r.mrp || "", feats: [], img: r.img, show: true, stock: true } }); r.ok = true; r.err = ""; left--; }
+          catch (x) { var m = String(x.message || ""); r.err = /too many/.test(m) ? (E ? "Max 20 products." : "20 से ज़्यादा नहीं।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : (E ? "Could not save. Try again." : "Save नहीं हुआ, फिर कोशिश करें।"); }
+        }
+        if (R.every(function (r) { return r.ok; })) { sc.remove(); refresh(b.slug); return; }
+        paint(); sc.querySelector("#mpE").textContent = E ? "Some were not saved — see red boxes." : "कुछ Save नहीं हुए — लाल box देखें।";
+      }
+    });
+    sc.addEventListener("change", async function (e) {
+      var inp = e.target.closest("[data-f]"); if (!inp) return;
+      var f = inp.files && inp.files[0], k = +inp.dataset.f, r = R[k]; if (!f || !r) return;
+      keep(); r.up = true; r.err = ""; paint();
+      try {
+        if (!/^image\//.test(f.type)) throw new Error("type");
+        ME = await PBA.session();
+        var blob = await resizeImage(f, 900), ext = blob.type === "image/webp" ? "webp" : "jpg";
+        var path = encodeURIComponent(b.slug) + "/prod-" + Date.now() + "-" + k + "." + ext;
+        var up = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
+        if (!up.ok) throw new Error("upload");
+        r.img = SB + "/storage/v1/object/public/shop-logos/" + path;
+      } catch (x) { r.err = E ? "Could not upload the photo. Try again." : "फ़ोटो upload नहीं हुई। फिर कोशिश करें।"; }
+      r.up = false; keep(); paint();
+    });
+    document.body.appendChild(sc); paint();
+  }
+
   async function del(b, p) {
     if (!confirm((en() ? "Delete “" : "“") + p.name + (en() ? "”? To only hide it, use 👁️." : "” हटाएँ? सिर्फ़ छिपाना हो तो 👁️ दबाएँ।"))) return;
     try { ME = await PBA.session(); await rpc("pb_product_remove", { p_slug: b.slug, p_id: p.id }); } catch (x) {}
@@ -144,9 +223,10 @@
   }
 
   document.getElementById("list").addEventListener("click", function (e) {
-    var t = e.target.closest("[data-padd],[data-ped],[data-psw],[data-pbe],[data-pdl]"); if (!t) return;
-    var i = +(t.dataset.padd || t.dataset.ped || t.dataset.psw || t.dataset.pbe || t.dataset.pdl), b = ROWS && ROWS[i]; if (!b) return;
+    var t = e.target.closest("[data-padd],[data-pmul],[data-ped],[data-psw],[data-pbe],[data-pdl]"); if (!t) return;
+    var i = +(t.dataset.padd || t.dataset.pmul || t.dataset.ped || t.dataset.psw || t.dataset.pbe || t.dataset.pdl), b = ROWS && ROWS[i]; if (!b) return;
     if (t.hasAttribute("data-padd")) return sheet(b, null);
+    if (t.hasAttribute("data-pmul")) return multi(b);
     var p = (PRD[b.slug] || []).filter(function (x) { return x.id === +t.dataset.id; })[0]; if (!p) return;
     if (t.hasAttribute("data-ped")) return sheet(b, p);
     if (t.hasAttribute("data-psw")) return flag(b, p, "show", !p.show);
