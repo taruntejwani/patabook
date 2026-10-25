@@ -1,6 +1,6 @@
 /* PataBook — फ़ोटो की AI जांच (upload से पहले)
    PBImg.check(file) → {ok:true} या {ok:false, cat, msg}
-   - फ़ोटो को छोटा (448px JPEG) करके "PataBook AI" Worker के /check-image पर भेजता है
+   - फ़ोटो को छोटा (384px JPEG — Gemini में 258 tokens) करके "PataBook AI" Worker के /check-image पर भेजता है
    - Worker पुराना हो, AI न चले, इंटरनेट धीमा हो → फ़ोटो रुकती नहीं (ok:true), ताकि दुकानदार परेशान न हो
    - असली फ़ोटो server पर नहीं रुकती; सिर्फ़ जांच के लिए छोटी copy जाती है */
 (function () {
@@ -39,7 +39,7 @@
     return new Promise(function (res, rej) {
       var img = new Image(), url = URL.createObjectURL(file);
       img.onload = function () {
-        var k = Math.min(1, 448 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+        var k = Math.min(1, 384 / Math.max(img.width, img.height)), c = document.createElement("canvas");
         c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
         var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(url); res({ data: c.toDataURL("image/jpeg", 0.72), w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
