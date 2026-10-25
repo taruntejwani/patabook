@@ -162,6 +162,7 @@ var css=".pbl{position:relative;display:inline-block;font-family:inherit}"+
 ".pbl.on .pbl-p{display:block}"+
 ".pbl-p button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;border:0;background:none;padding:9px 10px;border-radius:9px;font:inherit;font-size:15px;color:#12141c;cursor:pointer;text-align:start}"+
 ".pbl-p button:hover{background:#f1f6ff}.pbl-p button.on{background:#e8f1ff;color:#0b2f73;font-weight:700}"+
+".pbl-p .pbl-more{color:#1a73e8;font-weight:700}"+
 ".pbl-p small{font-size:11px;color:#7a8396;font-weight:400}.pbl-p hr{border:0;border-top:1px solid #eef1f6;margin:4px 6px}"+
 "html[lang=sat] body{font-family:'Noto Sans Ol Chiki',system-ui,sans-serif}html[lang=mni] body{font-family:'Noto Sans Meetei Mayek',system-ui,sans-serif}";
 var st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
@@ -179,8 +180,8 @@ function codeOf(code,name){
   for(var k in STATE_NAME)if(name.indexOf(k)>=0)return STATE_NAME[k];
   return code;
 }
-var regionLang=null;
-function setRegion(code){var l=STATE_LANG[code];regionLang=(l&&known(l))?l:null;}
+var regionLang=null,regionKnown=false;
+function setRegion(code){var l=STATE_LANG[code];regionLang=(l&&known(l))?l:null;regionKnown=!!code;}
 (function(){
   var q=null;try{q=new URLSearchParams(location.search).get("pbregion");}catch(e){}
   if(q){setRegion(codeOf(q));return;}               /* test: ?pbregion=PB */
@@ -191,10 +192,10 @@ function setRegion(code){var l=STATE_LANG[code];regionLang=(l&&known(l))?l:null;
   function save(code){try{localStorage.setItem("pb-region",JSON.stringify({c:code,t:Date.now()}));}catch(e){}setRegion(code);}
   function get(u){return fetch(u,{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json();});}
   get("https://get.geojs.io/v1/ip/geo.json").then(function(d){
-    save(d.country_code&&d.country_code!=="IN"?"":codeOf("",d.region));
+    save(d.country_code&&d.country_code!=="IN"?"":(codeOf("",d.region)||String(d.region||"").trim().toUpperCase().slice(0,12)));
   }).catch(function(){
     return get("https://ipapi.co/json/").then(function(d){
-      save(d.country_code&&d.country_code!=="IN"?"":codeOf(d.region_code,d.region));
+      save(d.country_code&&d.country_code!=="IN"?"":(codeOf(d.region_code,d.region)||String(d.region||"").trim().toUpperCase().slice(0,12)));
     });
   }).catch(function(){});
 })();
@@ -202,14 +203,20 @@ function btnHTML(code){
   var L=null;for(var k=0;k<LANGS.length;k++)if(LANGS[k][0]===code)L=LANGS[k];
   return '<button type="button" data-l="'+L[0]+'"'+(L[0]===cur?' class="on"':'')+' lang="'+(TAG[L[0]]||L[0])+'"><span>'+L[1]+'</span><small>'+L[2]+'</small></button>';
 }
+/* list: हमेशा English, हिन्दी, सिन्धी (देवनागरी) + राज्य की भाषा (हिन्दी वाले राज्य में सिर्फ़ 3)।
+   राज्य पता न हो तो ગુજરાતી। बाकी भाषाएँ "🌐 ＋" के अंदर। चुनी हुई भाषा कभी अपने-आप नहीं बदलती। */
+var showAll=false;
+function mainLangs(){
+  var m=["en","hi","sd-deva"];
+  var r=regionKnown?regionLang:"gu";
+  if(r&&m.indexOf(r)<0)m.push(r);
+  if(m.indexOf(cur)<0)m.push(cur);
+  return m;
+}
 function listHTML(){
-  /* English, Hindi | rajya ki bhasha, Sindhi (Devanagari) | baaki sab */
-  var top=["en","hi"],mid=[];
-  if(regionLang&&top.indexOf(regionLang)<0&&regionLang!=="sd-deva")mid.push(regionLang);
-  mid.push("sd-deva");
-  var used=top.concat(mid);
-  var rest=LANGS.map(function(L){return L[0];}).filter(function(c){return used.indexOf(c)<0;});
-  return top.map(btnHTML).join("")+"<hr>"+mid.map(btnHTML).join("")+"<hr>"+rest.map(btnHTML).join("");
+  var m=mainLangs();
+  var rest=LANGS.map(function(L){return L[0];}).filter(function(c){return m.indexOf(c)<0;});
+  return m.map(btnHTML).join("")+"<hr>"+(showAll?rest.map(btnHTML).join(""):'<button type="button" class="pbl-more" data-more="1" aria-label="More languages"><span>🌐 ＋'+rest.length+'</span><small>›</small></button>');
 }
 function mount(el){
   if(!el)return;
@@ -217,8 +224,9 @@ function mount(el){
   var list=listHTML();
   el.innerHTML='<button type="button" class="pbl-b" aria-haspopup="listbox" aria-label="Language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><span id="pblBtnTxt">'+nameOf(cur)+'</span><i>▾</i></button><div class="pbl-p" role="listbox">'+list+'</div>';
   var btn=el.querySelector(".pbl-b");
-  btn.onclick=function(e){e.stopPropagation();if(!el.classList.contains("on"))el.querySelector(".pbl-p").innerHTML=listHTML();el.classList.toggle("on");};
+  btn.onclick=function(e){e.stopPropagation();if(!el.classList.contains("on")){showAll=false;el.querySelector(".pbl-p").innerHTML=listHTML();}el.classList.toggle("on");};
   el.querySelector(".pbl-p").onclick=function(e){
+    if(e.target.closest("[data-more]")){e.stopPropagation();showAll=true;el.querySelector(".pbl-p").innerHTML=listHTML();return;}
     var b=e.target.closest("[data-l]");if(!b)return;e.stopPropagation();
     el.classList.remove("on");
     el.querySelectorAll("[data-l]").forEach(function(x){x.classList.toggle("on",x===b);});
@@ -291,5 +299,7 @@ function appText(){
   });
 })();
 
-window.PB={t:t,apply:apply,set:set,mount:mount,onChange:function(f){subs.push(f);},lang:function(){return cur;},langs:LANGS};
+function regionFromState(name){var c=codeOf("",name);if(!name)return;if(!STATE_LANG[c])c=String(name).trim().toUpperCase().slice(0,12)||"";
+  try{localStorage.setItem("pb-region",JSON.stringify({c:c,t:Date.now()}));}catch(e){}setRegion(c);}
+window.PB={regionFromState:regionFromState,t:t,apply:apply,set:set,mount:mount,onChange:function(f){subs.push(f);},lang:function(){return cur;},langs:LANGS};
 })();
