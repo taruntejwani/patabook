@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Products — PataBook</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="pin.png">
+<script src="i18n.js"></script>
+<script src="pb-auth.js"></script>
+<script src="site-config.js"></script>
+<script src="pb-imgcheck.js"></script>
+<style>
+/* ✏️ दुकान के page के अंदर (iframe) खुलने वाला Products manager — My Shop वाला ही code (pb-products-owner.js) */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#12141c;background:#fff;padding:10px 14px 40px;-webkit-font-smoothing:antialiased}
+.msg{color:#5b6475;font-size:14.5px;line-height:1.6;padding:30px 6px;text-align:center}
+.msg a{color:#1a73e8;font-weight:700}
+</style>
+</head><body>
+<div id="list"><p class="msg">…</p></div>
+<script>
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+const slug=new URLSearchParams(location.search).get("slug")||"";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const L=()=>{try{return localStorage.getItem("pb-lang")==="en"?"en":"hi";}catch(e){return "hi";}};
+const $=id=>document.getElementById(id);
+let ME=null,ROWS=[];
+async function rpc(fn,args){
+  ME=ME||await PBA.session();
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));e.status=r.status;throw e;}
+  return j;
+}
+function resizeImage(file,maxSide){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const k=Math.min(1,maxSide/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    /* 📉 हर फ़ोटो छोटी करो (WebP, ~150 KB तक) ताकि ज़्यादा फ़ोटो रखी जा सकें और page जल्दी खुले */
+    const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<150000)return res(bl);if(q>0.4)return tryQ(Math.round((q-0.1)*100)/100);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.78);};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
+function draw(){const b=ROWS[0];if(!b)return;$("list").innerHTML=window.prodBody?prodBody(b,0):"";try{parent.postMessage({pbEdit:"products"},location.origin);}catch(_){}}
+</script>
+<script src="pb-products-owner.js"></script>
+<script>
+(async function(){
+  const en=L()==="en",box=$("list");
+  try{
+    ME=await PBA.session();
+    if(!ME){box.innerHTML='<p class="msg">'+(en?'Please log in from <a href="mybusiness.html" target="_top">My Shop</a> first.':'पहले <a href="mybusiness.html" target="_top">मेरी दुकान</a> से login करें।')+'</p>';return;}
+    const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
+    if(!b){box.innerHTML='<p class="msg">'+(en?"This is not your shop.":"यह आपकी दुकान नहीं है।")+'</p>';return;}
+    ROWS=[b];await prodLoad(slug);draw();
+  }catch(e){box.innerHTML='<p class="msg">'+(/premium/i.test(e.message)?(en?"Products are for Premium shops.":"Products सिर्फ़ Premium दुकानों के लिए हैं।"):(en?"Could not load. Try again.":"खुल नहीं सका, फिर कोशिश करें।"))+'</p>';}
+})();
+</script>
+</body></html>

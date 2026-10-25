@@ -12,6 +12,8 @@
 <script src="pb-auth.js"></script>
 <script src="pb-guard.js" defer></script>
 <script src="pb-card.js" defer></script>
+<script src="pb-imgcheck.js"></script>
+<script src="pb-owner-edit.js"></script>
 <style>
 /* दुकानदार की अपनी mini website (shop.html?slug=...) — business.html के "View all" से खुलती है */
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--gold:#B58A2A;--green:#1e9e57;--bg:#f6f8fc}
@@ -247,9 +249,11 @@ const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
 const listingUrl=()=>"business.html?slug="+encodeURIComponent(slug);
 
 /* WhatsApp नंबर: वही नियम जो business.html में — public contact (मालिक का स्विच ON) से */
-function waNum(){if(CT.k!=="ok")return "";const alt=B?line(B,"WhatsApp").replace(/\D/g,""):"";
+/* 📞 मालिक का (login) नंबर छिपा हो तो दुकान / staff वाले नंबर (Phone2, WhatsApp) ही दिखते हैं */
+function staffNo(k){const v=B?line(B,k).replace(/\D/g,""):"";return /^\d{10}$/.test(v)?v:"";}
+function waNum(){if(CT.k!=="ok"){const a=staffNo("WhatsApp")||staffNo("Phone2");return a?"91"+a:"";}const alt=B?line(B,"WhatsApp").replace(/\D/g,""):"";
   const w=(/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"")).replace(/\D/g,"");return w.length===10?"91"+w:w;}
-const phNum=()=>CT.k==="ok"?String(CT.phone||"").replace(/[^\d+]/g,""):"";
+const phNum=()=>CT.k==="ok"?String(CT.phone||"").replace(/[^\d+]/g,""):staffNo("Phone2");
 
 async function load(){
   const app=document.getElementById("app");
@@ -362,7 +366,7 @@ function render(){
   drawVacFlag();drawNear();
   placeMap();spy();
 }
-function waLink(b,addr){const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return ["",""];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name,"📍 "+(en?"Address: ":"पता: ")+addr];if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
+function waLink(b,addr){const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name,"📍 "+(en?"Address: ":"पता: ")+addr];if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
 const NICO=[["food|restaurant|cafe|sweet|bakery","🍽️"],["auto|car|bike|tyre|garage","🚗"],["health|doctor|hospital|medical|dental|clinic","🏥"],["school|college|tuition|coaching|education","🎓"],["salon|beauty|spa","💇"],["hotel|lodge|guest","🏨"],["electric|plumb|carpenter|painter|home|repair|cleaning","🛠️"],["mobile|electronic","📱"],["cloth|fashion","👗"],["grocery|kirana","🛒"],["manufactur|wholesale|supplier","🏭"]];
@@ -450,16 +454,17 @@ let OWN=false;
 async function loadOwner(){
   try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
-    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);}catch(e){OWN=false;}
+    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
 function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;}
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const wa=waNum(),ph=phNum(),ph2=B?line(B,"Phone2").replace(/\D/g,""):"",altWa=B?line(B,"WhatsApp").replace(/\D/g,""):"";
   if(!ph&&!wa)return '<div class="num" style="filter:grayscale(1);opacity:.6"><div class="l"><small>📱 Mobile</small><b>'+L("नंबर बंद है","Not shared")+'</b></div></div><p class="cnote">'+L("दुकानदार ने अपना नंबर सार्वजनिक नहीं रखा है।","The shop owner has kept the number private.")+'</p>';
-  return (ph?'<div class="num"><div class="l"><small>📱 Mobile</small><b>'+esc(CT.phone)+'</b></div><a href="tel:'+esc(ph)+'">Call</a></div>':'')+
-    (/^\d{10}$/.test(ph2)?'<div class="num"><div class="l"><small>📞 '+L("दूसरा नंबर","Another number")+'</small><b>'+esc(ph2)+'</b></div><a href="tel:'+esc(ph2)+'">Call</a></div>':'')+
-    (wa?'<div class="num"><div class="l"><small>💬 WhatsApp</small><b>'+esc(/^\d{10}$/.test(altWa)?altWa:(CT.whatsapp||CT.phone))+'</b></div><a class="w" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a></div>':'');
+  const own=CT.k==="ok"?String(CT.phone||""):"";
+  return (own?'<div class="num"><div class="l"><small>📱 Mobile</small><b>'+esc(own)+'</b></div><a href="tel:'+esc(ph)+'">Call</a></div>':'')+
+    (/^\d{10}$/.test(ph2)?'<div class="num"><div class="l"><small>📞 '+(own?L("दूसरा नंबर","Another number"):L("दुकान का नंबर","Shop number"))+'</small><b>'+esc(ph2)+'</b></div><a href="tel:'+esc(ph2)+'">Call</a></div>':'')+
+    (wa?'<div class="num"><div class="l"><small>💬 WhatsApp</small><b>'+esc(wa.replace(/^91(?=\d{10}$)/,""))+'</b></div><a class="w" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a></div>':'');
 }
 function prodAsk(p){const wa=waNum();
   if(wa){const t=L("नमस्ते, PataBook पर देखा: ","Hello, saw on PataBook: ")+p.name+(p.size?" ("+p.size+")":"")+L(" — मिलेगा? कीमत बताइए।"," — is it available? Please share the price.");

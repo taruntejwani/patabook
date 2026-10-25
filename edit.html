@@ -8,6 +8,8 @@
 <link rel="icon" href="pin.png">
 <meta name="theme-color" content="#1a73e8">
 <script src="site-config.js"></script>
+<script>/* page के अंदर (✏️ Edit) खुलने पर ऊपर की पट्टी छिपाओ */window.PB_EMBED=/[?&]embed=1\b/.test(location.search);if(window.PB_EMBED)document.documentElement.classList.add("embed");</script>
+<style>.embed .top{display:none}.embed body{padding-top:6px}.embed #done .btn{display:none}</style>
 <script src="pb-auth.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -84,12 +86,13 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   </div>
 
   <div class="card">
-   <h2 data-en="📞 Other numbers">📞 दूसरे नंबर</h2>
+   <h2 data-en="📞 Numbers for customers (shop / staff)">📞 ग्राहकों के लिए नंबर (दुकान / staff)</h2>
+   <p class="hint" data-en="Login always stays on your own (main) number. If you hide your main number, customers see only these numbers.">Login हमेशा आपके अपने (मुख्य) नंबर से ही होगा। मुख्य नंबर छिपाएँगे तो ग्राहकों को सिर्फ़ ये नंबर दिखेंगे।</p>
    <label class="lbl" for="wa" data-en="💬 WhatsApp number (if different from main number)">💬 WhatsApp नंबर (अगर मुख्य नंबर से अलग है)</label>
    <input id="wa" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
-   <label class="lbl" for="ph2" data-en="☎️ Another number">☎️ दूसरा नंबर</label>
+   <label class="lbl" for="ph2" data-en="☎️ Call number for customers (shop / staff)">☎️ ग्राहकों के लिए Call नंबर (दुकान / staff)</label>
    <input id="ph2" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
-   <p class="note" id="hidNote" hidden data-en="Your number is hidden (switch OFF in My Shop), so these numbers will not show either.">आपका नंबर छिपा है ("मेरी दुकान" में स्विच OFF), इसलिए ये नंबर भी नहीं दिखेंगे।</p>
+   <p class="note" id="hidNote" hidden data-en="Your main number is hidden, so customers will see only the numbers above. (If both are empty, nobody can call you.)">आपका मुख्य नंबर छिपा है, इसलिए ग्राहकों को सिर्फ़ ऊपर वाले नंबर दिखेंगे। (दोनों खाली हों तो कोई call नहीं कर पाएगा।)</p>
    <p class="hint" data-en="To change your main number, use “📱 Change number” in My Shop.">मुख्य नंबर बदलने के लिए "मेरी दुकान" में "📱 नंबर बदलें" दबाएँ।</p>
   </div>
 
@@ -210,7 +213,7 @@ $("main").addEventListener("submit",async e=>{
   if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
   const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
   const b=$("saveBtn");b.disabled=true;
-  try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);}
+  try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
   catch(x){$("err").textContent=errText(x.message);}
   b.disabled=false;
 });
@@ -234,6 +237,7 @@ $("main").addEventListener("submit",async e=>{
     if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
     $("hidNote").hidden=!(d&&d.show_phone===false);
     only("main");
+    try{const fo=new URLSearchParams(location.search).get("focus");const fe=fo&&$(fo==="phone"?"wa":fo);if(fe)setTimeout(()=>{fe.scrollIntoView({block:"center"});},150);}catch(_){}
   }catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){only("needLogin");return;}
     only(/function|schema cache|not found/i.test(e.message)||e.status===404?"setup":"notOwner");
