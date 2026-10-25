@@ -103,6 +103,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 .cty input.cd{width:78px;text-transform:uppercase;font-weight:800;letter-spacing:.08em}
 .nav .brand{flex:none}.nav .who{flex:1;text-align:right}#pbLang{flex:none}
 @media(max-width:520px){#pbLang #pblBtnTxt{display:none}.nav{gap:6px}.brand b{font-size:17px}}
+.adm-ov{position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.5);display:flex;align-items:flex-end;justify-content:center}
+.adm-sh{background:#fff;width:100%;max-width:620px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px;box-sizing:border-box}
+@media(min-width:640px){.adm-ov{align-items:center}.adm-sh{border-radius:18px}}
+.adm-sh h3{margin:0 0 10px;color:#0b2f73;font-size:17px}.adm-sh .old{background:#fdecea;color:#7a1c14;border-radius:10px;padding:8px 10px;font-size:13.5px;margin:4px 0 8px}
+.adm-sh textarea{width:100%;box-sizing:border-box;border:1.5px solid #9ad7ae;background:#f2fbf5;border-radius:10px;padding:9px 10px;font:inherit;font-size:14.5px;min-height:62px}
+.adm-sh .bt{display:flex;gap:8px;margin-top:12px}.adm-sh .bt button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer}
+.adm-sh .go{background:#137333;color:#fff}.adm-sh .no{background:#eef1f6;color:#12141c}.adm-row{border:1px solid #e4eaf5;border-radius:12px;padding:10px;margin-top:10px}.adm-row label{display:flex;gap:8px;font-weight:700;font-size:14px}
+.adm-row small{display:block;color:#5b6475;font-size:12px;margin:4px 0}
 </style>
 <script src="i18n.js"></script>
 <script src="pb-admin-en.js"></script>
@@ -198,6 +206,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       <input class="q" id="q" type="search" placeholder="नाम, पता, मोबाइल या Business ID (PB-GIM-00001)">
     </div>
     <div class="cnt" id="cnt"></div>
+    <button type="button" id="addrAll" style="margin:0 0 10px;border:1px dashed #d9b257;background:#fffaf0;color:#7a5a14;border-radius:12px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer">✨ इस list के सभी पते AI से सुधारें</button>
     <div class="bulk" id="bulk" hidden>
       <label><input type="checkbox" id="selAll"> सभी चुनें</label><span class="n" id="selN"></span>
       <button class="ok" id="bOk" disabled>✅ Approve</button><button class="hold" id="bHold" disabled>⏸ Pending</button><button class="del" id="bDel" disabled>🗑 हटाएँ</button><button class="ok" id="bPrem" disabled style="background:#3b2bb8">💎 Premium</button>
@@ -308,6 +317,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (OWN ? phBtn(b, i) + '<button class="lnk" data-a="own" data-i="' + i + '">👤 मालिक</button>' : '') +
         '<button class="lnk" data-a="setph" data-i="' + i + '">📱 नंबर बदलें</button>' +
         '<button class="lnk" data-a="fix" data-i="' + i + '">✍️ सुधार माँगें</button>' +
+        (b.address ? '<button class="lnk" data-a="addr" data-i="' + i + '">✨ पता सुधारें</button>' : '') +
         (line(b.description, 'GST') ? '<button class="' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'phon' : 'lnk') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
         (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">💎 Premium ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
@@ -348,6 +358,55 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   $('bHold').onclick = function () { bulk('hold'); };
   $('bDel').onclick = function () { bulk('del'); };
   $('bPrem').onclick = function () { var sl = rows.filter(function (b) { return SEL[b.slug]; }).map(function (b) { return b.slug; }); if (sl.length) premSheet(sl, sl.length + ' दुकानें'); };
+
+  /* ✨ AI से पता सुधारना (Worker /addr) → Admin देखकर ✔ करे → pb_admin_set_address (sql-25) */
+  function aiBase() { return ((window.PB_SITE && PB_SITE.aiUrl) || '').replace(/\/$/, ''); }
+  var normA = function (t) { return String(t || '').toLowerCase().replace(/[^a-z0-9ऀ-૿]+/g, ''); };
+  var AIV2 = null;
+  async function aiAddr(r) {
+    if (!aiBase() || !r.address) return '';
+    if (AIV2 === null) { try { var g = await (await fetch(aiBase() + '/')).json(); AIV2 = !!(g && g.v >= 2); } catch (e) { AIV2 = false; } }
+    if (!AIV2) return '';   /* पुराना Worker: /addr नहीं है */
+    try {
+      var x = await fetch(aiBase() + '/addr', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: r.address, city: line(r.description, 'City'), pin: line(r.description, 'PIN') || line(r.description, 'Pincode'), name: r.name }) });
+      if (!x.ok) return ''; var j = await x.json(); return (j && j.address) || '';
+    } catch (e) { return ''; }
+  }
+  function addrSheet(items) {
+    var ov = document.createElement('div'); ov.className = 'adm-ov';
+    ov.innerHTML = '<div class="adm-sh"><h3>✨ AI से सुधरे पते (' + items.length + ')</h3><small style="color:#5b6475">लाल = अभी का पता, हरा = AI का पता (आप इसे बदल भी सकते हैं)। जो सही लगे उस पर ✔ रखें।</small>' +
+      items.map(function (it, k) { return '<div class="adm-row"><label><input type="checkbox" checked data-k="' + k + '"> ' + esc(it.r.name) + '</label><div class="old">' + esc(it.r.address) + '</div><textarea data-t="' + k + '" maxlength="250">' + esc(it.nw) + '</textarea></div>'; }).join('') +
+      '<p id="admMsg" style="min-height:18px;margin:8px 0 0;font-size:13.5px"></p><div class="bt"><button class="no" id="admX">बंद करें</button><button class="go" id="admGo">✔ चुने हुए पते बदलें</button></div></div>';
+    document.body.appendChild(ov);
+    ov.onclick = function (e) { if (e.target === ov || e.target.id === 'admX') ov.remove(); };
+    ov.querySelector('#admGo').onclick = async function () {
+      var go = this, msg = ov.querySelector('#admMsg'), ok = 0, fail = [];
+      go.disabled = true;
+      for (var k = 0; k < items.length; k++) {
+        if (!ov.querySelector('[data-k="' + k + '"]').checked) continue;
+        var v = ov.querySelector('[data-t="' + k + '"]').value.trim(); if (v.length < 5) continue;
+        msg.textContent = (k + 1) + ' / ' + items.length + ' …';
+        try { await rpc('pb_admin_set_address', { p_slug: items[k].r.slug, p_address: v }); ok++; }
+        catch (x) { if (/function|schema cache/i.test(x.message)) { msg.style.color = '#b42318'; msg.textContent = 'पहले Supabase में sql-25 चलाएँ।'; go.disabled = false; return; } fail.push(items[k].r.name); }
+      }
+      msg.style.color = fail.length ? '#b42318' : '#137333';
+      msg.textContent = '✅ ' + ok + ' पते बदल गए।' + (fail.length ? ' नहीं हुए: ' + fail.join(', ') : '');
+      go.style.display = 'none'; ov.querySelector('#admX').textContent = 'ठीक है'; load();
+    };
+  }
+  $('addrAll').onclick = async function () {
+    var L = rows.filter(function (r) { return r.address; }); if (!L.length) return alert('इस list में कोई पता नहीं है।');
+    if (!confirm('इस list की ' + L.length + ' दुकानों के पते AI से जांचें? (बदलने से पहले आपको दिखाया जाएगा)')) return;
+    var btn = this, items = [], t0 = btn.textContent; btn.disabled = true;
+    for (var k = 0; k < L.length; k++) {
+      btn.textContent = '✨ AI ' + (k + 1) + ' / ' + L.length + ' …';
+      var nw = await aiAddr(L[k]);
+      if (nw && normA(nw) !== normA(L[k].address)) items.push({ r: L[k], nw: nw });
+    }
+    btn.disabled = false; btn.textContent = t0;
+    if (!items.length) return alert('सब पते पहले से ठीक हैं, या AI से जवाब नहीं आया।');
+    addrSheet(items);
+  };
   $('list').onclick = async function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
     var r = rows[+b.dataset.i], a = b.dataset.a;
@@ -404,6 +463,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       b.disabled = true;
       try { await rpc('pb_admin_gst_verify', { p_slug: r.slug, p_on: !isV }); load(); }
       catch (x) { b.disabled = false; alert(/function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-19 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
+      return;
+    }
+    if (a === 'addr') {
+      b.disabled = true; var t0 = b.textContent; b.textContent = '✨ AI…';
+      var nw = await aiAddr(r); b.disabled = false; b.textContent = t0;
+      if (!nw) { alert('AI से जवाब नहीं आया। (Worker नया deploy हुआ है? थोड़ी देर बाद फिर कोशिश करें।)'); return; }
+      addrSheet([{ r: r, nw: nw }]);
       return;
     }
     if (a === 'fix') {

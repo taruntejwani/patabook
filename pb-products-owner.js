@@ -159,6 +159,10 @@
         var er = sc.querySelector("#prE1"); er.textContent = E ? "Uploading…" : "Upload हो रहा है…";
         try {
           if (!/^image\//.test(f.type)) throw new Error("type");
+          er.textContent = E ? "🔍 AI is checking the photo…" : "🔍 AI फ़ोटो जांच रहा है…";
+          var ck = window.PBImg ? await PBImg.check(f) : { ok: true };
+          if (!ck.ok) { er.textContent = ck.msg; return; }
+          er.textContent = E ? "Uploading…" : "Upload हो रहा है…";
           ME = await PBA.session();
           var blob = await resizeImage(f, 800), ext = blob.type === "image/webp" ? "webp" : "jpg";
           var path = encodeURIComponent(b.slug) + "/prod-" + Date.now() + "." + ext;
@@ -205,6 +209,8 @@
     }
     async function upload(r, f) {
       try {
+        var ck = window.PBImg ? await PBImg.check(f) : { ok: true };
+        if (!ck.ok) { r.err = ck.msg; r.prev = ""; r.up = false; keep(); paint(); return; }
         ME = await PBA.session();
         var blob = await resizeImage(f, 800), ext = blob.type === "image/webp" ? "webp" : "jpg";
         var path = encodeURIComponent(b.slug) + "/prod-" + Date.now() + "-" + r.id + "." + ext;
@@ -224,7 +230,7 @@
     function row(r, k) {
       return '<div class="mp-r' + (r.ok ? " ok" : r.err ? " bad" : "") + '" data-id="' + r.id + '"><div class="mp-h"><span>' + (r.ok ? "✅ " : "") + (k + 1) + ". " + (r.ok ? esc(r.name) : "Product") + '</span>' +
         (!r.ok ? '<button type="button" data-rm="' + r.id + '" aria-label="Remove">🗑️</button>' : "") + '</div>' +
-        (r.ok ? "" : '<div class="mp-g"><label class="mp-ph">' + (r.img || r.prev ? '<img src="' + esc(r.img || r.prev) + '" alt="">' : "📷") + '<small>' + (r.up ? "⏳ Upload…" : r.img ? "✓" : (E ? "Photo" : "फ़ोटो")) + '</small>' +
+        (r.ok ? "" : '<div class="mp-g"><label class="mp-ph">' + (r.img || r.prev ? '<img src="' + esc(r.img || r.prev) + '" alt="">' : "📷") + '<small>' + (r.up ? (E ? "⏳ Checking…" : "⏳ जांच…") : r.img ? "✓" : (E ? "Photo" : "फ़ोटो")) + '</small>' +
         '<input type="file" accept="image/*" hidden data-f="' + r.id + '"></label>' +
         '<div class="mp-f"><input class="pr-in mpN" maxlength="80" value="' + esc(r.name) + '" placeholder="' + (E ? "1. Product name" : "1. Product का नाम") + '">' +
         '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="2. Size"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (E ? "3. Price ₹" : "3. कीमत ₹") + '"></div></div></div>' +

@@ -348,7 +348,9 @@ function resizeImage(file,maxSide){return new Promise((res,rej)=>{const img=new 
     const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<150000)return res(bl);if(q>0.4)return tryQ(Math.round((q-0.1)*100)/100);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.78);};
   img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
 async function addPhoto(i,file){const b=ROWS[i],en=L()==="en",er=$("pe"+i);if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";
-  try{if(!/^image\//.test(file.type))throw new Error("type");ME=await PBA.session();const blob=await resizeImage(file,1000),ext=blob.type==="image/webp"?"webp":"jpg";
+  try{if(!/^image\//.test(file.type))throw new Error("type");
+    if(er)er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";const ck=window.PBImg?await PBImg.check(file):{ok:true};if(!ck.ok){if(er)er.textContent=ck.msg;return;}
+    if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";ME=await PBA.session();const blob=await resizeImage(file,1000),ext=blob.type==="image/webp"?"webp":"jpg";
     const path=encodeURIComponent(b.slug)+"/photo-"+Date.now()+"."+ext;
     const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
     if(!up.ok)throw new Error("upload");
@@ -417,6 +419,9 @@ async function uploadLogo(i,file){
   if(!/^image\//.test(file.type)){er.textContent=en?"Please choose a photo.":"कृपया फोटो चुनें।";return;}
   er.style.color="var(--muted)";er.textContent=en?"Uploading…":"Upload हो रहा है…";
   try{
+    er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";
+    const ck=window.PBImg?await PBImg.check(file):{ok:true};if(!ck.ok){er.style.color="";er.textContent=ck.msg;return;}
+    er.textContent=en?"Uploading…":"Upload हो रहा है…";
     ME=await PBA.session();if(!ME)throw new Error("login");
     const blob=await squareImage(file),ext=blob.type==="image/webp"?"webp":"jpg";
     const path=encodeURIComponent(b.slug)+"/logo-"+Date.now()+"."+ext;
@@ -660,6 +665,7 @@ PB.mount($("pbLang"));
 PB.onChange(draw);
 start();
 </script>
+<script src="pb-imgcheck.js"></script>
 <script src="pb-products-owner.js"></script>
 </body>
 </html>
