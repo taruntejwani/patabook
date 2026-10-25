@@ -76,6 +76,9 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.3px;line-height:1.25}
 .pbig{border-radius:14px;overflow:hidden;background:#0d0d10;aspect-ratio:1;max-height:56vh;margin:0 auto}.pbig img{width:100%;height:100%;object-fit:contain;display:block}
 .psh h3{font-size:19px;margin-top:12px;color:#12141c}.pmeta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:14px;font-weight:700;color:#123568}
 .pft{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pft span{background:#f1f4fa;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600}
+#prods.flash{box-shadow:0 0 0 3px var(--blue);transition:box-shadow .3s}
+.pall{display:block;text-align:center;margin-top:12px;padding:12px;border-radius:14px;background:var(--blue);color:#fff;font-weight:800;font-size:14.5px;text-decoration:none}
+#prods{scroll-margin-top:72px}
 #contact.flash{box-shadow:0 0 0 3px #25a244;transition:box-shadow .3s}
 .mos{display:grid;grid-template-columns:1.55fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:6px;margin-top:12px;height:230px}@media(max-width:520px){.mos{height:190px}}.mos.n1{grid-template-columns:1fr}.mos.n2{grid-template-columns:1fr 1fr}.mos.n3{grid-template-columns:1.55fr 1fr}.mos button{position:relative;border:0;padding:0;border-radius:14px;overflow:hidden;cursor:zoom-in;background:#eef3fd;min-height:0}.mos button:first-child{grid-row:1/3}.mos.n2 button:first-child{grid-row:1/3}.mos.n2 button:nth-child(2){grid-row:1/3}.mos img{width:100%;height:100%;object-fit:cover;display:block}.mos .cnt{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700}.mos .more{position:absolute;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;color:#fff;font-size:20px;font-weight:800}
 .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.gal button{border:0;padding:0;border-radius:12px;overflow:hidden;aspect-ratio:1;background:#eef3fd;cursor:zoom-in}.gal img{width:100%;height:100%;object-fit:cover;display:block}
@@ -240,11 +243,12 @@ function PRODP(){return PREM?(PRODS||[]).filter(p=>p&&p.name&&GAL_RX.test(p.img|
 const rsF=n=>n?"₹"+Number(n).toLocaleString("en-IN"):"";
 function drawProds(){const sec=document.getElementById("prods"),L=PRODP();if(!sec)return;if(!L.length){sec.hidden=true;return;}
   const en=PB.lang&&PB.lang()==="en";sec.hidden=false;
-  sec.innerHTML='<h2>🛍️ '+(en?"Our Products":"हमारे Products")+' <small style="font-size:13px;color:#5b6475;font-weight:600">('+L.length+')</small></h2><div class="pgr">'+L.map((p,i)=>
+  sec.innerHTML='<h2>🛍️ '+(en?"Our Products":"हमारे Products")+' <small style="font-size:13px;color:#5b6475;font-weight:600">('+L.length+')</small></h2><div class="pgr">'+L.slice(0,5).map((p,i)=>
     '<div class="pcd"><button type="button" class="pim" data-pv="'+i+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+(p.size?'<span class="psz">'+esc(p.size)+'</span>':'')+
     (p.best?'<span class="pbs">⭐ '+(en?"Best seller":"सबसे ज़्यादा बिकता")+'</span>':'')+(p.stock===false?'<span class="pout">'+(en?"Out of stock":"अभी Stock में नहीं")+'</span>':'')+'</button>'+
     '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>MRP</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+(en?"Ask price":"कीमत पूछें")+'</span>')+
-    '<button type="button" class="pask" data-pa="'+i+'">💬 '+(en?"Ask on WhatsApp":"WhatsApp पर पूछें")+'</button></div></div>').join("")+'</div>';
+    '<button type="button" class="pask" data-pa="'+i+'">💬 '+(en?"Ask on WhatsApp":"WhatsApp पर पूछें")+'</button></div></div>').join("")+'</div>'+
+    (L.length>5?'<a class="pall" href="shop.html?slug='+encodeURIComponent(B.slug)+'">'+(en?"View all "+L.length+" products ›":"सभी "+L.length+" products देखें ›")+'</a>':'');
   sec.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(L[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)prodAsk(L[+a.dataset.pa]);};}
 function prodWa(){const s=contactState||{};if(s.k!=="ok")return "";const altWa=B?line(B,"WhatsApp").replace(/\D/g,""):"";
   const wa=(/^\d{10}$/.test(altWa)?altWa:String(s.whatsapp||s.phone||"")).replace(/\D/g,"");return wa.length===10?"91"+wa:wa;}
@@ -306,7 +310,7 @@ function render(){
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()==="en")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
    '</div>'+(ost?'<div class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+
    (addr?'<div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(sub2?'<small>'+esc(sub2)+'</small>':'')+(lmk?'<span class="lmk">🏁 '+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</span>':'')+'</div></div>'+
-     '<div class="abtn'+(GALP().length&&map?' four':'')+'">'+(GALP().length?'<button type="button" class="gph" id="gphBtn"><span>📷</span>'+esc(en?"Photos":"फ़ोटो")+'</button>':'')+(map?'<a class="p" href="'+esc(map)+'"><span>🧭</span>'+esc(en?"Directions":"रास्ता देखें")+'</a>':'')+'<button type="button" id="cpAddr"><span>📋</span>'+esc(en?"Copy address":"पता copy")+'</button><a href="'+esc(gmapsUrl(b))+'" target="_blank" rel="noopener"><span>🗺️</span>Google Maps</a></div>':'')+
+     '<div class="abtn" style="grid-template-columns:repeat('+((GALP().length?1:0)+(PRODP().length?1:0)+(map?1:0)+1)+',1fr)">'+(GALP().length?'<button type="button" class="gph" id="gphBtn"><span>📷</span>'+esc(en?"Photos":"फ़ोटो")+'</button>':'')+(PRODP().length?'<button type="button" class="p" id="profBtn"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</button>':'')+(map?'<a'+(PRODP().length?'':' class="p"')+' href="'+esc(map)+'"><span>🧭</span>'+esc(en?"Directions":"रास्ता देखें")+'</a>':'')+'<a href="'+esc(gmapsUrl(b))+'" target="_blank" rel="noopener"><span>🗺️</span>Google Maps</a></div>':'')+
    (GALP().length?'<div class="mos n'+(GALP().length>=5?5:GALP().length===4?3:GALP().length)+'" id="galM"></div>':'')+
    staticMap(b,map)+
    '<div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
@@ -328,7 +332,7 @@ function render(){
    '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>';
   drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();drawProds();
-  const cp=document.getElementById("cpAddr");if(cp)cp.onclick=()=>{const t=b.name+", "+addr;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
+  const pf=document.getElementById("profBtn");if(pf)pf.onclick=()=>{const c=document.getElementById("prods");if(!c)return;c.scrollIntoView({behavior:"smooth",block:"start"});c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),1600);};
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
