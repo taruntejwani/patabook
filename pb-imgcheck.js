@@ -70,27 +70,42 @@
     if (/screen ?shot|screenshot|scrnshot|capture/i.test(String(file && file.name || ""))) return true;
     var lo = Math.min(w, h), hi = Math.max(w, h), r = hi / Math.max(1, lo);
     var dpr = window.devicePixelRatio || 1, sw = Math.round((screen.width || 0) * dpr), sh = Math.round((screen.height || 0) * dpr);
-    if (sw && sh && Math.min(sw, sh) === lo && Math.max(sw, sh) === hi) return true;   /* बिल्कुल इसी phone की screen जितना */
+    var near = function (a, b) { return Math.abs(a - b) <= Math.max(6, b * 0.01); };
+    if (sw && sh && near(lo, Math.min(sw, sh)) && near(hi, Math.max(sw, sh))) return true;   /* इसी phone (Fold की अंदर/बाहर वाली screen भी) जितना */
     return r >= 1.9 && r <= 2.45 && lo >= 600 && lo <= 1600;                            /* 18:9 – 21:9 वाला phone screenshot */
+  }
+  /* 🛠️ सिर्फ़ Admin के phone पर (admin page खोलने से pb-notrack=1 लगता है): जांच का नतीजा छोटी पट्टी में */
+  function isAdm() { try { return localStorage.getItem("pb-notrack") === "1"; } catch (e) { return false; } }
+  function dbg(t) {
+    if (!isAdm()) return;
+    try {
+      var d = document.createElement("div");
+      d.setAttribute("style", "position:fixed;left:8px;right:8px;bottom:12px;z-index:99999;background:#12141c;color:#fff;font:600 12.5px/1.4 system-ui,sans-serif;padding:9px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);word-break:break-word");
+      d.textContent = t + "  (सिर्फ़ admin को दिखता है)";
+      d.onclick = function () { d.remove(); };
+      document.body.appendChild(d); setTimeout(function () { d.remove(); }, 9000);
+    } catch (e) {}
   }
   /* PBImg.check(file, {slug, kind:"product"|"logo"|"shop", name}) */
   async function check(file, info) {
     try {
-      if (!(await ready())) return { ok: true, skipped: "off" };
+      if (!(await ready())) { dbg("⚠️ AI जांच बंद: Worker (v2+) नहीं मिला / aiUrl खाली"); return { ok: true, skipped: "off" }; }
       info = info || {};
       var I = await shopInfo(info.slug), ctxo = { kind: info.kind || "shop", item: String(info.name || "").slice(0, 80), shop: String(I.shop || "").slice(0, 80), cat: String(I.cat || "").slice(0, 60), sub: String(I.sub || "").slice(0, 60), svc: String(I.svc || "").slice(0, 120), unit: I.unit || "" };
       var sm = await small(file), data = sm.data;
       /* 📱 पक्की जांच (बिना AI): phone के screenshot का नाप screen जैसा लंबा-पतला होता है (जैसे 1080×2400) या नाम में Screenshot */
-      if (isScreen(file, sm.w, sm.h)) return { ok: false, cat: "screen", msg: msg("screen"), local: true };
+      if (isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से screenshot पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
       var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 15000);
       try {
         var r = await fetch(base() + "/check-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: data, ctx: ctxo }), signal: ctl.signal });
-        var j = await r.json();
-        if (window.console) console.log('PataBook AI photo check:', j);
+        var j = {}; try { j = await r.json(); } catch (e) { j = { skipped: "http " + r.status }; }
+        if (window.console) console.log("PataBook AI photo check:", j);
+        dbg((j.skipped ? "⚠️ AI जांच नहीं हुई (" + j.skipped + ")" : "🤖 AI [" + (j.src || "?") + "]: " + (j.ok === false ? "❌ रोका – " + j.cat : "✅ ठीक")) +
+          (j.what ? " · \"" + j.what + "\"" : j.r ? " · " + String(j.r).slice(0, 120) : "") + " · " + sm.w + "×" + sm.h);
         if (j && j.ok === false) return { ok: false, cat: j.cat, msg: msg(j.cat) };
         return { ok: true };
       } finally { clearTimeout(tm); }
-    } catch (e) { return { ok: true, skipped: "err" }; }
+    } catch (e) { dbg("⚠️ AI जांच नहीं हुई: " + (e && e.name === "AbortError" ? "15 सेकंड में जवाब नहीं आया" : String(e && e.message || e))); return { ok: true, skipped: "err" }; }
   }
   window.PBImg = { check: check, msg: msg };
 })();
