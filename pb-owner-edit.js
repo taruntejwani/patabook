@@ -91,7 +91,10 @@
   }
 
   /* ---------- काम ---------- */
-  function editDetails(focus) { frame("🏪 " + T("जानकारी बदलें", "Edit details"), "edit.html?slug=" + encodeURIComponent(O.slug) + "&embed=1" + (focus ? "&focus=" + focus : ""), false); }
+  function editDetails(focus, sec) {
+    var tt = sec === "about" ? "🏪 " + T("हमारे बारे में — बदलें", "About us — edit") : sec === "visit" ? "📍 " + T("पता और नक्शा — बदलें", "Address & map — edit") : "🏪 " + T("जानकारी बदलें", "Edit details");
+    frame(tt, "edit.html?slug=" + encodeURIComponent(O.slug) + "&embed=1" + (focus ? "&focus=" + focus : "") + (sec ? "&sec=" + sec : ""), false);
+  }
   function editProducts() { frame("🛍️ " + T("Products बदलें", "Edit products"), "myproducts.html?slug=" + encodeURIComponent(O.slug), true); }
 
   function pickFile(cb) { var i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.onchange = function () { if (i.files && i.files[0]) cb(i.files[0]); }; i.click(); }
@@ -277,11 +280,11 @@
       sv.disabled = false;
     };
   }
-  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible };
+  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, about: function () { editDetails("", "about"); }, visit: function () { editDetails("", "visit"); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible };
 
   /* ---------- pencils ---------- */
   var MAP = {
-    shop: [[".hlogo", "logo"], ["#prods", "products"], ["#photos", "photos"], ["#about", "details"], ["#visit", "details"], ["#contact", "numbers"], ["#vacFlag", "vacancy"]],
+    shop: [[".hlogo", "logo"], ["#prods", "products"], ["#photos", "photos"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], ["#vacFlag", "vacancy"]],
     biz: [[".lgw", "logo"], ["#prods", "products"], ["#galM", "photos"], ["#det", "details"], ["#contact", "numbers"], ["#vacFlag", "vacancy"]]
   };
   function pens() {

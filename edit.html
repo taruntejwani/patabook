@@ -9,6 +9,10 @@
 <meta name="theme-color" content="#1a73e8">
 <script src="site-config.js"></script>
 <script>/* page के अंदर (✏️ Edit) खुलने पर ऊपर की पट्टी छिपाओ */window.PB_EMBED=/[?&]embed=1\b/.test(location.search);if(window.PB_EMBED)document.documentElement.classList.add("embed");</script>
+<script>/* ✏️ किसी हिस्से की पेंसिल से खुला (?sec=about / visit): सिर्फ़ वही चीज़ें दिखें जो उस हिस्से में दिखती हैं */
+(function(){var m=location.search.match(/[?&]sec=(about|visit|numbers)\b/);if(!m)return;var k=m[1];
+var st=document.createElement("style");st.textContent='[data-sec]:not([data-sec="'+k+'"]){display:none!important}';
+document.head.appendChild(st);})();</script>
 <style>.embed .top{display:none}.embed body{padding-top:6px}.embed #done .btn{display:none}</style>
 <script src="pb-auth.js"></script>
 <style>
@@ -70,12 +74,12 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name, address and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम, पता और category सिर्फ PataBook Admin बदल सकते हैं।</p>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="about">
    <h2 data-en="🏷️ Business type">🏷️ बिज़नेस का प्रकार</h2>
    <select id="btype"></select>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="about">
    <h2 data-en="🕘 Timings">🕘 दुकान का समय</h2>
    <div class="two">
     <div><label class="lbl" for="openT" data-en="Opens at">खुलने का समय</label><input id="openT" type="time"></div>
@@ -85,7 +89,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <select id="offDay"></select>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="numbers">
    <h2 data-en="📞 Numbers for customers (shop / staff)">📞 ग्राहकों के लिए नंबर (दुकान / staff)</h2>
    <p class="hint" data-en="Login always stays on your own (main) number. If you hide your main number, customers see only these numbers.">Login हमेशा आपके अपने (मुख्य) नंबर से ही होगा। मुख्य नंबर छिपाएँगे तो ग्राहकों को सिर्फ़ ये नंबर दिखेंगे।</p>
    <label class="lbl" for="wa" data-en="💬 WhatsApp number (if different from main number)">💬 WhatsApp नंबर (अगर मुख्य नंबर से अलग है)</label>
@@ -96,17 +100,17 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <p class="hint" data-en="To change your main number, use “📱 Change number” in My Shop.">मुख्य नंबर बदलने के लिए "मेरी दुकान" में "📱 नंबर बदलें" दबाएँ।</p>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="visit">
    <h2 data-en="📍 PIN and delivery">📍 PIN और डिलीवरी</h2>
    <label class="lbl" for="pin" data-en="📮 Area postal PIN code">📮 शहर / इलाके का पिन कोड</label>
    <input id="pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंक" data-en-ph="6 digits">
    <p class="hint" data-en="The 6-digit post office code, like 370201 — not your ATM / bank PIN.">डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला PIN नहीं।</p>
    <label class="lbl" for="lmk" style="margin-top:14px" data-en="🏁 Landmark (a known place nearby)">🏁 पहचान (पास की कोई जानी-मानी जगह)</label>
    <input id="lmk" type="text" maxlength="80" data-en-ph="e.g. Near Apnanagar Circle" placeholder="जैसे: Apnanagar Circle के पास">
-   <label class="chk" style="margin-top:14px"><input id="homeDel" type="checkbox"><span data-en="🚚 We do home delivery">🚚 हम होम डिलीवरी करते हैं</span></label>
+   <label class="chk" data-sec="delivery" style="margin-top:14px"><input id="homeDel" type="checkbox"><span data-en="🚚 We do home delivery">🚚 हम होम डिलीवरी करते हैं</span></label>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="about">
    <h2 data-en="🌐 Online">🌐 ऑनलाइन</h2>
    <label class="lbl" for="email" data-en="Email">ईमेल</label>
    <input id="email" type="email" inputmode="email" placeholder="name@gmail.com">
@@ -114,13 +118,13 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <input id="web" type="url" inputmode="url" placeholder="www.example.com">
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="about">
    <h2 data-en="🛠️ What you sell / services">🛠️ आप क्या बेचते हैं / कौन-सी सेवाएँ</h2>
    <p data-en="👑 Premium shops: the first line is shown under your shop name on the home page card (e.g. Car Care Products Manufacturer)." style="margin:-4px 0 8px;font-size:12.5px;color:#8a6200;background:#fff6dc;border-radius:10px;padding:7px 10px;line-height:1.45">👑 Premium दुकान: इसकी पहली line Home page वाले card पर दुकान के नाम के नीचे दिखेगी (जैसे: Car Care Products Manufacturer)।</p>
    <textarea id="svc" maxlength="500" data-en-ph="e.g. Car shampoo, dashboard polish, wholesale supply" placeholder="जैसे: कार शैम्पू, डैशबोर्ड पॉलिश, थोक सप्लाई"></textarea>
   </div>
 
-  <div class="card" id="gstCard">
+  <div class="card" id="gstCard" data-sec="about">
    <h2 data-en="🧾 GST / Udyam (MSME) number">🧾 GST / उद्यम (MSME) नंबर</h2>
    <p class="hint" style="margin:-4px 0 6px" data-en="Optional. Your shop page shows a “GST Registered” / “MSME” badge — customers trust it more. Don’t have one? Leave empty.">ज़रूरी नहीं। दुकान के पेज पर "GST रजिस्टर्ड" / "MSME" का निशान दिखेगा — ग्राहकों का भरोसा बढ़ता है। नहीं है तो खाली छोड़ें।</p>
    <label class="lbl" for="gst" data-en="GST number (15 letters)">GST नंबर (15 अक्षर)</label>
@@ -129,7 +133,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <input id="udyam" type="text" maxlength="24" autocapitalize="characters" spellcheck="false" placeholder="UDYAM-GJ-03-0012345" style="text-transform:uppercase;letter-spacing:.04em">
   </div>
 
-  <a class="card" id="locLink" href="#" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
+  <a class="card" id="locLink" data-sec="visit" href="#" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
    <span style="font-size:26px">📍</span><span style="flex:1"><b style="display:block;font-size:15.5px;color:#0b2f73" data-en="Shop location on map">नक्शे पर दुकान की location</b><small style="color:#5b6475" data-en="Set it while standing at your shop — customers get the exact way">दुकान पर खड़े होकर लगाएँ — ग्राहकों को सही रास्ता मिलेगा</small></span><span style="font-size:22px;color:#1a73e8">›</span>
   </a>
 
