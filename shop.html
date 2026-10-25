@@ -111,7 +111,7 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .smap .tl{position:absolute;display:grid;grid-template-columns:repeat(3,256px)}.smap .tl img{width:256px;height:256px;display:block}
 .smap .mp{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);font-size:36px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
 .smap .ma{position:absolute;right:6px;bottom:4px;font-size:9.5px;color:#555;background:#ffffffc0;padding:0 4px;border-radius:4px}
-.vbtn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.vbtn{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
 .vbtn a{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:14px;padding:12px;font-weight:800;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--navy)}
 .vbtn a.p{background:var(--blue);border-color:var(--blue);color:#fff}
 
@@ -341,7 +341,7 @@ function render(){
        (web?'<div class="row" data-pbh="web"><span>Website</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+'</div>'
        :'<p class="empty">'+L("दुकानदार ने अभी और जानकारी नहीं जोड़ी है।","The owner hasn't added more details yet.")+'</p>')+'</section>'+
      (addr?'<section class="blk" data-pbh="addr" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
-       staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'<a href="'+esc(gmapsUrl(b))+'" target="_blank" rel="noopener">🗺️ Google Maps</a></div></section>':'')+
+       staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'</div></section>':'')+
      '<section class="blk" id="contact"><h2>📞 '+L("संपर्क करें","Contact")+'</h2>'+contactHTML()+dirRow(b,addr,dir)+'</section>'+
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      '<a class="shr" data-pbh="share" id="waShare" href="'+esc(waLink(b,window.PBHide&&PBHide.has('addr')?'':addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+L("दोस्त को पता और रास्ता भेजें","Send address & directions to a friend")+'</b><small>'+L("पता और map पर रास्ते का link, WhatsApp पर","Address + map route link on WhatsApp")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></a>'+
