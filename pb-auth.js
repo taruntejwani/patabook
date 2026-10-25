@@ -149,7 +149,11 @@ var mobile={
   useTokenHash:function(th,email){return verifyTokenHash(th,email);},
   ownerVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"owner_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
   shopSend:function(slug,phone){return otpCall("/send",{purpose:"shop_phone",slug:slug,phone:phone},true);},
-  shopVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"shop_phone",slug:slug,phone:phone,code:code},true);}
+  shopVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"shop_phone",slug:slug,phone:phone,code:code},true);},
+  /* दुकान / staff का Call-WhatsApp नंबर: OTP से पक्का (login नहीं बदलता) */
+  staffSend:function(slug,phone){return otpCall("/send",{purpose:"staff_phone",slug:slug,phone:phone},true);},
+  staffVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"staff_phone",slug:slug,phone:phone,code:code},true);}
+
 };
 window.PBA={otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
 })();

@@ -185,6 +185,31 @@ async function rpc(fn,args){
   if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));e.status=r.status;throw e;}
   return j;
 }
+/* 📱 दुकान / staff का नंबर: नया नंबर डालने पर उसी नंबर पर OTP — बिना OTP के नंबर save नहीं होगा */
+let ORIG={wa:"",p2:""},MAIN="",VERI={};
+const OTPERR={invalid_otp:["OTP गलत है।","Wrong OTP."],otp_expired:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],otp_expired_or_missing:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],too_many_attempts:["3 बार गलत OTP। नया OTP मँगाएँ।","3 wrong tries. Request a new OTP."],resend_too_soon:["थोड़ी देर बाद दोबारा मँगाएँ।","Please wait before asking again."],rate_limited_mobile:["इस नंबर पर आज के OTP पूरे हो गए। कल कोशिश करें।","Today's OTP limit for this number is used. Try tomorrow."],rate_limited_ip:["बहुत ज़्यादा कोशिशें। थोड़ी देर बाद करें।","Too many attempts. Try later."],sms_failed:["SMS नहीं जा सका। थोड़ी देर बाद कोशिश करें।","SMS failed. Try again later."],login_required:["Login की समय-सीमा खत्म हो गई। पेज दोबारा खोलें।","Login expired. Reopen the page."],captcha_failed:["\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज refresh करें।","Robot check failed. Refresh the page."]};
+function otpMsg(e){const c=(e&&(e.code||e.message))||"";const m=OTPERR[c];return (m?m[EN?1:0]:(EN?"Something went wrong. Try again.":"कुछ गड़बड़ हुई। फिर कोशिश करें."))+(c==="invalid_otp"&&e.attempts_left?(EN?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");}
+function verifyNum(num,label){
+  return new Promise(res=>{
+    if(!PBA.mobile||!PBA.mobile.enabled()){res(false);return;}
+    const ov=document.createElement("div");
+    ov.style.cssText="position:fixed;inset:0;z-index:99;background:rgba(10,20,40,.6);display:flex;align-items:center;justify-content:center;padding:16px";
+    ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:18px;font:inherit"><b style="display:block;font-size:16.5px;color:#123568">📱 '+(EN?"Verify this number":"यह नंबर पक्का करें")+'</b><p style="margin:8px 0 12px;font-size:14px;line-height:1.5;color:#334">'+(EN?label+" +91 "+num+". We will send an OTP to this number; only after the OTP it will show on your page.":label+" +91 "+num+" — इस नंबर पर OTP जाएगा। OTP डालने के बाद ही यह आपके page पर दिखेगा।")+'</p><input id="vnC" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #cfd8ea;border-radius:12px;font:inherit;font-size:18px;letter-spacing:4px;text-align:center" hidden><div id="vnE" style="color:#c5221f;font-size:13px;font-weight:700;min-height:18px;margin:8px 0 2px"></div><button type="button" id="vnG" style="width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:800;background:#1a73e8;color:#fff;cursor:pointer">'+(EN?"Send OTP":"OTP भेजें")+'</button><button type="button" id="vnX" style="width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;background:#f1f4f9;color:#123;cursor:pointer">'+(EN?"Cancel":"रद्द करें")+'</button></div>';
+    document.body.appendChild(ov);
+    const g=ov.querySelector("#vnG"),x=ov.querySelector("#vnX"),inp=ov.querySelector("#vnC"),er=ov.querySelector("#vnE");let sent=false;
+    const done=v=>{ov.remove();res(v);};
+    x.onclick=()=>done(false);
+    g.onclick=async()=>{
+      er.textContent="";g.disabled=true;
+      try{
+        if(!sent){await PBA.mobile.staffSend(slug,num);sent=true;inp.hidden=false;inp.focus();g.textContent=EN?"Verify":"पक्का करें";}
+        else{const c=inp.value.replace(/\D/g,"");if(c.length!==6){er.textContent=EN?"Enter the 6-digit OTP.":"6 अंकों का OTP डालें।";g.disabled=false;return;}
+          await PBA.mobile.staffVerify(slug,num,c);VERI[num]=1;done(true);return;}
+      }catch(e){er.textContent=otpMsg(e);if(e.code==="otp_expired"||e.code==="otp_expired_or_missing"||e.code==="too_many_attempts"){sent=false;inp.hidden=true;g.textContent=EN?"Send OTP":"OTP भेजें";}}
+      g.disabled=false;
+    };
+  });
+}
 function errText(m){
   m=String(m||"");
   const f={"bad Hours":["खुलने और बंद होने का समय दोनों चुनें।","Choose both opening and closing time."],"bad Website":["Website का link सही लिखें (जैसे www.example.com)।","Enter a correct website link (like www.example.com)."],
@@ -193,7 +218,7 @@ function errText(m){
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
     "bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
-    "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."]};
+    "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."],"number not verified":["यह नंबर OTP से पक्का नहीं हुआ है। फिर से सेव दबाएँ और OTP डालें।","This number is not verified by OTP. Press Save again and enter the OTP."]};
   for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
   return EN?"Could not save. Check your internet and try again.":"सेव नहीं हो सका। इंटरनेट जाँचकर दोबारा कोशिश करें।";
 }
@@ -212,6 +237,13 @@ $("main").addEventListener("submit",async e=>{
   if(gst&&!gstOk(gst)){$("err").textContent=errText("bad GST");$("gst").focus();return;}
   if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
   const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
+  /* नया (बदला हुआ) नंबर हो तो पहले उसी नंबर पर OTP से पक्का करें */
+  const have=[ORIG.wa,ORIG.p2,MAIN];
+  for(const [n,lb] of [[wa,EN?"WhatsApp":"WhatsApp"],[p2,EN?"Shop / staff call number":"दुकान / staff का Call नंबर"]]){
+    if(!n||have.includes(n)||VERI[n])continue;
+    const ok=await verifyNum(n,lb);
+    if(!ok){$("err").textContent=EN?"Number not saved: OTP was not verified.":"नंबर save नहीं हुआ: OTP से पक्का नहीं हुआ।";return;}
+  }
   const b=$("saveBtn");b.disabled=true;
   try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
   catch(x){$("err").textContent=errText(x.message);}
@@ -231,7 +263,7 @@ $("main").addEventListener("submit",async e=>{
     $("btype").value=t;
     const h=line(ds,"Hours").match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);if(h){$("openT").value=h[1];$("closeT").value=h[2];}
     $("offDay").value=line(ds,"Closed");
-    $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
+    $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");ORIG={wa:n10($("wa").value),p2:n10($("ph2").value)};MAIN=n10(String(b.phone||""));$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
     $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");$("lmk").value=line(ds,"Landmark");
     $("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
     if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
