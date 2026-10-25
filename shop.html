@@ -85,6 +85,9 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .pmr{font-size:15px;font-weight:900;color:#137333}.pmr small{font-size:11px;color:var(--muted);font-weight:600}
 .pask{margin-top:auto;border:0;border-radius:12px;padding:9px 6px;background:#25a244;color:#fff;font-weight:800;font-size:13px;cursor:pointer}
 .pask.big{width:100%;margin-top:14px;padding:13px;font-size:15px}
+.pbt{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:6px}.pbt .pask{margin-top:0;min-width:0;white-space:nowrap}
+.pshr{display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:9px 6px;font-weight:800;font-size:13px;color:var(--navy);cursor:pointer;min-width:0}
+.pshr.big{width:100%;margin-top:8px;padding:12px;font-size:15px}
 .empty{color:var(--muted);font-size:14px;line-height:1.6}
 
 /* Product sheet + lightbox */
@@ -333,7 +336,7 @@ function render(){
        '<div class="pcd"><button type="button" class="pim" data-pv="'+i+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+(p.size?'<span class="psz">'+esc(p.size)+'</span>':'')+
        (p.best?'<span class="pbs">⭐ '+L("सबसे ज़्यादा बिकता","Best seller")+'</span>':'')+(p.stock===false?'<span class="pout">'+L("अभी Stock में नहीं","Out of stock")+'</span>':'')+'</button>'+
        '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>MRP</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+L("कीमत पूछें","Ask price")+'</span>')+
-       '<button type="button" class="pask" data-pa="'+i+'">💬 '+L("WhatsApp पर पूछें","Ask on WhatsApp")+'</button></div></div>').join("")+'</div></section>':'')+
+       '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'')+
      (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'')+
      (addr?'<section class="blk" data-pbh="addr" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
        staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'</div></section>':'')+
@@ -358,7 +361,9 @@ function render(){
   else dock.hidden=true;
   document.body.style.paddingBottom=dock.hidden?"16px":"";
   /* events */
-  const pr=document.getElementById("prods");if(pr)pr.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(P[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)prodAsk(P[+a.dataset.pa]);};
+  const pr=document.getElementById("prods");if(pr)pr.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(P[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)return prodAsk(P[+a.dataset.pa]);const sh=e.target.closest("[data-ps]");if(sh)prodShare(P[+sh.dataset.ps]);};
+  /* दोस्त का भेजा link (#p<id>) खुले तो वही product सामने खुले */
+  if(!window.__pOpened){const hm=location.hash.match(/^#p(\d+)$/);if(hm){const q=P.find(x=>String(x.id)===hm[1]);if(q){window.__pOpened=1;setTimeout(()=>{const s2=document.getElementById("prods");if(s2)s2.scrollIntoView({block:"start"});prodSheet(q);},300);}}}
   const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
   document.getElementById("shareQa").onclick=share;
   document.getElementById("repBtn").onclick=openReport;
@@ -475,9 +480,15 @@ function prodSheet(p){const d=document.createElement("div");d.className="psh";
   d.innerHTML='<div class="pin"><button type="button" class="px" aria-label="Close">✕</button><div class="pbig"><img src="'+esc(p.img)+'" alt=""></div><h3>'+esc(p.name)+'</h3>'+
    '<div class="pmeta">'+(p.size?'<span>📦 '+esc(p.size)+'</span>':'')+'<span>'+(p.mrp?'💰 '+rsF(p.mrp)+' MRP':'💰 '+L("कीमत पूछें","Ask price"))+'</span>'+(p.stock===false?'<span style="color:#c5221f">⛔ '+L("Stock में नहीं","Out of stock")+'</span>':'')+'</div>'+
    ((p.feats||[]).length?'<div class="pft">'+p.feats.map(f=>'<span>✔ '+esc(f)+'</span>').join("")+'</div>':'')+
-   '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / order","Ask / order on WhatsApp")+'</button></div>';
+   '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / order","Ask / order on WhatsApp")+'</button>'+
+   '<button type="button" class="pshr big" id="pShr">📤 '+L("दोस्त को भेजें","Share with a friend")+'</button></div>';
   d.onclick=e=>{if(e.target===d||e.target.closest(".px"))d.remove();};document.body.appendChild(d);
-  d.querySelector("#pAsk").onclick=()=>{d.remove();prodAsk(p);};}
+  d.querySelector("#pAsk").onclick=()=>{d.remove();prodAsk(p);};
+  d.querySelector("#pShr").onclick=()=>prodShare(p);}
+function prodShare(p){if(!B||!p)return;const u=shopUrl()+(p.id?"#p"+p.id:"");
+  const t="🛍️ "+p.name+(p.size?" ("+p.size+")":"")+(p.mrp?" · "+rsF(p.mrp)+" MRP":"")+"\n🏪 "+B.name+"\n"+L("PataBook पर देखें:","See it on PataBook:");
+  if(navigator.share){navigator.share({title:p.name,text:t,url:u}).catch(()=>{});return;}
+  window.open("https://wa.me/?text="+encodeURIComponent(t+"\n"+u),"_blank","noopener");}
 function lightbox(Ls,i){const d=document.createElement("div");d.className="lbx";
   const show=()=>{d.innerHTML='<img src="'+esc(Ls[i])+'" alt=""><button class="x" aria-label="Close">✕</button>'+(Ls.length>1?'<button class="pv" aria-label="Previous">‹</button><button class="nx" aria-label="Next">›</button>':'');};
   show();d.onclick=e=>{if(e.target.closest(".pv")){i=(i-1+Ls.length)%Ls.length;show();return;}if(e.target.closest(".nx")){i=(i+1)%Ls.length;show();return;}if(e.target===d||e.target.closest(".x"))d.remove();};
