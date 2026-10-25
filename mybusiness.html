@@ -24,6 +24,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .brand{display:flex;align-items:center;gap:6px;font-weight:800;font-size:18px;color:var(--navy)}
 .brand img{width:22px}
 #pbLang{margin-inline-start:auto}
+.ntb{position:relative;flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:18px;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 8px rgba(11,47,115,.06)}.ntb[aria-expanded=true]{background:#eef4ff;border-color:#b9cdf2}.ntb i{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:#ea4335;color:#fff;font-style:normal;font-size:11px;font-weight:800;line-height:18px;padding:0 5px;box-shadow:0 0 0 2px #fff}.ntsc{position:fixed;inset:0;z-index:80;background:rgba(10,20,40,.25)}.ntp{position:fixed;z-index:81;top:62px;right:max(12px,calc((100vw - 560px)/2 + 12px));width:min(430px,calc(100vw - 24px));max-height:calc(100vh - 80px);overflow:auto;border-radius:18px;box-shadow:0 18px 40px rgba(11,47,115,.22)}.ntp .nt{margin:0}
 h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .sub{color:var(--muted);font-size:14px;margin:0 2px 14px}
 .who{background:#e8f5e9;color:#1b5e20;border:1px solid #cdeacf;border-radius:16px;padding:12px 14px;font-size:13.5px;margin:14px 0}
@@ -132,7 +133,10 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
     <a class="back" href="index.html" id="backT">← वापस</a>
     <a class="brand" href="index.html"><img src="pin.png" alt="">PataBook</a>
     <span id="pbLang"></span>
+    <button type="button" class="ntb" id="ntBtn" hidden aria-label="Notifications" aria-expanded="false">🔔<i id="ntDot" hidden></i></button>
   </div>
+  <div class="ntsc" id="ntScrim" hidden></div>
+  <div class="ntp" id="ntPanel" hidden></div>
 
   <h1 id="h1">मेरी दुकान</h1>
   <p class="sub" id="sub">अपनी दुकान की जानकारी और नंबर यहां से संभालें।</p>
@@ -276,6 +280,16 @@ async function bellState(){
   if(!bellOK())return;
   try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();BELL=(sub&&Notification.permission==="granted"&&localStorage.getItem("pb-own-bell")==="1")?"on":"";}catch(e){}
 }
+function ntUnread(){const ev=(EVS&&EVS.events||[]).filter(e=>e.kind!=="live");let seen=0;try{seen=+localStorage.getItem("pb-nt-seen")||0;}catch(e){}return ev.filter(e=>new Date(e.created_at).getTime()>seen).length;}
+function drawNt(){const btn=$("ntBtn"),p=$("ntPanel");if(!btn||!p)return;const h=notifBlock();btn.hidden=!h;if(!h){p.hidden=true;$("ntScrim").hidden=true;return;}
+  if(!p.hidden)p.innerHTML=h;const n=ntUnread(),d=$("ntDot");d.hidden=!n;d.textContent=n>9?"9+":String(n);
+  btn.setAttribute("aria-label",(L()==="en"?"Notifications":"सूचनाएँ")+(n?" ("+n+")":""));}
+function ntOpen(o){const p=$("ntPanel"),sc=$("ntScrim"),btn=$("ntBtn");if(!p)return;
+  if(o){p.innerHTML=notifBlock();p.hidden=false;sc.hidden=false;btn.setAttribute("aria-expanded","true");try{localStorage.setItem("pb-nt-seen",String(Date.now()));}catch(e){}$("ntDot").hidden=true;}
+  else{p.hidden=true;sc.hidden=true;btn.setAttribute("aria-expanded","false");}}
+$("ntBtn").addEventListener("click",()=>ntOpen($("ntPanel").hidden));
+$("ntScrim").addEventListener("click",()=>ntOpen(false));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")ntOpen(false);});
 function notifBlock(){
   if(!EVS)return "";
   const en=L()==="en",ev=(EVS.events||[]).filter(e=>e.kind!=="live").slice(0,5);
@@ -448,7 +462,7 @@ function draw(){
   if(!ROWS.length){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
-  list.innerHTML=notifBlock()+ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
+  drawNt();list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
     profBlock(b,i)+premBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i)+logoBlock(b,i)+
@@ -609,7 +623,7 @@ $("dv").addEventListener("click",async e=>{
   b.disabled=true;
   try{await PBA.deviceKick(b.dataset.kick);DEV=await PBA.deviceCheck();draw();}catch(x){b.disabled=false;}
 });
-$("list").addEventListener("click",async e=>{
+$("ntPanel").addEventListener("click",async e=>{
   const b=e.target.closest("#bellBtn");if(!b)return;
   const en=L()==="en",note=t=>{const n=$("bellNote");if(n){n.textContent=t||"";n.style.color="";}};
   b.disabled=true;note("…");
