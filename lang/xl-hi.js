@@ -125,6 +125,10 @@ PB_XL("hi",{
 "Udyam (MSME)": "उद्यम (MSME)",
 "GST Verified ✅": "GST सत्यापित ✅",
 "Delivery boy": "डिलीवरी बॉय",
-"{x} MRP": "{x} MRP"
+"{x} MRP": "{x} MRP",
+"Vacancy available (नौकरी खाली है)": "नौकरी खाली है",
+"Home Service (घर पर सेवा)": "घर पर सेवा",
+"सब देखें (View all) ›": "सब देखें ›",
+"नौकरी खाली है (Vacancy)": "नौकरी खाली है"
 }
 });
