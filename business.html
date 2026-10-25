@@ -119,6 +119,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 .pbig{background:#fff}
 </style><script src="pb-guard.js" defer></script>
 <script src="pb-track.js"></script>
+<script src="pb-hiring.js"></script>
 <script src="site-config.js"></script>
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js"></script>
@@ -434,8 +435,10 @@ async function loadVacFlag(){
 }
 function drawVacFlag(){
   const el=document.getElementById("vacFlag");if(!el)return;
+  if(window.PBHire)PBHire.top(!!VACF&&!(window.PBHide&&PBHide.has("vac")));
   if(!VACF){el.style.display="none";return;}
   const en=PB.lang&&PB.lang()!=="hi";el.style.display="flex";
+  if(window.PBHire){el.classList.add("pbh");el.innerHTML=PBHire.tile(62)+'<div class="tx"><b>'+(en?"Vacancy available":"नौकरी खाली है")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span></div>';return;}
   el.innerHTML='<b>💼 '+(en?"Vacancy available":"नौकरी खाली है (Vacancy)")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span>';
 }
 /* इस दुकान की चालू vacancies (₹499 plan वाली) */
