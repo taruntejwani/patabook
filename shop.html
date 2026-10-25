@@ -9,6 +9,7 @@
 <script src="i18n.js"></script>
 <script src="pb-track.js"></script>
 <script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
 <script src="pb-guard.js" defer></script>
 <script src="pb-card.js" defer></script>
 <style>
@@ -136,7 +137,7 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .near em{display:inline-block;font-style:normal;margin-top:6px;background:#e8f0fe;color:var(--blue);font-weight:800;font-size:11.5px;border-radius:999px;padding:2px 8px}
 .shr{font:inherit;text-align:left;cursor:pointer}
 .vflag{display:flex;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px}
-.lnk{display:block;text-align:center;margin:6px 0;font-size:14px;font-weight:700;color:var(--blue)}
+.lnk[hidden]{display:none}.lnk{display:block;text-align:center;margin:6px 0;font-size:14px;font-weight:700;color:var(--blue)}
 .rep{border:0;background:none;padding:6px 10px;font-size:13px;color:#b42318;cursor:pointer}
 .pw{text-align:center;color:var(--muted);font-size:12.5px;padding:8px 16px 22px;line-height:1.7}
 .pw a{color:var(--blue);font-weight:700}
@@ -226,7 +227,7 @@ async function load(){
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}
     render();
     await Promise.all([loadPrem(),loadContact()]);
-    loadNear();loadVacFlag();
+    loadNear();loadVacFlag();loadOwner();
     render();
   }catch(e){app.innerHTML='<p class="note">'+L("इंटरनेट की दिक्कत — दोबारा कोशिश करें।","Connection problem — please try again.")+'</p>';}
 }
@@ -301,7 +302,7 @@ function render(){
      '<section class="blk" id="near" hidden><h2>📍 '+L("पास की दूसरी दुकानें","Other shops nearby")+'</h2><div class="near" id="nearBox"></div></section>'+
    '</div>'+
    '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
-     '<a class="lnk" href="mybusiness.html">'+L("यह आपकी दुकान है? यहां से संभालें ›","Is this your shop? Manage it ›")+'</a>'+
+     '<a class="lnk" id="ownBox" hidden href="mybusiness.html">✏️ '+L("आपकी दुकान — यहां से संभालें ›","Your shop — manage it here ›")+'</a>'+
      '<button type="button" class="rep" id="repBtn">🚩 '+L("इस दुकान की शिकायत करें","Report this listing")+'</button><br>'+
      '<a class="pb" href="index.html"><img src="pin.png" alt="">Powered by PataBook</a></div>';
   /* नीचे चिपका Call / WhatsApp */
@@ -315,7 +316,7 @@ function render(){
   const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
   document.getElementById("shareQa").onclick=share;
   document.getElementById("repBtn").onclick=openReport;
-  wireDir(b,addr,dir);
+  wireDir(b,addr,dir);drawOwn();
   document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
   drawVacFlag();drawNear();
   placeMap();spy();
@@ -403,6 +404,14 @@ function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)retu
   const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
   const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
   c.onclick=go;const ct=c.closest(".l").querySelector(".cpt");if(ct)ct.onclick=go;}
+/* "आपकी दुकान — संभालें": सिर्फ़ login हुए मालिक को, और सिर्फ़ उसकी अपनी दुकान पर (My Shop वाली list से जाँच) */
+let OWN=false;
+async function loadOwner(){
+  try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
+    const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
+    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);}catch(e){OWN=false;}
+  drawOwn();}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;}
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const wa=waNum(),ph=phNum(),ph2=B?line(B,"Phone2").replace(/\D/g,""):"",altWa=B?line(B,"WhatsApp").replace(/\D/g,""):"";

@@ -160,7 +160,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();
+    render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();loadOwner();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -230,6 +230,14 @@ function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)retu
   const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
   const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
   c.onclick=go;const ct=c.closest(".l").querySelector(".cpt");if(ct)ct.onclick=go;}
+/* "आपकी दुकान — संभालें": सिर्फ़ login हुए मालिक को, और सिर्फ़ उसकी अपनी दुकान पर (My Shop वाली list से जाँच) */
+let OWN=false;
+async function loadOwner(){
+  try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
+    const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
+    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);}catch(e){OWN=false;}
+  drawOwn();}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;}
 function ctoast(s){const d=document.createElement("div");d.className="ctoast";d.textContent=s;document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}
 function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
@@ -346,10 +354,11 @@ function render(){
    '<section class="card" id="near" hidden><h2>📍 '+esc(en?"Other shops nearby":"पास की दूसरी दुकानें")+'</h2><div class="near" id="nearBox"></div></section>'+
    '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()==="en")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()==="en")?"Terms":"नियम")+'</a></p>'+
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
-   '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>'+
+   '<p id="ownBox" hidden style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:700">✏️ '+((PB.lang&&PB.lang()==="en")?"Your shop — manage it here ›":"आपकी दुकान — यहां से संभालें ›")+'</a></p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>'+'<div id="whoBot" style="text-align:center;margin:0 0 14px"></div>';
   drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();drawProds();
   wireDir(b,addr,map);
+  drawOwn();
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
   /* visitor वाला कार्ड: नंबर कभी नहीं छपता (QR से लोग PataBook पर आकर नंबर देखें); दुकानदार का अपना कार्ड Live स्क्रीन से नंबर के साथ बनता है */
