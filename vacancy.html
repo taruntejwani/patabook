@@ -52,7 +52,7 @@ input:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
 </style>
 </head>
 <body>
-<script>/* ₹499 Vacancy plan अभी बंद (site-config.js → jobs:false) — यह पेज न खुले */if(!(window.PB_SITE&&PB_SITE.jobs))location.replace("mybusiness.html");</script>
+<script>/* ₹499 Vacancy plan अभी बंद (site-config.js → jobs:false) — यह पेज न खुले */if(!(window.PB_SITE&&(PB_SITE.jobs||PB_SITE.premium)))location.replace("mybusiness.html");</script>
 <div class="wrap">
  <div class="top"><a class="back" id="backLink" href="index.html">←</a><div class="brand">PataBook</div><span id="pbLang"></span></div>
 
@@ -118,6 +118,8 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
 const TK="pb-own-"+slug;
 const PRICE=499;
+/* "मेरी दुकान" से आए (#t=…): अलग OTP नहीं — वहीं का login (sql-23 pb_owner_vac_token) */
+(function(){const m=/[#&]t=([0-9a-f]{64})/.exec(location.hash||"");if(m){try{localStorage.setItem(TK,JSON.stringify({t:m[1],exp:Date.now()+11.5*3600e3}));}catch(e){}history.replaceState(null,"",location.pathname+location.search);}})();
 function getTok(){try{const o=JSON.parse(localStorage.getItem(TK)||"null");return o&&o.exp>Date.now()?o.t:"";}catch(e){return "";}}
 function setTok(t){try{if(t)localStorage.setItem(TK,JSON.stringify({t:t,exp:Date.now()+11.5*3600e3}));else localStorage.removeItem(TK);}catch(e){}}
 function show(id){["loading","noShop","login","panel"].forEach(x=>$(x).hidden=x!==id);}
@@ -187,17 +189,13 @@ async function load(){
   const until=S.plan_until?new Date(S.plan_until):null,on=until&&until>new Date(S.now||Date.now());
   let h="";
   if(on){
-    h='<div class="plan on">✅ '+T("Vacancy plan चालू है — "+fmtD(S.plan_until)+" तक","Vacancy plan active — till "+fmtD(S.plan_until))+'</div>'+
-      '<button class="btn sec" id="payBtn">'+T("🔁 Plan 30 दिन और बढ़ाएँ — ₹"+PRICE,"🔁 Extend plan 30 days — ₹"+PRICE)+'</button>';
+    h='<div class="plan on">💎 '+T("Premium चालू है — "+fmtD(S.plan_until)+" तक। जितनी चाहें vacancy डालें।","Premium active — till "+fmtD(S.plan_until)+". Post as many vacancies as you like.")+'</div>';
   }else{
-    h='<div class="plan off">'+T(until?"⏳ आपका plan "+fmtD(S.plan_until)+" को खत्म हो गया। आपकी vacancies अभी किसी को नहीं दिख रहीं।":"Vacancy डालने के लिए plan लें।",until?"⏳ Your plan ended on "+fmtD(S.plan_until)+". Your vacancies are not visible now.":"Get a plan to post vacancies.")+'</div>'+
-      '<p class="price" style="margin:14px 0 0">₹'+PRICE+' <small>'+T("/ 30 दिन","/ 30 days")+'</small></p>'+
-      '<ul class="feat"><li>'+T("जितनी चाहें उतनी vacancy","Post as many vacancies as you like")+'</li><li>'+T("PataBook के “💼 नौकरी” पेज और आपकी दुकान के पेज पर दिखेगी","Shown on PataBook’s “💼 Jobs” page and on your shop page")+'</li><li>'+T("नौकरी ढूँढने वाले OTP से verified लोग ही आपको call करेंगे","Only OTP-verified job seekers can call you")+'</li></ul>'+
-      '<button class="btn pay" id="payBtn">'+T("💳 ₹"+PRICE+" देकर plan लें","💳 Get plan for ₹"+PRICE)+'</button>'+
-      '<p class="note">'+T("UPI / Card / Net Banking — Razorpay से सुरक्षित भुगतान। Plan 30 दिन चलता है, अपने-आप दोबारा नहीं कटता।","UPI / Card / Net Banking — secure payment by Razorpay. The plan runs for 30 days and does not auto-renew.")+'</p>';
+    h='<div class="plan off">'+T(until?"⏳ आपका Premium "+fmtD(S.plan_until)+" को खत्म हो गया। आपकी vacancies अभी किसी को नहीं दिख रहीं।":"💼 Vacancy डालना PataBook Premium का हिस्सा है। Premium चालू होते ही यहाँ vacancy डाल सकेंगे।",until?"⏳ Your Premium ended on "+fmtD(S.plan_until)+". Your vacancies are not shown now.":"💼 Posting vacancies is part of PataBook Premium. Once Premium is active you can post here.")+'</div>'+
+      '<p class="note">'+T("मुफ़्त \"Vacancy available\" switch \"मेरी दुकान\" में पहले की तरह चालू है।","The free \"Vacancy available\" switch in My Shop still works.")+'</p>';
   }
   if(S.is_active===false)h+='<p class="note">⚠️ '+T("आपकी दुकान अभी Pending है — admin के approve करने के बाद ही vacancies दिखेंगी।","Your shop is still pending — vacancies show only after the admin approves the shop.")+'</p>';
-  $("planBox").innerHTML=h;$("payBtn").onclick=pay;
+  $("planBox").innerHTML=h;const pb=$("payBtn");if(pb)pb.onclick=pay;
   $("formCard").hidden=!on;
   const jobs=S.jobs||[];$("listCard").hidden=!jobs.length;
   $("myJobs").innerHTML=jobs.map(j=>{const live=on&&j.status==="live"&&new Date(j.expires_at)>new Date();
@@ -221,7 +219,7 @@ $("jf").onsubmit=async ev=>{ev.preventDefault();$("eJ").textContent="";
   if(p.title.length<2){$("eJ").textContent=T("काम / पद का नाम लिखें।","Write the job / position.");$("jt").focus();return;}
   $("jSave").disabled=true;
   try{await rpc("pb_vac_save",{p_token:getTok(),p:p});resetForm();await load();}
-  catch(x){$("eJ").textContent=/plan required/i.test(x.message)?T("पहले plan लें।","Get a plan first."):/too many/i.test(x.message)?T("एक साथ 100 से ज़्यादा vacancy नहीं।","Max 100 vacancies at a time."):/login required/i.test(x.message)?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(x);
+  catch(x){$("eJ").textContent=/plan required/i.test(x.message)?T("Premium चालू नहीं है।","Premium is not active."):/too many/i.test(x.message)?T("एक साथ 100 से ज़्यादा vacancy नहीं।","Max 100 vacancies at a time."):/login required/i.test(x.message)?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(x);
     if(/login required/i.test(x.message)){setTok("");show("login");}}
   $("jSave").disabled=false;};
 $("logout").onclick=()=>{setTok("");location.reload();};

@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PataBook">
+<script src="site-config.js"></script>
 <script src="i18n.js"></script>
 <script src="pb-auth.js"></script>
 <style>
@@ -89,6 +90,7 @@ h1{font-size:30px;font-weight:800;letter-spacing:-.4px;margin-top:4px}
 footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12px}
 @media(max-width:480px){.nav{gap:6px}.add{padding:7px 10px;font-size:12px;max-width:34vw;overflow:hidden;text-overflow:ellipsis}.brand .col{display:none}}
 @media(max-width:380px){.acts,.addr,.desc{margin-inline-start:0}}
+.tag.feat{background:#fff6d6;color:#8a6200;font-weight:800}.tag.prem{background:linear-gradient(135deg,#e8f0fe,#f3e8ff);color:#3b2bb8;font-weight:800}.card.isprem{border-color:#c9b8ff;box-shadow:0 6px 18px rgba(91,63,228,.10)}
 </style>
 <script src="pb-guard.js" defer></script>
 <script src="pb-track.js"></script>
@@ -256,6 +258,7 @@ async function load(){
       return b;
     }).filter(b=>mode!=="geo"||b._nopos||(b._d!=null&&b._d<=radius));
     rows.sort((a,b)=>mode==="geo"?((a._nopos?1:0)-(b._nopos?1:0))||((a._d??0)-(b._d??0))||String(a.name).localeCompare(b.name):String(a.name).localeCompare(b.name));
+    rows=await premiumFirst(rows);
     render();
   }catch(e){list.innerHTML=`<p class="note">${L.err}</p>`;}
 }
@@ -264,6 +267,19 @@ function drawStatus_sub(){
     ?`${L.near} · ${T("within",{r:"<b>"+radius+" km</b>"})} · ${L.nearest}`:`${L.near} · <b>${esc(cityName)}</b>`;
 }
 
+/* 💎 Premium (sql-23): Premium दुकानें सबसे ऊपर — हर बार अलग क्रम (rotation), ताकि सबको बराबर मौका मिले */
+let PREMS={};
+async function premiumFirst(rows){
+  if(!(window.PB_SITE&&PB_SITE.premium)||!rows||!rows.length)return rows;
+  try{
+    const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:rows.map(b=>b.slug).filter(Boolean).slice(0,300)})});
+    if(!r.ok)return rows;PREMS=await r.json()||{};
+  }catch(e){return rows;}
+  const p=rows.filter(b=>PREMS[b.slug]),o=rows.filter(b=>!PREMS[b.slug]);
+  for(let i=p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}
+  return p.concat(o);
+}
+function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()==="en";return '<span class="tag feat">⭐ '+(en?"Featured":"Featured")+'</span><span class="tag prem">💎 Premium</span>';}
 /* render */
 /* दुकान का logo: logo_url हो तो फोटो, नहीं तो नाम के पहले अक्षर वाला रंगीन बैज */
 const LOGO_BG=["linear-gradient(135deg,#1a73e8,#0b2f73)","linear-gradient(135deg,#1e9e57,#0f6b3a)","linear-gradient(135deg,#f57c00,#c43e00)","linear-gradient(135deg,#8e24aa,#5e1780)","linear-gradient(135deg,#e53935,#a31515)","linear-gradient(135deg,#00897b,#005b52)","linear-gradient(135deg,#3949ab,#1f2a78)"];
@@ -305,13 +321,14 @@ function render(){
     const blink="business.html?slug="+encodeURIComponent(b.slug||"");
     const dir=pbDir(b);
     const d=cleanDesc(b);
-    return `<article class="card">
+    return `<article class="card${PREMS[b.slug]?" isprem":""}">
       <div class="top">
         ${logoHTML(b)}
         <div class="info">
           <h2><a href="${blink}">${esc(b.name)}</a></h2>
           <div class="tags">
             ${b._sub?`<span class="tag">${esc(b._sub)}</span>`:`<span class="tag">${esc(b.category)}</span>`}
+            ${premTags(b)}
             ${b.is_verified?`<span class="tag ver">${L.ver}</span>`:""}
             ${HIRE[b.slug]?`<span class="tag hire">💼 ${PB.lang&&PB.lang()==="en"?"Hiring":"नौकरी खाली है"}</span>`:""}
             ${b.rating?`<span class="tag rt">★ ${esc(b.rating)}${b.review_count?" ("+esc(b.review_count)+")":""}</span>`:""}

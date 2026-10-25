@@ -24,6 +24,11 @@ window.PB_SITE = {
 
   /* 💼 ₹499 Vacancy plan: अभी बंद (24 Oct 2026 — Play Store billing नियम की वजह से)। false रहने तक vacancy.html / jobs.html नहीं खुलते।
      मुफ़्त "Vacancy available" स्विच (मेरी दुकान) इससे अलग है और चालू रहता है। */
-  jobs: false
+  jobs: false,
+
+  /* 💎 Premium (sql-23): Admin से दिया जाता है (मुफ़्त / नकद)। true = Premium दुकानें ऊपर, निशान, gallery, 30 दिन रिपोर्ट, Vacancy डालना।
+     premiumReq: दुकानदार "मेरी दुकान" से Premium की request भेज सके — Google Play पेमेंट चालू होने तक false रखें। */
+  premium: true,
+  premiumReq: false
 
 };

@@ -62,6 +62,17 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .nt .bn{font-size:13px;margin-top:8px;line-height:1.45}.nt .bn:empty{display:none}
 .ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
+.pm{margin-top:12px;border-radius:16px;padding:12px 14px;background:linear-gradient(135deg,#eef2ff,#f6efff);border:1px solid #d9d0ff}
+.pm .ph{display:flex;align-items:center;gap:8px;font-weight:800;color:#3b2bb8;font-size:15px}.pm small{display:block;color:#5b6475;font-size:12.5px;font-weight:500;margin-top:2px}
+.pm .pb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.pm .pb button{border:1px solid #d9d0ff;background:#fff;border-radius:12px;padding:9px 4px;font:inherit;font-size:12.5px;font-weight:700;color:#3b2bb8;cursor:pointer}
+.pm .pb button.on{background:#3b2bb8;color:#fff}
+.pm ul{margin:8px 0 0 18px;font-size:13px;color:#33395a}.pm li{margin:3px 0}
+.pm textarea{width:100%;margin-top:8px;border:1px solid #d9d0ff;border-radius:10px;padding:8px;font:inherit;font-size:13.5px;min-height:56px}
+.pm .go{margin-top:8px;width:100%;border:0;border-radius:12px;padding:11px;font:inherit;font-weight:800;background:#3b2bb8;color:#fff;cursor:pointer}
+.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.pg .t{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#fff}.pg img{width:100%;height:100%;object-fit:cover;display:block}
+.pg .t button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;cursor:pointer}
+.pg .add{display:grid;place-items:center;border:2px dashed #c9b8ff;border-radius:10px;aspect-ratio:1;color:#3b2bb8;font-size:22px;background:#fff;cursor:pointer}
+.rp{margin-top:10px;background:#fff;border-radius:12px;padding:10px}.rp svg{display:block;width:100%;height:auto}.rp .tt{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:#33395a;margin-top:6px}.rp .tt b{color:#0b2f73}
 .wk{margin-top:10px;font-size:13px;color:#0b2f73;background:#eef4ff;border-radius:12px;padding:8px 12px;font-weight:600}
 .pf{display:flex;align-items:center;gap:14px;margin-top:12px;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:12px}
 .pf .ring{flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center}
@@ -273,6 +284,61 @@ function notifBlock(){
     (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
     '</div>';
 }
+/* 💎 Premium (sql-23) — अभी Admin से मिलता है; request वाला हिस्सा PB_SITE.premiumReq से */
+let PREM=null,PHOTOS={},REPORT={},PMOPEN={};
+async function loadPrem(){if(!(window.PB_SITE&&PB_SITE.premium)){PREM=null;return;}try{PREM=await rpc("pb_my_premium")||{};}catch(e){PREM=null;}}
+function premOn(b){return !!(PREM&&PREM[b.slug]&&PREM[b.slug].until);}
+function premBlock(b,i){
+  if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
+  if(P.until){
+    const till=new Date(P.until).toLocaleDateString(en?"en-IN":"hi-IN",{day:"numeric",month:"short",year:"numeric"}),o=PMOPEN[b.slug]||"";
+    let body="";
+    if(o==="ph"){const L8=PHOTOS[b.slug]||[];
+      body='<div class="pg">'+L8.map(x=>'<div class="t"><img src="'+esc(x.url)+'" alt="" loading="lazy"><button type="button" data-prm="'+x.id+'" data-i="'+i+'" aria-label="Remove">✕</button></div>').join("")+
+        (L8.length<8?'<label class="add">＋<input type="file" accept="image/*" hidden data-pup="'+i+'"></label>':'')+'</div>'+
+        '<small>'+(en?L8.length+" / 8 photos · shown on your shop page":L8.length+" / 8 फ़ोटो · आपकी दुकान के पेज पर दिखती हैं")+'</small><div class="err" id="pe'+i+'"></div>';}
+    if(o==="rp")body=reportHTML(b);
+    return '<div class="pm"><div class="ph">💎 '+(en?"PataBook Premium":"PataBook Premium")+'</div><small>'+(en?"Active till "+till+" · ⭐ your shop shows on top":till+" तक चालू · ⭐ आपकी दुकान ऊपर दिखती है")+'</small>'+
+      '<div class="pb"><button type="button" class="'+(o==="ph"?"on":"")+'" data-pm="ph" data-i="'+i+'">🖼️ '+(en?"Photos":"फ़ोटो")+'</button><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button><button type="button" data-pm="vac" data-i="'+i+'">💼 Vacancy</button></div>'+body+'</div>';
+  }
+  if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
+  const r=P.request;
+  const feats='<ul><li>⭐ '+(en?"Your shop on top in search and categories":"Search और category में आपकी दुकान ऊपर")+'</li><li>💎 '+(en?"Premium badge":"\"Premium\" निशान")+'</li><li>🖼️ '+(en?"Photo gallery (8 photos)":"फ़ोटो gallery (8 फ़ोटो)")+'</li><li>📊 '+(en?"Full 30-day report":"30 दिन की पूरी रिपोर्ट")+'</li><li>💼 '+(en?"Post vacancies":"Vacancy (नौकरी) डालना")+'</li></ul>';
+  let tail;
+  if(r==="pending")tail='<small style="margin-top:8px;font-weight:700;color:#7a4b00">⏳ '+(en?"Request sent — waiting for PataBook approval":"Request भेज दी — PataBook की मंज़ूरी का इंतज़ार")+'</small>';
+  else if(r==="approved")tail='<small style="margin-top:8px;font-weight:700;color:#137333">✅ '+(en?"Approved — PataBook will contact you":"मंज़ूर हो गया — PataBook आपसे संपर्क करेगा")+'</small>';
+  else tail=(r==="rejected"&&P.reason?'<small style="margin-top:8px;color:#b42318">'+esc((en?"Last request not approved: ":"पिछली request मंज़ूर नहीं हुई: ")+P.reason)+'</small>':'')+
+    '<textarea id="pmn'+i+'" maxlength="300" placeholder="'+(en?"Anything to tell us? (optional)":"कुछ बताना हो तो लिखें (ज़रूरी नहीं)")+'"></textarea><button type="button" class="go" data-preq="'+i+'">'+(en?"Send Premium request":"Premium के लिए request भेजें")+'</button><div class="err" id="pqe'+i+'"></div>';
+  return '<div class="pm"><div class="ph">💎 PataBook Premium</div>'+feats+tail+'</div>';
+}
+function reportHTML(b){
+  const R=REPORT[b.slug],en=L()==="en";if(!R)return '<div class="rp"><small>…</small></div>';
+  const days=R.days||30,end=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));const D=[];
+  for(let k=days-1;k>=0;k--){const d=new Date(end);d.setDate(d.getDate()-k);D.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"));}
+  const M={};(R.rows||[]).forEach(x=>{(M[x.day]=M[x.day]||{})[x.kind]=x.n;});
+  const tot={view:0,call:0,wa:0,dir:0};D.forEach(d=>{const m=M[d]||{};for(const k in tot)tot[k]+=(m[k]||0);});
+  const mx=Math.max(1,...D.map(d=>(M[d]||{}).view||0)),W=300,H=90,bw=W/D.length;
+  let bars="";D.forEach((d,k)=>{const m=M[d]||{},v=m.view||0,h=v/mx*(H-14),x=k*bw;
+    bars+='<rect x="'+(x+bw*.15).toFixed(1)+'" y="'+(H-12-h).toFixed(1)+'" width="'+(bw*.7).toFixed(1)+'" height="'+Math.max(h,v?1.5:0).toFixed(1)+'" rx="1.5" fill="#6b5cf0"><title>'+d+': '+v+'</title></rect>';
+    if((m.call||0)+(m.wa||0))bars+='<circle cx="'+(x+bw/2).toFixed(1)+'" cy="'+(H-12-h-4).toFixed(1)+'" r="2.2" fill="#1e9e57"/>';});
+  const lab=(t,x,a)=>'<text x="'+x+'" y="'+(H-1)+'" font-size="8" fill="#8a93a3" text-anchor="'+a+'">'+t+'</text>';
+  return '<div class="rp"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="views per day">'+bars+'<line x1="0" x2="'+W+'" y1="'+(H-12)+'" y2="'+(H-12)+'" stroke="#e4eaf5"/>'+lab(D[0].slice(5),0,"start")+lab(en?"today":"आज",W,"end")+'</svg>'+
+    '<div class="tt"><span>👀 <b>'+tot.view+'</b> '+(en?"views":"ने देखा")+'</span><span>📞 <b>'+tot.call+'</b> Call</span><span>💬 <b>'+tot.wa+'</b> WhatsApp</span><span>🧭 <b>'+tot.dir+'</b> '+(en?"directions":"रास्ता")+'</span></div>'+
+    '<small>'+(en?"Last "+days+" days · purple bar = views, green dot = a call/WhatsApp that day":"पिछले "+days+" दिन · बैंगनी = कितनों ने देखा, हरा बिंदु = उस दिन Call/WhatsApp")+'</small></div>';
+}
+function resizeImage(file,maxSide){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const k=Math.min(1,maxSide/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<290000)return res(bl);if(q>0.45)return tryQ(q-0.15);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.82);};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
+async function addPhoto(i,file){const b=ROWS[i],en=L()==="en",er=$("pe"+i);if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";
+  try{if(!/^image\//.test(file.type))throw new Error("type");ME=await PBA.session();const blob=await resizeImage(file,1100),ext=blob.type==="image/webp"?"webp":"jpg";
+    const path=encodeURIComponent(b.slug)+"/photo-"+Date.now()+"."+ext;
+    const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
+    if(!up.ok)throw new Error("upload");
+    await rpc("pb_photo_add",{p_slug:b.slug,p_url:SB+"/storage/v1/object/public/shop-logos/"+path});
+    PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();
+  }catch(x){const e2=$("pe"+i);if(e2)e2.textContent=/too many/.test(x.message||"")?(en?"Max 8 photos.":"8 से ज़्यादा फ़ोटो नहीं।"):(en?"Could not upload. Try again.":"फ़ोटो upload नहीं हुई। दोबारा कोशिश करें।");}}
 function weekLine(b){
   const w=EVS&&EVS.week&&EVS.week[b.slug];if(!w)return "";
   const en=L()==="en";
@@ -384,7 +450,7 @@ function draw(){
   list.innerHTML=notifBlock()+ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    profBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i)+logoBlock(b,i)+
+    profBlock(b,i)+premBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i)+logoBlock(b,i)+
     '<a class="edbtn" href="edit.html?slug='+encodeURIComponent(b.slug)+'"><span>✏️</span><span><b>'+(L()==="en"?"Edit details":"जानकारी बदलें")+'</b><small>'+(L()==="en"?"Timings, WhatsApp, PIN, delivery, email, website, services":"समय, WhatsApp, PIN, डिलीवरी, ईमेल, वेबसाइट, सेवाएँ")+'</small></span><i>›</i></a>'+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
@@ -392,7 +458,23 @@ function draw(){
     '<a class="addsm" href="list.html">➕ '+(L()==="en"?"Have another shop? Add it with a different mobile number ›":"दूसरी दुकान भी है? दूसरे मोबाइल नंबर से जोड़ें ›")+'</a>'+
     (PINST?'<button type="button" class="delacc" id="delAcc">🗑️ '+(L()==="en"?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
 }
+$("list").addEventListener("change",e=>{const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);});
 $("list").addEventListener("click",async e=>{
+  const pmb=e.target.closest("[data-pm]");
+  if(pmb){const i=+pmb.dataset.i,b=ROWS[i],k=pmb.dataset.pm;
+    if(k==="vac"){pmb.disabled=true;try{ME=await PBA.session();const t=await rpc("pb_owner_vac_token",{p_slug:b.slug});location.href="vacancy.html?slug="+encodeURIComponent(b.slug)+"#t="+t;}catch(x){pmb.disabled=false;alert(L()==="en"?"Could not open. Try again.":"खुल नहीं सका। दोबारा कोशिश करें।");}return;}
+    PMOPEN[b.slug]=PMOPEN[b.slug]===k?"":k;draw();
+    try{if(k==="ph"&&PMOPEN[b.slug]){PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}
+        if(k==="rp"&&PMOPEN[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});draw();}}catch(x){}
+    return;}
+  const prm=e.target.closest("[data-prm]");
+  if(prm){const i=+prm.dataset.i,b=ROWS[i];if(!confirm(L()==="en"?"Remove this photo?":"यह फ़ोटो हटाएँ?"))return;
+    try{await rpc("pb_photo_remove",{p_slug:b.slug,p_id:+prm.dataset.prm});PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}catch(x){}return;}
+  const prq=e.target.closest("[data-preq]");
+  if(prq){const i=+prq.dataset.preq,b=ROWS[i];prq.disabled=true;
+    try{ME=await PBA.session();await rpc("pb_owner_premium_request",{p_slug:b.slug,p_note:($("pmn"+i)||{}).value||null});await loadPrem();draw();}
+    catch(x){prq.disabled=false;const er=$("pqe"+i);if(er)er.textContent=/rate limit/.test(x.message||"")?(L()==="en"?"Try again tomorrow.":"कल फिर कोशिश करें।"):tx("e_sw");}
+    return;}
   const hs=e.target.closest(".sw.home");
   if(hs){
     const i=+hs.dataset.h,b=ROWS[i],cur=(HOME&&HOME[b.slug])||"off",want=cur==="off",en=L()==="en";$("he"+i).textContent="";
@@ -549,7 +631,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPrem();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}

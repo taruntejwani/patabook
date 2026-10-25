@@ -170,6 +170,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="pTabs"><button data-p="pending" class="on">⏳ बाकी</button><button data-p="done">✔ हो चुकी</button></div>
     <div id="pBody"></div>
   </div>
+  <div id="pmv" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>💎 Premium</h2></div>
+    <p class="cnt">Premium दुकानें search और category में ऊपर (बारी-बारी से), "💎 Premium" निशान, फ़ोटो gallery, 30 दिन की रिपोर्ट और Vacancy पाती हैं। बाहर सबको एक जैसा दिखता है — मुफ़्त / नकद सिर्फ यहाँ दिखता है।</p>
+    <div class="mtabs" id="pmTabs"><button data-pm="active" class="on">💎 चालू</button><button data-pm="log">📜 रिकॉर्ड / नकद</button><button data-pm="req">📨 Requests</button></div>
+    <div id="pmBody"></div>
+  </div>
   <div id="hsv" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
     <div class="hh"><h2>🏠 Home Service की requests</h2></div>
@@ -193,7 +200,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="cnt" id="cnt"></div>
     <div class="bulk" id="bulk" hidden>
       <label><input type="checkbox" id="selAll"> सभी चुनें</label><span class="n" id="selN"></span>
-      <button class="ok" id="bOk" disabled>✅ Approve</button><button class="hold" id="bHold" disabled>⏸ Pending</button><button class="del" id="bDel" disabled>🗑 हटाएँ</button>
+      <button class="ok" id="bOk" disabled>✅ Approve</button><button class="hold" id="bHold" disabled>⏸ Pending</button><button class="del" id="bDel" disabled>🗑 हटाएँ</button><button class="ok" id="bPrem" disabled style="background:#3b2bb8">💎 Premium</button>
     </div>
     <div id="list"></div>
   </div>
@@ -204,7 +211,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var START = location.hash;
-  var status = 'pending', sess = null, rows = [], timer = null, OWN = null, CODES = {}, HOME = null, CITIES = null;
+  var status = 'pending', sess = null, rows = [], timer = null, OWN = null, CODES = {}, HOME = null, CITIES = null, PREMA = null;
 
   async function rpc(fn, args) {
     sess = await PBA.session();
@@ -237,6 +244,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       }
       HOME = null;
       try { HOME = {}; (await rpc('pb_admin_home_info') || []).forEach(function (h) { HOME[h.slug] = h; }); } catch (x) { HOME = null; }
+      PREMA = null;
+      try { PREMA = {}; ((await rpc('pb_admin_premium_list') || {}).active || []).forEach(function (p) { PREMA[p.slug] = p; }); } catch (x) { PREMA = null; }
       if (!CITIES) { try { CITIES = await rpc('pb_public_cities') || []; } catch (x) { CITIES = []; } }
       CODES = {};
       try { (await rpc('pb_admin_codes', { p_q: null }) || []).forEach(function (c) { CODES[c.slug] = c.business_code; }); } catch (x) { CODES = {}; }
@@ -277,7 +286,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     $('bulk').hidden = !rows.length;
     $('selN').textContent = n ? n + ' चुनी' : 'कोई नहीं चुनी';
     $('selAll').checked = n > 0 && n === rows.length; $('selAll').indeterminate = n > 0 && n < rows.length;
-    $('bOk').disabled = $('bHold').disabled = $('bDel').disabled = !n;
+    $('bOk').disabled = $('bHold').disabled = $('bDel').disabled = !n; if ($('bPrem')) { $('bPrem').disabled = !n || !PREMA; $('bPrem').textContent = '💎 Premium' + (n ? ' (' + n + ')' : ''); }
     $('bOk').textContent = '✅ Approve' + (n ? ' (' + n + ')' : ''); $('bHold').textContent = '⏸ Pending' + (n ? ' (' + n + ')' : ''); $('bDel').textContent = '🗑 हटाएँ' + (n ? ' (' + n + ')' : '');
     document.querySelectorAll('#list .card').forEach(function (c) { var cb = c.querySelector('.pick'); if (cb) c.classList.toggle('sel', cb.checked); });
   }
@@ -301,6 +310,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '<button class="lnk" data-a="fix" data-i="' + i + '">✍️ सुधार माँगें</button>' +
         (line(b.description, 'GST') ? '<button class="' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'phon' : 'lnk') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
+        (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">💎 Premium ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
         (b.slug ? '<a class="lnk" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">प्रोफ़ाइल</a>' : '') +
         (mapLink ? '<a class="lnk" href="' + mapLink + '" target="_blank">मैप</a>' : '') +
         '</div></div>';
@@ -337,9 +347,18 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   $('bOk').onclick = function () { bulk('ok'); };
   $('bHold').onclick = function () { bulk('hold'); };
   $('bDel').onclick = function () { bulk('del'); };
+  $('bPrem').onclick = function () { var sl = rows.filter(function (b) { return SEL[b.slug]; }).map(function (b) { return b.slug; }); if (sl.length) premSheet(sl, sl.length + ' दुकानें'); };
   $('list').onclick = async function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
     var r = rows[+b.dataset.i], a = b.dataset.a;
+    if (a === 'prem') {
+      var pa = PREMA && PREMA[r.slug];
+      if (pa) {
+        if (confirm('"' + r.name + '" का Premium ' + fmtShort(pa.until) + ' तक चालू है (' + methodName(pa.method) + ')।\n\nOK = दिन और बढ़ाएँ\nCancel = कुछ नहीं')) premSheet([r.slug], r.name);
+        return;
+      }
+      premSheet([r.slug], r.name); return;
+    }
     if (a === 'ph') {
       b.disabled = true;
       try { await rpc('pb_set_show_phone', { p_slug: r.slug, p_on: ownOf(r).show_phone === false }); load(); }
@@ -413,7 +432,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!sess) return gate('login');
     $('who').textContent = sess.email || ''; $('out').hidden = false;
     showHome();
-    if (START === '#edv') showEdits(); else if (START === '#phv') showPhReq(); else if (START === '#hsv') showHsReq(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
+    if (START === '#edv') showEdits(); else if (START === '#phv') showPhReq(); else if (START === '#hsv') showHsReq(); else if (START === '#pmv') showPrem(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
     bellState();
   })();
   /* ---- 🔔 Push notification: नई दुकान / शिकायत / संदेश पर इस फ़ोन में घंटी ---- */
@@ -456,7 +475,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv', 'pmv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -497,13 +516,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0],
       ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0],
       ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
-      ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0]
+      ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0],
+      ['premium', '💎', '#efeaff', 'Premium', '–', 'चालू Premium दुकानें', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
-    repBadge(); phBadge(); edBadge(); hsBadge();
+    repBadge(); phBadge(); edBadge(); hsBadge(); pmBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -518,6 +538,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'phreq') return showPhReq();
     if (t === 'edits') return showEdits();
     if (t === 'hsreq') return showHsReq();
+    if (t === 'premium') return showPrem();
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
@@ -778,6 +799,96 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try { await rpc('pb_admin_phone_decide', { p_id: +b.dataset.id, p_approve: ok }); }
     catch (x) { alert(/phone in use/i.test(x.message) ? 'यह नया नंबर अब किसी दूसरी दुकान पर है — Approve नहीं हो सकता।' : 'गलती: ' + x.message); }
     loadPhReq();
+  };
+  /* ---- 💎 Premium (sql-23): Admin से देना, list, रिकॉर्ड, requests ---- */
+  function fmtShort(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function methodName(m) { return m === 'cash' ? '💵 नकद' : m === 'gift' ? '🎁 मुफ़्त' : m === 'play' ? '📱 Google Play' : m === 'revoke' ? '⛔ बंद किया' : '—'; }
+  function premSheet(slugs, label) {
+    var old = $('premSheet'); if (old) old.remove();
+    var w = document.createElement('div'); w.id = 'premSheet';
+    w.setAttribute('style', 'position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center');
+    w.innerHTML = '<form style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px 20px;max-height:92vh;overflow:auto">' +
+      '<h2 style="margin:0 0 4px;font-size:18px;color:#3b2bb8">💎 Premium दें</h2><p style="margin:0 0 12px;font-size:13px;color:#5b6475">' + esc(label) + '</p>' +
+      '<label style="display:block;font-weight:700;font-size:14px;margin-top:6px">कितने दिन</label><select id="psD" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit"><option value="365" selected>1 साल (365 दिन)</option><option value="180">6 महीने</option><option value="90">3 महीने</option><option value="30">1 महीना</option><option value="730">2 साल</option></select>' +
+      '<label style="display:block;font-weight:700;font-size:14px;margin-top:12px">कैसे</label><div style="display:flex;gap:8px;margin-top:4px"><label style="flex:1;border:1px solid #d0d7e2;border-radius:10px;padding:10px"><input type="radio" name="psM" value="gift" checked> 🎁 मुफ़्त</label><label style="flex:1;border:1px solid #d0d7e2;border-radius:10px;padding:10px"><input type="radio" name="psM" value="cash"> 💵 नकद</label></div>' +
+      '<div id="psCash" hidden><label style="display:block;font-weight:700;font-size:14px;margin-top:12px">रकम (₹, हर दुकान)</label><input id="psA" type="number" min="0" max="1000000" inputmode="numeric" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit">' +
+      '<label style="display:block;font-weight:700;font-size:14px;margin-top:10px">रसीद नंबर</label><input id="psR" maxlength="40" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit"></div>' +
+      '<label style="display:block;font-weight:700;font-size:14px;margin-top:12px">नोट (सिर्फ आपके लिए)</label><input id="psN" maxlength="300" placeholder="जैसे: चाचा जी की दुकानें" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit">' +
+      '<p id="psE" style="min-height:18px;margin:8px 0;font-size:13.5px;color:#b42318"></p>' +
+      '<div style="display:flex;gap:10px"><button type="button" id="psX" style="flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700">रहने दें</button><button type="submit" id="psGo" style="flex:1;border:0;background:#3b2bb8;color:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:800">💎 Premium चालू करें</button></div></form>';
+    document.body.appendChild(w);
+    var close = function () { w.remove(); };
+    w.addEventListener('click', function (e) { if (e.target === w) close(); });
+    w.querySelector('#psX').onclick = close;
+    w.querySelectorAll('input[name="psM"]').forEach(function (x) { x.onchange = function () { w.querySelector('#psCash').hidden = w.querySelector('input[name="psM"]:checked').value !== 'cash'; }; });
+    w.querySelector('form').onsubmit = async function (e) {
+      e.preventDefault();
+      var m = w.querySelector('input[name="psM"]:checked').value, amt = w.querySelector('#psA').value, er = w.querySelector('#psE');
+      if (m === 'cash' && !(+amt > 0)) { er.textContent = 'नकद की रकम लिखें।'; return; }
+      w.querySelector('#psGo').disabled = true; er.textContent = '';
+      try {
+        var res = await rpc('pb_admin_premium_grant', { p_slugs: slugs, p_days: +w.querySelector('#psD').value, p_method: m, p_amount: m === 'cash' ? +amt : null, p_receipt: w.querySelector('#psR').value || null, p_note: w.querySelector('#psN').value || null });
+        close(); alert('✅ ' + (res && res.shops || 0) + ' दुकान(ों) का Premium चालू।'); SEL = {}; load();
+      } catch (x) { er.textContent = 'नहीं हो सका: ' + x.message; w.querySelector('#psGo').disabled = false; }
+    };
+  }
+  var PMTAB = 'active', PMDATA = null, PMREQ = [];
+  async function pmBadge() {
+    var b = document.querySelector('#tiles [data-t="premium"]'); if (!b) return;
+    try {
+      var d = await rpc('pb_admin_premium_list', {}) || {}, R = await rpc('pb_admin_premium_requests', {}) || [], n = R.filter(function (r) { return r.status === 'pending'; }).length;
+      b.querySelector('b').textContent = (d.active || []).length;
+      b.querySelector('small').textContent = n ? n + ' request बाकी' : 'चालू Premium दुकानें';
+      if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
+    } catch (e) { b.querySelector('small').textContent = 'sql-23 चलाएँ'; }
+  }
+  function showPrem() { view('pmv'); loadPrem(); }
+  async function loadPrem() {
+    $('pmBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    try { PMDATA = await rpc('pb_admin_premium_list', {}) || {}; PMREQ = await rpc('pb_admin_premium_requests', {}) || []; drawPrem(); }
+    catch (e) { if (e.message === 'login') return; $('pmBody').innerHTML = '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 23_premium.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+  }
+  function drawPrem() {
+    var A = PMDATA.active || [], G = PMDATA.log || [], h = '';
+    if (PMTAB === 'active') {
+      h = '<p class="cnt">' + A.length + ' दुकानें Premium · नई दुकान को Premium देने के लिए "दुकानें" list में उस दुकान पर "💎 Premium दें" दबाएँ (या कई चुनकर ऊपर "💎 Premium")</p>' + A.map(function (p) {
+        return '<div class="cty"><h3>💎 <a href="business.html?slug=' + encodeURIComponent(p.slug) + '" target="_blank">' + esc(p.shop) + '</a> <span class="bid">' + methodName(p.method) + '</span></h3>' +
+          (p.address ? '<p class="meta">📍 ' + esc(p.address) + '</p>' : '') + '<p class="meta">' + fmtShort(p.until) + ' तक' + (p.live ? '' : ' · ⏸ दुकान अभी Pending है (Premium नहीं दिखेगा)') + '</p>' +
+          '<div class="acts"><button data-pmx="ext" data-slug="' + esc(p.slug) + '" data-n="' + esc(p.shop) + '" style="background:#3b2bb8;color:#fff">➕ दिन बढ़ाएँ</button><button class="del" data-pmx="off" data-slug="' + esc(p.slug) + '" data-n="' + esc(p.shop) + '">⛔ Premium बंद करें</button></div></div>';
+      }).join('');
+    } else if (PMTAB === 'log') {
+      h = '<p class="cnt">नकद कुल: ₹' + (PMDATA.cash_total || 0) + ' · पिछले ' + G.length + ' बदलाव</p>' + G.map(function (g) {
+        return '<div class="cty"><h3>' + methodName(g.method) + ' · ' + esc(g.shop) + '</h3><p class="meta">' + fmtD(g.at) + (g.days ? ' · ' + g.days + ' दिन' : '') + (g.amount ? ' · ₹' + g.amount : '') + (g.receipt ? ' · रसीद ' + esc(g.receipt) : '') + (g.until && g.method !== 'revoke' ? ' · ' + fmtShort(g.until) + ' तक' : '') + '</p>' + (g.note ? '<p class="meta">📝 ' + esc(g.note) + '</p>' : '') + '</div>';
+      }).join('');
+    } else {
+      var L = PMREQ;
+      h = '<p class="cnt">दुकानदार की Premium requests (दुकानदारों को यह विकल्प अभी website पर बंद है — site-config.js में premiumReq)</p>' + (L.length ? L.map(function (r) {
+        var chk = function (ok, t) { return (ok ? '✅ ' : '⚠️ ') + t; };
+        return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ Pending') + '</span></h3>' +
+          (r.address ? '<p class="meta">📍 ' + esc(r.address) + '</p>' : '') +
+          '<p class="meta">' + esc([r.category, r.type].filter(Boolean).join(' · ')) + ' · PataBook पर ' + fmtShort(r.since) + ' से</p>' +
+          '<p class="meta">' + [chk(r.gst, 'GST'), chk(r.udyam, 'उद्यम'), chk(r.location, 'location'), chk(r.logo, 'logo')].join(' · ') + ' · 👀 30 दिन: ' + (r.views30 || 0) + (r.reports ? ' · 🚩 ' + r.reports + ' शिकायत' : '') + '</p>' +
+          (r.note ? '<p class="meta">💬 ' + esc(r.note) + '</p>' : '') +
+          '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + ({ approved: '✅ मंज़ूर', rejected: '❌ मना', used: '💎 Premium दिया', expired: '⌛ समय निकल गया' }[r.status] || r.status) + (r.reason ? ' — ' + esc(r.reason) : '') : '') + '</p>' +
+          (r.status === 'pending' ? '<div class="acts"><button data-pmr="1" data-id="' + r.id + '" style="background:#137333;color:#fff">✅ Approve</button><button class="del" data-pmr="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
+      }).join('') : '<p class="cnt">अभी कोई request नहीं</p>');
+    }
+    $('pmBody').innerHTML = h || '<p class="cnt">अभी कुछ नहीं</p>';
+  }
+  $('pmTabs').onclick = function (e) { var b = e.target.closest('[data-pm]'); if (!b) return; PMTAB = b.dataset.pm; $('pmTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawPrem(); };
+  $('pmBody').onclick = async function (e) {
+    var x = e.target.closest('[data-pmx]'), q = e.target.closest('[data-pmr]');
+    if (x) {
+      if (x.dataset.pmx === 'ext') { premSheet([x.dataset.slug], x.dataset.n); return; }
+      var why = prompt('"' + x.dataset.n + '" का Premium अभी बंद करें? कारण (सिर्फ आपके रिकॉर्ड के लिए):', ''); if (why === null) return;
+      x.disabled = true; try { await rpc('pb_admin_premium_revoke', { p_slug: x.dataset.slug, p_note: why || null }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
+    }
+    if (q) {
+      var ok = q.dataset.pmr === '1', reason = null;
+      if (ok) { if (!confirm('यह Premium request मंज़ूर करें?')) return; }
+      else { reason = prompt('Reject का कारण (दुकानदार को दिखेगा), जैसे: पहले logo और location लगाएँ', ''); if (reason === null) return; }
+      q.disabled = true; try { await rpc('pb_admin_premium_decide', { p_id: +q.dataset.id, p_approve: ok, p_reason: reason }); } catch (er) { alert('गलती: ' + er.message); } loadPrem();
+    }
   };
   /* ---- 🏠 Home Service requests (sql-22) ---- */
   var HTAB = 'pending', HDATA = [];

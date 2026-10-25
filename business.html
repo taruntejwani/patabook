@@ -59,6 +59,9 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.3px;line-height:1.25}
 .near .i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:#eef3fd;overflow:hidden}.near .i img{width:100%;height:100%;object-fit:cover}
 .near b{display:block;font-size:13.5px;margin-top:8px;line-height:1.25}.near small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .near em{display:inline-block;font-style:normal;margin-top:6px;background:#e8f0fe;color:var(--blue);font-weight:800;font-size:11.5px;border-radius:999px;padding:2px 8px}
+.tag.prem{background:linear-gradient(135deg,#e8f0fe,#f3e8ff);color:#3b2bb8;font-weight:800}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.gal button{border:0;padding:0;border-radius:12px;overflow:hidden;aspect-ratio:1;background:#eef3fd;cursor:zoom-in}.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.lbx{position:fixed;inset:0;z-index:9999;background:rgba(5,10,20,.92);display:flex;align-items:center;justify-content:center}.lbx img{max-width:96vw;max-height:86vh;border-radius:10px}.lbx button{position:absolute;border:0;background:rgba(255,255,255,.15);color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer}.lbx .x{top:14px;right:14px}.lbx .pv{left:10px;top:50%}.lbx .nx{right:10px;top:50%}
 .ctoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12141c;color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:9px 16px;z-index:999}
 .row span{flex:0 0 112px;color:var(--muted)}
 .row b{font-weight:500;flex:1;min-width:0;word-break:break-word}
@@ -127,7 +130,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();bizDist();loadNear();loadContact();loadVac();loadVacFlag();
+    render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -195,6 +198,25 @@ function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<1
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 const NICO=[["food|restaurant|cafe|sweet|bakery","🍽️"],["auto|car|bike|tyre|garage","🚗"],["health|doctor|hospital|medical|dental|clinic","🏥"],["school|college|tuition|coaching|education","🎓"],["salon|beauty|spa","💇"],["hotel|lodge|guest","🏨"],["electric|plumb|carpenter|painter|home|repair|cleaning","🛠️"],["mobile|electronic","📱"],["cloth|fashion","👗"],["grocery|kirana","🛒"],["manufactur|wholesale|supplier","🏭"]];
 function nico(c){c=String(c||"").toLowerCase();for(const x of NICO)if(new RegExp(x[0]).test(c))return x[1];return "🏪";}
+/* 💎 Premium (sql-23): निशान + फ़ोटो gallery */
+let PREM=false,GAL=[];
+async function loadPrem(){
+  if(!(window.PB_SITE&&PB_SITE.premium)||!B)return;
+  const H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:H,body:JSON.stringify({p_slugs:[B.slug]})});if(!r.ok)return;const j=await r.json();PREM=!!(j&&j[B.slug]);}catch(e){return;}
+  if(!PREM)return;
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GAL=r.ok?(await r.json()||[]):[];}catch(e){GAL=[];}
+  render();bizDist();
+}
+const GAL_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+function drawGal(){const sec=document.getElementById("gal"),box=document.getElementById("galBox");if(!sec||!box)return;
+  const L=(GAL||[]).filter(u=>GAL_RX.test(u));if(!L.length){sec.hidden=true;return;}sec.hidden=false;
+  box.innerHTML=L.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("");
+  box.onclick=e=>{const b=e.target.closest("[data-g]");if(b)lightbox(L,+b.dataset.g);};}
+function lightbox(L,i){const d=document.createElement("div");d.className="lbx";
+  const show=()=>{d.innerHTML='<img src="'+esc(L[i])+'" alt=""><button class="x" aria-label="Close">✕</button>'+(L.length>1?'<button class="pv" aria-label="Previous">‹</button><button class="nx" aria-label="Next">›</button>':'');};
+  show();d.onclick=e=>{if(e.target.closest(".pv")){i=(i-1+L.length)%L.length;show();return;}if(e.target.closest(".nx")){i=(i+1)%L.length;show();return;}if(e.target===d||e.target.closest(".x"))d.remove();};
+  document.body.appendChild(d);}
 let NEAR=null;
 async function loadNear(){
   if(!B)return;const la=+B.latitude,ln=+B.longitude,city=line(B,"City")||String(B.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";
@@ -230,7 +252,7 @@ function render(){
   const ost=openStatus(b),addr=fullAddr(b,city),lmk=line(b,"Landmark").replace(/[<>]/g,""),sub2=[line(b,"District"),line(b,"State")].filter(Boolean).filter(x=>!addr.toLowerCase().includes(x.toLowerCase())).join(", ");
   document.getElementById("app").innerHTML=
    '<section class="card"><div style="display:flex;align-items:center;gap:14px">'+(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" style="flex:none;width:64px;height:64px;border-radius:16px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5">':'')+'<h1 style="min-width:0">'+esc(b.name)+'</h1></div><div class="tags">'+
-     (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+
+     (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+(PREM?'<span class="tag prem">💎 Premium</span>':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
      (gst?'<span class="tag" style="background:#e3f7ea;color:#137333">🧾 '+(gstV?(en?"GST Verified ✅":"GST Verified ✅"):(en?"GST Registered":"GST रजिस्टर्ड"))+'</span>':'')+
      (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME (Udyam)":"MSME (उद्यम)")+'</span>':'')+
@@ -246,6 +268,7 @@ function render(){
    '</div>'+(rows.length?'':'<p class="desc">'+esc(T("b_def"))+'</p>')+
    (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')+
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
+   '<section class="card" id="gal" hidden><h2>🖼️ '+esc(en?"Photos":"फ़ोटो")+'</h2><div class="gal" id="galBox"></div></section>'+
    '<div id="vacFlag" style="display:none;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px"></div>'+
    '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div></section>'+
    '<section class="card" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
@@ -256,7 +279,7 @@ function render(){
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
    '<p style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:600">'+((PB.lang&&PB.lang()==="en")?"Is this your shop? Manage it ›":"यह आपकी दुकान है? यहां से संभालें ›")+'</a></p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>';
-  drawContact();drawVac();drawVacFlag();drawNear();placeMap();
+  drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();
   const cp=document.getElementById("cpAddr");if(cp)cp.onclick=()=>{const t=b.name+", "+addr;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
@@ -322,7 +345,7 @@ function drawVacFlag(){
 /* इस दुकान की चालू vacancies (₹499 plan वाली) */
 let VAC=null;
 async function loadVac(){
-  if(!(window.PB_SITE&&PB_SITE.jobs))return;
+  if(!(window.PB_SITE&&(PB_SITE.jobs||PB_SITE.premium)))return;
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_public_jobs",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_city:null,p_q:null,p_slug:slug})});
     VAC=r.ok?await r.json():[];}catch(e){VAC=[];}
   drawVac();
@@ -332,7 +355,7 @@ function drawVac(){
   if(!VAC||!VAC.length){sec.hidden=true;return;}
   const en=PB.lang&&PB.lang()==="en";sec.hidden=false;
   box.innerHTML=VAC.map(j=>'<div style="border:1px solid #e4eaf5;border-radius:12px;padding:10px 12px;margin-top:8px"><b style="color:#0b2f73">'+esc(j.title)+'</b><div style="font-size:13px;color:#5b6475;margin-top:3px;line-height:1.5">'+[j.salary&&("💰 "+esc(j.salary)),j.timing&&("🕘 "+esc(j.timing)),"👥 "+(j.openings||1)].filter(Boolean).join(" · ")+'</div></div>').join("")+
-    '<a href="jobs.html?city=&q='+encodeURIComponent(B.name||"")+'#job-'+VAC[0].id+'" style="display:block;text-align:center;margin-top:10px;font-weight:700;color:#1a73e8;text-decoration:none">'+(en?"Apply / contact on the Jobs page ›":"नौकरी पेज पर देखें / संपर्क करें ›")+'</a>';
+    (window.PB_SITE&&PB_SITE.jobs?'<a href="jobs.html?city=&q='+encodeURIComponent(B.name||"")+'#job-'+VAC[0].id+'" style="display:block;text-align:center;margin-top:10px;font-weight:700;color:#1a73e8;text-decoration:none">'+(en?"Apply / contact on the Jobs page ›":"नौकरी पेज पर देखें / संपर्क करें ›")+'</a>':'');
 }
 function lockHTML(){
   const go=esc(PBA.loginUrl("business.html?slug="+encodeURIComponent(slug)));
