@@ -72,7 +72,7 @@
     var dpr = window.devicePixelRatio || 1, sw = Math.round((screen.width || 0) * dpr), sh = Math.round((screen.height || 0) * dpr);
     var near = function (a, b) { return Math.abs(a - b) <= Math.max(6, b * 0.01); };
     if (sw && sh && near(lo, Math.min(sw, sh)) && near(hi, Math.max(sw, sh))) return true;   /* इसी phone (Fold की अंदर/बाहर वाली screen भी) जितना */
-    return r >= 1.9 && r <= 2.45 && lo >= 600 && lo <= 1600;                            /* 18:9 – 21:9 वाला phone screenshot */
+    return r >= 1.9 && r <= 2.75 && lo >= 600 && lo <= 1600;                            /* 18:9 – 23:9 वाला phone / Fold बाहर वाली screen का screenshot */
   }
   /* 🛠️ सिर्फ़ Admin के phone पर (admin page खोलने से pb-notrack=1 लगता है): जांच का नतीजा छोटी पट्टी में */
   function isAdm() { try { return localStorage.getItem("pb-notrack") === "1"; } catch (e) { return false; } }
@@ -101,7 +101,7 @@
         var j = {}; try { j = await r.json(); } catch (e) { j = { skipped: "http " + r.status }; }
         if (window.console) console.log("PataBook AI photo check:", j);
         dbg((j.skipped ? "⚠️ AI जांच नहीं हुई (" + j.skipped + ")" : "🤖 AI [" + (j.src || "?") + "]: " + (j.ok === false ? "❌ रोका – " + j.cat : "✅ ठीक")) +
-          (j.what ? " · \"" + j.what + "\"" : j.r ? " · " + String(j.r).slice(0, 120) : "") + " · " + sm.w + "×" + sm.h);
+          (j.what ? " · \"" + j.what + "\"" : j.r ? " · " + String(j.r).slice(0, 120) : "") + " · " + sm.w + "×" + sm.h + (j.ge ? " · Gemini error: " + j.ge : ""));
         if (j && j.ok === false) return { ok: false, cat: j.cat, msg: msg(j.cat) };
         return { ok: true };
       } finally { clearTimeout(tm); }
