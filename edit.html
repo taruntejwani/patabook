@@ -147,7 +147,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
 </div>
 <script>
 /* English चुनी हो तो data-en वाले हिस्से English में */
-(function(){var en=false;try{en=localStorage.getItem("pb-lang")==="en";}catch(e){}window.PB_EN=en;if(!en)return;
+(function(){var en=false;try{en=/^(?!hi$)./.test(localStorage.getItem("pb-lang")||"");}catch(e){}window.PB_EN=en;if(!en)return;
 document.documentElement.lang="en";document.title="Edit details — PataBook";
 document.querySelectorAll("[data-en]").forEach(function(el){el.textContent=el.getAttribute("data-en");});
 document.querySelectorAll("[data-en-ph]").forEach(function(el){el.placeholder=el.getAttribute("data-en-ph");});})();

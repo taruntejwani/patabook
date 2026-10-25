@@ -112,7 +112,7 @@ input:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
 (function(){
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const $=id=>document.getElementById(id);
-let EN=false;try{EN=localStorage.getItem("pb-lang")==="en";}catch(e){}
+let EN=false;try{EN=/^(?!hi$)./.test(localStorage.getItem("pb-lang")||"");}catch(e){}
 const T=(hi,en)=>EN?en:hi;
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();

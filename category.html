@@ -279,7 +279,7 @@ async function premiumFirst(rows){
   for(let i=p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}
   return p.concat(o);
 }
-function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()==="en";return '<span class="tag feat">⭐ '+(en?"Featured":"Featured")+'</span><span class="tag prem"><i>💎</i>Premium</span>';}
+function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()!=="hi";return '<span class="tag feat">⭐ '+(en?"Featured":"Featured")+'</span><span class="tag prem"><i>💎</i>Premium</span>';}
 /* render */
 /* दुकान का logo: logo_url हो तो फोटो, नहीं तो नाम के पहले अक्षर वाला रंगीन बैज */
 const LOGO_BG=["linear-gradient(135deg,#1a73e8,#0b2f73)","linear-gradient(135deg,#1e9e57,#0f6b3a)","linear-gradient(135deg,#f57c00,#c43e00)","linear-gradient(135deg,#8e24aa,#5e1780)","linear-gradient(135deg,#e53935,#a31515)","linear-gradient(135deg,#00897b,#005b52)","linear-gradient(135deg,#3949ab,#1f2a78)"];
@@ -330,7 +330,7 @@ function render(){
             ${b._sub?`<span class="tag">${esc(b._sub)}</span>`:`<span class="tag">${esc(b.category)}</span>`}
             ${premTags(b)}
             ${b.is_verified?`<span class="tag ver">${L.ver}</span>`:""}
-            ${HIRE[b.slug]?`<span class="tag hire">💼 ${PB.lang&&PB.lang()==="en"?"Hiring":"नौकरी खाली है"}</span>`:""}
+            ${HIRE[b.slug]?`<span class="tag hire">💼 ${PB.lang&&PB.lang()!=="hi"?"Hiring":"नौकरी खाली है"}</span>`:""}
             ${b.rating?`<span class="tag rt">★ ${esc(b.rating)}${b.review_count?" ("+esc(b.review_count)+")":""}</span>`:""}
           </div>
         </div>

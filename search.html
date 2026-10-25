@@ -196,7 +196,7 @@ async function premiumFirst(rows){
   for(let i=p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}
   return p.concat(o);
 }
-function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()==="en";return '<span class="tag feat">⭐ '+(en?"Featured":"Featured")+'</span><span class="tag prem"><i>💎</i>Premium</span>';}
+function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()!=="hi";return '<span class="tag feat">⭐ '+(en?"Featured":"Featured")+'</span><span class="tag prem"><i>💎</i>Premium</span>';}
 function render(rows,q,city){
   const list=$("list"),label=[q,city].filter(Boolean).join(" · ");
   $("count").textContent=rows.length?T("found",{n:rows.length})+" · "+T("s_for",{q:label}):"";

@@ -108,7 +108,7 @@ async function captchaToken(anchor){
       var box=document.getElementById("pbCaptcha");
       if(!box){box=document.createElement("div");box.id="pbCaptcha";box.style.cssText="display:flex;justify-content:center;margin:10px 0";
         if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else document.body.appendChild(box);}
-      var lg="hi";try{if(localStorage.getItem("pb-lang")==="en")lg="en";}catch(e){}
+      var lg="hi";try{if(/^(?!hi$)./.test(localStorage.getItem("pb-lang")||""))lg="en";}catch(e){}
       tsWid=window.turnstile.render(box,{sitekey:tsKey(),execution:"execute",appearance:"interaction-only",language:lg,
         callback:function(t){var p=tsWait;tsWait=null;if(p)p.res(t);},"error-callback":fail,"timeout-callback":fail});
     }

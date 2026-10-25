@@ -20,7 +20,7 @@ body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe U
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const slug=new URLSearchParams(location.search).get("slug")||"";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-const L=()=>{try{return localStorage.getItem("pb-lang")==="en"?"en":"hi";}catch(e){return "hi";}};
+const L=()=>{try{return /^(?!hi$)./.test(localStorage.getItem("pb-lang")||"")?"en":"hi";}catch(e){return "hi";}};
 const $=id=>document.getElementById(id);
 let ME=null,ROWS=[];
 async function rpc(fn,args){

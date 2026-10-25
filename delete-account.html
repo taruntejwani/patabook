@@ -109,7 +109,7 @@ html[lang="en"] li[data-l="en"]{display:list-item}
 (function(){
   var S=window.PB_SITE||{},em=String(S.email||"patabook.in@gmail.com");
   document.querySelectorAll('[data-s="email"]').forEach(function(el){el.innerHTML='<a href="mailto:'+em.replace(/[<>"']/g,"")+'">'+em.replace(/[<>&"']/g,"")+'</a>';});
-  var en=false;try{en=localStorage.getItem("pb-lang")==="en";}catch(e){}
+  var en=false;try{en=/^(?!hi$)./.test(localStorage.getItem("pb-lang")||"");}catch(e){}
   function set(v){en=v;document.documentElement.lang=en?"en":"hi";document.getElementById("lg").textContent=en?"हिंदी":"English";document.title=en?"Delete shop / account – PataBook":"दुकान / खाता हटाएँ – PataBook";}
   set(en);
   document.getElementById("lg").onclick=function(){set(!en);try{localStorage.setItem("pb-lang",en?"en":"hi");}catch(e){}};

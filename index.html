@@ -312,7 +312,7 @@ function applyLang(){
   PB.apply();
   drawCats();drawDrawer();
   {const jb=document.getElementById("jobsBtn");if(jb)jb.hidden=!(window.PB_SITE&&PB_SITE.jobs);}
-  {const en=PB.lang&&PB.lang()==="en";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / Jobs";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";document.getElementById("hsS").textContent=en?"Call an Electrician, Plumber or AC Repair to your home":"Electrician, Plumber, AC Repair घर पर बुलाएं";}
+  {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / Jobs";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";document.getElementById("hsS").textContent=en?"Call an Electrician, Plumber or AC Repair to your home":"Electrician, Plumber, AC Repair घर पर बुलाएं";}
 }
 /* ---- नई 25 दुकानें: एक-एक करके अपने-आप slide (नई दुकान आते ही सबसे पुरानी हट जाती है) ---- */
 (function(){
@@ -322,7 +322,7 @@ function applyLang(){
     ["mobile|electronic","📱"],["cloth|footwear|fashion","👗"],["grocery|kirana","🛒"],["furniture","🛋️"],["travel|taxi|transport|courier|truck","🚚"],["lawyer|ca|architect|interior|marketing|professional","💼"],
     ["real estate|property|builder","🏘️"],["manufactur|wholesale|supplier|distributor","🏭"],["bank|insurance|loan|finance","🏦"],["wedding|event|photo","📸"]];
   function ico(c){c=String(c||"").toLowerCase();for(const x of ICON)if(new RegExp(x[0]).test(c))return x[1];return "🏪";}
-  const en=()=>PB.lang&&PB.lang()==="en";
+  const en=()=>PB.lang&&PB.lang()!=="hi";
   let L=[];
   /* दुकान ने logo लगाया हो तो logo, नहीं तो category वाला icon */
   const LOGO={},LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
@@ -484,7 +484,7 @@ function sugKm(b){const la=+b.latitude,ln=+b.longitude;if(!MYPOS||!la||!ln)retur
 function sugD(b){const la=+b.latitude,ln=+b.longitude;if(!MYPOS||!la||!ln)return 1e9;return (la-MYPOS[0])**2+((ln-MYPOS[1])*Math.cos(la*Math.PI/180))**2;}
 sugPos();document.addEventListener("pb-city-auto",sugPos);
 function drawSug(){
-  const v=document.getElementById("q").value.trim().toLowerCase(),box=document.getElementById("sug"),en=PB.lang&&PB.lang()==="en";
+  const v=document.getElementById("q").value.trim().toLowerCase(),box=document.getElementById("sug"),en=PB.lang&&PB.lang()!=="hi";
   if(!v){box.className="sug";box.innerHTML="";return;}
   const m=ALL.filter(x=>x.k.split(/[\s&]+/).some(w=>w.startsWith(v))).slice(0,SHOPS.length?4:8);
   let h="";
@@ -568,7 +568,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
 /* 📍 दबाओ = अभी की location से शहर (पहले खुद चुना हो तब भी) */
 (function(){
   const b=document.getElementById("locBtn"),g=document.getElementById("gpsBtn"),inp=document.getElementById("city");if(!b||!inp)return;
-  const en=()=>PB.lang&&PB.lang()==="en";
+  const en=()=>PB.lang&&PB.lang()!=="hi";
   function done(c){if(!c)return;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}
     inp.dispatchEvent(new Event("change",{bubbles:true}));document.dispatchEvent(new Event("pb-city-auto"));}
   function msg(t){inp.value="";inp.placeholder=t;}
@@ -648,7 +648,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   const END=Date.parse("2026-10-21T00:00:00+05:30");let off=false;
   try{off=localStorage.getItem("pb-launch-x")==="1";}catch(e){}
   if(off||Date.now()>END)return;
-  const en=()=>window.PB&&PB.lang&&PB.lang()==="en";
+  const en=()=>window.PB&&PB.lang&&PB.lang()!=="hi";
   function txt(){
     document.getElementById("lbH").textContent=PB_LBT("h");
     document.getElementById("lbP").innerHTML=PB_LBT("p");

@@ -194,7 +194,7 @@ const TX={
      e_none_h:"No shop is linked to your email",e_none_p:"Add a new shop. If your shop is already on PataBook, ask the PataBook Admin to link your email.",
      e_setup:"This feature is just starting. Please open again in a while.",e_net:"Could not load. Check your internet and open again.",e_sw:"Could not change. Try again.",sw_l:"Show number",pbT:"What does the ₹99 plan include? See",pbS:"Dashboard and Marketing Studio · coming soon"}
 };
-const L=()=>(window.PB&&PB.lang&&PB.lang()==="en")?"en":"hi";
+const L=()=>(window.PB&&PB.lang&&PB.lang()!=="hi")?"en":"hi";
 const tx=(k,v)=>String(TX[L()][k]).replace("{e}",v||"");
 let ME=null,ROWS=null,ERR="";
 

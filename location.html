@@ -70,7 +70,7 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
  </div>
 </div>
 <script>
-(function(){var en=false;try{en=localStorage.getItem("pb-lang")==="en";}catch(e){}window.PB_EN=en;if(!en)return;
+(function(){var en=false;try{en=/^(?!hi$)./.test(localStorage.getItem("pb-lang")||"");}catch(e){}window.PB_EN=en;if(!en)return;
 document.documentElement.lang="en";document.title="Shop location — PataBook";
 document.querySelectorAll("[data-en]").forEach(function(el){el.textContent=el.getAttribute("data-en");});})();
 </script>

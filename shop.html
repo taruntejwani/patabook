@@ -208,7 +208,7 @@ const KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
 const slug=new URLSearchParams(location.search).get("slug")||"";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-const EN=()=>!!(window.PB&&PB.lang&&PB.lang()==="en");
+const EN=()=>!!(window.PB&&PB.lang&&PB.lang()!=="hi");
 const L=(hi,en)=>EN()?en:hi;
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 const IMG_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
@@ -401,11 +401,11 @@ async function loadVacFlag(){
 function drawVacFlag(){
   const el=document.getElementById("vacFlag");if(!el)return;
   if(!VACF){el.style.display="none";return;}
-  const en=PB.lang&&PB.lang()==="en";el.style.display="flex";
+  const en=PB.lang&&PB.lang()!=="hi";el.style.display="flex";
   el.innerHTML='<b>💼 '+(en?"Vacancy available":"नौकरी खाली है (Vacancy)")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span>';
 }
 function openReport(){
-  const en=PB.lang&&PB.lang()==="en",L=(h,e)=>en?e:h;
+  const en=PB.lang&&PB.lang()!=="hi",L=(h,e)=>en?e:h;
   const R=[["wrong_info",L("गलत जानकारी (नंबर / पता / नाम)","Wrong information (number / address / name)")],
            ["closed",L("दुकान बंद हो गई / मौजूद नहीं","Shop closed / does not exist")],
            ["fake",L("नकली या धोखाधड़ी","Fake or fraud")],

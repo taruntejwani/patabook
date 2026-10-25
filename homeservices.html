@@ -80,7 +80,7 @@ h1{font-size:24px;color:var(--navy);display:flex;align-items:center;gap:8px}
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const L=()=>(window.PB&&PB.lang&&PB.lang()==="en")?"en":"hi";
+const L=()=>(window.PB&&PB.lang&&PB.lang()!=="hi")?"en":"hi";
 const TX={
  hi:{tBack:"← वापस",tH:"Home Services",tSub:"Electrician, Plumber, AC Repair, Carpenter और दूसरे सेवा देने वालों को घर पर बुलाएं।",tCat:"सेवा चुनें",
      tJoin:"क्या आपकी दुकान घर पर सेवा देती है?",tJoinB:"\"मेरी दुकान\" में Home Service ON करें ›",tTip:"💡 काम शुरू होने से पहले दुकान को call करके आने वाले व्यक्ति का नाम पूछ लें।",all:"सभी सेवाएं",allCity:"सभी शहर",
