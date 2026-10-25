@@ -79,6 +79,7 @@ h1{font-size:26px;font-weight:800;letter-spacing:-.3px;line-height:1.25}
 .pft{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pft span{background:#f1f4fa;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600}
 #prods.flash{box-shadow:0 0 0 3px var(--blue);transition:box-shadow .3s}
 .pall{display:block;text-align:center;margin-top:12px;padding:12px;border-radius:14px;background:var(--blue);color:#fff;font-weight:800;font-size:14.5px;text-decoration:none}
+#det>.rows:first-child{margin-top:0;border-top:0}
 #prods{margin-top:14px}#prods h2{margin-bottom:10px}
 .profb{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;border-radius:14px;padding:13px;background:var(--blue);color:#fff;font-weight:800;font-size:15.5px;text-decoration:none}.profb span{font-size:19px}
 .num.dir .l{min-width:0}.num.dir .lk{display:flex;align-items:center;gap:6px;margin-top:2px}.num.dir .lk a{flex:0 1 auto;min-width:0;background:none;padding:0;border-radius:0;color:var(--blue);font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.num.dir .cpy{flex:none;border:1px solid var(--line);background:#f4f7fc;border-radius:8px;width:30px;height:28px;font-size:15px;cursor:pointer}.num.dir .cpt{display:inline-block;margin-top:3px;font-size:12px;font-weight:700;color:#5b6475;cursor:pointer}.num.dir a.d{background:var(--navy)}
@@ -316,8 +317,6 @@ function render(){
   const rows=[
     [(PB.lang&&PB.lang()==="en")?"Business type":"बिज़नेस का प्रकार",btypeLabel(line(b,"Type"))],
     [(PB.lang&&PB.lang()==="en")?"Hours":"समय",hoursText(b)],
-    [T("s_cat"),[sub,b.category].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(" · ")],
-    [T("i_svc"),line(b,"Services")],
     ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))?line(b,"GST"):""],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
@@ -326,7 +325,7 @@ function render(){
   const ost=openStatus(b),addr=fullAddr(b,city),lmk=line(b,"Landmark").replace(/[<>]/g,""),sub2=[line(b,"District"),line(b,"State")].filter(Boolean).filter(x=>!addr.toLowerCase().includes(x.toLowerCase())).join(", ");
   document.getElementById("app").innerHTML=
    '<section class="card'+(PREM?' pcard':'')+'"><div style="display:flex;align-items:center;gap:14px">'+((/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||""))||PREM?'<div class="lgw">'+((/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||""))?'<img class="blogo" src="'+esc(b.logo_url)+'" alt="">':'<div class="blogo ini">'+esc((String(b.name||"").trim()[0]||"P").toUpperCase())+'</div>')+(PREM?'<img class="crn" src="pb-crown.webp" alt="" width="34" height="34">':'')+'</div>':'')+'<h1 style="min-width:0"'+(PREM?' class="goldname"':'')+'><span class="t">'+esc(b.name)+'</span>'+(PREM?'<span class="seal" title="Premium">💎</span>':'')+'</h1></div><div class="tags">'+
-     (sub||b.category?'<span class="tag">'+esc(sub||b.category)+'</span>':'')+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+(PREM?'<img class="gpb" src="pb-gold-premium.webp" alt="Gold Premium" width="112" height="30">':'')+
+     [sub,b.category].filter(Boolean).filter((x,i,a)=>a.findIndex(y=>y.toLowerCase()===x.toLowerCase())===i).map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+(PREM?'<img class="gpb" src="pb-gold-premium.webp" alt="Gold Premium" width="112" height="30">':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
      (gst?'<span class="tag" style="background:#e3f7ea;color:#137333">🧾 '+(gstV?(en?"GST Verified ✅":"GST Verified ✅"):(en?"GST Registered":"GST रजिस्टर्ड"))+'</span>':'')+
      (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME (Udyam)":"MSME (उद्यम)")+'</span>':'')+
@@ -336,18 +335,22 @@ function render(){
    (addr?'<div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(sub2?'<small>'+esc(sub2)+'</small>':'')+(lmk?'<span class="lmk">🏁 '+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</span>':'')+'</div></div>'+
      '':'')+
    (PRODP().length?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods"></div>':'')+
+   (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
+   '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div>'+dirRow(b,addr,map)+'</section>'+
+   ((DET=>DET?'<section class="card" id="det">'+DET+'</section>':'')(
    (GALP().length?'<div class="mos n'+(GALP().length>=5?5:GALP().length===4?3:GALP().length)+'" id="galM"></div>':'')+
    staticMap(b,map)+
-   '<div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
+   (rows.length||line(b,"Email")||web?'<div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
      (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(line(b,"Email"))?'<div class="row"><span>Email</span><b><a href="mailto:'+esc(line(b,"Email"))+'">'+esc(line(b,"Email"))+'</a></b></div>':'')+
      (web?'<div class="row"><span>'+esc(T("b_web"))+'</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+
-   '</div>'+(rows.length?'':'<p class="desc">'+esc(T("b_def"))+'</p>')+
-   (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')+
-   (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
+   '</div>':'')+
+   (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')
+   ))+
+
    
    '<section class="card" id="gal" hidden><h2>🖼️ '+esc(en?"Photos":"फ़ोटो")+'</h2><div class="gal" id="galBox"></div></section>'+
    '<div id="vacFlag" style="display:none;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px"></div>'+
-   '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div>'+dirRow(b,addr,map)+'</section>'+
+   
    '<section class="card" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
    '<a class="shr" id="waShare" href="'+esc(waLink(b,addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+esc(en?"Send address & directions to a friend":"दोस्त को पता और रास्ता भेजें")+'</b><small>'+esc(en?"Address + map route link on WhatsApp":"पता और map पर रास्ते का link, WhatsApp पर")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></a>'+
    '<button type="button" class="shr crd" id="cardBtn"><span class="ic">🪪</span><span><b>'+esc(en?"Send visiting card to a friend":"विज़िटिंग कार्ड दोस्त को भेजें")+'</b><small>'+esc(en?"Shop card with QR, as a photo":"दुकान का कार्ड QR के साथ, फ़ोटो में")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></button>'+
