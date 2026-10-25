@@ -164,7 +164,7 @@
           if (!ck.ok) { er.textContent = ck.msg; return; }
           er.textContent = E ? "Uploading…" : "Upload हो रहा है…";
           ME = await PBA.session();
-          var blob = await resizeImage(f, 800), ext = blob.type === "image/webp" ? "webp" : "jpg";
+          var blob = await resizeImage(f, 800); if (window.PBWM) blob = await PBWM.mark(blob); var ext = blob.type === "image/webp" ? "webp" : "jpg";
           var path = encodeURIComponent(b.slug) + "/prod-" + Date.now() + "." + ext;
           var up = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
           if (!up.ok) throw new Error("upload");
@@ -212,7 +212,7 @@
         var ck = window.PBImg ? await PBImg.check(f, { slug: b.slug, kind: "product", name: r.name }) : { ok: true };
         if (!ck.ok) { r.err = ck.msg; r.prev = ""; r.up = false; keep(); paint(); return; }
         ME = await PBA.session();
-        var blob = await resizeImage(f, 800), ext = blob.type === "image/webp" ? "webp" : "jpg";
+        var blob = await resizeImage(f, 800); if (window.PBWM) blob = await PBWM.mark(blob); var ext = blob.type === "image/webp" ? "webp" : "jpg";
         var path = encodeURIComponent(b.slug) + "/prod-" + Date.now() + "-" + r.id + "." + ext;
         var up = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
         if (!up.ok) throw new Error("upload");
