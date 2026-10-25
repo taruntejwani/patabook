@@ -485,6 +485,7 @@ $("list").addEventListener("change",e=>{const f=e.target.closest("[data-pup]");i
 $("list").addEventListener("click",async e=>{
   const pmb=e.target.closest("[data-pm]");
   if(pmb){const i=+pmb.dataset.i,b=ROWS[i],k=pmb.dataset.pm;
+    if(k==="vac"&&window.PBHire){ME=await PBA.session();PBHire.editor(b.slug,rpc,async()=>{try{const j=await rpc("pb_my_vacancy_job",{p_slug:b.slug});if(j&&j.open)VAC[b.slug]=j.until;else delete VAC[b.slug];}catch(_){}draw();});return;}   /* एक ही नौकरी वाला तरीका (sql-26) */
     if(k==="vac"){pmb.disabled=true;try{ME=await PBA.session();const t=await rpc("pb_owner_vac_token",{p_slug:b.slug});location.href="vacancy.html?slug="+encodeURIComponent(b.slug)+"#t="+t;}catch(x){pmb.disabled=false;alert(L()==="en"?"Could not open. Try again.":"खुल नहीं सका। दोबारा कोशिश करें।");}return;}
     PMOPEN[b.slug]=PMOPEN[b.slug]===k?"":k;draw();
     try{if(k==="ph"&&PMOPEN[b.slug]){PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}

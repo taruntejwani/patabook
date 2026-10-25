@@ -465,7 +465,7 @@ function lockHTML(){
 function drawContact(){
   const el=document.getElementById("cbox");if(!el)return;
   const s=contactState,who=PBA.current();
-  const whoLine=who?'<p class="who">'+esc(T("l_in",{e:who.email||""}))+'<button type="button" id="lo">'+esc(T("l_out"))+'</button></p>':'';
+  const whoLine=who?'<p class="who">'+esc(T("l_in",{e:(/^m([6-9]\d{9})@phone\.patabook\.in$/.exec(who.email||"")?"📱 +91 "+RegExp.$1:(who.email||""))}))+'<button type="button" id="lo">'+esc(T("l_out"))+'</button></p>':'';
   const wb=document.getElementById("whoBot");if(wb){wb.innerHTML=whoLine;const lb=wb.querySelector("#lo");if(lb)lb.onclick=async()=>{await PBA.logout();contactState={k:"locked"};drawContact();};}
   if(s.k==="loading"){el.innerHTML='<p class="cnote">…</p>';return;}
   if(s.k==="locked"){el.innerHTML=lockHTML();return;}

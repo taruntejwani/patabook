@@ -443,7 +443,7 @@ function applyLang(){
   function refreshCityShops(){
     const city=currentCity();setCityTitle(city);L=ALL_ROWS.filter(b=>inCity(b,city)).slice(0,25);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
-    if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">No shops found for this city yet.</div>';return;}
+    if(!L.length){document.getElementById("nst").innerHTML=city?'<div class="nsc-empty">No shops found for this city yet.</div>':'';return;}   /* शहर नहीं चुना: ऊपर की लाइन ही काफ़ी */
     draw();wire();start();loadLogos();loadPrem();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);

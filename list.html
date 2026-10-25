@@ -1006,7 +1006,7 @@ function LX(k){const L=(window.PB&&PB.lang&&PB.lang()!=="hi")?"en":"hi";return L
 let ME=null;
 function gateText(){
   $("gateH").textContent=LX("g_h");$("gateP").textContent=LX("g_p");$("gateBtn").textContent=LX("g_b");
-  if(ME){$("whoTxt").textContent=LX("who").replace("{e}",ME.email||"");$("whoOut").textContent=LX("out");}
+  if(ME){$("whoTxt").textContent=LX("who").replace("{e}",/^m([6-9]\d{9})@phone\.patabook\.in$/.exec(ME.email||"")?"📱 +91 "+RegExp.$1:(ME.email||""));$("whoOut").textContent=LX("out");}
 }
 async function checkLogin(){
   ME=await PBA.session();

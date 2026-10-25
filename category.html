@@ -171,7 +171,12 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;",
 function km(a,b,c,d){const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dn=r(d-b);const h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
 function fmt(d){return d<1?Math.round(d*1000)+" m":d.toFixed(1)+" km";}
 function subOf(b){const m=String(b.description||"").match(/Subcategory:\s*(.+)/);return m?m[1].trim():"";}
-function cleanDesc(b){return String(b.description||"").split("\n").filter(l=>!/^(Owner|Map|Coordinates|Subcategory|City|Area|Category):/i.test(l.trim())).join(" ").trim();}
+function cleanDesc(b){   /* card पर सिर्फ़ काम का प्रकार और "क्या बेचते हैं" — बाकी (समय, GST, Hide…) दुकान के page पर */
+  const d=String(b.description||""),g=k=>{const m=d.match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
+  const ty=g("Type"),sv=g("Services")||g("Products");
+  if(ty||sv)return [ty,sv].filter(Boolean).join(" · ");
+  if(/^[A-Za-z][\w-]*\s*:/m.test(d))return "";   /* बाकी सब "Key: value" lines */
+  return d.replace(/\s+/g," ").trim();}
 
 /* chips */
 function drawSubs(){

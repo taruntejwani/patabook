@@ -98,7 +98,7 @@ function cool(){
   timer=setInterval(()=>{left--;$("resend").textContent=T("l_resend")+(left>0?" ("+left+")":"");if(left<=0){clearInterval(timer);$("resend").disabled=false;}},1000);
 }
 async function loggedIn(s){
-  $("who").textContent=T("l_in",{e:s.email||""});
+  $("who").textContent=T("l_in",{e:(/^m([6-9]\d{9})@phone\.patabook\.in$/.exec(s.email||"")?"📱 +91 "+RegExp.$1:(s.email||""))});
   $("cont").href=next;show(3);
 }
 async function send(){
@@ -128,7 +128,7 @@ $("out").onclick=async()=>{await PBA.logout();show(1);};
 $("backBtn").onclick=()=>{history.length>1?history.back():location.href="index.html";};
 
 PB.apply();PB.mount($("pbLang"));
-PB.onChange(()=>{PB.apply();if(email)$("sentTo").textContent=T("l_sent",{e:email});const s=PBA.current();if(s&&!$("s3").hidden)$("who").textContent=T("l_in",{e:s.email||""});});
+PB.onChange(()=>{PB.apply();if(email)$("sentTo").textContent=T("l_sent",{e:email});const s=PBA.current();if(s&&!$("s3").hidden)$("who").textContent=T("l_in",{e:(/^m([6-9]\d{9})@phone\.patabook\.in$/.exec(s.email||"")?"📱 +91 "+RegExp.$1:(s.email||""))});});
 (async()=>{
   const fromLink=PBA.fromUrl();                 /* email ke link se aaye */
   if(fromLink){location.replace(next);return;}
