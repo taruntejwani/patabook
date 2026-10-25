@@ -64,7 +64,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
 .pm{margin-top:12px;border-radius:16px;padding:12px 14px;background:linear-gradient(135deg,#eef2ff,#f6efff);border:1px solid #d9d0ff}
 .pm .ph{display:flex;align-items:center;gap:8px;font-weight:800;color:#3b2bb8;font-size:15px}.pm small{display:block;color:#5b6475;font-size:12.5px;font-weight:500;margin-top:2px}
-.pm .pb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.pm .pb button{border:1px solid #d9d0ff;background:#fff;border-radius:12px;padding:9px 4px;font:inherit;font-size:12.5px;font-weight:700;color:#3b2bb8;cursor:pointer}
+.pm .pb{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.pm .pb button{border:1px solid #d9d0ff;background:#fff;border-radius:12px;padding:9px 4px;font:inherit;font-size:12.5px;font-weight:700;color:#3b2bb8;cursor:pointer}
 .pm .pb button.on{background:#3b2bb8;color:#fff}
 .pm ul{margin:8px 0 0 18px;font-size:13px;color:#33395a}.pm li{margin:3px 0}
 .pm textarea{width:100%;margin-top:8px;border:1px solid #d9d0ff;border-radius:10px;padding:8px;font:inherit;font-size:13.5px;min-height:56px}
@@ -298,8 +298,9 @@ function premBlock(b,i){
         (L8.length<8?'<label class="add">＋<input type="file" accept="image/*" hidden data-pup="'+i+'"></label>':'')+'</div>'+
         '<small>'+(en?L8.length+" / 8 photos · shown on your shop page":L8.length+" / 8 फ़ोटो · आपकी दुकान के पेज पर दिखती हैं")+'</small><div class="err" id="pe'+i+'"></div>';}
     if(o==="rp")body=reportHTML(b);
+    if(o==="pr"&&window.prodBody)body=prodBody(b,i);
     return '<div class="pm"><div class="ph">💎 '+(en?"PataBook Premium":"PataBook Premium")+'</div><small>'+(en?"Active till "+till+" · ⭐ your shop shows on top":till+" तक चालू · ⭐ आपकी दुकान ऊपर दिखती है")+'</small>'+
-      '<div class="pb"><button type="button" class="'+(o==="ph"?"on":"")+'" data-pm="ph" data-i="'+i+'">🖼️ '+(en?"Photos":"फ़ोटो")+'</button><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button><button type="button" data-pm="vac" data-i="'+i+'">💼 Vacancy</button></div>'+body+'</div>';
+      '<div class="pb"><button type="button" class="'+(o==="ph"?"on":"")+'" data-pm="ph" data-i="'+i+'">🖼️ '+(en?"Photos":"फ़ोटो")+'</button><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button><button type="button" data-pm="vac" data-i="'+i+'">💼 Vacancy</button><button type="button" class="'+(o==="pr"?"on":"")+'" data-pm="pr" data-i="'+i+'">🛍️ '+(en?"Products":"Products")+'</button></div>'+body+'</div>';
   }
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
   const r=P.request;
@@ -465,7 +466,8 @@ $("list").addEventListener("click",async e=>{
     if(k==="vac"){pmb.disabled=true;try{ME=await PBA.session();const t=await rpc("pb_owner_vac_token",{p_slug:b.slug});location.href="vacancy.html?slug="+encodeURIComponent(b.slug)+"#t="+t;}catch(x){pmb.disabled=false;alert(L()==="en"?"Could not open. Try again.":"खुल नहीं सका। दोबारा कोशिश करें।");}return;}
     PMOPEN[b.slug]=PMOPEN[b.slug]===k?"":k;draw();
     try{if(k==="ph"&&PMOPEN[b.slug]){PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}
-        if(k==="rp"&&PMOPEN[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});draw();}}catch(x){}
+        if(k==="rp"&&PMOPEN[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});draw();}
+        if(k==="pr"&&PMOPEN[b.slug]&&window.prodLoad){await prodLoad(b.slug);draw();}}catch(x){}
     return;}
   const prm=e.target.closest("[data-prm]");
   if(prm){const i=+prm.dataset.i,b=ROWS[i];if(!confirm(L()==="en"?"Remove this photo?":"यह फ़ोटो हटाएँ?"))return;
@@ -643,5 +645,6 @@ PB.mount($("pbLang"));
 PB.onChange(draw);
 start();
 </script>
+<script src="pb-products-owner.js"></script>
 </body>
 </html>
