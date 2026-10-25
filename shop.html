@@ -115,6 +115,7 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .num{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px 12px 12px 14px;margin-bottom:10px}
 .num .l{flex:1;min-width:0}.num small{display:block;color:var(--muted);font-size:12px}.num b{font-size:17px;letter-spacing:.02em}
 .num a{flex:none;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:700;color:#fff;background:var(--blue)}.num a.w{background:var(--green)}
+.num.dir .l{min-width:0}.num.dir .lk{display:flex;align-items:center;gap:6px;margin-top:2px}.num.dir .lk a{flex:0 1 auto;min-width:0;background:none;padding:0;border-radius:0;color:var(--blue);font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.num.dir .cpy{flex:none;border:1px solid var(--line);background:#f4f7fc;border-radius:8px;width:30px;height:28px;font-size:15px;cursor:pointer}.num.dir .cpt{display:inline-block;margin-top:3px;font-size:12px;font-weight:700;color:#5b6475;cursor:pointer}.num.dir a.d{background:var(--navy)}
 .cnote{color:var(--muted);font-size:13.5px;line-height:1.5}
 
 /* नीचे चिपका Call / WhatsApp */
@@ -293,7 +294,7 @@ function render(){
        :'<p class="empty">'+L("दुकानदार ने अभी और जानकारी नहीं जोड़ी है।","The owner hasn't added more details yet.")+'</p>')+'</section>'+
      (addr?'<section class="blk" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
        staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'<a href="'+esc(gmapsUrl(b))+'" target="_blank" rel="noopener">🗺️ Google Maps</a></div></section>':'')+
-     '<section class="blk" id="contact"><h2>📞 '+L("संपर्क करें","Contact")+'</h2>'+contactHTML()+'</section>'+
+     '<section class="blk" id="contact"><h2>📞 '+L("संपर्क करें","Contact")+'</h2>'+contactHTML()+dirRow(b,addr,dir)+'</section>'+
      '<div class="vflag" id="vacFlag" style="display:none"></div>'+
      '<a class="shr" id="waShare" href="'+esc(waLink(b,addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+L("दोस्त को पता और रास्ता भेजें","Send address & directions to a friend")+'</b><small>'+L("पता और map पर रास्ते का link, WhatsApp पर","Address + map route link on WhatsApp")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></a>'+
      '<button type="button" class="shr crd" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>'+
@@ -314,6 +315,7 @@ function render(){
   const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
   document.getElementById("shareQa").onclick=share;
   document.getElementById("repBtn").onclick=openReport;
+  wireDir(b,addr,dir);
   document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
   drawVacFlag();drawNear();
   placeMap();spy();
@@ -394,6 +396,13 @@ function openReport(){
     }
   };
 }
+/* 🧭 Directions पट्टी (Call / WhatsApp जैसी): रास्ते का link + 📋 copy + "रास्ता" बटन */
+function dirRow(b,addr,map){if(!map)return "";const en=EN(),full="https://patabook.in/"+map;
+  return '<div class="num dir"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (Directions)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता copy करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
+function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)return;const en=EN();
+  const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
+  const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
+  c.onclick=go;const ct=c.closest(".l").querySelector(".cpt");if(ct)ct.onclick=go;}
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const wa=waNum(),ph=phNum(),ph2=B?line(B,"Phone2").replace(/\D/g,""):"",altWa=B?line(B,"WhatsApp").replace(/\D/g,""):"";
