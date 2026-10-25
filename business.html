@@ -122,6 +122,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 <script src="site-config.js"></script>
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js"></script>
+<script src="pb-hide.js"></script>
 <script src="pb-owner-edit.js"></script>
 </head><body>
 
@@ -226,18 +227,18 @@ function openStatus(b){
     return {open:false,t:en?"Closed now · opens "+when+" "+at(openT):"अभी बंद · "+when+" "+at(openT)+" पर खुलेगा"};}
   return {open:false,t:en?"Closed now":"अभी बंद"};
 }
-function waLink(b,addr){const en=PB.lang&&PB.lang()==="en",la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug),P=(()=>{const c=contactState||{};if(c.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(c.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(c.whatsapp||c.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name,"📍 "+(en?"Address: ":"पता: ")+addr];if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
+function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=PB.lang&&PB.lang()==="en",la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug),P=(()=>{const c=contactState||{};if(c.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(c.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(c.whatsapp||c.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function gmapsUrl(b){const la=+b.latitude,ln=+b.longitude;return "https://www.google.com/maps/search/?api=1&query="+(la&&ln?la+","+ln:encodeURIComponent((b.name||"")+", "+(b.address||"")));}
 function staticMap(b,href){const la=+b.latitude,ln=+b.longitude;if(!la||!ln)return "";
   const z=16,n=2**z,xf=(ln+180)/360*n,yr=la*Math.PI/180,yf=(1-Math.log(Math.tan(yr)+1/Math.cos(yr))/Math.PI)/2*n,x=Math.floor(xf),y=Math.floor(yf);
   let t="";for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t+='<img alt="" loading="lazy" src="https://tile.openstreetmap.org/'+z+'/'+(x+dx)+'/'+(y+dy)+'.png">';
-  return '<a class="smap" id="smap" href="'+esc(href||"#")+'" data-fx="'+(xf-x)+'" data-fy="'+(yf-y)+'"><div class="tl">'+t+'</div><span class="mp">📍</span><span class="ml">'+((PB.lang&&PB.lang()==="en")?"Shop on map ›":"नक्शे पर दुकान ›")+'</span><span class="ma">© OpenStreetMap</span></a>';}
+  return '<a class="smap" data-pbh="addr" id="smap" href="'+esc(href||"#")+'" data-fx="'+(xf-x)+'" data-fy="'+(yf-y)+'"><div class="tl">'+t+'</div><span class="mp">📍</span><span class="ml">'+((PB.lang&&PB.lang()==="en")?"Shop on map ›":"नक्शे पर दुकान ›")+'</span><span class="ma">© OpenStreetMap</span></a>';}
 function placeMap(){const m=document.getElementById("smap");if(!m)return;const t=m.querySelector(".tl"),w=m.clientWidth,H=m.clientHeight;
   t.style.left=(w/2-(256+ +m.dataset.fx*256))+"px";t.style.top=(H/2-(256+ +m.dataset.fy*256))+"px";}
 addEventListener("resize",placeMap);
 /* 🧭 Directions पट्टी (Call / WhatsApp जैसी): रास्ते का link + 📋 copy + "रास्ता" बटन */
 function dirRow(b,addr,map){if(!map)return "";const en=PB.lang&&PB.lang()==="en",full="https://patabook.in/"+map;
-  return '<div class="num dir"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (Directions)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता copy करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
+  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (Directions)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता copy करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
 function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)return;const en=PB.lang&&PB.lang()==="en";
   const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
   const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
@@ -326,10 +327,11 @@ function render(){
   if(!B)return;
   const b=B,sub=line(b,"Subcategory"),city=line(b,"City")||String(b.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";
   const map=pbDir(b);
+  if(window.PBHide)PBHide.apply(b.description);
   const rows=[
     [(PB.lang&&PB.lang()==="en")?"Business type":"बिज़नेस का प्रकार",btypeLabel(line(b,"Type"))],
-    [(PB.lang&&PB.lang()==="en")?"Hours":"समय",hoursText(b)],
-    ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))?line(b,"GST"):""],
+    [(PB.lang&&PB.lang()==="en")?"Hours":"समय",hoursText(b),"hours"],
+    ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
   const en=PB.lang&&PB.lang()==="en",gst=/^[0-9A-Z]{15}$/.test(line(b,"GST")),gstV=gst&&/^yes$/i.test(line(b,"GST-Verified")),udy=/^UDYAM-/.test(line(b,"Udyam"));
@@ -339,34 +341,34 @@ function render(){
    '<section class="card'+(PREM?' pcard':'')+'"><div style="display:flex;align-items:center;gap:14px">'+((/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||""))||PREM?'<div class="lgw">'+((/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||""))?'<img class="blogo" src="'+esc(b.logo_url)+'" alt="">':'<div class="blogo ini">'+esc((String(b.name||"").trim()[0]||"P").toUpperCase())+'</div>')+(PREM?'<img class="crn" src="pb-crown.webp" alt="" width="34" height="34">':'')+'</div>':'')+'<h1 style="min-width:0"'+(PREM?' class="goldname"':'')+'><span class="t">'+esc(b.name)+'</span>'+(PREM?'<span class="seal" title="Premium">💎</span>':'')+'</h1></div><div class="tags">'+
      [sub,b.category].filter(Boolean).filter((x,i,a)=>a.findIndex(y=>y.toLowerCase()===x.toLowerCase())===i).map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+(city?'<span class="tag city">📍 '+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+(PREM?'<img class="gpb" src="pb-gold-premium.webp" alt="Gold Premium" width="112" height="30">':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
-     (gst?'<span class="tag" style="background:#e3f7ea;color:#137333">🧾 '+(gstV?(en?"GST Verified ✅":"GST Verified ✅"):(en?"GST Registered":"GST रजिस्टर्ड"))+'</span>':'')+
+     (gst?'<span class="tag" data-pbh="gst" style="background:#e3f7ea;color:#137333">🧾 '+(gstV?(en?"GST Verified ✅":"GST Verified ✅"):(en?"GST Registered":"GST रजिस्टर्ड"))+'</span>':'')+
      (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME (Udyam)":"MSME (उद्यम)")+'</span>':'')+
      (/^yes$/i.test(line(b,"Delivery"))?'<span class="tag" style="background:#fff4e5;color:#874d00">🚚 '+((PB.lang&&PB.lang()==="en")?"Home Delivery":"होम डिलीवरी")+'</span>':'')+
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()==="en")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
-   '</div>'+(ost?'<div class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+
-   (addr?'<div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(sub2?'<small>'+esc(sub2)+'</small>':'')+(lmk?'<span class="lmk">🏁 '+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</span>':'')+'</div></div>'+
+   '</div>'+(ost?'<div data-pbh="hours" class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+
+   (addr?'<div class="addr" data-pbh="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(sub2?'<small>'+esc(sub2)+'</small>':'')+(lmk?'<span class="lmk">🏁 '+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</span>':'')+'</div></div>'+
      '':'')+
-   (PRODP().length?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods"></div>':'')+
+   (PRODP().length?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods" data-pbh="prods"></div>':'')+
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
    '<section class="card" id="contact"><h2>📞 '+esc(T("c_title"))+'</h2><div id="cbox"></div>'+dirRow(b,addr,map)+'</section>'+
    ((DET=>DET?'<section class="card" id="det">'+DET+'</section>':'')(
-   (GALP().length?'<div class="mos n'+(GALP().length>=5?5:GALP().length===4?3:GALP().length)+'" id="galM"></div>':'')+
+   (GALP().length?'<div class="mos n'+(GALP().length>=5?5:GALP().length===4?3:GALP().length)+'" id="galM" data-pbh="photos"></div>':'')+
    staticMap(b,map)+
-   (rows.length||line(b,"Email")||web?'<div class="rows">'+rows.map(r=>'<div class="row"><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
-     (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(line(b,"Email"))?'<div class="row"><span>Email</span><b><a href="mailto:'+esc(line(b,"Email"))+'">'+esc(line(b,"Email"))+'</a></b></div>':'')+
-     (web?'<div class="row"><span>'+esc(T("b_web"))+'</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+
+   (rows.length||line(b,"Email")||web?'<div class="rows" data-pbh="about">'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
+     (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(line(b,"Email"))?'<div class="row" data-pbh="web"><span>Email</span><b><a href="mailto:'+esc(line(b,"Email"))+'">'+esc(line(b,"Email"))+'</a></b></div>':'')+
+     (web?'<div class="row" data-pbh="web"><span>'+esc(T("b_web"))+'</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+
    '</div>':'')+
    (b.home_service?'<button type="button" disabled style="margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#e4e8ef;color:#667085;cursor:not-allowed">🏠 '+((PB.lang&&PB.lang()==="en")?"Book Home Service — coming soon":"घर पर सेवा बुक करें — जल्द शुरू होगा")+'</button>':'')
    ))+
 
    
-   '<section class="card" id="gal" hidden><h2>🖼️ '+esc(en?"Photos":"फ़ोटो")+'</h2><div class="gal" id="galBox"></div></section>'+
-   '<div id="vacFlag" style="display:none;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px"></div>'+
+   '<section class="card" data-pbh="photos" id="gal" hidden><h2>🖼️ '+esc(en?"Photos":"फ़ोटो")+'</h2><div class="gal" id="galBox"></div></section>'+
+   '<div id="vacFlag" data-pbh="vac" style="display:none;flex-direction:column;gap:3px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px"></div>'+
    
-   '<section class="card" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
-   '<a class="shr" id="waShare" href="'+esc(waLink(b,addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+esc(en?"Send address & directions to a friend":"दोस्त को पता और रास्ता भेजें")+'</b><small>'+esc(en?"Address + map route link on WhatsApp":"पता और map पर रास्ते का link, WhatsApp पर")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></a>'+
-   '<button type="button" class="shr crd" id="cardBtn"><span class="ic">🪪</span><span><b>'+esc(en?"Send visiting card to a friend":"विज़िटिंग कार्ड दोस्त को भेजें")+'</b><small>'+esc(en?"Shop card with QR, as a photo":"दुकान का कार्ड QR के साथ, फ़ोटो में")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></button>'+
-   '<section class="card" id="near" hidden><h2>📍 '+esc(en?"Other shops nearby":"पास की दूसरी दुकानें")+'</h2><div class="near" id="nearBox"></div></section>'+
+   '<section class="card" data-pbh="vac" id="vac" hidden><h2>💼 '+((PB.lang&&PB.lang()==="en")?"Hiring now":"नौकरी खाली है")+'</h2><div id="vbox"></div></section>'+
+   '<a class="shr" data-pbh="share" id="waShare" href="'+esc(waLink(b,window.PBHide&&PBHide.has('addr')?'':addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+esc(en?"Send address & directions to a friend":"दोस्त को पता और रास्ता भेजें")+'</b><small>'+esc(en?"Address + map route link on WhatsApp":"पता और map पर रास्ते का link, WhatsApp पर")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></a>'+
+   '<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+esc(en?"Send visiting card to a friend":"विज़िटिंग कार्ड दोस्त को भेजें")+'</b><small>'+esc(en?"Shop card with QR, as a photo":"दुकान का कार्ड QR के साथ, फ़ोटो में")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></button>'+
+   '<section class="card" data-pbh="near" id="near" hidden><h2>📍 '+esc(en?"Other shops nearby":"पास की दूसरी दुकानें")+'</h2><div class="near" id="nearBox"></div></section>'+
    '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()==="en")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()==="en")?"Terms":"नियम")+'</a></p>'+
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()==="en")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
    '<p id="ownBox" hidden style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:700">✏️ '+((PB.lang&&PB.lang()==="en")?"Your shop — manage it here ›":"आपकी दुकान — यहां से संभालें ›")+'</a></p>'+

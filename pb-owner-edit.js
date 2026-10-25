@@ -169,7 +169,40 @@
     var sw = s.body.querySelector("#pbeVs");
     sw.onclick = async function () { var want = !sw.classList.contains("on"); sw.disabled = true; try { var v = await rpc("pb_set_vacancy", { p_slug: O.slug, p_on: want }); sw.classList.toggle("on", !!(v && v.open)); s.changed = true; } catch (x) { s.body.querySelector("#pbeVe").textContent = T("बदल नहीं सका।", "Could not change."); } sw.disabled = false; };
   }
-  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, numbers: editNumbers, vacancy: editVacancy };
+  /* 👁️ public को क्या दिखे — हर हिस्से का switch; दुकान की जानकारी में "Hide:" line बनकर save */
+  var VIS = [
+    ["prods", "🛍️", "Products", "Products"], ["photos", "📷", "फ़ोटो", "Photos"], ["about", "🏪", "हमारे बारे में (जानकारी)", "About us (details)"],
+    ["hours", "🕘", "खुलने-बंद होने का समय", "Opening hours"], ["addr", "📍", "पता और Directions", "Address & directions"],
+    ["gst", "🧾", "GST Registered वाला निशान", "GST Registered badge"], ["web", "🌐", "Email / Website", "Email / Website"],
+    ["vac", "💼", "Vacancy वाली पट्टी", "Vacancy strip"], ["near", "🏬", "आस-पास की दुकानें", "Nearby shops"],
+    ["share", "📤", "“दोस्त को भेजें” और Visiting card", "“Send to friend” & visiting card"]
+  ];
+  function editVisible() {
+    var H = {}, cur = window.PBHide ? PBHide.cur() : {}; Object.keys(cur).forEach(function (k) { H[k] = 1; });
+    var s = sheet("👁️ " + T("Public को क्या दिखे", "What customers see"),
+      '<p class="pbe-note">' + T("🟢 चालू = ग्राहक को दिखेगा · ⚪ बंद = ग्राहक को नहीं दिखेगा। दुकान का नाम, Logo, Call / WhatsApp हमेशा दिखेंगे।", "🟢 ON = customers see it · ⚪ OFF = hidden. Shop name, logo, Call / WhatsApp always show.") + '</p>' +
+      VIS.map(function (v) { return '<div class="pbe-row"><div class="t"><b>' + v[1] + ' ' + T(v[2], v[3]) + '</b></div><button type="button" class="pbe-sw' + (H[v[0]] ? "" : " on") + '" data-k="' + v[0] + '" aria-label="Switch"><i></i></button></div>'; }).join("") +
+      '<button type="button" class="pbe-b p" id="pbeVsv">✔ ' + T("Save करें", "Save") + '</button><div class="pbe-er" id="pbeVer"></div>');
+    s.body.querySelectorAll("[data-k]").forEach(function (b) { b.onclick = function () { b.classList.toggle("on"); if (b.classList.contains("on")) delete H[b.dataset.k]; else H[b.dataset.k] = 1; }; });
+    var sv = s.body.querySelector("#pbeVsv"), er = s.body.querySelector("#pbeVer");
+    sv.onclick = async function () {
+      var val = VIS.map(function (v) { return v[0]; }).filter(function (k) { return H[k]; }).join(",");
+      sv.disabled = true; er.style.color = "#1a73e8"; er.textContent = T("Save हो रहा है…", "Saving…");
+      try {
+        await rpc("pb_owner_set_details", { p_slug: O.slug, p: { Hide: val } });
+        /* पक्का करें कि line सच में save हुई */
+        var r = await fetch(SBU + "/rest/v1/businesses?select=description&slug=eq." + encodeURIComponent(O.slug) + "&limit=1", { headers: { apikey: PK, Authorization: "Bearer " + PK } });
+        var j = r.ok ? await r.json() : [], d = (j && j[0] && j[0].description) || "", got = window.PBHide ? Object.keys(PBHide.parse(d)).sort().join(",") : val;
+        if (got !== val.split(",").filter(Boolean).sort().join(",")) throw new Error("notsaved");
+        s.el.remove(); location.reload();
+      } catch (x) {
+        er.style.color = ""; er.textContent = x.message === "notsaved" ? T("❌ Setting save नहीं हुई — Supabase में थोड़ा बदलाव चाहिए (admin को बताएँ)।", "❌ Not saved — the server needs a small update (tell admin).") : T("❌ Save नहीं हुआ, फिर कोशिश करें।", "❌ Could not save. Try again.");
+        if (window.console) console.warn("PataBook visibility save:", x);
+      }
+      sv.disabled = false;
+    };
+  }
+  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible };
 
   /* ---------- pencils ---------- */
   var MAP = {
@@ -191,7 +224,7 @@
   }
   function bar() {
     var d = document.createElement("div"); d.className = "pbe-bar";
-    var P = prem(), items = [["logo", "🖼️ Logo"]].concat(P ? [["products", "🛍️ Products"], ["photos", "📷 " + T("फ़ोटो", "Photos")]] : []).concat([["details", "🏪 " + T("जानकारी", "Details")], ["numbers", "📞 " + T("नंबर", "Numbers")], ["vacancy", "💼 Vacancy"]]);
+    var P = prem(), items = [["logo", "🖼️ Logo"]].concat(P ? [["products", "🛍️ Products"], ["photos", "📷 " + T("फ़ोटो", "Photos")]] : []).concat([["details", "🏪 " + T("जानकारी", "Details")], ["numbers", "📞 " + T("नंबर", "Numbers")], ["vacancy", "💼 Vacancy"], ["visible", "👁️ " + T("क्या दिखाएँ", "Show / hide")]]);
     d.innerHTML = '<div class="h"><span>✏️</span><b>' + T("आप अपना page बदल रहे हैं — पीली ✏️ दबाएँ", "You are editing your page — tap a yellow ✏️") + '</b><button type="button" id="pbeDone">✔ ' + T("हो गया", "Done") + '</button></div><div class="g">' +
       items.map(function (x) { return '<button type="button" data-a="' + x[0] + '">' + x[1] + '</button>'; }).join("") + '</div>';
     d.onclick = function (e) { var b = e.target.closest("[data-a]"); if (b) return ACT[b.dataset.a](); if (e.target.closest("#pbeDone")) toggle(false); };
