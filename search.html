@@ -74,6 +74,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 .tag.feat{background:#fff6d6;color:#8a6200;font-weight:800}/* Premium: सफ़ेद + हल्का सुनहरा + गहरा navy (सिर्फ़ Premium दुकानों पर) */.tag.prem{background:linear-gradient(135deg,#fdf7e6,#f4e4b8);color:#123568;border:1px solid #e3c983;font-weight:800;letter-spacing:.1px}.tag.prem i{font-style:normal;font-size:.85em;margin-right:3px}.goldname{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.goldname{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}.card.isprem{border-color:#ecdcb0;box-shadow:0 6px 20px rgba(18,53,104,.08),0 1px 3px rgba(181,138,42,.10)}.card.isprem h2 a{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.card.isprem h2 a{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}
 .jobc .jl{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:inherit;padding-bottom:6px}.jobc .jt{min-width:0;flex:1}.jobc h2{font-size:16.5px;margin:0}
 .jobc .jr{margin-top:4px;font-weight:800;color:#c2410c;font-size:14.5px}.jobc .jm{margin-top:2px;font-size:13px;color:#5b6475}.jobc .jm:empty{display:none}
+#list article.card{cursor:pointer}
 </style>
 <script src="pb-guard.js" defer></script>
 <script src="pb-track.js"></script>
@@ -268,6 +269,13 @@ if(!P.get("q"))$("q").focus();
     if(window.PB_CITY_RERUN)PB_CITY_RERUN();
   }).catch(function(){});
 })();
+
+/* पूरा card दबाने पर दुकान खुले (button / link अपना काम करें) */
+document.getElementById("list").addEventListener("click",function(e){
+  if(e.target.closest("a,button,input,select,textarea,label"))return;
+  var c=e.target.closest("article.card");if(!c)return;
+  var a=c.querySelector("h2 a[href], a.jl[href]");if(a)location.href=a.getAttribute("href");
+});
 </script>
 </body>
 </html>
