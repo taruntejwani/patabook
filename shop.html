@@ -329,7 +329,7 @@ function render(){
        '<a '+(ph?'href="tel:'+esc(ph)+'"':'class="dis"')+'><span>📞</span>'+L("Call","Call")+'</a>'+
        '<a '+(wa?'href="https://wa.me/'+wa+'" target="_blank" rel="noopener"':'class="dis"')+'><span>💬</span>WhatsApp</a>'+
        '<a data-pbh="addr" '+(dir?'href="'+esc(dir)+'"':'class="dis"')+'><span>🧭</span>'+L("रास्ता","Directions")+'</a>'+
-       '<button type="button" id="shareQa"><span>📤</span>'+L("Share","Share")+'</button>'+
+       '<button type="button" id="shareQa"><span>📤</span>'+L("पता भेजें","Share Address")+'</button>'+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',about:'about',visit:'addr'}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
      (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
@@ -365,7 +365,7 @@ function render(){
   /* दोस्त का भेजा link (#p<id>) खुले तो वही product सामने खुले */
   if(!window.__pOpened){const hm=location.hash.match(/^#p(\d+)$/);if(hm){const q=P.find(x=>String(x.id)===hm[1]);if(q){window.__pOpened=1;setTimeout(()=>{const s2=document.getElementById("prods");if(s2)s2.scrollIntoView({block:"start"});prodSheet(q);},300);}}}
   const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
-  document.getElementById("shareQa").onclick=share;
+  document.getElementById("shareQa").onclick=()=>{window.open(waLink(b,window.PBHide&&PBHide.has("addr")?"":addr),"_blank","noopener");};
   document.getElementById("repBtn").onclick=openReport;
   wireDir(b,addr,dir);const ws=document.getElementById("waShare");if(ws)ws.onclick=()=>{ws.href=waLink(b,addr);};drawOwn();
   document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
