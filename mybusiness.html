@@ -344,10 +344,11 @@ function reportHTML(b){
 function resizeImage(file,maxSide){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
   img.onload=()=>{const k=Math.min(1,maxSide/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
     const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
-    const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<290000)return res(bl);if(q>0.45)return tryQ(q-0.15);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.82);};
+    /* 📉 हर फ़ोटो छोटी करो (WebP, ~150 KB तक) ताकि ज़्यादा फ़ोटो रखी जा सकें और page जल्दी खुले */
+    const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<150000)return res(bl);if(q>0.4)return tryQ(Math.round((q-0.1)*100)/100);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.78);};
   img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
 async function addPhoto(i,file){const b=ROWS[i],en=L()==="en",er=$("pe"+i);if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";
-  try{if(!/^image\//.test(file.type))throw new Error("type");ME=await PBA.session();const blob=await resizeImage(file,1100),ext=blob.type==="image/webp"?"webp":"jpg";
+  try{if(!/^image\//.test(file.type))throw new Error("type");ME=await PBA.session();const blob=await resizeImage(file,1000),ext=blob.type==="image/webp"?"webp":"jpg";
     const path=encodeURIComponent(b.slug)+"/photo-"+Date.now()+"."+ext;
     const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
     if(!up.ok)throw new Error("upload");
