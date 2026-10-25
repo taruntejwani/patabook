@@ -215,7 +215,7 @@ function openStatus(b){
     return {open:false,t:en?"Closed now · opens "+when+" "+at(openT):"अभी बंद · "+when+" "+at(openT)+" पर खुलेगा"};}
   return {open:false,t:en?"Closed now":"अभी बंद"};
 }
-function waLink(b,addr){const en=PB.lang&&PB.lang()==="en",u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug),d=pbDir(b);return "https://wa.me/?text="+encodeURIComponent("🏪 "+b.name+"\n📍 "+addr+(d?"\n\n🧭 "+(en?"Directions:":"रास्ता:")+"\nhttps://patabook.in/"+d:"")+"\n\nℹ️ "+(en?"Full details, Call & WhatsApp:":"पूरी जानकारी, Call और WhatsApp:")+"\n"+u);}
+function waLink(b,addr){const en=PB.lang&&PB.lang()==="en",la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug),P=(()=>{const c=contactState||{};if(c.k!=="ok")return ["",""];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(c.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(c.whatsapp||c.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name,"📍 "+(en?"Address: ":"पता: ")+addr];if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function gmapsUrl(b){const la=+b.latitude,ln=+b.longitude;return "https://www.google.com/maps/search/?api=1&query="+(la&&ln?la+","+ln:encodeURIComponent((b.name||"")+", "+(b.address||"")));}
 function staticMap(b,href){const la=+b.latitude,ln=+b.longitude;if(!la||!ln)return "";
   const z=16,n=2**z,xf=(ln+180)/360*n,yr=la*Math.PI/180,yf=(1-Math.log(Math.tan(yr)+1/Math.cos(yr))/Math.PI)/2*n,x=Math.floor(xf),y=Math.floor(yf);
@@ -361,6 +361,7 @@ function render(){
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()==="en")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>'+'<div id="whoBot" style="text-align:center;margin:0 0 14px"></div>';
   drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();drawProds();
   wireDir(b,addr,map);
+  const ws=document.getElementById("waShare");if(ws)ws.onclick=()=>{ws.href=waLink(b,addr);};   /* नंबर बाद में आता है, इसलिए दबाते समय link बनाओ */
   drawOwn();
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
