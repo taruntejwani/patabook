@@ -314,7 +314,7 @@ function premBlock(b,i){
     if(o==="rp")body=reportHTML(b);
     if(o==="pr"&&window.prodBody)body=prodBody(b,i);
     return '<div class="pm"><div class="ph">💎 '+(en?"PataBook Premium":"PataBook Premium")+'</div><small>'+(en?"Active till "+till+" · ⭐ your shop shows on top":till+" तक चालू · ⭐ आपकी दुकान ऊपर दिखती है")+'</small>'+
-      '<div class="pb"><button type="button" class="'+(o==="ph"?"on":"")+'" data-pm="ph" data-i="'+i+'">🖼️ '+(en?"Photos":"फ़ोटो")+'</button><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button><button type="button" data-pm="vac" data-i="'+i+'">💼 Vacancy</button><button type="button" class="'+(o==="pr"?"on":"")+'" data-pm="pr" data-i="'+i+'">🛍️ '+(en?"Products":"Products")+'</button></div>'+body+'</div>';
+      '<div class="pb"><button type="button" class="'+(o==="ph"?"on":"")+'" data-pm="ph" data-i="'+i+'">🖼️ '+(en?"Photos":"फ़ोटो")+'</button><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button><button type="button" data-pm="vac" data-i="'+i+'">💼 Vacancy</button><button type="button" class="'+(o==="pr"?"on":"")+'" data-pm="pr" data-i="'+i+'">'+(window.prodBtnLabel?prodBtnLabel(b):"🛍️ Products")+'</button></div>'+body+'</div>';
   }
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
   const r=P.request;
@@ -666,6 +666,7 @@ PB.onChange(draw);
 start();
 </script>
 <script src="pb-imgcheck.js"></script>
+<script src="pb-kind.js"></script>
 <script src="pb-products-owner.js"></script>
 </body>
 </html>

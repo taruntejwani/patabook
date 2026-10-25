@@ -3,31 +3,41 @@
    mybusiness.html की चीज़ें इस्तेमाल होती हैं: rpc, esc, L, $, ME, PBA, SB, KEY, ROWS, draw, resizeImage */
 (function () {
   var PRD = {};
-  var UNITS = {
-    vol: { i: "🧴", hi: "Ltr / ML", en: "Ltr / ML", z: ["100 ML", "200 ML", "500 ML", "1 Ltr", "5 Ltr", "20 Ltr", "25 Ltr", "50 Ltr"] },
-    wt: { i: "⚖️", hi: "वज़न (Kg/g)", en: "Weight (Kg/g)", z: ["100 g", "250 g", "500 g", "1 Kg", "5 Kg", "25 Kg", "50 Kg", "1 Quintal"] },
-    pcs: { i: "🔢", hi: "पीस", en: "Pieces", z: ["1 PCS", "2 PCS", "6 PCS", "12 PCS (1 Dozen)", "1 Box", "1 Packet"] },
-    sz: { i: "👕", hi: "Size", en: "Size", z: ["S", "M", "L", "XL", "XXL", "Free Size", "6", "7", "8", "9", "10"] },
-    len: { i: "📏", hi: "लंबाई", en: "Length", z: ["1 Meter", "5 Meter", "10 Meter", "1 Feet", "10 Feet"] },
-    svc: { i: "🛠️", hi: "सेवा", en: "Service", z: ["Per visit", "Per hour", "Per day", "Per job"] }
-  };
-  var UORD = ["vol", "wt", "pcs", "sz", "len", "svc"];
+  /* Units और category वाली table: pb-kind.js (PBKind) */
+  var K = window.PBKind;
+  var UNITS = K.UNITS;
+  var UORD = K.ORDER;
   var MAXUP = 10;
   /* दुकान का Unit: इस phone में याद (localStorage) — नहीं तो पुराने products के size से अंदाज़ा */
   function ukey(slug) { return "pb-unit-" + slug; }
-  function guess(list) {
-    var t = (list || []).map(function (p) { return String(p.size || ""); }).join(" ").toLowerCase();
-    if (/\b(ml|ltr|litre|liter|l)\b/.test(t)) return "vol"; if (/\b(kg|g|gram|quintal|ton)\b/.test(t)) return "wt";
-    if (/\b(pcs|pc|dozen|box|packet)\b/.test(t)) return "pcs"; if (/\b(meter|feet|ft|m)\b/.test(t)) return "len";
-    if (/\b(per visit|per hour|per day|per job)\b/.test(t)) return "svc"; if (/\b(s|m|l|xl|xxl|free size)\b/.test(t)) return "sz"; return "";
+  var INFO = {};   /* slug → {category, description} — category से Unit अपने-आप */
+  async function infoLoad(slug) {
+    if (INFO[slug]) return;
+    var p = prof(slug);
+    if (p && p.d) { INFO[slug] = { description: p.d }; }
+    try {
+      var r = await fetch(SB + "/rest/v1/businesses?select=category,description&slug=eq." + encodeURIComponent(slug) + "&limit=1", { headers: { apikey: KEY, Authorization: "Bearer " + KEY } });
+      var j = r.ok ? await r.json() : null; if (j && j[0]) INFO[slug] = j[0];
+    } catch (e) {}
+    if (!INFO[slug]) INFO[slug] = {};
   }
-  function unitOf(slug) { var u = ""; try { u = localStorage.getItem(ukey(slug)) || ""; } catch (e) {} if (!UNITS[u]) u = guess(PRD[slug]); return UNITS[u] ? u : ""; }
+  function saved(slug) { var u = ""; try { u = localStorage.getItem(ukey(slug)) || ""; } catch (e) {} return UNITS[u] ? u : ""; }
+  function prof(slug) { try { return typeof PROF !== "undefined" && PROF && PROF[slug]; } catch (e) { return null; } }   /* My Shop में पहले से आई जानकारी */
+  function auto(slug) { return K.of(INFO[slug] || prof(slug) || {}); }
+  /* Unit: (1) इस phone में चुना हुआ (2) पुराने products के size से (3) दुकान की category से अपने-आप */
+  function unitOf(slug) { return saved(slug) || K.guess(PRD[slug]) || auto(slug).unit || ""; }
+  function isAuto(slug) { return !saved(slug) && !K.guess(PRD[slug]) && !!auto(slug).unit; }
+  function modeOf(slug) { var u = unitOf(slug); return u ? K.modeOfUnit(u) : auto(slug).mode; }
+  function W(slug, k) { return K.word(modeOf(slug), k, en()); }
   function setUnit(slug, u) { try { localStorage.setItem(ukey(slug), u); } catch (e) {} }
   function sizesOf(slug) { var u = unitOf(slug); return u ? UNITS[u].z : UNITS.vol.z; }
   /* "और जानकारी": खूबियों में "Brand: …" जैसे रखी जाती है — ग्राहक को tag दिखता है */
-  var EXTRA = [["Brand", "🏷️ Brand", "🏷️ Brand", "Tejwani"], ["Packing", "📦 Packing", "📦 Packing", "Can / Bottle / Pouch"], ["Min order", "🚚 कम से कम Order", "🚚 Min order", "5 Can"]];
+  /* "और जानकारी" के खाने Unit के हिसाब से (pb-kind.js) — जैसे Transport: रूट, गाड़ी, कम से कम माल */
+  var EXTRA = UNITS.vol.x;
+  function xOf(slug) { var u = unitOf(slug); return (UNITS[u] && UNITS[u].x) || UNITS.vol.x; }
+  var ALLX = []; UORD.forEach(function (k) { UNITS[k].x.forEach(function (x) { if (!ALLX.some(function (y) { return y[0] === x[0]; })) ALLX.push(x); }); });
   function getX(feats, k) { var re = new RegExp("^" + k + ":\\s*", "i"); for (var i = 0; i < feats.length; i++) if (re.test(feats[i])) return feats[i].replace(re, ""); return ""; }
-  function plainF(feats) { return feats.filter(function (f) { return !EXTRA.some(function (x) { return new RegExp("^" + x[0] + ":", "i").test(f); }); }); }
+  function plainF(feats, xs) { return feats.filter(function (f) { return !(xs || EXTRA).some(function (x) { return new RegExp("^" + x[0] + ":", "i").test(f); }); }); }
   var IMG_RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   var css = document.createElement("style");
   css.textContent =
@@ -64,6 +74,7 @@
     ".pr-un h4{font-size:13.5px;color:#123568;margin:0 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}.pr-un h4 small{font-size:11.5px;color:#5b6475;font-weight:600}" +
     ".pr-ug{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.pr-ug button{border:1.5px solid #e4eaf5;background:#fff;border-radius:12px;padding:8px 4px;font:inherit;font-weight:800;font-size:12.5px;color:#123568;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}.pr-ug button span{font-size:19px}.pr-ug button.on{background:#123568;border-color:#123568;color:#fff}" +
     ".pr-uc{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;color:#123568}.pr-uc button{margin-left:auto;border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;font-weight:700;color:#1a73e8;cursor:pointer}" +
+    ".pr-au{display:block;margin-top:6px;font-size:11.5px;color:#7a5a14;background:#fffaf0;border-radius:8px;padding:5px 8px}" +
     ".pr-add:disabled,.pr-mul:disabled{opacity:.45;filter:grayscale(1);cursor:not-allowed}" +
     ".pr-more{margin-top:12px;border:1px solid #e4eaf5;border-radius:14px;padding:0 12px;background:#fbfcfe}.pr-more summary{padding:11px 0;font-weight:800;font-size:14px;color:#123568;cursor:pointer;list-style:none}.pr-more summary::-webkit-details-marker{display:none}.pr-more[open]{padding-bottom:12px}" +
     ".pr-num{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#123568;color:#fff;font-size:11px;font-weight:800;margin-right:6px}" +
@@ -79,11 +90,16 @@
   document.head.appendChild(css);
 
   function en() { return L() === "en"; }
+  var NAME_PH = { vol: "Tyre Polish", wt: "Basmati Rice", pcs: "LED Bulb", sz: "Cotton Kurta", len: "PVC Pipe", svc: "AC Service", ship: "Gandhidham → Mumbai (Full truck)", ride: "Gandhidham → Ahmedabad", stay: "Deluxe AC Room", food: "Gujarati Thali", edu: "Class 10 Maths", med: "Blood Test (CBC)", event: "Wedding Photography", pro: "GST Return Filing" };
+  function namePh(slug) { var u = unitOf(slug); return (en() ? "e.g. " : "जैसे: ") + (NAME_PH[u] || "Tyre Polish"); }
+  /* My Shop का Premium बटन "Products" → दुकान के हिसाब से "सेवाएँ" / "Menu" */
+  window.prodBtnLabel = function (b) { return W(b.slug, "ic") + " " + W(b.slug, "btn"); };
   function rs(n) { return n ? "₹" + Number(n).toLocaleString("en-IN") : ""; }
 
   window.prodLoad = async function (slug) {
     ME = await PBA.session();
     PRD[slug] = (await rpc("pb_my_products", { p_slug: slug })) || [];
+    await infoLoad(slug);
   };
 
   var PICK = {};
@@ -92,15 +108,17 @@
     if (!list) return '<div class="pr-l"><small>…</small></div>';
     var E = en();
     var u = unitOf(b.slug), lock = !u;
+    var one = W(b.slug, "one"), au = isAuto(b.slug);
     var picker = '<div class="pr-un' + (lock ? " need" : "") + '">' + (lock || PICK[b.slug]
-      ? '<h4>⚙️ ' + (E ? "First: how do you sell your products?" : "पहले बताइए: आपका माल किस हिसाब से बिकता है?") + (lock ? '<small>' + (E ? "required" : "ज़रूरी") + '</small>' : "") + '</h4><div class="pr-ug">' +
+      ? '<h4>⚙️ ' + (E ? "First: how do you sell / charge?" : "पहले बताइए: आपका माल / सेवा किस हिसाब से है?") + (lock ? '<small>' + (E ? "required" : "ज़रूरी") + '</small>' : "") + '</h4><div class="pr-ug">' +
         UORD.map(function (k) { return '<button type="button" class="' + (u === k ? "on" : "") + '" data-punit="' + i + '" data-u="' + k + '"><span>' + UNITS[k].i + '</span>' + (E ? UNITS[k].en : UNITS[k].hi) + '</button>'; }).join("") + '</div>'
-      : '<div class="pr-uc">' + UNITS[u].i + ' ' + (E ? "Sold by: " + UNITS[u].en : "बिक्री: " + UNITS[u].hi) + '<button type="button" data-pchg="' + i + '">' + (E ? "Change" : "बदलें") + '</button></div>') + '</div>';
-    return picker + '<button type="button" class="pr-add" data-padd="' + i + '"' + (list.length >= 20 || lock ? " disabled" : "") + '><i>＋</i><span><b>' + (lock ? (E ? "Add a product — choose unit above first" : "नया Product — पहले ऊपर Unit चुनें") : (E ? "Add a product" : "नया Product जोड़ें")) + '</b><small>' +
-      (E ? "Photo, name, size, price · " + list.length + " / 20" : "फ़ोटो, नाम, size, कीमत · " + list.length + " / 20") + '</small></span></button>' +
-      (list.length < 20 ? '<button type="button" class="pr-mul" data-pmul="' + i + '"' + (lock ? " disabled" : "") + '><i>📋</i><span><b>' + (E ? "Add many products (Multiple)" : "एक साथ कई Products (Multiple)") + '</b><small>' + (E ? "Pick up to " + MAXUP + " photos at once, then fill details" : "एक साथ " + MAXUP + " तक फ़ोटो चुनें, फिर details भरें") + '</small></span></button>' : '') +
+      : '<div class="pr-uc">' + UNITS[u].i + ' ' + (E ? "Unit: " + UNITS[u].en : "Unit: " + UNITS[u].hi) + '<button type="button" data-pchg="' + i + '">' + (E ? "Change" : "बदलें") + '</button></div>' +
+        (au ? '<small class="pr-au">✨ ' + (E ? "Chosen automatically from your shop category — change if wrong." : "आपकी दुकान की category से अपने-आप चुना — गलत हो तो बदलें।") + '</small>' : "")) + '</div>';
+    return picker + '<button type="button" class="pr-add" data-padd="' + i + '"' + (list.length >= 20 || lock ? " disabled" : "") + '><i>＋</i><span><b>' + (lock ? (E ? "Add a " + one.toLowerCase() + " — choose unit above first" : W(b.slug, "nw") + " " + one + " — पहले ऊपर Unit चुनें") : (E ? "Add a " + one.toLowerCase() : W(b.slug, "nw") + " " + one + " जोड़ें")) + '</b><small>' +
+      (E ? "Photo, name, " + (modeOf(b.slug) === "p" ? "size" : "unit") + ", price · " + list.length + " / 20" : "फ़ोटो, नाम, " + (modeOf(b.slug) === "p" ? "size" : "Unit") + ", कीमत · " + list.length + " / 20") + '</small></span></button>' +
+      (list.length < 20 ? '<button type="button" class="pr-mul" data-pmul="' + i + '"' + (lock ? " disabled" : "") + '><i>📋</i><span><b>' + (E ? "Add many at once (Multiple)" : "एक साथ कई " + W(b.slug, "nav") + " (Multiple)") + '</b><small>' + (E ? "Pick up to " + MAXUP + " photos at once, then fill details" : "एक साथ " + MAXUP + " तक फ़ोटो चुनें, फिर details भरें") + '</small></span></button>' : '') +
       '<div class="pr-l">' + list.map(function (p) {
-        var st = !p.show ? '<span class="pr-st hid">🙈 ' + (E ? "Hidden" : "छिपा है") + '</span>' : p.stock ? '<span class="pr-st on">✅ ' + (E ? "Visible" : "दिख रहा है") + '</span>' : '<span class="pr-st out">⛔ ' + (E ? "Out of stock" : "Stock खत्म") + '</span>';
+        var st = !p.show ? '<span class="pr-st hid">🙈 ' + (E ? "Hidden" : "छिपा है") + '</span>' : p.stock ? '<span class="pr-st on">✅ ' + (E ? "Visible" : "दिख रहा है") + '</span>' : '<span class="pr-st out">⛔ ' + W(b.slug, "out") + '</span>';
         return '<div class="pr-i' + (p.show ? "" : " hid") + '"><div class="th">' + (IMG_RX.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : "") + '</div>' +
           '<div class="tx"><b>' + (p.best ? "⭐ " : "") + esc(p.name) + '</b><small>' + esc(p.size || "") + (p.mrp ? " · " + rs(p.mrp) : "") + '</small>' + st + '</div>' +
           '<div class="pr-a"><button type="button" class="e" data-ped="' + i + '" data-id="' + p.id + '" aria-label="Edit">✏️</button>' +
@@ -116,7 +134,8 @@
   function sheet(b, p) {
     var E = en();
     var D = p ? JSON.parse(JSON.stringify(p)) : { name: "", size: "", mrp: "", feats: [], img: "", show: true, stock: true };
-    D.feats = D.feats || []; D.x = {}; EXTRA.forEach(function (x) { D.x[x[0]] = getX(D.feats, x[0]); }); D.feats = plainF(D.feats);
+    var XS = xOf(b.slug), MD = modeOf(b.slug), ONE = W(b.slug, "one");
+    D.feats = D.feats || []; D.x = {}; XS.forEach(function (x) { D.x[x[0]] = getX(D.feats, x[0]); }); D.feats = plainF(D.feats, XS);
     var SIZES = sizesOf(b.slug), FMAX = 5;
     var sc = document.createElement("div"); sc.className = "pr-sc";
     function keep() {
@@ -124,27 +143,27 @@
       D.name = n.value; D.mrp = sc.querySelector("#prM").value.replace(/\D/g, "");
       D.stock = sc.querySelector("#prS").checked; D.show = sc.querySelector("#prV").checked;
       var cs = sc.querySelector("#prCS"); if (cs && cs.value.trim()) D.size = cs.value.trim();
-      EXTRA.forEach(function (x, k) { var el = sc.querySelector("#prX" + k); if (el) D.x[x[0]] = el.value.trim().slice(0, 30); });
+      XS.forEach(function (x, k) { var el = sc.querySelector("#prX" + k); if (el) D.x[x[0]] = el.value.trim().slice(0, 30); });
       var mo = sc.querySelector(".pr-more"); D.open = !!(mo && mo.open);
     }
-    function allFeats() { return D.feats.slice(0, FMAX).concat(EXTRA.filter(function (x) { return D.x[x[0]]; }).map(function (x) { return x[0] + ": " + D.x[x[0]]; })); }
+    function allFeats() { return D.feats.slice(0, FMAX).concat(XS.filter(function (x) { return D.x[x[0]]; }).map(function (x) { return x[0] + ": " + D.x[x[0]]; })); }
     function body() {
-      var hasX = EXTRA.some(function (x) { return D.x[x[0]]; }) || D.feats.length;
-      return '<div class="pr-sh"><div class="pr-hd"><b>' + (p ? (E ? "✏️ Edit product" : "✏️ Product बदलें") : (E ? "➕ New product" : "➕ नया Product")) + '</b><button type="button" id="prX" aria-label="Close">✕</button></div>' +
+      var hasX = XS.some(function (x) { return D.x[x[0]]; }) || D.feats.length;
+      return '<div class="pr-sh"><div class="pr-hd"><b>' + (p ? (E ? "✏️ Edit " + ONE.toLowerCase() : "✏️ " + ONE + " बदलें") : (E ? "➕ New " + ONE.toLowerCase() : "➕ " + W(b.slug, "nw") + " " + ONE)) + '</b><button type="button" id="prX" aria-label="Close">✕</button></div>' +
         '<div class="pr-pk"><div class="pr-pv">' + (D.img ? '<img src="' + esc(D.img) + '" alt="">' : "📷") + '</div><div class="bt"><label>📷 ' + (D.img ? (E ? "Change photo" : "फ़ोटो बदलें") : (E ? "Add photo" : "फ़ोटो लगाएँ")) +
         '<input type="file" accept="image/*" hidden id="prF"></label></div></div><div class="pr-er" id="prE1"></div>' +
-        '<label class="pr-f" for="prN"><span class="pr-num">1</span>' + (E ? "Product name" : "Product का नाम") + '</label><input class="pr-in" id="prN" maxlength="80" value="' + esc(D.name) + '" placeholder="' + (E ? "e.g. Tyre Polish" : "जैसे: Tyre Polish") + '">' +
-        '<span class="pr-f"><span class="pr-num">2</span>Size</span><div class="pr-sz" id="prZ">' + SIZES.map(function (z) { return '<button type="button" class="' + (D.size === z ? "on" : "") + '">' + z + '</button>'; }).join("") + '</div>' +
-        '<input class="pr-in" id="prCS" maxlength="30" style="margin-top:6px" placeholder="' + (E ? "Other size (optional)" : "दूसरा size लिखें (ज़रूरी नहीं)") + '" value="' + (SIZES.indexOf(D.size) < 0 ? esc(D.size || "") : "") + '">' +
-        '<label class="pr-f" for="prM"><span class="pr-num">3</span>' + (E ? "Price (₹) — empty = “Ask price”" : "कीमत (₹) — खाली = “कीमत पूछें”") + '</label><input class="pr-in" id="prM" inputmode="numeric" maxlength="9" value="' + esc(D.mrp || "") + '" placeholder="1499">' +
+        '<label class="pr-f" for="prN"><span class="pr-num">1</span>' + (E ? ONE + " name" : ONE + " का नाम") + '</label><input class="pr-in" id="prN" maxlength="80" value="' + esc(D.name) + '" placeholder="' + esc(namePh(b.slug)) + '">' +
+        '<span class="pr-f"><span class="pr-num">2</span>' + (MD === "p" ? "Size" : (E ? "Rate is per" : "Rate किस हिसाब से")) + '</span><div class="pr-sz" id="prZ">' + SIZES.map(function (z) { return '<button type="button" class="' + (D.size === z ? "on" : "") + '">' + z + '</button>'; }).join("") + '</div>' +
+        '<input class="pr-in" id="prCS" maxlength="30" style="margin-top:6px" placeholder="' + (MD === "p" ? (E ? "Other size (optional)" : "दूसरा size लिखें (ज़रूरी नहीं)") : (E ? "Other (optional), e.g. Per sq.ft" : "दूसरा लिखें (ज़रूरी नहीं), जैसे Per sq.ft")) + '" value="' + (SIZES.indexOf(D.size) < 0 ? esc(D.size || "") : "") + '">' +
+        '<label class="pr-f" for="prM"><span class="pr-num">3</span>' + (MD === "p" ? (E ? "Price (₹) — empty = “Ask price”" : "कीमत (₹) — खाली = “कीमत पूछें”") : (E ? "Rate (₹) — empty = “" + W(b.slug, "ask") + "”" : "Rate (₹) — खाली = “" + W(b.slug, "ask") + "”")) + '</label><input class="pr-in" id="prM" inputmode="numeric" maxlength="9" value="' + esc(D.mrp || "") + '" placeholder="1499">' +
         '<details class="pr-more"' + (D.open || hasX ? " open" : "") + '><summary>▸ ' + (E ? "More details (optional)" : "और जानकारी (ज़रूरी नहीं)") + '</summary>' +
-        EXTRA.map(function (x, k) { return '<label class="pr-f" for="prX' + k + '">' + (E ? x[2] : x[1]) + '</label><input class="pr-in" id="prX' + k + '" maxlength="30" value="' + esc(D.x[x[0]] || "") + '" placeholder="' + esc(x[3]) + '">'; }).join("") +
+        XS.map(function (x, k) { return '<label class="pr-f" for="prX' + k + '">' + (E ? x[2] : x[1]) + '</label><input class="pr-in" id="prX' + k + '" maxlength="30" value="' + esc(D.x[x[0]] || "") + '" placeholder="' + esc(x[3]) + '">'; }).join("") +
         '<span class="pr-f">' + (E ? "Features (up to " + FMAX + ")" : "खूबियाँ (" + FMAX + " तक)") + '</span><div class="pr-ch" id="prC">' + (D.feats.length ? D.feats.map(function (f, k) { return '<span>' + esc(f) + '<button type="button" data-rf="' + k + '" aria-label="Remove">✕</button></span>'; }).join("") : '<small style="color:#5b6475">' + (E ? "None yet" : "अभी कोई नहीं") + '</small>') + '</div>' +
-        (D.feats.length < FMAX ? '<div class="pr-af"><input class="pr-in" id="prNF" maxlength="40" placeholder="' + (E ? "e.g. Non Greasy" : "जैसे: Non Greasy") + '"><button type="button" id="prAF" aria-label="Add">＋</button></div>' : "") + '</details>' +
-        '<label class="pr-tg"><span>✅ ' + (E ? "In stock" : "Stock में है") + '<small>' + (E ? "Off = shows “Out of stock”" : "बंद = “अभी Stock में नहीं” दिखेगा") + '</small></span><input type="checkbox" id="prS"' + (D.stock ? " checked" : "") + '></label>' +
+        (D.feats.length < FMAX ? '<div class="pr-af"><input class="pr-in" id="prNF" maxlength="40" placeholder="' + (MD === "p" ? (E ? "e.g. Non Greasy" : "जैसे: Non Greasy") : (E ? "e.g. GPS tracking" : "जैसे: Door pickup")) + '"><button type="button" id="prAF" aria-label="Add">＋</button></div>' : "") + '</details>' +
+        '<label class="pr-tg"><span>✅ ' + (MD === "p" ? (E ? "In stock" : "Stock में है") : (E ? "Available now" : "अभी उपलब्ध है")) + '<small>' + (E ? "Off = shows “" + W(b.slug, "out") + "”" : "बंद = “" + W(b.slug, "out") + "” दिखेगा") + '</small></span><input type="checkbox" id="prS"' + (D.stock ? " checked" : "") + '></label>' +
         '<label class="pr-tg"><span>👁️ ' + (E ? "Show to customers" : "ग्राहकों को दिखाएँ") + '<small>' + (E ? "Off = hidden, not deleted" : "बंद = छिप जाएगा, हटेगा नहीं") + '</small></span><input type="checkbox" id="prV"' + (D.show ? " checked" : "") + '></label>' +
         '<div class="pr-er" id="prE"></div><button type="button" class="pr-sv" id="prSave">✔ ' + (E ? "Save" : "Save करें") + '</button>' +
-        (p ? '<button type="button" class="pr-dl" id="prDel">🗑️ ' + (E ? "Delete this product" : "यह Product हटाएँ") + '</button>' : "") + '</div>';
+        (p ? '<button type="button" class="pr-dl" id="prDel">🗑️ ' + (E ? "Delete this " + ONE.toLowerCase() : "यह " + ONE + " हटाएँ") + '</button>' : "") + '</div>';
     }
     function paint() { sc.innerHTML = body(); wire(); }
     function wire() {
@@ -173,7 +192,7 @@
       };
       sc.querySelector("#prSave").onclick = async function () {
         keep(); var er = sc.querySelector("#prE"), btn = this;
-        if (String(D.name || "").trim().length < 2) { er.textContent = E ? "Write the product name." : "Product का नाम लिखें।"; return; }
+        if (String(D.name || "").trim().length < 2) { er.textContent = E ? "Write the name." : ONE + " का नाम लिखें।"; return; }
         if (!D.img) { er.textContent = E ? "Add a photo." : "फ़ोटो लगाएँ।"; return; }
         btn.disabled = true; er.textContent = "";
         try {
@@ -182,7 +201,7 @@
           sc.remove(); refresh(b.slug);
         } catch (x) {
           btn.disabled = false; var m = String(x.message || "");
-          er.textContent = /too many/.test(m) ? (E ? "Max 20 products." : "20 से ज़्यादा products नहीं।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : (E ? "Could not save. Try again." : "Save नहीं हुआ। फिर कोशिश करें।");
+          er.textContent = /too many/.test(m) ? (E ? "Max 20." : "20 से ज़्यादा नहीं।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : (E ? "Could not save. Try again." : "Save नहीं हुआ। फिर कोशिश करें।");
         }
       };
       var dl = sc.querySelector("#prDel"); if (dl) dl.onclick = function () { sc.remove(); del(b, p); };
@@ -201,7 +220,7 @@
       inp.onchange = function () {
         var fs = Array.prototype.slice.call(inp.files || []).filter(function (f) { return /^image\//.test(f.type); }), r0 = room();
         if (!fs.length) { if (!R.length && sc) sc.remove(); return; }
-        if (fs.length > r0) alert(E ? "Only " + r0 + " photos can be added now (max " + MAXUP + " at a time, 20 products total)." : "अभी " + r0 + " फ़ोटो ही जुड़ सकती हैं (एक बार में " + MAXUP + ", कुल 20 products)।");
+        if (fs.length > r0) alert(E ? "Only " + r0 + " photos can be added now (max " + MAXUP + " at a time, 20 in total)." : "अभी " + r0 + " फ़ोटो ही जुड़ सकती हैं (एक बार में " + MAXUP + ", कुल 20)।");
         fs.slice(0, r0).forEach(function (f) { var r = { id: ++n, name: "", size: "", mrp: "", img: "", prev: URL.createObjectURL(f), up: true, err: "", ok: false }; R.push(r); upload(r, f); });
         open(); paint();
       };
@@ -232,16 +251,16 @@
         (!r.ok ? '<button type="button" data-rm="' + r.id + '" aria-label="Remove">🗑️</button>' : "") + '</div>' +
         (r.ok ? "" : '<div class="mp-g"><label class="mp-ph">' + (r.img || r.prev ? '<img src="' + esc(r.img || r.prev) + '" alt="">' : "📷") + '<small>' + (r.up ? (E ? "⏳ Checking…" : "⏳ जांच…") : r.img ? "✓" : (E ? "Photo" : "फ़ोटो")) + '</small>' +
         '<input type="file" accept="image/*" hidden data-f="' + r.id + '"></label>' +
-        '<div class="mp-f"><input class="pr-in mpN" maxlength="80" value="' + esc(r.name) + '" placeholder="' + (E ? "1. Product name" : "1. Product का नाम") + '">' +
-        '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="2. Size"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (E ? "3. Price ₹" : "3. कीमत ₹") + '"></div></div></div>' +
+        '<div class="mp-f"><input class="pr-in mpN" maxlength="80" value="' + esc(r.name) + '" placeholder="' + (E ? "1. Name" : "1. नाम") + '">' +
+        '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="2. ' + (modeOf(b.slug) === "p" ? "Size" : "Unit") + '"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (modeOf(b.slug) === "p" ? (E ? "3. Price ₹" : "3. कीमत ₹") : "3. Rate ₹") + '"></div></div></div>' +
         '<div class="mp-sz">' + SZ.map(function (z) { return '<button type="button" data-sz="' + r.id + '" class="' + (r.size === z ? "on" : "") + '">' + z + '</button>'; }).join("") + '</div>') +
         (r.err ? '<div class="mp-e">' + esc(r.err) + '</div>' : "") + '</div>';
     }
     function paint() {
       if (!sc) return;
       var todo = R.filter(function (r) { return !r.ok; }).length, ups = R.filter(function (r) { return r.up; }).length, rm = room();
-      sc.innerHTML = '<div class="pr-sh"><div class="pr-hd"><b>📋 ' + (E ? "Add many products" : "एक साथ कई Products") + '</b><button type="button" id="mpX" aria-label="Close">✕</button></div>' +
-        '<small style="color:#5b6475">' + (E ? "Fill name, size and price next to each photo. Price empty = “Ask price”." : "हर फ़ोटो के सामने नाम, size और कीमत भरें। कीमत खाली = “कीमत पूछें”।") + (ups ? ' · ⏳ ' + ups + (E ? " uploading" : " upload हो रही") : "") + '</small>' +
+      sc.innerHTML = '<div class="pr-sh"><div class="pr-hd"><b>📋 ' + (E ? "Add many at once" : "एक साथ कई " + K.word(modeOf(b.slug), "nav", false)) + '</b><button type="button" id="mpX" aria-label="Close">✕</button></div>' +
+        '<small style="color:#5b6475">' + (E ? "Fill name, " + (modeOf(b.slug) === "p" ? "size" : "unit") + " and price next to each photo. Price empty = “" + W(b.slug, "ask") + "”." : "हर फ़ोटो के सामने नाम, " + (modeOf(b.slug) === "p" ? "size" : "Unit") + " और कीमत भरें। कीमत खाली = “" + W(b.slug, "ask") + "”।") + (ups ? ' · ⏳ ' + ups + (E ? " uploading" : " upload हो रही") : "") + '</small>' +
         R.map(row).join("") +
         (rm ? '<button type="button" class="mp-add" id="mpAdd">📷 ' + (E ? "Add more photos (" + rm + " more)" : "और फ़ोटो जोड़ें (" + rm + " और)") + '</button>' : "") +
         '<div class="pr-er" id="mpE"></div><button type="button" class="pr-sv" id="mpSave"' + (todo ? "" : " disabled") + '>✔ ' + (E ? "Save all (" + todo + ")" : "सब Save करें (" + todo + ")") + '</button></div>';

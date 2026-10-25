@@ -92,7 +92,10 @@
 
   /* ---------- काम ---------- */
   function editDetails(focus) { frame("🏪 " + T("जानकारी बदलें", "Edit details"), "edit.html?slug=" + encodeURIComponent(O.slug) + "&embed=1" + (focus ? "&focus=" + focus : ""), false); }
-  function editProducts() { frame("🛍️ " + T("Products बदलें", "Edit products"), "myproducts.html?slug=" + encodeURIComponent(O.slug), true); }
+  /* दुकान के हिसाब से "Products" / "सेवाएँ" / "Menu" (pb-kind.js) — B = page पर खुली दुकान */
+  function kw(k) { try { var K = window.PBKind, b = typeof B !== "undefined" ? B : null; if (!K || !b) return ""; var pr = typeof PRODS !== "undefined" ? PRODS : []; var u = K.guess(pr || []); return K.word(u ? K.modeOfUnit(u) : K.of(b).mode, k, T("", "x") === "x"); } catch (e) { return ""; } }
+  function prodLbl() { return kw("btn") ? kw("ic") + " " + kw("btn") : "🛍️ Products"; }
+  function editProducts() { frame(prodLbl() + " " + T("बदलें", "— edit"), "myproducts.html?slug=" + encodeURIComponent(O.slug), true); }
 
   function pickFile(cb) { var i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.onchange = function () { if (i.files && i.files[0]) cb(i.files[0]); }; i.click(); }
   async function upload(blob, name) {
@@ -299,7 +302,7 @@
   }
   function bar() {
     var d = document.createElement("div"); d.className = "pbe-bar";
-    var P = prem(), items = [["logo", "🖼️ Logo"]].concat(P ? [["products", "🛍️ Products"], ["photos", "📷 " + T("फ़ोटो", "Photos")]] : []).concat([["details", "🏪 " + T("जानकारी", "Details")], ["numbers", "📞 " + T("नंबर", "Numbers")], ["vacancy", "💼 Vacancy"], ["visible", "👁️ " + T("क्या दिखाएँ", "Show / hide")]]);
+    var P = prem(), items = [["logo", "🖼️ Logo"]].concat(P ? [["products", prodLbl()], ["photos", "📷 " + T("फ़ोटो", "Photos")]] : []).concat([["details", "🏪 " + T("जानकारी", "Details")], ["numbers", "📞 " + T("नंबर", "Numbers")], ["vacancy", "💼 Vacancy"], ["visible", "👁️ " + T("क्या दिखाएँ", "Show / hide")]]);
     d.innerHTML = '<div class="h"><span>✏️</span><b>' + T("आप अपना page बदल रहे हैं — पीली ✏️ दबाएँ", "You are editing your page — tap a yellow ✏️") + '</b><button type="button" id="pbeDone">✔ ' + T("हो गया", "Done") + '</button></div><div class="g">' +
       items.map(function (x) { return '<button type="button" data-a="' + x[0] + '">' + x[1] + '</button>'; }).join("") + '</div>';
     d.onclick = function (e) { var b = e.target.closest("[data-a]"); if (b) return ACT[b.dataset.a](); if (e.target.closest("#pbeDone")) toggle(false); };

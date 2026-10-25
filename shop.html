@@ -14,6 +14,7 @@
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hide.js"></script>
+<script src="pb-kind.js"></script>
 <script src="pb-owner-edit.js"></script>
 <style>
 /* दुकानदार की अपनी mini website (shop.html?slug=...) — business.html के "View all" से खुलती है */
@@ -247,6 +248,10 @@ const LOGO=()=>B&&IMG_RX.test(B.logo_url||"")?B.logo_url:"";
 const INI=()=>esc((String(B&&B.name||"").trim()[0]||"P").toUpperCase());
 const GALP=()=>PREM?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
 const PRODP=()=>PREM?(PRODS||[]).filter(p=>p&&p.name&&IMG_RX.test(p.img||"")):[];
+/* सामान / सेवा / दोनों — products के size से, नहीं तो दुकान की category से (pb-kind.js) */
+const KMODE=()=>{const K=window.PBKind;if(!K||!B)return "p";const u=K.guess(PRODP());return u?K.modeOfUnit(u):K.of(B).mode;};
+const KW=(k)=>window.PBKind?PBKind.word(KMODE(),k,EN()):({sec:L("हमारे Products","Our Products"),ic:"🛍️",nav:"Products",ask:L("कीमत पूछें","Ask price"),best:L("सबसे ज़्यादा बिकता","Best seller"),out:L("अभी Stock में नहीं","Out of stock")})[k];
+const KF=f=>window.PBKind?PBKind.featLabel(f,EN()):f;
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
 const listingUrl=()=>"business.html?slug="+encodeURIComponent(slug);
 
@@ -312,7 +317,7 @@ function render(){
     ["GST",gst?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
-  const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("फ़ोटो","Photos")],["about",L("हमारे बारे में","About")],["visit",L("पता","Visit us")],["contact",L("संपर्क","Contact")]].filter(Boolean);
+  const navs=[P.length&&["prods",KW("nav")],G.length&&["photos",L("फ़ोटो","Photos")],["about",L("हमारे बारे में","About")],["visit",L("पता","Visit us")],["contact",L("संपर्क","Contact")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="pb-crown.webp" alt="">':'')+'</div>'+
@@ -330,10 +335,10 @@ function render(){
        '<button type="button" id="shareQa"><span>📤</span>'+L("Share","Share")+'</button>'+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',about:'about',visit:'addr'}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
-     (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
+     (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>'+KW("ic")+' '+esc(KW("sec"))+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
        '<div class="pcd"><button type="button" class="pim" data-pv="'+i+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+(p.size?'<span class="psz">'+esc(p.size)+'</span>':'')+
-       (p.best?'<span class="pbs">⭐ '+L("सबसे ज़्यादा बिकता","Best seller")+'</span>':'')+(p.stock===false?'<span class="pout">'+L("अभी Stock में नहीं","Out of stock")+'</span>':'')+'</button>'+
-       '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>MRP</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+L("कीमत पूछें","Ask price")+'</span>')+
+       (p.best?'<span class="pbs">⭐ '+esc(KW("best"))+'</span>':'')+(p.stock===false?'<span class="pout">'+esc(KW("out"))+'</span>':'')+'</button>'+
+       '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>'+(KMODE()==="p"?"MRP":esc(p.size||""))+'</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+esc(KW("ask"))+'</span>')+
        '<button type="button" class="pask" data-pa="'+i+'">💬 '+L("WhatsApp पर पूछें","Ask on WhatsApp")+'</button></div></div>').join("")+'</div></section>':'')+
      (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'')+
      '<section class="blk" data-pbh="about" id="about"><h2>🏪 '+L("हमारे बारे में","About us")+'</h2>'+
@@ -470,13 +475,13 @@ function contactHTML(){
     (wa?'<div class="num"><div class="l"><small>💬 WhatsApp</small><b>'+esc(wa.replace(/^91(?=\d{10}$)/,""))+'</b></div><a class="w" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a></div>':'');
 }
 function prodAsk(p){const wa=waNum();
-  if(wa){const t=L("नमस्ते, PataBook पर देखा: ","Hello, saw on PataBook: ")+p.name+(p.size?" ("+p.size+")":"")+L(" — मिलेगा? कीमत बताइए।"," — is it available? Please share the price.");
+  if(wa){const t=L("नमस्ते, PataBook पर देखा: ","Hello, saw on PataBook: ")+p.name+(p.size?" ("+p.size+")":"")+(KMODE()==="p"?L(" — मिलेगा? कीमत बताइए।"," — is it available? Please share the price."):L(" — इसका rate और जानकारी बताइए।"," — please share the rate and details."));
     window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(t),"_blank","noopener");return;}
   const c=document.getElementById("contact");if(c)c.scrollIntoView({behavior:"smooth",block:"center"});}
 function prodSheet(p){const d=document.createElement("div");d.className="psh";
   d.innerHTML='<div class="pin"><button type="button" class="px" aria-label="Close">✕</button><div class="pbig"><img src="'+esc(p.img)+'" alt=""></div><h3>'+esc(p.name)+'</h3>'+
-   '<div class="pmeta">'+(p.size?'<span>📦 '+esc(p.size)+'</span>':'')+'<span>'+(p.mrp?'💰 '+rsF(p.mrp)+' MRP':'💰 '+L("कीमत पूछें","Ask price"))+'</span>'+(p.stock===false?'<span style="color:#c5221f">⛔ '+L("Stock में नहीं","Out of stock")+'</span>':'')+'</div>'+
-   ((p.feats||[]).length?'<div class="pft">'+p.feats.map(f=>'<span>✔ '+esc(f)+'</span>').join("")+'</div>':'')+
+   '<div class="pmeta">'+(p.size&&(KMODE()==="p"||!p.mrp)?'<span>'+(KMODE()==="p"?"📦 ":"⏱️ ")+esc(p.size)+'</span>':'')+'<span>'+(p.mrp?'💰 '+rsF(p.mrp)+(KMODE()==="p"?' MRP':(p.size?' / '+esc(p.size):'')):'💰 '+esc(KW("ask")))+'</span>'+(p.stock===false?'<span style="color:#c5221f">⛔ '+esc(KW("out"))+'</span>':'')+'</div>'+
+   ((p.feats||[]).length?'<div class="pft">'+p.feats.map(f=>{const t=KF(f);return '<span>'+(t===f?'✔ ':'')+esc(t)+'</span>';}).join("")+'</div>':'')+
    '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / order","Ask / order on WhatsApp")+'</button></div>';
   d.onclick=e=>{if(e.target===d||e.target.closest(".px"))d.remove();};document.body.appendChild(d);
   d.querySelector("#pAsk").onclick=()=>{d.remove();prodAsk(p);};}
