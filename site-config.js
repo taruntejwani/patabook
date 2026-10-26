@@ -34,7 +34,7 @@ window.PB_SITE = {
   payUrl: '',
   /* 🏪 दुकान Verification (sql-32): वही 'patabook-pay' Worker (/verify-shop)। खाली = My Shop में verify वाला box नहीं और plan पर रोक नहीं।
      sql-32 चलाने + Worker का नया code deploy + GEMINI_API_KEY secret डालने के बाद भरें। */
-  verifyUrl: '',
+  verifyUrl: 'https://patabook-pay.tejwani512.workers.dev',
   premiumReq: false
 
 };
