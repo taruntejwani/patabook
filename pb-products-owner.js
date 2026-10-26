@@ -83,9 +83,30 @@
   function en() { return L() === "en"; }
   function rs(n) { return n ? "₹" + Number(n).toLocaleString("en-IN") : ""; }
 
+  /* ✋ Save से पहले कुछ नहीं लगता (myproducts.html में PB_STAGE=true): 👁️ ⭐ 🗑 की बातें यहाँ जमा होती हैं, Save पर एक साथ लगती हैं */
+  var PEND = { flags: {}, dels: {} };
+  function stage() { return !!window.PB_STAGE; }
+  function applyPend(slug) {
+    (PRD[slug] || []).forEach(function (p) {
+      ["show", "best"].forEach(function (f) { var q = PEND.flags[p.id + ":" + f]; if (q) p[f] = q.on; });
+      if (PEND.dels[p.id]) p._del = true;
+    });
+  }
+  window.prodPend = {
+    count: function () { return Object.keys(PEND.flags).length + Object.keys(PEND.dels).length; },
+    save: async function (slug) {
+      ME = await PBA.session();
+      var ids = Object.keys(PEND.dels);
+      for (var i = 0; i < ids.length; i++) await rpc("pb_product_remove", { p_slug: slug, p_id: +ids[i] });
+      var fk = Object.keys(PEND.flags);
+      for (var j = 0; j < fk.length; j++) { var q = PEND.flags[fk[j]]; if (PEND.dels[q.id]) continue; await rpc("pb_product_flag", { p_slug: slug, p_id: q.id, p_flag: q.f, p_on: q.on }); }
+      PEND = { flags: {}, dels: {} };
+    }
+  };
   window.prodLoad = async function (slug) {
     ME = await PBA.session();
     PRD[slug] = (await rpc("pb_my_products", { p_slug: slug })) || [];
+    if (stage()) applyPend(slug);
   };
 
   var PICK = {};
@@ -103,6 +124,7 @@
       (list.length < MAXP(b.slug) ? '<button type="button" class="pr-mul" data-pmul="' + i + '"' + (lock ? " disabled" : "") + '><i>📋</i><span><b>' + (E ? "Add many products (Multiple)" : "एक साथ कई Products (Multiple)") + '</b><small>' + (E ? "Pick up to " + MAXUP + " photos at once, then fill details" : "एक साथ " + MAXUP + " तक फ़ोटो चुनें, फिर details भरें") + '</small></span></button>' : '') +
       '<div class="pr-l">' + list.map(function (p) {
         var st = !p.show ? '<span class="pr-st hid">🙈 ' + (E ? "Hidden" : "छिपा है") + '</span>' : p.stock ? '<span class="pr-st on">✅ ' + (E ? "Visible" : "दिख रहा है") + '</span>' : '<span class="pr-st out">⛔ ' + (E ? "Out of stock" : "Stock खत्म") + '</span>';
+        if (p._del) return '<div class="pr-i hid"><div class="th">' + (IMG_RX.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : "") + '</div><div class="tx"><b>' + esc(p.name) + '</b><small>' + esc(p.size || "") + '</small><span class="pr-st out">🗑 ' + (E ? "Will be deleted — press Save" : "हटेगा — नीचे Save दबाएँ") + '</span></div><div class="pr-a"><button type="button" data-pun="' + i + '" data-id="' + p.id + '" aria-label="Undo">↩</button></div></div>';
         return '<div class="pr-i' + (p.show ? "" : " hid") + '"><div class="th">' + (IMG_RX.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : "") + '</div>' +
           '<div class="tx"><b>' + (p.best ? "⭐ " : "") + esc(p.name) + '</b><small>' + esc(p.size || "") + (p.mrp ? " · " + rs(p.mrp) : "") + '</small>' + st + '</div>' +
           '<div class="pr-a"><button type="button" class="e" data-ped="' + i + '" data-id="' + p.id + '" aria-label="Edit">✏️</button>' +
@@ -283,11 +305,13 @@
   }
 
   async function del(b, p) {
+    if (stage()) { PEND.dels[p.id] = true; p._del = true; draw(); return; }
     if (!confirm((en() ? "Delete “" : "“") + p.name + (en() ? "”? To only hide it, use 👁️." : "” हटाएँ? सिर्फ़ छिपाना हो तो 👁️ दबाएँ।"))) return;
     try { ME = await PBA.session(); await rpc("pb_product_remove", { p_slug: b.slug, p_id: p.id }); } catch (x) {}
     refresh(b.slug);
   }
   async function flag(b, p, f, on) {
+    if (stage()) { PEND.flags[p.id + ":" + f] = { id: p.id, f: f, on: on }; p[f] = on; draw(); return; }
     try { ME = await PBA.session(); await rpc("pb_product_flag", { p_slug: b.slug, p_id: p.id, p_flag: f, p_on: on }); } catch (x) {}
     refresh(b.slug);
   }
@@ -295,11 +319,12 @@
   document.getElementById("list").addEventListener("click", function (e) {
     var u = e.target.closest("[data-punit],[data-pchg]");
     if (u) { var bb = ROWS && ROWS[+(u.dataset.punit || u.dataset.pchg)]; if (!bb) return; if (u.hasAttribute("data-pchg")) { PICK[bb.slug] = true; } else { setUnit(bb.slug, u.dataset.u); PICK[bb.slug] = false; } draw(); return; }
-    var t = e.target.closest("[data-padd],[data-pmul],[data-ped],[data-psw],[data-pbe],[data-pdl]"); if (!t || t.disabled) return;
-    var i = +(t.dataset.padd || t.dataset.pmul || t.dataset.ped || t.dataset.psw || t.dataset.pbe || t.dataset.pdl), b = ROWS && ROWS[i]; if (!b) return;
+    var t = e.target.closest("[data-padd],[data-pmul],[data-ped],[data-psw],[data-pbe],[data-pdl],[data-pun]"); if (!t || t.disabled) return;
+    var i = +(t.dataset.padd || t.dataset.pmul || t.dataset.ped || t.dataset.psw || t.dataset.pbe || t.dataset.pdl || t.dataset.pun), b = ROWS && ROWS[i]; if (!b) return;
     if (t.hasAttribute("data-padd")) return sheet(b, null);
     if (t.hasAttribute("data-pmul")) return multi(b);
     var p = (PRD[b.slug] || []).filter(function (x) { return x.id === +t.dataset.id; })[0]; if (!p) return;
+    if (t.hasAttribute("data-pun")) { delete PEND.dels[p.id]; p._del = false; draw(); return; }
     if (t.hasAttribute("data-ped")) return sheet(b, p);
     if (t.hasAttribute("data-psw")) return flag(b, p, "show", !p.show);
     if (t.hasAttribute("data-pbe")) return flag(b, p, "best", !p.best);

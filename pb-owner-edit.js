@@ -65,7 +65,7 @@
     ".pbe-sc{position:fixed;inset:0;z-index:9500;background:rgba(10,20,40,.55);display:flex;align-items:flex-end;justify-content:center}" +
     ".pbe-sh{position:relative;width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;background:#fff;border-radius:22px 22px 0 0;overflow:hidden}" +
     "@media(min-width:640px){.pbe-sc{align-items:center}.pbe-sh{border-radius:22px}}" +
-    ".pbe-hd{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid #eef1f6}.pbe-hd b{flex:1;font-size:16.5px;color:#123568}.pbe-hd button{width:36px;height:36px;border-radius:50%;border:0;background:#f1f4f9;font-size:15px;cursor:pointer}" +
+    ".pbe-hd{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid #eef1f6}.pbe-hd b{flex:1;font-size:16.5px;color:#123568}.pbe-hd button.pbe-dn{border-radius:999px;border:0;background:#12141c;color:#fff;font:inherit;font-weight:800;font-size:14px;padding:8px 14px;cursor:pointer}" +
     ".pbe-bd{overflow:auto;padding:14px 16px calc(18px + env(safe-area-inset-bottom));font-size:14.5px;line-height:1.5}" +
     ".pbe-fr{width:100%;height:78vh;border:0;display:block}" +
     ".pbe-row{display:flex;align-items:center;gap:12px;border:1px solid #e4eaf5;border-radius:14px;padding:12px;margin-bottom:10px}.pbe-row .t{flex:1;min-width:0}.pbe-row small{display:block;color:#5b6475;font-size:12.5px}" +
@@ -83,14 +83,25 @@
   /* ---------- sheet ---------- */
   function sheet(title, html, onClose) {
     var sc = document.createElement("div"); sc.className = "pbe-sc";
-    sc.innerHTML = '<div class="pbe-sh"><div class="pbe-hd"><b>' + title + '</b><button type="button" aria-label="Close">✕</button></div><div class="pbe-bd">' + html + '</div></div>';
-    function close() { sc.remove(); window.removeEventListener("message", onMsg); if (onClose) onClose(); }
-    function onMsg(e) { if (e.origin === location.origin && e.data && e.data.pbEdit === "saved") { sc.remove(); window.removeEventListener("message", onMsg); location.reload(); } }
+    sc.innerHTML = '<div class="pbe-sh"><div class="pbe-hd"><b>' + title + '</b><button type="button" aria-label="Done" class="pbe-dn">✔ ' + T("Done", "Done") + '</button></div><div class="pbe-bd">' + html + '</div></div>';
+    var o = { el: sc, body: sc.querySelector(".pbe-bd"), dirty: false, changed: false };
+    function gone() { sc.remove(); window.removeEventListener("message", onMsg); }
+    function close(force) {
+      if (!force && o.dirty && !confirm(T("बदलाव Save नहीं हुए। फिर भी बंद करें?", "Changes are not saved. Close anyway?"))) return;
+      gone(); if (onClose) onClose();
+    }
+    function onMsg(e) {
+      if (e.origin !== location.origin || !e.data) return;
+      if (e.data.pbEdit === "saved") { gone(); location.reload(); }
+      else if (e.data.pbEdit === "dirty") o.dirty = true;
+      else if (e.data.pbEdit === "clean") o.dirty = false;
+    }
     window.addEventListener("message", onMsg);
-    sc.querySelector(".pbe-hd button").onclick = close;
+    sc.querySelector(".pbe-hd button").onclick = function () { close(); };
     sc.addEventListener("click", function (e) { if (e.target === sc) close(); });
     document.body.appendChild(sc);
-    return { el: sc, body: sc.querySelector(".pbe-bd"), close: close };
+    o.close = close; o.remove = gone;
+    return o;
   }
   function frame(title, src, reloadOnClose) {
     var s = sheet(title, '<iframe class="pbe-fr" src="' + E(src) + '"></iframe>', reloadOnClose ? function () { location.reload(); } : null);
@@ -113,33 +124,58 @@
   }
   function editLogo() {
     if (!has("logo")) return premOnly("🖼️ Logo");
-    var has = false; try { has = !!(typeof B !== "undefined" && B && /shop-logos\//.test(B.logo_url || "")); } catch (e) {}
-    var s = sheet("🖼️ " + T("Logo", "Logo"), '<p style="color:#5b6475;font-size:13.5px">' + T("चौकोर (square) फ़ोटो सबसे अच्छी लगती है।", "A square photo works best.") + '</p>' +
-      '<button type="button" class="pbe-b p" id="pbeLc">📷 ' + (has ? T("Logo बदलें", "Change logo") : T("Logo लगाएँ", "Add logo")) + '</button>' +
-      (has ? '<button type="button" class="pbe-b d" id="pbeLr">🗑️ ' + T("Logo हटाएँ", "Remove logo") + '</button>' : '') + '<div class="pbe-er" id="pbeLe"></div>');
-    var er = s.body.querySelector("#pbeLe");
-    s.body.querySelector("#pbeLc").onclick = function () {
-      pickFile(async function (f) {
+    var hasLogo = false; try { hasLogo = !!(typeof B !== "undefined" && B && /shop-logos\//.test(B.logo_url || "")); } catch (e) {}
+    var st = { blob: null, prev: "", rm: false };
+    var s = sheet("🖼️ " + T("Logo", "Logo"), "");
+    function paint() {
+      var h = '<p style="color:#5b6475;font-size:13.5px">' + T("चौकोर (square) फ़ोटो सबसे अच्छी लगती है।", "A square photo works best.") + '</p>';
+      if (st.prev) h += '<div style="text-align:center;margin:8px 0"><img src="' + E(st.prev) + '" alt="" style="width:110px;height:110px;border-radius:24px;object-fit:cover;box-shadow:0 0 0 3px #e2b34c"><div style="font-size:13px;color:#137333;font-weight:700;margin-top:6px">✔ ' + T("नया logo चुना — नीचे Save दबाएँ", "New logo chosen — press Save below") + '</div></div>';
+      if (st.rm) h += '<p class="pbe-note">' + T("Logo हटेगा — नीचे Save दबाएँ।", "Logo will be removed — press Save below.") + '</p>';
+      h += '<button type="button" class="pbe-b s" id="pbeLc">📷 ' + ((hasLogo || st.blob) ? T("Logo बदलें", "Change logo") : T("Logo लगाएँ", "Add logo")) + '</button>';
+      if (hasLogo && !st.rm && !st.blob) h += '<button type="button" class="pbe-b d" id="pbeLr">🗑️ ' + T("Logo हटाएँ", "Remove logo") + '</button>';
+      if (st.blob || st.rm) h += '<button type="button" class="pbe-b p" id="pbeLs" style="background:#1e9e57">💾 ' + T("Save", "Save") + '</button>';
+      h += '<div class="pbe-er" id="pbeLe"></div>';
+      s.body.innerHTML = h; wire();
+    }
+    function wire() {
+      var er = s.body.querySelector("#pbeLe");
+      s.body.querySelector("#pbeLc").onclick = function () {
+        pickFile(async function (f) {
+          try {
+            er.style.color = "#5b6475"; er.textContent = "🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…");
+            var ck = window.PBImg ? await PBImg.check(f, { slug: O.slug, kind: "logo" }) : { ok: true };
+            if (!ck.ok) { er.style.color = ""; er.textContent = ck.msg; return; }
+            var bl = await squareImage(f); if (st.prev) URL.revokeObjectURL(st.prev);
+            st.blob = bl; st.prev = URL.createObjectURL(bl); st.rm = false; s.dirty = true; paint();
+          } catch (x) { er.style.color = ""; er.textContent = T("फ़ोटो पढ़ नहीं सका, दूसरी फ़ोटो चुनें।", "Could not read the photo. Pick another."); }
+        });
+      };
+      var rm = s.body.querySelector("#pbeLr"); if (rm) rm.onclick = function () { st.rm = true; s.dirty = true; paint(); };
+      var sv = s.body.querySelector("#pbeLs");
+      if (sv) sv.onclick = async function () {
+        sv.disabled = true; er.style.color = "#5b6475"; er.textContent = T("Save हो रहा है…", "Saving…");
         try {
-          er.style.color = "#5b6475"; er.textContent = "🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…");
-          var ck = window.PBImg ? await PBImg.check(f, { slug: O.slug, kind: "logo" }) : { ok: true };
-          if (!ck.ok) { er.style.color = ""; er.textContent = ck.msg; return; }
-          er.textContent = T("Upload हो रहा है…", "Uploading…");
-          var url = await upload(await squareImage(f), "logo");
-          await rpc("pb_set_logo", { p_slug: O.slug, p_url: url }); location.reload();
-        } catch (x) { er.style.color = ""; er.textContent = T("Logo नहीं लग सका, फिर कोशिश करें।", "Could not set the logo. Try again."); }
-      });
-    };
-    var rm = s.body.querySelector("#pbeLr");
-    if (rm) rm.onclick = async function () { if (!confirm(T("Logo हटाएँ?", "Remove the logo?"))) return; try { await rpc("pb_set_logo", { p_slug: O.slug, p_url: null }); location.reload(); } catch (x) { er.textContent = T("नहीं हुआ, फिर कोशिश करें।", "Failed. Try again."); } };
+          var url = null; if (st.blob) url = await upload(st.blob, "logo");
+          await rpc("pb_set_logo", { p_slug: O.slug, p_url: url });
+          s.dirty = false; s.remove(); location.reload();
+        } catch (x) { er.style.color = ""; er.textContent = T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again."); sv.disabled = false; }
+      };
+    }
+    paint();
   }
   async function editPhotos() {
-    var s = sheet("📷 " + T("दुकान की फ़ोटो", "Shop photos"), '<p style="color:#5b6475">…</p>', function () { if (s.changed) location.reload(); });
-    async function paint() {
-      var L = [];
-      try { L = await rpc("pb_my_photos", { p_slug: O.slug }) || []; } catch (x) { s.body.innerHTML = '<p class="pbe-note">' + (/premium/i.test(x.message) ? T("फ़ोटो सिर्फ़ Premium दुकानों के लिए हैं।", "Photos are for Premium shops.") : T("खुल नहीं सका।", "Could not load.")) + '</p>'; return; }
-      s.body.innerHTML = '<div class="pbe-pg">' + L.map(function (x) { return '<div class="t"><img src="' + E(x.url) + '" alt="" loading="lazy"><button type="button" data-rm="' + x.id + '" aria-label="Remove">✕</button></div>'; }).join("") +
-        (L.length < plim("photos", 8) ? '<label>＋<input type="file" accept="image/*" hidden id="pbePf"></label>' : '') + '</div><small style="display:block;color:#5b6475;margin-top:8px">' + L.length + ' / ' + plim("photos", 8) + ' ' + T("फ़ोटो", "photos") + '</small><div class="pbe-er" id="pbePe"></div>';
+    var s = sheet("📷 " + T("दुकान की फ़ोटो", "Shop photos"), '<p style="color:#5b6475">…</p>');
+    var L = [], rm = {}, add = [];
+    try { L = await rpc("pb_my_photos", { p_slug: O.slug }) || []; } catch (x) { s.body.innerHTML = '<p class="pbe-note">' + (/premium/i.test(x.message) ? T("फ़ोटो सिर्फ़ Premium दुकानों के लिए हैं।", "Photos are for Premium shops.") : T("खुल नहीं सका।", "Could not load.")) + '</p>'; return; }
+    function count() { return L.filter(function (x) { return !rm[x.id]; }).length + add.length; }
+    function paint() {
+      var n = count(), h = '<div class="pbe-pg">' +
+        L.filter(function (x) { return !rm[x.id]; }).map(function (x) { return '<div class="t"><img src="' + E(x.url) + '" alt="" loading="lazy"><button type="button" data-rm="' + x.id + '" aria-label="Remove">✕</button></div>'; }).join("") +
+        add.map(function (a, i) { return '<div class="t" style="outline:2px solid #1e9e57"><img src="' + E(a.prev) + '" alt=""><button type="button" data-ra="' + i + '" aria-label="Remove">✕</button></div>'; }).join("") +
+        (n < plim("photos", 8) ? '<label>＋<input type="file" accept="image/*" hidden id="pbePf"></label>' : '') + '</div><small style="display:block;color:#5b6475;margin-top:8px">' + n + ' / ' + plim("photos", 8) + ' ' + T("फ़ोटो", "photos") + '</small>';
+      if (s.dirty) h += '<button type="button" class="pbe-b p" id="pbePs" style="background:#1e9e57">💾 ' + T("Save", "Save") + '</button>';
+      h += '<div class="pbe-er" id="pbePe"></div>';
+      s.body.innerHTML = h;
       var inp = s.body.querySelector("#pbePf"), er = s.body.querySelector("#pbePe");
       if (inp) inp.onchange = async function () {
         var f = inp.files && inp.files[0]; if (!f) return;
@@ -147,12 +183,20 @@
           er.style.color = "#5b6475"; er.textContent = "🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…");
           var ck = window.PBImg ? await PBImg.check(f, { slug: O.slug, kind: "shop" }) : { ok: true };
           if (!ck.ok) { er.style.color = ""; er.textContent = ck.msg; return; }
-          er.textContent = T("Upload हो रहा है…", "Uploading…");
-          var url = await upload(await resizeImage(f, 1000), "photo");
-          await rpc("pb_photo_add", { p_slug: O.slug, p_url: url }); s.changed = true; paint();
-        } catch (x) { er.style.color = ""; er.textContent = /too many/.test(x.message || "") ? T(plim("photos", 8) + " से ज़्यादा फ़ोटो नहीं।", "Max " + plim("photos", 8) + " photos.") : T("फ़ोटो upload नहीं हुई।", "Could not upload."); }
+          var bl = await resizeImage(f, 1000); add.push({ blob: bl, prev: URL.createObjectURL(bl) }); s.dirty = true; paint();
+        } catch (x) { er.style.color = ""; er.textContent = T("फ़ोटो पढ़ नहीं सका, दूसरी चुनें।", "Could not read the photo. Pick another."); }
       };
-      s.body.querySelectorAll("[data-rm]").forEach(function (b) { b.onclick = async function () { if (!confirm(T("यह फ़ोटो हटाएँ?", "Remove this photo?"))) return; try { await rpc("pb_photo_remove", { p_slug: O.slug, p_id: +b.dataset.rm }); s.changed = true; paint(); } catch (x) {} }; });
+      s.body.querySelectorAll("[data-rm]").forEach(function (b) { b.onclick = function () { rm[b.dataset.rm] = 1; s.dirty = true; paint(); }; });
+      s.body.querySelectorAll("[data-ra]").forEach(function (b) { b.onclick = function () { var a = add.splice(+b.dataset.ra, 1)[0]; if (a) URL.revokeObjectURL(a.prev); s.dirty = add.length > 0 || Object.keys(rm).length > 0; paint(); }; });
+      var sv = s.body.querySelector("#pbePs");
+      if (sv) sv.onclick = async function () {
+        sv.disabled = true; er.style.color = "#5b6475"; er.textContent = T("Save हो रहा है…", "Saving…");
+        try {
+          for (var id in rm) await rpc("pb_photo_remove", { p_slug: O.slug, p_id: +id });
+          for (var i = 0; i < add.length; i++) { var url = await upload(add[i].blob, "photo"); await rpc("pb_photo_add", { p_slug: O.slug, p_url: url }); }
+          s.dirty = false; s.remove(); location.reload();
+        } catch (x) { er.style.color = ""; er.textContent = /too many/.test(x.message || "") ? T(plim("photos", 8) + " से ज़्यादा फ़ोटो नहीं।", "Max " + plim("photos", 8) + " photos.") : T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again."); sv.disabled = false; }
+      };
     }
     paint();
   }
@@ -175,12 +219,11 @@
   function n10(v) { var d = String(v || "").replace(/\D/g, ""); return d.length > 10 ? d.slice(-10) : d; }
 
   function editNumbers() {
-    var on = O.show_phone !== false, main = n10(O.phone);
+    var on = O.show_phone !== false, on0 = on, main = n10(O.phone);
     var cur = { Phone2: n10(ln("Phone2")), WhatsApp: n10(ln("WhatsApp")) }, next = { Phone2: cur.Phone2, WhatsApp: cur.WhatsApp }, VER = {}, ed = null;
     var ROW = [["Phone2", "☎️ " + T("दुकान / staff का Call नंबर", "Shop / staff call number")], ["WhatsApp", "💬 " + T("दुकान / staff का WhatsApp", "Shop / staff WhatsApp")]];
-    var s = sheet("📞 " + T("ग्राहकों के लिए नंबर", "Numbers for customers"), "", function () { if (s.changed) location.reload(); });
-    var dn = s.el.querySelector(".pbe-hd button"); dn.textContent = "✔ " + T("Done", "Done"); dn.style.cssText = "width:auto;height:auto;border-radius:999px;padding:8px 14px;background:#12141c;color:#fff;font:inherit;font-weight:800";
-    function dirty() { return next.Phone2 !== cur.Phone2 || next.WhatsApp !== cur.WhatsApp; }
+    var s = sheet("📞 " + T("ग्राहकों के लिए नंबर", "Numbers for customers"), "");
+    function dirty() { return next.Phone2 !== cur.Phone2 || next.WhatsApp !== cur.WhatsApp || on !== on0; }
     function paint() {
       var h = '<div class="pbe-row"><div class="t"><b>📱 ' + T("मेरा मुख्य (login) नंबर दिखाएँ", "Show my main (login) number") + '</b><small>' + E(O.phone || "") + ' · ' + T("Login हमेशा इसी नंबर से होगा", "Login always stays on this number") + '</small></div><button type="button" class="pbe-sw' + (on ? " on" : "") + '" id="pbeSw" aria-label="Switch"><i></i></button></div>';
       ROW.forEach(function (r) {
@@ -200,6 +243,7 @@
         h += '</div>';
       });
       h += '<p class="pbe-note">' + T("नया नंबर उसी नंबर पर OTP आने के बाद ही लगेगा। इस नंबर से login नहीं होगा, यह सिर्फ़ ग्राहकों को दिखेगा।", "A new number is added only after the OTP on that number. It cannot be used to log in; it is only shown to customers.") + '</p>';
+      if (on !== on0) h += '<p class="pbe-note">' + (on ? T("मुख्य नंबर दिखेगा — नीचे Save दबाएँ।", "Main number will show — press Save below.") : T("मुख्य नंबर छिपेगा — नीचे Save दबाएँ।", "Main number will be hidden — press Save below.")) + '</p>';
       if (dirty() && !ed) h += '<button type="button" class="pbe-b p" id="pbeSave" style="background:#1e9e57">💾 ' + T("Save", "Save") + '</button>';
       h += '<div class="pbe-er" id="pbeNr"></div>';
       s.body.innerHTML = h; wire();
@@ -207,22 +251,15 @@
     function err(t, good) { var e = s.body.querySelector("#pbeNr"); if (e) { e.style.color = good ? "#1a73e8" : ""; e.textContent = t; } }
     function wire() {
       var sw = s.body.querySelector("#pbeSw");
-      sw.onclick = async function () {
-        var want = !sw.classList.contains("on");
-        if (!want && !next.Phone2 && !next.WhatsApp && !confirm(T("दुकान / staff का कोई नंबर नहीं डाला है। मुख्य नंबर छिपाया तो कोई call नहीं कर पाएगा। फिर भी छिपाएँ?", "No shop / staff number is added. If you hide the main number nobody can call you. Hide anyway?"))) return;
-        sw.disabled = true;
-        try { var v = await rpc("pb_set_show_phone", { p_slug: O.slug, p_on: want }); O.show_phone = v === false ? false : want; on = O.show_phone !== false; sw.classList.toggle("on", on); s.changed = true; err(""); }
-        catch (x) { err(T("बदल नहीं सका, फिर कोशिश करें।", "Could not change. Try again.")); }
-        sw.disabled = false;
-      };
+      sw.onclick = function () { on = !on; s.dirty = dirty(); paint(); };
       s.body.querySelectorAll("[data-ed]").forEach(function (b) { b.onclick = function () { ed = { k: b.dataset.ed, stage: "num", num: "" }; paint(); var i = s.body.querySelector("#pbeN"); if (i) i.focus(); }; });
-      s.body.querySelectorAll("[data-rm]").forEach(function (b) { b.onclick = function () { next[b.dataset.rm] = ""; paint(); }; });
+      s.body.querySelectorAll("[data-rm]").forEach(function (b) { b.onclick = function () { next[b.dataset.rm] = ""; s.dirty = dirty(); paint(); }; });
       var cx = s.body.querySelector("#pbeCx"); if (cx) cx.onclick = function () { ed = null; paint(); };
       var sd = s.body.querySelector("#pbeSend");
       if (sd) sd.onclick = async function () {
         var num = n10(s.body.querySelector("#pbeN").value);
         if (!/^[6-9]\d{9}$/.test(num)) { err(T("10 अंकों का सही नंबर लिखें।", "Enter a correct 10-digit number.")); return; }
-        if (num === cur[ed.k] || num === main || VER[num]) { next[ed.k] = num; ed = null; paint(); return; }   /* पहले से पक्का नंबर */
+        if (num === cur[ed.k] || num === main || VER[num]) { next[ed.k] = num; ed = null; s.dirty = dirty(); paint(); return; }   /* पहले से पक्का नंबर */
         sd.disabled = true; err(T("OTP भेज रहे हैं…", "Sending OTP…"), true);
         try { await PBA.mobile.staffSend(O.slug, num); ed.num = num; ed.stage = "otp"; paint(); var o = s.body.querySelector("#pbeO"); if (o) o.focus(); }
         catch (e) { err(otpMsg(e)); sd.disabled = false; }
@@ -232,15 +269,17 @@
         var c = s.body.querySelector("#pbeO").value.replace(/\D/g, "");
         if (c.length !== 6) { err(T("6 अंकों का OTP डालें।", "Enter the 6-digit OTP.")); return; }
         ok.disabled = true;
-        try { await PBA.mobile.staffVerify(O.slug, ed.num, c); VER[ed.num] = 1; next[ed.k] = ed.num; ed = null; paint(); }
+        try { await PBA.mobile.staffVerify(O.slug, ed.num, c); VER[ed.num] = 1; next[ed.k] = ed.num; ed = null; s.dirty = dirty(); paint(); }
         catch (e) { err(otpMsg(e)); ok.disabled = false; if (/expired|too_many/.test((e && e.code) || "")) { ed.stage = "num"; paint(); err(otpMsg(e)); } }
       };
       var sv = s.body.querySelector("#pbeSave");
       if (sv) sv.onclick = async function () {
+        if (!on && !next.Phone2 && !next.WhatsApp && !confirm(T("दुकान / staff का कोई नंबर नहीं डाला है। मुख्य नंबर छिपाया तो कोई call नहीं कर पाएगा। फिर भी छिपाएँ?", "No shop / staff number is added. If you hide the main number nobody can call you. Hide anyway?"))) return;
         sv.disabled = true; err(T("Save हो रहा है…", "Saving…"), true);
         try {
-          await rpc("pb_owner_set_details", { p_slug: O.slug, p: allLines({ Phone2: next.Phone2, WhatsApp: next.WhatsApp }) });
-          s.el.remove(); location.reload();
+          if (next.Phone2 !== cur.Phone2 || next.WhatsApp !== cur.WhatsApp) await rpc("pb_owner_set_details", { p_slug: O.slug, p: allLines({ Phone2: next.Phone2, WhatsApp: next.WhatsApp }) });
+          if (on !== on0) await rpc("pb_set_show_phone", { p_slug: O.slug, p_on: on });
+          s.dirty = false; s.remove(); location.reload();
         } catch (e) {
           err(/not verified/i.test(e.message || "") ? T("यह नंबर OTP से पक्का नहीं हुआ। नंबर फिर से डालकर OTP करें।", "This number is not verified by OTP. Enter it again and verify.") : T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again."));
           sv.disabled = false;
@@ -253,9 +292,19 @@
     if (!has("hiring")) return premOnly("💼 " + T("नौकरी (Hiring)", "Hiring"));
     if (window.PBHire && PBHire.editor) return PBHire.editor(O.slug, rpc, function () { location.reload(); });   /* sql-26: पूरी जानकारी */
     var open = false; try { var r = await fetch(SBU + "/rest/v1/rpc/pb_vacancy_status", { method: "POST", headers: { apikey: PK, Authorization: "Bearer " + PK, "Content-Type": "application/json" }, body: JSON.stringify({ p_slugs: [O.slug] }) }); var j = r.ok ? await r.json() : {}; open = !!(j && j[O.slug]); } catch (e) {}
-    var s = sheet("💼 " + T("Vacancy (नौकरी खाली है)", "Vacancy available"), '<div class="pbe-row"><div class="t"><b>' + T("स्टाफ़ चाहिए?", "Need staff?") + '</b><small>' + T("ON करने पर आपके page पर “नौकरी खाली है” दिखेगा (30 दिन बाद अपने-आप बंद)", "When ON, your page shows “Vacancy available” (auto-off after 30 days)") + '</small></div><button type="button" class="pbe-sw' + (open ? " on" : "") + '" id="pbeVs" aria-label="Switch"><i></i></button></div><div class="pbe-er" id="pbeVe"></div>', function () { if (s.changed) location.reload(); });
-    var sw = s.body.querySelector("#pbeVs");
-    sw.onclick = async function () { var want = !sw.classList.contains("on"); sw.disabled = true; try { var v = await rpc("pb_set_vacancy", { p_slug: O.slug, p_on: want }); sw.classList.toggle("on", !!(v && v.open)); s.changed = true; } catch (x) { s.body.querySelector("#pbeVe").textContent = T("बदल नहीं सका।", "Could not change."); } sw.disabled = false; };
+    var open0 = open, s = sheet("💼 " + T("Vacancy (नौकरी खाली है)", "Vacancy available"), "");
+    function paint() {
+      s.body.innerHTML = '<div class="pbe-row"><div class="t"><b>' + T("स्टाफ़ चाहिए?", "Need staff?") + '</b><small>' + T("ON करने पर आपके page पर “नौकरी खाली है” दिखेगा (30 दिन बाद अपने-आप बंद)", "When ON, your page shows “Vacancy available” (auto-off after 30 days)") + '</small></div><button type="button" class="pbe-sw' + (open ? " on" : "") + '" id="pbeVs" aria-label="Switch"><i></i></button></div>' +
+        (open !== open0 ? '<button type="button" class="pbe-b p" id="pbeVv" style="background:#1e9e57">💾 ' + T("Save", "Save") + '</button>' : '') + '<div class="pbe-er" id="pbeVe"></div>';
+      s.body.querySelector("#pbeVs").onclick = function () { open = !open; s.dirty = open !== open0; paint(); };
+      var sv = s.body.querySelector("#pbeVv");
+      if (sv) sv.onclick = async function () {
+        sv.disabled = true;
+        try { await rpc("pb_set_vacancy", { p_slug: O.slug, p_on: open }); s.dirty = false; s.remove(); location.reload(); }
+        catch (x) { s.body.querySelector("#pbeVe").textContent = T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again."); sv.disabled = false; }
+      };
+    }
+    paint();
   }
   /* 👁️ public को क्या दिखे — हर हिस्से का switch; दुकान की जानकारी में "Hide:" line बनकर save */
   var VIS = [
@@ -271,7 +320,7 @@
       '<p class="pbe-note">' + T("🟢 चालू = ग्राहक को दिखेगा · ⚪ बंद = ग्राहक को नहीं दिखेगा। दुकान का नाम, Logo, Call / WhatsApp हमेशा दिखेंगे।", "🟢 ON = customers see it · ⚪ OFF = hidden. Shop name, logo, Call / WhatsApp always show.") + '</p>' +
       VIS.map(function (v) { return '<div class="pbe-row"><div class="t"><b>' + v[1] + ' ' + T(v[2], v[3]) + '</b></div><button type="button" class="pbe-sw' + (H[v[0]] ? "" : " on") + '" data-k="' + v[0] + '" aria-label="Switch"><i></i></button></div>'; }).join("") +
       '<button type="button" class="pbe-b p" id="pbeVsv">✔ ' + T("Save करें", "Save") + '</button><div class="pbe-er" id="pbeVer"></div>');
-    s.body.querySelectorAll("[data-k]").forEach(function (b) { b.onclick = function () { b.classList.toggle("on"); if (b.classList.contains("on")) delete H[b.dataset.k]; else H[b.dataset.k] = 1; }; });
+    s.body.querySelectorAll("[data-k]").forEach(function (b) { b.onclick = function () { b.classList.toggle("on"); if (b.classList.contains("on")) delete H[b.dataset.k]; else H[b.dataset.k] = 1; s.dirty = true; }; });
     var sv = s.body.querySelector("#pbeVsv"), er = s.body.querySelector("#pbeVer");
     sv.onclick = async function () {
       var val = VIS.map(function (v) { return v[0]; }).filter(function (k) { return H[k]; }).join(",");
@@ -284,7 +333,7 @@
         var r = await fetch(SBU + "/rest/v1/businesses?select=description&slug=eq." + encodeURIComponent(O.slug) + "&limit=1", { headers: { apikey: PK, Authorization: "Bearer " + PK } });
         var j = r.ok ? await r.json() : [], d = (j && j[0] && j[0].description) || "", got = window.PBHide ? Object.keys(PBHide.parse(d)).sort().join(",") : val;
         if (got !== val.split(",").filter(Boolean).sort().join(",")) throw new Error("notsaved");
-        s.el.remove(); location.reload();
+        s.dirty = false; s.remove(); location.reload();
       } catch (x) {
         er.style.color = ""; er.textContent = x.message === "notsaved" ? T("❌ Setting save नहीं हुई — Supabase में थोड़ा बदलाव चाहिए (admin को बताएँ)।", "❌ Not saved — the server needs a small update (tell admin).") : T("❌ Save नहीं हुआ, फिर कोशिश करें।", "❌ Could not save. Try again.");
         if (window.console) console.warn("PataBook visibility save:", x);

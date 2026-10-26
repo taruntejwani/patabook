@@ -17,6 +17,12 @@ body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe U
 </style>
 </head><body>
 <div id="list"><p class="msg">…</p></div>
+<div id="svbar" hidden style="position:sticky;bottom:0;background:#fff;padding:10px 0 6px;margin-top:10px"><button type="button" id="svBtn" style="display:block;width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:800;font-size:16px;background:#1e9e57;color:#fff;cursor:pointer">💾 Save</button><div id="svEr" style="color:#c5221f;font-size:13px;font-weight:700;margin-top:6px;min-height:16px"></div></div>
+<script>
+document.getElementById("svBtn").onclick=async function(){const b=this;b.disabled=true;document.getElementById("svEr").textContent="";
+  try{await prodPend.save(slug);try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){location.reload();}}
+  catch(x){document.getElementById("svEr").textContent="Save नहीं हुआ, फिर कोशिश करें।";b.disabled=false;}};
+</script>
 <script>
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const slug=new URLSearchParams(location.search).get("slug")||"";
@@ -37,7 +43,9 @@ function resizeImage(file,maxSide){return new Promise((res,rej)=>{const img=new 
     /* 📉 हर फ़ोटो छोटी करो (WebP, ~150 KB तक) ताकि ज़्यादा फ़ोटो रखी जा सकें और page जल्दी खुले */
     const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<150000)return res(bl);if(q>0.4)return tryQ(Math.round((q-0.1)*100)/100);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.78);};
   img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
-function draw(){const b=ROWS[0];if(!b)return;$("list").innerHTML=window.prodBody?prodBody(b,0):"";try{parent.postMessage({pbEdit:"products"},location.origin);}catch(_){}}
+window.PB_STAGE=true;
+function pendBar(){const n=window.prodPend?prodPend.count():0,sv=$("svbar");if(!sv)return;sv.hidden=!n;try{parent.postMessage({pbEdit:n?"dirty":"clean"},location.origin);}catch(_){}}
+function draw(){const b=ROWS[0];if(!b)return;$("list").innerHTML=window.prodBody?prodBody(b,0):"";pendBar();try{parent.postMessage({pbEdit:"products"},location.origin);}catch(_){}}
 </script>
 <script src="pb-watermark.js"></script>
 <script src="pb-products-owner.js"></script>

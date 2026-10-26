@@ -238,6 +238,7 @@ function errText(m){
   for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
   return EN?"Could not save. Check your internet and try again.":"सेव नहीं हो सका। इंटरनेट जाँचकर दोबारा कोशिश करें।";
 }
+$("main").addEventListener("input",()=>{if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"dirty"},location.origin);}catch(_){}},{once:true});
 $("pin").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,6);});
 $("main").addEventListener("submit",async e=>{
   e.preventDefault();$("err").textContent="";
