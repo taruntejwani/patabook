@@ -373,7 +373,7 @@ function render(){drawSoc();
   const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("फ़ोटो","Photos")],["visit",L("पता","Visit us")],["about",L("हमारे बारे में","About")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
-     '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="silver"||TIER()==="platinum"?"pb-crown-"+TIER()+".webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
+     '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
        '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Silver",gold:"👑 Gold",platinum:"💎 Platinum"}[TIER()]||"👑 Premium")+'</span>':'')+
