@@ -103,6 +103,12 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .vf .vm{margin-top:8px;font-size:13.5px;font-weight:700;line-height:1.45}
 .vf.pd{border-color:#f3d48b;background:#fffaf0}.vf.ok{border-color:#a6dcbc;background:#f1fbf5;padding:10px 14px}
 .lock{margin-top:8px;border-radius:10px;background:#f1f4f8;color:#5b6475;font-weight:800;font-size:13.5px;padding:10px;text-align:center}
+.pdz{margin-top:12px;border-top:1px dashed #d9d0ff;padding-top:10px;display:grid;gap:6px}.pdz>b{color:#3b2bb8;font-size:14.5px}.pdz small{color:#5b6475;font-size:12.5px;line-height:1.4}
+.pdc{display:flex;justify-content:space-between;font-weight:800;font-size:13.5px;color:#0b2f73}.pdc .bad{color:#b42318}
+.pdm{display:flex;align-items:center;justify-content:space-between}.pdm button{width:38px;height:34px;border-radius:10px;border:1px solid #d9d0ff;background:#fff;font-size:18px;font-weight:800;color:#3b2bb8;cursor:pointer}.pdm button:disabled{opacity:.35}
+.pdg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.pdg i{font-style:normal;font-size:11px;font-weight:700;color:#8a93a3}
+.pdd{height:36px;border-radius:9px;border:1px solid #e4eaf5;background:#fff;font:inherit;font-weight:700;font-size:13.5px;color:#0b2f73;cursor:pointer;padding:0}.pdd.on{background:#3b2bb8;border-color:#3b2bb8;color:#fff}.pdd.td{outline:2px solid #f3c64b;outline-offset:-2px}.pdd:disabled{opacity:.4;cursor:default}.pdd.on:disabled{opacity:.6}
+.pds{border:0;border-radius:12px;padding:11px;background:#3b2bb8;color:#fff;font:inherit;font-weight:800;cursor:pointer}.pds:disabled{background:#b8b0e6}.pdmsg{font-weight:700;font-size:13.5px;color:#137333}
 .ban{margin-top:12px;border:1px solid #e3dcf7;background:#fff;border-radius:14px;padding:12px}.ban .bh{font-weight:800;color:#3b2bb8;margin-bottom:6px}.ban img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:10px;display:block}
 .ban .bs{margin-top:8px;font-size:13px}.ban .bb{display:flex;gap:8px;margin-top:10px}.ban .bb label,.ban .bb button{flex:1;text-align:center;border:1px solid #cfc5f5;background:#f5f2ff;color:#3b2bb8;border-radius:12px;padding:10px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
 .ban .bb button{background:#fff5f4;border-color:#f3c3be;color:#b42318}
@@ -334,8 +340,8 @@ async function loadPrem(){if(!(window.PB_SITE&&PB_SITE.premium)){PREM=null;retur
   if(window.PBPlan&&ROWS&&ROWS.length){try{await PBPlan.load(ROWS.map(b=>b.slug));}catch(e){}ROWS.forEach(b=>{if(PREM&&PREM[b.slug])PBPlan.set(b.slug,tierOf(b));});}
   if(window.PBPlay&&PBPlay.on()){try{PLAYP=await PBPlay.products();}catch(e){PLAYP=[];}
     if(!RECOV&&PBPlay.inApp()&&ROWS&&ROWS.length===1){RECOV=1;try{const got=await PBPlay.recover(ROWS[0].slug);if(got.length){PREM=await rpc("pb_my_premium")||{};ROWS.forEach(b=>{if(PREM[b.slug])PBPlan.set(b.slug,tierOf(b));});}}catch(e){}}}
-  BAN={};if(PREM)for(const b of ROWS||[]){if(PH(b,"banner")){try{BAN[b.slug]=await rpc("pb_my_banner",{p_slug:b.slug});}catch(e){}}}}
-let BAN={},PLAYP=[],RECOV=0,BUYOPEN={};
+  BAN={};PDAYS={};if(PREM)for(const b of ROWS||[]){if(PH(b,"banner")){try{BAN[b.slug]=await rpc("pb_my_banner",{p_slug:b.slug});}catch(e){}if(premOn(b)){try{PDAYS[b.slug]=await rpc("pb_poster_my",{p_slug:b.slug});}catch(e){}}}}}
+let BAN={},PLAYP=[],RECOV=0,BUYOPEN={},PDAYS={},PSEL={},PMON={},PMSG={};
 /* 🏪 दुकान Verification (sql-32): plan लेने से पहले ज़रूरी — 2 फ़ोटो (बाहर बोर्ड + अंदर) → AI बोर्ड का नाम मिलाए → PataBook (Admin) approve */
 let VER=null,VPH={},VMSG={};
 function verUrl(){return String((window.PB_SITE&&PB_SITE.verifyUrl)||"").replace(/\/$/,"");}
@@ -391,11 +397,38 @@ function PH(b,f){return window.PBPlan?PBPlan.hasT(tierOf(b),f):isP(b);}
 function premOn(b){return !!(PREM&&PREM[b.slug]&&PREM[b.slug].until);}
 /* 🖼️ Banner: दुकानदार लगाए → PataBook (Admin) मंज़ूर करे → home की चलती पट्टी में (plan के दिनों के हिसाब से) */
 function banBlock(b,i){const en=L()==="en",x=BAN[b.slug],RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
-  const st=x?(x.status==="approved"?'<b style="color:#137333">✅ '+(en?"Approved — shows on PataBook home strip":"मंज़ूर — PataBook home की पट्टी में दिखता है")+'</b>':x.status==="rejected"?'<b style="color:#b42318">❌ '+(en?"Not approved":"मंज़ूर नहीं हुआ")+(x.reason?": "+esc(x.reason):"")+'</b>':'<b style="color:#7a4b00">⏳ '+(en?"Waiting for PataBook approval":"PataBook की मंज़ूरी का इंतज़ार")+'</b>'):'';
-  return '<div class="ban"><div class="bh">🖼️ '+(en?"Your banner (advertisement)":"आपका Banner (विज्ञापन)")+'</div>'+
-    (x&&RX.test(x.url||"")?'<img src="'+esc(x.url)+'" alt="" loading="lazy">':'<small>'+(en?"A wide photo of your shop / offer (2:1, like 1200×600). It runs in the moving strip on PataBook home.":"दुकान / offer की चौड़ी photo (2:1, जैसे 1200×600)। PataBook home की चलती पट्टी में दिखेगी।")+'</small>')+
+  const st=x?(x.status==="approved"?'<b style="color:#137333">✅ '+(en?"Approved — shows on PataBook home on your poster days":"मंज़ूर — आपके चुने दिनों पर PataBook home पर दिखता है")+'</b>':x.status==="rejected"?'<b style="color:#b42318">❌ '+(en?"Not approved":"मंज़ूर नहीं हुआ")+(x.reason?": "+esc(x.reason):"")+'</b>':'<b style="color:#7a4b00">⏳ '+(en?"Waiting for PataBook approval":"PataBook की मंज़ूरी का इंतज़ार")+'</b>'):'';
+  return '<div class="ban"><div class="bh">🖼️ '+(en?"Your poster on PataBook home":"PataBook home पर आपका Poster")+'</div>'+
+    (x&&RX.test(x.url||"")?'<img src="'+esc(x.url)+'" alt="" loading="lazy">':'<small>'+(en?"A wide photo of your shop / offer. Any photo is resized automatically (1200×600, small size). It shows full-width on PataBook home.":"दुकान / offer की चौड़ी photo। कोई भी photo चुनें — अपने-आप 1200×600 और छोटी (कम KB) हो जाएगी। PataBook home पर पूरे size में दिखेगी।")+'</small>')+
     (st?'<div class="bs">'+st+'</div>':'')+
-    '<div class="bb"><label>'+(x?(en?"🔄 Change banner":"🔄 Banner बदलें"):(en?"➕ Add banner":"➕ Banner लगाएँ"))+'<input type="file" accept="image/*" hidden data-bup="'+i+'"></label>'+(x?'<button type="button" data-brm="'+i+'">🗑️ '+(en?"Remove":"हटाएँ")+'</button>':'')+'</div><div class="err" id="be'+i+'"></div></div>';}
+    '<div class="bb"><label>'+(x?(en?"🔄 Change poster":"🔄 Poster बदलें"):(en?"➕ Add poster":"➕ Poster लगाएँ"))+'<input type="file" accept="image/*" hidden data-bup="'+i+'"></label>'+(x?'<button type="button" data-brm="'+i+'">🗑️ '+(en?"Remove":"हटाएँ")+'</button>':'')+'</div><div class="err" id="be'+i+'"></div>'+posterDays(b,i)+'</div>';}
+/* 📅 Poster के दिन (sql-33): Silver साल में 50, Gold 100 — दुकानदार तारीख़ें चुने; Platinum हर दिन */
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const pday=s0=>{const [y,m,d]=String(s0).slice(0,10).split("-").map(Number);return new Date(y,m-1,d);};
+function posterDays(b,i){const P=PDAYS[b.slug],en=L()==="en";if(!P||!P.quota)return "";
+  if(P.full)return '<div class="pdz"><b>💎 '+(en?"Your poster runs every day":"आपका poster हर दिन चलता है")+'</b><small>'+(en?"Platinum: full year, no need to pick days.":"Platinum: पूरा साल — दिन चुनने की ज़रूरत नहीं।")+'</small></div>';
+  if(!P.until)return "";
+  const today=P.today,SEL=PSEL[b.slug]||(PSEL[b.slug]=new Set((P.days||[]).map(x=>String(x).slice(0,10)))),past=[...SEL].filter(d=>d<today).length,used=SEL.size,left=P.quota-used;
+  const t0=pday(today),last=pday(P.until);last.setDate(last.getDate()-1);
+  const mi=PMON[b.slug]||0,first=new Date(t0.getFullYear(),t0.getMonth()+mi,1),maxM=(last.getFullYear()-t0.getFullYear())*12+last.getMonth()-t0.getMonth();
+  const MN=en?["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]:["जनवरी","फ़रवरी","मार्च","अप्रैल","मई","जून","जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"];
+  const WD=en?["Mo","Tu","We","Th","Fr","Sa","Su"]:["सो","मं","बु","गु","शु","श","र"];
+  let cells="";const lead=(first.getDay()+6)%7;for(let k=0;k<lead;k++)cells+='<span></span>';
+  const dim=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+  for(let d=1;d<=dim;d++){const dt=new Date(first.getFullYear(),first.getMonth(),d),k=ymd(dt),on=SEL.has(k),off=k<today||dt>last,lock=k<today||(k===today&&on&&(P.days||[]).some(x=>String(x).slice(0,10)===k));
+    cells+='<button type="button" class="pdd'+(on?' on':'')+(k===today?' td':'')+'" data-pd="'+k+'" data-i="'+i+'"'+(off||lock?' disabled':'')+' aria-pressed="'+on+'">'+d+'</button>';}
+  return '<div class="pdz"><b>📅 '+(en?"Pick your poster days":"Poster के दिन चुनें")+'</b><small>'+(en?"Your plan: "+P.quota+" days a year. Tap dates to select, then Save. Today and past days cannot be changed.":"आपके plan में साल में "+P.quota+" दिन। तारीख़ दबाकर चुनें, फिर Save करें। आज और बीते दिन बदल नहीं सकते।")+'</small>'+
+    '<div class="pdc"><span class="'+(left<0?'bad':'')+'">'+(en?"Selected ":"चुने ")+used+' / '+P.quota+'</span><span>'+(left>=0?(en?left+" left":left+" बचे"):(en?"Too many":"ज़्यादा हो गए"))+'</span></div>'+
+    '<div class="pdm"><button type="button" data-pm2="-1" data-i="'+i+'"'+(mi<=0?' disabled':'')+'>‹</button><b>'+MN[first.getMonth()]+' '+first.getFullYear()+'</b><button type="button" data-pm2="1" data-i="'+i+'"'+(mi>=maxM?' disabled':'')+'>›</button></div>'+
+    '<div class="pdg">'+WD.map(w=>'<i>'+w+'</i>').join("")+cells+'</div>'+
+    '<button type="button" class="pds" data-psv="'+i+'"'+(left<0?' disabled':'')+'>💾 '+(en?"Save days":"दिन Save करें")+'</button>'+
+    (PMSG[b.slug]?'<div class="pdmsg">'+esc(PMSG[b.slug])+'</div>':'')+
+    '<small>'+(en?"Your poster shows only after PataBook approves it.":"Poster PataBook की मंज़ूरी के बाद ही दिखेगा।")+'</small></div>';}
+async function savePosterDays(i,btn){const b=ROWS[i],en=L()==="en",P=PDAYS[b.slug],S2=PSEL[b.slug];if(!P||!S2)return;btn.disabled=true;
+  try{ME=await PBA.session();const days=[...S2].filter(d=>d>=P.today).sort();const r=await rpc("pb_poster_set",{p_slug:b.slug,p_days:days});
+    PDAYS[b.slug]=await rpc("pb_poster_my",{p_slug:b.slug});delete PSEL[b.slug];PMSG[b.slug]=en?"✅ Saved":"✅ Save हो गया";}
+  catch(x){PMSG[b.slug]=/quota/.test(x.message||"")?(en?"More days than your plan allows. Remove some.":"Plan से ज़्यादा दिन चुने हैं। कुछ हटाएँ।"):/rate/.test(x.message||"")?(en?"Too many changes. Try later.":"बहुत बार बदला। थोड़ी देर बाद करें।"):(en?"Could not save. Try again.":"Save नहीं हुआ। दोबारा कोशिश करें।");}
+  draw();}
 function bannerImage(file){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
   img.onload=()=>{const W=1200,H=600,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,H);
     const k=Math.max(W/img.width,H/img.height),w=img.width*k,h=img.height*k;x.drawImage(img,(W-w)/2,(H-h)/2,w,h);URL.revokeObjectURL(url);
@@ -418,13 +451,13 @@ function buyBlock(b,i,paid){
   if(!(window.PBPlay&&PBPlay.on())||!PLAYP||!PLAYP.length)return "";
   const en=L()==="en",ic={silver:"🥈",gold:"👑",platinum:"💎"};
   if(paid&&!BUYOPEN[b.slug])return '<button type="button" class="buyx" data-buyx="'+i+'">🔄 '+(en?"Renew / take a bigger plan":"Plan आगे बढ़ाएँ / बड़ा plan लें")+' ›</button>';
-  const F=[["logo","🖼️ Logo"],["hiring",en?"💼 Hiring":"💼 नौकरी (Hiring)"],["card",en?"🪪 Visiting card":"🪪 विज़िटिंग कार्ड"],["report",en?"📊 Report":"📊 रिपोर्ट"],["top",en?"⭐ On top in search":"⭐ Search में ऊपर"],["strip",en?"🏠 Big card on home":"🏠 Home पर बड़ा card"],["banner",en?"📢 Banner ad":"📢 Banner विज्ञापन"]];
+  const F=[["logo","🖼️ Logo"],["hiring",en?"💼 Hiring":"💼 नौकरी (Hiring)"],["card",en?"🪪 Visiting card":"🪪 विज़िटिंग कार्ड"],["report",en?"📊 Report":"📊 रिपोर्ट"],["top",en?"⭐ On top in search":"⭐ Search में ऊपर"],["banner",en?"📢 Home poster":"📢 Home poster"]];
   const inApp=PBPlay.inApp(),store="https://play.google.com/store/apps/details?id=in.patabook.app";
   const price=p=>p.playPrice&&p.playPrice.value?(p.playPrice.currency==="INR"?"₹":p.playPrice.currency+" ")+Number(p.playPrice.value).toLocaleString("en-IN"):"₹"+Number(p.price||0).toLocaleString("en-IN");
   return '<div class="buy"><div class="bh2">💳 '+(paid?(en?"Renew or upgrade":"Plan आगे बढ़ाएँ या बड़ा लें"):(en?"Become a PataBook Member":"PataBook Member बनें"))+'</div><small>'+(en?"1 year · paid once · no auto-renewal · via Google Play":"1 साल · एक बार भुगतान · अपने-आप renew नहीं · Google Play से")+'</small>'+
     PLAYP.map(p=>{const t=p.tier,n=window.PBPlan?PBPlan.name(t,true):t;
       return '<div class="bp pt-'+t+'"><div class="bt"><b>'+(ic[t]||"")+' '+esc(n)+' Member</b><span>'+price(p)+'<small>/'+(en?"year":"साल")+'</small></span></div>'+
-        '<div class="bf">'+(window.PBPlan?('<i>📷 '+PBPlan.limT(t,"photos")+(en?" photos":" फ़ोटो")+'</i><i>🛍️ '+PBPlan.limT(t,"products")+' products</i>'+F.filter(f=>PBPlan.hasT(t,f[0])).map(f=>'<i>'+f[1]+'</i>').join("")):'')+'</div>'+
+        '<div class="bf">'+(window.PBPlan?((PBPlan.limT(t,"photos")?'<i>📷 '+PBPlan.limT(t,"photos")+(en?" photos":" फ़ोटो")+'</i>':'')+'<i>🛍️ '+PBPlan.limT(t,"products")+(en?" products":" सामान")+'</i>'+F.filter(f=>PBPlan.hasT(t,f[0])).map(f=>'<i>'+(f[0]==="banner"&&PBPlan.limT(t,"poster_days")?(PBPlan.limT(t,"poster_days")>=365?(en?"📢 Home poster every day":"📢 Home poster रोज़"):(en?"📢 Home poster "+PBPlan.limT(t,"poster_days")+" days/yr":"📢 Home poster साल में "+PBPlan.limT(t,"poster_days")+" दिन")):f[1])+'</i>').join("")):'')+'</div>'+
         (verLocked(b)?'<div class="lock">🔒 '+(en?"Verify your shop first (above)":"पहले दुकान verify करवाएँ (ऊपर)")+'</div>':inApp?'<button type="button" data-buy="'+i+'" data-p="'+esc(p.product)+'">'+(en?"Buy with Google Play":"Google Play से खरीदें")+'</button>':'<a href="'+store+'" target="_blank" rel="noopener">'+(en?"Buy in the PataBook app ›":"PataBook app में खरीदें ›")+'</a>')+'</div>';}).join("")+
     '<small style="margin-top:8px">'+(en?"By buying you accept the ":"खरीदकर आप ")+'<a href="terms.html">'+(en?"Terms":"नियम")+'</a> · <a href="refund.html">'+(en?"Refund Policy":"Refund नीति")+'</a>'+(en?".":" मानते हैं।")+'</small><div class="err" id="bye'+i+'"></div></div>';
 }
@@ -614,6 +647,9 @@ $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");i
   const g=e.target.closest("[data-bup]");if(g&&g.files&&g.files[0])addBanner(+g.dataset.bup,g.files[0]);});
 $("list").addEventListener("click",async e=>{
   const vs=e.target.closest("[data-vsend]");if(vs){sendVerify(+vs.dataset.vsend,vs);return;}
+  const pd=e.target.closest("[data-pd]");if(pd){const b=ROWS[+pd.dataset.i],S2=PSEL[b.slug];if(!S2)return;const k=pd.dataset.pd;S2.has(k)?S2.delete(k):S2.add(k);delete PMSG[b.slug];draw();return;}
+  const pm2=e.target.closest("[data-pm2]");if(pm2){const b=ROWS[+pm2.dataset.i];PMON[b.slug]=(PMON[b.slug]||0)+(+pm2.dataset.pm2);draw();return;}
+  const psv=e.target.closest("[data-psv]");if(psv){savePosterDays(+psv.dataset.psv,psv);return;}
   const bx=e.target.closest("[data-buyx]");if(bx){BUYOPEN[ROWS[+bx.dataset.buyx].slug]=1;draw();return;}
   const bb=e.target.closest("[data-buy]");if(bb){const i=+bb.dataset.buy,b=ROWS[i],en=L()==="en",er=$("bye"+i);bb.disabled=true;if(er){er.style.color="#5b6475";er.textContent=en?"Opening Google Play…":"Google Play खुल रहा है…";}
     const v=await PBPlay.buy(b.slug,bb.dataset.p);

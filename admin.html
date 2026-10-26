@@ -1002,9 +1002,10 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:14px">' +
           '<label>📷 फ़ोटो <input type="number" min="0" max="60" data-n="photos" value="' + (c.photos || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"></label>' +
           '<label>🛍️ Products <input type="number" min="0" max="100" data-n="products" value="' + (c.products || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"></label>' +
-          (fr ? '' : '<label>📢 Banner: <input type="number" min="1" max="30" data-n="banner_on" value="' + (c.banner_on || 1) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन चले, फिर <input type="number" min="0" max="60" data-n="banner_off" value="' + (c.banner_off || 0) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन बंद <small style="color:#5b6475">(0 = हर दिन)</small></label>') +
+          (fr ? '' : ('poster_days' in c ? '<label>📢 Poster: साल में <input type="number" min="0" max="366" data-n="poster_days" value="' + (c.poster_days || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन <small style="color:#5b6475">(365 = रोज़; दुकानदार My Shop से तारीख़ें चुनता है)</small></label>'
+            : '<label>📢 Banner: <input type="number" min="1" max="30" data-n="banner_on" value="' + (c.banner_on || 1) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन चले, फिर <input type="number" min="0" max="60" data-n="banner_off" value="' + (c.banner_off || 0) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन बंद <small style="color:#5b6475">(0 = हर दिन)</small></label>')) +
         '</div><div class="acts"><button data-psave="' + t[0] + '" style="background:#137333;color:#fff">💾 Save</button></div></div>';
-    }).join('') + '<p class="cnt">उदाहरण: "1 दिन चले, फिर 3 दिन बंद" = हर 4 दिन में 1 दिन banner; "3 दिन चले, 0 बंद" = रोज़।</p>';
+    }).join('') + '<p class="cnt">Poster: Silver / Gold दुकानदार अपने दिन खुद चुनते हैं (किसी भी 12 महीने में इतने दिन तक); 365 = हर दिन।</p>';
   }
   /* 🏪 दुकान Verification (sql-32): दुकानदार की 2 फ़ोटो (private) + AI ने बोर्ड पर क्या पढ़ा → Approve / Reject */
   async function loadVers() {

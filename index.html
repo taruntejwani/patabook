@@ -173,6 +173,7 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .ps img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .ps .pl{position:absolute;left:8px;top:8px;font-size:10.5px;font-weight:800;letter-spacing:.3px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff}
 .ps .pl.pt-gold{background:linear-gradient(90deg,#b8860b,#f3c64b);color:#3a2700}
+.ps .pl.pt-silver{background:linear-gradient(90deg,#8d99a6,#e3e8ee);color:#1d2630}
 .ps .pl.pt-platinum{background:linear-gradient(90deg,#5b6b7d,#d9e2ec);color:#14202c}
 .ps.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;background:linear-gradient(135deg,#0d2b5c 0%,#1a4b9a 55%,#c99a2e 130%);color:#fff}
 .ps.ph b{font-size:17px;font-weight:800}
@@ -520,9 +521,9 @@ function applyLang(){
   function inCity(b,city){const t=normCity(city);if(!t)return true;return [b.city,b.address].filter(Boolean).map(normCity).some(v=>v===t||v.startsWith(t+" ")||v.endsWith(" "+t)||v.includes(" "+t+" "));}
   let ALL=[],P=[],i=0,timer=null,loaded=false;
   const tk=()=>document.getElementById("ptk");
-  function slide(b){const t=b.tier==="platinum"?"platinum":"gold";
-    return '<a class="ps" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+(t==="platinum"?"💎 PLATINUM":"👑 GOLD")+'</span></a>';}
-  function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का Poster यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"Gold और Platinum Member अपना poster यहाँ पूरे size में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
+  function slide(b){const t=b.tier==="platinum"||b.tier==="silver"?b.tier:"gold";
+    return '<a class="ps" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 PLATINUM",gold:"👑 GOLD",silver:"🥈 SILVER"}[t])+'</span></a>';}
+  function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का Poster यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"Silver, Gold और Platinum Member अपना poster यहाँ पूरे size में चला सकते हैं":"Silver, Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
   function go(n,anim){const t=tk();if(!t)return;i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
     document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===i));}
   function auto(){clearInterval(timer);if(P.length>1&&!matchMedia("(prefers-reduced-motion: reduce)").matches)timer=setInterval(()=>go(i+1),4500);}
@@ -535,8 +536,8 @@ function applyLang(){
   async function load(){
     try{const r=await fetch(SBU+"/rest/v1/rpc/pb_banners_today",{method:"POST",headers:H,body:"{}"});
       if(r.ok){const rows=await r.json();
-        ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="gold"||b.tier==="platinum"))
-          .sort((a,b)=>(b.tier==="platinum")-(a.tier==="platinum")).slice(0,12);}}catch(e){}
+        ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="silver"||b.tier==="gold"||b.tier==="platinum"))
+          .sort((a,b)=>({platinum:0,gold:1,silver:2}[a.tier])-({platinum:0,gold:1,silver:2}[b.tier])).slice(0,15);}}catch(e){}
     loaded=true;draw();
   }
   /* उँगली से आगे-पीछे खिसकाएँ */
