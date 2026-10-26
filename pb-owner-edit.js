@@ -330,6 +330,7 @@
     /* नीचे वाली काली पट्टी हटा दी — हर हिस्से की पीली ✏️ से बदलें */
     new MutationObserver(function () { if (ON) pens(); }).observe(document.body, { childList: true, subtree: true });
     var keep = false; try { keep = sessionStorage.getItem("pbe-on-" + O.slug) === "1"; } catch (e) {}
+    if (location.hash === "#edit") { keep = true; try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
     if (keep) toggle(true);
   }
   window.PBEdit = { start: start, act: function (k) { if (O && ACT[k]) ACT[k](); } };

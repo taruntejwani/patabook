@@ -247,7 +247,7 @@ function profItems(b,i){
     [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता",""],
     [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
-    [!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","#lgx"+i],
+    [!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"],
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय",E+"#openT"],
     [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार",E+"#btype"],
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",E+"#svc"],
@@ -316,7 +316,7 @@ function premBlock(b,i){
     if(o==="rp")body=reportHTML(b);
     if(o==="pr"&&window.prodBody)body=prodBody(b,i);
     return '<div class="pm"><div class="ph">💎 '+(en?"PataBook Premium":"PataBook Premium")+'</div><small>'+(en?"Active till "+till+" · ⭐ your shop shows on top":till+" तक चालू · ⭐ आपकी दुकान ऊपर दिखती है")+'</small>'+
-      '<div class="pb"><button type="button" class="'+(o==="ph"?"on":"")+'" data-pm="ph" data-i="'+i+'">🖼️ '+(en?"Photos":"फ़ोटो")+'</button><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button><button type="button" data-pm="vac" data-i="'+i+'">💼 Vacancy</button><button type="button" class="'+(o==="pr"?"on":"")+'" data-pm="pr" data-i="'+i+'">🛍️ '+(en?"Products":"Products")+'</button></div>'+body+'</div>';
+      '<div class="pb"><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button></div>'+body+'</div>';
   }
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
   const r=P.request;
@@ -473,8 +473,8 @@ function draw(){
   drawNt();list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    profBlock(b,i)+premBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i)+logoBlock(b,i)+
-    '<a class="edbtn" href="edit.html?slug='+encodeURIComponent(b.slug)+'"><span>✏️</span><span><b>'+(L()==="en"?"Edit details":"जानकारी बदलें")+'</b><small>'+(L()==="en"?"Timings, WhatsApp, PIN, delivery, email, website, services":"समय, WhatsApp, PIN, डिलीवरी, ईमेल, वेबसाइट, सेवाएँ")+'</small></span><i>›</i></a>'+
+    profBlock(b,i)+premBlock(b,i)+weekLine(b)+phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i)+
+    '<a class="edbtn" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit"><span>✏️</span><span><b>'+(L()==="en"?"Edit on your shop page":"अपनी दुकान का page खोलकर बदलें")+'</b><small>'+(L()==="en"?"Logo, products, photos, timings, numbers — tap the yellow ✏️ on any part":"Logo, products, फ़ोटो, समय, नंबर — जिस हिस्से को बदलना है उसकी पीली ✏️ दबाएँ")+'</small></span><span style="font-size:20px;color:#7a4b00">›</span></a>'+
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
