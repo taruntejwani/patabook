@@ -355,7 +355,7 @@ function premBlock(b,i){
     if(o==="rp")body=reportHTML(b);
     if(o==="pr"&&window.prodBody)body=prodBody(b,i);
     const t=tierOf(b),tn=window.PBPlan?PBPlan.name(t,en):"Premium",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";
-    return '<div class="pm pt-'+t+'"><div class="ph">'+ic+' PataBook '+esc(tn)+'</div><small>'+(en?"Active till "+till:till+" तक चालू")+(PH(b,"top")?(en?" · ⭐ your shop shows on top":" · ⭐ आपकी दुकान ऊपर दिखती है"):"")+'</small>'+
+    return '<div class="pm pt-'+t+'"><div class="ph">'+ic+' PataBook '+esc(window.PBPlan?PBPlan.name(t,true):tn)+' Member</div><small>'+(en?"Active till "+till:till+" तक चालू")+(PH(b,"top")?(en?" · ⭐ your shop shows on top":" · ⭐ आपकी दुकान ऊपर दिखती है"):"")+'</small>'+
       (PH(b,"report")?'<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small>':'')+
       (PH(b,"banner")?banBlock(b,i):'')+'</div>';
   }

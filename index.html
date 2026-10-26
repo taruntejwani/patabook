@@ -89,7 +89,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 /* Premium दुकान: off-white card + सुनहरी किनारी + सुनहरा नाम */
 .nsc.bn{padding:0;overflow:hidden;position:relative;width:calc((min(560px,100vw) - 32px - 20px) / 3 * 2 + 10px);background:#eef2f8;border:2px solid #d6dde8}
 .nsc.bn img{width:100%;height:100%;min-height:132px;object-fit:cover;display:block}.nsc.bn .bnl{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px;letter-spacing:.3px}
-.nsc .pbg.pb-silver i,.nsc .pbg.pb-platinum i{font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.4px;border-radius:5px;padding:2px 5px 2px 7px;line-height:1}
+.nsc .pbg.pb-gold i{background:linear-gradient(135deg,#f6e3a8,#d9b257 45%,#B58A2A);color:#123568;border:1px solid #c9a24a}
+.nsc .pbg.pb-silver i,.nsc .pbg.pb-platinum i,.nsc .pbg.pb-gold i{white-space:nowrap;font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.4px;border-radius:5px;padding:2px 5px 2px 7px;line-height:1}
 .nsc .pbg.pb-silver i{background:linear-gradient(180deg,#f7f9fb,#c5ccd6);color:#39424e;border:1px solid #aab3bf}
 .nsc .pbg.pb-platinum i{background:linear-gradient(180deg,#bfe3ff,#4a6fa5 60%,#1c2539);color:#fff;border:1px solid #7fa6d6;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 .nsc.tc{position:relative}.nsc.tc .tcb{position:absolute;top:7px;right:6px;display:flex;align-items:center;gap:3px;font-size:8.5px;font-weight:900;letter-spacing:.3px;border-radius:999px;padding:1px 6px 1px 2px}
@@ -398,9 +399,8 @@ function applyLang(){
     });
   }
   /* 👑 plan का निशान: Gold = सुनहरा crown + GOLD PREMIUM; Silver / Platinum = उसी crown पर अपना रंग */
-  function tcBadge(t){return '<span class="tcb"><img src="'+(t==="gold"?"pb-crown.webp":t==="platinum"?"pb-diamond.webp":"pb-crown-"+t+".webp")+'" alt="" width="14" height="14">'+({silver:"SILVER",gold:"GOLD",platinum:"PLATINUM"}[t]||"")+'</span>';}
-  function premBadge(t){if(t==="silver"||t==="platinum")return '<span class="pbg pb-'+t+'"><img class="c" src="'+(t==="platinum"?"pb-diamond.webp":"pb-crown-"+t+".webp")+'" alt="" width="16" height="16"><i>'+(t==="silver"?"SILVER":"PLATINUM")+'</i></span>';
-    return '<span class="pbg"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><img class="g" src="pb-gold-premium.webp" alt="Gold Premium" width="53" height="14"></span>';}
+  function tcBadge(t){return '<span class="tcb"><img src="'+(t==="gold"?"pb-crown.webp":t==="platinum"?"pb-diamond.webp":"pb-crown-"+t+".webp")+'" alt="" width="14" height="14">'+({silver:"SILVER",gold:"GOLD",platinum:"PLATINUM"}[t]||"")+" MEMBER"+'</span>';}
+  function premBadge(t){t=t==="silver"||t==="platinum"?t:"gold";return '<span class="pbg pb-'+t+'"><img class="c" src="'+(t==="platinum"?"pb-diamond.webp":t==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="" width="16" height="16"><i>'+t.toUpperCase()+' MEMBER</i></span>';}
   /* 🖼️ Banner (sql-30): दुकान का banner पट्टी में — दबाने पर दुकान खुले */
   function bannerHTML(b){return '<a class="nsc bn" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" loading="lazy" decoding="async"><span class="bnl">'+((PB.lang&&PB.lang()==="hi")?"विज्ञापन":"Ad")+'</span></a>';}
   let BANNERS=[];

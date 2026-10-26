@@ -229,7 +229,7 @@ async function premiumFirst(rows){
   top.sort((a,b)=>(R[PBPlan.tier(b.slug)]||0)-(R[PBPlan.tier(a.slug)]||0));
   return top.concat(o);
 }
-function premTags(b){const t=PREMS[b.slug];if(!t)return "";const en=PB.lang&&PB.lang()!=="hi",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";return (PBPlan.has(b.slug,"top")?'<span class="tag feat">⭐ Featured</span>':'')+'<span class="tag prem pt-'+t+'"><i>'+ic+'</i>'+esc(PBPlan.name(t,true))+'</span>';}
+function premTags(b){const t=PREMS[b.slug];if(!t)return "";const en=PB.lang&&PB.lang()!=="hi",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";return (PBPlan.has(b.slug,"top")?'<span class="tag feat">⭐ Featured</span>':'')+'<span class="tag prem pt-'+t+'"><i>'+ic+'</i>'+esc(PBPlan.name(t,true))+' Member</span>';}
 function render(rows,q,city){
   const list=$("list"),label=[q,city].filter(Boolean).join(" · ");
   $("count").textContent=rows.length?T("found",{n:rows.length})+" · "+T("s_for",{q:label}):"";

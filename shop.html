@@ -376,7 +376,7 @@ function render(){drawSoc();
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
-       '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Silver",gold:"👑 Gold",platinum:"💎 Platinum"}[TIER()]||"👑 Premium")+'</span>':'')+
+       '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Silver Member",gold:"👑 Gold Member",platinum:"💎 Platinum Member"}[TIER()]||"👑 Premium")+'</span>':'')+
          (gst?'<span class="chip" data-pbh="gst">🧾 '+L("GST रजिस्टर्ड","GST Registered")+'</span>':'')+(b.is_verified?'<span class="chip">✅ '+L("Verified","Verified")+'</span>':'')+
          (b.rating?'<span class="chip">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+'</div>'+
      '</div></div></div>'+
