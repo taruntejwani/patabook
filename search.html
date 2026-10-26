@@ -13,6 +13,8 @@
 <meta name="apple-mobile-web-app-title" content="PataBook">
 <script src="site-config.js"></script>
 <script src="i18n.js"></script>
+<script src="pb-plan.js"></script>
+<script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
 <style>
 :root{--blue:#1a73e8;--navy:#0b2f73;--yellow:#ffd21f;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--green:#188038}
@@ -71,6 +73,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
  .search .go{flex:0 0 120px}
 }
 @media(max-width:480px){.nav{gap:6px}.add{padding:7px 10px;font-size:12px;max-width:34vw;overflow:hidden;text-overflow:ellipsis}.brand .col{display:none}}
+.tag.prem.pt-silver{background:linear-gradient(135deg,#f6f8fa,#d5dbe3)!important;color:#3c4652!important;border-color:#c3cad4!important}.tag.prem.pt-platinum{background:linear-gradient(135deg,#1d2433,#41506e)!important;color:#eef3ff!important;border-color:#2b3650!important}
 .tag.feat{background:#fff6d6;color:#8a6200;font-weight:800}/* Premium: सफ़ेद + हल्का सुनहरा + गहरा navy (सिर्फ़ Premium दुकानों पर) */.tag.prem{background:linear-gradient(135deg,#fdf7e6,#f4e4b8);color:#123568;border:1px solid #e3c983;font-weight:800;letter-spacing:.1px}.tag.prem i{font-style:normal;font-size:.85em;margin-right:3px}.goldname{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.goldname{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}.card.isprem{border-color:#ecdcb0;box-shadow:0 6px 20px rgba(18,53,104,.08),0 1px 3px rgba(181,138,42,.10)}.card.isprem h2 a{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.card.isprem h2 a{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}
 .jobc .jl{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:inherit;padding-bottom:6px}.jobc .jt{min-width:0;flex:1}.jobc h2{font-size:16.5px;margin:0}
 .jobc .jr{margin-top:4px;font-weight:800;color:#c2410c;font-size:14.5px}.jobc .jm{margin-top:2px;font-size:13px;color:#5b6475}.jobc .jm:empty{display:none}
@@ -217,16 +220,16 @@ async function runJobs(q,city,n){
 /* 💎 Premium (sql-23): Premium दुकानें सबसे ऊपर — हर बार अलग क्रम (rotation), ताकि सबको बराबर मौका मिले */
 let PREMS={};
 async function premiumFirst(rows){
-  if(!(window.PB_SITE&&PB_SITE.premium)||!rows||!rows.length)return rows;
-  try{
-    const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:rows.map(b=>b.slug).filter(Boolean).slice(0,300)})});
-    if(!r.ok)return rows;PREMS=await r.json()||{};
-  }catch(e){return rows;}
-  const p=rows.filter(b=>PREMS[b.slug]),o=rows.filter(b=>!PREMS[b.slug]);
-  for(let i=p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}
-  return p.concat(o);
+  if(!(window.PB_SITE&&PB_SITE.premium)||!rows||!rows.length||!window.PBPlan)return rows;
+  try{await PBPlan.load(rows.map(b=>b.slug).filter(Boolean));}catch(e){return rows;}
+  PREMS={};rows.forEach(b=>{if(PBPlan.paid(b.slug))PREMS[b.slug]=PBPlan.tier(b.slug);});
+  /* plan में "ऊपर दिखना" ON: Platinum → Gold → Silver, हर समूह के अंदर हर बार अलग क्रम */
+  const R={platinum:3,gold:2,silver:1},top=rows.filter(b=>PBPlan.has(b.slug,"top")),o=rows.filter(b=>!PBPlan.has(b.slug,"top"));
+  for(let i=top.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[top[i],top[j]]=[top[j],top[i]];}
+  top.sort((a,b)=>(R[PBPlan.tier(b.slug)]||0)-(R[PBPlan.tier(a.slug)]||0));
+  return top.concat(o);
 }
-function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()!=="hi";return '<span class="tag feat">⭐ '+(en?"Featured":"Featured")+'</span><span class="tag prem"><i>💎</i>Premium</span>';}
+function premTags(b){const t=PREMS[b.slug];if(!t)return "";const en=PB.lang&&PB.lang()!=="hi",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";return (PBPlan.has(b.slug,"top")?'<span class="tag feat">⭐ Featured</span>':'')+'<span class="tag prem pt-'+t+'"><i>'+ic+'</i>'+esc(PBPlan.name(t,true))+'</span>';}
 function render(rows,q,city){
   const list=$("list"),label=[q,city].filter(Boolean).join(" · ");
   $("count").textContent=rows.length?T("found",{n:rows.length})+" · "+T("s_for",{q:label}):"";

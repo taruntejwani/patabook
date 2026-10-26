@@ -13,6 +13,8 @@
   };
   var UORD = ["vol", "wt", "pcs", "sz", "len", "svc"];
   var MAXUP = 10;
+  /* plan की products limit (Admin → Plans); पुराने तरीके में 20 */
+  function MAXP(sl) { return window.PBPlan ? (PBPlan.lim(sl, "products") || 20) : 20; }
   /* दुकान का Unit: इस phone में याद (localStorage) — नहीं तो पुराने products के size से अंदाज़ा */
   function ukey(slug) { return "pb-unit-" + slug; }
   function guess(list) {
@@ -96,9 +98,9 @@
       ? '<h4>⚙️ ' + (E ? "First: how do you sell your products?" : "पहले बताइए: आपका माल किस हिसाब से बिकता है?") + (lock ? '<small>' + (E ? "required" : "ज़रूरी") + '</small>' : "") + '</h4><div class="pr-ug">' +
         UORD.map(function (k) { return '<button type="button" class="' + (u === k ? "on" : "") + '" data-punit="' + i + '" data-u="' + k + '"><span>' + UNITS[k].i + '</span>' + (E ? UNITS[k].en : UNITS[k].hi) + '</button>'; }).join("") + '</div>'
       : '<div class="pr-uc">' + UNITS[u].i + ' ' + (E ? "Sold by: " + UNITS[u].en : "बिक्री: " + UNITS[u].hi) + '<button type="button" data-pchg="' + i + '">' + (E ? "Change" : "बदलें") + '</button></div>') + '</div>';
-    return picker + '<button type="button" class="pr-add" data-padd="' + i + '"' + (list.length >= 20 || lock ? " disabled" : "") + '><i>＋</i><span><b>' + (lock ? (E ? "Add a product — choose unit above first" : "नया Product — पहले ऊपर Unit चुनें") : (E ? "Add a product" : "नया Product जोड़ें")) + '</b><small>' +
-      (E ? "Photo, name, size, price · " + list.length + " / 20" : "फ़ोटो, नाम, size, कीमत · " + list.length + " / 20") + '</small></span></button>' +
-      (list.length < 20 ? '<button type="button" class="pr-mul" data-pmul="' + i + '"' + (lock ? " disabled" : "") + '><i>📋</i><span><b>' + (E ? "Add many products (Multiple)" : "एक साथ कई Products (Multiple)") + '</b><small>' + (E ? "Pick up to " + MAXUP + " photos at once, then fill details" : "एक साथ " + MAXUP + " तक फ़ोटो चुनें, फिर details भरें") + '</small></span></button>' : '') +
+    return picker + '<button type="button" class="pr-add" data-padd="' + i + '"' + (list.length >= MAXP(b.slug) || lock ? " disabled" : "") + '><i>＋</i><span><b>' + (lock ? (E ? "Add a product — choose unit above first" : "नया Product — पहले ऊपर Unit चुनें") : (E ? "Add a product" : "नया Product जोड़ें")) + '</b><small>' +
+      (E ? "Photo, name, size, price · " + list.length + " / " + MAXP(b.slug) : "फ़ोटो, नाम, size, कीमत · " + list.length + " / " + MAXP(b.slug)) + '</small></span></button>' +
+      (list.length < MAXP(b.slug) ? '<button type="button" class="pr-mul" data-pmul="' + i + '"' + (lock ? " disabled" : "") + '><i>📋</i><span><b>' + (E ? "Add many products (Multiple)" : "एक साथ कई Products (Multiple)") + '</b><small>' + (E ? "Pick up to " + MAXUP + " photos at once, then fill details" : "एक साथ " + MAXUP + " तक फ़ोटो चुनें, फिर details भरें") + '</small></span></button>' : '') +
       '<div class="pr-l">' + list.map(function (p) {
         var st = !p.show ? '<span class="pr-st hid">🙈 ' + (E ? "Hidden" : "छिपा है") + '</span>' : p.stock ? '<span class="pr-st on">✅ ' + (E ? "Visible" : "दिख रहा है") + '</span>' : '<span class="pr-st out">⛔ ' + (E ? "Out of stock" : "Stock खत्म") + '</span>';
         return '<div class="pr-i' + (p.show ? "" : " hid") + '"><div class="th">' + (IMG_RX.test(p.img || "") ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : "") + '</div>' +
@@ -182,7 +184,7 @@
           sc.remove(); refresh(b.slug);
         } catch (x) {
           btn.disabled = false; var m = String(x.message || "");
-          er.textContent = /too many/.test(m) ? (E ? "Max 20 products." : "20 से ज़्यादा products नहीं।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : (E ? "Could not save. Try again." : "Save नहीं हुआ। फिर कोशिश करें।");
+          er.textContent = /too many/.test(m) ? (E ? "Max " + MAXP(b.slug) + " products." : MAXP(b.slug) + " से ज़्यादा products नहीं।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : (E ? "Could not save. Try again." : "Save नहीं हुआ। फिर कोशिश करें।");
         }
       };
       var dl = sc.querySelector("#prDel"); if (dl) dl.onclick = function () { sc.remove(); del(b, p); };
@@ -193,7 +195,7 @@
 
   /* 📋 एक साथ कई Products: पहले एक साथ 10 तक फ़ोटो चुनें → हर फ़ोटो का box बने → details भरें → सब Save */
   function multi(b) {
-    var E = en(), left = 20 - (PRD[b.slug] || []).length, SZ = sizesOf(b.slug);
+    var E = en(), left = MAXP(b.slug) - (PRD[b.slug] || []).length, SZ = sizesOf(b.slug);
     var R = [], sc = null, n = 0;
     function room() { return Math.max(0, Math.min(MAXUP - R.filter(function (r) { return !r.ok; }).length, left - R.filter(function (r) { return !r.ok; }).length)); }
     function pick() {
@@ -201,7 +203,7 @@
       inp.onchange = function () {
         var fs = Array.prototype.slice.call(inp.files || []).filter(function (f) { return /^image\//.test(f.type); }), r0 = room();
         if (!fs.length) { if (!R.length && sc) sc.remove(); return; }
-        if (fs.length > r0) alert(E ? "Only " + r0 + " photos can be added now (max " + MAXUP + " at a time, 20 products total)." : "अभी " + r0 + " फ़ोटो ही जुड़ सकती हैं (एक बार में " + MAXUP + ", कुल 20 products)।");
+        if (fs.length > r0) alert(E ? "Only " + r0 + " photos can be added now (max " + MAXUP + " at a time, " + MAXP(b.slug) + " products total)." : "अभी " + r0 + " फ़ोटो ही जुड़ सकती हैं (एक बार में " + MAXUP + ", कुल " + MAXP(b.slug) + " products)।");
         fs.slice(0, r0).forEach(function (f) { var r = { id: ++n, name: "", size: "", mrp: "", img: "", prev: URL.createObjectURL(f), up: true, err: "", ok: false }; R.push(r); upload(r, f); });
         open(); paint();
       };
@@ -264,7 +266,7 @@
           for (var k = 0; k < go.length; k++) {
             var r2 = go[k];
             try { await rpc("pb_product_save", { p_slug: b.slug, p: { id: null, name: r2.name.trim(), size: r2.size || "", mrp: r2.mrp || "", feats: [], img: r2.img, show: true, stock: true } }); r2.ok = true; left--; }
-            catch (x) { var m = String(x.message || ""); bad++; r2.err = /too many/.test(m) ? (E ? "Max 20 products." : "20 से ज़्यादा नहीं।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : (E ? "Could not save. Try again." : "Save नहीं हुआ, फिर कोशिश करें।"); }
+            catch (x) { var m = String(x.message || ""); bad++; r2.err = /too many/.test(m) ? (E ? "Max " + MAXP(b.slug) + " products." : MAXP(b.slug) + " से ज़्यादा नहीं।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : (E ? "Could not save. Try again." : "Save नहीं हुआ, फिर कोशिश करें।"); }
           }
           if (!bad && R.every(function (r) { return r.ok; })) { sc.remove(); refresh(b.slug); return; }
           paint(); sc.querySelector("#mpE").textContent = E ? "Saved the good ones. Fix the red boxes and save again." : "सही वाले Save हो गए। लाल box ठीक करके फिर Save करें।";

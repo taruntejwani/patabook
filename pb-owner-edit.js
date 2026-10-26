@@ -17,6 +17,9 @@
   function desc() { try { return (typeof B !== "undefined" && B && B.description) || ""; } catch (e) { return ""; } }
   function ln(k) { var m = desc().match(new RegExp("^" + k + ":\\s*(.+)$", "mi")); return m ? m[1].trim() : ""; }
   function prem() { try { return typeof PREM !== "undefined" && !!PREM; } catch (e) { return false; } }
+  /* plan में यह सुविधा ON है? (Admin → Plans) */
+  function has(f) { if (window.PBPlan && O) return PBPlan.has(O.slug, f); return prem(); }
+  function plim(k, d) { return window.PBPlan && O ? (PBPlan.lim(O.slug, k) || d) : d; }
   function squareImage(file){
   return new Promise((res,rej)=>{
     const img=new Image(),url=URL.createObjectURL(file);
@@ -109,7 +112,7 @@
     return SBU + "/storage/v1/object/public/shop-logos/" + path;
   }
   function editLogo() {
-    if (!prem()) return premOnly("🖼️ Logo");
+    if (!has("logo")) return premOnly("🖼️ Logo");
     var has = false; try { has = !!(typeof B !== "undefined" && B && /shop-logos\//.test(B.logo_url || "")); } catch (e) {}
     var s = sheet("🖼️ " + T("Logo", "Logo"), '<p style="color:#5b6475;font-size:13.5px">' + T("चौकोर (square) फ़ोटो सबसे अच्छी लगती है।", "A square photo works best.") + '</p>' +
       '<button type="button" class="pbe-b p" id="pbeLc">📷 ' + (has ? T("Logo बदलें", "Change logo") : T("Logo लगाएँ", "Add logo")) + '</button>' +
@@ -136,7 +139,7 @@
       var L = [];
       try { L = await rpc("pb_my_photos", { p_slug: O.slug }) || []; } catch (x) { s.body.innerHTML = '<p class="pbe-note">' + (/premium/i.test(x.message) ? T("फ़ोटो सिर्फ़ Premium दुकानों के लिए हैं।", "Photos are for Premium shops.") : T("खुल नहीं सका।", "Could not load.")) + '</p>'; return; }
       s.body.innerHTML = '<div class="pbe-pg">' + L.map(function (x) { return '<div class="t"><img src="' + E(x.url) + '" alt="" loading="lazy"><button type="button" data-rm="' + x.id + '" aria-label="Remove">✕</button></div>'; }).join("") +
-        (L.length < 8 ? '<label>＋<input type="file" accept="image/*" hidden id="pbePf"></label>' : '') + '</div><small style="display:block;color:#5b6475;margin-top:8px">' + L.length + ' / 8 ' + T("फ़ोटो", "photos") + '</small><div class="pbe-er" id="pbePe"></div>';
+        (L.length < plim("photos", 8) ? '<label>＋<input type="file" accept="image/*" hidden id="pbePf"></label>' : '') + '</div><small style="display:block;color:#5b6475;margin-top:8px">' + L.length + ' / ' + plim("photos", 8) + ' ' + T("फ़ोटो", "photos") + '</small><div class="pbe-er" id="pbePe"></div>';
       var inp = s.body.querySelector("#pbePf"), er = s.body.querySelector("#pbePe");
       if (inp) inp.onchange = async function () {
         var f = inp.files && inp.files[0]; if (!f) return;
@@ -147,7 +150,7 @@
           er.textContent = T("Upload हो रहा है…", "Uploading…");
           var url = await upload(await resizeImage(f, 1000), "photo");
           await rpc("pb_photo_add", { p_slug: O.slug, p_url: url }); s.changed = true; paint();
-        } catch (x) { er.style.color = ""; er.textContent = /too many/.test(x.message || "") ? T("8 से ज़्यादा फ़ोटो नहीं।", "Max 8 photos.") : T("फ़ोटो upload नहीं हुई।", "Could not upload."); }
+        } catch (x) { er.style.color = ""; er.textContent = /too many/.test(x.message || "") ? T(plim("photos", 8) + " से ज़्यादा फ़ोटो नहीं।", "Max " + plim("photos", 8) + " photos.") : T("फ़ोटो upload नहीं हुई।", "Could not upload."); }
       };
       s.body.querySelectorAll("[data-rm]").forEach(function (b) { b.onclick = async function () { if (!confirm(T("यह फ़ोटो हटाएँ?", "Remove this photo?"))) return; try { await rpc("pb_photo_remove", { p_slug: O.slug, p_id: +b.dataset.rm }); s.changed = true; paint(); } catch (x) {} }; });
     }
@@ -247,7 +250,7 @@
     paint();
   }
   async function editVacancy() {
-    if (!prem()) return premOnly("💼 " + T("नौकरी (Hiring)", "Hiring"));
+    if (!has("hiring")) return premOnly("💼 " + T("नौकरी (Hiring)", "Hiring"));
     if (window.PBHire && PBHire.editor) return PBHire.editor(O.slug, rpc, function () { location.reload(); });   /* sql-26: पूरी जानकारी */
     var open = false; try { var r = await fetch(SBU + "/rest/v1/rpc/pb_vacancy_status", { method: "POST", headers: { apikey: PK, Authorization: "Bearer " + PK, "Content-Type": "application/json" }, body: JSON.stringify({ p_slugs: [O.slug] }) }); var j = r.ok ? await r.json() : {}; open = !!(j && j[O.slug]); } catch (e) {}
     var s = sheet("💼 " + T("Vacancy (नौकरी खाली है)", "Vacancy available"), '<div class="pbe-row"><div class="t"><b>' + T("स्टाफ़ चाहिए?", "Need staff?") + '</b><small>' + T("ON करने पर आपके page पर “नौकरी खाली है” दिखेगा (30 दिन बाद अपने-आप बंद)", "When ON, your page shows “Vacancy available” (auto-off after 30 days)") + '</small></div><button type="button" class="pbe-sw' + (open ? " on" : "") + '" id="pbeVs" aria-label="Switch"><i></i></button></div><div class="pbe-er" id="pbeVe"></div>', function () { if (s.changed) location.reload(); });
@@ -311,9 +314,9 @@
       '<div class="pbe-lg"><span><i style="background:#6b5cf0"></i>' + T("देखा", "Views") + '</span><span><i style="background:#1e9e57"></i>Call + WhatsApp</span></div></div>' +
       (days < 14 ? '<p class="pbe-note" style="margin-top:12px">💎 ' + T("Premium दुकान को 14 दिन की रिपोर्ट मिलती है।", "Premium shops get a 14-day report.") + '</p>' : '');
   }
-  function premOnly(t) { sheet(t, '<p style="font-size:15px;line-height:1.6">💎 ' + T("यह सुविधा सिर्फ़ Premium दुकानों के लिए है।", "This is only for Premium shops.") + '</p>'); }
+  function premOnly(t) { sheet(t, '<p style="font-size:15px;line-height:1.6">💎 ' + T("यह सुविधा आपके plan में नहीं है। बड़ा plan लेने के लिए PataBook से बात करें।", "This is not in your plan. Contact PataBook to upgrade.") + '</p>'); }
   function editReport() {
-    if (!prem()) return premOnly("📊 " + T("दुकान की रिपोर्ट", "Shop report"));
+    if (!has("report")) return premOnly("📊 " + T("दुकान की रिपोर्ट", "Shop report"));
     var s = sheet("📊 " + T("दुकान की रिपोर्ट", "Shop report"), '<p style="color:#5b6475">…</p>');
     rpc("pb_my_report", { p_slug: O.slug }).then(function (R) { s.body.innerHTML = reportBody(R); })
       .catch(function () { s.body.innerHTML = '<p class="pbe-er">' + T("रिपोर्ट नहीं खुल सकी। इंटरनेट जाँचकर फिर कोशिश करें।", "Could not load the report. Check internet and try again.") + '</p>'; });

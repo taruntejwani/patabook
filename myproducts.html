@@ -7,6 +7,7 @@
 <script src="pb-auth.js"></script>
 <script src="site-config.js"></script>
 <script src="pb-imgcheck.js"></script>
+<script src="pb-plan.js"></script>
 <style>
 /* ✏️ दुकान के page के अंदर (iframe) खुलने वाला Products manager — My Shop वाला ही code (pb-products-owner.js) */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -48,7 +49,7 @@ function draw(){const b=ROWS[0];if(!b)return;$("list").innerHTML=window.prodBody
     if(!ME){box.innerHTML='<p class="msg">'+(en?'Please log in from <a href="mybusiness.html" target="_top">My Shop</a> first.':'पहले <a href="mybusiness.html" target="_top">मेरी दुकान</a> से login करें।')+'</p>';return;}
     const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
     if(!b){box.innerHTML='<p class="msg">'+(en?"This is not your shop.":"यह आपकी दुकान नहीं है।")+'</p>';return;}
-    ROWS=[b];await prodLoad(slug);draw();
+    ROWS=[b];if(window.PBPlan){try{await PBPlan.load([slug]);}catch(_){}}await prodLoad(slug);draw();
   }catch(e){box.innerHTML='<p class="msg">'+(/premium/i.test(e.message)?(en?"Products are for Premium shops.":"Products सिर्फ़ Premium दुकानों के लिए हैं।"):(en?"Could not load. Try again.":"खुल नहीं सका, फिर कोशिश करें।"))+'</p>';}
 })();
 </script>

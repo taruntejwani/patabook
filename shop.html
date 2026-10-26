@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#fbf6ea">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script src="i18n.js"></script>
+<script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-track.js"></script>
 <script src="site-config.js"></script>
@@ -195,6 +196,32 @@ h2{color:var(--gold3)}
 .pw .pb{background:var(--cream);border-color:var(--goldline)}
 .shr.crd{background:linear-gradient(135deg,#fdf5df,#fffdf7);border-color:var(--goldline)}.shr.crd .ic,.shr.crd .go{background:linear-gradient(135deg,#e7c36a,#B58A2A);color:#123568}
 
+/* 🥈 Silver / 💎 Platinum: Gold वाला ही page, अपने रंग में */
+html.t-silver{--gold1:#b4bdc9;--gold2:#7d8898;--gold3:#4c5664;--goldline:#d6dce4;--cream:#fdfdfe;--cream2:#eef1f5}
+html.t-silver body{background:linear-gradient(180deg,#f7f8fa 0%,#eceff3 100%) fixed}
+html.t-silver .top{background:rgba(253,253,254,.94)}
+html.t-silver .hero{background:radial-gradient(130% 120% at 80% -10%,#ffffff 0%,rgba(255,255,255,0) 55%),linear-gradient(160deg,#fdfdfe 0%,#f0f2f5 55%,#d9dee5 100%);border-bottom-color:#aeb7c3}
+html.t-silver .tb img,html.t-silver .tb .ini{box-shadow:0 0 0 1.5px #aeb7c3}
+html.t-silver .hlogo.gold img,html.t-silver .hlogo.gold .ini{box-shadow:0 0 0 3px #fff,0 0 0 6px #aeb7c3,0 10px 26px rgba(0,0,0,.25)}
+html.t-silver .hlogo .crn{filter:grayscale(1) brightness(1.2) drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+html.t-silver .chip{color:#4c5664}html.t-silver .chip.gold{background:linear-gradient(135deg,#ffffff,#d5dbe3 50%,#a3adba);color:#1f2833}
+html.t-silver .snav a{color:#4c5664}html.t-silver .snav{background:rgba(240,242,245,.95)}
+html.t-silver .snav a.on,html.t-silver .vbtn a.p,html.t-silver .num a,html.t-silver .dock a,html.t-silver .shr.crd .ic,html.t-silver .shr.crd .go{background:linear-gradient(135deg,#f3f5f8,#c3cbd6 50%,#8f9aa8);color:#1f2833;border-color:#b4bdc9}
+html.t-silver .row,html.t-silver .rows{border-color:#e3e7ec}html.t-silver .shr.crd{background:linear-gradient(135deg,#f1f3f6,#fdfdfe)}
+html.t-platinum{--gold1:#7d92b8;--gold2:#3f5075;--gold3:#1c2539;--goldline:#cbd5e8;--cream:#fbfcff;--cream2:#e8edf7}
+html.t-platinum body{background:linear-gradient(180deg,#f4f6fb 0%,#e6ebf4 100%) fixed}
+html.t-platinum .top{background:rgba(251,252,255,.94)}
+html.t-platinum .hero{background:radial-gradient(130% 120% at 80% -10%,#ffffff 0%,rgba(255,255,255,0) 55%),linear-gradient(160deg,#fbfcff 0%,#e9eef8 55%,#c7d2e6 100%);border-bottom-color:#6d80a6}
+html.t-platinum .tb img,html.t-platinum .tb .ini{box-shadow:0 0 0 1.5px #6d80a6}
+html.t-platinum .hlogo.gold img,html.t-platinum .hlogo.gold .ini{box-shadow:0 0 0 3px #fff,0 0 0 6px #5b6f97,0 10px 26px rgba(20,30,60,.35)}
+html.t-platinum .hlogo .crn{filter:grayscale(1) brightness(1.55) drop-shadow(0 0 4px #9fd3ff) drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+html.t-platinum .chip{color:#2c3a58}html.t-platinum .chip.gold{background:linear-gradient(135deg,#4a5c82,#1c2539);color:#eef3ff}
+html.t-platinum .snav a{color:#2c3a58}html.t-platinum .snav{background:rgba(233,238,248,.95)}
+html.t-platinum .snav a.on,html.t-platinum .vbtn a.p,html.t-platinum .num a,html.t-platinum .dock a,html.t-platinum .shr.crd .ic,html.t-platinum .shr.crd .go{background:linear-gradient(135deg,#5a6e96,#2c3a58 55%,#161d2c);color:#eef3ff;border-color:#3f5075}
+html.t-platinum .row,html.t-platinum .rows{border-color:#e1e7f2}html.t-platinum .shr.crd{background:linear-gradient(135deg,#e8edf7,#fbfcff)}
+html.t-silver .num a.w,html.t-platinum .num a.w,html.t-silver .dock a.w,html.t-platinum .dock a.w{background:#25a244;color:#fff}
+html.t-silver .num.dir a.d,html.t-platinum .num.dir a.d{background:#123568;color:#fff}
+
 /* 📐 सारे products एक नाप में: चौकोर फ़ोटो box (फ़ोटो कटे नहीं), नाम 2 line, बटन सबसे नीचे एक level पर */
 .pgr{align-items:stretch}
 .pcd{height:100%}
@@ -259,10 +286,12 @@ function staticMap(b,href){const la=+b.latitude,ln=+b.longitude;if(!la||!ln)retu
 function placeMap(){const m=document.getElementById("smap");if(!m)return;const t=m.querySelector(".tl");t.style.left=(m.clientWidth/2-(256+ +m.dataset.fx*256))+"px";t.style.top=(m.clientHeight/2-(256+ +m.dataset.fy*256))+"px";}
 addEventListener("resize",placeMap);
 function ctoast(s){const d=document.createElement("div");d.className="ctoast";d.textContent=s;document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}
-const LOGO=()=>B&&IMG_RX.test(B.logo_url||"")?B.logo_url:"";
+const LOGO=()=>B&&PF("logo")&&IMG_RX.test(B.logo_url||"")?B.logo_url:"";
 const INI=()=>esc((String(B&&B.name||"").trim()[0]||"P").toUpperCase());
-const GALP=()=>PREM?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
-const PRODP=()=>PREM?(PRODS||[]).filter(p=>p&&p.name&&IMG_RX.test(p.img||"")):[];
+/* plan (Silver / Gold / Platinum) में यह सुविधा ON है? — Admin → Plans */
+const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f)),TIER=()=>window.PBPlan?PBPlan.tier(slug):(PREM?"platinum":"free");
+const GALP=()=>PF("photos")?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
+const PRODP=()=>PF("products")?(PRODS||[]).filter(p=>p&&p.name&&IMG_RX.test(p.img||"")):[];
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
 const listingUrl=()=>"business.html?slug="+encodeURIComponent(slug);
 
@@ -306,7 +335,9 @@ async function load(){
 async function loadPrem(){
   if(!(window.PB_SITE&&PB_SITE.premium))return;
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:H,body:JSON.stringify({p_slugs:[slug]})});if(!r.ok)return;const j=await r.json();PREM=!!(j&&j[slug]);}catch(e){return;}
-  if(!PREM)return;
+  if(window.PBPlan){try{await PBPlan.load([slug]);}catch(e){}}
+  document.documentElement.classList.add("t-"+TIER());
+  if(!PF("photos")&&!PF("products"))return;
   await Promise.all([
     fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{GAL=j||[];}).catch(()=>{GAL=[];}),
     fetch(SB+"/rest/v1/rpc/pb_shop_products_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{PRODS=j||[];}).catch(()=>{PRODS=[];})
@@ -345,7 +376,7 @@ function render(){drawSoc();
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="pb-crown.webp" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
-       '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">👑 Premium</span>':'')+
+       '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Silver",gold:"👑 Gold",platinum:"💎 Platinum"}[TIER()]||"👑 Premium")+'</span>':'')+
          (gst?'<span class="chip" data-pbh="gst">🧾 '+L("GST रजिस्टर्ड","GST Registered")+'</span>':'')+(b.is_verified?'<span class="chip">✅ '+L("Verified","Verified")+'</span>':'')+
          (b.rating?'<span class="chip">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+'</div>'+
      '</div></div></div>'+
@@ -367,7 +398,7 @@ function render(){drawSoc();
        staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'</div></section>':'')+
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      '<a class="shr" data-pbh="share" id="waShare" href="'+esc(waLink(b,window.PBHide&&PBHide.has('addr')?'':addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+L("दोस्त को पता और रास्ता भेजें","Send address & directions to a friend")+'</b><small>'+L("पता और map पर रास्ते का link, WhatsApp पर","Address + map route link on WhatsApp")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></a>'+
-     '<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>'+
+     (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
      '<section class="blk" data-pbh="about" id="about"><h2>🏪 '+L("हमारे बारे में","About us")+'</h2>'+
        (rows.length||email||web||mobRow()?'<div class="rows">'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
        mobRow()+
@@ -379,7 +410,7 @@ function render(){drawSoc();
    '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
      '<div class="own2" id="ownBox" hidden><button type="button" id="ownVis"><span class="oi">👁️</span><span><b>'+L("ग्राहक को क्या दिखे","What customers see")+'</b><small>'+L("हिस्से दिखाएँ / छिपाएँ","Show / hide parts")+'</small></span></button>'+
        '<a href="mybusiness.html"><span class="oi">🏪</span><span><b>'+L("मेरी दुकान","Your shop")+'</b><small>'+L("यहाँ से संभालें ›","Manage it here ›")+'</small></span></a>'+
-       '<button type="button" id="ownRep"><span class="oi">📊</span><span><b>'+L("रिपोर्ट","Report")+'</b><small>'+L("Views, Call, WhatsApp","Views, Call, WhatsApp")+'</small></span></button></div>'+
+       (PF("report")?'<button type="button" id="ownRep"><span class="oi">📊</span><span><b>'+L("रिपोर्ट","Report")+'</b><small>'+L("Views, Call, WhatsApp","Views, Call, WhatsApp")+'</small></span></button>':'')+'</div>'+
      '<button type="button" class="rep" id="repBtn">🚩 '+L("इस दुकान की शिकायत करें","Report this listing")+'</button><br>'+
      '<a class="pb" href="index.html"><img src="pin.png" alt="">Powered by PataBook</a></div>';
   /* नीचे चिपका Call / WhatsApp */
@@ -396,7 +427,7 @@ function render(){drawSoc();
   document.getElementById("shareQa").onclick=()=>{window.open(waLink(b,window.PBHide&&PBHide.has("addr")?"":addr),"_blank","noopener");};
   document.getElementById("repBtn").onclick=openReport;
   wireDir(b,addr,dir);const ws=document.getElementById("waShare");if(ws)ws.onclick=()=>{ws.href=waLink(b,addr);};drawOwn();
-  document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
+  if(document.getElementById("cardBtn"))document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:"",code:b.business_code||"",visitor:true});};
   drawVacFlag();drawNear();
   placeMap();spy();
 }
@@ -432,7 +463,7 @@ async function loadVacFlag(){
 function drawVacFlag(){
   const el=document.getElementById("vacFlag");if(!el)return;
   if(window.PBHire){el.style.display="none";
-    PBHire.top(!!VACF&&!(window.PBHide&&PBHide.has("vac")),{slug:slug,name:B&&B.name,call:phNum(),wa:waNum(),own:()=>OWN,onEdit:()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("vacancy");}});return;}
+    PBHire.top(PF("hiring")&&!!VACF&&!(window.PBHide&&PBHide.has("vac")),{slug:slug,name:B&&B.name,call:phNum(),wa:waNum(),own:()=>OWN,onEdit:()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("vacancy");}});return;}
   if(!VACF){el.style.display="none";return;}
   const en=PB.lang&&PB.lang()!=="hi";el.style.display="flex";
   if(window.PBHire){el.classList.add("pbh");el.innerHTML=PBHire.tile(62)+'<div class="tx"><b>'+(en?"Vacancy available":"नौकरी खाली है")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span></div>';return;}

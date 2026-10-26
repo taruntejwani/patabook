@@ -9,6 +9,8 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a73e8">
 <script src="i18n.js"></script>
+<script src="pb-plan.js"></script>
+<script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
 <script src="site-config.js"></script>
 <style>
@@ -82,6 +84,11 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pm{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .pm a{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;border-bottom:1px solid var(--line);background:#fff}.pm a:last-child{border-bottom:0}
 .pm a span:nth-child(2){flex:1;min-width:0}.pm a i{font-style:normal;color:var(--blue);font-weight:800;font-size:13px}
+.ban{margin-top:12px;border:1px solid #e3dcf7;background:#fff;border-radius:14px;padding:12px}.ban .bh{font-weight:800;color:#3b2bb8;margin-bottom:6px}.ban img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:10px;display:block}
+.ban .bs{margin-top:8px;font-size:13px}.ban .bb{display:flex;gap:8px;margin-top:10px}.ban .bb label,.ban .bb button{flex:1;text-align:center;border:1px solid #cfc5f5;background:#f5f2ff;color:#3b2bb8;border-radius:12px;padding:10px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
+.ban .bb button{background:#fff5f4;border-color:#f3c3be;color:#b42318}
+.pm.pt-silver{background:linear-gradient(135deg,#f7f9fb,#e7ebf0)!important;border-color:#c3cad4!important}.pm.pt-silver .ph{color:#4c5664!important}
+.pm.pt-platinum{background:linear-gradient(135deg,#eef2fa,#dde4f2)!important;border-color:#8495b8!important}.pm.pt-platinum .ph{color:#1c2539!important}
 .edbtn{display:flex;align-items:center;gap:12px;margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff8e1,#ffefc2);border:1px solid #ffd76a}
 .edbtn>span:first-child{font-size:24px}.edbtn>span:nth-child(2){flex:1;min-width:0}.edbtn b{display:block;font-size:15px}.edbtn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}.edbtn i{font-style:normal;font-size:22px;color:#b07d00}
 .lg{display:flex;align-items:center;gap:12px;margin-top:12px;border:1px dashed #c8d6ee;border-radius:14px;padding:10px}
@@ -230,7 +237,7 @@ function homeBlock(b,i){
 const isP=b=>!!(PREM&&PREM[b.slug]&&PREM[b.slug].until);   /* 💎 Premium दुकान? (Free में: Hiring, Logo, विज़िटिंग कार्ड, रिपोर्ट नहीं) */
 function vacBlock(b,i){
   if(!VAC_OK)return "";
-  if(PREM&&!isP(b)){const en=L()==="en";return '<div class="phone off" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span><span class="tx"><b>'+(en?"Hiring (Vacancy)":"नौकरी (Hiring)")+'</b><small>'+(en?"💎 Only for Premium shops":"💎 सिर्फ़ Premium दुकानों के लिए")+'</small></span><span style="font-size:20px" aria-hidden="true">🔒</span></div>';}
+  if(PREM&&!PH(b,"hiring")){const en=L()==="en";return '<div class="phone off" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span><span class="tx"><b>'+(en?"Hiring (Vacancy)":"नौकरी (Hiring)")+'</b><small>'+(en?"💎 Not in your plan":"💎 आपके plan में नहीं")+'</small></span><span style="font-size:20px" aria-hidden="true">🔒</span></div>';}
   const u=VAC[b.slug],on=!!u,en=L()==="en";
   const till=on?new Date(u).toLocaleDateString(en?"en-IN":"hi-IN",{day:"numeric",month:"short"}):"";
   return '<div class="phone'+(on?"":" off")+'" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span>'+
@@ -249,7 +256,7 @@ function profItems(b,i){
     [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता",""],
     [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
-    ...(isP(b)?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
+    ...(PH(b,"logo")?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय",E+"#openT"],
     [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार",E+"#btype"],
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",E+"#svc"],
@@ -304,8 +311,38 @@ function notifBlock(){
 }
 /* 💎 Premium (sql-23) — अभी Admin से मिलता है; request वाला हिस्सा PB_SITE.premiumReq से */
 let PREM=null,PHOTOS={},REPORT={},PMOPEN={};
-async function loadPrem(){if(!(window.PB_SITE&&PB_SITE.premium)){PREM=null;return;}try{PREM=await rpc("pb_my_premium")||{};}catch(e){PREM=null;}}
+async function loadPrem(){if(!(window.PB_SITE&&PB_SITE.premium)){PREM=null;return;}try{PREM=await rpc("pb_my_premium")||{};}catch(e){PREM=null;}
+  if(window.PBPlan&&ROWS&&ROWS.length){try{await PBPlan.load(ROWS.map(b=>b.slug));}catch(e){}ROWS.forEach(b=>{if(PREM&&PREM[b.slug])PBPlan.set(b.slug,tierOf(b));});}
+  BAN={};if(PREM)for(const b of ROWS||[]){if(PH(b,"banner")){try{BAN[b.slug]=await rpc("pb_my_banner",{p_slug:b.slug});}catch(e){}}}}
+let BAN={};
+/* plan: free / silver / gold / platinum — और उसमें कौन-सी सुविधा ON है (Admin → Plans) */
+function tierOf(b){const P=PREM&&PREM[b.slug];return P&&P.until?(P.tier&&P.tier!=="free"?P.tier:"platinum"):"free";}
+function PH(b,f){return window.PBPlan?PBPlan.hasT(tierOf(b),f):isP(b);}
 function premOn(b){return !!(PREM&&PREM[b.slug]&&PREM[b.slug].until);}
+/* 🖼️ Banner: दुकानदार लगाए → PataBook (Admin) मंज़ूर करे → home की चलती पट्टी में (plan के दिनों के हिसाब से) */
+function banBlock(b,i){const en=L()==="en",x=BAN[b.slug],RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  const st=x?(x.status==="approved"?'<b style="color:#137333">✅ '+(en?"Approved — shows on PataBook home strip":"मंज़ूर — PataBook home की पट्टी में दिखता है")+'</b>':x.status==="rejected"?'<b style="color:#b42318">❌ '+(en?"Not approved":"मंज़ूर नहीं हुआ")+(x.reason?": "+esc(x.reason):"")+'</b>':'<b style="color:#7a4b00">⏳ '+(en?"Waiting for PataBook approval":"PataBook की मंज़ूरी का इंतज़ार")+'</b>'):'';
+  return '<div class="ban"><div class="bh">🖼️ '+(en?"Your banner (advertisement)":"आपका Banner (विज्ञापन)")+'</div>'+
+    (x&&RX.test(x.url||"")?'<img src="'+esc(x.url)+'" alt="" loading="lazy">':'<small>'+(en?"A wide photo of your shop / offer (2:1, like 1200×600). It runs in the moving strip on PataBook home.":"दुकान / offer की चौड़ी photo (2:1, जैसे 1200×600)। PataBook home की चलती पट्टी में दिखेगी।")+'</small>')+
+    (st?'<div class="bs">'+st+'</div>':'')+
+    '<div class="bb"><label>'+(x?(en?"🔄 Change banner":"🔄 Banner बदलें"):(en?"➕ Add banner":"➕ Banner लगाएँ"))+'<input type="file" accept="image/*" hidden data-bup="'+i+'"></label>'+(x?'<button type="button" data-brm="'+i+'">🗑️ '+(en?"Remove":"हटाएँ")+'</button>':'')+'</div><div class="err" id="be'+i+'"></div></div>';}
+function bannerImage(file){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const W=1200,H=600,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,H);
+    const k=Math.max(W/img.width,H/img.height),w=img.width*k,h=img.height*k;x.drawImage(img,(W-w)/2,(H-h)/2,w,h);URL.revokeObjectURL(url);
+    const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<220000)return res(bl);if(q>0.4)return tryQ(Math.round((q-0.1)*100)/100);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.82);};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
+async function addBanner(i,file){const b=ROWS[i],en=L()==="en",er=$("be"+i);
+  try{if(!/^image\//.test(file.type))throw new Error("type");
+    if(er){er.style.color="#5b6475";er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";}
+    const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop"}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
+    if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";ME=await PBA.session();const blob=await bannerImage(file);
+    const path=encodeURIComponent(b.slug)+"/banner-"+Date.now()+".webp";
+    const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
+    if(!up.ok)throw new Error("upload");
+    await rpc("pb_banner_set",{p_slug:b.slug,p_url:SB+"/storage/v1/object/public/shop-logos/"+path});
+    BAN[b.slug]=await rpc("pb_my_banner",{p_slug:b.slug});draw();
+  }catch(x){const e2=$("be"+i);if(e2){e2.style.color="";e2.textContent=/premium/.test(x.message||"")?(en?"Banner is not in your plan.":"Banner आपके plan में नहीं है।"):/rate/.test(x.message||"")?(en?"Too many changes today. Try tomorrow.":"आज बहुत बार बदला। कल कोशिश करें।"):(en?"Could not upload. Try again.":"Banner upload नहीं हुआ। दोबारा कोशिश करें।");}}
+}
 function premBlock(b,i){
   if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
   if(P.until){
@@ -317,8 +354,10 @@ function premBlock(b,i){
         '<small>'+(en?L8.length+" / 8 photos · shown on your shop page":L8.length+" / 8 फ़ोटो · आपकी दुकान के पेज पर दिखती हैं")+'</small><div class="err" id="pe'+i+'"></div>';}
     if(o==="rp")body=reportHTML(b);
     if(o==="pr"&&window.prodBody)body=prodBody(b,i);
-    return '<div class="pm"><div class="ph">💎 '+(en?"PataBook Premium":"PataBook Premium")+'</div><small>'+(en?"Active till "+till+" · ⭐ your shop shows on top":till+" तक चालू · ⭐ आपकी दुकान ऊपर दिखती है")+'</small>'+
-      '<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small></div>';
+    const t=tierOf(b),tn=window.PBPlan?PBPlan.name(t,en):"Premium",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";
+    return '<div class="pm pt-'+t+'"><div class="ph">'+ic+' PataBook '+esc(tn)+'</div><small>'+(en?"Active till "+till:till+" तक चालू")+(PH(b,"top")?(en?" · ⭐ your shop shows on top":" · ⭐ आपकी दुकान ऊपर दिखती है"):"")+'</small>'+
+      (PH(b,"report")?'<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small>':'')+
+      (PH(b,"banner")?banBlock(b,i):'')+'</div>';
   }
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
   const r=P.request;
@@ -362,7 +401,7 @@ async function addPhoto(i,file){const b=ROWS[i],en=L()==="en",er=$("pe"+i);if(er
     PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();
   }catch(x){const e2=$("pe"+i);if(e2)e2.textContent=/too many/.test(x.message||"")?(en?"Max 8 photos.":"8 से ज़्यादा फ़ोटो नहीं।"):(en?"Could not upload. Try again.":"फ़ोटो upload नहीं हुई। दोबारा कोशिश करें।");}}
 function weekLine(b){
-  if(!isP(b))return "";   /* रिपोर्ट सिर्फ़ Premium */
+  if(!PH(b,"report"))return "";   /* रिपोर्ट: plan में ON हो तो */
   const w=EVS&&EVS.week&&EVS.week[b.slug];if(!w)return "";
   const en=L()==="en";
   return '<div class="wk">📊 '+(en?"Last 7 days: ":"पिछले 7 दिन: ")+'👀 '+(w.view||0)+(en?" views":" ने देखा")+' · 📞 '+(w.call||0)+' Call · 💬 '+(w.wa||0)+' WhatsApp</div>';
@@ -484,7 +523,10 @@ function draw(){
     '<a class="addsm" href="list.html">➕ '+(L()==="en"?"Have another shop? Add it with a different mobile number ›":"दूसरी दुकान भी है? दूसरे मोबाइल नंबर से जोड़ें ›")+'</a>'+
     (PINST?'<button type="button" class="delacc" id="delAcc">🗑️ '+(L()==="en"?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
 }
-$("list").addEventListener("change",e=>{const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);});
+$("list").addEventListener("change",e=>{const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
+  const g=e.target.closest("[data-bup]");if(g&&g.files&&g.files[0])addBanner(+g.dataset.bup,g.files[0]);});
+$("list").addEventListener("click",async e=>{const r=e.target.closest("[data-brm]");if(!r)return;const b=ROWS[+r.dataset.brm],en=L()==="en";
+  if(!confirm(en?"Remove your banner?":"Banner हटाएँ?"))return;r.disabled=true;try{ME=await PBA.session();await rpc("pb_banner_remove",{p_slug:b.slug});delete BAN[b.slug];draw();}catch(x){r.disabled=false;alert(en?"Could not remove.":"हटा नहीं सके।");}});
 $("list").addEventListener("click",async e=>{
   const pmb=e.target.closest("[data-pm]");
   if(pmb){const i=+pmb.dataset.i,b=ROWS[i],k=pmb.dataset.pm;
