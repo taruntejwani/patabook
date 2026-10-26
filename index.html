@@ -166,6 +166,7 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 
 /* Added quick category icon grid; existing category chips are preserved. */
 .posters{width:100%;margin:16px 0 0}
+.gpw{margin-top:10px;padding:4px 0}.gpw .nsc{min-height:132px}.pv[hidden]{display:none}
 .pv{position:relative;width:100%;aspect-ratio:2/1;overflow:hidden;border-radius:18px;background:#eef3fb;box-shadow:0 6px 18px rgba(26,115,232,.12);touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .ptk{display:flex;height:100%;transition:transform .45s ease;will-change:transform}
 .ptk.nd{transition:none}
@@ -257,7 +258,18 @@ window.PATABOOK_SUPABASE={
 <script src="pb-track.js"></script>
 <script>
 /* दुकानदार login है (मोबाइल OTP / ईमेल) तो सबसे ऊपर "मेरी दुकान" का बटन */
-document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
+/* 🏪 "मेरी दुकान" पट्टी: दुकान का वही पेज खुले जो ग्राहक देखते हैं (बदलने के लिए उस पेज पर "यहाँ से संभालें") ; 2+ दुकानें हों तो list */
+function pbMyShopLink(b,s){
+  function set(sl){if(!Array.isArray(sl)||sl.length!==1)return;b.href="business.html?slug="+encodeURIComponent(sl[0]);
+    var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),m=b.querySelector("small");if(m){m.removeAttribute("data-i");m.textContent=hi?"अपनी दुकान देखें — जैसी ग्राहक देखते हैं":"See your shop — as customers see it";}}
+  var c=null;try{c=JSON.parse(localStorage.getItem("pb-my-shops")||"null");}catch(e){}
+  if(Array.isArray(c)){set(c);return;}
+  if(!s.access_token||!window.PATABOOK_SUPABASE)return;
+  fetch(PATABOOK_SUPABASE.url+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:PATABOOK_SUPABASE.anonKey,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"})
+    .then(function(r){return r.ok?r.json():null}).then(function(rows){if(!Array.isArray(rows))return;var sl=rows.map(function(r){return r&&r.slug}).filter(Boolean);
+      try{localStorage.setItem("pb-my-shops",JSON.stringify(sl));}catch(e){}set(sl);}).catch(function(){});
+}
+document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";if(b)pbMyShopLink(b,s);var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
 </script>
 </head>
 <body>
@@ -311,6 +323,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   <section class="posters" id="posters" aria-label="Member posters">
     <div class="pv" id="pv"><div class="ptk" id="ptk"></div></div>
     <div class="pdots" id="pdots" aria-hidden="true"></div>
+    <div class="gpw" id="gpw" hidden><div class="nsv" id="gpv"><div class="nst" id="gpt"></div></div></div>
   </section>
 
   <a class="hsbtn" href="homeservices.html"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b id="hsT">Home Services</b><small id="hsS">Electrician, Plumber, AC Repair घर पर बुलाएं</small></span><span aria-hidden="true" class="go">›</span></a>
@@ -498,8 +511,10 @@ function applyLang(){
     const run=++RUN,city=currentCity();setCityTitle(city);
     let rows=ALL_ROWS.filter(b=>inCity(b,city)).slice(0,60);
     if(rows.length&&window.PB_SITE&&PB_SITE.premium&&window.PBPlan){
-      try{await PBPlan.load(rows.map(b=>b.slug).filter(Boolean));rows=rows.filter(b=>{const t=PBPlan.paid(b.slug)?PBPlan.tier(b.slug):"";return t!=="gold"&&t!=="platinum";});}catch(e){}
-    }
+      try{await PBPlan.load(rows.map(b=>b.slug).filter(Boolean));const gp=[];
+        rows=rows.filter(b=>{const t=PBPlan.paid(b.slug)?PBPlan.tier(b.slug):"";if(t==="gold"||t==="platinum"){gp.push(Object.assign({_t:t,_ic:ico(b.category),_lg:PBPlan.has(b.slug,"logo")},b));return false;}return true;});
+        if(run===RUN)document.dispatchEvent(new CustomEvent("pb-gp",{detail:gp}));}catch(e){}
+    }else if(run===RUN)document.dispatchEvent(new CustomEvent("pb-gp",{detail:[]}));
     if(run!==RUN)return;
     L=rows.slice(0,25);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
@@ -527,10 +542,40 @@ function applyLang(){
   function go(n,anim){const t=tk();if(!t)return;i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
     document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===i));}
   function auto(){clearInterval(timer);if(P.length>1&&!matchMedia("(prefers-reduced-motion: reduce)").matches)timer=setInterval(()=>go(i+1),4500);}
+  /* Gold / Platinum दुकान जिसका आज poster नहीं: ऊपर वाली पट्टी जैसा चलता card (नीचे) */
+  let GP=[],GL=[];const LOGO={},LRX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  function badge(t){return '<span class="pbg pb-'+t+'"><img class="c" src="'+(t==="platinum"?"pb-diamond.webp":"pb-crown.webp")+'" alt="" width="16" height="16"><i>'+t.toUpperCase()+' MEMBER</i></span>';}
+  function gcard(b){const lg=b._lg&&LOGO[b.slug];
+    return '<a class="nsc pm pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+badge(b._t)+'<span class="ic'+(lg?' lg':'')+'">'+(lg?'<img src="'+esc(lg)+'" alt="" loading="lazy" decoding="async">':b._ic)+'</span><b>'+esc(b.name)+'</b><span class="ad">'+(b.category?b._ic+' '+esc(b.category):'📍 '+esc(b.address||b.city||""))+'</span><span class="vs">🛍️ '+(hi()?"दुकान देखें":"Visit shop")+' ›</span></a>';}
+  const G={p:0,w:0,loop:false,drag:false,idle:0,moved:0,last:0,on:false};
+  function gdraw(){const w=document.getElementById("gpw"),t=document.getElementById("gpt"),pv=document.getElementById("pv");if(!w||!t)return;
+    const has={};P.forEach(b=>has[b.slug]=1);
+    GL=loaded?GP.filter(b=>!has[b.slug]).sort((a,b)=>(a._t==="platinum"?0:1)-(b._t==="platinum"?0:1)):[];
+    pv.hidden=!P.length&&GL.length>0;            /* poster एक भी नहीं: खाली बड़ा डिब्बा नहीं, सिर्फ़ चलती पट्टी */
+    w.hidden=!GL.length;if(!GL.length){t.innerHTML="";return;}
+    const one=GL.map(gcard).join("");t.innerHTML=one;
+    requestAnimationFrame(()=>{const vw=document.getElementById("gpv").clientWidth;G.loop=t.scrollWidth>vw;
+      if(G.loop)t.innerHTML=one+one;G.vw=vw;G.w=G.loop?t.scrollWidth/2:vw+t.scrollWidth;if(!G.loop)G.p=vw*.35;gplace();gstart();});   /* कम दुकानें: दाएँ से आकर बाएँ निकलें (ऊपर वाली पट्टी जैसा) */
+    const need=GL.filter(b=>b._lg&&!(b.slug in LOGO)).map(b=>b.slug);if(need.length)gLogos(need);}
+  async function gLogos(sl){sl.forEach(k=>LOGO[k]="");
+    try{const r=await fetch(SBU+"/rest/v1/businesses?select=slug,logo_url&slug=in.("+encodeURIComponent(sl.map(x=>'"'+String(x).replace(/"/g,"")+'"').join(","))+")",{headers:H});
+      if(!r.ok)return;let any=0;(await r.json()).forEach(x=>{if(LRX.test(x.logo_url||"")){LOGO[x.slug]=x.logo_url;any=1;}});if(any)gdraw();}catch(e){}}
+  function gplace(){const t=document.getElementById("gpt");if(!G.w)return;const q=((G.p%G.w)+G.w)%G.w;t.style.transform="translateX("+(G.loop?-q:G.vw-q)+"px)";}
+  function gstart(){if(G.on)return;G.on=true;const red=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const v=document.getElementById("gpv");let sx=0,sp=0;
+    v.addEventListener("pointerdown",e=>{G.drag=true;G.moved=0;sx=e.clientX;sp=G.p;});
+    addEventListener("pointermove",e=>{if(!G.drag)return;G.p=sp-(e.clientX-sx);G.moved=Math.max(G.moved,Math.abs(e.clientX-sx));gplace();});
+    const up=()=>{if(!G.drag)return;G.drag=false;G.idle=performance.now()+1500;};addEventListener("pointerup",up);addEventListener("pointercancel",up);
+    v.addEventListener("click",e=>{if(G.moved>6){e.preventDefault();e.stopPropagation();G.moved=0;}},true);v.addEventListener("dragstart",e=>e.preventDefault());
+    const tick=now=>{const dt=Math.min(.05,(now-(G.last||now))/1000);G.last=now;
+      if(G.w&&!G.drag&&now>G.idle){G.p+=(G.loop?Math.max(25,G.w/Math.max(20,GL.length*4.5)):55)*(red?.5:1)*dt;gplace();}requestAnimationFrame(tick);};
+    requestAnimationFrame(tick);}
+  document.addEventListener("pb-gp",e=>{GP=Array.isArray(e.detail)?e.detail:[];if(loaded)draw();});
   function draw(){const t=tk();if(!t)return;
     const city=String(document.getElementById("city")?.value||"").trim();
     P=ALL.filter(b=>inCity(b,city));
-    t.innerHTML=P.length?P.map(slide).join(""):(loaded?ph():"");
+    gdraw();
+    t.innerHTML=P.length?P.map(slide).join(""):(loaded&&!GL.length?ph():"");
     document.getElementById("pdots").innerHTML=P.length>1?P.map(()=>"<i></i>").join(""):"";
     go(0,false);auto();}
   async function load(){

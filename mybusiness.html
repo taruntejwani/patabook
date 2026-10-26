@@ -788,7 +788,7 @@ $("list").addEventListener("click",async e=>{
     const j=await r.json().catch(()=>null);
     if(!r.ok||!j||!j.ok)throw new Error((j&&j.error)||"HTTP "+r.status);
     try{localStorage.removeItem("pb-has-pin");localStorage.removeItem("pb-own-bell");localStorage.removeItem("pb-reg");}catch(x){}
-    await PBA.logout();ME=null;ROWS=null;draw();
+    try{localStorage.removeItem("pb-my-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();
     $("kick").textContent=en?"✅ Your shop and account have been deleted. Thank you for using PataBook.":"✅ आपकी दुकान और खाता हटा दिए गए। PataBook इस्तेमाल करने के लिए धन्यवाद।";
     $("kick").style.background="#e6f4ea";$("kick").style.color="#137333";$("kick").style.borderColor="#b7e1c1";$("kick").hidden=false;window.scrollTo(0,0);
   }catch(x){b.disabled=false;b.textContent="🗑️ "+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ");
@@ -829,14 +829,14 @@ $("ntPanel").addEventListener("click",async e=>{
     BELL="on";draw();note(en?"✅ Turned on! A test notification should arrive now.":"✅ चालू हो गया! अभी एक test घंटी आनी चाहिए।");
   }catch(x){b.disabled=false;note(en?"Could not turn on. Try again in a while.":"चालू नहीं हो पाया। थोड़ी देर बाद दोबारा कोशिश करें।");}
 });
-$("out").onclick=async()=>{await PBA.logout();ME=null;ROWS=null;draw();};
+$("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
   ME=await PBA.session();
   if(ME&&PBA.deviceCheck){DEV=await PBA.deviceCheck().catch(()=>null);if(DEV&&DEV.ok===false){ME=null;DEV=null;}}
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";await loadLogos();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
