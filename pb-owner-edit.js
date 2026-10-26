@@ -53,6 +53,7 @@
     ".pbe-on .pbe-t{outline:2px dashed #f5b400;outline-offset:3px;border-radius:16px}" +
     ".pbe-bar{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:#12141c;color:#fff;padding:10px 10px calc(10px + env(safe-area-inset-bottom));display:none;box-shadow:0 -6px 20px rgba(0,0,0,.25)}" +
     ".pbe-on .pbe-bar{display:none}" +
+    ".qa3{position:relative}.qa3>.pbe-pen{top:-18px;right:auto;left:calc(33.3% - 19px)}" +
     ".qa>.pbe-pen{top:-18px;right:auto;left:calc(25% - 19px);z-index:9;opacity:1;background:#ffd21f!important;border:2px solid #fff!important;padding:0!important;width:38px!important;height:38px!important;border-radius:50%!important;font-size:17px!important}" +
     ".pbe-bar .h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:0 4px 8px}.pbe-bar .h b{flex:1}.pbe-bar .h button{border:0;border-radius:999px;padding:7px 13px;font:inherit;font-weight:800;background:#1e9e57;color:#fff;cursor:pointer}" +
     ".pbe-bar .g{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.pbe-bar .g::-webkit-scrollbar{display:none}" +
@@ -322,7 +323,7 @@
   /* ---------- pencils ---------- */
   var MAP = {
     shop: [[".hlogo", "logo"], ["#prods", "products"], ["#photos", "photos"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], [".qa", "numbers"], ["#vacFlag", "vacancy"]],
-    biz: [[".lgw", "logo"], ["#prods", "products"], ["#galM", "photos"], ["#det", "details"], ["#contact", "numbers"], ["#vacFlag", "vacancy"]]
+    biz: [[".lgw", "logo"], ["#prods", "products"], ["#galM", "photos"], ["#det", "details"], ["#contact", "numbers"], [".qa3", "numbers"], ["#vacFlag", "vacancy"]]
   };
   function pens() {
     if (!ON) return;
