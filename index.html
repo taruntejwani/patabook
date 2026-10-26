@@ -523,7 +523,7 @@ function applyLang(){
   const tk=()=>document.getElementById("ptk");
   function slide(b){const t=b.tier==="platinum"||b.tier==="silver"?b.tier:"gold";
     return '<a class="ps" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 PLATINUM",gold:"👑 GOLD",silver:"🥈 SILVER"}[t])+'</span></a>';}
-  function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का Poster यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"Silver, Gold और Platinum Member अपना poster यहाँ पूरे size में चला सकते हैं":"Silver, Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
+  function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का Poster यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"Gold और Platinum Member अपना poster यहाँ पूरे size में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
   function go(n,anim){const t=tk();if(!t)return;i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
     document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===i));}
   function auto(){clearInterval(timer);if(P.length>1&&!matchMedia("(prefers-reduced-motion: reduce)").matches)timer=setInterval(()=>go(i+1),4500);}
@@ -536,7 +536,7 @@ function applyLang(){
   async function load(){
     try{const r=await fetch(SBU+"/rest/v1/rpc/pb_banners_today",{method:"POST",headers:H,body:"{}"});
       if(r.ok){const rows=await r.json();
-        ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="silver"||b.tier==="gold"||b.tier==="platinum"))
+        ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="gold"||b.tier==="platinum"))
           .sort((a,b)=>({platinum:0,gold:1,silver:2}[a.tier])-({platinum:0,gold:1,silver:2}[b.tier])).slice(0,15);}}catch(e){}
     loaded=true;draw();
   }
