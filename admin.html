@@ -182,7 +182,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <button class="backd" data-home="1">← Dashboard</button>
     <div class="hh"><h2>💎 Premium</h2></div>
     <p class="cnt">Premium दुकानें search और category में ऊपर (बारी-बारी से), "💎 Premium" निशान, फ़ोटो gallery, 30 दिन की रिपोर्ट और Vacancy पाती हैं। बाहर सबको एक जैसा दिखता है — मुफ़्त / नकद सिर्फ यहाँ दिखता है।</p>
-    <div class="mtabs" id="pmTabs"><button data-pm="active" class="on">💎 चालू</button><button data-pm="log">📜 रिकॉर्ड / नकद</button><button data-pm="req">📨 Requests</button><button data-pm="plans">⚙️ Plans</button><button data-pm="ban">🖼️ Banners</button></div>
+    <div class="mtabs" id="pmTabs"><button data-pm="active" class="on">💎 चालू</button><button data-pm="log">📜 रिकॉर्ड / नकद</button><button data-pm="req">📨 Requests</button><button data-pm="plans">⚙️ Plans</button><button data-pm="ban">🖼️ Banners</button><button data-pm="ver">🏪 Verify</button></div>
     <div id="pmBody"></div>
   </div>
   <div id="hsv" hidden>
@@ -910,12 +910,18 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div id="psCash" hidden><label style="display:block;font-weight:700;font-size:14px;margin-top:12px">रकम (₹, हर दुकान)</label><input id="psA" type="number" min="0" max="1000000" inputmode="numeric" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit">' +
       '<label style="display:block;font-weight:700;font-size:14px;margin-top:10px">रसीद नंबर</label><input id="psR" maxlength="40" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit"></div>' +
       '<label style="display:block;font-weight:700;font-size:14px;margin-top:12px">नोट (सिर्फ आपके लिए)</label><input id="psN" maxlength="300" placeholder="जैसे: चाचा जी की दुकानें" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit">' +
+      '<p id="psV" hidden style="margin:10px 0 0;padding:10px 12px;border-radius:10px;background:#fff4e5;color:#7a3b00;font-size:13.5px;font-weight:700"></p>' +
       '<p id="psE" style="min-height:18px;margin:8px 0;font-size:13.5px;color:#b42318"></p>' +
       '<div style="display:flex;gap:10px"><button type="button" id="psX" style="flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700">रहने दें</button><button type="submit" id="psGo" style="flex:1;border:0;background:#3b2bb8;color:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:800">💎 Premium चालू करें</button></div></form>';
     document.body.appendChild(w);
     var close = function () { w.remove(); };
     w.addEventListener('click', function (e) { if (e.target === w) close(); });
     w.querySelector('#psX').onclick = close;
+    /* ⚠️ verify नहीं हुई दुकान (sql-32) — चेतावनी, रोक नहीं */
+    (async function () { try { var st = await rpc('pb_admin_verify_state', { p_slugs: slugs }) || {}, bad = slugs.filter(function (s2) { return st[s2] !== 'approved'; });
+      if (!bad.length || !document.body.contains(w)) return; var pv = w.querySelector('#psV');
+      pv.textContent = '⚠️ ' + (slugs.length === 1 ? 'यह दुकान' : bad.length + ' दुकान(ें)') + ' अभी verify नहीं हुई' + (slugs.length === 1 && st[slugs[0]] === 'pending' ? ' (फ़ोटो जाँच के लिए आई हुई हैं — 💎 Premium → 🏪 Verify)' : slugs.length === 1 && st[slugs[0]] === 'rejected' ? ' (पिछली बार मना हुई थी)' : ' (दुकानदार ने अभी फ़ोटो नहीं भेजीं)') + '। पहले verify करना बेहतर है — फिर भी plan देना हो तो नीचे बटन दबाएँ।';
+      pv.hidden = false; } catch (e) {} })();
     w.querySelectorAll('input[name="psM"]').forEach(function (x) { x.onchange = function () { w.querySelector('#psCash').hidden = w.querySelector('input[name="psM"]:checked').value !== 'cash'; }; });
     w.querySelector('form').onsubmit = async function (e) {
       e.preventDefault();
@@ -930,7 +936,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       } catch (x) { er.textContent = 'नहीं हो सका: ' + x.message; w.querySelector('#psGo').disabled = false; }
     };
   }
-  var PMTAB = 'active', PMDATA = null, PMREQ = [], PLANCFG = null, PMTIER = {}, BANS = null;
+  var PMTAB = 'active', PMDATA = null, PMREQ = [], PLANCFG = null, PMTIER = {}, BANS = null, VERS = null, VSIGN = {};
   /* 🥈 Silver · 👑 Gold · 💎 Platinum (sql-30) */
   var TIERS = [['free', '🆓', 'Free'], ['silver', '🥈', 'Silver'], ['gold', '👑', 'Gold'], ['platinum', '💎', 'Platinum']];
   var FEATS = [['logo', '🖼️ Logo'], ['products', '🛍️ Products'], ['photos', '📷 फ़ोटो gallery'], ['hiring', '💼 नौकरी (Hiring)'], ['card', '🪪 विज़िटिंग कार्ड'], ['report', '📊 रिपोर्ट'], ['top', '⭐ Search / category में ऊपर'], ['strip', '🏠 Home पट्टी में बड़ा card'], ['banner', '📢 Banner (विज्ञापन)'], ['social', '📸 Instagram / Facebook']];
@@ -949,6 +955,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     $('pmBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
     try { PMDATA = await rpc('pb_admin_premium_list', {}) || {}; PMREQ = await rpc('pb_admin_premium_requests', {}) || [];
       try { PLANCFG = await rpc('pb_admin_plan_config', {}); PMTIER = await rpc('pb_admin_plan_tiers', {}) || {}; BANS = await rpc('pb_admin_banners', {}) || []; } catch (x2) { PLANCFG = null; BANS = null; }
+      await loadVers();
       drawPrem(); }
     catch (e) { if (e.message === 'login') return; $('pmBody').innerHTML = '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 23_premium.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
   }
@@ -981,6 +988,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     }
     if (PMTAB === 'plans') h = plansHTML();
     if (PMTAB === 'ban') h = bansHTML();
+    if (PMTAB === 'ver') h = versHTML();
     $('pmBody').innerHTML = h || '<p class="cnt">अभी कुछ नहीं</p>';
   }
   /* ⚙️ हर plan की settings: सुविधाएँ ON/OFF, फ़ोटो / products की limit, banner कितने दिन */
@@ -998,6 +1006,33 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '</div><div class="acts"><button data-psave="' + t[0] + '" style="background:#137333;color:#fff">💾 Save</button></div></div>';
     }).join('') + '<p class="cnt">उदाहरण: "1 दिन चले, फिर 3 दिन बंद" = हर 4 दिन में 1 दिन banner; "3 दिन चले, 0 बंद" = रोज़।</p>';
   }
+  /* 🏪 दुकान Verification (sql-32): दुकानदार की 2 फ़ोटो (private) + AI ने बोर्ड पर क्या पढ़ा → Approve / Reject */
+  async function loadVers() {
+    try { VERS = await rpc('pb_admin_verifications', {}) || []; } catch (x) { VERS = null; return; }
+    var paths = []; VERS.forEach(function (v) { [v.outside_path, v.inside_path].forEach(function (p) { if (p && !VSIGN[p]) paths.push(p); }); });
+    if (!paths.length) return;
+    try {
+      var r = await fetch(SB + '/storage/v1/object/sign/shop-verify', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + sess.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ expiresIn: 3600, paths: paths.slice(0, 200) }) });
+      var j = r.ok ? await r.json() : [];
+      (j || []).forEach(function (x) { if (x && x.path && x.signedURL) VSIGN[x.path] = SB + '/storage/v1' + (x.signedURL.charAt(0) === '/' ? '' : '/') + x.signedURL; });
+    } catch (e) {}
+  }
+  function versHTML() {
+    if (!VERS) return '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 32_shop_verify.sql चलाएँ।</p></div>';
+    if (!VERS.length) return '<p class="cnt">अभी कोई दुकान verification के लिए नहीं आई</p>';
+    var np = VERS.filter(function (v) { return v.status === 'pending'; }).length;
+    var img = function (p, t) { var u = VSIGN[p]; return '<figure style="margin:0;flex:1;min-width:0"><figcaption style="font-size:12.5px;font-weight:700;color:#5b6475;margin-bottom:4px">' + t + '</figcaption>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + t + '" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:#eef2f7"></a>' : '<div style="aspect-ratio:4/3;border-radius:10px;background:#eef2f7;display:grid;place-items:center;font-size:12px;color:#5b6475">फ़ोटो नहीं खुली</div>') + '</figure>'; };
+    return '<p class="cnt">' + (np ? np + ' दुकान(ें) जाँच के लिए बाकी · ' : '') + 'फ़ोटो सिर्फ़ आपको दिखती हैं (private) — दबाकर बड़ा देखें</p>' + VERS.map(function (v) {
+      var ai = v.ai_status === 'error' ? '<p class="meta" style="color:#b54708;font-weight:700">⚠️ AI जाँच नहीं हो पाई — बोर्ड का नाम खुद मिलाएँ</p>'
+        : '<p class="meta">🤖 बोर्ड पर पढ़ा: <b>' + esc(v.sign_text || '—') + '</b> ' + (v.ai_match ? '✅ नाम मिला' : '❌ नाम नहीं मिला') + (v.ai_note ? '<br>' + esc(v.ai_note) : '') + '</p>';
+      return '<div class="cty' + (v.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(v.slug) + '" target="_blank">' + esc(v.shop) + '</a> <span class="bid">' + ({ pending: '⏳ जाँच बाकी', approved: '✅ Verified', rejected: '❌ मना' }[v.status] || v.status) + '</span></h3>' +
+        (v.address ? '<p class="meta">📍 ' + esc(v.address) + '</p>' : '') +
+        '<p class="meta">Profile में नाम: <b>' + esc(v.shop) + '</b> · ' + (v.paid ? tierName(v.tier) : '🆓 Free') + ' · ' + fmtD(v.created_at) + '</p>' + ai +
+        '<div style="display:flex;gap:8px;margin:8px 0">' + img(v.outside_path, 'बाहर (बोर्ड)') + img(v.inside_path, 'अंदर') + '</div>' +
+        (v.reason ? '<p class="meta">कारण: ' + esc(v.reason) + '</p>' : '') +
+        (v.status === 'pending' ? '<div class="acts"><button data-ver="1" data-id="' + v.id + '" data-n="' + esc(v.shop) + '" style="background:#137333;color:#fff">✅ Approve — दुकान verified</button><button class="del" data-ver="0" data-id="' + v.id + '" data-n="' + esc(v.shop) + '">❌ Reject</button></div>' : '') + '</div>';
+    }).join('');
+  }
   /* 🖼️ दुकानदारों के banner: मंज़ूर / मना */
   function bansHTML() {
     if (!BANS) return '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 30_plans_banners.sql चलाएँ।</p></div>';
@@ -1013,6 +1048,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   $('pmTabs').onclick = function (e) { var b = e.target.closest('[data-pm]'); if (!b) return; PMTAB = b.dataset.pm; $('pmTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawPrem(); };
   $('pmBody').onclick = async function (e) {
     var ps = e.target.closest('[data-psave]'), pt = e.target.closest('[data-ptier]'), bn = e.target.closest('[data-ban]');
+    var vr = e.target.closest('[data-ver]');
+    if (vr) {
+      var okv = vr.dataset.ver === '1', whyv = null;
+      if (okv) { if (!confirm('"' + vr.dataset.n + '" को verified करें? दुकानदार को 🔔 संदेश जाएगा और वह plan ले सकेगा।')) return; }
+      else { whyv = prompt('Reject का कारण (दुकानदार को 🔔 में दिखेगा), जैसे: बोर्ड का नाम साफ़ नहीं, दुकान बंद दिख रही', ''); if (whyv === null) return; if (!whyv.trim()) { alert('कारण लिखें।'); return; } }
+      vr.disabled = true; try { await rpc('pb_admin_verify_decide', { p_id: +vr.dataset.id, p_ok: okv, p_reason: whyv }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
+    }
     if (ps) {
       var box = ps.closest('[data-plan]'), feats = {}, body = {};
       box.querySelectorAll('[data-f]').forEach(function (c) { feats[c.dataset.f] = c.checked; });

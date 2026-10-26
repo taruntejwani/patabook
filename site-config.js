@@ -32,6 +32,9 @@ window.PB_SITE = {
   /* 💳 Google Play से Member plan खरीदना: 'patabook-pay' Worker का पता (जैसे 'https://patabook-pay.XXXX.workers.dev').
      खाली रहे तो खरीदने का बटन नहीं दिखता। Worker में Google key + Supabase service_role secret डालने और Play Console में products बनाने के बाद ही भरें। */
   payUrl: '',
+  /* 🏪 दुकान Verification (sql-32): वही 'patabook-pay' Worker (/verify-shop)। खाली = My Shop में verify वाला box नहीं और plan पर रोक नहीं।
+     sql-32 चलाने + Worker का नया code deploy + GEMINI_API_KEY secret डालने के बाद भरें। */
+  verifyUrl: '',
   premiumReq: false
 
 };
