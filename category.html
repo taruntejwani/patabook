@@ -290,7 +290,7 @@ function premTags(b){if(!PREMS[b.slug])return "";const en=PB.lang&&PB.lang()!=="
 /* दुकान का logo: logo_url हो तो फोटो, नहीं तो नाम के पहले अक्षर वाला रंगीन बैज */
 const LOGO_BG=["linear-gradient(135deg,#1a73e8,#0b2f73)","linear-gradient(135deg,#1e9e57,#0f6b3a)","linear-gradient(135deg,#f57c00,#c43e00)","linear-gradient(135deg,#8e24aa,#5e1780)","linear-gradient(135deg,#e53935,#a31515)","linear-gradient(135deg,#00897b,#005b52)","linear-gradient(135deg,#3949ab,#1f2a78)"];
 function logoHTML(b){
-  const u=String(b.logo_url||"");
+  const u=PREMS[b.slug]?String(b.logo_url||""):"";   /* Logo सिर्फ़ Premium दुकान का */
   if(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(u))
     return `<div class="logo"><img src="${esc(u)}" alt="" loading="lazy" decoding="async" onerror="this.parentNode.textContent='${esc(initials(b.name))}'"></div>`;
   let h=0;for(const ch of String(b.name||""))h=(h*31+ch.charCodeAt(0))>>>0;

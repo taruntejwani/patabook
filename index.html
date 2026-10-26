@@ -212,6 +212,7 @@ window.PATABOOK_SUPABASE={
   anonKey:"sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8"
 };
 </script>
+<script src="pb-premlogo.js"></script>
 <script src="pb-track.js"></script>
 <script>
 /* दुकानदार login है (मोबाइल OTP / ईमेल) तो सबसे ऊपर "मेरी दुकान" का बटन */
@@ -325,7 +326,7 @@ function applyLang(){
   const en=()=>PB.lang&&PB.lang()!=="hi";
   let L=[];
   /* दुकान ने logo लगाया हो तो logo, नहीं तो category वाला icon */
-  const LOGO={},LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+  const LOGO={},LG=k=>PREMS[k]&&LOGO[k],LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   /* Premium दुकानें (Admin से चालू) — पट्टी में navy + सुनहरा card */
   const PREMS={};
   /* Premium card: पते की जगह "Category · काम" (काम = My Shop → जानकारी बदलें → "Products / Services" की पहली line) */
@@ -348,7 +349,7 @@ function applyLang(){
       const a=el.closest(".nsc");if(!a||!PREMS[el.dataset.s]||a.classList.contains("pm"))return;
       a.classList.add("pm");if(!a.querySelector(".vs"))a.insertAdjacentHTML("beforeend",'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>');const n=a.querySelector(".new");if(n)n.outerHTML='<span class="pbg"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><img class="g" src="pb-gold-premium.webp" alt="Gold Premium" width="53" height="14"></span>';
     });
-    requestAnimationFrame(measure);   /* Premium card चौड़ा हुआ: पट्टी की लंबाई फिर से नापें */
+    applyLogos();requestAnimationFrame(measure);   /* Premium card चौड़ा हुआ: पट्टी की लंबाई फिर से नापें */
     await loadWork(Object.keys(PREMS));
     document.querySelectorAll("#nst .nsc.pm .ic[data-s]").forEach(el=>{const b=L.find(x=>x.slug===el.dataset.s);setPremLine(el.closest(".nsc"),b);});
   }
@@ -359,15 +360,19 @@ function applyLang(){
       if(!r.ok)return;
       (await r.json()).forEach(x=>{LOGO[x.slug]=LOGO_RX.test(x.logo_url||"")?x.logo_url:"";});
     }catch(e){return;}
+    applyLogos();
+  }
+  /* Logo सिर्फ़ Premium दुकान का (Free में logo नहीं) */
+  function applyLogos(){
     document.querySelectorAll("#nst .ic[data-s]").forEach(el=>{
-      const u=LOGO[el.dataset.s];if(!u||el.classList.contains("lg"))return;
+      const u=LG(el.dataset.s);if(!u||el.classList.contains("lg"))return;
       const im=new Image();im.alt="";im.decoding="async";
       im.onload=()=>{el.textContent="";el.appendChild(im);el.classList.add("lg");};
       im.src=u;
     });
   }
   function cardHTML(b){
-    return '<a class="nsc'+(PREMS[b.slug]?' pm':'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?'<span class="pbg"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><img class="g" src="pb-gold-premium.webp" alt="Gold Premium" width="53" height="14"></span>':'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LOGO[b.slug]?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LOGO[b.slug]?'<img src="'+esc(LOGO[b.slug])+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">📍 '+esc(b.address||b.city||"")+'</span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>';
+    return '<a class="nsc'+(PREMS[b.slug]?' pm':'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?'<span class="pbg"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><img class="g" src="pb-gold-premium.webp" alt="Gold Premium" width="53" height="14"></span>':'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">📍 '+esc(b.address||b.city||"")+'</span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>';
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
@@ -510,7 +515,7 @@ function showSug(){
       const lc=clean.toLowerCase(),cy=city.toLowerCase();
       rows.sort((a,b)=>{const sa=(String(a.name).toLowerCase().startsWith(lc)?2:0)+(cy&&String(a.address||"").toLowerCase().includes(cy)?1:0),
                                 sb=(String(b.name).toLowerCase().startsWith(lc)?2:0)+(cy&&String(b.address||"").toLowerCase().includes(cy)?1:0);return (sb-sa)||(sugD(a)-sugD(b));});
-      SHOPS=rows.slice(0,6);drawSug();
+      SHOPS=rows.slice(0,6);if(window.PBPL)await PBPL(SHOPS);if(n!==shopReq)return;drawSug();
     }catch(e){}
   },250);
 }

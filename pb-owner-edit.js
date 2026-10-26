@@ -108,6 +108,7 @@
     return SBU + "/storage/v1/object/public/shop-logos/" + path;
   }
   function editLogo() {
+    if (!prem()) return premOnly("🖼️ Logo");
     var has = false; try { has = !!(typeof B !== "undefined" && B && /shop-logos\//.test(B.logo_url || "")); } catch (e) {}
     var s = sheet("🖼️ " + T("Logo", "Logo"), '<p style="color:#5b6475;font-size:13.5px">' + T("चौकोर (square) फ़ोटो सबसे अच्छी लगती है।", "A square photo works best.") + '</p>' +
       '<button type="button" class="pbe-b p" id="pbeLc">📷 ' + (has ? T("Logo बदलें", "Change logo") : T("Logo लगाएँ", "Add logo")) + '</button>' +
@@ -245,6 +246,7 @@
     paint();
   }
   async function editVacancy() {
+    if (!prem()) return premOnly("💼 " + T("नौकरी (Hiring)", "Hiring"));
     if (window.PBHire && PBHire.editor) return PBHire.editor(O.slug, rpc, function () { location.reload(); });   /* sql-26: पूरी जानकारी */
     var open = false; try { var r = await fetch(SBU + "/rest/v1/rpc/pb_vacancy_status", { method: "POST", headers: { apikey: PK, Authorization: "Bearer " + PK, "Content-Type": "application/json" }, body: JSON.stringify({ p_slugs: [O.slug] }) }); var j = r.ok ? await r.json() : {}; open = !!(j && j[O.slug]); } catch (e) {}
     var s = sheet("💼 " + T("Vacancy (नौकरी खाली है)", "Vacancy available"), '<div class="pbe-row"><div class="t"><b>' + T("स्टाफ़ चाहिए?", "Need staff?") + '</b><small>' + T("ON करने पर आपके page पर “नौकरी खाली है” दिखेगा (30 दिन बाद अपने-आप बंद)", "When ON, your page shows “Vacancy available” (auto-off after 30 days)") + '</small></div><button type="button" class="pbe-sw' + (open ? " on" : "") + '" id="pbeVs" aria-label="Switch"><i></i></button></div><div class="pbe-er" id="pbeVe"></div>', function () { if (s.changed) location.reload(); });
@@ -308,7 +310,9 @@
       '<div class="pbe-lg"><span><i style="background:#6b5cf0"></i>' + T("देखा", "Views") + '</span><span><i style="background:#1e9e57"></i>Call + WhatsApp</span></div></div>' +
       (days < 14 ? '<p class="pbe-note" style="margin-top:12px">💎 ' + T("Premium दुकान को 14 दिन की रिपोर्ट मिलती है।", "Premium shops get a 14-day report.") + '</p>' : '');
   }
+  function premOnly(t) { sheet(t, '<p style="font-size:15px;line-height:1.6">💎 ' + T("यह सुविधा सिर्फ़ Premium दुकानों के लिए है।", "This is only for Premium shops.") + '</p>'); }
   function editReport() {
+    if (!prem()) return premOnly("📊 " + T("दुकान की रिपोर्ट", "Shop report"));
     var s = sheet("📊 " + T("दुकान की रिपोर्ट", "Shop report"), '<p style="color:#5b6475">…</p>');
     rpc("pb_my_report", { p_slug: O.slug }).then(function (R) { s.body.innerHTML = reportBody(R); })
       .catch(function () { s.body.innerHTML = '<p class="pbe-er">' + T("रिपोर्ट नहीं खुल सकी। इंटरनेट जाँचकर फिर कोशिश करें।", "Could not load the report. Check internet and try again.") + '</p>'; });

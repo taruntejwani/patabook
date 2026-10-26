@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#fbf6ea">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script src="i18n.js"></script>
+<script src="pb-premlogo.js"></script>
 <script src="pb-track.js"></script>
 <script src="site-config.js"></script>
 <script src="pb-auth.js"></script>
@@ -416,7 +417,7 @@ async function loadNear(){
     if(!r.ok)r=await fetch(u+"&select=slug,name,address,category,latitude,longitude",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
     if(!r.ok)return;let a=await r.json();
     if(la&&ln){a.forEach(x=>{x._km=(+x.latitude&&+x.longitude)?hav(la,ln,+x.latitude,+x.longitude):null;});a=a.filter(x=>x._km!=null).sort((p,q)=>p._km-q._km);}
-    NEAR=a.slice(0,8);drawNear();}catch(e){}
+    NEAR=a.slice(0,8);if(window.PBPL)await PBPL(NEAR);drawNear();}catch(e){}
 }
 function drawNear(){const box=document.getElementById("nearBox"),sec=document.getElementById("near");if(!box||!sec)return;
   if(!NEAR||!NEAR.length){sec.hidden=true;return;}sec.hidden=false;

@@ -227,8 +227,10 @@ function homeBlock(b,i){
       :(en?"Turn ON if your shop sends staff to customers' homes":"आपकी दुकान ग्राहक के घर जाकर सेवा देती है तो ON करें"))+'</small></span>'+
     '<button type="button" class="sw home" role="switch" aria-checked="'+(on||pend)+'" aria-label="Home Service" data-h="'+i+'"></button></div><div class="err" id="he'+i+'"></div>';
 }
+const isP=b=>!!(PREM&&PREM[b.slug]&&PREM[b.slug].until);   /* 💎 Premium दुकान? (Free में: Hiring, Logo, विज़िटिंग कार्ड, रिपोर्ट नहीं) */
 function vacBlock(b,i){
   if(!VAC_OK)return "";
+  if(PREM&&!isP(b)){const en=L()==="en";return '<div class="phone off" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span><span class="tx"><b>'+(en?"Hiring (Vacancy)":"नौकरी (Hiring)")+'</b><small>'+(en?"💎 Only for Premium shops":"💎 सिर्फ़ Premium दुकानों के लिए")+'</small></span><span style="font-size:20px" aria-hidden="true">🔒</span></div>';}
   const u=VAC[b.slug],on=!!u,en=L()==="en";
   const till=on?new Date(u).toLocaleDateString(en?"en-IN":"hi-IN",{day:"numeric",month:"short"}):"";
   return '<div class="phone'+(on?"":" off")+'" style="margin-top:10px"><span class="ic" aria-hidden="true">💼</span>'+
@@ -247,7 +249,7 @@ function profItems(b,i){
     [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता",""],
     [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
-    [!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"],
+    ...(isP(b)?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय",E+"#openT"],
     [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार",E+"#btype"],
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",E+"#svc"],
@@ -258,7 +260,7 @@ function profItems(b,i){
 }
 function profBlock(b,i){
   const it=profItems(b,i);if(!it)return "";
-  const n=it.filter(x=>x[0]).length,pc=n*10,en=L()==="en",miss=it.filter(x=>!x[0]);
+  const n=it.filter(x=>x[0]).length,pc=Math.round(n/it.length*100),en=L()==="en",miss=it.filter(x=>!x[0]);
   const col=pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
   return '<div class="pf"><div class="ring" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></div>'+
     '<div class="pt"><b>'+(pc>=100?(en?"🎉 Profile 100% complete!":"🎉 प्रोफ़ाइल 100% पूरी!"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</b>'+
@@ -360,6 +362,7 @@ async function addPhoto(i,file){const b=ROWS[i],en=L()==="en",er=$("pe"+i);if(er
     PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();
   }catch(x){const e2=$("pe"+i);if(e2)e2.textContent=/too many/.test(x.message||"")?(en?"Max 8 photos.":"8 से ज़्यादा फ़ोटो नहीं।"):(en?"Could not upload. Try again.":"फ़ोटो upload नहीं हुई। दोबारा कोशिश करें।");}}
 function weekLine(b){
+  if(!isP(b))return "";   /* रिपोर्ट सिर्फ़ Premium */
   const w=EVS&&EVS.week&&EVS.week[b.slug];if(!w)return "";
   const en=L()==="en";
   return '<div class="wk">📊 '+(en?"Last 7 days: ":"पिछले 7 दिन: ")+'👀 '+(w.view||0)+(en?" views":" ने देखा")+' · 📞 '+(w.call||0)+' Call · 💬 '+(w.wa||0)+' WhatsApp</div>';
