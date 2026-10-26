@@ -71,6 +71,8 @@
     ".pbe-note{background:#fff7e6;border:1px solid #ffd591;color:#874d00;border-radius:12px;padding:10px 12px;font-size:13px;margin:6px 0 10px}" +
     ".pbe-er{color:#c5221f;font-size:13px;font-weight:700;min-height:18px;margin-top:8px}" +
     ".pbe-pg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pbe-pg .t{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#eef3fd}.pbe-pg img{width:100%;height:100%;object-fit:cover}.pbe-pg .t button{position:absolute;top:5px;right:5px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(197,34,31,.92);color:#fff;cursor:pointer}" +
+    ".pbe-rk{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.pbe-rk div{border:1.5px solid #ecdcb0;border-radius:16px;background:linear-gradient(180deg,#fffdf6,#fff6df);text-align:center;padding:10px 4px}.pbe-rk i{display:block;font-style:normal;font-size:22px}.pbe-rk b{display:block;font-size:21px;color:#123568;line-height:1.2;margin-top:2px}.pbe-rk small{display:block;font-size:11.5px;color:#5b6475;font-weight:700}" +
+    ".pbe-gr{border:1px solid #eef1f6;border-radius:16px;padding:10px 10px 4px}.pbe-gr svg{width:100%;height:auto;display:block}.pbe-lg{display:flex;gap:14px;justify-content:center;font-size:12px;color:#5b6475;margin-top:8px}.pbe-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}" +
     ".pbe-pg label{aspect-ratio:1;border-radius:12px;border:2px dashed #9fc0f5;background:#f4f8ff;display:grid;place-items:center;font-size:30px;color:#1a73e8;cursor:pointer}";
   document.head.appendChild(css);
 
@@ -284,7 +286,34 @@
       sv.disabled = false;
     };
   }
-  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, about: function () { editDetails("", "about"); }, visit: function () { editDetails("", "visit"); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible };
+  /* 📊 रिपोर्ट: पिछले 14 दिन (free दुकान: 7 दिन) — कितनों ने देखा, Call, WhatsApp, रास्ता */
+  function istDay(k) { var d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })); d.setDate(d.getDate() - k); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function reportBody(R) {
+    var days = Math.min((R && R.days) || 7, 14), D = [], M = {}, tot = { view: 0, call: 0, wa: 0, dir: 0 }, k;
+    for (k = days - 1; k >= 0; k--) D.push(istDay(k));
+    ((R && R.rows) || []).forEach(function (x) { (M[x.day] = M[x.day] || {})[x.kind] = x.n; });
+    D.forEach(function (d) { var m = M[d] || {}; for (var q in tot) tot[q] += (m[q] || 0); });
+    var mx = 1; D.forEach(function (d) { var m = M[d] || {}; mx = Math.max(mx, m.view || 0, (m.call || 0) + (m.wa || 0)); });
+    var W = 320, H = 130, base = H - 16, bw = W / D.length, bars = "";
+    D.forEach(function (d, i) {
+      var m = M[d] || {}, v = m.view || 0, c = (m.call || 0) + (m.wa || 0), x = i * bw, hv = v / mx * (base - 10), hc = c / mx * (base - 10);
+      bars += '<rect x="' + (x + bw * .12).toFixed(1) + '" y="' + (base - hv).toFixed(1) + '" width="' + (bw * .4).toFixed(1) + '" height="' + Math.max(hv, v ? 2 : 0).toFixed(1) + '" rx="2" fill="#6b5cf0"><title>' + d + ': ' + v + '</title></rect>';
+      bars += '<rect x="' + (x + bw * .52).toFixed(1) + '" y="' + (base - hc).toFixed(1) + '" width="' + (bw * .36).toFixed(1) + '" height="' + Math.max(hc, c ? 2 : 0).toFixed(1) + '" rx="2" fill="#1e9e57"><title>' + d + ': ' + c + '</title></rect>';
+      if (i % (days > 7 ? 2 : 1) === 0 || i === days - 1) bars += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 3) + '" font-size="8.5" fill="#8a93a3" text-anchor="middle">' + (i === days - 1 ? T("आज", "today") : String(+d.slice(8))) + '</text>';
+    });
+    var tile = function (ic, n, t) { return '<div><i>' + ic + '</i><b>' + n + '</b><small>' + t + '</small></div>'; };
+    return '<p style="margin:0 0 10px;font-weight:800;color:#123568">' + T("पिछले " + days + " दिन", "Last " + days + " days") + '</p>' +
+      '<div class="pbe-rk">' + tile("👀", tot.view, T("ने देखा", "Views")) + tile("📞", tot.call, "Call") + tile("💬", tot.wa, "WhatsApp") + tile("🧭", tot.dir, T("रास्ता", "Directions")) + '</div>' +
+      '<div class="pbe-gr"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="report">' + bars + '<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="#e4eaf5"/></svg>' +
+      '<div class="pbe-lg"><span><i style="background:#6b5cf0"></i>' + T("देखा", "Views") + '</span><span><i style="background:#1e9e57"></i>Call + WhatsApp</span></div></div>' +
+      (days < 14 ? '<p class="pbe-note" style="margin-top:12px">💎 ' + T("Premium दुकान को 14 दिन की रिपोर्ट मिलती है।", "Premium shops get a 14-day report.") + '</p>' : '');
+  }
+  function editReport() {
+    var s = sheet("📊 " + T("दुकान की रिपोर्ट", "Shop report"), '<p style="color:#5b6475">…</p>');
+    rpc("pb_my_report", { p_slug: O.slug }).then(function (R) { s.body.innerHTML = reportBody(R); })
+      .catch(function () { s.body.innerHTML = '<p class="pbe-er">' + T("रिपोर्ट नहीं खुल सकी। इंटरनेट जाँचकर फिर कोशिश करें।", "Could not load the report. Check internet and try again.") + '</p>'; });
+  }
+  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, about: function () { editDetails("", "about"); }, visit: function () { editDetails("", "visit"); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible, report: editReport };
 
   /* ---------- pencils ---------- */
   var MAP = {

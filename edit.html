@@ -11,7 +11,8 @@
 <script>/* page के अंदर (✏️ Edit) खुलने पर ऊपर की पट्टी छिपाओ */window.PB_EMBED=/[?&]embed=1\b/.test(location.search);if(window.PB_EMBED)document.documentElement.classList.add("embed");</script>
 <script>/* ✏️ किसी हिस्से की पेंसिल से खुला (?sec=about / visit): सिर्फ़ वही चीज़ें दिखें जो उस हिस्से में दिखती हैं */
 (function(){var m=location.search.match(/[?&]sec=(about|visit|numbers)\b/);if(!m)return;var k=m[1];
-var st=document.createElement("style");st.textContent='[data-sec]:not([data-sec="'+k+'"]){display:none!important}';
+var sh={about:["about","numbers"],visit:["visit"],numbers:["numbers"]}[k];
+var st=document.createElement("style");st.textContent='[data-sec]'+sh.map(function(x){return ':not([data-sec="'+x+'"])';}).join("")+'{display:none!important}';
 document.head.appendChild(st);})();</script>
 <style>.embed .top{display:none}.embed body{padding-top:6px}.embed #done .btn{display:none}</style>
 <script src="pb-auth.js"></script>
@@ -71,7 +72,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   <div class="card">
    <h1 data-en="✏️ Edit details">✏️ जानकारी बदलें</h1>
    <p class="shop" id="shopName"></p><p class="addr" id="shopAddr"></p>
-   <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name, address and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम, पता और category सिर्फ PataBook Admin बदल सकते हैं।</p>
+   <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम और category सिर्फ PataBook Admin बदल सकते हैं।</p>
   </div>
 
   <div class="card" data-sec="about">
@@ -97,7 +98,13 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <label class="lbl" for="ph2" data-en="☎️ Call number for customers (shop / staff)">☎️ ग्राहकों के लिए Call नंबर (दुकान / staff)</label>
    <input id="ph2" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
    <p class="note" id="hidNote" hidden data-en="Your main number is hidden, so customers will see only the numbers above. (If both are empty, nobody can call you.)">आपका मुख्य नंबर छिपा है, इसलिए ग्राहकों को सिर्फ़ ऊपर वाले नंबर दिखेंगे। (दोनों खाली हों तो कोई call नहीं कर पाएगा।)</p>
-   <p class="hint" data-en="To change your main number, use “📱 Change number” in My Shop.">मुख्य नंबर बदलने के लिए "मेरी दुकान" में "📱 नंबर बदलें" दबाएँ।</p>
+   <p class="hint" style="margin-top:12px"><span data-en="📱 Main (login) number:">📱 मुख्य (login) नंबर:</span> <b id="mainNo"></b> · <a id="mainChg" target="_top" href="#" style="color:#1a73e8;font-weight:700" data-en="Change (with OTP) ›">बदलें (OTP से) ›</a></p>
+  </div>
+
+  <div class="card" data-sec="visit">
+   <h2 data-en="📍 Shop address">📍 दुकान का पता</h2>
+   <textarea id="addrIn" maxlength="250" rows="3" data-en-ph="e.g. Plot 17A, Apnanagar, Gandhidham" placeholder="जैसे: Plot 17A, Apnanagar, Gandhidham"></textarea>
+   <p class="hint" data-en="Write the full address — shop no. / plot, area, city. It shows on your shop page and in search.">पूरा पता लिखें — दुकान / प्लॉट नंबर, इलाका, शहर। यही आपकी दुकान के पेज और search में दिखेगा।</p>
   </div>
 
   <div class="card" data-sec="visit">
@@ -190,7 +197,7 @@ async function rpc(fn,args){
   return j;
 }
 /* 📱 दुकान / staff का नंबर: नया नंबर डालने पर उसी नंबर पर OTP — बिना OTP के नंबर save नहीं होगा */
-let ORIG={wa:"",p2:""},MAIN="",VERI={};
+let ORIG={wa:"",p2:""},MAIN="",VERI={},ORIGADDR="";
 const OTPERR={invalid_otp:["OTP गलत है।","Wrong OTP."],otp_expired:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],otp_expired_or_missing:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],too_many_attempts:["3 बार गलत OTP। नया OTP मँगाएँ।","3 wrong tries. Request a new OTP."],resend_too_soon:["थोड़ी देर बाद दोबारा मँगाएँ।","Please wait before asking again."],rate_limited_mobile:["इस नंबर पर आज के OTP पूरे हो गए। कल कोशिश करें।","Today's OTP limit for this number is used. Try tomorrow."],rate_limited_ip:["बहुत ज़्यादा कोशिशें। थोड़ी देर बाद करें।","Too many attempts. Try later."],sms_failed:["SMS नहीं जा सका। थोड़ी देर बाद कोशिश करें।","SMS failed. Try again later."],login_required:["Login की समय-सीमा खत्म हो गई। पेज दोबारा खोलें।","Login expired. Reopen the page."],captcha_failed:["\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज refresh करें।","Robot check failed. Refresh the page."]};
 function otpMsg(e){const c=(e&&(e.code||e.message))||"";const m=OTPERR[c];return (m?m[EN?1:0]:(EN?"Something went wrong. Try again.":"कुछ गड़बड़ हुई। फिर कोशिश करें."))+(c==="invalid_otp"&&e.attempts_left?(EN?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");}
 function verifyNum(num,label){
@@ -220,7 +227,7 @@ function errText(m){
     "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
     "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
-    "bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
+    "bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."],"number not verified":["यह नंबर OTP से पक्का नहीं हुआ है। फिर से सेव दबाएँ और OTP डालें।","This number is not verified by OTP. Press Save again and enter the OTP."]};
   for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
@@ -240,6 +247,7 @@ $("main").addEventListener("submit",async e=>{
   const gst=$("gst").value.replace(/\s/g,"").toUpperCase(),udy=$("udyam").value.replace(/\s/g,"").toUpperCase();
   if(gst&&!gstOk(gst)){$("err").textContent=errText("bad GST");$("gst").focus();return;}
   if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
+  {const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR&&(ad.length<8||ad.length>250)){$("err").textContent=errText("bad address");$("addrIn").focus();return;}}
   const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
   /* नया (बदला हुआ) नंबर हो तो पहले उसी नंबर पर OTP से पक्का करें */
   const have=[ORIG.wa,ORIG.p2,MAIN];
@@ -249,7 +257,7 @@ $("main").addEventListener("submit",async e=>{
     if(!ok){$("err").textContent=EN?"Number not saved: OTP was not verified.":"नंबर save नहीं हुआ: OTP से पक्का नहीं हुआ।";return;}
   }
   const b=$("saveBtn");b.disabled=true;
-  try{S=await PBA.session();if(!S){only("needLogin");return;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
+  try{S=await PBA.session();if(!S){only("needLogin");return;}const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR){await rpc("pb_owner_set_address",{p_slug:slug,p_address:ad});ORIGADDR=ad;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
   catch(x){$("err").textContent=errText(x.message);}
   b.disabled=false;
 });
@@ -261,7 +269,7 @@ $("main").addEventListener("submit",async e=>{
   try{
     const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
     if(!b){only("notOwner");return;}
-    $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";
+    $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";ORIGADDR=String(b.address||"").replace(/\s+/g," ").trim();$("addrIn").value=ORIGADDR;$("mainNo").textContent=b.phone?"+91 "+String(b.phone).replace(/\D/g,"").slice(-10):"—";$("mainChg").href="phone-update.html?slug="+encodeURIComponent(slug);
     const d=await rpc("pb_my_details",{p_slug:slug}),ds=(d&&d.description)||"";
     const t=line(ds,"Type");if(t&&![...$("btype").options].some(x=>x.value===t))$("btype").insertAdjacentHTML("beforeend",'<option value="'+esc(t)+'">'+esc(t)+'</option>');
     $("btype").value=t;

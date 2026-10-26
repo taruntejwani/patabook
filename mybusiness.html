@@ -316,7 +316,7 @@ function premBlock(b,i){
     if(o==="rp")body=reportHTML(b);
     if(o==="pr"&&window.prodBody)body=prodBody(b,i);
     return '<div class="pm"><div class="ph">💎 '+(en?"PataBook Premium":"PataBook Premium")+'</div><small>'+(en?"Active till "+till+" · ⭐ your shop shows on top":till+" तक चालू · ⭐ आपकी दुकान ऊपर दिखती है")+'</small>'+
-      '<div class="pb"><button type="button" class="'+(o==="rp"?"on":"")+'" data-pm="rp" data-i="'+i+'">📊 '+(en?"Report":"रिपोर्ट")+'</button></div>'+body+'</div>';
+      '<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small></div>';
   }
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
   const r=P.request;
