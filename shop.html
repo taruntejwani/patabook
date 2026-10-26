@@ -35,6 +35,9 @@ button{font:inherit}
 .tb b{font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ib{flex:none;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:17px;cursor:pointer}
 #pbLang{flex:none}
+#socTop{flex:none;display:flex;gap:6px;margin-left:auto}
+@media(max-width:520px){.top .wrap.hsoc .tb{display:none}.top .wrap.hsoc{gap:7px}}#socTop:empty{display:none}#socTop a{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}#socTop svg{width:20px;height:20px}#socTop .ig{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}#socTop .fb{background:#1877f2}
+@media(max-width:420px){#socTop a{width:30px;height:30px;border-radius:9px}#socTop svg{width:18px;height:18px}#socTop{gap:5px}}
 
 /* Hero */
 .hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(135deg,#0b2f73 0%,#123f96 55%,#1a73e8 100%)}
@@ -206,6 +209,7 @@ h2{color:var(--gold3)}
 <div class="top"><div class="wrap">
  <a class="ib" id="backA" href="index.html" aria-label="Back">←</a>
  <div class="tb" id="tb"></div>
+ <span id="socTop"></span>
  <span id="pbLang"></span>
 </div></div>
 
@@ -267,6 +271,12 @@ function staffNo(k){const v=B?line(B,k).replace(/\D/g,""):"";return /^\d{10}$/.t
 function waNum(){if(CT.k!=="ok"){const a=staffNo("WhatsApp")||staffNo("Phone2");return a?"91"+a:"";}const alt=B?line(B,"WhatsApp").replace(/\D/g,""):"";
   const w=(/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"")).replace(/\D/g,"");return w.length===10?"91"+w:w;}
 const phNum=()=>CT.k==="ok"?String(CT.phone||"").replace(/[^\d+]/g,""):staffNo("Phone2");
+/* 📸 Instagram / Facebook — दुकानदार ने link डाला हो तभी ऊपर icon (sql-28) */
+function socUrl(k){const ok=u=>/^https:\/\/www\.(instagram|facebook)\.com\/[A-Za-z0-9.\-_\/=?&%]{1,150}$/.test(u)&&u.indexOf(k==="Instagram"?"instagram.com":"facebook.com")>0;
+  let u=B?line(B,k):"";if(ok(u))return u;const w=B?line(B,"Website").replace(/^https?:\/\/(m\.|web\.)?(www\.)?/i,"https://www."):"";return ok(w)?w:"";}
+function drawSoc(){const e=document.getElementById("socTop");if(!e)return;const ig=socUrl("Instagram"),fb=socUrl("Facebook");e.parentNode.classList.toggle("hsoc",!!(ig||fb));
+  e.innerHTML=(ig?'<a class="ig" href="'+esc(ig)+'" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="#fff" stroke="none"/></svg></a>':'')+
+    (fb?'<a class="fb" href="'+esc(fb)+'" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path fill="#fff" d="M13.6 21v-7.6h2.6l.4-3h-3V8.5c0-.9.3-1.5 1.5-1.5h1.6V4.3c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.6V21z"/></svg></a>':'');}
 /* 📞 About में मोबाइल नंबर — वही नंबर जो Call / WhatsApp बटन पर (मालिक का switch और staff नंबर वाले नियम) */
 function mobRow(){const t=x=>{x=String(x||"").replace(/\D/g,"");return x.length>10?x.slice(-10):x;},p=t(phNum()),w=t(waNum()),out=[];
   if(/^\d{10}$/.test(p))out.push('<a href="tel:+91'+p+'">📞 +91 '+p+'</a>');
@@ -310,7 +320,7 @@ async function loadContact(){
   if(window.PBA){try{const s=await PBA.session();if(s){const c=await PBA.contact(slug);if(c&&(c.phone||c.whatsapp))CT={k:"ok",phone:c.phone,whatsapp:c.whatsapp};}}catch(e){}}
 }
 
-function render(){
+function render(){drawSoc();
   if(!B)return;
   const b=B,en=EN(),sub=line(b,"Subcategory"),city=cityOf(b),addr=fullAddr(b),ost=openStatus(b),dir=pbDir(b),P=PRODP(),G=GALP();
   const gst=/^[0-9A-Z]{15}$/.test(line(b,"GST")),wsrc=b.website||line(b,"Website"),web=/^https?:\/\//i.test(wsrc||"")?wsrc:"",email=line(b,"Email");

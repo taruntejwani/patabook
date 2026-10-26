@@ -123,6 +123,11 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <input id="email" type="email" inputmode="email" placeholder="name@gmail.com">
    <label class="lbl" for="web" data-en="Website / Instagram / Facebook link">वेबसाइट / Instagram / Facebook link</label>
    <input id="web" type="url" inputmode="url" placeholder="www.example.com">
+   <label class="lbl" for="igIn" data-en="📸 Instagram (link or username)">📸 Instagram (link या username)</label>
+   <input id="igIn" type="text" inputmode="url" maxlength="200" autocapitalize="off" spellcheck="false" placeholder="instagram.com/yourshop">
+   <label class="lbl" for="fbIn" data-en="📘 Facebook page (link)">📘 Facebook page (link)</label>
+   <input id="fbIn" type="text" inputmode="url" maxlength="200" autocapitalize="off" spellcheck="false" placeholder="facebook.com/yourshop">
+   <p class="hint" data-en="If filled, Instagram / Facebook icons show at the top of your shop page.">भरने पर आपकी दुकान के page पर सबसे ऊपर Instagram / Facebook के icon दिखेंगे।</p>
   </div>
 
   <div class="card" data-sec="about">
@@ -197,7 +202,7 @@ async function rpc(fn,args){
   return j;
 }
 /* 📱 दुकान / staff का नंबर: नया नंबर डालने पर उसी नंबर पर OTP — बिना OTP के नंबर save नहीं होगा */
-let ORIG={wa:"",p2:""},MAIN="",VERI={},ORIGADDR="";
+let ORIG={wa:"",p2:""},MAIN="",VERI={},ORIGADDR="",ORIGSOC={ig:"",fb:""};
 const OTPERR={invalid_otp:["OTP गलत है।","Wrong OTP."],otp_expired:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],otp_expired_or_missing:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],too_many_attempts:["3 बार गलत OTP। नया OTP मँगाएँ।","3 wrong tries. Request a new OTP."],resend_too_soon:["थोड़ी देर बाद दोबारा मँगाएँ।","Please wait before asking again."],rate_limited_mobile:["इस नंबर पर आज के OTP पूरे हो गए। कल कोशिश करें।","Today's OTP limit for this number is used. Try tomorrow."],rate_limited_ip:["बहुत ज़्यादा कोशिशें। थोड़ी देर बाद करें।","Too many attempts. Try later."],sms_failed:["SMS नहीं जा सका। थोड़ी देर बाद कोशिश करें।","SMS failed. Try again later."],login_required:["Login की समय-सीमा खत्म हो गई। पेज दोबारा खोलें।","Login expired. Reopen the page."],captcha_failed:["\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज refresh करें।","Robot check failed. Refresh the page."]};
 function otpMsg(e){const c=(e&&(e.code||e.message))||"";const m=OTPERR[c];return (m?m[EN?1:0]:(EN?"Something went wrong. Try again.":"कुछ गड़बड़ हुई। फिर कोशिश करें."))+(c==="invalid_otp"&&e.attempts_left?(EN?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");}
 function verifyNum(num,label){
@@ -227,7 +232,7 @@ function errText(m){
     "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
     "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
-    "bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
+    "bad Instagram":["Instagram का link या username सही लिखें (जैसे instagram.com/yourshop)।","Enter a correct Instagram link or username (like instagram.com/yourshop)."],"bad Facebook":["Facebook page का link सही लिखें (जैसे facebook.com/yourshop)।","Enter a correct Facebook page link (like facebook.com/yourshop)."],"bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."],"number not verified":["यह नंबर OTP से पक्का नहीं हुआ है। फिर से सेव दबाएँ और OTP डालें।","This number is not verified by OTP. Press Save again and enter the OTP."]};
   for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
@@ -257,7 +262,7 @@ $("main").addEventListener("submit",async e=>{
     if(!ok){$("err").textContent=EN?"Number not saved: OTP was not verified.":"नंबर save नहीं हुआ: OTP से पक्का नहीं हुआ।";return;}
   }
   const b=$("saveBtn");b.disabled=true;
-  try{S=await PBA.session();if(!S){only("needLogin");return;}const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR){await rpc("pb_owner_set_address",{p_slug:slug,p_address:ad});ORIGADDR=ad;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
+  try{S=await PBA.session();if(!S){only("needLogin");return;}const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR){await rpc("pb_owner_set_address",{p_slug:slug,p_address:ad});ORIGADDR=ad;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});const ig=$("igIn").value.trim(),fb=$("fbIn").value.trim();if(ig!==ORIGSOC.ig||fb!==ORIGSOC.fb){await rpc("pb_owner_set_social",{p_slug:slug,p_instagram:ig,p_facebook:fb});ORIGSOC={ig,fb};}$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
   catch(x){$("err").textContent=errText(x.message);}
   b.disabled=false;
 });
@@ -277,7 +282,7 @@ $("main").addEventListener("submit",async e=>{
     $("offDay").value=line(ds,"Closed");
     $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");ORIG={wa:n10($("wa").value),p2:n10($("ph2").value)};MAIN=n10(String(b.phone||""));$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
     $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");$("lmk").value=line(ds,"Landmark");
-    $("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
+    $("igIn").value=line(ds,"Instagram");$("fbIn").value=line(ds,"Facebook");ORIGSOC={ig:$("igIn").value,fb:$("fbIn").value};$("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
     if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
     $("hidNote").hidden=!(d&&d.show_phone===false);
     only("main");
