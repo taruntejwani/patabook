@@ -29,6 +29,9 @@ window.PB_SITE = {
   /* 💎 Premium (sql-23): Admin से दिया जाता है (मुफ़्त / नकद)। true = Premium दुकानें ऊपर, निशान, gallery, 30 दिन रिपोर्ट, Vacancy डालना।
      premiumReq: दुकानदार "मेरी दुकान" से Premium की request भेज सके — Google Play पेमेंट चालू होने तक false रखें। */
   premium: true,
+  /* 💳 Google Play से Member plan खरीदना: 'patabook-pay' Worker का पता (जैसे 'https://patabook-pay.XXXX.workers.dev').
+     खाली रहे तो खरीदने का बटन नहीं दिखता। Worker में Google key + Supabase service_role secret डालने और Play Console में products बनाने के बाद ही भरें। */
+  payUrl: '',
   premiumReq: false
 
 };

@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#1a73e8">
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
+<script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
 <script src="site-config.js"></script>
@@ -84,6 +85,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pm{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .pm a{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;border-bottom:1px solid var(--line);background:#fff}.pm a:last-child{border-bottom:0}
 .pm a span:nth-child(2){flex:1;min-width:0}.pm a i{font-style:normal;color:var(--blue);font-weight:800;font-size:13px}
+.buy{margin-top:12px;border:1px solid #d7e3f7;background:#fff;border-radius:14px;padding:12px}.buy .bh2{font-weight:800;color:#0b2f73}.buy>small{display:block;color:#5b6475;font-size:12.5px}
+.bp{border:1.5px solid #e4eaf5;border-radius:14px;padding:11px;margin-top:10px}.bp .bt{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.bp .bt b{font-size:15.5px}.bp .bt span{font-weight:900;font-size:17px;color:#0b2f73}.bp .bt span small{font-size:11px;font-weight:700;color:#5b6475}
+.bp .bf{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.bp .bf i{font-style:normal;font-size:12px;background:#f4f7fc;border-radius:999px;padding:2px 8px}
+.bp button,.bp a{display:block;width:100%;text-align:center;border:0;border-radius:12px;padding:11px;font:inherit;font-weight:800;font-size:14.5px;background:#1a73e8;color:#fff;text-decoration:none;cursor:pointer}
+.bp.pt-silver{border-color:#c3cad4;background:linear-gradient(135deg,#fbfcfd,#eef1f5)}.bp.pt-gold{border-color:#e2b34c;background:linear-gradient(135deg,#fffdf7,#fbf3df)}.bp.pt-gold button,.bp.pt-gold a{background:linear-gradient(135deg,#e7c36a,#B58A2A);color:#123568}
+.bp.pt-platinum{border-color:#7fa6d6;background:linear-gradient(135deg,#f7fbff,#e3eefa)}.bp.pt-platinum button,.bp.pt-platinum a{background:linear-gradient(135deg,#5a8ccc,#1c2539);color:#fff}
+.buyx{display:block;width:100%;margin-top:10px;border:1px dashed #b6c6e3;background:#f7faff;color:#0b2f73;border-radius:12px;padding:10px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
 .ban{margin-top:12px;border:1px solid #e3dcf7;background:#fff;border-radius:14px;padding:12px}.ban .bh{font-weight:800;color:#3b2bb8;margin-bottom:6px}.ban img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:10px;display:block}
 .ban .bs{margin-top:8px;font-size:13px}.ban .bb{display:flex;gap:8px;margin-top:10px}.ban .bb label,.ban .bb button{flex:1;text-align:center;border:1px solid #cfc5f5;background:#f5f2ff;color:#3b2bb8;border-radius:12px;padding:10px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
 .ban .bb button{background:#fff5f4;border-color:#f3c3be;color:#b42318}
@@ -313,8 +321,10 @@ function notifBlock(){
 let PREM=null,PHOTOS={},REPORT={},PMOPEN={};
 async function loadPrem(){if(!(window.PB_SITE&&PB_SITE.premium)){PREM=null;return;}try{PREM=await rpc("pb_my_premium")||{};}catch(e){PREM=null;}
   if(window.PBPlan&&ROWS&&ROWS.length){try{await PBPlan.load(ROWS.map(b=>b.slug));}catch(e){}ROWS.forEach(b=>{if(PREM&&PREM[b.slug])PBPlan.set(b.slug,tierOf(b));});}
+  if(window.PBPlay&&PBPlay.on()){try{PLAYP=await PBPlay.products();}catch(e){PLAYP=[];}
+    if(!RECOV&&PBPlay.inApp()&&ROWS&&ROWS.length===1){RECOV=1;try{const got=await PBPlay.recover(ROWS[0].slug);if(got.length){PREM=await rpc("pb_my_premium")||{};ROWS.forEach(b=>{if(PREM[b.slug])PBPlan.set(b.slug,tierOf(b));});}}catch(e){}}}
   BAN={};if(PREM)for(const b of ROWS||[]){if(PH(b,"banner")){try{BAN[b.slug]=await rpc("pb_my_banner",{p_slug:b.slug});}catch(e){}}}}
-let BAN={};
+let BAN={},PLAYP=[],RECOV=0,BUYOPEN={};
 /* plan: free / silver / gold / platinum — और उसमें कौन-सी सुविधा ON है (Admin → Plans) */
 function tierOf(b){const P=PREM&&PREM[b.slug];return P&&P.until?(P.tier&&P.tier!=="free"?P.tier:"platinum"):"free";}
 function PH(b,f){return window.PBPlan?PBPlan.hasT(tierOf(b),f):isP(b);}
@@ -343,6 +353,21 @@ async function addBanner(i,file){const b=ROWS[i],en=L()==="en",er=$("be"+i);
     BAN[b.slug]=await rpc("pb_my_banner",{p_slug:b.slug});draw();
   }catch(x){const e2=$("be"+i);if(e2){e2.style.color="";e2.textContent=/premium/.test(x.message||"")?(en?"Banner is not in your plan.":"Banner आपके plan में नहीं है।"):/rate/.test(x.message||"")?(en?"Too many changes today. Try tomorrow.":"आज बहुत बार बदला। कल कोशिश करें।"):(en?"Could not upload. Try again.":"Banner upload नहीं हुआ। दोबारा कोशिश करें।");}}
 }
+/* 💳 Google Play से Member plan (1 साल, अपने-आप renew नहीं) — PataBook app के अंदर */
+function buyBlock(b,i,paid){
+  if(!(window.PBPlay&&PBPlay.on())||!PLAYP||!PLAYP.length)return "";
+  const en=L()==="en",ic={silver:"🥈",gold:"👑",platinum:"💎"};
+  if(paid&&!BUYOPEN[b.slug])return '<button type="button" class="buyx" data-buyx="'+i+'">🔄 '+(en?"Renew / take a bigger plan":"Plan आगे बढ़ाएँ / बड़ा plan लें")+' ›</button>';
+  const F=[["logo","🖼️ Logo"],["hiring",en?"💼 Hiring":"💼 नौकरी (Hiring)"],["card",en?"🪪 Visiting card":"🪪 विज़िटिंग कार्ड"],["report",en?"📊 Report":"📊 रिपोर्ट"],["top",en?"⭐ On top in search":"⭐ Search में ऊपर"],["strip",en?"🏠 Big card on home":"🏠 Home पर बड़ा card"],["banner",en?"📢 Banner ad":"📢 Banner विज्ञापन"]];
+  const inApp=PBPlay.inApp(),store="https://play.google.com/store/apps/details?id=in.patabook.app";
+  const price=p=>p.playPrice&&p.playPrice.value?(p.playPrice.currency==="INR"?"₹":p.playPrice.currency+" ")+Number(p.playPrice.value).toLocaleString("en-IN"):"₹"+Number(p.price||0).toLocaleString("en-IN");
+  return '<div class="buy"><div class="bh2">💳 '+(paid?(en?"Renew or upgrade":"Plan आगे बढ़ाएँ या बड़ा लें"):(en?"Become a PataBook Member":"PataBook Member बनें"))+'</div><small>'+(en?"1 year · paid once · no auto-renewal · via Google Play":"1 साल · एक बार भुगतान · अपने-आप renew नहीं · Google Play से")+'</small>'+
+    PLAYP.map(p=>{const t=p.tier,n=window.PBPlan?PBPlan.name(t,true):t;
+      return '<div class="bp pt-'+t+'"><div class="bt"><b>'+(ic[t]||"")+' '+esc(n)+' Member</b><span>'+price(p)+'<small>/'+(en?"year":"साल")+'</small></span></div>'+
+        '<div class="bf">'+(window.PBPlan?('<i>📷 '+PBPlan.limT(t,"photos")+(en?" photos":" फ़ोटो")+'</i><i>🛍️ '+PBPlan.limT(t,"products")+' products</i>'+F.filter(f=>PBPlan.hasT(t,f[0])).map(f=>'<i>'+f[1]+'</i>').join("")):'')+'</div>'+
+        (inApp?'<button type="button" data-buy="'+i+'" data-p="'+esc(p.product)+'">'+(en?"Buy with Google Play":"Google Play से खरीदें")+'</button>':'<a href="'+store+'" target="_blank" rel="noopener">'+(en?"Buy in the PataBook app ›":"PataBook app में खरीदें ›")+'</a>')+'</div>';}).join("")+
+    '<small style="margin-top:8px">'+(en?"By buying you accept the ":"खरीदकर आप ")+'<a href="terms.html">'+(en?"Terms":"नियम")+'</a> · <a href="refund.html">'+(en?"Refund Policy":"Refund नीति")+'</a>'+(en?".":" मानते हैं।")+'</small><div class="err" id="bye'+i+'"></div></div>';
+}
 function premBlock(b,i){
   if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
   if(P.until){
@@ -357,8 +382,9 @@ function premBlock(b,i){
     const t=tierOf(b),tn=window.PBPlan?PBPlan.name(t,en):"Premium",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";
     return '<div class="pm pt-'+t+'"><div class="ph">'+ic+' PataBook '+esc(window.PBPlan?PBPlan.name(t,true):tn)+' Member</div><small>'+(en?"Active till "+till:till+" तक चालू")+(PH(b,"top")?(en?" · ⭐ your shop shows on top":" · ⭐ आपकी दुकान ऊपर दिखती है"):"")+'</small>'+
       (PH(b,"report")?'<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small>':'')+
-      (PH(b,"banner")?banBlock(b,i):'')+'</div>';
+      (PH(b,"banner")?banBlock(b,i):'')+buyBlock(b,i,true)+'</div>';
   }
+  if(window.PBPlay&&PBPlay.on()&&PLAYP&&PLAYP.length)return buyBlock(b,i,false);
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
   const r=P.request;
   const feats='<ul><li>⭐ '+(en?"Your shop on top in search and categories":"Search और category में आपकी दुकान ऊपर")+'</li><li>💎 '+(en?"Premium badge":"\"Premium\" निशान")+'</li><li>🖼️ '+(en?"Photo gallery (8 photos)":"फ़ोटो gallery (8 फ़ोटो)")+'</li><li>📊 '+(en?"Full 30-day report":"30 दिन की पूरी रिपोर्ट")+'</li><li>💼 '+(en?"Post vacancies":"Vacancy (नौकरी) डालना")+'</li></ul>';
@@ -525,7 +551,14 @@ function draw(){
 }
 $("list").addEventListener("change",e=>{const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
   const g=e.target.closest("[data-bup]");if(g&&g.files&&g.files[0])addBanner(+g.dataset.bup,g.files[0]);});
-$("list").addEventListener("click",async e=>{const r=e.target.closest("[data-brm]");if(!r)return;const b=ROWS[+r.dataset.brm],en=L()==="en";
+$("list").addEventListener("click",async e=>{
+  const bx=e.target.closest("[data-buyx]");if(bx){BUYOPEN[ROWS[+bx.dataset.buyx].slug]=1;draw();return;}
+  const bb=e.target.closest("[data-buy]");if(bb){const i=+bb.dataset.buy,b=ROWS[i],en=L()==="en",er=$("bye"+i);bb.disabled=true;if(er){er.style.color="#5b6475";er.textContent=en?"Opening Google Play…":"Google Play खुल रहा है…";}
+    const v=await PBPlay.buy(b.slug,bb.dataset.p);
+    if(v.ok){PREM=await rpc("pb_my_premium")||{};if(window.PBPlan)PBPlan.set(b.slug,tierOf(b));delete BUYOPEN[b.slug];await loadPrem();draw();alert((en?"✅ Done! Your plan is active till ":"✅ हो गया! आपका plan चालू है — ")+new Date(v.until).toLocaleDateString(en?"en-IN":"hi-IN",{day:"numeric",month:"short",year:"numeric"})+(en?"":" तक"));return;}
+    bb.disabled=false;const e2=$("bye"+i);if(e2){e2.style.color="";e2.textContent=v.error==="cancelled"?(en?"Payment cancelled.":"भुगतान रद्द किया गया।"):v.error==="pending"?(en?"Payment is pending with Google. The plan starts as soon as it completes — reopen My Shop later.":"Google पर भुगतान अभी pending है। पूरा होते ही plan चालू होगा — थोड़ी देर बाद \"मेरी दुकान\" फिर खोलें।"):(en?"Could not complete. If money was deducted, reopen My Shop — it is checked again automatically. Error: ":"पूरा नहीं हो सका। पैसा कटा हो तो \"मेरी दुकान\" फिर खोलें — अपने-आप दोबारा जाँच होगी। गलती: ")+esc(v.error||"");}
+    return;}
+  const r=e.target.closest("[data-brm]");if(!r)return;const b=ROWS[+r.dataset.brm],en=L()==="en";
   if(!confirm(en?"Remove your banner?":"Banner हटाएँ?"))return;r.disabled=true;try{ME=await PBA.session();await rpc("pb_banner_remove",{p_slug:b.slug});delete BAN[b.slug];draw();}catch(x){r.disabled=false;alert(en?"Could not remove.":"हटा नहीं सके।");}});
 $("list").addEventListener("click",async e=>{
   const pmb=e.target.closest("[data-pm]");
