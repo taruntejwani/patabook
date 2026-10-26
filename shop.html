@@ -203,7 +203,7 @@ html.t-silver .top{background:rgba(253,253,254,.94)}
 html.t-silver .hero{background:radial-gradient(130% 120% at 80% -10%,#ffffff 0%,rgba(255,255,255,0) 55%),linear-gradient(160deg,#fdfdfe 0%,#f0f2f5 55%,#d9dee5 100%);border-bottom-color:#aeb7c3}
 html.t-silver .tb img,html.t-silver .tb .ini{box-shadow:0 0 0 1.5px #aeb7c3}
 html.t-silver .hlogo.gold img,html.t-silver .hlogo.gold .ini{box-shadow:0 0 0 3px #fff,0 0 0 6px #aeb7c3,0 10px 26px rgba(0,0,0,.25)}
-html.t-silver .hlogo .crn{filter:grayscale(1) brightness(1.2) drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+
 html.t-silver .chip{color:#4c5664}html.t-silver .chip.gold{background:linear-gradient(135deg,#ffffff,#d5dbe3 50%,#a3adba);color:#1f2833}
 html.t-silver .snav a{color:#4c5664}html.t-silver .snav{background:rgba(240,242,245,.95)}
 html.t-silver .snav a.on,html.t-silver .vbtn a.p,html.t-silver .num a,html.t-silver .dock a,html.t-silver .shr.crd .ic,html.t-silver .shr.crd .go{background:linear-gradient(135deg,#f3f5f8,#c3cbd6 50%,#8f9aa8);color:#1f2833;border-color:#b4bdc9}
@@ -213,11 +213,11 @@ html.t-platinum body{background:linear-gradient(180deg,#f4f6fb 0%,#e6ebf4 100%) 
 html.t-platinum .top{background:rgba(251,252,255,.94)}
 html.t-platinum .hero{background:radial-gradient(130% 120% at 80% -10%,#ffffff 0%,rgba(255,255,255,0) 55%),linear-gradient(160deg,#fbfcff 0%,#e9eef8 55%,#c7d2e6 100%);border-bottom-color:#6d80a6}
 html.t-platinum .tb img,html.t-platinum .tb .ini{box-shadow:0 0 0 1.5px #6d80a6}
-html.t-platinum .hlogo.gold img,html.t-platinum .hlogo.gold .ini{box-shadow:0 0 0 3px #fff,0 0 0 6px #5b6f97,0 10px 26px rgba(20,30,60,.35)}
-html.t-platinum .hlogo .crn{filter:grayscale(1) brightness(1.55) drop-shadow(0 0 4px #9fd3ff) drop-shadow(0 2px 4px rgba(0,0,0,.35))}
-html.t-platinum .chip{color:#2c3a58}html.t-platinum .chip.gold{background:linear-gradient(135deg,#4a5c82,#1c2539);color:#eef3ff}
+html.t-platinum .hlogo.gold img,html.t-platinum .hlogo.gold .ini{box-shadow:0 0 0 3px #fff,0 0 0 6px #7fa6d6,0 10px 26px rgba(20,30,60,.35)}
+html.t-platinum .hlogo .crn{filter:drop-shadow(0 0 5px rgba(140,200,255,.7)) drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+html.t-platinum .chip{color:#2c3a58}html.t-platinum .chip.gold{background:linear-gradient(135deg,#9fd3ff,#4a6fa5 50%,#1c2539);color:#fff}
 html.t-platinum .snav a{color:#2c3a58}html.t-platinum .snav{background:rgba(233,238,248,.95)}
-html.t-platinum .snav a.on,html.t-platinum .vbtn a.p,html.t-platinum .num a,html.t-platinum .dock a,html.t-platinum .shr.crd .ic,html.t-platinum .shr.crd .go{background:linear-gradient(135deg,#5a6e96,#2c3a58 55%,#161d2c);color:#eef3ff;border-color:#3f5075}
+html.t-platinum .snav a.on,html.t-platinum .vbtn a.p,html.t-platinum .num a,html.t-platinum .dock a,html.t-platinum .shr.crd .ic,html.t-platinum .shr.crd .go{background:linear-gradient(135deg,#8cc4f2,#3f6296 50%,#1c2539);color:#eef3ff;border-color:#3f5075}
 html.t-platinum .row,html.t-platinum .rows{border-color:#e1e7f2}html.t-platinum .shr.crd{background:linear-gradient(135deg,#e8edf7,#fbfcff)}
 html.t-silver .num a.w,html.t-platinum .num a.w,html.t-silver .dock a.w,html.t-platinum .dock a.w{background:#25a244;color:#fff}
 html.t-silver .num.dir a.d,html.t-platinum .num.dir a.d{background:#123568;color:#fff}
@@ -373,7 +373,7 @@ function render(){drawSoc();
   const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("फ़ोटो","Photos")],["visit",L("पता","Visit us")],["about",L("हमारे बारे में","About")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
-     '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="pb-crown.webp" alt="">':'')+'</div>'+
+     '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="silver"||TIER()==="platinum"?"pb-crown-"+TIER()+".webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
        '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Silver",gold:"👑 Gold",platinum:"💎 Platinum"}[TIER()]||"👑 Premium")+'</span>':'')+

@@ -90,11 +90,15 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc.bn{padding:0;overflow:hidden;position:relative;width:calc((min(560px,100vw) - 32px - 20px) / 3 * 2 + 10px);background:#eef2f8;border:2px solid #d6dde8}
 .nsc.bn img{width:100%;height:100%;min-height:132px;object-fit:cover;display:block}.nsc.bn .bnl{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px;letter-spacing:.3px}
 .nsc .pbg.pb-silver i,.nsc .pbg.pb-platinum i{font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.4px;border-radius:5px;padding:2px 5px 2px 7px;line-height:1}
-.nsc .pbg.pb-silver .c{filter:grayscale(1) brightness(1.25)}.nsc .pbg.pb-silver i{background:linear-gradient(180deg,#f7f9fb,#c5ccd6);color:#39424e;border:1px solid #aab3bf}
-.nsc .pbg.pb-platinum .c{filter:grayscale(1) brightness(1.5) drop-shadow(0 0 2px #9fd3ff)}.nsc .pbg.pb-platinum i{background:linear-gradient(180deg,#3b4a66,#141a26);color:#e6f0ff;border:1px solid #6b7fa6}
+.nsc .pbg.pb-silver i{background:linear-gradient(180deg,#f7f9fb,#c5ccd6);color:#39424e;border:1px solid #aab3bf}
+.nsc .pbg.pb-platinum i{background:linear-gradient(180deg,#bfe3ff,#4a6fa5 60%,#1c2539);color:#fff;border:1px solid #7fa6d6;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.nsc.pm.pt-silver .vs{background:linear-gradient(135deg,#f6f8fa,#c9d0da 50%,#8f9aa8)!important;color:#1f2833!important;box-shadow:0 2px 6px rgba(90,100,115,.3)!important}
+.nsc.pm.pt-silver .ic{background:#eef1f5!important}.nsc.pm.pt-silver .ic.lg{box-shadow:0 0 0 2px #fff,0 0 0 3.5px #aeb7c3!important}
+.nsc.pm.pt-platinum .vs{background:linear-gradient(135deg,#9fd3ff,#4a6fa5 45%,#1c2539)!important;color:#fff!important;box-shadow:0 2px 8px rgba(40,80,140,.35)!important}
+.nsc.pm.pt-platinum .ic{background:#e8f1fb!important}.nsc.pm.pt-platinum .ic.lg{box-shadow:0 0 0 2px #fff,0 0 0 3.5px #7fa6d6!important}
 .nsc.pm.pt-silver{background:linear-gradient(160deg,#ffffff 0%,#f1f3f6 100%)!important;border-color:#b8c0cb!important;box-shadow:0 8px 20px rgba(90,100,115,.18)!important}
 .nsc.pm.pt-silver b{background:linear-gradient(180deg,#8a95a3,#4f5a68)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
-.nsc.pm.pt-platinum{background:linear-gradient(160deg,#f7f9ff 0%,#e6ebf5 100%)!important;border-color:#5d6f92!important;box-shadow:0 8px 22px rgba(30,45,80,.25)!important}
+.nsc.pm.pt-platinum{background:linear-gradient(160deg,#f7fbff 0%,#e3eefa 100%)!important;border-color:#7fa6d6!important;box-shadow:0 8px 22px rgba(30,45,80,.25)!important}
 .nsc.pm.pt-platinum b{background:linear-gradient(180deg,#3d4d6e,#141c2c)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
 .nsc.pm{background:linear-gradient(160deg,#fffdf7 0%,#fbf6ea 100%);color:#12141c;border:2px solid #e2b34c;box-shadow:0 8px 20px rgba(181,138,42,.22)}
 .nsc.pm b{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.nsc.pm b{background:linear-gradient(180deg,#d4a63d,#B58A2A 55%,#8E6A1C);-webkit-background-clip:text;background-clip:text;color:transparent}}
@@ -383,7 +387,7 @@ function applyLang(){
     });
   }
   /* 👑 plan का निशान: Gold = सुनहरा crown + GOLD PREMIUM; Silver / Platinum = उसी crown पर अपना रंग */
-  function premBadge(t){if(t==="silver"||t==="platinum")return '<span class="pbg pb-'+t+'"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><i>'+(t==="silver"?"SILVER":"PLATINUM")+'</i></span>';
+  function premBadge(t){if(t==="silver"||t==="platinum")return '<span class="pbg pb-'+t+'"><img class="c" src="pb-crown-'+t+'.webp" alt="" width="16" height="16"><i>'+(t==="silver"?"SILVER":"PLATINUM")+'</i></span>';
     return '<span class="pbg"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><img class="g" src="pb-gold-premium.webp" alt="Gold Premium" width="53" height="14"></span>';}
   /* 🖼️ Banner (sql-30): दुकान का banner पट्टी में — दबाने पर दुकान खुले */
   function bannerHTML(b){return '<a class="nsc bn" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" loading="lazy" decoding="async"><span class="bnl">'+((PB.lang&&PB.lang()==="hi")?"विज्ञापन":"Ad")+'</span></a>';}
