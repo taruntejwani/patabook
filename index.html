@@ -579,8 +579,12 @@ function applyLang(){
     w.hidden=!GL.length;if(!GL.length){t.innerHTML="";document.getElementById("gdots").innerHTML="";clearTimeout(G.tm);return;}
     const one=GL.map(gcard).join("");t.innerHTML=GL.length>1?one+gcard(GL[0]):one;   /* आख़िर में पहला card दोबारा: घूमकर लौटते समय पीछे न भागे */
     document.getElementById("gdots").innerHTML=GL.length>1?GL.map(()=>"<i></i>").join(""):"";
-    G.i=0;G.drag=false;gset(false);gwire();gauto();
+    G.i=0;G.drag=false;gset(false);gwire();gauto();requestAnimationFrame(gfit);
     const need=GL.filter(b=>b._lg&&!(b.slug in LOGO)).map(b=>b.slug);if(need.length)gLogos(need);}
+  /* हर नाम अपनी जगह में पूरा बैठे: जितना बड़ा अक्षर आ सके उतना, नहीं आए तो आधा-आधा px घटाकर (कम से कम 13px); "..." से कटे नहीं */
+  function gfit(){document.querySelectorAll("#gpt .nsc.pm b").forEach(b=>{b.style.fontSize="";let fs=parseFloat(getComputedStyle(b).fontSize)||20;
+    while(b.scrollHeight>b.clientHeight+1&&fs>13){fs-=.5;b.style.fontSize=fs+"px";}});}
+  addEventListener("resize",()=>requestAnimationFrame(gfit));if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>requestAnimationFrame(gfit));
   async function gLogos(sl){sl.forEach(k=>LOGO[k]="");
     try{const r=await fetch(SBU+"/rest/v1/businesses?select=slug,logo_url&slug=in.("+encodeURIComponent(sl.map(x=>'"'+String(x).replace(/"/g,"")+'"').join(","))+")",{headers:H});
       if(!r.ok)return;let any=0;(await r.json()).forEach(x=>{if(LRX.test(x.logo_url||"")){LOGO[x.slug]=x.logo_url;any=1;}});if(any)gdraw();}catch(e){}}
