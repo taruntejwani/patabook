@@ -413,8 +413,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (a === 'prem') {
       var pa = PREMA && PREMA[r.slug];
       if (pa) {
-        if (confirm('"' + r.name + '" का Premium ' + fmtShort(pa.until) + ' तक चालू है (' + methodName(pa.method) + ')।\n\nOK = दिन और बढ़ाएँ\nCancel = कुछ नहीं')) premSheet([r.slug], r.name);
-        return;
+        premManage(r, pa); return;
       }
       premSheet([r.slug], r.name); return;
     }
@@ -869,6 +868,31 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ---- 💎 Premium (sql-23): Admin से देना, list, रिकॉर्ड, requests ---- */
   function fmtShort(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
   function methodName(m) { return m === 'cash' ? '💵 नकद' : m === 'gift' ? '🎁 मुफ़्त' : m === 'play' ? '📱 Google Play' : m === 'revoke' ? '⛔ बंद किया' : '—'; }
+  /* 💎 चालू Premium: दिन बढ़ाएँ या Premium बंद करें (दुकान Free हो जाए; logo / products / फ़ोटो मिटते नहीं) */
+  function premManage(r, pa) {
+    var old = $('premMg'); if (old) old.remove();
+    var w = document.createElement('div'); w.id = 'premMg';
+    w.setAttribute('style', 'position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center');
+    var B = 'display:block;width:100%;border-radius:12px;padding:13px;font:inherit;font-weight:800;font-size:15px;margin-top:10px;cursor:pointer;';
+    w.innerHTML = '<div style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px 20px">' +
+      '<h2 style="margin:0 0 4px;font-size:18px;color:#3b2bb8">💎 ' + esc(r.name) + '</h2><p style="margin:0 0 6px;font-size:14px;color:#5b6475">Premium ' + esc(fmtShort(pa.until)) + ' तक चालू · ' + esc(methodName(pa.method)) + '</p>' +
+      '<button type="button" id="pmgExt" style="' + B + 'border:0;background:#3b2bb8;color:#fff">➕ दिन बढ़ाएँ</button>' +
+      '<button type="button" id="pmgOff" style="' + B + 'border:1px solid #f3b8b3;background:#fdecea;color:#b42318">⛔ Premium बंद करें (दुकान Free हो जाए)</button>' +
+      '<button type="button" id="pmgX" style="' + B + 'border:1px solid #d0d7e2;background:#fff;color:#12141c">रहने दें</button>' +
+      '<p id="pmgE" style="min-height:18px;margin:8px 0 0;font-size:13.5px;color:#b42318"></p></div>';
+    document.body.appendChild(w);
+    var close = function () { w.remove(); };
+    w.addEventListener('click', function (e) { if (e.target === w) close(); });
+    w.querySelector('#pmgX').onclick = close;
+    w.querySelector('#pmgExt').onclick = function () { close(); premSheet([r.slug], r.name); };
+    w.querySelector('#pmgOff').onclick = async function () {
+      var why = prompt('"' + r.name + '" का Premium अभी बंद करें?\nदुकान Free हो जाएगी (logo, products, फ़ोटो मिटेंगे नहीं — फिर Premium देने पर वापस आएँगे)।\n\nकारण (सिर्फ आपके रिकॉर्ड के लिए):', '');
+      if (why === null) return;
+      this.disabled = true;
+      try { await rpc('pb_admin_premium_revoke', { p_slug: r.slug, p_note: why || null }); close(); alert('✅ "' + r.name + '" अब Free है।'); load(); }
+      catch (x) { w.querySelector('#pmgE').textContent = 'नहीं हो सका: ' + x.message; this.disabled = false; }
+    };
+  }
   function premSheet(slugs, label) {
     var old = $('premSheet'); if (old) old.remove();
     var w = document.createElement('div'); w.id = 'premSheet';
