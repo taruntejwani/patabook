@@ -167,7 +167,10 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 /* Added quick category icon grid; existing category chips are preserved. */
 .posters{width:100%;margin:16px 0 0}
 .gpw{margin-top:10px;padding:4px 0}.gpw .nsc{min-height:132px}
-.nst .nsc.pm{min-height:165px}/* Gold / Platinum thode lambe (chaudai wahi); baaki cards row ke saath barabar */.pv[hidden]{display:none}
+.gpw .nsv{-webkit-mask-image:none;mask-image:none;cursor:default}.gpw .nst{width:100%;gap:0;transition:transform .45s cubic-bezier(.3,.75,.3,1)}.gpw .nst.nt{transition:none}
+.gpw .nsc.pm{flex:0 0 100%;width:100%;min-height:165px;box-sizing:border-box;box-shadow:none!important}
+.gdots{display:flex;justify-content:center;gap:6px;margin-top:8px}.gdots i{width:7px;height:7px;border-radius:50%;background:#cfd6e2;transition:.25s}.gdots i.on{width:20px;border-radius:999px;background:#B58A2A}
+@media (prefers-reduced-motion:reduce){.gpw .nst{transition:none}}.pv[hidden]{display:none}
 .pv{position:relative;width:100%;aspect-ratio:2/1;overflow:hidden;border-radius:18px;background:#eef3fb;box-shadow:0 6px 18px rgba(26,115,232,.12);touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .ptk{display:flex;height:100%;transition:transform .45s ease;will-change:transform}
 .ptk.nd{transition:none}
@@ -324,7 +327,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   <section class="posters" id="posters" aria-label="Member posters">
     <div class="pv" id="pv"><div class="ptk" id="ptk"></div></div>
     <div class="pdots" id="pdots" aria-hidden="true"></div>
-    <div class="gpw" id="gpw" hidden><div class="nsv" id="gpv"><div class="nst" id="gpt"></div></div></div>
+    <div class="gpw" id="gpw" hidden><div class="nsv" id="gpv"><div class="nst" id="gpt"></div></div><div class="gdots" id="gdots" aria-hidden="true"></div></div>
   </section>
 
   <a class="hsbtn" href="homeservices.html"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b id="hsT">Home Services</b><small id="hsS">Electrician, Plumber, AC Repair घर पर बुलाएं</small></span><span aria-hidden="true" class="go">›</span></a>
@@ -548,29 +551,35 @@ function applyLang(){
   function badge(t){return '<span class="pbg pb-'+t+'"><img class="c" src="'+(t==="platinum"?"pb-diamond.webp":"pb-crown.webp")+'" alt="" width="16" height="16"><i>'+t.toUpperCase()+' MEMBER</i></span>';}
   function gcard(b){const lg=b._lg&&LOGO[b.slug];
     return '<a class="nsc pm pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+badge(b._t)+'<span class="ic'+(lg?' lg':'')+'">'+(lg?'<img src="'+esc(lg)+'" alt="" loading="lazy" decoding="async">':b._ic)+'</span><b>'+esc(b.name)+'</b><span class="ad">'+(b.category?b._ic+' '+esc(b.category):'📍 '+esc(b.address||b.city||""))+'</span><span class="vs">🛍️ '+(hi()?"दुकान देखें":"Visit shop")+' ›</span></a>';}
-  const G={p:0,w:0,loop:false,drag:false,idle:0,moved:0,last:0,on:false};
+  const G={i:0,drag:false,moved:0,on:false,tm:0,fx:0};
+  /* नीचे की पट्टी: एक-एक पूरा pamphlet; 4 सेकंड रुकता है, फिर झट से अगला slide होकर आता है; उँगली से भी पलटा जा सकता है */
   function gdraw(){const w=document.getElementById("gpw"),t=document.getElementById("gpt"),pv=document.getElementById("pv");if(!w||!t)return;
     const has={};P.forEach(b=>has[b.slug]=1);
     GL=loaded?GP.filter(b=>!has[b.slug]).sort((a,b)=>(a._t==="platinum"?0:1)-(b._t==="platinum"?0:1)):[];
-    pv.hidden=!P.length&&GL.length>0;            /* poster एक भी नहीं: खाली बड़ा डिब्बा नहीं, सिर्फ़ चलती पट्टी */
-    w.hidden=!GL.length;if(!GL.length){t.innerHTML="";return;}
-    const one=GL.map(gcard).join("");t.innerHTML=one;
-    requestAnimationFrame(()=>{const vw=document.getElementById("gpv").clientWidth;G.loop=t.scrollWidth>vw;
-      if(G.loop)t.innerHTML=one+one;G.vw=vw;G.w=G.loop?t.scrollWidth/2:vw+t.scrollWidth;if(!G.loop)G.p=vw*.35;gplace();gstart();});   /* कम दुकानें: दाएँ से आकर बाएँ निकलें (ऊपर वाली पट्टी जैसा) */
+    pv.hidden=!P.length&&GL.length>0;            /* poster एक भी नहीं: खाली बड़ा डिब्बा नहीं, सिर्फ़ यह पट्टी */
+    w.hidden=!GL.length;if(!GL.length){t.innerHTML="";document.getElementById("gdots").innerHTML="";clearTimeout(G.tm);return;}
+    const one=GL.map(gcard).join("");t.innerHTML=GL.length>1?one+gcard(GL[0]):one;   /* आख़िर में पहला card दोबारा: घूमकर लौटते समय पीछे न भागे */
+    document.getElementById("gdots").innerHTML=GL.length>1?GL.map(()=>"<i></i>").join(""):"";
+    G.i=0;G.drag=false;gset(false);gwire();gauto();
     const need=GL.filter(b=>b._lg&&!(b.slug in LOGO)).map(b=>b.slug);if(need.length)gLogos(need);}
   async function gLogos(sl){sl.forEach(k=>LOGO[k]="");
     try{const r=await fetch(SBU+"/rest/v1/businesses?select=slug,logo_url&slug=in.("+encodeURIComponent(sl.map(x=>'"'+String(x).replace(/"/g,"")+'"').join(","))+")",{headers:H});
       if(!r.ok)return;let any=0;(await r.json()).forEach(x=>{if(LRX.test(x.logo_url||"")){LOGO[x.slug]=x.logo_url;any=1;}});if(any)gdraw();}catch(e){}}
-  function gplace(){const t=document.getElementById("gpt");if(!G.w)return;const q=((G.p%G.w)+G.w)%G.w;t.style.transform="translateX("+(G.loop?-q:G.vw-q)+"px)";}
-  function gstart(){if(G.on)return;G.on=true;const red=matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const v=document.getElementById("gpv");let sx=0,sp=0;
-    v.addEventListener("pointerdown",e=>{G.drag=true;G.moved=0;sx=e.clientX;sp=G.p;});
-    addEventListener("pointermove",e=>{if(!G.drag)return;G.p=sp-(e.clientX-sx);G.moved=Math.max(G.moved,Math.abs(e.clientX-sx));gplace();});
-    const up=()=>{if(!G.drag)return;G.drag=false;G.idle=performance.now()+1500;};addEventListener("pointerup",up);addEventListener("pointercancel",up);
-    v.addEventListener("click",e=>{if(G.moved>6){e.preventDefault();e.stopPropagation();G.moved=0;}},true);v.addEventListener("dragstart",e=>e.preventDefault());
-    const tick=now=>{const dt=Math.min(.05,(now-(G.last||now))/1000);G.last=now;
-      if(G.w&&!G.drag&&now>G.idle){G.p+=(G.loop?Math.max(25,G.w/Math.max(20,GL.length*4.5)):55)*(red?.5:1)*dt;gplace();}requestAnimationFrame(tick);};
-    requestAnimationFrame(tick);}
+  function gset(anim,dx){const t=document.getElementById("gpt");if(!t)return;t.classList.toggle("nt",!anim);
+    t.style.transform="translateX(calc(-"+G.i*100+"% + "+(dx||0)+"px))";
+    const d=document.querySelectorAll("#gdots i"),k=GL.length?G.i%GL.length:0;d.forEach((e,x)=>e.classList.toggle("on",x===k));}
+  function gnext(){if(GL.length<2)return;G.i++;gset(true);
+    if(G.i>=GL.length){clearTimeout(G.fx);G.fx=setTimeout(()=>{G.i=0;gset(false);},520);}}   /* नक़ली आख़िरी card पर पहुँचकर चुपचाप पहले पर लौटना */
+  function gprev(){if(GL.length<2)return;if(G.i<=0){G.i=GL.length;gset(false);void document.getElementById("gpt").offsetWidth;}G.i--;gset(true);}
+  function gauto(){clearTimeout(G.tm);if(GL.length<2)return;const red=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    G.tm=setTimeout(function f(){if(!G.drag&&!document.hidden)gnext();G.tm=setTimeout(f,4000);},4000);}
+  function gwire(){if(G.on)return;G.on=true;const v=document.getElementById("gpv");let sx=0,sy=0,ph=0;
+    v.addEventListener("pointerdown",e=>{if(GL.length<2)return;G.drag=true;G.moved=0;sx=e.clientX;sy=e.clientY;clearTimeout(G.tm);clearTimeout(G.fx);if(G.i>=GL.length){G.i=0;}gset(false);});
+    addEventListener("pointermove",e=>{if(!G.drag)return;const dx=e.clientX-sx;G.moved=Math.max(G.moved,Math.abs(dx));gset(false,dx);});
+    const up=e=>{if(!G.drag)return;G.drag=false;const dx=(e&&e.clientX!=null?e.clientX:sx)-sx;
+      if(dx<-40)gnext();else if(dx>40)gprev();else gset(true);gauto();};
+    addEventListener("pointerup",up);addEventListener("pointercancel",up);
+    v.addEventListener("click",e=>{if(G.moved>6){e.preventDefault();e.stopPropagation();G.moved=0;}},true);v.addEventListener("dragstart",e=>e.preventDefault());}
   document.addEventListener("pb-gp",e=>{GP=Array.isArray(e.detail)?e.detail:[];if(loaded)draw();});
   function draw(){const t=tk();if(!t)return;
     const city=String(document.getElementById("city")?.value||"").trim();
