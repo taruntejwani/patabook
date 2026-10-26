@@ -92,6 +92,15 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc .pbg.pb-silver i,.nsc .pbg.pb-platinum i{font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.4px;border-radius:5px;padding:2px 5px 2px 7px;line-height:1}
 .nsc .pbg.pb-silver i{background:linear-gradient(180deg,#f7f9fb,#c5ccd6);color:#39424e;border:1px solid #aab3bf}
 .nsc .pbg.pb-platinum i{background:linear-gradient(180deg,#bfe3ff,#4a6fa5 60%,#1c2539);color:#fff;border:1px solid #7fa6d6;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.nsc.tc{position:relative}.nsc.tc .tcb{position:absolute;top:7px;right:6px;display:flex;align-items:center;gap:3px;font-size:8.5px;font-weight:900;letter-spacing:.3px;border-radius:999px;padding:1px 6px 1px 2px}
+.nsc.tc .tcb img{width:14px;height:14px;border-radius:50%}
+.nsc.tc.pt-silver{background:linear-gradient(150deg,#ffffff 0%,#dfe4ea 100%)!important;color:#1f2833!important;border:2px solid #b8c0cb;box-shadow:0 6px 16px rgba(90,100,115,.2)!important}
+.nsc.tc.pt-silver .tcb{background:linear-gradient(180deg,#f7f9fb,#c5ccd6);color:#39424e;border:1px solid #aab3bf}
+.nsc.tc.pt-gold{background:linear-gradient(150deg,#fffdf7 0%,#f4e4b8 100%)!important;color:#12141c!important;border:2px solid #e2b34c;box-shadow:0 6px 16px rgba(181,138,42,.22)!important}
+.nsc.tc.pt-gold .tcb{background:linear-gradient(135deg,#f6e3a8,#d9b257 45%,#B58A2A);color:#123568}
+.nsc.tc.pt-platinum{background:linear-gradient(150deg,#f7fbff 0%,#d6e6f8 100%)!important;color:#12141c!important;border:2px solid #7fa6d6;box-shadow:0 6px 16px rgba(40,80,140,.22)!important}
+.nsc.tc.pt-platinum .tcb{background:linear-gradient(180deg,#bfe3ff,#4a6fa5 60%,#1c2539);color:#fff}
+.nsc.tc b{color:#12141c!important}.nsc.tc .ad{color:#5b6475!important;opacity:1!important}.nsc.tc .ic{background:rgba(255,255,255,.7)!important}
 .nsc.pm.pt-silver .vs{background:linear-gradient(135deg,#f6f8fa,#c9d0da 50%,#8f9aa8)!important;color:#1f2833!important;box-shadow:0 2px 6px rgba(90,100,115,.3)!important}
 .nsc.pm.pt-silver .ic{background:#eef1f5!important}.nsc.pm.pt-silver .ic.lg{box-shadow:0 0 0 2px #fff,0 0 0 3.5px #aeb7c3!important}
 .nsc.pm.pt-platinum .vs{background:linear-gradient(135deg,#9fd3ff,#4a6fa5 45%,#1c2539)!important;color:#fff!important;box-shadow:0 2px 8px rgba(40,80,140,.35)!important}
@@ -342,7 +351,7 @@ function applyLang(){
   /* दुकान ने logo लगाया हो तो logo, नहीं तो category वाला icon */
   const LOGO={},LG=k=>window.PBPlan&&PBPlan.has(k,"logo")&&LOGO[k],LOGO_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   /* Premium दुकानें (Admin से चालू) — पट्टी में navy + सुनहरा card */
-  const PREMS={};
+  const PREMS={},TC={};
   /* Premium card: पते की जगह "Category · काम" (काम = My Shop → जानकारी बदलें → "Products / Services" की पहली line) */
   const PWORK={};
   function premLine(b){return b.category||"";}
@@ -359,7 +368,9 @@ function applyLang(){
     if(!(window.PB_SITE&&PB_SITE.premium))return;
     const sl=L.map(b=>b.slug).filter(Boolean).slice(0,300);if(!sl.length)return;
     if(!window.PBPlan)return;try{await PBPlan.load(sl);}catch(e){return;}
-    sl.forEach(k=>{if(PBPlan.has(k,"strip"))PREMS[k]=PBPlan.tier(k);});   /* plan में "Home पट्टी" ON */
+    sl.forEach(k=>{if(PBPlan.has(k,"strip"))PREMS[k]=PBPlan.tier(k);else if(PBPlan.paid(k))TC[k]=PBPlan.tier(k);});   /* "Home पट्टी" ON = बड़ा card; OFF = छोटा card पर उसी plan के रंग */
+    document.querySelectorAll("#nst .ic[data-s]").forEach(el=>{const t=TC[el.dataset.s],a=el.closest(".nsc");if(!t||!a||a.classList.contains("tc"))return;
+      a.classList.add("tc","pt-"+t);const n=a.querySelector(".new");if(n)n.outerHTML=tcBadge(t);});
     document.querySelectorAll("#nst .ic[data-s]").forEach(el=>{
       const a=el.closest(".nsc");if(!a||!PREMS[el.dataset.s]||a.classList.contains("pm"))return;
       a.classList.add("pm");if(!a.querySelector(".vs"))a.insertAdjacentHTML("beforeend",'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>');const n=a.querySelector(".new");if(n)n.outerHTML=premBadge(PREMS[el.dataset.s]);a.classList.add("pt-"+PREMS[el.dataset.s]);
@@ -387,6 +398,7 @@ function applyLang(){
     });
   }
   /* 👑 plan का निशान: Gold = सुनहरा crown + GOLD PREMIUM; Silver / Platinum = उसी crown पर अपना रंग */
+  function tcBadge(t){return '<span class="tcb"><img src="'+(t==="gold"?"pb-crown.webp":"pb-crown-"+t+".webp")+'" alt="" width="14" height="14">'+({silver:"SILVER",gold:"GOLD",platinum:"PLATINUM"}[t]||"")+'</span>';}
   function premBadge(t){if(t==="silver"||t==="platinum")return '<span class="pbg pb-'+t+'"><img class="c" src="pb-crown-'+t+'.webp" alt="" width="16" height="16"><i>'+(t==="silver"?"SILVER":"PLATINUM")+'</i></span>';
     return '<span class="pbg"><img class="c" src="pb-crown.webp" alt="" width="16" height="16"><img class="g" src="pb-gold-premium.webp" alt="Gold Premium" width="53" height="14"></span>';}
   /* 🖼️ Banner (sql-30): दुकान का banner पट्टी में — दबाने पर दुकान खुले */
@@ -401,7 +413,7 @@ function applyLang(){
   /* पट्टी की list: हर 3 दुकानों के बाद एक banner */
   function items(){if(!BANNERS.length)return L;const out=[];let k=0;L.forEach((b,i)=>{if(i%3===0&&k<BANNERS.length)out.push(BANNERS[k++]);out.push(b);});while(k<BANNERS.length)out.push(BANNERS[k++]);return out;}
   function cardHTML(b){
-    return (b._ban?bannerHTML(b):'<a class="nsc'+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?premBadge(PREMS[b.slug]):'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">📍 '+esc(b.address||b.city||"")+'</span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
+    return (b._ban?bannerHTML(b):'<a class="nsc'+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">📍 '+esc(b.address||b.city||"")+'</span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
