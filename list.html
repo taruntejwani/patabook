@@ -1141,7 +1141,7 @@ render();
   function reg(){try{return localStorage.getItem("pb-reg")}catch(e){return null}}
   var mode=null;try{mode=sessionStorage.getItem("pb-addmode")}catch(e){}
   if(/[?&]m=manual\b/.test(location.search)){mode="manual";try{sessionStorage.setItem("pb-addmode","manual")}catch(e){}}
-  var show=!mode&&!reg();
+  var show=!mode&&!reg()&&!!(window.PB_SITE&&PB_SITE.aiExtract);   /* Worker में /extract डालने के बाद site-config में aiExtract:true करें */
   if(show){document.body.classList.add("pre");$("choose").hidden=false;}
   function lab(){
     $("chH").textContent=t("h");$("chS").textContent=t("s");$("chAIt").textContent=t("ai");$("chAIs").textContent=t("ais");

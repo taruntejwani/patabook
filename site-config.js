@@ -14,6 +14,8 @@ window.PB_SITE = {
 
   /* AI Poster: 'PataBook AI' Worker का पता (जैसे 'https://patabook-ai.XXXX.workers.dev'). खाली रहे तो AI बटन नहीं दिखेगा। */
   aiUrl: 'https://patabook-ai.tejwani512.workers.dev',
+  /* 🤖 "AI से जोड़ें" (दुकान जोड़ते समय): patabook-ai Worker में /extract डालकर Deploy करने के बाद ही true करें। */
+  aiExtract: false,
 
   /* Mobile OTP Worker (Fast2SMS). STAGING: नीचे staging Worker का पता है।
      Production में यह पता तभी बदलें जब staging के सारे tests पास हों। खाली रहे तो Mobile OTP बटन नहीं दिखेगा। */
