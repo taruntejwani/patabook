@@ -12,7 +12,9 @@
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   var a = document.createElement('a');
   a.id = 'pbAddFab'; a.href = 'list.html'; a.setAttribute('aria-label', 'Add Your Business');
-  a.innerHTML = '<i>➕</i><span>Add Your Business</span>';
+  a.innerHTML = '<i>➕</i><span id="pbAddTx">Add Your Business</span>';
+  function lab() { try { if (window.PB && PB.t) { var v = PB.t('addbiz'); if (v && v !== 'addbiz') { document.getElementById('pbAddTx').textContent = v; a.setAttribute('aria-label', v); } } } catch (e) {} }
   a.addEventListener('click', function () { try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) {} });
   document.body.appendChild(a);
+  lab(); if (window.PB && PB.onChange) PB.onChange(lab);
 })();
