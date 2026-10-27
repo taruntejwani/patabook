@@ -2,6 +2,9 @@
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="दुकान की अपनी website — सारे products, फ़ोटो, पता और WhatsApp। Powered by PataBook.">
 <title>Shop — PataBook</title>
+<meta property="og:site_name" content="PataBook">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://patabook.in/icon-512.png">
 <link rel="icon" href="pin.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#fbf6ea">
@@ -325,6 +328,7 @@ async function load(){
     if(!rows||!rows.length){app.innerHTML='<p class="note">'+L("यह दुकान अभी उपलब्ध नहीं है।","This shop is not available right now.")+'<br><br><a href="index.html" style="color:#1a73e8;font-weight:700">PataBook ›</a></p>';return;}
     B=rows[0];
     document.title=B.name+" — "+(B.category||"Shop")+" | PataBook";
+    try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}
     render();
     await Promise.all([loadPrem(),loadContact()]);
