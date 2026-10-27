@@ -1166,7 +1166,7 @@ render();
   function reqOk(){return !!(card.name&&card.owner&&card.city&&card.address)}
   var last={};
   function drawCard(){
-    var hrs=card.open?(card.open+(card.close?" "+t("to")+" "+card.close:"")):"";
+    var hrs=card.open?(card.open+(card.close?" "+t("to")+" "+card.close:"")):(card.close?"… "+t("to")+" "+card.close:"");
     var rows=[["nm",card.name],["cat",card.category],["ow",card.owner],["ct",card.city],["ar",card.area],["ad",card.address],["hr",hrs],["sv",card.services]];
     var any=rows.some(function(r){return r[1]});
     $("aiCard").hidden=!any;
