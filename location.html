@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="site-config.js"></script>
 <script src="pb-auth.js"></script>
+<script src="pb-icons.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:"Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#e8f1ff 0%,#fff 42%);color:#12141c;min-height:100vh}
@@ -30,6 +31,8 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
 .st.err{color:#c5221f}.st.ok{color:#137333}
 .ok{background:#e6f4ea;color:#137333;border-radius:12px;padding:14px;line-height:1.55;font-size:15px;font-weight:600}
 .muted{color:#5b6475;text-align:center;padding:30px 10px}
+.hd{display:flex;align-items:center;gap:8px}.hd .pbi{width:24px;height:24px;color:#1a73e8}.btn .pbi{width:20px;height:20px;margin-right:8px;vertical-align:-4px}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;line-height:1.45;color:#12141c;background:#f4f8ff;border:1px solid #cfe0fb;border-radius:12px;padding:10px 12px}.chk input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:#1a73e8}
 .pinhelp{display:flex;gap:8px;align-items:center;font-size:13px;color:#174ea6;background:#eef4ff;border-radius:10px;padding:8px 10px;margin-top:8px}
 [hidden]{display:none!important}
 </style>
@@ -50,21 +53,22 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
 
  <div id="main" hidden>
   <div class="card">
-   <h1 data-en="📍 Shop location">📍 दुकान की location</h1>
+   <h1 class="hd"><script>document.write(PBI("pin"))</script><span data-en="Shop location">दुकान का स्थान (location)</span></h1>
    <p class="shop" id="shopName"></p><p class="addr" id="shopAddr"></p>
    <p class="hint" id="curTxt"></p>
   </div>
   <div class="card">
-   <button class="btn gps" type="button" id="gpsBtn" data-en="📍 I am at my shop now — use my location">📍 मैं अभी दुकान पर हूँ — मेरी location लगाएँ</button>
+   <button class="btn gps" type="button" id="gpsBtn"><script>document.write(PBI("pin"))</script><span data-en="I am at my shop now — use my location">मैं अभी दुकान पर हूँ — मेरा स्थान लगाएँ</span></button>
    <div class="st" id="gpsSt"></div>
    <div id="map" style="margin-top:12px"></div>
-   <div class="pinhelp"><span>✋</span><span data-en="Drag the red pin or tap on the map to put it exactly on your shop.">लाल pin को उँगली से खिसकाएँ, या नक्शे पर दबाएँ — pin ठीक दुकान पर रखें।</span></div>
-   <button class="btn" type="button" id="saveBtn" disabled data-en="Save location">Location सेव करें</button>
+   <div class="pinhelp"><span data-en="Zoom in, then drag the red pin (or tap the map) to put it exactly on your shop.">नक्शे को पास (zoom) करें, फिर लाल पिन को उँगली से खिसकाएँ या नक्शे पर दबाएँ — पिन ठीक दुकान पर रखें।</span></div>
+   <label class="chk" id="chkBox"><input type="checkbox" id="chk"><span data-en="I checked: the pin is exactly on my shop.">मैंने देख लिया: पिन ठीक मेरी दुकान पर है।</span></label>
+   <button class="btn" type="button" id="saveBtn" disabled data-en="Save location">स्थान सेव करें</button>
    <div class="st" id="saveSt"></div>
   </div>
  </div>
  <div class="card" id="done" hidden>
-  <div class="ok" data-en="✅ Location saved. Customers will now get the right way to your shop.">✅ Location सेव हो गई। अब ग्राहकों को आपकी दुकान का सही रास्ता मिलेगा।</div>
+  <div class="ok" data-en="Location saved. Customers will now get the right way to your shop.">स्थान सेव हो गया। अब ग्राहकों को आपकी दुकान का सही रास्ता मिलेगा।</div>
   <a class="btn" id="viewShop" href="#" data-en="View shop page">दुकान का पेज देखें</a>
   <a class="btn sec" href="mybusiness.html" data-en="Back to My Shop">मेरी दुकान पर वापस</a>
  </div>
@@ -79,7 +83,13 @@ document.querySelectorAll("[data-en]").forEach(function(el){el.textContent=el.ge
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const $=id=>document.getElementById(id),EN=!!window.PB_EN,T=(h,e)=>EN?e:h;
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
-let S=null,map=null,mk=null,pos=null,orig=null;
+let S=null,map=null,mk=null,pos=null,orig=null,accM=0;
+function canSave(){$("saveBtn").disabled=!(pos&&$("chk").checked);}
+$("chk").onchange=canSave;
+function circle(la,ln,r){const pts=[],d=r/111320,c=Math.cos(la*Math.PI/180);for(let i=0;i<=48;i++){const t=i/48*2*Math.PI;pts.push([ln+d*Math.sin(t)/c,la+d*Math.cos(t)]);}return{type:"Feature",geometry:{type:"Polygon",coordinates:[pts]}};}
+function drawAcc(la,ln,r){if(!map)return;try{const f=r>0?circle(la,ln,r):{type:"FeatureCollection",features:[]};
+  if(map.getSource("acc"))map.getSource("acc").setData(f);
+  else{map.addSource("acc",{type:"geojson",data:f});map.addLayer({id:"acc-f",type:"fill",source:"acc",paint:{"fill-color":"#1a73e8","fill-opacity":.15}});map.addLayer({id:"acc-l",type:"line",source:"acc",paint:{"line-color":"#1a73e8","line-width":1.5}});}}catch(e){}}
 function only(id){["loading","needLogin","notOwner","setup","main","done"].forEach(x=>$(x).hidden=x!==id);}
 async function rpc(fn,args){
   const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+S.access_token,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
@@ -89,12 +99,12 @@ async function rpc(fn,args){
 }
 function st(id,t,cls){const e=$(id);e.textContent=t||"";e.className="st"+(cls?" "+cls:"");}
 function setPos(la,ln,fly){
-  pos={lat:+(+la).toFixed(6),lng:+(+ln).toFixed(6)};$("saveBtn").disabled=false;
+  pos={lat:+(+la).toFixed(6),lng:+(+ln).toFixed(6)};$("chk").checked=false;canSave();
   if(!map)return;
   if(!mk){mk=new maplibregl.Marker({color:"#d93025",draggable:true}).setLngLat([pos.lng,pos.lat]).addTo(map);
-    mk.on("dragend",()=>{const p=mk.getLngLat();pos={lat:+p.lat.toFixed(6),lng:+p.lng.toFixed(6)};$("saveBtn").disabled=false;st("saveSt","");});}
+    mk.on("dragend",()=>{const p=mk.getLngLat();pos={lat:+p.lat.toFixed(6),lng:+p.lng.toFixed(6)};$("chk").checked=false;canSave();drawAcc(0,0,0);st("saveSt","");});}
   else mk.setLngLat([pos.lng,pos.lat]);
-  if(fly)map.flyTo({center:[pos.lng,pos.lat],zoom:17.5,speed:1.6});
+  if(fly)map.flyTo({center:[pos.lng,pos.lat],zoom:accM>30?19:18,speed:1.6});
 }
 function loadMap(center,zoom){
   return new Promise(res=>{
@@ -102,24 +112,27 @@ function loadMap(center,zoom){
     s.onload=()=>{try{
       map=new maplibregl.Map({container:"map",style:"https://tiles.openfreemap.org/styles/liberty",center:[center[1],center[0]],zoom:zoom,attributionControl:{compact:true}});
       map.addControl(new maplibregl.NavigationControl({showCompass:false}),"top-right");
-      map.on("click",e=>{setPos(e.lngLat.lat,e.lngLat.lng,false);st("saveSt","");});
+      map.on("click",e=>{setPos(e.lngLat.lat,e.lngLat.lng,false);drawAcc(0,0,0);st("saveSt","");});
       map.on("load",()=>res());setTimeout(res,6000);
     }catch(e){res();}};
-    s.onerror=()=>{$("map").innerHTML='<p class="muted">'+T("नक्शा नहीं खुल पाया — ऊपर वाले हरे बटन से location लगाएँ।","Map could not load — use the green button above.")+'</p>';res();};
+    s.onerror=()=>{$("map").innerHTML='<p class="muted">'+T("नक्शा नहीं खुल पाया — ऊपर वाले हरे बटन से स्थान लगाएँ।","Map could not load — use the green button above.")+'</p>';res();};
     document.head.appendChild(s);
   });
 }
 $("gpsBtn").onclick=()=>{
-  if(!navigator.geolocation){st("gpsSt",T("इस फ़ोन में location नहीं चलती।","Location is not available on this phone."),"err");return;}
-  const b=$("gpsBtn");b.disabled=true;st("gpsSt",T("📡 location ढूँढ रहे हैं… (खुली जगह / दुकान के दरवाज़े पर खड़े हों)","📡 Finding your location… (stand at the shop door / open place)"));
+  if(!navigator.geolocation){st("gpsSt",T("इस फ़ोन में स्थान (location) नहीं चलता।","Location is not available on this phone."),"err");return;}
+  const b=$("gpsBtn");b.disabled=true;st("gpsSt",T("स्थान ढूँढ रहे हैं… (दुकान के दरवाज़े के बाहर खुली जगह में खड़े रहें, 10–20 सेकंड)","Finding your location… (stand outside the shop door in the open, 10–20 seconds)"));
   navigator.geolocation.getCurrentPosition(p=>{
     b.disabled=false;const a=Math.round(p.coords.accuracy||0);
-    if(p.coords.latitude<6||p.coords.latitude>38||p.coords.longitude<67||p.coords.longitude>98){st("gpsSt",T("यह location भारत की नहीं लग रही। दोबारा कोशिश करें।","This location does not look like India. Try again."),"err");return;}
-    setPos(p.coords.latitude,p.coords.longitude,true);
-    st("gpsSt",(a>80?T("⚠️ location ±"+a+" मीटर तक गलत हो सकती है — pin को खिसकाकर ठीक दुकान पर रखें।","⚠️ Location may be off by ±"+a+" m — drag the pin exactly onto your shop."):T("✅ location मिल गई (±"+a+" मीटर)। ज़रूरत हो तो pin खिसकाएँ, फिर सेव करें।","✅ Location found (±"+a+" m). Adjust the pin if needed, then save.")),a>80?"err":"ok");
+    if(p.coords.latitude<6||p.coords.latitude>38||p.coords.longitude<67||p.coords.longitude>98){st("gpsSt",T("यह स्थान भारत का नहीं लग रहा। दोबारा कोशिश करें।","This location does not look like India. Try again."),"err");return;}
+    accM=a;setPos(p.coords.latitude,p.coords.longitude,true);drawAcc(p.coords.latitude,p.coords.longitude,a);
+    const good=a<=30,mid=a>30&&a<=80;
+    st("gpsSt",good?T("स्थान ठीक मिला (सटीकता ±"+a+" मीटर)। पिन दुकान पर हो तो नीचे टिक करके सेव करें।","Good fix (accuracy ±"+a+" m). If the pin is on your shop, tick the box and save.")
+      :mid?T("स्थान लगभग मिला (±"+a+" मीटर)। नीला घेरा बताता है कि असली जगह कहाँ तक हो सकती है। पिन को खिसकाकर दुकान पर रखें।","Approximate fix (±"+a+" m). The blue circle shows where the real spot may be. Drag the pin onto your shop.")
+      :T("स्थान साफ़ नहीं मिला (±"+a+" मीटर)। बैटरी सेवर बंद करें, खुली जगह जाकर दोबारा दबाएँ, या पिन ख़ुद दुकान पर रखें।","Weak fix (±"+a+" m). Turn off battery saver, go to an open spot and press again, or place the pin yourself."),good?"ok":(mid?"":"err"));
   },e=>{b.disabled=false;
-    st("gpsSt",e&&e.code===1?T("Location की अनुमति नहीं मिली। फ़ोन की Settings → Apps → PataBook (या Chrome) → Permissions → Location → Allow करें। या नक्शे पर pin रखें।","Location permission denied. Phone Settings → Apps → PataBook (or Chrome) → Permissions → Location → Allow. Or place the pin on the map.")
-      :T("Location नहीं मिली। GPS चालू करके दोबारा दबाएँ, या नक्शे पर pin रखें।","Could not get location. Turn on GPS and try again, or place the pin on the map."),"err");
+    st("gpsSt",e&&e.code===1?T("स्थान की अनुमति नहीं मिली। फ़ोन की Settings → Apps → PataBook (या Chrome) → Permissions → Location → Allow करें। या नक्शे पर पिन रखें।","Location permission denied. Phone Settings → Apps → PataBook (or Chrome) → Permissions → Location → Allow. Or place the pin on the map.")
+      :T("स्थान नहीं मिला। GPS चालू करके दोबारा दबाएँ, या नक्शे पर पिन रखें।","Could not get location. Turn on GPS and try again, or place the pin on the map."),"err");
   },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 };
 $("saveBtn").onclick=async()=>{
@@ -128,8 +141,8 @@ $("saveBtn").onclick=async()=>{
     await rpc("pb_owner_set_location",{p_slug:slug,p_lat:pos.lat,p_lng:pos.lng});
     $("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);}
   catch(x){b.disabled=false;const m=String(x.message||"");
-    st("saveSt",/rate limit/.test(m)?T("आज location 3 बार बदल चुकी है। कल फिर कोशिश करें।","Location was changed 3 times today. Try again tomorrow.")
-      :/bad location/.test(m)?T("pin भारत के अंदर रखें।","Put the pin inside India.")
+    st("saveSt",/rate limit/.test(m)?T("आज स्थान 3 बार बदल चुके हैं। कल फिर कोशिश करें।","Location was changed 3 times today. Try again tomorrow.")
+      :/bad location/.test(m)?T("पिन भारत के अंदर रखें।","Put the pin inside India.")
       :T("सेव नहीं हो सकी। इंटरनेट जाँचकर दोबारा कोशिश करें।","Could not save. Check your internet and try again."),"err");}
 };
 (async function start(){
@@ -140,13 +153,13 @@ $("saveBtn").onclick=async()=>{
   try{
     const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
     if(!b){only("notOwner");return;}
-    $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";
+    $("shopName").textContent=b.name||slug;$("shopAddr").textContent=b.address||"";
     const pr=await rpc("pb_my_profiles"),me=pr&&pr[slug];
-    if(me&&me.lat!=null&&me.lng!=null){orig=[+me.lat,+me.lng];$("curTxt").textContent=T("✅ अभी location लगी हुई है। बदलनी हो तो नीचे से नई लगाएँ।","✅ A location is already set. To change it, set a new one below.");}
-    else $("curTxt").textContent=T("⚠️ अभी नक्शे पर location नहीं लगी है। ग्राहकों को रास्ता दिखाने के लिए ज़रूर लगाएँ।","⚠️ No map location yet. Set it so customers can find the way.");
+    if(me&&me.lat!=null&&me.lng!=null){orig=[+me.lat,+me.lng];$("curTxt").textContent=T("अभी स्थान लगा हुआ है। बदलना हो तो नीचे से नया लगाएँ।","A location is already set. To change it, set a new one below.");}
+    else $("curTxt").textContent=T("अभी नक्शे पर स्थान नहीं लगा है। ग्राहकों को रास्ता दिखाने के लिए ज़रूर लगाएँ।","No map location yet. Set it so customers can find the way.");
     only("main");
     await loadMap(orig||[22.5,79],orig?17:4.2);
-    if(orig)setPos(orig[0],orig[1],false),$("saveBtn").disabled=true;
+    if(orig){setPos(orig[0],orig[1],false);$("saveBtn").disabled=true;}
   }catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){only("needLogin");return;}
     only(/function|schema cache/i.test(e.message)||e.status===404?"setup":"notOwner");
