@@ -140,7 +140,7 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
 .aif input{flex:1;min-width:0;border:2px solid #dfe1e5;border-radius:999px;padding:11px 14px;font-size:16px;font-family:inherit}
 .aif button{border:0;border-radius:999px;background:#1a73e8;color:#fff;font-size:18px;padding:0 15px;cursor:pointer}
 .aif button.mic{background:#eef4ff;color:#1a73e8}.aif button.mic.on{background:#d93025;color:#fff}
-#aiGo{display:block;width:100%;margin-top:10px}#aiGo:disabled{opacity:.5}
+#aiGo{display:block;width:100%;margin-top:10px}#aiGo:disabled{opacity:.5}#aiGo[hidden],#aiSkip[hidden]{display:none}#aiSkip{display:block;margin:10px auto 0}
 .aiback{background:none;border:0;color:#1a73e8;font:inherit;font-weight:700;cursor:pointer;margin-top:8px;text-decoration:underline}
 </style>
 <script src="pb-track.js"></script>
@@ -160,7 +160,8 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
     <div class="aic" id="aiCard"></div>
     <div id="aiMsgs" aria-live="polite"></div>
     <form class="aif" id="aiF" autocomplete="off"><input id="aiI" maxlength="500"><button type="button" class="mic" id="aiMic" hidden aria-label="Mic">🎤</button><button type="submit" aria-label="Send">➤</button></form>
-    <button type="button" class="btn" id="aiGo" disabled></button>
+    <button type="button" class="aiback" id="aiSkip" hidden></button>
+    <button type="button" class="btn" id="aiGo" disabled hidden></button>
     <button type="button" class="aiback" id="aiBk"></button>
   </div>
 
@@ -1121,64 +1122,93 @@ render();
 })();
 </script>
 <script>
-/* ===== Add Your Shop: "AI से जोड़ें" (लाइव कार्ड) या "खुद भरूँगा" ===== */
+/* ===== Add Your Shop: "AI से जोड़ें" (एक-एक सवाल, लाइव कार्ड) या "खुद भरूँगा" ===== */
 (function(){
   var $=function(i){return document.getElementById(i)};
   function lg(){try{return window.PB&&PB.lang&&PB.lang()==="en"?"en":"hi"}catch(e){return"hi"}}
+  var STEPS=[
+    {k:"name",req:1},{k:"owner",req:1},{k:"city",req:1},{k:"area",req:0},{k:"address",req:1},{k:"hours",req:0},{k:"services",req:0}
+  ];
   var X={
-   hi:{h:"दुकान कैसे जोड़ना चाहेंगे?",s:"AI से बोलकर या लिखकर जल्दी जुड़ती है। खुद भरना भी आसान है।",ai:"AI से जोड़ें",ais:"अपनी दुकान के बारे में बोलिए या लिखिए, AI सामने कार्ड बनाता जाएगा।",man:"खुद भरूँगा",mans:"एक-एक सवाल का जवाब देकर खुद भरें।",
-     nm:"दुकान का नाम",cat:"प्रकार",ow:"मालिक",ct:"शहर / गाँव",ar:"इलाका",ad:"पता",hr:"समय",sv:"सेवाएँ",ph:"अपनी दुकान के बारे में बोलिए या लिखिए…",
-     hi0:"नमस्ते! अपनी दुकान के बारे में बताइए। जैसे: दुकान का नाम, शहर, पता, कब खुलती है और क्या काम करती है। जो बताएँगे, ऊपर कार्ड में बनता जाएगा।",
-     go:"सही है, आगे बढ़ें →",bk:"← वापस, खुद भरूँगा",think:"सोच रहा हूँ…",fail:"माफ़ कीजिए, AI अभी जवाब नहीं दे पाया। थोड़ी देर बाद फिर कोशिश करें, या \"खुद भरूँगा\" चुनें।",lim:"आज के लिए AI की सीमा पूरी हो गई। कृपया \"खुद भरूँगा\" से जोड़ें।",to:"से",tl:"बजे"},
-   en:{h:"How would you like to add your shop?",s:"Speak or type to the AI for a quick start. Filling it yourself is easy too.",ai:"Add with AI",ais:"Tell us about your shop by voice or text, and the AI builds your card live.",man:"I'll fill it myself",mans:"Answer one question at a time.",
-     nm:"Shop name",cat:"Type",ow:"Owner",ct:"City / village",ar:"Area",ad:"Address",hr:"Timings",sv:"Services",ph:"Speak or type about your shop…",
-     hi0:"Hello! Tell me about your shop, such as its name, city, address, timings and what it does. Your card above fills in as you speak.",
-     go:"Looks right, continue →",bk:"← Back, I'll fill it myself",think:"Thinking…",fail:"Sorry, the AI could not answer right now. Please try again in a while, or choose \"I'll fill it myself\".",lim:"The AI limit for today is over. Please use \"I'll fill it myself\".",to:"to",tl:""}
+   hi:{h:"दुकान कैसे जोड़ना चाहेंगे?",s:"AI एक-एक सवाल पूछकर आपकी दुकान बना देगा। खुद भरना भी आसान है।",ai:"AI से जोड़ें",ais:"AI सवाल पूछेगा, आप बोलकर या लिखकर जवाब दीजिए।",man:"खुद भरूँगा",mans:"एक-एक सवाल का जवाब देकर खुद भरें।",
+     nm:"दुकान का नाम",cat:"प्रकार",ow:"मालिक",ct:"शहर / गाँव",ar:"इलाका",ad:"पता",hr:"समय",sv:"सेवाएँ",ph:"अपना जवाब बोलिए या लिखिए…",title:"आपकी दुकान",
+     q_name:"आपकी दुकान / बिज़नेस का नाम क्या है? (जैसा बोर्ड पर लिखा है)",q_owner:"दुकान के मालिक का पूरा नाम क्या है?",q_city:"दुकान किस शहर या गाँव में है?",
+     q_area:"किस इलाके में है? (वैकल्पिक)",q_address:"दुकान का पूरा पता बताइए: दुकान नंबर, रोड, लैंडमार्क।",q_hours:"दुकान कब खुलती और कब बंद होती है? (वैकल्पिक)",q_services:"आप क्या-क्या काम या सामान देते हैं? (वैकल्पिक)",
+     need:"यह जानकारी ज़रूरी है, इसके बिना आगे नहीं बढ़ सकते।",
+     rev:"यह आपकी दुकान की पूरी जानकारी है। कुछ बदलना हो तो नीचे बताइए, जैसे \"समय रात 9 तक कर दो\"। सब ठीक हो तो \"सही है, आगे बढ़ें\" दबाइए।",
+     go:"सही है, आगे बढ़ें →",bk:"← वापस, खुद भरूँगा",skip:"छोड़ें →",think:"सोच रहा हूँ…",fail:"माफ़ कीजिए, AI अभी जवाब नहीं दे पाया। थोड़ी देर बाद फिर कोशिश करें, या \"खुद भरूँगा\" चुनें।",lim:"आज के लिए AI की सीमा पूरी हो गई। कृपया \"खुद भरूँगा\" से जोड़ें।",to:"से"},
+   en:{h:"How would you like to add your shop?",s:"The AI asks one question at a time and builds your shop. Filling it yourself is easy too.",ai:"Add with AI",ais:"The AI asks the questions; answer by voice or text.",man:"I'll fill it myself",mans:"Answer one question at a time.",
+     nm:"Shop name",cat:"Type",ow:"Owner",ct:"City / village",ar:"Area",ad:"Address",hr:"Timings",sv:"Services",ph:"Speak or type your answer…",title:"Your shop",
+     q_name:"What is the name of your shop / business? (as written on the board)",q_owner:"What is the owner's full name?",q_city:"Which city or village is the shop in?",
+     q_area:"Which area is it in? (optional)",q_address:"Please tell me the full address: shop number, road, landmark.",q_hours:"When does the shop open and close? (optional)",q_services:"What work or products do you offer? (optional)",
+     need:"This detail is required; we cannot go ahead without it.",
+     rev:"Here is the full information about your shop. If anything needs changing, tell me below, for example \"make closing time 9 pm\". If all is right, press \"Looks right, continue\".",
+     go:"Looks right, continue →",bk:"← Back, I'll fill it myself",skip:"Skip →",think:"Thinking…",fail:"Sorry, the AI could not answer right now. Please try again in a while, or choose \"I'll fill it myself\".",lim:"The AI limit for today is over. Please use \"I'll fill it myself\".",to:"to"}
   };
   function t(k){return X[lg()][k]}
   var card={name:"",category:"",owner:"",city:"",area:"",address:"",open:"",close:"",services:""};
-  var started=false,busy=false;
+  var skipped={},started=false,busy=false,cur=null,review=false;
   function reg(){try{return localStorage.getItem("pb-reg")}catch(e){return null}}
-  try{sessionStorage.removeItem("pb-addmode")}catch(e){}   /* पुराना याद रखा हुआ चुनाव हटाओ: हर बार दोनों बटन दिखें */
+  try{sessionStorage.removeItem("pb-addmode")}catch(e){}
   var mode=/[?&]m=manual\b/.test(location.search)?"manual":null;
   var show=!mode&&!reg()&&!!(window.PB_SITE&&PB_SITE.aiExtract);   /* Worker में /extract डालने के बाद site-config में aiExtract:true करें */
   if(show){document.body.classList.add("pre");$("choose").hidden=false;}
   function lab(){
     $("chH").textContent=t("h");$("chS").textContent=t("s");$("chAIt").textContent=t("ai");$("chAIs").textContent=t("ais");
-    $("chMt").textContent=t("man");$("chMs").textContent=t("mans");$("aiI").placeholder=t("ph");$("aiGo").textContent=t("go");$("aiBk").textContent=t("bk");drawCard();
+    $("chMt").textContent=t("man");$("chMs").textContent=t("mans");$("aiI").placeholder=t("ph");$("aiGo").textContent=t("go");$("aiBk").textContent=t("bk");$("aiSkip").textContent=t("skip");drawCard();
   }
   function esc(v){return String(v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function done(s){
+    if(s.k==="hours")return !!card.open||!!skipped.hours;
+    return !!card[s.k]||(!s.req&&!!skipped[s.k]);
+  }
+  function nextStep(){for(var i=0;i<STEPS.length;i++)if(!done(STEPS[i]))return STEPS[i];return null}
+  function reqOk(){return !!(card.name&&card.owner&&card.city&&card.address)}
   var last={};
   function drawCard(){
     var hrs=card.open?(card.open+(card.close?" "+t("to")+" "+card.close:"")):"";
     var rows=[["nm",card.name],["cat",card.category],["ow",card.owner],["ct",card.city],["ar",card.area],["ad",card.address],["hr",hrs],["sv",card.services]];
-    $("aiCard").innerHTML='<h3>🏪 '+esc(card.name||t("nm"))+'</h3>'+rows.map(function(r){var ch=r[1]&&last[r[0]]!==r[1];last[r[0]]=r[1];return '<div class="r'+(ch?' new':'')+'"><span>'+t(r[0])+'</span><b'+(r[1]?'':' class="e"')+'>'+(r[1]?esc(r[1]):"—")+'</b></div>'}).join("");
-    $("aiGo").disabled=!card.name;
+    var any=rows.some(function(r){return r[1]});
+    $("aiCard").hidden=!any;
+    if(any)$("aiCard").innerHTML='<h3>🏪 '+esc(card.name||t("title"))+'</h3>'+rows.filter(function(r){return review||r[1]}).map(function(r){var ch=r[1]&&last[r[0]]!==r[1];last[r[0]]=r[1];return '<div class="r'+(ch?' new':'')+'"><span>'+t(r[0])+'</span><b'+(r[1]?'':' class="e"')+'>'+(r[1]?esc(r[1]):"—")+'</b></div>'}).join("");
+    $("aiGo").hidden=!review;$("aiGo").disabled=!reqOk();
+    $("aiSkip").hidden=!(cur&&!cur.req&&!review);
   }
   function bubble(c,txt){var d=document.createElement("div");d.className="m "+c;d.textContent=txt;$("aiMsgs").appendChild(d);$("aiMsgs").scrollTop=1e6;return d}
+  function ask(prefix){
+    var s=nextStep();cur=s;
+    if(!s){review=true;drawCard();bubble("b",t("rev"));return}
+    bubble("b",(prefix?prefix+" ":"")+t("q_"+s.k));drawCard();
+  }
   function leave(){document.body.classList.remove("pre");$("choose").hidden=true;$("aiBox").hidden=true;window.scrollTo(0,0)}
   $("chMan").onclick=leave;
-  $("chAI").onclick=function(){$("choose").hidden=true;$("aiBox").hidden=false;if(!started){started=true;bubble("b",t("hi0"));}drawCard();setTimeout(function(){$("aiI").focus()},50)};
+  $("chAI").onclick=function(){$("choose").hidden=true;$("aiBox").hidden=false;if(!started){started=true;ask("")}drawCard();setTimeout(function(){$("aiI").focus()},50)};
   $("aiBk").onclick=leave;
+  $("aiSkip").onclick=function(){if(!cur||cur.req)return;skipped[cur.k]=1;ask("")};
   function setv(id,v){var e=$(id);if(!e||!v)return;e.value=v;try{e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}))}catch(x){}}
   $("aiGo").onclick=function(){
-    if(!card.name)return;leave();
+    if(!reqOk())return;leave();
     setv("shop",card.name);setv("owner",card.owner);setv("city",card.city);setv("area",card.area);setv("address",card.address);setv("services",card.services);
     if(/^\d\d:\d\d$/.test(card.open))setv("openT",card.open);if(/^\d\d:\d\d$/.test(card.close))setv("closeT",card.close);
   };
   async function send(txt){
     if(busy||!txt)return;busy=true;bubble("u",txt);var th=bubble("b",t("think"));
-    var base=(window.PB_SITE&&PB_SITE.aiUrl)||"",ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},20000);
+    var base=(window.PB_SITE&&PB_SITE.aiUrl)||"",ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},20000),ok=false;
     try{
       if(!base)throw 0;
-      var r=await fetch(base.replace(/\/$/,"")+"/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,card:card,lang:lg()}),signal:ctl.signal});
+      var r=await fetch(base.replace(/\/$/,"")+"/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,card:card,lang:lg(),mode:review?"edit":"guided",ask:review||!cur?"":cur.k}),signal:ctl.signal});
       if(r.status===429){th.textContent=t("lim");return}
       if(!r.ok){var et="";try{et=(await r.text()).replace(/\s+/g," ").slice(0,140)}catch(x){}throw {st:r.status,d:et}}var j=await r.json();
       if(!j||!j.card)throw {st:"nocard",d:JSON.stringify(j).slice(0,100)};
       Object.keys(card).forEach(function(k){if(typeof j.card[k]==="string")card[k]=j.card[k]});
-      drawCard();th.textContent=j.reply||"";
+      th.textContent=j.reply||"";if(!j.reply)th.remove();ok=true;
     }catch(e){th.textContent=t("fail")+" ["+((e&&e.st)||(e&&e.name)||"net")+((e&&e.d)?": "+e.d:"")+"]"}
-    finally{clearTimeout(tm);busy=false;$("aiMsgs").scrollTop=1e6}
+    finally{clearTimeout(tm);busy=false}
+    if(ok){
+      if(review){drawCard();$("aiMsgs").scrollTop=1e6;return}
+      var was=cur,s0=nextStep();
+      if(was&&s0&&s0.k===was.k&&was.req)ask(t("need")); else ask("");
+    }
   }
   $("aiF").onsubmit=function(e){e.preventDefault();var v=$("aiI").value.trim();$("aiI").value="";send(v)};
   $("aiI").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();e.stopPropagation();var v=$("aiI").value.trim();$("aiI").value="";send(v)}});
