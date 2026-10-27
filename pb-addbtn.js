@@ -2,6 +2,8 @@
    हर पेज पर:  <script src="pb-addbtn.js" defer></script>  */
 (function () {
   if (window.__pbAdd) return; window.__pbAdd = 1;
+  /* लॉगिन है (खाता खुला) तो बटन नहीं दिखता: एक नंबर पर एक ही दुकान */
+  try { var ss = JSON.parse(localStorage.getItem("pb-session") || "null"); if (ss && ss.refresh_token) return; } catch (e) {}
   var css = '' +
     '#pbAddFab{position:fixed;right:14px;bottom:16px;z-index:90;display:flex;align-items:center;gap:8px;text-decoration:none;color:#1b1b1b;background:linear-gradient(135deg,#ffcb2e,#ff9f1a);font:800 15px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:13px 18px 13px 14px;border-radius:999px;box-shadow:0 4px 16px rgba(255,159,26,.55);-webkit-tap-highlight-color:transparent;animation:pbBuzz 4s ease-in-out infinite}' +
     '#pbAddFab i{font-style:normal;font-size:20px;line-height:1}' +
