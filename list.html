@@ -1192,7 +1192,10 @@ render();
     if(/^\d\d:\d\d$/.test(card.open))setv("openT",card.open);if(/^\d\d:\d\d$/.test(card.close))setv("closeT",card.close);
   };
   async function send(txt){
-    if(busy||!txt)return;busy=true;bubble("u",txt);var th=bubble("b",t("think"));
+    if(busy||!txt)return;
+    var lm=/^\s*(?:(hindi|hindhi|हिन्दी|हिंदी)|(english|angrezi|अंग्रेज़ी|अंग्रेजी|इंग्लिश))(?:\s+\S+){0,3}\s*$/i.exec(txt);
+    if(lm&&!review){var nl=lm[1]?"hi":"en";if(window.PB&&PB.set&&nl!==lg()){try{sessionStorage.setItem("pb-aistate",JSON.stringify({card:card,skipped:skipped}))}catch(x){}PB.set(nl);setTimeout(function(){ask("")},60)}else ask("");return}
+    busy=true;bubble("u",txt);var th=bubble("b",t("think"));
     var base=(window.PB_SITE&&PB_SITE.aiUrl)||"",ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},20000),ok=false;
     try{
       if(!base)throw 0;
@@ -1223,6 +1226,8 @@ render();
     };
   }
   lab();if(window.PB&&PB.onChange)PB.onChange(lab);
+  try{var sv=sessionStorage.getItem("pb-aistate");sessionStorage.removeItem("pb-aistate");
+    if(sv&&show){sv=JSON.parse(sv);Object.keys(card).forEach(function(k){if(typeof sv.card[k]==="string")card[k]=sv.card[k]});skipped=sv.skipped||{};$("chAI").onclick()}}catch(x){}
 })();
 </script>
 </body>
