@@ -135,7 +135,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 <footer><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav>© PataBook · Business Directory · www.PataBook.in</footer>
 
 <script>
-function pbDir(b){if(b.location_confirmed!==true)return "";const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.address||"");if(b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude))return "map.html?to="+(+b.latitude)+","+(+b.longitude)+"&n="+n+"&a="+a;return b.address?"map.html?q="+a+"&n="+n:"";}
+function pbDir(b){const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.address||"");if(b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude))return "map.html?to="+(+b.latitude)+","+(+b.longitude)+"&n="+n+"&a="+a;return b.address?"map.html?q="+a+"&n="+n:"";}
 
 const SB="https://kkvbpzysktozghnxplxv.supabase.co";
 const KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
@@ -227,7 +227,7 @@ function drawStatus(){
 }
 
 /* data */
-let SEL="name,slug,address,description,category,rating,review_count,is_verified,latitude,longitude,location_confirmed,logo_url";
+let SEL="name,slug,address,description,category,rating,review_count,is_verified,latitude,longitude,logo_url";
 async function load(){
   const list=document.getElementById("list");
   list.innerHTML='<p class="note">…</p>';document.getElementById("count").textContent="";

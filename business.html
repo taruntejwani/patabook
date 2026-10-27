@@ -131,7 +131,6 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 .qa3 a b small{font-size:11.5px;font-weight:600;opacity:.88;letter-spacing:.02em}
 .qa3 a.qc{background:linear-gradient(135deg,#1a73e8,#0b3a94)}
 .qa3 a.qw{background:linear-gradient(135deg,#25b866,#128a47)}
-.qa3 a.pend{opacity:.55;filter:grayscale(.5);cursor:pointer}.qa3 .locmsg{grid-column:1/-1;margin:0;padding:10px 12px;border-radius:12px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:13.5px;font-weight:600}
 .qa3 a.qd{grid-column:1/-1;min-height:46px;background:#e8f1ff;color:#0b2f73;box-shadow:none;border:1px solid #cfe0fb}
 .qa3 a.qd i{background:#fff;width:30px;height:30px}.qa3 a.qd i .pbi{width:16px;height:16px}.qa3 a.qd b{font-size:14.5px}
 #pbDock{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.96);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(11,47,115,.12)}
@@ -170,7 +169,7 @@ h2 .pbi{width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:var(--
 
 <footer><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav>© PataBook · Business Directory · www.PataBook.in</footer>
 <script>
-function pbDir(b){if(b.location_confirmed!==true)return "";const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.address||"");if(b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude))return "map.html?to="+(+b.latitude)+","+(+b.longitude)+"&n="+n+"&a="+a;return b.address?"map.html?q="+a+"&n="+n:"";}
+function pbDir(b){const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.address||"");if(b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude))return "map.html?to="+(+b.latitude)+","+(+b.longitude)+"&n="+n+"&a="+a;return b.address?"map.html?q="+a+"&n="+n:"";}
 
 const SB="https://kkvbpzysktozghnxplxv.supabase.co";
 const KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
@@ -190,7 +189,7 @@ async function load(){
       if(pr.ok){const pj=await pr.json();if(pj&&pj[slug]){location.replace("shop.html?slug="+encodeURIComponent(slug)+location.hash);return;}}}catch(_){}
   }
   const u=new URL(SB+"/rest/v1/businesses");
-  const COLS="name,slug,address,description,category,website,is_verified,rating,review_count,latitude,longitude,location_confirmed";
+  const COLS="name,slug,address,description,category,website,is_verified,rating,review_count,latitude,longitude";
   u.searchParams.set("select",COLS+",business_code,home_service");
   u.searchParams.set("slug","eq."+slug);u.searchParams.set("limit","1");
   try{
@@ -256,9 +255,9 @@ function openStatus(b){
     return {open:false,t:en?"Closed now · opens "+when+" "+at(openT):"अभी बंद · "+when+" "+at(openT)+" पर खुलेगा"};}
   return {open:false,t:en?"Closed now":"अभी बंद"};
 }
-function waLink(b,addr){const _nl=b.location_confirmed!==true;if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=PB.lang&&PB.lang()!=="hi",la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug),P=(()=>{const c=contactState||{};if(c.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(c.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(c.whatsapp||c.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d&&!_nl)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
+function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=PB.lang&&PB.lang()!=="hi",la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/business.html?slug="+encodeURIComponent(b.slug),P=(()=>{const c=contactState||{};if(c.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(c.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(c.whatsapp||c.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function gmapsUrl(b){const la=+b.latitude,ln=+b.longitude;return "https://www.google.com/maps/search/?api=1&query="+(la&&ln?la+","+ln:encodeURIComponent((b.name||"")+", "+(b.address||"")));}
-function staticMap(b,href){const la=+b.latitude,ln=+b.longitude;if(!la||!ln||b.location_confirmed!==true)return "";
+function staticMap(b,href){const la=+b.latitude,ln=+b.longitude;if(!la||!ln)return "";
   const z=16,n=2**z,xf=(ln+180)/360*n,yr=la*Math.PI/180,yf=(1-Math.log(Math.tan(yr)+1/Math.cos(yr))/Math.PI)/2*n,x=Math.floor(xf),y=Math.floor(yf);
   let t="";for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t+='<img alt="" loading="lazy" src="https://tile.openstreetmap.org/'+z+'/'+(x+dx)+'/'+(y+dy)+'.png">';
   return '<a class="smap" data-pbh="addr" id="smap" href="'+esc(href||"#")+'" data-fx="'+(xf-x)+'" data-fy="'+(yf-y)+'"><div class="tl">'+t+'</div><span class="mp">📍</span><span class="ml">'+((PB.lang&&PB.lang()!=="hi")?"Shop on map ›":"नक्शे पर दुकान ›")+'</span><span class="ma">© OpenStreetMap</span></a>';}
@@ -279,7 +278,7 @@ async function loadOwner(){
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
     if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"biz"});}catch(e){OWN=false;}
   drawOwn();}
-function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const o=document.getElementById("locWarn");if(o)o.remove();if(OWN&&B&&B.location_confirmed!==true&&e){const en=PB.lang&&PB.lang()!=="hi",d=document.createElement("div");d.id="locWarn";d.style.cssText="margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-size:14px;line-height:1.5";d.innerHTML="<b>"+(en?"Your shop's location is not confirmed.":"आपकी दुकान की लोकेशन अभी पक्की नहीं है।")+"</b><br>"+(en?"Customers cannot use Directions until you set it.":"जब तक आप सही लोकेशन सेव नहीं करेंगे, ग्राहक को Directions नहीं दिखेगा।")+' <a href="location.html?slug='+encodeURIComponent(B.slug)+'" style="color:#1a73e8;font-weight:800">'+(en?"Set location ›":"लोकेशन सही करें ›")+"</a>";e.parentNode.insertBefore(d,e);}}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;}
 function ctoast(s){const d=document.createElement("div");d.className="ctoast";d.textContent=s;document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}
 function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
@@ -519,8 +518,7 @@ function drawQa(){
   const ph2=s.k==="ok"?staffNo("Phone2"):"";
   const t=(href,ic,lb,cls,ext)=>href?'<a class="'+(cls||"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':'')+'><i>'+ic+'</i><b>'+lb+'</b></a>':'<a class="dis '+(cls||"")+'" aria-disabled="true"><i>'+ic+'</i><b>'+lb+'</b></a>';
   const callLb=(en?"Call":"कॉल")+(ph?'<small>'+ph+'</small>':''),waLb='WhatsApp<small>'+(en?"Send message":"संदेश भेजें")+'</small>';
-  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+(map?t(map,PBI("dir"),en?"Directions":"रास्ता (Directions)","qd"):'<a class="qd pend" href="#" id="dirPend" role="button"><i>'+PBI("dir")+'</i><b>'+(en?"Directions":"रास्ता (Directions)")+'</b></a><p class="locmsg" id="locMsg" hidden>'+(en?"This shop's exact location is being updated. Directions will appear soon.":"इस दुकान की सही लोकेशन अभी अपडेट हो रही है। रास्ता जल्द दिखेगा।")+'</p>');
-  {const dp=document.getElementById("dirPend");if(dp)dp.onclick=e=>{e.preventDefault();const m=document.getElementById("locMsg");if(m)m.hidden=!m.hidden;};}
+  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता (Directions)","qd");
   drawDock(ph,wa,en);
   if(mr){const L2=[];if(/^\d{10}$/.test(ph))L2.push('<a href="tel:+91'+ph+'">'+PBI("call")+'+91 '+ph+'</a>');if(/^\d{10}$/.test(ph2)&&ph2!==ph)L2.push('<a href="tel:+91'+ph2+'">'+PBI("call")+'+91 '+ph2+'</a>');if(/^\d{10}$/.test(wa)&&wa!==ph)L2.push('<a href="https://wa.me/91'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'+91 '+wa+'</a>');
     mr.outerHTML='<div id="mobRow">'+(L2.length?'<div class="row"><span>'+(en?"Mobile":"मोबाइल")+'</span><b>'+L2.join("<br>")+'</b></div>':'')+'</div>';}
