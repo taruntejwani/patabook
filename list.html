@@ -1173,11 +1173,11 @@ render();
       if(!base)throw 0;
       var r=await fetch(base.replace(/\/$/,"")+"/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,card:card,lang:lg()}),signal:ctl.signal});
       if(r.status===429){th.textContent=t("lim");return}
-      if(!r.ok)throw 0;var j=await r.json();
-      if(!j||!j.card)throw 0;
+      if(!r.ok){var et="";try{et=(await r.text()).replace(/\s+/g," ").slice(0,140)}catch(x){}throw {st:r.status,d:et}}var j=await r.json();
+      if(!j||!j.card)throw {st:"nocard",d:JSON.stringify(j).slice(0,100)};
       Object.keys(card).forEach(function(k){if(typeof j.card[k]==="string")card[k]=j.card[k]});
       drawCard();th.textContent=j.reply||"";
-    }catch(e){th.textContent=t("fail")}
+    }catch(e){th.textContent=t("fail")+" ["+((e&&e.st)||(e&&e.name)||"net")+((e&&e.d)?": "+e.d:"")+"]"}
     finally{clearTimeout(tm);busy=false;$("aiMsgs").scrollTop=1e6}
   }
   $("aiF").onsubmit=function(e){e.preventDefault();var v=$("aiI").value.trim();$("aiI").value="";send(v)};
