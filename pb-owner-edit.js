@@ -49,8 +49,8 @@
   /* ---------- रूप ---------- */
   var css = document.createElement("style");
   css.textContent =
-    ".pbe-btn{flex:none;display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:8px 13px;font:inherit;font-size:13.5px;font-weight:800;background:linear-gradient(135deg,#ffd21f,#f5b400);color:#12141c;cursor:pointer;box-shadow:0 2px 8px rgba(245,180,0,.35)}" +
-    ".pbe-on .pbe-btn{background:#12141c;color:#fff;box-shadow:none}" +
+    ".pbe-btn{flex:none;display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:8px 13px;font:inherit;font-size:13.5px;font-weight:800;background:#e8f1ff;color:#0b3a94;border:1px solid #cfe0fb;cursor:pointer}" +
+    ".pbe-on .pbe-btn{background:#0b3a94;color:#fff;border-color:#0b3a94}.pbe-btn svg{width:15px;height:15px}" +
     ".pbe-pen{position:absolute;top:8px;right:8px;z-index:6;width:38px;height:38px;border-radius:50%;border:2px solid #fff;background:#ffd21f;font-size:17px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.25);display:none}" +
     ".pbe-on .pbe-pen{display:grid;place-items:center}" +
     ".pbe-on .pbe-t{outline:2px dashed #f5b400;outline-offset:3px;border-radius:16px}" +
@@ -401,7 +401,7 @@
   function toggle(v) {
     ON = v === undefined ? !ON : v;
     document.body.classList.toggle("pbe-on", ON);
-    var b = document.getElementById("pbeBtn"); if (b) b.textContent = ON ? "✔ " + T("हो गया", "Done") : "✏️ " + T("Edit", "Edit");
+    var b = document.getElementById("pbeBtn"); if (b) b.innerHTML = ON ? "✔ " + T("हो गया", "Done") : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg> ' + T("Edit", "Edit");
     try { sessionStorage.setItem("pbe-on-" + O.slug, ON ? "1" : ""); } catch (e) {}
     if (ON) pens();
   }
@@ -410,7 +410,7 @@
     O = { slug: o.slug, page: o.page, show_phone: o.row.show_phone, phone: o.row.phone || "" };
     var host = o.page === "shop" ? document.querySelector(".top .wrap") : document.querySelector("header .nav");
     var lang = document.getElementById("pbLang");
-    var btn = document.createElement("button"); btn.type = "button"; btn.id = "pbeBtn"; btn.className = "pbe-btn"; btn.textContent = "✏️ " + T("Edit", "Edit");
+    var btn = document.createElement("button"); btn.type = "button"; btn.id = "pbeBtn"; btn.className = "pbe-btn"; btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg> ' + T("Edit", "Edit");
     btn.onclick = function () { toggle(); };
     if (host && lang && lang.parentNode === host) host.insertBefore(btn, lang); else if (host) host.appendChild(btn);
     /* नीचे वाली काली पट्टी हटा दी — हर हिस्से की पीली ✏️ से बदलें */
