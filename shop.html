@@ -332,8 +332,12 @@ html.t-gold body .snav a.on{background:linear-gradient(135deg,#d9b257,#B58A2A 55
 html.t-platinum body .qa a:not(.pri),html.t-platinum body .qa button:not(.pri){background:linear-gradient(135deg,#f5f8fd,#cfdaf0 60%,#a9bbe0)!important;border:1.5px solid #0b2f73!important;color:#0b2f73!important}
 html.t-gold body .qa a:not(.pri),html.t-gold body .qa button:not(.pri){background:#fbf3df!important;border:1.5px solid #e2c777!important;color:#7a5a14!important}
 /* 👑 Gold पेज: गहरा Navy + Gold, साफ़ बटन/कार्ड (सिर्फ़ Gold; Silver/Platinum जैसे थे) */
-html.t-gold body .hero{background:linear-gradient(135deg,#0a1b45 0%,#12306e 58%,#7a5a14 135%)!important;border-top:3px solid #e2b34c!important}
-html.t-gold .hero .hname h1{background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important}
+html.t-gold body .hero{background:#fbf3df!important;color:#7a5a14!important;border-top:3px solid #e2b34c!important;border-bottom:1.5px solid #e2c777!important;min-height:0}
+html.t-gold .hero::after{display:none!important}html.t-gold .hero .bg{opacity:.22!important}
+html.t-gold body .hero .wrap{padding-top:18px!important;padding-bottom:18px!important;align-items:center!important}
+html.t-gold .hero .hname h1{background:none!important;-webkit-text-fill-color:#0b2f73!important;color:#0b2f73!important;text-shadow:none!important}
+html.t-gold .hero .hname .sub{color:#7a5a14!important;text-shadow:none!important;opacity:1}
+html.t-gold .hero .chip:not(.gold):not(.op):not(.cl){background:#fff!important;color:#7a5a14!important;border:1px solid #e2c777!important}
 html.t-gold .chip.gold{background:linear-gradient(135deg,#fff3c4 0%,#e7c36a 38%,#b58a2a 72%,#f3d98a 100%)!important;color:#3a2a08!important;border:1px solid #fff0b8!important;font-size:12px;font-weight:800;padding:3px 10px;box-shadow:0 2px 8px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.6)}
 html.t-gold .qa .pri{min-height:54px;border-radius:14px;box-sizing:border-box}
 html.t-gold .qa a:not(.pri),html.t-gold .qa button:not(.pri){min-height:44px;box-sizing:border-box}
