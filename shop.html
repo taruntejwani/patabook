@@ -19,6 +19,7 @@
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js"></script>
 <script src="pb-icons.js"></script>
+<script src="pb-backhome.js"></script>
 <script src="pb-hide.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-owner-edit.js"></script>
@@ -670,7 +671,6 @@ function spy(){if(IO)IO.disconnect();if(!("IntersectionObserver" in window))retu
   IO=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id));
     const on=links.find(a=>a.classList.contains("on"));if(on){const bx=on.parentElement;bx.scrollTo({left:on.offsetLeft-bx.clientWidth/2+on.clientWidth/2,behavior:"smooth"});}}});},{rootMargin:"-130px 0px -60% 0px"});
   document.querySelectorAll("section.blk").forEach(s=>IO.observe(s));}
-document.getElementById("backA").onclick=e=>{try{if(document.referrer&&new URL(document.referrer).origin===location.origin&&history.length>1){e.preventDefault();history.back();}}catch(_){}};
 if(window.PB){try{PB.apply&&PB.apply();PB.mount&&PB.mount(document.getElementById("pbLang"));PB.onChange&&PB.onChange(()=>render());}catch(e){}}
 load();
 </script></body></html>
