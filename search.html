@@ -44,6 +44,7 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .search .f{display:flex;align-items:center;gap:8px;flex:1 1 100%;padding:8px 12px;color:var(--muted)}
 .search input,.search select{border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);width:100%;min-width:0}
 .gpsb{flex:none;width:30px;height:30px;margin:-3px -4px -3px 0;border-radius:50%;border:0;background:#e8f0fe;color:#1a73e8;display:grid;place-items:center;cursor:pointer;padding:0}.gpsb svg{width:18px;height:18px}.gpsb:active{background:#d2e3fc}.gpsb.busy{opacity:.5}
+.pgn{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 6px}.pgn button{border:1.5px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:800;font-size:14px;border-radius:999px;padding:9px 18px;cursor:pointer}.pgn button:disabled{opacity:.35;cursor:default}.pgn span{font-weight:700;color:var(--muted);font-size:14px}
 .search .f.loc{flex:1 1 55%;border-top:1px solid var(--line)}
 .search .go{flex:1 1 35%;background:var(--blue);color:#fff;font-weight:700;font-size:16px;border-radius:22px;padding:11px 18px}
 .hint{font-size:12.5px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
@@ -232,10 +233,13 @@ async function premiumFirst(rows){
   return top.concat(o);
 }
 function premTags(b){const t=PREMS[b.slug];if(!t)return "";const en=PB.lang&&PB.lang()!=="hi",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";return (PBPlan.has(b.slug,"top")?'<span class="tag feat">⭐ Featured</span>':'')+'<span class="tag prem pt-'+t+'"><i>'+ic+'</i>'+esc(PBPlan.name(t,true))+' Member</span>';}
-function render(rows,q,city){
+const PGN=6;let PGI=0,PGK="";
+function render(rows,q,city,keep){
   const list=$("list"),label=[q,city].filter(Boolean).join(" · ");
-  $("count").textContent=rows.length?T("found",{n:rows.length})+" · "+T("s_for",{q:label}):"";
-  if(label&&window.PBT)PBT.once(rows.length?"search":"search0",label);   /* traffic: क्या खोजा, नतीजा मिला या नहीं */
+  if(!keep){if(PGK!==label)PGI=0;PGK=label;}
+  const total=rows.length,pages=Math.max(1,Math.ceil(total/PGN));if(PGI>=pages)PGI=pages-1;const allRows=rows;rows=rows.slice(PGI*PGN,PGI*PGN+PGN);
+  $("count").textContent=total?T("found",{n:total})+" · "+T("s_for",{q:label}):"";
+  if(label&&window.PBT)PBT.once(total?"search":"search0",label);   /* traffic: क्या खोजा, नतीजा मिला या नहीं */
   if(!rows.length){
     list.innerHTML='<div class="empty"><p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
     return;
@@ -250,6 +254,10 @@ function render(rows,q,city){
       (dir?'<a href="'+esc(dir)+'">'+esc(T("dir"))+'</a>':'')+
       '<a href="'+link+'">'+esc(T("details"))+'</a></div></article>';
   }).join("");
+  if(pages>1){const en=PB.lang&&PB.lang()!=="hi";
+    list.insertAdjacentHTML("beforeend",'<nav class="pgn" aria-label="Pages"><button type="button" id="pgPrev"'+(PGI<=0?' disabled':'')+'>‹ '+(en?"Previous":"पिछला")+'</button><span>'+(PGI+1)+' / '+pages+'</span><button type="button" id="pgNext"'+(PGI>=pages-1?' disabled':'')+'>'+(en?"Next":"अगला")+' ›</button></nav>');
+    const go=d=>{PGI+=d;render(allRows,q,city,true);const c=$("count");if(c)c.scrollIntoView({behavior:"smooth",block:"start"});};
+    $("pgPrev").onclick=()=>go(-1);$("pgNext").onclick=()=>go(1);}
 }
 
 const P=new URLSearchParams(location.search);
