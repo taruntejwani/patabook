@@ -448,7 +448,7 @@ function bannerImage(file){return new Promise((res,rej)=>{const img=new Image(),
 async function addBanner(i,file){const b=ROWS[i],en=L()==="en",er=$("be"+i);
   try{if(!/^image\//.test(file.type))throw new Error("type");
     if(er){er.style.color="#5b6475";er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";}
-    const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop"}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
+    const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop",poster:true}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
     if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";ME=await PBA.session();const blob=await bannerImage(file);
     const path=encodeURIComponent(b.slug)+"/banner-"+Date.now()+".webp";
     const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});

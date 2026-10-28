@@ -94,7 +94,7 @@
       var I = await shopInfo(info.slug), ctxo = { kind: info.kind || "shop", item: String(info.name || "").slice(0, 80), shop: String(I.shop || "").slice(0, 80), cat: String(I.cat || "").slice(0, 60), sub: String(I.sub || "").slice(0, 60), svc: String(I.svc || "").slice(0, 120), unit: I.unit || "" };
       var sm = await small(file), data = sm.data;
       /* 📱 पक्की जांच (बिना AI): phone के screenshot का नाप screen जैसा लंबा-पतला होता है (जैसे 1080×2400) या नाम में Screenshot */
-      if (isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से screenshot पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
+      if (info.poster ? /screen ?shot|screenshot|scrnshot/i.test(String(file && file.name || "")) : isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से screenshot पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
       var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 15000);
       try {
         var r = await fetch(base() + "/check-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: data, ctx: ctxo }), signal: ctl.signal });
