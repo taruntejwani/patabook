@@ -96,6 +96,9 @@
   var ICO = {
     pin: function (c, x, y, s) { c.fillStyle = '#e53935'; c.beginPath(); c.arc(x, y - s * .12, s * .3, Math.PI, 0); c.lineTo(x, y + s * .42); c.closePath(); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y - s * .12, s * .12, 0, 7); c.fill(); },
     phone: function (c, x, y, s) { c.font = (s * .62) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('📞', x, y + 2); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; },
+    ig: function (c, x, y, s) { var g = c.createLinearGradient(x - s * .34, y + s * .34, x + s * .34, y - s * .34); g.addColorStop(0, '#feda75'); g.addColorStop(.5, '#d62976'); g.addColorStop(1, '#4f5bd5'); c.fillStyle = g; rr(c, x - s * .34, y - s * .34, s * .68, s * .68, s * .18); c.fill();
+      c.strokeStyle = '#fff'; c.lineWidth = Math.max(2, s * .06); rr(c, x - s * .2, y - s * .2, s * .4, s * .4, s * .12); c.stroke(); c.beginPath(); c.arc(x, y, s * .09, 0, 7); c.stroke(); },
+    fb: function (c, x, y, s) { c.fillStyle = '#1877f2'; c.beginPath(); c.arc(x, y, s * .34, 0, 7); c.fill(); c.fillStyle = '#fff'; c.font = '800 ' + (s * .5) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('f', x + s * .02, y + s * .04); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; },
     wa: function (c, x, y, s) { c.fillStyle = '#25d366'; c.beginPath(); c.arc(x, y, s * .34, 0, 7); c.fill(); c.beginPath(); c.moveTo(x - s * .26, y + s * .22); c.lineTo(x - s * .34, y + s * .38); c.lineTo(x - s * .12, y + s * .3); c.fill();
       c.fillStyle = '#fff'; c.font = '700 ' + (s * .34) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('✆', x, y + 1); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
   };
@@ -133,24 +136,27 @@
     if (addrT) rows.push(['pin', addrT]);
     if (d.phone) { rows.push(['phone', fmt(d.phone)]); rows.push(['wa', 'WhatsApp  ' + fmt(d.wa || d.phone)]); }
     else rows.push(['phone', X('नंबर PataBook पर देखें', 'See number on PataBook')]);
+    function soc(u, ig) { var m = String(u || '').match(/^https?:\/\/(?:www\.)?(?:instagram|facebook)\.com\/([^?#\/]+)/i); return m ? (ig ? '@' + m[1].replace(/^@/, '') : 'facebook.com/' + m[1]) : ''; }
+    if (soc(d.insta, 1)) rows.push(['ig', soc(d.insta, 1)]);
+    if (soc(d.fb, 0)) rows.push(['fb', soc(d.fb, 0)]);
     if (!portrait) {
       var ns = fit(c, d.name, 690, 70, 900); c.fillStyle = '#fff'; c.textBaseline = 'alphabetic'; c.fillText(d.name, 64, 64 + ns * .82);
       var cy = 64 + ns + 46;
       c.fillStyle = 'rgba(255,255,255,.14)'; rr(c, 64, cy - 29, 58, 58, 16); c.fill(); c.fillStyle = '#fff'; c.font = '32px ' + FONT; c.textBaseline = 'middle'; c.fillText(th[1], 74, cy);
       c.fillStyle = 'rgba(255,255,255,.9)'; c.font = '700 27px ' + FONT; c.fillText(catTxt || 'Business', 138, cy); c.textBaseline = 'alphabetic';
-      var y0 = cy + 62; if (d.owner) { c.font = '600 25px ' + FONT; c.fillStyle = 'rgba(255,255,255,.82)'; c.fillText('Owner: ' + d.owner, 64, y0 + 8); y0 += 40; }
-      y0 += 30; var yl = y0; rows.forEach(function (r) { var n = row(64, yl, r[0], r[1], 27, 640, r[0] === 'pin' ? 2 : 1); yl += 62 + (n - 1) * 35; });
+      var y0 = cy + 54; if (d.owner) { c.font = '600 25px ' + FONT; c.fillStyle = 'rgba(255,255,255,.82)'; c.fillText('Owner: ' + d.owner, 64, y0 + 8); y0 += 36; }
+      y0 += 22; var yl = y0, dense = rows.length > 3, fs = dense ? 25 : 27, st = rows.length > 4 ? 50 : dense ? 56 : 62; rows.forEach(function (r) { var n = row(64, yl, r[0], r[1], fs, 640, r[0] === 'pin' ? 2 : 1); yl += st + (n - 1) * 33; });
       qrBox(814, 56, 330);
       c.fillStyle = '#e8f0ff'; c.textAlign = 'center'; c.font = '700 21px ' + FONT; c.fillText(X('📱 Scan करें — दुकान', '📱 Scan to view this'), 979, 418); c.fillText(X('PataBook पर देखें', 'shop on PataBook'), 979, 446);
       if (d.code) { c.font = '800 22px ui-monospace,Menlo,monospace'; var cw2 = c.measureText(d.code).width + 32; c.fillStyle = 'rgba(255,255,255,.14)'; rr(c, 979 - cw2 / 2, 474, cw2, 42, 12); c.fill(); c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = 2; c.stroke(); c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.fillText(d.code, 979, 496); c.textBaseline = 'alphabetic'; }
-      linkPill(W / 2, H - 86 - 40, 26);
+      linkPill(W / 2, H - 86 - 30, 22);
       c.textAlign = 'left'; foot(86, 1);
     } else {
       var ps = fit(c, d.name, 960, 104, 900); c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(d.name, W / 2, 330);
       var cy2 = 330 + ps * .5 + 58; c.fillStyle = 'rgba(255,255,255,.9)'; c.font = '700 40px ' + FONT; c.fillText(th[1] + '  ' + (catTxt || 'Business'), W / 2, cy2);
       var yy0 = cy2 + 56; if (d.owner) { c.font = '600 36px ' + FONT; c.fillStyle = 'rgba(255,255,255,.82)'; c.fillText('Owner: ' + d.owner, W / 2, yy0 + 14); yy0 += 50; }
       c.textAlign = 'left'; c.textBaseline = 'alphabetic'; yy0 += 80;
-      var yp = yy0; rows.slice(0, 3).forEach(function (r) { var n = row(130, yp, r[0], r[1], 38, 760, r[0] === 'pin' ? 2 : 1); yp += 90 + (n - 1) * 50; });
+      var yp = yy0; rows.slice(0, 5).forEach(function (r) { var n = row(130, yp, r[0], r[1], 38, 760, r[0] === 'pin' ? 2 : 1); yp += (rows.length > 3 ? 78 : 90) + (n - 1) * 50; });
       var qy = yp + 20; qrBox(W / 2 - 220, qy, 440);
       c.textAlign = 'center'; c.fillStyle = '#e8f0ff'; c.font = '700 32px ' + FONT; c.fillText(X('📱 Scan करें — दुकान PataBook पर देखें', '📱 Scan to view this shop on PataBook'), W / 2, qy + 500);
       if (d.code) { c.font = '800 30px ui-monospace,Menlo,monospace'; var cw3 = c.measureText(d.code).width + 40; c.fillStyle = 'rgba(255,255,255,.14)'; rr(c, W / 2 - cw3 / 2, qy + 536, cw3, 56, 14); c.fill(); c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.fillText(d.code, W / 2, qy + 565); c.textBaseline = 'alphabetic'; }
