@@ -132,7 +132,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 .qa3 a.qc,.qa3 a.qw{justify-content:flex-start;min-height:66px;padding:10px 12px 10px 10px;gap:10px}.qa3 a.qc i,.qa3 a.qw i{width:44px;height:44px}.qa3 a.qc i .pbi,.qa3 a.qw i .pbi{width:24px;height:24px}.qa3 a.qc b,.qa3 a.qw b{font-size:19px;white-space:nowrap}.qa3 a.qc b small,.qa3 a.qw b small{font-size:13px}
 .qa3 a.qc{background:linear-gradient(135deg,#1a73e8,#0b3a94)}
 .qa3 a.qw{background:linear-gradient(135deg,#25b866,#128a47)}
-.qa3 a.qd{grid-column:1/-1;min-height:46px;background:#e8f1ff;color:#0b2f73;box-shadow:none;border:1px solid #cfe0fb}
+.qa3 a.qd,.qa3 a.qk{min-height:48px;justify-content:flex-start;padding:8px 10px;gap:8px}.qa3 a.qd:last-child{grid-column:1/-1;justify-content:center}.qa3 a.qk{background:#fff4d6;color:#5c3b00;box-shadow:none;border:1px solid #f1d58a}.qa3 a.qk i{background:#fff;width:30px;height:30px}.qa3 a.qk i .pbi{width:16px;height:16px}.qa3 a.qk b{font-size:13.5px;white-space:nowrap}.qa3 a.qd b{font-size:14.5px;white-space:nowrap}.qa3 a.qd{min-height:48px;background:#e8f1ff;color:#0b2f73;box-shadow:none;border:1px solid #cfe0fb}
 .qa3 a.qd i{background:#fff;width:30px;height:30px}.qa3 a.qd i .pbi{width:16px;height:16px}.qa3 a.qd b{font-size:14.5px}
 #pbDock{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.96);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(11,47,115,.12)}
 #pbDock.on{display:flex}#pbDock a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;color:#fff;font-weight:800;font-size:15.5px;text-decoration:none}
@@ -519,7 +519,7 @@ function drawQa(){
   const ph2=s.k==="ok"?staffNo("Phone2"):"";
   const t=(href,ic,lb,cls,ext)=>href?'<a class="'+(cls||"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':'')+'><i>'+ic+'</i><b>'+lb+'</b></a>':'<a class="dis '+(cls||"")+'" aria-disabled="true"><i>'+ic+'</i><b>'+lb+'</b></a>';
   const callLb=(en?"Call":"कॉल"),waLb='WhatsApp<small>'+(en?"Send message":"संदेश भेजें")+'</small>';
-  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता (Directions)","qd");
+  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता (Directions)","qd")+(document.getElementById("cardBtn")?'<a class="qk" href="#" id="qkCard"><i>'+PBI("card")+'</i><b>'+(en?"Digital Card":"डिजिटल कार्ड")+'</b></a>':"");const qk=document.getElementById("qkCard");if(qk)qk.onclick=e=>{e.preventDefault();const c=document.getElementById("cardBtn");if(c)c.click();};
   drawDock(ph,wa,en);
   if(mr){const L2=[];if(/^\d{10}$/.test(ph))L2.push('<a href="tel:+91'+ph+'">'+PBI("call")+'+91 '+ph+'</a>');if(/^\d{10}$/.test(ph2)&&ph2!==ph)L2.push('<a href="tel:+91'+ph2+'">'+PBI("call")+'+91 '+ph2+'</a>');if(/^\d{10}$/.test(wa)&&wa!==ph)L2.push('<a href="https://wa.me/91'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'+91 '+wa+'</a>');
     mr.outerHTML='<div id="mobRow">'+(L2.length?'<div class="row"><span>'+(en?"Mobile":"मोबाइल")+'</span><b>'+L2.join("<br>")+'</b></div>':'')+'</div>';}
