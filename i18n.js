@@ -336,3 +336,6 @@ function regionFromState(name){var c=codeOf("",name);if(!name)return;if(!STATE_L
   try{localStorage.setItem("pb-region",JSON.stringify({c:c,t:Date.now()}));}catch(e){}setRegion(c);}
 window.PB={regionFromState:regionFromState,t:t,apply:apply,set:set,mount:mount,onChange:function(f){subs.push(f);},lang:function(){return cur;},langs:LANGS};
 })();
+
+/* login हुए मालिक को ऊपर "दुकान जोड़ें" नहीं दिखता */
+(function(){try{if(!localStorage.getItem("pb-session"))return;var h=function(){document.querySelectorAll('a.add[data-i="addshop"]').forEach(function(a){a.style.display="none"});};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",h);else h();}catch(e){}})();

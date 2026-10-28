@@ -639,7 +639,6 @@ function draw(){
     '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
-    '<a class="addsm" href="list.html">➕ '+(L()==="en"?"Have another shop? Add it with a different mobile number ›":"दूसरी दुकान भी है? दूसरे मोबाइल नंबर से जोड़ें ›")+'</a>'+
     (PINST?'<button type="button" class="delacc" id="delAcc">🗑️ '+(L()==="en"?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
