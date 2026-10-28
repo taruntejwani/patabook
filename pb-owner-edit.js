@@ -127,13 +127,13 @@
     bar.setAttribute("style", "flex:none;padding:9px 12px;background:#f6f1ff;border-bottom:1px solid #e1d8fb;font:13px system-ui");
     function paintBar(msg) {
       bar.innerHTML = '<div style="color:#3b2a85;font-weight:700;margin-bottom:6px">🏷️ ' + T("यह हिस्सा पेज पर क्या कहलाए?", "What should this section be called?") + '</div><div style="display:flex;gap:8px">' +
-        ["product", "service"].map(function (k) { var on = cur === k; return '<button type="button" data-lb="' + k + '" style="flex:1;border:1.5px solid ' + (on ? "#6d3fe0" : "#d9cffa") + ';background:' + (on ? "#6d3fe0" : "#fff") + ';color:' + (on ? "#fff" : "#3b2a85") + ';border-radius:12px;padding:9px;font:700 14px system-ui">' + (on ? "✔ " : "") + (k === "product" ? "Product" : "Service") + '</button>'; }).join("") + '</div>' +
+        ["product", "service", "both"].map(function (k) { var on = (cur || "both") === k; return '<button type="button" data-lb="' + k + '" style="flex:1;border:1.5px solid ' + (on ? "#6d3fe0" : "#d9cffa") + ';background:' + (on ? "#6d3fe0" : "#fff") + ';color:' + (on ? "#fff" : "#3b2a85") + ';border-radius:12px;padding:9px 4px;font:700 13px system-ui">' + (on ? "✔ " : "") + (k === "product" ? "Product" : k === "service" ? "Service" : "Product & Service") + '</button>'; }).join("") + '</div>' +
         (msg ? '<div style="margin-top:6px;color:#b3261e">' + msg + '</div>' : "");
     }
     paintBar(); bd.style.display = "flex"; bd.style.flexDirection = "column"; bd.insertBefore(bar, fr); fr.style.flex = "1"; fr.style.minHeight = "0"; fr.style.height = "auto";
     bar.onclick = async function (e) {
-      var b = e.target.closest("[data-lb]"); if (!b || b.dataset.lb === cur) return; var v = b.dataset.lb;
-      try { await rpc("pb_shop_label_set", { p_slug: O.slug, p_label: v }); cur = v; if (HUB) HUB.reload = true; paintBar(); }
+      var b = e.target.closest("[data-lb]"); var v = b && b.dataset.lb; if (!v || v === (cur || "both")) return;
+      try { await rpc("pb_shop_label_set", { p_slug: O.slug, p_label: v }); cur = v === "both" ? "" : v; if (HUB) HUB.reload = true; paintBar(); }
       catch (x) { paintBar(T("अभी यह सुविधा चालू नहीं हुई है।", "This is not switched on yet.")); }
     };
   }
@@ -569,8 +569,7 @@
   }
   var HUB = null;
   function hubTabs() {
-    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("Product और Service", "Product & Service"), editProducts], ["photos", "🖼️ " + T("गैलरी", "Gallery"), function (arg) { editPhotos(arg || ""); }],
-      ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
+    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("Product और Service", "Product & Service"), editProducts], ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
       ["link", "🔗 " + T("लिंक", "Link"), editLink], ["visible", "👁️ " + T("क्या दिखे", "Visibility"), editVisible]];
   }
   function hubSheet(title, html, onClose) {
