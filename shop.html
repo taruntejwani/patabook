@@ -366,6 +366,18 @@ html.t-silver body .qa a:not(.pri),html.t-silver body .qa button:not(.pri){backg
 html.t-silver body .snav a.on{background:#2f3742!important;color:#fff!important;border-color:#2f3742!important}
 html.t-silver .blk h2,html.t-silver .blk h2 small,html.t-silver .pbd b{color:#2f3742!important}
 html.t-silver .qa a:not(.pri) span,html.t-silver .qa button span{color:#2f3742}
+/* ━ धातु की रेखाएँ: Gold सुनहरी · Silver चाँदी · Platinum इस्पात-नीली (सारे border व divider) */
+html.t-gold{--ml:#e2b34c}html.t-silver{--ml:#aeb7c3}html.t-platinum{--ml:#6d80a6}
+html:is(.t-gold,.t-silver,.t-platinum) section.blk{border:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) .rows{border-top:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) .row{border-bottom:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) .row:last-child{border-bottom:0!important}
+html:is(.t-gold,.t-silver,.t-platinum) .addr{border:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) .pcd{border:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) body .snav{border-bottom:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) body .dock{border-top:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) .pw .pb{border:1.5px solid var(--ml)!important}
+html:is(.t-gold,.t-silver,.t-platinum) body .snav a:not(.on){border-color:var(--ml)!important}
 </style>
 </head><body>
 
