@@ -107,5 +107,34 @@
       } finally { clearTimeout(tm); }
     } catch (e) { dbg("⚠️ AI जांच नहीं हुई: " + (e && e.name === "AbortError" ? "15 सेकंड में जवाब नहीं आया" : String(e && e.message || e))); return { ok: true, skipped: "err" }; }
   }
-  window.PBImg = { check: check, msg: msg };
+  /* 🪄 AI से product की जानकारी: फ़ोटो → {name,size,feats} (कीमत कभी नहीं). Worker v9 न हो / AI न चले → null (दुकानदार हाथ से भरे) */
+  var V9 = null;
+  async function v9() {
+    if (V9 !== null) return V9;
+    var b = base(); if (!b) return (V9 = false);
+    try { var r = await fetch(b + "/", { method: "GET" }); var j = await r.json(); V9 = !!(j && j.v >= 9); } catch (e) { V9 = false; }
+    return V9;
+  }
+  async function describe(file, info) {
+    try {
+      if (!(await v9())) return null;
+      info = info || {}; var I = await shopInfo(info.slug), sm = await small(file);
+      var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 20000);
+      try {
+        var r = await fetch(base() + "/describe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: sm.data, ctx: { shop: I.shop || "", cat: I.cat || "", sub: I.sub || "", lang: en() ? "en" : "hi" } }), signal: ctl.signal });
+        var j = await r.json(); if (!j || j.skipped || j.error || !(j.name || (j.feats && j.feats.length))) return null;
+        return { name: String(j.name || ""), size: String(j.size || ""), feats: (j.feats || []).slice(0, 3) };
+      } finally { clearTimeout(tm); }
+    } catch (e) { return null; }
+  }
+  /* ✍️ About / Services के लिए: mode "ask" → 3 सवाल, mode "write" → {about, services[]} */
+  async function about(mode, info, answers) {
+    try {
+      if (!(await v9())) return null;
+      info = info || {}; var I = info.shop || info.cat ? { shop: info.shop, cat: info.cat, sub: info.sub } : await shopInfo(info.slug);
+      var r = await fetch(base() + "/about", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: mode, lang: en() ? "en" : "hi", ctx: { shop: I.shop || "", cat: I.cat || "", sub: I.sub || "", city: info.city || "" }, answers: answers || [] }) });
+      var j = await r.json(); return j && !j.skipped && !j.error ? j : null;
+    } catch (e) { return null; }
+  }
+  window.PBImg = { check: check, msg: msg, describe: describe, about: about };
 })();

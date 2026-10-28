@@ -193,6 +193,14 @@
           var up = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
           if (!up.ok) throw new Error("upload");
           D.img = SB + "/storage/v1/object/public/shop-logos/" + path; paint();
+          if (window.PBImg && PBImg.describe && !String(D.name || "").trim()) {
+            var e0 = sc.querySelector("#prE1"); if (e0) e0.textContent = E ? "🪄 AI is writing the details…" : "🪄 AI जानकारी लिख रहा है…";
+            var ds = await PBImg.describe(f, { slug: b.slug });
+            if (ds && sc.isConnected) {
+              keep(); if (!String(D.name || "").trim()) { D.name = ds.name || D.name; if (!D.size && ds.size) D.size = ds.size; if (!D.feats.length && ds.feats) D.feats = ds.feats.slice(0, FMAX); D.open = true; D.ai = true; }
+              paint(); var e2 = sc.querySelector("#prE1"); if (e2) e2.textContent = E ? "🪄 AI filled this — please check, edit if needed, then Save." : "🪄 AI ने भरा है — देख लें, ग़लत हो तो बदलें, फिर Save करें।";
+            } else { var e3 = sc.querySelector("#prE1"); if (e3) e3.textContent = ""; }
+          }
         } catch (x) { var e1 = sc.querySelector("#prE1"); if (e1) e1.textContent = E ? "Could not upload the photo. Try again." : "फ़ोटो upload नहीं हुई। फिर कोशिश करें।"; }
       };
       sc.querySelector("#prSave").onclick = async function () {
@@ -241,6 +249,10 @@
         var up = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
         if (!up.ok) throw new Error("upload");
         r.img = SB + "/storage/v1/object/public/shop-logos/" + path; r.err = "";
+        if (window.PBImg && PBImg.describe) {
+          var ds = await PBImg.describe(f, { slug: b.slug }); keep();
+          if (ds && !String(r.name || "").trim()) { r.name = ds.name || ""; if (!r.size && ds.size) r.size = ds.size; r.feats = ds.feats || []; r.ai = !!r.name; }
+        }
       } catch (x) { r.err = E ? "Photo did not upload — tap the photo to try again." : "फ़ोटो upload नहीं हुई — फ़ोटो दबाकर फिर लगाएँ।"; }
       r.up = false; keep(); paint();
     }
@@ -252,9 +264,9 @@
       });
     }
     function row(r, k) {
-      return '<div class="mp-r' + (r.ok ? " ok" : r.err ? " bad" : "") + '" data-id="' + r.id + '"><div class="mp-h"><span>' + (r.ok ? "✅ " : "") + (k + 1) + ". " + (r.ok ? esc(r.name) : "Product") + '</span>' +
+      return '<div class="mp-r' + (r.ok ? " ok" : r.err ? " bad" : "") + '" data-id="' + r.id + '"><div class="mp-h"><span>' + (r.ok ? "✅ " : "") + (k + 1) + ". " + (r.ok ? esc(r.name) : "Product") + (r.ai && !r.ok ? ' <em style="font-style:normal;font-size:11px;color:#6a3fd1;background:#f1ebff;border-radius:8px;padding:1px 6px">🪄 AI</em>' : "") + '</span>' +
         (!r.ok ? '<button type="button" data-rm="' + r.id + '" aria-label="Remove">🗑️</button>' : "") + '</div>' +
-        (r.ok ? "" : '<div class="mp-g"><label class="mp-ph">' + (r.img || r.prev ? '<img src="' + esc(r.img || r.prev) + '" alt="">' : "📷") + '<small>' + (r.up ? (E ? "⏳ Checking…" : "⏳ जांच…") : r.img ? "✓" : (E ? "Photo" : "फ़ोटो")) + '</small>' +
+        (r.ok ? "" : '<div class="mp-g"><label class="mp-ph">' + (r.img || r.prev ? '<img src="' + esc(r.img || r.prev) + '" alt="">' : "📷") + '<small>' + (r.up ? (E ? "⏳ AI working…" : "⏳ AI काम में…") : r.img ? "✓" : (E ? "Photo" : "फ़ोटो")) + '</small>' +
         '<input type="file" accept="image/*" hidden data-f="' + r.id + '"></label>' +
         '<div class="mp-f"><input class="pr-in mpN" maxlength="80" value="' + esc(r.name) + '" placeholder="' + (E ? "1. Product name" : "1. Product का नाम") + '">' +
         '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="2. Size"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (E ? "3. Price ₹" : "3. कीमत ₹") + '"></div></div></div>' +
@@ -287,7 +299,7 @@
           try { ME = await PBA.session(); } catch (x) {}
           for (var k = 0; k < go.length; k++) {
             var r2 = go[k];
-            try { await rpc("pb_product_save", { p_slug: b.slug, p: { id: null, name: r2.name.trim(), size: r2.size || "", mrp: r2.mrp || "", feats: [], img: r2.img, show: true, stock: true } }); r2.ok = true; left--; }
+            try { await rpc("pb_product_save", { p_slug: b.slug, p: { id: null, name: r2.name.trim(), size: r2.size || "", mrp: r2.mrp || "", feats: (r2.feats || []).slice(0, 5), img: r2.img, show: true, stock: true } }); r2.ok = true; left--; }
             catch (x) { var m = String(x.message || ""); bad++; r2.err = /too many/.test(m) ? (E ? "Max " + MAXP(b.slug) + " products." : MAXP(b.slug) + " से ज़्यादा नहीं।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : (E ? "Could not save. Try again." : "Save नहीं हुआ, फिर कोशिश करें।"); }
           }
           if (!bad && R.every(function (r) { return r.ok; })) { sc.remove(); refresh(b.slug); return; }
