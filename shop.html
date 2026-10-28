@@ -278,13 +278,33 @@ html body .dock a.w{background:#1e9e57!important}
 body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 #cardBtn{display:none!important}
 
-/* ✨ Gold / Platinum: पेज खुलते ही 3 सेकंड का intro (हल्का → गहरा → हल्का), बीच में दुकान का नाम, नीचे "… BUSINESS CARD" */
-.pbi{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;--pl:#eef3fb;--pd:#0d1730;--pc:#1d2b4d;animation:pbiBg 3s ease-in-out forwards}
-.pbi.gold{--pl:#fbf5e4;--pd:#2a1d05;--pc:#8a6417}
-.pbi b{display:block;font:800 clamp(28px,9vw,48px)/1.2 "Noto Sans Devanagari","Inter",system-ui,sans-serif;letter-spacing:-.3px;word-break:break-word;max-width:92vw;animation:pbiTx 3s ease-in-out forwards}
-.pbi small{position:absolute;left:0;right:0;bottom:calc(34px + env(safe-area-inset-bottom));font:700 clamp(10px,2.9vw,12.5px)/1 Georgia,"Times New Roman",serif;letter-spacing:.26em;margin-right:-.26em;animation:pbiTx 3s ease-in-out forwards}
-@keyframes pbiBg{0%{background:var(--pl);opacity:0}12%{opacity:1}50%{background:var(--pd)}88%{background:var(--pl);opacity:1}100%{background:var(--pl);opacity:0}}
-@keyframes pbiTx{0%,20%{color:var(--pc)}34%,66%{color:#fff}80%,100%{color:var(--pc)}}
+/* 🌐 Website जैसा cover: ऊपर बड़ी फ़ोटो/गहरा रंग, उस पर नाम; पता-नक्शा सबसे नीचे */
+html body .hero{background:linear-gradient(160deg,#3a2a08,#8a6417)!important;color:#fff!important;border:0!important;min-height:230px;display:flex;align-items:flex-end}
+html.t-platinum body .hero{background:linear-gradient(160deg,#0d1730,#2c4272)!important}
+html.t-silver body .hero{background:linear-gradient(160deg,#394250,#8591a1)!important}
+.hero .bg{display:block!important;opacity:.6!important;filter:none!important}
+.hero::after{display:block!important;content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.72) 100%)!important}
+.hero .wrap{width:100%;align-items:flex-end!important;padding-top:70px!important;padding-bottom:18px!important}
+.hname h1{-webkit-text-fill-color:#fff!important;color:#fff!important;font-size:26px!important;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+.hname .sub{color:rgba(255,255,255,.88)!important;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.chip{background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important}
+.chip.op{background:#e8f6ed!important;color:#137333!important;border-color:#bfe3cb!important}.chip.cl{background:#fdecea!important;color:#b42318!important;border-color:#f3c5c0!important}
+.chip.gold{background:linear-gradient(180deg,#fff,var(--cream2))!important;color:var(--gold3)!important;border:1px solid var(--gold1)!important}
+.hlogo img,.hlogo .ini{box-shadow:0 0 0 2px #fff!important}.hlogo.gold img,.hlogo.gold .ini{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold1)!important}
+/* 🎬 Poster intro (Gold / Platinum): गहरा परदा, नाम उभरे, चमक गुज़रे, फिर वेबसाइट */
+.pbi{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;overflow:hidden;
+ --b1:#2a3a63;--b2:#070c1a;--base:#aebfe0;--hi:#fff;--ln:#9db4d6;background:radial-gradient(120% 90% at 50% 40%,var(--b1),var(--b2) 70%);animation:pbiOut 4.2s ease-in forwards}
+.pbi.gold{--b1:#4a3407;--b2:#0e0a02;--base:#c79a35;--hi:#fff3c4;--ln:#d9b257}
+.pbi b{display:block;font:800 clamp(30px,9.5vw,50px)/1.2 "Noto Sans Devanagari","Inter",system-ui,sans-serif;max-width:90vw;word-break:break-word;
+ background:linear-gradient(100deg,var(--base) 35%,var(--hi) 50%,var(--base) 65%) 120% 0/260% 100% no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+ opacity:0;transform:scale(.94);animation:pbiName 4.2s ease-out forwards}
+.pbi em{display:block;margin-top:12px;font:600 clamp(13px,3.8vw,16px)/1.3 Georgia,"Times New Roman",serif;font-style:normal;letter-spacing:.18em;text-transform:uppercase;color:var(--base);opacity:0;animation:pbiSub 4.2s ease-out forwards}
+.pbi i{display:block;height:1.5px;width:0;margin:18px 0;background:linear-gradient(90deg,transparent,var(--ln),transparent);animation:pbiLn 4.2s ease-out forwards}
+.pbi small{position:absolute;left:0;right:0;bottom:calc(34px + env(safe-area-inset-bottom));font:700 clamp(10px,2.9vw,12.5px)/1 Georgia,"Times New Roman",serif;letter-spacing:.26em;margin-right:-.26em;color:var(--base);opacity:0;animation:pbiSub 4.2s ease-out forwards}
+@keyframes pbiName{0%{opacity:0;transform:scale(.94);background-position:120% 0}18%{opacity:1;transform:scale(1)}30%{background-position:120% 0}68%{background-position:-20% 0;opacity:1;transform:scale(1.02)}100%{opacity:1;transform:scale(1.03);background-position:-20% 0}}
+@keyframes pbiSub{0%,22%{opacity:0}38%,100%{opacity:1}}
+@keyframes pbiLn{0%,12%{width:0}34%,100%{width:min(70vw,320px)}}
+@keyframes pbiOut{0%{opacity:0}8%{opacity:1}84%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.04)}}
 </style>
 </head><body>
 
@@ -425,7 +445,7 @@ function render(){drawSoc();
     ["GST",gst?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
-  const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("फ़ोटो","Photos")],["visit",L("पता","Visit us")],["about",L("हमारे बारे में","About")]].filter(Boolean);
+  const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("फ़ोटो","Photos")],["about",L("हमारे बारे में","About")],addr&&["visit",L("पता","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
@@ -449,8 +469,6 @@ function render(){drawSoc();
        '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>MRP</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+L("कीमत पूछें","Ask price")+'</span>')+
        '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'<section class="blk pbe-empty" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'products\')">➕ '+L("पहला product जोड़ें","Add your first product")+'</button></section>')+
      (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
-     (addr?'<section class="blk" data-pbh="addr" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
-       staticMap(b,dir)+'</section>':'')+
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
      '<section class="blk" data-pbh="about" id="about"><h2>🏪 '+L("हमारे बारे में","About us")+'</h2>'+
@@ -459,6 +477,8 @@ function render(){drawSoc();
        (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)?'<div class="row" data-pbh="web"><span>Email</span><b><a href="mailto:'+esc(email)+'">'+esc(email)+'</a></b></div>':'')+
        (web?'<div class="row" data-pbh="web"><span>Website</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+'</div>'
        :'<p class="empty">'+L("दुकानदार ने अभी और जानकारी नहीं जोड़ी है।","The owner hasn't added more details yet.")+'</p>')+'</section>'+
+     (addr?'<section class="blk" data-pbh="addr" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
+       staticMap(b,dir)+'</section>':'')+
      '<section class="blk" data-pbh="near" id="near" hidden><h2>📍 '+L("पास की दूसरी दुकानें","Other shops nearby")+'</h2><div class="near" id="nearBox"></div></section>'+
    '</div>'+
    '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
@@ -493,8 +513,8 @@ function pbIntro(){try{
   const k="pbi_"+slug,d=new Date().toISOString().slice(0,10);let seen="";try{seen=localStorage.getItem(k)||"";}catch(_){}
   if(seen===d)return;try{localStorage.setItem(k,d);}catch(_){}
   window.__pbIntro=1;const e=document.createElement("div");e.className="pbi "+t;e.id="pbIntro";
-  e.innerHTML="<b>"+esc(B.name)+"</b><small>"+t.toUpperCase()+" BUSINESS CARD</small>";
-  const x=()=>{if(e.parentNode)e.remove();};e.onclick=x;e.addEventListener("animationend",ev=>{if(ev.target===e)x();});setTimeout(x,3400);
+  e.innerHTML="<i></i><b>"+esc(B.name)+"</b>"+(B.category?"<em>"+esc(B.category)+"</em>":"")+"<i></i><small>"+t.toUpperCase()+" BUSINESS CARD</small>";
+  const x=()=>{if(e.parentNode)e.remove();};e.onclick=x;e.addEventListener("animationend",ev=>{if(ev.target===e)x();});setTimeout(x,4500);
   document.body.appendChild(e);}catch(_){}}
 
 function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
