@@ -43,6 +43,7 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .search{display:flex;flex-wrap:wrap;gap:6px;background:#fff;border:1px solid var(--line);border-radius:28px;padding:6px;box-shadow:0 8px 24px rgba(26,115,232,.12)}
 .search .f{display:flex;align-items:center;gap:8px;flex:1 1 100%;padding:8px 12px;color:var(--muted)}
 .search input,.search select{border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);width:100%;min-width:0}
+.gpsb{flex:none;width:30px;height:30px;margin:-3px -4px -3px 0;border-radius:50%;border:0;background:#e8f0fe;color:#1a73e8;display:grid;place-items:center;cursor:pointer;padding:0}.gpsb svg{width:18px;height:18px}.gpsb:active{background:#d2e3fc}.gpsb.busy{opacity:.5}
 .search .f.loc{flex:1 1 55%;border-top:1px solid var(--line)}
 .search .go{flex:1 1 35%;background:var(--blue);color:#fff;font-weight:700;font-size:16px;border-radius:22px;padding:11px 18px}
 .hint{font-size:12.5px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
@@ -105,6 +106,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
    <label class="f"><input id="q" type="search" enterkeyhint="search" data-ip="ph" placeholder="क्या ढूंढ रहे हैं?"></label>
    <label class="f loc">
     <span aria-hidden="true" style="font-size:15px">📍</span><input id="city" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist>
+   <button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी location से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
    </label>
    <button class="go" type="submit" data-i="search">खोजें</button>
   </div>
@@ -253,6 +255,29 @@ function render(rows,q,city){
 const P=new URLSearchParams(location.search);
 $("q").value=P.get("q")||"";
 if(P.get("city"))$("city").value=P.get("city");
+/* 📍 शहर: बाहर (home) की तरह — याद रखा शहर अपने-आप, और GPS बटन से अपनी location का शहर */
+if(!P.get("city")){try{const c0=localStorage.getItem("pb-city");if(c0)$("city").value=c0;}catch(e){}}
+(function(){
+  const g=document.getElementById("gpsBtn"),inp=$("city");if(!g||!inp)return;
+  const en=()=>PB.lang&&PB.lang()!=="hi";
+  const LL={"Gandhidham":[23.0753,70.1337],"Adipur":[23.0717,70.0886],"Anjar":[23.1132,70.0283],"Bhuj":[23.2420,69.6669],"Mundra":[22.8390,69.7210],"Mandvi":[22.8324,69.3532],"Nakhatrana":[23.3474,69.2645],"Bhachau":[23.2964,70.3437],"Rapar":[23.5721,70.6432],"Naliya":[23.2606,68.8269],"Dayapar":[23.6380,68.9010]};
+  function done(c){if(!c)return;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}run(true);}
+  function note(t){let d=document.getElementById("locMsg");if(!d){d=document.createElement("div");d.id="locMsg";d.style.cssText="position:fixed;left:12px;right:12px;top:70px;z-index:99;background:#fff4e5;color:#7a3b00;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;font-size:13.5px";document.body.appendChild(d);}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
+  g.addEventListener("click",e=>{e.preventDefault();
+    if(!navigator.geolocation){note(en()?"Location not available":"Location नहीं मिली");return;}
+    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"Location ढूँढ रहे हैं…";g.classList.add("busy");
+    const fail=t=>{g.classList.remove("busy");inp.value=old;inp.placeholder=ph;if(t)note(t);};
+    navigator.geolocation.getCurrentPosition(p=>{
+      g.classList.remove("busy");inp.placeholder=ph;
+      const la=p.coords.latitude,ln=p.coords.longitude;let best=null,bd=1e9;
+      Object.keys(LL).forEach(c=>{const dy=(LL[c][0]-la)*111,dx=(LL[c][1]-ln)*111*Math.cos(la*Math.PI/180),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=c;}});
+      if(best&&bd<35){done(best);return;}
+      fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la.toFixed(4)+"&longitude="+ln.toFixed(4)+"&localityLanguage=en")
+        .then(r=>r.json()).then(d=>{const c=d.city||d.locality||"";if(c)done(c);else fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।");})
+        .catch(()=>fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।"));
+    },err=>{fail(err&&err.code===1?(en()?"Location permission is blocked for this site. Allow it in browser settings.":"इस site के लिए Location की इजाज़त बंद है। Browser की settings में इजाज़त दें।"):(en()?"Could not get your location. Turn on GPS and try again.":"Location नहीं मिली। GPS चालू करके दोबारा दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  });
+})();
 $("sform").onsubmit=e=>{e.preventDefault();$("q").blur();run(true);};
 $("city").onchange=()=>run(true);
 window.PB_CITY_RERUN=()=>{if($("city").value.trim())run(false);};
