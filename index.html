@@ -972,5 +972,27 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   draw();if(window.PB&&PB.onChange)PB.onChange(draw);
 })();
 </script>
+<script>
+/* ↩️ Home पर Back: पहली बार "बाहर निकलने के लिए फिर Back दबाएँ", दूसरी बार (2.5 सेकंड में) बाहर */
+(function(){
+  try{
+    var armed=false,tm=0,done=false;
+    var hi=function(){return !(window.PB&&PB.lang&&PB.lang()!=="hi")};
+    function toast(){
+      var d=document.createElement("div");d.textContent=hi()?"बाहर निकलने के लिए फिर से Back दबाएँ":"Press Back again to exit";
+      d.style.cssText="position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(20,24,38,.92);color:#fff;font:600 14px/1.3 system-ui,sans-serif;padding:10px 16px;border-radius:999px;z-index:99999;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:88vw;text-align:center";
+      document.body.appendChild(d);setTimeout(function(){d.remove()},2300);
+    }
+    history.pushState({pbHome:1},"",location.href);
+    addEventListener("popstate",function(){
+      if(done)return;
+      if(!armed){armed=true;toast();history.pushState({pbHome:1},"",location.href);clearTimeout(tm);tm=setTimeout(function(){armed=false},2500);return;}
+      done=true;
+      var app=(matchMedia("(display-mode: standalone)").matches||navigator.standalone);
+      if(app){history.go(-(history.length-1));setTimeout(function(){try{window.close()}catch(e){}},150);}else{history.back();}
+    });
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
