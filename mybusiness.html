@@ -22,6 +22,7 @@ a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 [hidden]{display:none!important}
 .wrap{max-width:560px;margin:0 auto;padding:12px 16px 40px}
+.edrow{display:flex;justify-content:flex-end;margin:-6px 0 12px}.edtop{display:inline-flex;align-items:center;gap:6px;background:#ffd21f;color:#3b2a00;font-weight:800;font-size:14px;border-radius:999px;padding:9px 16px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--navy)}
 .brand{display:flex;align-items:center;gap:6px;font-weight:800;font-size:18px;color:var(--navy)}
@@ -169,6 +170,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
     <span id="pbLang"></span>
     <button type="button" class="ntb" id="ntBtn" hidden aria-label="Notifications" aria-expanded="false">🔔<i id="ntDot" hidden></i></button>
   </div>
+  <div class="edrow"><a class="edtop" id="edTop" href="#" hidden>✏️ <span>Edit Profile</span></a></div>
   <div class="ntsc" id="ntScrim" hidden></div>
   <div class="ntp" id="ntPanel" hidden></div>
 
@@ -640,12 +642,11 @@ function draw(){
   if(!ROWS.length){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
-  drawNt();list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
+  drawNt();{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=false;}}list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
     tilesBlock(b,i)+(TAB[b.slug]==='p'?profBlock(b,i)+verifyBlock(b,i):'')+premBlock(b,i)+weekLine(b)+(TAB[b.slug]==='f'?phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i):'')+
-    '<a class="edbtn" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit"><span>✏️</span><span><b>'+(L()==="en"?"Edit on your shop page":"अपनी दुकान का page खोलकर बदलें")+'</b><small>'+(L()==="en"?"Logo, products, photos, timings, numbers — tap the yellow ✏️ on any part":"Logo, products, फ़ोटो, समय, नंबर — जिस हिस्से को बदलना है उसकी पीली ✏️ दबाएँ")+'</small></span><span style="font-size:20px;color:#7a4b00">›</span></a>'+
-    '<div class="row2"><a href="business.html?slug='+encodeURIComponent(b.slug)+'">'+esc(tx("view"))+' ›</a>'+
+    '<div class="row2">'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
     (PINST?'<button type="button" class="delacc" id="delAcc">🗑️ '+(L()==="en"?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
