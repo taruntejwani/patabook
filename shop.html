@@ -499,18 +499,19 @@ function mobRow(){const t=x=>{x=String(x||"").replace(/\D/g,"");return x.length>
 
 async function load(){
   const app=document.getElementById("app");
-  if(!slug){app.innerHTML='<p class="note">'+L("दुकान नहीं मिली।","Shop not found.")+'</p>';return;}
+  if(!slug){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("दुकान नहीं मिली।","Shop not found.")+'</p>';return;}
   const COLS="name,slug,address,description,category,website,is_verified,rating,review_count,latitude,longitude";
   const tries=[COLS+",business_code,home_service,logo_url",COLS+",business_code,home_service",COLS];
   try{
     let r,rows=null;
     for(const sel of tries){const u=new URL(SB+"/rest/v1/businesses");u.searchParams.set("select",sel);u.searchParams.set("slug","eq."+slug);u.searchParams.set("limit","1");
       r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});if(r.ok){rows=await r.json();break;}}
-    if(!rows||!rows.length){app.innerHTML='<p class="note">'+L("यह दुकान अभी उपलब्ध नहीं है।","This shop is not available right now.")+'<br><br><a href="index.html" style="color:#1a73e8;font-weight:700">PataBook ›</a></p>';return;}
+    if(!rows||!rows.length){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("यह दुकान अभी उपलब्ध नहीं है।","This shop is not available right now.")+'<br><br><a href="index.html" style="color:#1a73e8;font-weight:700">PataBook ›</a></p>';return;}
     B=rows[0];
     document.title=B.name+" — "+(B.category||"Shop")+" | PataBook";
     try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}
+    try{var _u=location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),_ds=(document.querySelector('meta[name="description"]')||{}).content||"",_im=(!(window.PBHide&&PBHide.has("logo"))&&/^https?:\/\//.test(B.logo_url||""))?B.logo_url:"https://patabook.in/icon-512.png",_c=document.querySelector('link[rel="canonical"]');if(!_c){_c=document.createElement("link");_c.rel="canonical";document.head.appendChild(_c);}_c.href=_u;[["og:title",document.title],["og:description",_ds],["og:url",_u],["og:image",_im]].forEach(function(p){var m=document.querySelector('meta[property="'+p[0]+'"]');if(!m){m=document.createElement("meta");m.setAttribute("property",p[0]);document.head.appendChild(m);}m.setAttribute("content",p[1]);});}catch(_){}
     render();
     await Promise.all([loadPrem(),loadContact()]);
     loadNear();loadVacFlag();loadOwner();

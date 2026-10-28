@@ -8,3 +8,4 @@ Disallow: /login.html
 Disallow: /vacancy.html
 
 Sitemap: https://patabook.in/sitemap.xml
+Sitemap: https://patabook.in/sitemap-shops.xml
