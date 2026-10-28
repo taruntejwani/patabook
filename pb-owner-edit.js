@@ -420,9 +420,75 @@
     };
   }
   /* ✏️ एक ही Edit विंडो: ऊपर टैब (लोगो · प्रोडक्ट · गैलरी · जानकारी · नंबर · लिंक · क्या दिखे); हर टैब में वही पुराना editor */
+
+  /* 🤖 AI सहायक: ✏️ दबाते ही सबसे पहले यही खुलता है — "मैं आपकी कैसे मदद करूँ?" */
+  function bInfo() { try { return { shop: (B && B.name) || "", cat: (B && B.category) || "", sub: ln("Type") }; } catch (e) { return { shop: "", cat: "", sub: "" }; } }
+  async function editAI() {
+    var s = hubSheet("🤖 AI", ""), body = s.body, I = bInfo();
+    s.close = s.close;
+    function go(k) { if (HUB) HUB.go(k); }
+    function bub(h) { return '<div style="background:#f1ebff;border-radius:16px 16px 16px 4px;padding:12px 14px;color:#2d1b69;margin-bottom:10px">' + h + '</div>'; }
+    function btn(k, ic, t, sm) { return '<button type="button" data-ai="' + k + '" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1.5px solid #e1d8fb;background:#fff;border-radius:14px;padding:11px 13px;margin-top:8px;font:inherit;cursor:pointer"><span style="font-size:22px">' + ic + '</span><span><b style="display:block;font-size:14.5px;color:#26145e">' + t + '</b><small style="color:#5b6475">' + sm + '</small></span></button>'; }
+    var st = { prods: null, phs: null };
+    try { var pl = await rpc("pb_my_products", { p_slug: O.slug }); st.prods = (pl || []).length; } catch (e) {}
+    try { var ph = await rpc("pb_my_photos", { p_slug: O.slug }); st.phs = (ph || []).length; } catch (e) {}
+    if (!HUB || HUB.cur !== s) return;
+    var chk = [
+      ["products", T("कम से कम 3 products / सेवाएँ", "At least 3 products / services"), st.prods == null ? null : st.prods >= 3],
+      ["photos", T("कम से कम 3 Gallery फ़ोटो", "At least 3 gallery photos"), st.phs == null ? null : st.phs >= 3],
+      ["svc", T("Services लिखी हैं", "Services written"), !!ln("Services")],
+      ["details", T("दुकान का समय भरा है", "Timings filled"), !!ln("Hours")],
+      ["numbers", T("Call / WhatsApp नंबर", "Call / WhatsApp number"), !!(n10(ln("Phone2")) || n10(ln("WhatsApp")) || n10(O.phone))]
+    ].filter(function (c) { return c[2] !== null; });
+    var done = chk.filter(function (c) { return c[2]; }).length, pct = chk.length ? Math.round(done * 100 / chk.length) : 0;
+    function home() {
+      body.innerHTML = bub("👋 <b>" + T("नमस्ते! मैं आपकी कैसे मदद करूँ?", "Hello! How may I help you?") + "</b><br><small>" + T("आप सिर्फ़ फ़ोटो चुनें या छोटे जवाब दें — बाकी मैं सँभाल लूँगा। आपके देखे बिना कुछ सेव नहीं होगा।", "Just pick photos or give short answers — I will do the rest. Nothing is saved without your approval.") + "</small>") +
+        '<div style="margin:6px 0 4px;font-size:13px;color:#5b6475">' + T("आपकी profile कितनी पूरी है", "How complete your profile is") + ': <b style="color:#26145e">' + pct + '%</b></div>' +
+        '<div style="height:8px;background:#eee8fb;border-radius:8px;overflow:hidden"><i style="display:block;height:100%;width:' + pct + '%;background:linear-gradient(90deg,#8b5cf6,#1e9e57)"></i></div>' +
+        '<div style="margin:8px 0 2px">' + chk.map(function (c) { return '<div data-ai="' + (c[0] === "svc" ? "svc" : c[0]) + '" style="font-size:13px;padding:3px 0;color:' + (c[2] ? "#1e9e57" : "#b3261e") + ';cursor:pointer">' + (c[2] ? "✅ " : "⬜ ") + c[1] + '</div>'; }).join("") + '</div>' +
+        btn("products", "📷", T("Product / सेवा की फ़ोटो जोड़ें", "Add product / service photos"), T("फ़ोटो चुनें — नाम, size और खूबियाँ AI भर देगा", "Pick a photo — AI fills name, size and features")) +
+        btn("photos", "🖼️", T("Gallery की फ़ोटो", "Gallery photos"), T("दुकान / काम / टीम की फ़ोटो", "Shop, work or team photos")) +
+        btn("svc", "✍️", T("अपनी सेवाएँ AI से लिखवाएँ", "Let AI write your services"), T("AI आपके काम के हिसाब से 3 सवाल पूछेगा", "AI asks 3 questions about your work")) +
+        btn("details", "🏪", T("समय, पता और बाकी जानकारी", "Timings, address & details"), T("खुलने-बंद होने का समय, छुट्टी, website", "Opening hours, weekly off, website")) +
+        btn("numbers", "📞", T("Call / WhatsApp नंबर", "Call / WhatsApp numbers"), T("ग्राहक किस नंबर पर बात करें", "Which numbers customers can use")) +
+        btn("self", "✋", T("मैं ख़ुद बदलूँगा", "I will edit myself"), T("पीली ✏️ दबाकर हर हिस्सा बदलें", "Tap the yellow ✏️ on any part"));
+    }
+    var Q = [];
+    async function svc() {
+      body.innerHTML = bub("<b>🪄 " + T("AI सोच रहा है…", "AI is thinking…") + "</b>");
+      var r = window.PBImg && PBImg.about ? await PBImg.about("ask", I, []) : null;
+      if (!r || !r.qs || !r.qs.length) { body.innerHTML = bub(T("अभी AI उपलब्ध नहीं है। आप ‘जानकारी’ टैब में ख़ुद लिख सकते हैं।", "AI is not available right now. You can type it yourself in the ‘Details’ tab.")) + btn("back", "⬅️", T("वापस", "Back"), ""); return; }
+      Q = r.qs;
+      body.innerHTML = bub("<b>" + T("इन सवालों का छोटा जवाब दें", "Answer these briefly") + "</b>") + Q.map(function (q, k) { return '<label style="display:block;font-size:13.5px;margin-top:10px">' + E(q) + '</label><input class="aiA" data-k="' + k + '" maxlength="200" style="width:100%;box-sizing:border-box;padding:11px;border:1.5px solid #d9cffa;border-radius:12px;font:15px system-ui">'; }).join("") +
+        '<button type="button" id="aiGo" style="margin-top:14px;width:100%;border:0;background:#6d3fe0;color:#fff;font:700 15px system-ui;border-radius:12px;padding:13px">✨ ' + T("लिखो", "Write it") + '</button>' + btn("back", "⬅️", T("वापस", "Back"), "");
+      body.querySelector("#aiGo").onclick = write;
+    }
+    async function write() {
+      var ans = [].map.call(body.querySelectorAll(".aiA"), function (i) { return { q: Q[+i.dataset.k], a: i.value.trim() }; }).filter(function (a) { return a.a; });
+      if (!ans.length) { body.querySelector(".aiA").focus(); return; }
+      var g = body.querySelector("#aiGo"); g.disabled = true; g.textContent = "⏳ …";
+      var r = await PBImg.about("write", I, ans);
+      if (!r || !r.services || !r.services.length) { g.disabled = false; g.textContent = T("AI से नहीं बन पाया — फिर दबाएँ", "AI could not write it — tap again"); return; }
+      body.innerHTML = bub("<b>🪄 " + T("AI ने यह लिखा — देख लें", "AI wrote this — please check") + "</b>") + (r.about ? '<p style="font-size:13.5px;color:#4b3a85;margin:6px 0">' + E(r.about) + '</p>' : "") +
+        '<textarea id="aiOut" maxlength="500" style="width:100%;box-sizing:border-box;min-height:80px;padding:11px;border:1.5px solid #d9cffa;border-radius:12px;font:15px system-ui">' + E(r.services.join(", ")) + '</textarea><div class="pbe-er" id="aiEr"></div>' +
+        '<button type="button" id="aiUse" style="margin-top:8px;width:100%;border:0;background:#1e9e57;color:#fff;font:700 15px system-ui;border-radius:12px;padding:13px">✔ ' + T("यह रखें और Save करें", "Keep this and save") + '</button>' + btn("back", "⬅️", T("रहने दें", "Cancel"), "");
+      body.querySelector("#aiUse").onclick = async function () {
+        var v = body.querySelector("#aiOut").value.trim().slice(0, 500); if (!v) return; this.disabled = true;
+        try { await rpc("pb_owner_set_details", { p_slug: O.slug, p: allLines({ Services: v }) }); HUB.reload = true; body.innerHTML = bub("✅ <b>" + T("Save हो गया!", "Saved!") + "</b><br><small>" + T("आपकी सेवाएँ पेज पर दिखने लगेंगी।", "Your services will show on your page.") + "</small>") + btn("back", "⬅️", T("वापस", "Back"), ""); }
+        catch (x) { this.disabled = false; body.querySelector("#aiEr").textContent = T("Save नहीं हुआ। फिर कोशिश करें।", "Could not save. Try again."); }
+      };
+    }
+    body.onclick = function (e) {
+      var b = e.target.closest("[data-ai]"); if (!b) return; var k = b.dataset.ai;
+      if (k === "svc") return svc(); if (k === "back") return home();
+      if (k === "self") return HUB && HUB.close(true);
+      go(k);
+    };
+    home();
+  }
   var HUB = null;
   function hubTabs() {
-    return [["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("प्रोडक्ट", "Products"), editProducts], ["photos", "🖼️ " + T("गैलरी", "Gallery"), editPhotos],
+    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("प्रोडक्ट", "Products"), editProducts], ["photos", "🖼️ " + T("गैलरी", "Gallery"), editPhotos],
       ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
       ["link", "🔗 " + T("लिंक", "Link"), editLink], ["visible", "👁️ " + T("क्या दिखे", "Visibility"), editVisible]];
   }
@@ -509,7 +575,7 @@
     var host = o.page === "shop" ? document.querySelector(".top .wrap") : document.querySelector("header .nav");
     var lang = document.getElementById("pbLang");
     var btn = document.createElement("button"); btn.type = "button"; btn.id = "pbeBtn"; btn.className = "pbe-btn"; btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg> ' + T("Edit", "Edit");
-    btn.onclick = function () { toggle(); };
+    btn.onclick = function () { var was = ON; toggle(); if (!was && ON) openHub("ai"); };
     if (host && lang && lang.parentNode === host) host.insertBefore(btn, lang); else if (host) host.appendChild(btn);
     /* नीचे वाली काली पट्टी हटा दी — हर हिस्से की पीली ✏️ से बदलें */
     new MutationObserver(function () { if (ON) pens(); }).observe(document.body, { childList: true, subtree: true });
