@@ -307,6 +307,11 @@ html.t-silver body .hero{background:linear-gradient(160deg,#394250,#8591a1)!impo
 @keyframes pbiLn{0%,12%{width:0}34%,100%{width:min(70vw,320px)}}
 @keyframes pbiOut{0%{opacity:0}8%{opacity:1}84%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.04)}}
 .qa .pri span{display:flex;align-items:center}.qa .pri svg,.dock a svg{width:22px!important;height:22px!important;margin:0!important;vertical-align:0}
+.pbx.pst{padding:0;background:#071a52;animation:pbPstIn .35s ease-out both;transition:opacity .45s ease}.pbx.pst.out{opacity:0;pointer-events:none}
+.pbx.pst img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.pbx.pst .pbsk{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:2;border:1px solid rgba(255,255,255,.45);background:rgba(7,26,82,.55);color:#fff;font:700 13px/1 system-ui,sans-serif;border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.pbx.pst .pbbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25);z-index:2}.pbx.pst .pbbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d9b257,#fff3c4)}
+@keyframes pbPstIn{from{opacity:0}to{opacity:1}}
 </style>
 </head><body>
 
@@ -510,8 +515,20 @@ function render(){drawSoc();
 /* ✨ intro: Gold/Platinum, दिन में एक बार (उसी फ़ोन पर, उसी दुकान का), टैप से बंद, motion कम हो तो नहीं */
 function pbIntro(){try{
   if(window.__pbIntro||!B)return;const t=TIER();if(t!=="gold"&&t!=="platinum")return;
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   if(document.body.classList.contains("pbe-on"))return;
+  /* 🖼️ दुकान का अपना poster (posters/<slug>.webp): पूरी screen, ~5 सेकंड timer, Skip / टैप से बंद; हर नई visit (browser session) में एक बार */
+  const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
+  const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);
+  if(pk){const sk="pbp_"+pk;let seenS="";try{seenS=sessionStorage.getItem(sk)||"";}catch(_){}if(seenS)return;try{sessionStorage.setItem(sk,"1");}catch(_){}
+    window.__pbIntro=1;const T=5,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
+    e.innerHTML='<img alt="'+esc(B.name)+'" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
+    const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
+    const x=()=>{if(done)return;done=1;clearInterval(tm);e.classList.add("out");setTimeout(()=>{if(e.parentNode)e.remove();},450);};
+    const lab=()=>{sk2.textContent=L("छोड़ें","Skip")+" "+n+" ›";};lab();
+    const go=()=>{if(tm)return;bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
+    im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2500);
+    e.onclick=x;document.body.appendChild(e);return;}
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   const k="pbi_"+slug,d=new Date().toISOString().slice(0,10);let seen="";try{seen=localStorage.getItem(k)||"";}catch(_){}
   if(seen===d)return;try{localStorage.setItem(k,d);}catch(_){}
   window.__pbIntro=1;const e=document.createElement("div");e.className="pbx "+t;e.id="pbIntro";
