@@ -111,9 +111,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc.tc .tcb{padding:3px 8px!important;position:static!important;align-self:flex-start;margin-bottom:6px;white-space:nowrap;border-radius:9px!important;line-height:1.3!important}
 .nsc .pbg i{white-space:nowrap}
 .nsc .new.dbc{font-family:Georgia,'Times New Roman',serif;font-size:7.5px;letter-spacing:.12em;font-weight:700;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:3px 8px;position:static;align-self:flex-start;margin-bottom:6px;white-space:nowrap;border-radius:9px;line-height:1.3;font-size:7px}
-.bcl{position:absolute;top:14px;right:16px;text-align:right;font-family:Georgia,'Times New Roman',serif;line-height:1.1}
+.bcl{position:absolute;top:auto;bottom:14px;right:16px;text-align:right;white-space:nowrap;font-family:Georgia,'Times New Roman',serif;line-height:1.1}
 .bcl em{display:block;font-style:normal;font-weight:700;font-size:24px;letter-spacing:.2em;margin-right:-.2em}
-.bcl small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.32em;margin-top:3px;margin-right:-.32em;opacity:.9}
+.bcl small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.2em;margin-right:-.2em;opacity:1}
 .bcl-gold{color:#9a741f}.bcl-gold em{background:linear-gradient(180deg,#e9c65f,#b58a2a 55%,#7a5614);-webkit-background-clip:text;background-clip:text;color:transparent}
 .bcl-platinum{color:#3d4d6e}.bcl-platinum em{background:linear-gradient(180deg,#6f86b3,#2f3f63 55%,#141c2c);-webkit-background-clip:text;background-clip:text;color:transparent}
 .nsc.tc{position:relative}.nsc.tc .tcb{position:absolute;top:7px;right:6px;display:flex;align-items:center;gap:3px;font-size:8.5px;font-weight:900;letter-spacing:.3px;border-radius:999px;padding:1px 6px 1px 2px}
@@ -599,7 +599,7 @@ function applyLang(){
   let GP=[],GL=[];const LOGO={},LRX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   function badge(t){return '<span class="pbg pb-'+t+'"><i>'+t.toUpperCase()+' BUSINESS CARD</i></span>';}
   function gcard(b){const lg=b._lg&&LOGO[b.slug];
-    return '<a class="nsc pm pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+badge(b._t)+(b._t==="platinum"||b._t==="gold"?'<span class="bcl bcl-'+b._t+'"><em>'+b._t.toUpperCase()+'</em><small>BUSINESS CARD</small></span>':"")+'<span class="ic'+(lg?' lg':'')+'">'+(lg?'<img src="'+esc(lg)+'" alt="" loading="lazy" decoding="async">':b._ic)+'</span><b>'+esc(b.name)+'</b><span class="ad">'+(b.category?b._ic+' '+esc(b.category):'📍 '+esc(b.address||b.city||""))+'</span><span class="vs">🛍️ '+(hi()?"दुकान देखें":"Visit shop")+' ›</span></a>';}
+    return '<a class="nsc pm pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+badge(b._t)+(b._t==="platinum"||b._t==="gold"?'<span class="bcl bcl-'+b._t+'"><small>'+b._t.toUpperCase()+' BUSINESS CARD</small></span>':"")+'<span class="ic'+(lg?' lg':'')+'">'+(lg?'<img src="'+esc(lg)+'" alt="" loading="lazy" decoding="async">':b._ic)+'</span><b>'+esc(b.name)+'</b><span class="ad">'+(b.category?b._ic+' '+esc(b.category):'📍 '+esc(b.address||b.city||""))+'</span><span class="vs">🛍️ '+(hi()?"दुकान देखें":"Visit shop")+' ›</span></a>';}
   const G={i:0,drag:false,moved:0,on:false,tm:0,fx:0};
   /* नीचे की पट्टी: एक-एक पूरा pamphlet; 4 सेकंड रुकता है, फिर झट से अगला slide होकर आता है; उँगली से भी पलटा जा सकता है */
   function gdraw(){const w=document.getElementById("gpw"),t=document.getElementById("gpt"),pv=document.getElementById("pv");if(!w||!t)return;
