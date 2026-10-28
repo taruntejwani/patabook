@@ -349,10 +349,10 @@ html.t-gold .dock{padding:6px 12px calc(6px + env(safe-area-inset-bottom))!impor
 html.t-gold body .dock a{padding:9px 8px!important;font-size:14px!important;border-radius:11px!important}
 html.t-gold body{padding-bottom:calc(52px + env(safe-area-inset-bottom))}
 /* ✨ धातु की चमक (Silver/Gold/Platinum): हल्की, ~6 सेकंड में एक बार; "Reduce motion" पर बंद */
-@keyframes pbShine{0%{transform:translateX(-140%) skewX(-20deg)}22%,100%{transform:translateX(160%) skewX(-20deg)}}
+@keyframes pbShine{0%{transform:translateX(-300%) skewX(-20deg)}22%,100%{transform:translateX(420%) skewX(-20deg)}}
 @keyframes pbCrn{0%,86%,100%{filter:brightness(1)}93%{filter:brightness(1.55) drop-shadow(0 0 7px rgba(255,255,255,.95))}}
 html:is(.t-silver,.t-gold,.t-platinum) :is(.chip.gold,.qa .pri.c,.dock a:not(.w)){position:relative;overflow:hidden;isolation:isolate}
-html:is(.t-silver,.t-gold,.t-platinum) :is(.chip.gold,.qa .pri.c,.dock a:not(.w))::before{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;z-index:1;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);animation:pbShine 6s ease-in-out infinite}
+html:is(.t-silver,.t-gold,.t-platinum) :is(.chip.gold,.qa .pri.c,.dock a:not(.w))::before{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;z-index:-1;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:pbShine 6s ease-in-out infinite}
 html:is(.t-silver,.t-gold,.t-platinum) .hlogo .crn{animation:pbCrn 6s ease-in-out infinite}
 html.t-platinum :is(.chip.gold,.qa .pri.c,.dock a:not(.w))::before{background:linear-gradient(100deg,transparent,rgba(190,225,255,.75),transparent)}
 html.t-gold .dock a:not(.w)::before{animation-delay:1.5s}
