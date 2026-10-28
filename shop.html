@@ -116,6 +116,9 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .pbig{border-radius:14px;overflow:hidden;background:#0d0d10;aspect-ratio:1;max-height:56vh;margin:0 auto}.pbig img{width:100%;height:100%;object-fit:contain;display:block}
 .psh h3{font-size:19px;margin-top:12px}.pmeta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:14px;font-weight:700;color:#123568}
 .pft{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pft span{background:#f1f4fa;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600}
+.galc{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:640px){.galc{grid-template-columns:1fr 1fr}}
+.galc figure{margin:0;background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden}.galc figure button{display:block;width:100%;border:0;padding:0;aspect-ratio:4/3;background:#eef3fd;cursor:zoom-in}.galc img{width:100%;height:100%;object-fit:cover;display:block}
+.galc figcaption{padding:10px 13px 12px;font-size:13.5px;line-height:1.55;color:#2a3350;cursor:pointer}.galc .ct{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.galc figcaption.open .ct{display:block}.galc figcaption em{display:block;font-style:normal;font-weight:700;color:#1a73e8;margin-top:2px}.galc figcaption.open em{display:none}
 .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}@media(min-width:640px){.gal{grid-template-columns:repeat(4,1fr)}}
 .gal button{border:0;padding:0;border-radius:14px;overflow:hidden;aspect-ratio:1;background:#eef3fd;cursor:zoom-in}.gal img{width:100%;height:100%;object-fit:cover;display:block}
 .lbx{position:fixed;inset:0;z-index:9999;background:rgba(5,10,20,.92);display:flex;align-items:center;justify-content:center}.lbx img{max-width:96vw;max-height:86vh;border-radius:10px}.lbx button{position:absolute;border:0;background:rgba(255,255,255,.15);color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer}.lbx .x{top:14px;right:14px}.lbx .pv{left:10px;top:50%}.lbx .nx{right:10px;top:50%}
@@ -338,7 +341,7 @@ const L=(hi,en)=>EN()?en:hi;
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 const IMG_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
 const rsF=n=>n?"₹"+Number(n).toLocaleString("en-IN"):"";
-let B=null,PREM=false,GAL=[],PRODS=[],CT={k:"loading"};
+let B=null,PREM=false,GAL=[],CAPS={},PRODS=[],CT={k:"loading"};
 
 const DAY_HI={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
 function hm12(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
@@ -423,6 +426,7 @@ async function loadPrem(){
   if(!PF("photos")&&!PF("products"))return;
   await Promise.all([
     fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{GAL=j||[];}).catch(()=>{GAL=[];}),
+    fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{CAPS={};(j||[]).forEach(c=>{if(c&&c.url&&c.caption)CAPS[c.url]=c.caption;});}).catch(()=>{CAPS={};}),
     fetch(SB+"/rest/v1/rpc/pb_shop_products_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{PRODS=j||[];}).catch(()=>{PRODS=[];})
   ]);
 }
@@ -476,7 +480,7 @@ function render(){drawSoc();
        (p.best?'<span class="pbs">⭐ '+L("सबसे ज़्यादा बिकता","Best seller")+'</span>':'')+(p.stock===false?'<span class="pout">'+L("अभी Stock में नहीं","Out of stock")+'</span>':'')+'</button>'+
        '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>MRP</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+L("कीमत पूछें","Ask price")+'</span>')+
        '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'<section class="blk pbe-empty" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'products\')">➕ '+L("पहला product जोड़ें","Add your first product")+'</button></section>')+
-     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
+     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+' <small>('+G.length+')</small></h2>'+(G.some(u=>CAPS[u])?'<div class="galc">'+G.map((u,i)=>'<figure><button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="'+esc((CAPS[u]||"").slice(0,80))+'" loading="lazy"></button>'+(CAPS[u]?'<figcaption><span class="ct">'+esc(CAPS[u])+'</span>'+(CAPS[u].length>110?'<em>'+L("और पढ़ें","Read more")+'</em>':"")+'</figcaption>':"")+'</figure>').join("")+'</div>':'<div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div>')+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
      '<section class="blk" id="vis"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div id="about" data-pbh="about">'+
@@ -505,7 +509,7 @@ function render(){drawSoc();
   const pr=document.getElementById("prods");if(pr)pr.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(P[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)return prodAsk(P[+a.dataset.pa]);const sh=e.target.closest("[data-ps]");if(sh)prodShare(P[+sh.dataset.ps]);};
   /* दोस्त का भेजा link (#p<id>) खुले तो वही product सामने खुले */
   if(!window.__pOpened){const hm=location.hash.match(/^#p(\d+)$/);if(hm){const q=P.find(x=>String(x.id)===hm[1]);if(q){window.__pOpened=1;setTimeout(()=>{const s2=document.getElementById("prods");if(s2)s2.scrollIntoView({block:"start"});prodSheet(q);},300);}}}
-  const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
+  const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const c=e.target.closest("figcaption");if(c){c.classList.toggle("open");return;}const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
   document.getElementById("shareQa").onclick=document.getElementById("shareQa").classList.contains("isCard")?()=>{const c=document.getElementById("cardBtn");if(c)c.click();}:()=>{window.open(waLink(b,window.PBHide&&PBHide.has("addr")?"":addr),"_blank","noopener");};
   document.getElementById("repBtn").onclick=openReport;
   wireDir(b,addr,dir);drawOwn();

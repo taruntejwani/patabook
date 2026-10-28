@@ -127,6 +127,18 @@
       } finally { clearTimeout(tm); }
     } catch (e) { return null; }
   }
+  /* 🖼️ Gallery फ़ोटो का caption: opts {slug, hint, shop, cat} → string (ख़ाली/ null = नहीं बना) */
+  async function caption(file, opts) {
+    try {
+      if (!(await v9())) return null;
+      opts = opts || {}; var I = opts.shop || opts.cat ? { shop: opts.shop, cat: opts.cat } : await shopInfo(opts.slug), sm = await small(file);
+      var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 25000);
+      try {
+        var r = await fetch(base() + "/caption", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: sm.data, hint: String(opts.hint || "").slice(0, 160), ctx: { shop: I.shop || "", cat: I.cat || "", lang: en() ? "en" : "hi" } }), signal: ctl.signal });
+        var j = await r.json(); return j && j.caption ? String(j.caption) : null;
+      } finally { clearTimeout(tm); }
+    } catch (e) { return null; }
+  }
   /* ✍️ About / Services के लिए: mode "ask" → 3 सवाल, mode "write" → {about, services[]} */
   async function about(mode, info, answers) {
     try {
@@ -136,5 +148,5 @@
       var j = await r.json(); return j && !j.skipped && !j.error ? j : null;
     } catch (e) { return null; }
   }
-  window.PBImg = { check: check, msg: msg, describe: describe, about: about };
+  window.PBImg = { check: check, msg: msg, describe: describe, about: about, caption: caption };
 })();

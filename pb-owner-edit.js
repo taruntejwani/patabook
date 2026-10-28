@@ -168,40 +168,105 @@
     }
     paint();
   }
-  async function editPhotos() {
-    var s = sheet("📷 " + T("दुकान की फ़ोटो", "Shop photos"), '<p style="color:#5b6475">…</p>');
-    var L = [], rm = {}, add = [];
+  async function editPhotos(view0) {
+    var s = sheet("📷 " + T("Gallery", "Gallery"), '<p style="color:#5b6475">…</p>');
+    var L = [], rm = {}, add = [], caps = {}, capOk = true, view = view0 || "home", ed = {}, nid = 0, busyN = 0;
     try { L = await rpc("pb_my_photos", { p_slug: O.slug }) || []; } catch (x) { s.body.innerHTML = '<p class="pbe-note">' + (/premium/i.test(x.message) ? T("फ़ोटो सिर्फ़ Premium दुकानों के लिए हैं।", "Photos are for Premium shops.") : T("खुल नहीं सका।", "Could not load.")) + '</p>'; return; }
+    try { (await rpc("pb_photo_captions", { p_slug: O.slug }) || []).forEach(function (c) { caps[c.url] = c.caption; }); } catch (x) { capOk = false; }
+    var LIM = plim("photos", 8), I = bInfo();
     function count() { return L.filter(function (x) { return !rm[x.id]; }).length + add.length; }
+    function E2(v) { return E(v == null ? "" : v); }
+    function wid(k, o) {
+      var h = '<div class="pbe-cw" style="margin-top:8px;background:#f8f6ff;border-radius:12px;padding:9px 10px"><label style="display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:700;color:#3b2a85"><input type="checkbox" data-ck="' + k + '"' + (o.on ? " checked" : "") + '> ✍️ ' + T("इस फ़ोटो के नीचे caption", "Caption under this photo") + '</label>';
+      if (o.on) {
+        h += o.busy ? '<div style="font-size:13px;color:#6d3fe0;margin-top:6px">⏳ ' + T("AI caption लिख रहा है…", "AI is writing the caption…") + '</div>' :
+          '<textarea data-ct="' + k + '" maxlength="300" placeholder="' + T("caption लिखें", "Write a caption") + '" style="width:100%;box-sizing:border-box;min-height:66px;margin-top:6px;padding:9px;border:1.5px solid #d9cffa;border-radius:10px;font:14.5px system-ui">' + E2(o.cap) + '</textarea>' +
+          '<div style="font-size:12px;color:#5b6475;margin:3px 0 5px">' + (o.ai ? "✓ " + T("AI ने लिखा है। बदलना हो तो ख़ुद लिखें, या AI को बताएँ:", "Written by AI. Edit it yourself, or tell AI:") : T("ख़ुद लिखें, या AI से लिखवाएँ:", "Write it yourself, or let AI write:")) + '</div>' +
+          '<div style="display:flex;gap:6px"><input data-ch="' + k + '" maxlength="120" value="' + E2(o.hint) + '" placeholder="' + T("जैसे: छोटा लिखो / अंग्रेज़ी में", "e.g. keep it short / in Hindi") + '" style="flex:1;min-width:0;padding:9px;border:1.5px solid #d9cffa;border-radius:10px;font:14px system-ui"><button type="button" data-cg="' + k + '" style="border:0;background:#6d3fe0;color:#fff;border-radius:10px;padding:0 12px;font:700 13px system-ui">🪄 ' + T("लिखो", "Write") + '</button></div>' +
+          (o.note ? '<div style="font-size:12px;color:#b3261e;margin-top:4px">' + o.note + '</div>' : "");
+      }
+      return h + '</div>';
+    }
+    function find(k) { return k.charAt(0) === "n" ? add.filter(function (a) { return "n" + a.id === k; })[0] : ed[k.slice(1)]; }
+    async function aiCap(k, srcBlob) {
+      var o = find(k); if (!o) return; o.busy = true; o.note = ""; paint();
+      var cap = null;
+      try { var bl = srcBlob || o.blob; if (!bl && o.url) bl = await (await fetch(o.url)).blob(); cap = bl && window.PBImg && PBImg.caption ? await PBImg.caption(bl, { slug: O.slug, hint: o.hint || "", shop: I.shop, cat: I.cat }) : null; } catch (x) { cap = null; }
+      o.busy = false;
+      if (cap) { o.cap = cap; o.ai = true; } else o.note = T("अभी AI caption नहीं बना पाया — आप ख़ुद लिख सकते हैं।", "AI could not write it now — you can type it yourself.");
+      s.dirty = true; paint();
+    }
     function paint() {
-      var n = count(), h = '<div class="pbe-pg">' +
-        L.filter(function (x) { return !rm[x.id]; }).map(function (x) { return '<div class="t"><img src="' + E(x.url) + '" alt="" loading="lazy"><button type="button" data-rm="' + x.id + '" aria-label="Remove">✕</button></div>'; }).join("") +
-        add.map(function (a, i) { return '<div class="t" style="outline:2px solid #1e9e57"><img src="' + E(a.prev) + '" alt=""><button type="button" data-ra="' + i + '" aria-label="Remove">✕</button></div>'; }).join("") +
-        (n < plim("photos", 8) ? '<label>＋<input type="file" accept="image/*" hidden id="pbePf"></label>' : '') + '</div><small style="display:block;color:#5b6475;margin-top:8px">' + n + ' / ' + plim("photos", 8) + ' ' + T("फ़ोटो", "photos") + '</small>';
-      if (s.dirty) h += '<button type="button" class="pbe-b p" id="pbePs" style="background:#1e9e57">💾 ' + T("Save", "Save") + '</button>';
-      h += '<div class="pbe-er" id="pbePe"></div>';
-      s.body.innerHTML = h;
-      var inp = s.body.querySelector("#pbePf"), er = s.body.querySelector("#pbePe");
-      if (inp) inp.onchange = async function () {
-        var f = inp.files && inp.files[0]; if (!f) return;
+      var n = count(), h = "";
+      if (view === "home") {
+        h = '<p style="margin:0 0 4px;font-weight:700;color:#26145e">🖼️ ' + T("आपकी Gallery", "Your Gallery") + ' <small style="color:#5b6475;font-weight:400">(' + n + ' / ' + LIM + ')</small></p>' +
+          '<button type="button" data-v="add" class="pbe-b p" style="width:100%;margin-top:10px">📷 ' + T("फ़ोटो जोड़ें / हटाएँ", "Add / remove photos") + '</button>' +
+          '<button type="button" data-v="cap" class="pbe-b" style="width:100%;margin-top:10px;background:#f1ebff;color:#3b2a85;border:1.5px solid #d9cffa">✍️ ' + T("फ़ोटो के नीचे caption दें", "Add captions under photos") + '</button>' +
+          (capOk ? "" : '<p style="font-size:12.5px;color:#b3261e;margin-top:10px">' + T("caption की सुविधा अभी चालू नहीं हुई है।", "Captions are not switched on yet.") + '</p>');
+        s.body.innerHTML = h; s.body.onclick = onClick; return;
+      }
+      h = '<button type="button" data-v="home" style="border:0;background:none;color:#3b2a85;font:700 14px system-ui;padding:0 0 8px">← ' + T("वापस", "Back") + '</button>';
+      if (view === "add") {
+        h += '<div class="pbe-pg">' + L.filter(function (x) { return !rm[x.id]; }).map(function (x) { return '<div class="t"><img src="' + E(x.url) + '" alt="" loading="lazy"><button type="button" data-rm="' + x.id + '" aria-label="Remove">✕</button></div>'; }).join("") +
+          (n < LIM ? '<label>＋<input type="file" accept="image/*" multiple hidden id="pbePf"></label>' : '') + '</div><small style="display:block;color:#5b6475;margin:6px 0">' + n + ' / ' + LIM + ' ' + T("फ़ोटो — एक साथ कई चुन सकते हैं", "photos — you can pick many at once") + '</small>';
+        if (add.length) {
+          if (capOk) h += '<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0"><input type="checkbox" data-allcap' + (add.every(function (a) { return !a.on; }) ? " checked" : "") + '> ' + T("सब का caption बंद करें", "Turn off captions for all") + '</label>';
+          h += add.map(function (a) { return '<div style="border:1.5px solid #bfe6cd;border-radius:14px;padding:8px;margin-top:8px"><div style="display:flex;gap:10px"><img src="' + E(a.prev) + '" alt="" style="width:76px;height:76px;object-fit:cover;border-radius:10px"><div style="flex:1;font-size:12.5px;color:#1e9e57">' + T("नई फ़ोटो", "New photo") + '</div><button type="button" data-ra="' + a.id + '" aria-label="Remove" style="border:0;background:none;font-size:18px">✕</button></div>' + (capOk ? wid("n" + a.id, a) : "") + '</div>'; }).join("");
+        }
+      } else {
+        var ex = L.filter(function (x) { return !rm[x.id]; });
+        if (!capOk) h += '<p style="color:#b3261e">' + T("caption की सुविधा अभी चालू नहीं हुई है।", "Captions are not switched on yet.") + '</p>';
+        else if (!ex.length) h += '<p style="color:#5b6475">' + T("पहले फ़ोटो जोड़ें।", "Add photos first.") + '</p>';
+        else h += ex.map(function (x) { var o = ed[x.id] || (ed[x.id] = { url: x.url, on: !!caps[x.url], cap: caps[x.url] || "", hint: "", id: x.id }); return '<div style="border:1.5px solid #e1d8fb;border-radius:14px;padding:8px;margin-top:8px"><img src="' + E(x.url) + '" alt="" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px">' + wid("e" + x.id, o) + '</div>'; }).join("");
+      }
+      var dirty = s.dirty;
+      h += (dirty ? '<button type="button" class="pbe-b p" id="pbePs" style="background:#1e9e57;margin-top:12px;width:100%">💾 ' + T("Save", "Save") + '</button>' : '') + '<div class="pbe-er" id="pbePe"></div>';
+      s.body.innerHTML = h; s.body.onclick = onClick;
+      var inp = s.body.querySelector("#pbePf"); if (inp) inp.onchange = function () { pick([].slice.call(inp.files || [])); inp.value = ""; };
+    }
+    function er(t, ok) { var e = s.body.querySelector("#pbePe"); if (e) { e.style.color = ok ? "#5b6475" : ""; e.textContent = t; } }
+    async function pick(fs) {
+      fs = fs.filter(function (f) { return /^image\//.test(f.type); }); var room = Math.max(0, LIM - count());
+      if (fs.length > room) { er(T("अभी " + room + " फ़ोटो ही जुड़ सकती हैं।", "Only " + room + " more photos fit."), false); fs = fs.slice(0, room); }
+      for (var i = 0; i < fs.length; i++) {
+        var f = fs[i];
         try {
-          er.style.color = "#5b6475"; er.textContent = "🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…");
+          er("🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…") + (fs.length > 1 ? " (" + (i + 1) + "/" + fs.length + ")" : ""), true);
           var ck = window.PBImg ? await PBImg.check(f, { slug: O.slug, kind: "shop" }) : { ok: true };
-          if (!ck.ok) { er.style.color = ""; er.textContent = ck.msg; return; }
-          var bl = await resizeImage(f, 1000); add.push({ blob: bl, prev: URL.createObjectURL(bl) }); s.dirty = true; paint();
-        } catch (x) { er.style.color = ""; er.textContent = T("फ़ोटो पढ़ नहीं सका, दूसरी चुनें।", "Could not read the photo. Pick another."); }
-      };
-      s.body.querySelectorAll("[data-rm]").forEach(function (b) { b.onclick = function () { rm[b.dataset.rm] = 1; s.dirty = true; paint(); }; });
-      s.body.querySelectorAll("[data-ra]").forEach(function (b) { b.onclick = function () { var a = add.splice(+b.dataset.ra, 1)[0]; if (a) URL.revokeObjectURL(a.prev); s.dirty = add.length > 0 || Object.keys(rm).length > 0; paint(); }; });
-      var sv = s.body.querySelector("#pbePs");
-      if (sv) sv.onclick = async function () {
-        sv.disabled = true; er.style.color = "#5b6475"; er.textContent = T("Save हो रहा है…", "Saving…");
-        try {
-          for (var id in rm) await rpc("pb_photo_remove", { p_slug: O.slug, p_id: +id });
-          for (var i = 0; i < add.length; i++) { var url = await upload(add[i].blob, "photo"); await rpc("pb_photo_add", { p_slug: O.slug, p_url: url }); }
-          s.dirty = false; s.remove(); location.reload();
-        } catch (x) { er.style.color = ""; er.textContent = /too many/.test(x.message || "") ? T(plim("photos", 8) + " से ज़्यादा फ़ोटो नहीं।", "Max " + plim("photos", 8) + " photos.") : T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again."); sv.disabled = false; }
-      };
+          if (!ck.ok) { er(ck.msg, false); continue; }
+          var bl = await resizeImage(f, 1000), a = { id: ++nid, blob: bl, prev: URL.createObjectURL(bl), on: capOk, cap: "", hint: "", busy: capOk };
+          add.push(a); s.dirty = true; paint(); if (capOk) aiCap("n" + a.id, bl);
+        } catch (x) { er(T("फ़ोटो पढ़ नहीं सका, दूसरी चुनें।", "Could not read the photo. Pick another."), false); }
+      }
+    }
+    function onClick(e) {
+      var t;
+      if ((t = e.target.closest("[data-v]"))) { view = t.dataset.v; paint(); return; }
+      if ((t = e.target.closest("[data-rm]"))) { rm[t.dataset.rm] = 1; s.dirty = true; paint(); return; }
+      if ((t = e.target.closest("[data-ra]"))) { var i = add.findIndex(function (a) { return a.id === +t.dataset.ra; }); if (i >= 0) { URL.revokeObjectURL(add[i].prev); add.splice(i, 1); } s.dirty = add.length > 0 || Object.keys(rm).length > 0 || Object.keys(ed).some(function (k) { return ed[k].dirty; }); paint(); return; }
+      if ((t = e.target.closest("[data-cg]"))) { var o = find(t.dataset.cg); if (o && !o.busy) aiCap(t.dataset.cg); return; }
+      if ((t = e.target.closest("[data-ck]"))) { var o2 = find(t.dataset.ck); if (o2) { o2.on = t.checked; o2.dirty = true; s.dirty = true; var need = o2.on && !o2.cap && o2.blob && !o2.busy; paint(); if (need) aiCap(t.dataset.ck); } return; }
+      if (e.target.closest("[data-allcap]")) { var off = e.target.closest("[data-allcap]").checked; add.forEach(function (a) { a.on = !off; if (a.on && !a.cap && !a.busy) setTimeout(function () { aiCap("n" + a.id); }, 0); }); paint(); return; }
+      if (e.target.closest("#pbePs")) save(e.target.closest("#pbePs"));
+    }
+    s.body.addEventListener("input", function (e) {
+      var t = e.target, k = t.dataset && (t.dataset.ct || t.dataset.ch), o = k && find(k); if (!o) return;
+      if (t.dataset.ct) { o.cap = t.value; o.ai = false; o.dirty = true; s.dirty = true; } else o.hint = t.value;
+      var sv = s.body.querySelector("#pbePs"); if (!sv && s.dirty) paint();
+    });
+    async function save(btn) {
+      if (add.some(function (a) { return a.busy; })) { er(T("AI का caption लिखना ख़त्म होने दें…", "Wait for AI to finish the captions…"), false); return; }
+      btn.disabled = true; er(T("Save हो रहा है…", "Saving…"), true); var capFail = false;
+      try {
+        for (var id in rm) await rpc("pb_photo_remove", { p_slug: O.slug, p_id: +id });
+        for (var i = 0; i < add.length; i++) {
+          var a = add[i], url = await upload(a.blob, "photo"); await rpc("pb_photo_add", { p_slug: O.slug, p_url: url });
+          if (capOk && a.on && String(a.cap || "").trim()) { try { await rpc("pb_photo_caption_set", { p_slug: O.slug, p_url: url, p_caption: a.cap }); } catch (x2) { capFail = true; } }
+        }
+        for (var k in ed) { var o = ed[k]; if (!o.dirty || rm[o.id]) continue; try { await rpc("pb_photo_caption_set", { p_slug: O.slug, p_url: o.url, p_caption: o.on ? o.cap : "" }); } catch (x3) { capFail = true; } }
+        if (capFail) { er(T("फ़ोटो Save हो गईं, पर caption Save नहीं हुए। कुछ देर बाद फिर कोशिश करें।", "Photos saved, but captions could not be saved. Try again later."), false); s.dirty = false; HUB && (HUB.reload = true); btn.disabled = false; return; }
+        s.dirty = false; s.remove(); location.reload();
+      } catch (x) { er(/too many/.test(x.message || "") ? T(LIM + " से ज़्यादा फ़ोटो नहीं।", "Max " + LIM + " photos.") : T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again."), false); btn.disabled = false; }
     }
     paint();
   }
@@ -488,7 +553,7 @@
   }
   var HUB = null;
   function hubTabs() {
-    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("प्रोडक्ट", "Products"), editProducts], ["photos", "🖼️ " + T("गैलरी", "Gallery"), editPhotos],
+    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("प्रोडक्ट", "Products"), editProducts], ["photos", "🖼️ " + T("गैलरी", "Gallery"), function (arg) { editPhotos(arg || ""); }],
       ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
       ["link", "🔗 " + T("लिंक", "Link"), editLink], ["visible", "👁️ " + T("क्या दिखे", "Visibility"), editVisible]];
   }
