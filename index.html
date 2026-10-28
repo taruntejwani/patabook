@@ -628,7 +628,7 @@ function applyLang(){
   /* नीचे की पट्टी: एक-एक पूरा pamphlet; 4 सेकंड रुकता है, फिर झट से अगला slide होकर आता है; उँगली से भी पलटा जा सकता है */
   function gdraw(){const w=document.getElementById("gpw"),t=document.getElementById("gpt"),pv=document.getElementById("pv");if(!w||!t)return;
     const has={};P.forEach(b=>has[b.slug]=1);
-    GL=loaded?GP.filter(b=>!has[b.slug]).sort((a,b)=>(a._t==="platinum"?0:1)-(b._t==="platinum"?0:1)):[];
+    GL=[];   /* नीचे की card पट्टी बंद: Silver / Gold / Platinum सब poster से दिखते हैं */
     pv.hidden=!P.length&&GL.length>0;            /* poster एक भी नहीं: खाली बड़ा डिब्बा नहीं, सिर्फ़ यह पट्टी */
     w.hidden=!GL.length;if(!GL.length){t.innerHTML="";document.getElementById("gdots").innerHTML="";clearTimeout(G.tm);return;}
     const one=GL.map(gcard).join("");t.innerHTML=GL.length>1?one+gcard(GL[0]):one;   /* आख़िर में पहला card दोबारा: घूमकर लौटते समय पीछे न भागे */
@@ -668,7 +668,7 @@ function applyLang(){
   async function load(){
     try{const r=await fetch(SBU+"/rest/v1/rpc/pb_banners_today",{method:"POST",headers:H,body:"{}"});
       if(r.ok){const rows=await r.json();
-        ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="gold"||b.tier==="platinum"))
+        ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="gold"||b.tier==="platinum"||b.tier==="silver"))
           .sort((a,b)=>({platinum:0,gold:1,silver:2}[a.tier])-({platinum:0,gold:1,silver:2}[b.tier])).slice(0,15);}}catch(e){}
     loaded=true;draw();
   }
