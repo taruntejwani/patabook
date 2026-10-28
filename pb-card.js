@@ -109,7 +109,7 @@
     c.fillStyle = g; c.fillRect(0, 0, W, H);
     c.save(); c.globalAlpha = .09; c.strokeStyle = '#fff'; c.lineWidth = 2; c.translate(W / 2, H / 2); c.rotate(-0.14); for (var gx = -W * 1.5; gx < W * 1.5; gx += 60) { c.beginPath(); c.moveTo(gx, -H * 1.5); c.lineTo(gx, H * 1.5); c.stroke(); } for (var gy = -H * 1.5; gy < H * 1.5; gy += 60) { c.beginPath(); c.moveTo(-W * 1.5, gy); c.lineTo(W * 1.5, gy); c.stroke(); } c.restore();
     var pin = await img('pin.png'), logo = await img('card-logo.png');
-    var url = location.origin.replace(/^http:\/\/localhost[^/]*/, 'https://patabook.in') + '/business.html?slug=' + encodeURIComponent(d.slug || '');
+    var url = d.link ? 'https://patabook.in/' + d.link : location.origin.replace(/^http:\/\/localhost[^/]*/, 'https://patabook.in') + '/business.html?slug=' + encodeURIComponent(d.slug || '');
     var Q = qr(url), qs = Q.length;
     function badge(x, y, sc) { c.font = '800 ' + (21 * sc) + 'px ' + FONT; var t = 'Listed on PataBook', tw = c.measureText(t).width, w = tw + 92 * sc, h = 48 * sc;
       c.save(); c.shadowColor = 'rgba(0,0,0,.2)'; c.shadowBlur = 18; c.shadowOffsetY = 6; c.fillStyle = '#fff'; rr(c, x, y, w, h, h / 2); c.fill(); c.restore();
@@ -426,7 +426,7 @@
   function el(h) { var t = document.createElement('div'); t.innerHTML = h; return t.firstChild; }
   function close() { var o = document.querySelector('.pbc-o'); if (o) o.remove(); }
   function fname() { var ff = festOf(mode); return 'PataBook_' + String(D.name || 'card').replace(/[^\wऀ-ॿ]+/g, '_').slice(0, 40) + (mode === 'P' ? '_Status' : mode === 'L' ? '_Card' : mode === 'AI' ? '_AI_' + Date.now() % 100000 : '_' + mode + '_' + ((vi[mode] || 0) + 1)) + '.png'; }
-  function shopUrl() { return 'https://patabook.in/business.html?slug=' + encodeURIComponent(D.slug || ''); }
+  function shopUrl() { return D.link ? 'https://patabook.in/' + D.link : 'https://patabook.in/business.html?slug=' + encodeURIComponent(D.slug || ''); }
   function shareText() { var ff = mode === 'AI' ? aiFest() : festOf(mode);
     if (ff) return ff.ic + ' ' + ff.t[fLang()][0] + ' — ' + D.name + '\n' + shopUrl() + '\n\n' + X('अपनी दुकान का FREE त्योहार poster बनाएँ', 'Make a FREE festival poster for your shop') + ' — patabook.in';
     return '📇 ' + D.name + X(' — PataBook पर देखें:', ' — view on PataBook:') + '\n' + shopUrl() + '\n\n' + X('अपनी दुकान का भी FREE डिजिटल विज़िटिंग कार्ड बनाएँ', 'Get your own FREE digital visiting card') + ' — patabook.in'; }
