@@ -29,7 +29,7 @@
   /* "और जानकारी": खूबियों में "Brand: …" जैसे रखी जाती है — ग्राहक को tag दिखता है */
   var EXTRA = [["Brand", "🏷️ Brand", "🏷️ Brand", "Tejwani"], ["Packing", "📦 Packing", "📦 Packing", "Can / Bottle / Pouch"], ["Min order", "🚚 कम से कम Order", "🚚 Min order", "5 Can"]];
   function getX(feats, k) { var re = new RegExp("^" + k + ":\\s*", "i"); for (var i = 0; i < feats.length; i++) if (re.test(feats[i])) return feats[i].replace(re, ""); return ""; }
-  function plainF(feats) { return feats.filter(function (f) { return !EXTRA.some(function (x) { return new RegExp("^" + x[0] + ":", "i").test(f); }); }); }
+  function plainF(feats) { return feats.filter(function (f) { return !/^Offer:/i.test(f) && !EXTRA.some(function (x) { return new RegExp("^" + x[0] + ":", "i").test(f); }); }); }
   var IMG_RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   var css = document.createElement("style");
   css.textContent =
@@ -140,18 +140,18 @@
   function sheet(b, p) {
     var E = en();
     var D = p ? JSON.parse(JSON.stringify(p)) : { name: "", size: "", mrp: "", feats: [], img: "", show: true, stock: true };
-    D.feats = D.feats || []; D.x = {}; EXTRA.forEach(function (x) { D.x[x[0]] = getX(D.feats, x[0]); }); D.feats = plainF(D.feats);
+    D.feats = D.feats || []; D.offer = String(getX(D.feats, "Offer") || "").replace(/\D/g, ""); D.x = {}; EXTRA.forEach(function (x) { D.x[x[0]] = getX(D.feats, x[0]); }); D.feats = plainF(D.feats);
     var SIZES = sizesOf(b.slug), FMAX = 5;
     var sc = document.createElement("div"); sc.className = "pr-sc";
     function keep() {
       var n = sc.querySelector("#prN"); if (!n) return;
-      D.name = n.value; D.mrp = sc.querySelector("#prM").value.replace(/\D/g, "");
+      D.name = n.value; D.mrp = sc.querySelector("#prM").value.replace(/\D/g, ""); var po = sc.querySelector("#prO"); if (po) D.offer = po.value.replace(/\D/g, "");
       D.stock = sc.querySelector("#prS").checked; D.show = sc.querySelector("#prV").checked;
       var cs = sc.querySelector("#prCS"); if (cs && cs.value.trim()) D.size = cs.value.trim();
       EXTRA.forEach(function (x, k) { var el = sc.querySelector("#prX" + k); if (el) D.x[x[0]] = el.value.trim().slice(0, 30); });
       var mo = sc.querySelector(".pr-more"); D.open = !!(mo && mo.open);
     }
-    function allFeats() { return D.feats.slice(0, FMAX).concat(EXTRA.filter(function (x) { return D.x[x[0]]; }).map(function (x) { return x[0] + ": " + D.x[x[0]]; })); }
+    function allFeats() { var ex = EXTRA.filter(function (x) { return D.x[x[0]]; }).length + (D.offer ? 1 : 0); return D.feats.slice(0, Math.min(FMAX, 8 - ex)).concat(D.offer ? ["Offer: " + D.offer] : []).concat(EXTRA.filter(function (x) { return D.x[x[0]]; }).map(function (x) { return x[0] + ": " + D.x[x[0]]; })); }
     function body() {
       var hasX = EXTRA.some(function (x) { return D.x[x[0]]; }) || D.feats.length;
       return '<div class="pr-sh"><div class="pr-hd"><b>' + (p ? (E ? "✏️ Edit product" : "✏️ Product बदलें") : (E ? "➕ New product" : "➕ नया Product")) + '</b><button type="button" id="prX" aria-label="Close">✕</button></div>' +
@@ -160,7 +160,8 @@
         '<label class="pr-f" for="prN"><span class="pr-num">1</span>' + (E ? "Product name" : "Product का नाम") + '</label><input class="pr-in" id="prN" maxlength="80" value="' + esc(D.name) + '" placeholder="' + (E ? "e.g. Tyre Polish" : "जैसे: Tyre Polish") + '">' +
         '<span class="pr-f"><span class="pr-num">2</span>Size</span><div class="pr-sz" id="prZ">' + SIZES.map(function (z) { return '<button type="button" class="' + (D.size === z ? "on" : "") + '">' + z + '</button>'; }).join("") + '</div>' +
         '<input class="pr-in" id="prCS" maxlength="30" style="margin-top:6px" placeholder="' + (E ? "Other size (optional)" : "दूसरा size लिखें (ज़रूरी नहीं)") + '" value="' + (SIZES.indexOf(D.size) < 0 ? esc(D.size || "") : "") + '">' +
-        '<label class="pr-f" for="prM"><span class="pr-num">3</span>' + (E ? "Price (₹) — empty = “Ask price”" : "कीमत (₹) — खाली = “कीमत पूछें”") + '</label><input class="pr-in" id="prM" inputmode="numeric" maxlength="9" value="' + esc(D.mrp || "") + '" placeholder="1499">' +
+        '<label class="pr-f" for="prM"><span class="pr-num">3</span>' + (E ? "MRP / printed price (₹) — empty = “Ask price”" : "MRP / छपी कीमत (₹) — खाली = “कीमत पूछें”") + '</label><input class="pr-in" id="prM" inputmode="numeric" maxlength="9" value="' + esc(D.mrp || "") + '" placeholder="1499">' +
+        '<label class="pr-f" for="prO">💸 ' + (E ? "Your selling price (₹) — shown to customers, optional" : "आपका भाव (₹) — ग्राहक को इसी में मिलेगा (ज़रूरी नहीं)") + '</label><input class="pr-in" id="prO" inputmode="numeric" maxlength="9" value="' + esc(D.offer || "") + '" placeholder="900"><small style="display:block;color:#5b6475;margin-top:3px">' + (E ? "Example: MRP 1400, your price 900 → customers see ₹1400 struck and ₹900." : "जैसे: MRP 1400, आपका भाव 900 → ग्राहक को ₹1400 कटा हुआ और ₹900 दिखेगा।") + '</small>' +
         '<details class="pr-more"' + (D.open || hasX ? " open" : "") + '><summary>▸ ' + (E ? "More details (optional)" : "और जानकारी (ज़रूरी नहीं)") + '</summary>' +
         EXTRA.map(function (x, k) { return '<label class="pr-f" for="prX' + k + '">' + (E ? x[2] : x[1]) + '</label><input class="pr-in" id="prX' + k + '" maxlength="30" value="' + esc(D.x[x[0]] || "") + '" placeholder="' + esc(x[3]) + '">'; }).join("") +
         '<span class="pr-f">' + (E ? "Features (up to " + FMAX + ")" : "खूबियाँ (" + FMAX + " तक)") + '</span><div class="pr-ch" id="prC">' + (D.feats.length ? D.feats.map(function (f, k) { return '<span>' + esc(f) + '<button type="button" data-rf="' + k + '" aria-label="Remove">✕</button></span>'; }).join("") : '<small style="color:#5b6475">' + (E ? "None yet" : "अभी कोई नहीं") + '</small>') + '</div>' +
@@ -207,6 +208,7 @@
         keep(); var er = sc.querySelector("#prE"), btn = this;
         if (String(D.name || "").trim().length < 2) { er.textContent = E ? "Write the product name." : "Product का नाम लिखें।"; return; }
         if (!D.img) { er.textContent = E ? "Add a photo." : "फ़ोटो लगाएँ।"; return; }
+        if (D.offer && D.mrp && +D.offer >= +D.mrp) { er.textContent = E ? "Your price must be less than the MRP." : "आपका भाव MRP से कम होना चाहिए।"; return; }
         btn.disabled = true; er.textContent = "";
         try {
           ME = await PBA.session();
@@ -260,7 +262,7 @@
       if (!sc) return;
       sc.querySelectorAll(".mp-r").forEach(function (el) {
         var r = R.filter(function (x) { return x.id === +el.dataset.id; })[0]; if (!r || r.ok) return;
-        r.name = el.querySelector(".mpN").value; r.mrp = el.querySelector(".mpM").value.replace(/\D/g, ""); r.size = el.querySelector(".mpS").value.trim();
+        r.name = el.querySelector(".mpN").value; r.mrp = el.querySelector(".mpM").value.replace(/\D/g, ""); r.size = el.querySelector(".mpS").value.trim(); var mo = el.querySelector(".mpO"); if (mo) r.offer = mo.value.replace(/\D/g, "");
       });
     }
     function row(r, k) {
@@ -269,7 +271,7 @@
         (r.ok ? "" : '<div class="mp-g"><label class="mp-ph">' + (r.img || r.prev ? '<img src="' + esc(r.img || r.prev) + '" alt="">' : "📷") + '<small>' + (r.up ? (E ? "⏳ AI working…" : "⏳ AI काम में…") : r.img ? "✓" : (E ? "Photo" : "फ़ोटो")) + '</small>' +
         '<input type="file" accept="image/*" hidden data-f="' + r.id + '"></label>' +
         '<div class="mp-f"><input class="pr-in mpN" maxlength="80" value="' + esc(r.name) + '" placeholder="' + (E ? "1. Product name" : "1. Product का नाम") + '">' +
-        '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="2. Size"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (E ? "3. Price ₹" : "3. कीमत ₹") + '"></div></div></div>' +
+        '<div class="mp-two"><input class="pr-in mpS" maxlength="30" value="' + esc(r.size) + '" placeholder="2. Size"><input class="pr-in mpM" inputmode="numeric" maxlength="9" value="' + esc(r.mrp) + '" placeholder="' + (E ? "3. MRP ₹" : "3. MRP ₹") + '"></div><input class="pr-in mpO" inputmode="numeric" maxlength="9" style="margin-top:6px" value="' + esc(r.offer || "") + '" placeholder="' + (E ? "4. Your price ₹ (optional)" : "4. आपका भाव ₹ (ज़रूरी नहीं)") + '"></div></div></div>' +
         '<div class="mp-sz">' + SZ.map(function (z) { return '<button type="button" data-sz="' + r.id + '" class="' + (r.size === z ? "on" : "") + '">' + z + '</button>'; }).join("") + '</div>') +
         (r.err ? '<div class="mp-e">' + esc(r.err) + '</div>' : "") + '</div>';
     }
@@ -293,13 +295,13 @@
         if ((t = e.target.closest("[data-sz]"))) { keep(); var r = R.filter(function (x) { return x.id === +t.dataset.sz; })[0]; if (r) { r.size = r.size === t.textContent ? "" : t.textContent; paint(); } return; }
         if (e.target.closest("#mpSave")) {
           keep(); var bad = 0;
-          R.forEach(function (r) { if (r.ok) return; r.err = String(r.name || "").trim().length < 2 ? (E ? "Write the name." : "नाम लिखें।") : r.up ? (E ? "Photo still uploading — wait a moment." : "फ़ोटो अभी upload हो रही है — थोड़ा रुकें।") : !r.img ? (E ? "Photo missing — tap the photo." : "फ़ोटो नहीं लगी — फ़ोटो दबाएँ।") : ""; if (r.err) bad++; });
+          R.forEach(function (r) { if (r.ok) return; r.err = String(r.name || "").trim().length < 2 ? (E ? "Write the name." : "नाम लिखें।") : (r.offer && r.mrp && +r.offer >= +r.mrp) ? (E ? "Your price must be less than MRP." : "आपका भाव MRP से कम हो।") : r.up ? (E ? "Photo still uploading — wait a moment." : "फ़ोटो अभी upload हो रही है — थोड़ा रुकें।") : !r.img ? (E ? "Photo missing — tap the photo." : "फ़ोटो नहीं लगी — फ़ोटो दबाएँ।") : ""; if (r.err) bad++; });
           var go = R.filter(function (r) { return !r.ok && !r.err; });
           var btn = sc.querySelector("#mpSave"); btn.disabled = true; sc.querySelector("#mpE").textContent = E ? "Saving…" : "Save हो रहा है…";
           try { ME = await PBA.session(); } catch (x) {}
           for (var k = 0; k < go.length; k++) {
             var r2 = go[k];
-            try { await rpc("pb_product_save", { p_slug: b.slug, p: { id: null, name: r2.name.trim(), size: r2.size || "", mrp: r2.mrp || "", feats: (r2.feats || []).slice(0, 5), img: r2.img, show: true, stock: true } }); r2.ok = true; left--; }
+            try { await rpc("pb_product_save", { p_slug: b.slug, p: { id: null, name: r2.name.trim(), size: r2.size || "", mrp: r2.mrp || "", feats: (r2.feats || []).slice(0, 5).concat(r2.offer ? ["Offer: " + r2.offer] : []), img: r2.img, show: true, stock: true } }); r2.ok = true; left--; }
             catch (x) { var m = String(x.message || ""); bad++; r2.err = /too many/.test(m) ? (E ? "Max " + MAXP(b.slug) + " products." : MAXP(b.slug) + " से ज़्यादा नहीं।") : /bad mrp/.test(m) ? (E ? "Check the price." : "कीमत ठीक लिखें।") : /premium/.test(m) ? (E ? "Premium is needed." : "Premium ज़रूरी है।") : (E ? "Could not save. Try again." : "Save नहीं हुआ, फिर कोशिश करें।"); }
           }
           if (!bad && R.every(function (r) { return r.ok; })) { sc.remove(); refresh(b.slug); return; }
