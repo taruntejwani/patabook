@@ -316,6 +316,14 @@ html.t-silver body .hero{background:linear-gradient(160deg,#394250,#8591a1)!impo
 .pbx.pst .pbsk{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:2;border:1px solid rgba(255,255,255,.45);background:rgba(7,26,82,.55);color:#fff;font:700 13px/1 system-ui,sans-serif;border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .pbx.pst .pbbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25);z-index:2}.pbx.pst .pbbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d9b257,#fff3c4)}
 @keyframes pbPstIn{from{opacity:0}to{opacity:1}}
+.tabhide{display:none!important}
+@keyframes tabInR{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}@keyframes tabInL{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+.tabin{animation:tabInR .28s ease both}.tabinL{animation:tabInL .28s ease both}
+@media(prefers-reduced-motion:reduce){.tabin,.tabinL{animation:none}}
+/* 👑 Gold: Call बटन सुनहरा, Directions / Digital Card हल्के सुनहरे */
+html.t-gold body .qa .pri.c,html.t-gold body .dock a:not(.w){background:linear-gradient(135deg,#d9b257,#B58A2A 55%,#8E6A1C)!important;color:#fff!important}
+html.t-gold body .snav a.on{background:linear-gradient(135deg,#d9b257,#B58A2A 55%,#8E6A1C)!important;color:#fff!important;border-color:#B58A2A!important}
+html.t-gold body .qa a:not(.pri),html.t-gold body .qa button:not(.pri){background:#fbf3df!important;border:1.5px solid #e2c777!important;color:#7a5a14!important}
 </style>
 </head><body>
 
@@ -468,7 +476,7 @@ function render(){drawSoc();
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
-       '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Silver Member",gold:"👑 Gold Member",platinum:"💎 Platinum Member"}[TIER()]||"👑 Premium")+'</span>':'')+
+       '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Digital Silver Card",gold:"👑 Digital Gold Card",platinum:"💎 Digital Platinum Card"}[TIER()]||"👑 Premium")+'</span>':'')+
          (gst?'<span class="chip" data-pbh="gst">🧾 '+L("GST रजिस्टर्ड","GST Registered")+'</span>':'')+(b.is_verified?'<span class="chip">✅ '+L("Verified","Verified")+'</span>':'')+
          (b.rating?'<span class="chip">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+'</div>'+
      '</div></div></div>'+
@@ -520,7 +528,7 @@ function render(){drawSoc();
   wireDir(b,addr,dir);drawOwn();
   if(document.getElementById("cardBtn"))document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,tier:(window.PBPlan&&PBPlan.paid(b.slug)?PBPlan.tier(b.slug):""),phone:(CT.k==="ok"?String(CT.phone||"").replace(/\D/g,"").slice(-10):""),wa:(CT.k==="ok"?(()=>{const w=line(b,"WhatsApp").replace(/\D/g,"");return /^\d{10}$/.test(w)?w:"";})():""),insta:socUrl("Instagram"),fb:socUrl("Facebook"),code:b.business_code||"",visitor:true});};
   drawVacFlag();drawNear();
-  placeMap();spy();pbIntro();
+  placeMap();tabsApply();pbIntro();
 }
 /* ✨ intro: Gold/Platinum, दिन में एक बार (उसी फ़ोन पर, उसी दुकान का), टैप से बंद, motion कम हो तो नहीं */
 function pbIntro(){try{
@@ -673,7 +681,19 @@ function lightbox(Ls,i){const d=document.createElement("div");d.className="lbx";
 function share(){if(!B)return;const u=shopUrl(),t=B.name+" — "+L("Products, फ़ोटो और WhatsApp","Products, photos & WhatsApp");
   if(navigator.share){navigator.share({title:B.name,text:t,url:u}).catch(()=>{});return;}
   window.open("https://wa.me/?text="+encodeURIComponent("🏪 "+t+"\n"+u),"_blank","noopener");}
-/* section nav: जो हिस्सा दिख रहा है उसका chip नीला */
+/* असली tab: Products / Gallery / Visit us — दबाते ही वही हिस्सा सामने (स्क्रॉल नहीं करना पड़ता) */
+let TAB="",TABU=0;
+function tabsApply(){const links=[...document.querySelectorAll(".snav a")];if(!links.length)return;
+  const ids=links.map(a=>a.getAttribute("href").slice(1));if(!TABU||!ids.includes(TAB))TAB=ids[0];
+  links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+TAB));
+  ids.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle("tabhide",id!==TAB);});
+  const nr=document.getElementById("near");if(nr)nr.classList.toggle("tabhide",TAB!=="vis");}
+function tabGo(id,dir){TAB=id;TABU=1;tabsApply();const e=document.getElementById(id);
+  if(e){e.classList.remove("tabin","tabinL");void e.offsetWidth;e.classList.add(dir<0?"tabinL":"tabin");}
+  const nv=document.querySelector(".snav");if(nv){const y=nv.getBoundingClientRect().top+window.scrollY-56;if(window.scrollY>y)window.scrollTo({top:Math.max(0,y),behavior:"auto"});}
+  const on=document.querySelector(".snav a.on");if(on){const bx=on.parentElement;bx.scrollTo({left:on.offsetLeft-bx.clientWidth/2+on.clientWidth/2,behavior:"smooth"});}}
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest(".snav a");if(!a)return;e.preventDefault();const ids=[...document.querySelectorAll(".snav a")].map(x=>x.getAttribute("href").slice(1)),to=a.getAttribute("href").slice(1);tabGo(to,ids.indexOf(to)-ids.indexOf(TAB));});
+/* section nav (पुराना scroll-spy, अब इस्तेमाल नहीं) */
 let IO=null;
 function spy(){if(IO)IO.disconnect();if(!("IntersectionObserver" in window))return;
   const links=[...document.querySelectorAll(".snav a")];
