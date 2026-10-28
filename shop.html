@@ -357,6 +357,15 @@ html:is(.t-silver,.t-gold,.t-platinum) .hlogo .crn{animation:pbCrn 6s ease-in-ou
 html.t-platinum :is(.chip.gold,.qa .pri.c,.dock a:not(.w))::before{background:linear-gradient(100deg,transparent,rgba(190,225,255,.75),transparent)}
 html.t-gold .dock a:not(.w)::before{animation-delay:1.5s}
 @media (prefers-reduced-motion:reduce){html:is(.t-silver,.t-gold,.t-platinum) :is(.chip.gold,.qa .pri.c,.dock a)::before,html:is(.t-silver,.t-gold,.t-platinum) .hlogo .crn{animation:none!important;display:none}}
+/* 🥈 Silver पेज: नीले की जगह गहरा ग्रे + चाँदी (Gold/Platinum जैसे थे) */
+html.t-silver{--navy:#2f3742;--blue:#4c5664}
+html.t-silver .hlogo .ini,html.t-silver .tb .ini{background:linear-gradient(160deg,#6b7684,#2f3742)!important}
+html.t-silver body .qa .pri.c{background:linear-gradient(135deg,#f3f5f8,#c3cbd6 50%,#8f9aa8)!important;color:#1f2833!important;border:1px solid #b4bdc9!important}
+html.t-silver body .dock a:not(.w){background:linear-gradient(135deg,#f3f5f8,#c3cbd6 50%,#8f9aa8)!important;color:#1f2833!important}
+html.t-silver body .qa a:not(.pri),html.t-silver body .qa button:not(.pri){background:#f4f6f8!important;border:1.5px solid #c3cad4!important;color:#2f3742!important}
+html.t-silver body .snav a.on{background:#2f3742!important;color:#fff!important;border-color:#2f3742!important}
+html.t-silver .blk h2,html.t-silver .blk h2 small,html.t-silver .pbd b{color:#2f3742!important}
+html.t-silver .qa a:not(.pri) span,html.t-silver .qa button span{color:#2f3742}
 </style>
 </head><body>
 
