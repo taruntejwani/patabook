@@ -277,6 +277,14 @@ html body .dock a{background:#0b2f73!important;color:#fff!important;padding:11px
 html body .dock a.w{background:#1e9e57!important}
 body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 #cardBtn{display:none!important}
+
+/* ✨ Gold / Platinum: पेज खुलते ही 3 सेकंड का intro (हल्का → गहरा → हल्का), बीच में दुकान का नाम, नीचे "… BUSINESS CARD" */
+.pbi{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;--pl:#eef3fb;--pd:#0d1730;--pc:#1d2b4d;animation:pbiBg 3s ease-in-out forwards}
+.pbi.gold{--pl:#fbf5e4;--pd:#2a1d05;--pc:#8a6417}
+.pbi b{display:block;font:800 clamp(28px,9vw,48px)/1.2 "Noto Sans Devanagari","Inter",system-ui,sans-serif;letter-spacing:-.3px;word-break:break-word;max-width:92vw;animation:pbiTx 3s ease-in-out forwards}
+.pbi small{position:absolute;left:0;right:0;bottom:calc(34px + env(safe-area-inset-bottom));font:700 clamp(10px,2.9vw,12.5px)/1 Georgia,"Times New Roman",serif;letter-spacing:.26em;margin-right:-.26em;animation:pbiTx 3s ease-in-out forwards}
+@keyframes pbiBg{0%{background:var(--pl);opacity:0}12%{opacity:1}50%{background:var(--pd)}88%{background:var(--pl);opacity:1}100%{background:var(--pl);opacity:0}}
+@keyframes pbiTx{0%,20%{color:var(--pc)}34%,66%{color:#fff}80%,100%{color:var(--pc)}}
 </style>
 </head><body>
 
@@ -475,8 +483,20 @@ function render(){drawSoc();
   wireDir(b,addr,dir);drawOwn();
   if(document.getElementById("cardBtn"))document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,tier:(window.PBPlan&&PBPlan.paid(b.slug)?PBPlan.tier(b.slug):""),phone:(CT.k==="ok"?String(CT.phone||"").replace(/\D/g,"").slice(-10):""),wa:(CT.k==="ok"?(()=>{const w=line(b,"WhatsApp").replace(/\D/g,"");return /^\d{10}$/.test(w)?w:"";})():""),insta:socUrl("Instagram"),fb:socUrl("Facebook"),code:b.business_code||"",visitor:true});};
   drawVacFlag();drawNear();
-  placeMap();spy();
+  placeMap();spy();pbIntro();
 }
+/* ✨ intro: Gold/Platinum, दिन में एक बार (उसी फ़ोन पर, उसी दुकान का), टैप से बंद, motion कम हो तो नहीं */
+function pbIntro(){try{
+  if(window.__pbIntro||!B)return;const t=TIER();if(t!=="gold"&&t!=="platinum")return;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  if(document.body.classList.contains("pbe-on"))return;
+  const k="pbi_"+slug,d=new Date().toISOString().slice(0,10);let seen="";try{seen=localStorage.getItem(k)||"";}catch(_){}
+  if(seen===d)return;try{localStorage.setItem(k,d);}catch(_){}
+  window.__pbIntro=1;const e=document.createElement("div");e.className="pbi "+t;e.id="pbIntro";
+  e.innerHTML="<b>"+esc(B.name)+"</b><small>"+t.toUpperCase()+" BUSINESS CARD</small>";
+  const x=()=>{if(e.parentNode)e.remove();};e.onclick=x;e.addEventListener("animationend",ev=>{if(ev.target===e)x();});setTimeout(x,3400);
+  document.body.appendChild(e);}catch(_){}}
+
 function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt=line(b,"WhatsApp").replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
@@ -568,7 +588,7 @@ let OWN=false;
 async function loadOwner(){
   try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
-    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
+    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
 function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
 function contactHTML(){
