@@ -370,12 +370,56 @@
     rpc("pb_my_report", { p_slug: O.slug }).then(function (R) { s.body.innerHTML = reportBody(R); })
       .catch(function () { s.body.innerHTML = '<p class="pbe-er">' + T("रिपोर्ट नहीं खुल सकी। इंटरनेट जाँचकर फिर कोशिश करें।", "Could not load the report. Check internet and try again.") + '</p>'; });
   }
-  var ACT = { logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, about: function () { editDetails("", "about"); }, visit: function () { editDetails("", "visit"); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible, report: editReport };
+  /* 🔗 patabook.in/<नाम> — पहली बार चुनना + 1 बार बदलना */
+  async function editLink() {
+    var cur = (typeof LNK !== "undefined" && LNK) || {}, left = cur.left == null ? 2 : cur.left;
+    if (cur.link && left <= 0) { sheet("🔗 " + T("आपका link", "Your link"), '<p>patabook.in/<b>' + E(cur.link) + '</b></p><p class="pbe-note">' + T("यह link बदला जा चुका है और अब नहीं बदल सकता। ज़रूरत हो तो Support से संपर्क करें।", "This link has already been changed and is now locked. Contact Support if needed.") + '</p>'); return; }
+    var nm = ""; try { nm = (B && B.name) || ""; } catch (e) {}
+    var start = cur.link || fix(nm);
+    var s = sheet("🔗 " + T("आपका link", "Your link"),
+      '<p style="margin:0 0 8px;color:#5b6475">' + (cur.link ? T("link बदलें — यह आख़िरी बदलाव होगा।", "Change your link — this is your last change.") : T("अपनी दुकान का छोटा link चुनें (space की जगह - लगेगा)।", "Choose your shop\'s short link (spaces become -).")) + '</p>' +
+      '<div style="display:flex;align-items:center;gap:4px;font-weight:700">patabook.in/<input id="pbeLk" maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0;font:inherit;border:1px solid #cfd6e4;border-radius:10px;padding:10px" value="' + E(start) + '"></div>' +
+      '<div id="pbeLs" style="min-height:24px;margin:8px 0;font-weight:700"></div>' +
+      '<button type="button" class="pbe-b p" id="pbeLgo" disabled>' + T("Save", "Save") + '</button><div class="pbe-er" id="pbeLe"></div>');
+    var inp = s.body.querySelector("#pbeLk"), st = s.body.querySelector("#pbeLs"), go = s.body.querySelector("#pbeLgo"), er = s.body.querySelector("#pbeLe"), tm = null, okv = "";
+    function fix(v) { return String(v || "").toLowerCase().trim().replace(/[\s_]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-+/, "").slice(0, 30); }
+    function chk() {
+      var v = fix(inp.value); if (v !== inp.value) inp.value = v; okv = ""; go.disabled = true; er.textContent = "";
+      clearTimeout(tm);
+      if (v.length < 3) { st.style.color = "#5b6475"; st.textContent = T("कम से कम 3 अक्षर", "At least 3 characters"); return; }
+      if (cur.link && v === cur.link) { st.style.color = "#5b6475"; st.textContent = T("यही अभी का link है", "This is your current link"); return; }
+      st.style.color = "#5b6475"; st.textContent = "…";
+      tm = setTimeout(async function () {
+        try {
+          var r = await rpc("pb_link_check", { p_link: v });
+          if (fix(inp.value) !== v) return;
+          if (r && r.ok) { okv = v; go.disabled = false; st.style.color = "#1e9e57"; st.textContent = "✅ " + T("यह नाम मिल सकता है", "Available"); }
+          else { st.style.color = "#c5221f"; st.textContent = "❌ " + (r && r.reason === "taken" ? T("यह नाम किसी और का है", "Already taken") : r && r.reason === "reserved" ? T("यह नाम साइट के लिए रखा है", "Reserved name") : T("सिर्फ़ a-z, 0-9 और -  (3 से 30 अक्षर)", "Only a-z, 0-9 and - (3 to 30 characters)")); }
+        } catch (x) { st.style.color = "#c5221f"; st.textContent = T("जाँच नहीं हो सकी, फिर कोशिश करें।", "Could not check. Try again."); }
+      }, 450);
+    }
+    inp.oninput = chk; chk();
+    go.onclick = async function () {
+      if (!okv) return;
+      var after = Math.max(0, left - 1);
+      var msg = T("आपका link बनेगा:\n\npatabook.in/" + okv + "\n\n" + (after > 0 ? "इसके बाद आप इसे सिर्फ़ " + after + " बार और बदल सकेंगे।" : "यह आख़िरी बदलाव है — इसके बाद link बदला नहीं जा सकेगा।") + "\n\nपक्का करें?",
+        "Your link will be:\n\npatabook.in/" + okv + "\n\n" + (after > 0 ? "After this you can change it " + after + " more time." : "This is the last change — the link cannot be changed after this.") + "\n\nConfirm?");
+      if (!confirm(msg)) return;
+      go.disabled = true; er.style.color = "#5b6475"; er.textContent = T("Save हो रहा है…", "Saving…");
+      try { await rpc("pb_owner_set_link", { p_slug: O.slug, p_link: okv }); s.dirty = false; s.remove(); location.reload(); }
+      catch (x) {
+        var m = x.message || ""; er.style.color = "";
+        er.textContent = /link_taken/.test(m) ? T("यह नाम अभी किसी और ने ले लिया।", "Someone just took this name.") : /link_locked/.test(m) ? T("link बदलने की सीमा पूरी हो चुकी है।", "Change limit reached.") : /link_reserved/.test(m) ? T("यह नाम नहीं मिल सकता।", "This name is not allowed.") : T("Save नहीं हुआ, फिर कोशिश करें।", "Could not save. Try again.");
+        go.disabled = false;
+      }
+    };
+  }
+  var ACT = { link: editLink,  logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, about: function () { editDetails("", "about"); }, visit: function () { editDetails("", "visit"); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible, report: editReport };
 
   /* ---------- pencils ---------- */
   var MAP = {
     shop: [[".hlogo", "logo"], ["#prods", "products"], ["#photos", "photos"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], [".qa", "numbers"], ["#vacFlag", "vacancy"]],
-    biz: [[".lgw", "logo"], ["#prods", "products"], ["#galM", "photos"], ["#det", "details"], ["#contact", "numbers"], [".qa3", "numbers"], ["#vacFlag", "vacancy"]]
+    biz: [[".lgw", "logo"], ["#prods", "products"], ["#galM", "photos"], ["#det", "details"], ["#lnkRow", "link"], ["#contact", "numbers"], [".qa3", "numbers"], ["#vacFlag", "vacancy"]]
   };
   function pens() {
     if (!ON) return;

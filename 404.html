@@ -17,7 +17,7 @@ a.s{background:#eef2fb;color:#174ea6}
 </style>
 </head>
 <body>
-<div class="c">
+<div class="c" id="cc">
   <div class="big">🔍</div>
   <h1 id="h">यह पेज नहीं मिला</h1>
   <p id="p">हो सकता है यह link पुराना हो या बदल गया हो।</p>
@@ -27,6 +27,20 @@ a.s{background:#eef2fb;color:#174ea6}
 <script>
 try{if(localStorage.getItem('pb-lang')==='en'){document.documentElement.lang='en';document.title='Page not found — PataBook';
 h.textContent='This page could not be found';p.textContent='The link may be old or may have changed.';a1.textContent='🏠 PataBook Home';a2.textContent='Search shops';}}catch(e){}
+</script>
+<script>
+/* patabook.in/<दुकान-का-नाम> — दुकानदार का अपना छोटा link: Supabase से दुकान ढूँढकर सीधे उसके पेज पर */
+(function(){
+  var n=decodeURIComponent(location.pathname).replace(/^\/+|\/+$/g,"").toLowerCase();
+  if(!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(n)||/--/.test(n))return;
+  var c=document.getElementById("cc");c.style.visibility="hidden";
+  var back=function(){c.style.visibility="visible";};
+  var t=setTimeout(back,4000);
+  fetch("https://kkvbpzysktozghnxplxv.supabase.co/rest/v1/rpc/pb_link_resolve",{method:"POST",headers:{apikey:"sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8","Content-Type":"application/json"},body:JSON.stringify({p_link:n})})
+   .then(function(r){return r.ok?r.json():null;}).then(function(slug){
+     if(typeof slug==="string"&&slug){clearTimeout(t);location.replace("/business.html?slug="+encodeURIComponent(slug)+location.hash);}else{back();}
+   }).catch(back);
+})();
 </script>
 <div>
 </div>

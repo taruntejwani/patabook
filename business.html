@@ -202,7 +202,7 @@ async function load(){
     const rows=await r.json();
     if(!r.ok||!rows.length){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}
-    render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();loadOwner();
+    render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();loadOwner();loadLink();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
@@ -279,7 +279,14 @@ async function loadOwner(){
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
     if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"biz"});}catch(e){OWN=false;}
   drawOwn();}
-function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;}
+let LNK=null;
+async function loadLink(){try{const r=await fetch(SB+"/rest/v1/rpc/pb_link_of",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify({p_slug:B.slug})});LNK=r.ok?await r.json():null;}catch(e){LNK=null;}drawLink();}
+function drawLink(){const r=document.getElementById("lnkRow");if(!r)return;const en=PB.lang&&PB.lang()!=="hi",l=LNK&&LNK.link;
+  if(!l&&!OWN){r.hidden=true;return;}
+  r.hidden=false;
+  r.innerHTML='<span>Link</span><b>'+(l?'<a href="/'+esc(l)+'">patabook.in/'+esc(l)+'</a> <button type="button" id="lnkCp" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 9px;font:inherit;font-size:12px;font-weight:700;color:#1558d6;cursor:pointer;margin-left:6px">'+(en?"Copy":"कॉपी")+'</button>':'<span style="color:#8a93a3;font-weight:600">'+(en?"Not set yet — tap ✏️ to choose":"अभी नहीं बना — ✏️ दबाकर चुनें")+'</span>')+'</b>';
+  const c=document.getElementById("lnkCp");if(c)c.onclick=()=>{const u="https://patabook.in/"+l;try{navigator.clipboard.writeText(u);c.textContent=en?"Copied ✓":"कॉपी हुआ ✓";}catch(e){prompt("Link",u);}};}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;drawLink();}
 function ctoast(s){const d=document.createElement("div");d.className="ctoast";d.textContent=s;document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}
 function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
@@ -387,7 +394,7 @@ function render(){
    '<h2>'+PBI("store")+esc(en?"About us":"हमारे बारे में")+'</h2>'+
    '<div class="rows" data-pbh="about">'+
      (addr?'<div class="row" data-pbh="addr"><span>'+esc(en?"Address":"पता")+'</span><b>'+esc(addr)+(sub2?'<br><small style="color:#5b6475;font-weight:600">'+esc(sub2)+'</small>':'')+(lmk?'<br><small style="color:#874d00;font-weight:700">'+PBI("flag")+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</small>':'')+'</b></div>':'')+
-     '<div id="mobRow"></div>'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
+     '<div id="mobRow"></div>'+'<div class="row" id="lnkRow" data-pbh="link" hidden></div>'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
      (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(line(b,"Email"))?'<div class="row" data-pbh="web"><span>Email</span><b><a href="mailto:'+esc(line(b,"Email"))+'">'+esc(line(b,"Email"))+'</a></b></div>':'')+
      (web?'<div class="row" data-pbh="web"><span>'+esc(T("b_web"))+'</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+
      (socUrl("Instagram")?'<div class="row" data-pbh="web"><span>Instagram</span><b><a target="_blank" rel="noopener" href="'+esc(socUrl("Instagram"))+'">'+PBI("insta")+esc(socUrl("Instagram").replace(/^https:\/\/www\.instagram\.com\//,"@").replace(/\/$/,""))+'</a></b></div>':'')+
