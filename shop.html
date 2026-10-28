@@ -290,7 +290,7 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 html body .hero{background:linear-gradient(160deg,#3a2a08,#8a6417)!important;color:#fff!important;border:0!important;min-height:230px;display:flex;align-items:flex-end}
 html.t-platinum body .hero{background:linear-gradient(160deg,#0d1730,#2c4272)!important}
 html.t-silver body .hero{background:linear-gradient(160deg,#394250,#8591a1)!important}
-.hero .bg{display:block!important;opacity:.6!important;filter:none!important}
+.hero .bg{display:block!important;opacity:.6!important;filter:none!important}.hero .bg.cvr{opacity:1!important}
 .hero::after{display:block!important;content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.72) 100%)!important}
 .hero .wrap{width:100%;align-items:flex-end!important;padding-top:70px!important;padding-bottom:18px!important}
 .hname h1{-webkit-text-fill-color:#fff!important;color:#fff!important;font-size:26px!important;text-shadow:0 2px 8px rgba(0,0,0,.45)}
@@ -315,7 +315,7 @@ html.t-silver body .hero{background:linear-gradient(160deg,#394250,#8591a1)!impo
 @keyframes pbiOut{0%{opacity:0}8%{opacity:1}84%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.04)}}
 .qa .pri span{display:flex;align-items:center}.qa .pri svg,.dock a svg{width:22px!important;height:22px!important;margin:0!important;vertical-align:0}
 .pbx.pst{padding:0;background:#071a52;animation:pbPstIn .35s ease-out both;transition:opacity .45s ease}.pbx.pst.out{opacity:0;pointer-events:none}
-.pbx.pst img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.pbx.pst img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}.pbx.pst.wide img{object-fit:contain;object-position:center}
 .pbx.pst .pbsk{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:2;border:1px solid rgba(255,255,255,.45);background:rgba(7,26,82,.55);color:#fff;font:700 13px/1 system-ui,sans-serif;border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .pbx.pst .pbbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25);z-index:2}.pbx.pst .pbbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d9b257,#fff3c4)}
 @keyframes pbPstIn{from{opacity:0}to{opacity:1}}
@@ -353,17 +353,23 @@ const L=(hi,en)=>EN()?en:hi;
 /* 🖼️ दुकान का अपना poster सबसे पहले: पेज खुलते ही, data आने से पहले — profile / "लोड हो रहा है" की झलक नहीं दिखती */
 (function(){try{
   const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
-  const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);if(!pk||!document.body)return;
-  window.__pbIntro=1;   /* पुराना intro दोबारा न चले */
+  const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);if(!document.body||!slug)return;
   try{const nv=performance.getEntriesByType("navigation")[0],ty=nv?nv.type:"navigate";if(ty==="reload"||ty==="back_forward")return;}catch(_){}   /* refresh / Back से लौटने पर नहीं; search या लिंक से अंदर आने पर हर बार */
-  const T=3,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
-  e.innerHTML='<img alt="" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
-  const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
-  const x=()=>{if(done)return;done=1;clearInterval(tm);e.classList.add("out");setTimeout(()=>{if(e.parentNode)e.remove();},450);};
-  const lab=()=>{sk2.textContent=L("छोड़ें","Skip")+" "+n+" ›";};lab();
-  const go=()=>{if(tm)return;bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
-  im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2000);
-  e.onclick=x;document.body.appendChild(e);
+  const show=src=>{
+    if(document.getElementById("pbIntro"))return;window.__pbIntro=1;   /* पुराना intro दोबारा न चले */
+    const T=3,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
+    e.innerHTML='<img alt="" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
+    const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
+    const x=()=>{if(done)return;done=1;clearInterval(tm);e.classList.add("out");setTimeout(()=>{if(e.parentNode)e.remove();},450);};
+    const lab=()=>{sk2.textContent=L("छोड़ें","Skip")+" "+n+" ›";};lab();
+    const go=()=>{if(tm)return;if(im.naturalWidth&&im.naturalWidth/im.naturalHeight>1.15)e.classList.add("wide");bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
+    im.onload=go;im.onerror=x;im.src=src;setTimeout(go,2000);
+    e.onclick=x;document.body.appendChild(e);};
+  if(pk){show(PST[pk]);return;}
+  /* हर दुकान: आज उसका approved poster चालू हो तो वही पहले */
+  const RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\/[^/]+\/banner-/;
+  fetch(SB+"/rest/v1/rpc/pb_banners_today",{method:"POST",headers:H,body:"{}"}).then(r=>r.ok?r.json():[]).then(j=>{
+    const m=(j||[]).find(b=>b&&b.slug===slug&&RX.test(b.url||""));if(m)show(m.url);}).catch(()=>{});
 }catch(_){}})();
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 const IMG_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
@@ -374,7 +380,7 @@ const priceCard=(p,ask)=>{const o=offerOf(p);if(o&&p.mrp&&o<p.mrp)return '<span 
 const priceMeta=(p,ask,sv)=>{const o=offerOf(p);if(o&&p.mrp&&o<p.mrp){const pc=Math.round((p.mrp-o)*100/p.mrp);return '💰 <s style="color:#8a93a6">'+rsF(p.mrp)+'</s> <b style="color:#137333">'+rsF(o)+'</b> <span style="color:#c5221f;font-weight:700">'+sv(p.mrp-o,pc)+'</span>';}if(o)return '💰 <b style="color:#137333">'+rsF(o)+'</b>';return p.mrp?'💰 '+rsF(p.mrp)+' MRP':'💰 '+ask;};
 
 let B=null,PREM=false,SLAB="",GAL=[],CAPS={},PRODS=[],CT={k:"loading"};
-let DSCP={};
+let DSCP={},COVER="";
 
 const DAY_HI={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
 function hm12(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
@@ -457,6 +463,7 @@ async function loadPrem(){
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:H,body:JSON.stringify({p_slugs:[slug]})});if(!r.ok)return;const j=await r.json();PREM=!!(j&&j[slug]);}catch(e){return;}
   if(window.PBPlan){try{await PBPlan.load([slug]);}catch(e){}}
   document.documentElement.classList.add("t-"+TIER());
+  await fetch(SB+"/rest/v1/rpc/pb_profile_banner_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():"").then(j=>{COVER=(typeof j==="string"&&IMG_RX.test(j))?j:"";}).catch(()=>{COVER="";});
   if(!PF("photos")&&!PF("products"))return;
   await Promise.all([
     fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{GAL=j||[];}).catch(()=>{GAL=[];}),
@@ -495,7 +502,7 @@ function render(){drawSoc();
   ].filter(r=>r[1]);
   const navs=[P.length&&["prods",SECN()],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
-   '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
+   '<div class="hero">'+((COVER||G[0])?'<div class="bg'+(COVER?' cvr':'')+'" data-pbh="photos" style="background-image:url(\''+esc(COVER||G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+

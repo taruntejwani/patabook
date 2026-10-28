@@ -113,7 +113,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pds{border:0;border-radius:12px;padding:11px;background:#3b2bb8;color:#fff;font:inherit;font-weight:800;cursor:pointer}.pds:disabled{background:#b8b0e6}.pdmsg{font-weight:700;font-size:13.5px;color:#137333}
 .ban{margin-top:12px;border:1px solid #e3dcf7;background:#fff;border-radius:14px;padding:12px}.ban .bh{font-weight:800;color:#3b2bb8;margin-bottom:6px}.ban img{width:100%;aspect-ratio:2/1;object-fit:cover;border-radius:10px;display:block}
 .ban .bs{margin-top:8px;font-size:13px}.ban .bb{display:flex;gap:8px;margin-top:10px}.ban .bb label,.ban .bb button{flex:1;text-align:center;border:1px solid #cfc5f5;background:#f5f2ff;color:#3b2bb8;border-radius:12px;padding:10px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
-.ban .bb button{background:#fff5f4;border-color:#f3c3be;color:#b42318}
+.ban .bb button{background:#fff5f4;border-color:#f3c3be;color:#b42318}.ban .bb button.sd{background:#eef3fc;border-color:#cfdcf5;color:#1a4fb4}.strips{margin-top:12px}.strips .sth{font-weight:800;color:var(--navy);font-size:15px}.strips .ban,.strips .lg{margin-top:8px}
 .pm.pt-silver{background:linear-gradient(135deg,#f7f9fb,#e7ebf0)!important;border-color:#c3cad4!important}.pm.pt-silver .ph{color:#4c5664!important}
 .pm.pt-platinum{background:linear-gradient(135deg,#eef2fa,#dde4f2)!important;border-color:#8495b8!important}.pm.pt-platinum .ph{color:#1c2539!important}
 .edbtn{display:flex;align-items:center;gap:12px;margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff8e1,#ffefc2);border:1px solid #ffd76a}
@@ -409,9 +409,9 @@ function premOn(b){return !!(PREM&&PREM[b.slug]&&PREM[b.slug].until);}
 function banBlock(b,i){const en=L()==="en",x=BAN[b.slug],RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   const st=x?(x.status==="approved"?'<b style="color:#137333">✅ '+(en?"Approved — shows on PataBook home on your poster days":"मंज़ूर — आपके चुने दिनों पर PataBook home पर दिखता है")+'</b>':x.status==="rejected"?'<b style="color:#b42318">❌ '+(en?"Not approved":"मंज़ूर नहीं हुआ")+(x.reason?": "+esc(x.reason):"")+'</b>':'<b style="color:#7a4b00">⏳ '+(en?"Waiting for PataBook approval":"PataBook की मंज़ूरी का इंतज़ार")+'</b>'):'';
   return '<div class="ban"><div class="bh">🖼️ '+(en?"Your poster on PataBook home":"PataBook home पर आपका Poster")+'</div>'+
-    (x&&RX.test(x.url||"")?'<img src="'+esc(x.url)+'" alt="" loading="lazy">':'<small>'+(en?"A wide photo of your shop / offer. Any photo is resized automatically (1200×600, small size). It shows full-width on PataBook home.":"दुकान / offer की चौड़ी photo। कोई भी photo चुनें — अपने-आप 1200×600 और छोटी (कम KB) हो जाएगी। PataBook home पर पूरे size में दिखेगी।")+'</small>')+
+    (x&&RX.test(x.url||"")?'<img src="'+esc(x.url)+'" alt="" loading="lazy">':'<small>'+(en?"Your poster: shows on PataBook home and opens full-screen (3 sec) when someone opens your page, on the days you set. Any photo is resized automatically (small size).":"आपका Poster: चुने हुए दिनों पर PataBook home पर दिखता है और आपका page खुलते ही पूरी screen पर 3 सेकंड आता है। कोई भी photo चुनें — अपने-आप छोटी (कम KB) हो जाएगी।")+'</small>')+
     (st?'<div class="bs">'+st+'</div>':'')+
-    '<div class="bb"><label>'+(x?(en?"🔄 Change poster":"🔄 Poster बदलें"):(en?"➕ Add poster":"➕ Poster लगाएँ"))+'<input type="file" accept="image/*" hidden data-bup="'+i+'"></label>'+(x?'<button type="button" data-brm="'+i+'">🗑️ '+(en?"Remove":"हटाएँ")+'</button>':'')+'</div><div class="err" id="be'+i+'"></div>'+posterDays(b,i)+'</div>';}
+    '<div class="bb"><label>'+(x?(en?"🔄 Change poster":"🔄 Poster बदलें"):(en?"➕ Add poster":"➕ Poster लगाएँ"))+'<input type="file" accept="image/*" hidden data-bup="'+i+'"></label>'+(x?'<button type="button" data-brm="'+i+'">🗑️ '+(en?"Remove":"हटाएँ")+'</button>':'')+(PDAYS[b.slug]&&PDAYS[b.slug].quota?'<button type="button" class="sd" data-pdt="'+i+'">📅 '+(en?"Set Date":"Date चुनें")+'</button>':'')+'</div><div class="err" id="be'+i+'"></div>'+(PDOPEN[b.slug]?posterDays(b,i):'')+'</div>';}
 /* 📅 Poster के दिन (sql-33): Silver साल में 50, Gold 100 — दुकानदार तारीख़ें चुने; Platinum हर दिन */
 const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const pday=s0=>{const [y,m,d]=String(s0).slice(0,10).split("-").map(Number);return new Date(y,m-1,d);};
@@ -439,17 +439,27 @@ async function savePosterDays(i,btn){const b=ROWS[i],en=L()==="en",P=PDAYS[b.slu
     PDAYS[b.slug]=await rpc("pb_poster_my",{p_slug:b.slug});delete PSEL[b.slug];PMSG[b.slug]=en?"✅ Saved":"✅ Save हो गया";}
   catch(x){PMSG[b.slug]=/quota/.test(x.message||"")?(en?"More days than your plan allows. Remove some.":"Plan से ज़्यादा दिन चुने हैं। कुछ हटाएँ।"):/rate/.test(x.message||"")?(en?"Too many changes. Try later.":"बहुत बार बदला। थोड़ी देर बाद करें।"):(en?"Could not save. Try again.":"Save नहीं हुआ। दोबारा कोशिश करें।");}
   draw();}
-function bannerImage(file){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
-  img.onload=()=>{const W=1200,H=600,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,H);
-    const k=Math.max(W/img.width,H/img.height),w=img.width*k,h=img.height*k;x.drawImage(img,(W-w)/2,(H-h)/2,w,h);URL.revokeObjectURL(url);
-    const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<220000)return res(bl);if(q>0.4)return tryQ(Math.round((q-0.1)*100)/100);bl?res(bl):rej(new Error("img"));},"image/webp",q);tryQ(0.82);};
+/* 🗜️ सबसे छोटी KB में image: crop (cover) → webp, size व quality घटाते हुए limit के नीचे */
+function packImg(file,W,H,limit,steps){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{URL.revokeObjectURL(url);let best=null;const sc=steps||[1,.8,.64];let si=0,q=0.8;
+    const go=()=>{const w=Math.round(W*sc[si]),h=Math.round(H*sc[si]),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);
+      const k=Math.max(w/img.width,h/img.height),dw=img.width*k,dh=img.height*k;x.drawImage(img,(w-dw)/2,(h-dh)/2,dw,dh);
+      c.toBlob(bl=>{if(!bl)return best?res(best):rej(new Error("img"));if(!best||bl.size<best.size)best=bl;
+        if(bl.size<=limit||bl.type!=="image/webp"&&q<=0.5)return res(bl.size<=limit?bl:best);
+        if(q>0.35){q=Math.round((q-0.1)*100)/100;return go();}
+        if(si<sc.length-1){si++;q=0.7;return go();}
+        res(best);},"image/webp",q);};
+    go();};
   img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
+const bannerImage=f=>packImg(f,1200,600,110000,[1,.8,.64]);
+const coverImage=f=>packImg(f,1200,400,65000,[1,.8,.6]);
+const extOf=bl=>bl.type==="image/webp"?"webp":"jpg";
 async function addBanner(i,file){const b=ROWS[i],en=L()==="en",er=$("be"+i);
   try{if(!/^image\//.test(file.type))throw new Error("type");
     if(er){er.style.color="#5b6475";er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";}
     const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop",poster:true}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
     if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";ME=await PBA.session();const blob=await bannerImage(file);
-    const path=encodeURIComponent(b.slug)+"/banner-"+Date.now()+".webp";
+    const path=encodeURIComponent(b.slug)+"/banner-"+Date.now()+"."+extOf(blob);
     const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
     if(!up.ok)throw new Error("upload");
     await rpc("pb_banner_set",{p_slug:b.slug,p_url:SB+"/storage/v1/object/public/shop-logos/"+path});
@@ -485,7 +495,7 @@ function premBlock(b,i){
     const t=tierOf(b),tn=window.PBPlan?PBPlan.name(t,en):"Premium",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";
     return '<div class="pm pt-'+t+'"><div class="ph">'+ic+' PataBook '+esc(window.PBPlan?PBPlan.name(t,true):tn)+' Member</div><small>'+(en?"Active till "+till:till+" तक चालू")+(PH(b,"top")?(en?" · ⭐ your shop shows on top":" · ⭐ आपकी दुकान ऊपर दिखती है"):"")+'</small>'+
       (PH(b,"report")?'<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small>':'')+
-      (PH(b,"banner")?banBlock(b,i):'')+buyBlock(b,i,true)+'</div>';
+      buyBlock(b,i,true)+'</div>';
   }
   if(window.PBPlay&&PBPlay.on()&&PLAYP&&PLAYP.length)return buyBlock(b,i,false);
   if(!(window.PB_SITE&&PB_SITE.premiumReq))return "";
@@ -560,6 +570,27 @@ function logoBlock(b,i){
     (u?'<button type="button" class="rm" data-lg="rm" data-i="'+i+'">'+(en?"Remove":"हटाएँ")+'</button>':'')+
     '<input type="file" accept="image/*" hidden id="lf'+i+'"></div></div>';
 }
+
+/* 🖼️ तीन पट्टियाँ: Logo · Profile Banner · Poster (Silver / Gold / Platinum) */
+let COVER={},PDOPEN={};
+const COVER_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+function coverBlock(b,i){const en=L()==="en",u=COVER[b.slug]||"";
+  return '<div class="ban cv"><div class="bh">🌄 '+(en?"Profile Banner":"Profile Banner")+'</div>'+
+    (COVER_RX.test(u)?'<img src="'+esc(u)+'" alt="" loading="lazy" style="aspect-ratio:3/1">':'<small>'+(en?"The strip above your shop name on your page. Any photo works — it is resized and made small automatically.":"आपके page पर दुकान के नाम के ऊपर वाली पट्टी। कोई भी photo चुनें — अपने-आप छोटी (कम KB) हो जाएगी।")+'</small>')+
+    '<div class="bb"><label>'+(u?(en?"🔄 Change":"🔄 बदलें"):(en?"➕ Add banner":"➕ Banner लगाएँ"))+'<input type="file" accept="image/*" hidden data-cup="'+i+'"></label>'+(u?'<button type="button" data-crm="'+i+'">🗑️ '+(en?"Delete":"हटाएँ")+'</button>':'')+'</div><div class="err" id="ce'+i+'"></div></div>';}
+async function addCover(i,file){const b=ROWS[i],en=L()==="en",er=$("ce"+i);
+  try{if(!/^image\//.test(file.type))throw new Error("type");
+    if(er){er.style.color="#5b6475";er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";}
+    const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop",poster:true}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
+    if(er)er.textContent=en?"Uploading…":"Upload हो रहा है…";ME=await PBA.session();const blob=await coverImage(file);
+    const path=encodeURIComponent(b.slug)+"/cover-"+Date.now()+"."+extOf(blob);
+    const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
+    if(!up.ok)throw new Error("upload");
+    const pub=SB+"/storage/v1/object/public/shop-logos/"+path;await rpc("pb_profile_banner_set",{p_slug:b.slug,p_url:pub});COVER[b.slug]=pub;draw();
+  }catch(x){const e2=$("ce"+i);if(e2){e2.style.color="";e2.textContent=en?"Could not upload. Try again.":"Banner upload नहीं हुआ। दोबारा कोशिश करें।";}}}
+async function loadCovers(){COVER={};if(!ROWS||!PREM)return;for(const b of ROWS){if(PREM[b.slug]&&PREM[b.slug].until){try{const u=await rpc("pb_profile_banner_get",{p_slug:b.slug});if(typeof u==="string")COVER[b.slug]=u;}catch(e){}}}}
+function stripsBlock(b,i){const P=PREM&&PREM[b.slug];if(!(P&&P.until))return "";const en=L()==="en";
+  return '<div class="strips"><div class="sth">'+(en?"Your 3 strips":"आपकी 3 पट्टियाँ")+'</div>'+logoBlock(b,i)+coverBlock(b,i)+(PH(b,"banner")?banBlock(b,i):'<div class="ban"><small>📢 '+(en?"Poster is not in your plan yet.":"Poster अभी आपके plan में चालू नहीं है।")+'</small></div>')+'</div>';}
 async function loadLogos(){
   if(!ROWS||!ROWS.length)return;
   const slugs=ROWS.map(b=>'"'+String(b.slug).replace(/"/g,'')+'"').join(",");
@@ -569,24 +600,7 @@ async function loadLogos(){
     (await r.json()).forEach(x=>{LOGOS[x.slug]=x.logo_url||"";});
   }catch(e){LOGO_OK=false;}
 }
-function squareImage(file){
-  return new Promise((res,rej)=>{
-    const img=new Image(),url=URL.createObjectURL(file);
-    img.onload=()=>{
-      const S=320,c=document.createElement("canvas");c.width=S;c.height=S;
-      const x=c.getContext("2d"),m=Math.min(img.width,img.height);
-      x.fillStyle="#fff";x.fillRect(0,0,S,S);
-      x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S);
-      URL.revokeObjectURL(url);
-      c.toBlob(bl=>{
-        if(bl&&bl.type==="image/webp")return res(bl);
-        c.toBlob(b2=>b2?res(b2):rej(new Error("img")),"image/jpeg",0.85);
-      },"image/webp",0.85);
-    };
-    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};
-    img.src=url;
-  });
-}
+const squareImage=f=>packImg(f,400,400,30000,[1,.8,.6]);
 async function uploadLogo(i,file){
   const b=ROWS[i],en=L()==="en",er=$("le"+i);er.textContent="";
   if(!/^image\//.test(file.type)){er.textContent=en?"Please choose a photo.":"कृपया फोटो चुनें।";return;}
@@ -596,7 +610,7 @@ async function uploadLogo(i,file){
     const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"logo"}):{ok:true};if(!ck.ok){er.style.color="";er.textContent=ck.msg;return;}
     er.textContent=en?"Uploading…":"Upload हो रहा है…";
     ME=await PBA.session();if(!ME)throw new Error("login");
-    const blob=await squareImage(file),ext=blob.type==="image/webp"?"webp":"jpg";
+    const blob=await squareImage(file),ext=extOf(blob);
     const path=encodeURIComponent(b.slug)+"/logo-"+Date.now()+"."+ext;
     const up=await fetch(SB+"/storage/v1/object/shop-logos/"+path,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ME.access_token,"Content-Type":blob.type,"x-upsert":"false"},body:blob});
     if(!up.ok)throw new Error("upload "+up.status);
@@ -644,7 +658,7 @@ function draw(){
   drawNt();{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=false;}const vp=$("vpTop");if(vp){vp.href="business.html?slug="+encodeURIComponent(ROWS[0].slug);vp.querySelector("span").textContent=en?"My Profile":"मेरी Profile";vp.hidden=false;}}list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
     (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    tilesBlock(b,i)+(TAB[b.slug]==='p'?profBlock(b,i)+verifyBlock(b,i):'')+premBlock(b,i)+weekLine(b)+(TAB[b.slug]==='f'?phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i):'')+
+    stripsBlock(b,i)+tilesBlock(b,i)+(TAB[b.slug]==='p'?profBlock(b,i)+verifyBlock(b,i):'')+premBlock(b,i)+weekLine(b)+(TAB[b.slug]==='f'?phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i):'')+
     '<div class="row2">'+
     (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
     '</div></div>').join("")+
@@ -711,7 +725,11 @@ $("list").addEventListener("click",async e=>{
   try{const v=await rpc("pb_set_show_phone",{p_slug:b.slug,p_on:want});b.show_phone=(v===false)?false:want;draw();}
   catch(x){sw.disabled=false;$("er"+i).textContent=tx("e_sw");}
 });
+$("list").addEventListener("change",e=>{const g=e.target.closest("[data-cup]");if(g&&g.files&&g.files[0])addCover(+g.dataset.cup,g.files[0]);});
 $("list").addEventListener("click",async e=>{
+  const cr=e.target.closest("[data-crm]");if(cr){const b=ROWS[+cr.dataset.crm],en=L()==="en";if(!confirm(en?"Delete your profile banner?":"Profile Banner हटाएँ?"))return;cr.disabled=true;
+    try{ME=await PBA.session();await rpc("pb_profile_banner_set",{p_slug:b.slug,p_url:null});delete COVER[b.slug];draw();}catch(x){cr.disabled=false;alert(en?"Could not delete.":"हटा नहीं सके।");}return;}
+  const pdt=e.target.closest("[data-pdt]");if(pdt){const b=ROWS[+pdt.dataset.pdt];PDOPEN[b.slug]=!PDOPEN[b.slug];draw();return;}
   const bt=e.target.closest("[data-lg]");if(!bt)return;
   const i=+bt.dataset.i,b=ROWS[i];
   if(bt.dataset.lg==="up"){const f=$("lf"+i);f.onchange=()=>{if(f.files&&f.files[0])uploadLogo(i,f.files[0]);};f.click();return;}
@@ -845,7 +863,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadCovers();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
