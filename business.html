@@ -423,7 +423,7 @@ function render(){
   const cbtn=document.getElementById("cardBtn");
   /* कार्ड: नंबर तभी छपता है जब दुकानदार का "नंबर सबको दिखे" चालू हो और देखने वाला login हो (contactState ok); नहीं तो "नंबर PataBook पर देखें" */
   if(cbtn)cbtn.onclick=()=>{if(!window.PBCard)return;
-    PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:(contactState&&contactState.k==="ok"?String(contactState.phone||"").replace(/\D/g,"").slice(-10):""),wa:(contactState&&contactState.k==="ok"?(()=>{const w=line(b,"WhatsApp").replace(/\D/g,"");return /^\d{10}$/.test(w)?w:"";})():""),insta:socUrl("Instagram"),fb:socUrl("Facebook"),link:(LNK&&LNK.link)||"",code:b.business_code||"",visitor:true});};
+    PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:(contactState&&contactState.k==="ok"?String(contactState.phone||"").replace(/\D/g,"").slice(-10):""),wa:(contactState&&contactState.k==="ok"?(()=>{const w=line(b,"WhatsApp").replace(/\D/g,"");return /^\d{10}$/.test(w)?w:"";})():""),insta:socUrl("Instagram"),fb:socUrl("Facebook"),tier:(window.PBPlan&&PBPlan.paid(b.slug)?PBPlan.tier(b.slug):""),link:(LNK&&LNK.link)||"",code:b.business_code||"",visitor:true});};
 }
 /* शिकायत / Report (Google Play नियम: users गलत/नकली listing की शिकायत कर सकें) — admin पैनल में जाती है */
 function openReport(){

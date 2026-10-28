@@ -102,12 +102,17 @@
     wa: function (c, x, y, s) { c.fillStyle = '#25d366'; c.beginPath(); c.arc(x, y, s * .34, 0, 7); c.fill(); c.beginPath(); c.moveTo(x - s * .26, y + s * .22); c.lineTo(x - s * .34, y + s * .38); c.lineTo(x - s * .12, y + s * .3); c.fill();
       c.fillStyle = '#fff'; c.font = '700 ' + (s * .34) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('✆', x, y + 1); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
   };
+  var TIER = { platinum: { c: ['#566178', '#1d2536', '#070b16'], a: ['#f4f8ff', '#9db4d6'], n: 'PLATINUM' }, gold: { c: ['#6b4f12', '#33260a', '#120d02'], a: ['#fff1bf', '#d9b257'], n: 'GOLD' }, silver: { c: ['#8794a6', '#4f5b6b', '#1f2733'], a: ['#ffffff', '#cdd5df'], n: 'SILVER' } };
   async function draw(d, portrait) {
     var W = portrait ? 1080 : 1200, H = portrait ? 1920 : 690, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    var c = cv.getContext('2d'), th = theme((d.sub || '') + ' ' + (d.category || '')), col = th[2];
+    var c = cv.getContext('2d'), th = theme((d.sub || '') + ' ' + (d.category || '')), tr = TIER[d.tier], col = tr ? tr.c : th[2];
     var g = c.createRadialGradient(W * .15, 0, 10, W * .3, H * .2, Math.max(W, H) * 1.05); g.addColorStop(0, col[0]); g.addColorStop(.45, col[1]); g.addColorStop(1, col[2]);
     c.fillStyle = g; c.fillRect(0, 0, W, H);
     c.save(); c.globalAlpha = .09; c.strokeStyle = '#fff'; c.lineWidth = 2; c.translate(W / 2, H / 2); c.rotate(-0.14); for (var gx = -W * 1.5; gx < W * 1.5; gx += 60) { c.beginPath(); c.moveTo(gx, -H * 1.5); c.lineTo(gx, H * 1.5); c.stroke(); } for (var gy = -H * 1.5; gy < H * 1.5; gy += 60) { c.beginPath(); c.moveTo(-W * 1.5, gy); c.lineTo(W * 1.5, gy); c.stroke(); } c.restore();
+    if (tr) { var sg = c.createLinearGradient(0, 0, W, H); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.45, 'rgba(255,255,255,.14)'); sg.addColorStop(.55, 'rgba(255,255,255,0)'); c.fillStyle = sg; c.fillRect(0, 0, W, H);
+      var bg = c.createLinearGradient(0, 0, W, H); bg.addColorStop(0, tr.a[0]); bg.addColorStop(.5, tr.a[1]); bg.addColorStop(1, tr.a[0]); c.strokeStyle = bg; c.lineWidth = portrait ? 6 : 4; var mg = portrait ? 26 : 18; rr(c, mg, mg, W - 2 * mg, H - 2 * mg, portrait ? 34 : 24); c.stroke();
+      c.save(); c.fillStyle = bg; c.font = '700 ' + (portrait ? 30 : 21) + 'px Georgia,"Times New Roman",serif'; try { c.letterSpacing = (portrait ? 8 : 5) + 'px'; } catch (e) {} c.textBaseline = 'middle';
+      var lt = tr.n + '  BUSINESS CARD'; if (portrait) { c.textAlign = 'center'; c.fillText(lt, W / 2, 200); } else { c.fillText(lt, 64, 52); } c.restore(); }
     var pin = await img('pin.png'), logo = await img('card-logo.png');
     var url = d.link ? 'https://patabook.in/' + d.link : location.origin.replace(/^http:\/\/localhost[^/]*/, 'https://patabook.in') + '/business.html?slug=' + encodeURIComponent(d.slug || '');
     var Q = qr(url), qs = Q.length;
@@ -142,8 +147,8 @@
     if (soc(d.insta, 1)) rows.push(['ig', soc(d.insta, 1)]);
     if (soc(d.fb, 0)) rows.push(['fb', soc(d.fb, 0)]);
     if (!portrait) {
-      var ns = fit(c, d.name, 690, 70, 900); c.fillStyle = '#fff'; c.textBaseline = 'alphabetic'; c.fillText(d.name, 64, 64 + ns * .82);
-      var cy = 64 + ns + 46;
+      var ns = fit(c, d.name, 690, 70, 900); c.fillStyle = '#fff'; c.textBaseline = 'alphabetic'; c.fillText(d.name, 64, 64 + (tr ? 18 : 0) + ns * .82);
+      var cy = 64 + (tr ? 18 : 0) + ns + 46;
       c.fillStyle = 'rgba(255,255,255,.14)'; rr(c, 64, cy - 29, 58, 58, 16); c.fill(); c.fillStyle = '#fff'; c.font = '32px ' + FONT; c.textBaseline = 'middle'; c.fillText(th[1], 74, cy);
       c.fillStyle = 'rgba(255,255,255,.9)'; c.font = '700 27px ' + FONT; c.fillText(catTxt || 'Business', 138, cy); c.textBaseline = 'alphabetic';
       var y0 = cy + 54; if (d.owner) { ownerPill(64, y0 + 8, 23, false); y0 += 52; }
