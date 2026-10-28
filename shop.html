@@ -40,6 +40,8 @@ button{font:inherit}
 .tb img{width:34px;height:34px;border-radius:10px;object-fit:cover;flex:none;background:#fff;box-shadow:0 0 0 1px var(--line)}
 .tb .ini{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff;font:800 17px/1 Arial,sans-serif;background:linear-gradient(160deg,#2f6fd6,#123568)}
 .tb b{font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib.pbhome{width:auto;padding:0 10px 0 7px;gap:5px;display:flex;align-items:center;text-decoration:none;color:#0b2f73;font-size:13px}.ib.pbhome img{display:block;object-fit:contain}.ib.pbhome b{font-weight:800;letter-spacing:.1px}#tb{cursor:pointer;min-width:0}
+@media(max-width:420px){.ib.pbhome b{display:none}.ib.pbhome{width:38px;padding:0;justify-content:center}}
 .ib{flex:none;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:17px;cursor:pointer}
 #pbLang{flex:none}
 #socTop{flex:none;display:flex;gap:6px;margin-left:auto}
@@ -329,7 +331,7 @@ html.t-gold body .qa a:not(.pri),html.t-gold body .qa button:not(.pri){backgroun
 </head><body>
 
 <div class="top"><div class="wrap">
- <a class="ib" id="backA" href="index.html" aria-label="Back">←</a>
+ <a class="ib pbhome" id="backA" href="index.html" aria-label="PataBook Home"><img src="pin.png" alt="PataBook" width="24" height="24"><b>PataBook</b></a>
  <div class="tb" id="tb"></div>
  <span id="socTop"></span>
  <span id="pbLang"></span>
@@ -708,4 +710,5 @@ function spy(){if(IO)IO.disconnect();if(!("IntersectionObserver" in window))retu
   document.querySelectorAll("section.blk").forEach(s=>IO.observe(s));}
 if(window.PB){try{PB.apply&&PB.apply();PB.mount&&PB.mount(document.getElementById("pbLang"));PB.onChange&&PB.onChange(()=>render());}catch(e){}}
 load();
-</script></body></html>
+</script><script>document.addEventListener("DOMContentLoaded",function(){var t=document.getElementById("tb");if(t)t.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});});</script>
+</body></html>
