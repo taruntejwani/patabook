@@ -2,7 +2,7 @@
    दुकानदार product जोड़े / बदले / छिपाए / Stock / ⭐ ऊपर / हटाए। फ़ोटो shop-logos/<slug>/prod-*.webp में।
    mybusiness.html की चीज़ें इस्तेमाल होती हैं: rpc, esc, L, $, ME, PBA, SB, KEY, ROWS, draw, resizeImage */
 (function () {
-  var PRD = {};
+  var PRD = {}, DSC = {};
   var UNITS = {
     vol: { i: "🧴", hi: "Ltr / ML", en: "Ltr / ML", z: ["100 ML", "200 ML", "500 ML", "1 Ltr", "5 Ltr", "20 Ltr", "25 Ltr", "50 Ltr"] },
     wt: { i: "⚖️", hi: "वज़न (Kg/g)", en: "Weight (Kg/g)", z: ["100 g", "250 g", "500 g", "1 Kg", "5 Kg", "25 Kg", "50 Kg", "1 Quintal"] },
@@ -106,6 +106,7 @@
   window.prodLoad = async function (slug) {
     ME = await PBA.session();
     PRD[slug] = (await rpc("pb_my_products", { p_slug: slug })) || [];
+    try { DSC[slug] = (await rpc("pb_product_descs", { p_slug: slug })) || {}; } catch (e) { DSC[slug] = DSC[slug] || {}; }
     if (stage()) applyPend(slug);
   };
 
@@ -140,6 +141,7 @@
   function sheet(b, p) {
     var E = en();
     var D = p ? JSON.parse(JSON.stringify(p)) : { name: "", size: "", mrp: "", feats: [], img: "", show: true, stock: true };
+    D.dsc = p && p.id && DSC[b.slug] ? String(DSC[b.slug][p.id] || "") : ""; D.dai = !p; D.dh = "";
     D.feats = D.feats || []; D.offer = String(getX(D.feats, "Offer") || "").replace(/\D/g, ""); D.x = {}; EXTRA.forEach(function (x) { D.x[x[0]] = getX(D.feats, x[0]); }); D.feats = plainF(D.feats);
     var SIZES = sizesOf(b.slug), FMAX = 5;
     var sc = document.createElement("div"); sc.className = "pr-sc";
@@ -148,6 +150,7 @@
       D.name = n.value; D.mrp = sc.querySelector("#prM").value.replace(/\D/g, ""); var po = sc.querySelector("#prO"); if (po) D.offer = po.value.replace(/\D/g, "");
       D.stock = sc.querySelector("#prS").checked; D.show = sc.querySelector("#prV").checked;
       var cs = sc.querySelector("#prCS"); if (cs && cs.value.trim()) D.size = cs.value.trim();
+      var dd = sc.querySelector("#prD"); if (dd) D.dsc = dd.value.slice(0, 300); var da = sc.querySelector("#prDA"); if (da) D.dai = da.checked; var dh = sc.querySelector("#prDH"); if (dh) D.dh = dh.value.slice(0, 120);
       EXTRA.forEach(function (x, k) { var el = sc.querySelector("#prX" + k); if (el) D.x[x[0]] = el.value.trim().slice(0, 30); });
       var mo = sc.querySelector(".pr-more"); D.open = !!(mo && mo.open);
     }
@@ -162,6 +165,9 @@
         '<input class="pr-in" id="prCS" maxlength="30" style="margin-top:6px" placeholder="' + (E ? "Other size (optional)" : "दूसरा size लिखें (ज़रूरी नहीं)") + '" value="' + (SIZES.indexOf(D.size) < 0 ? esc(D.size || "") : "") + '">' +
         '<label class="pr-f" for="prM"><span class="pr-num">3</span>' + (E ? "MRP / printed price (₹) — empty = “Ask price”" : "MRP / छपी कीमत (₹) — खाली = “कीमत पूछें”") + '</label><input class="pr-in" id="prM" inputmode="numeric" maxlength="9" value="' + esc(D.mrp || "") + '" placeholder="1499">' +
         '<label class="pr-f" for="prO">💸 ' + (E ? "Your selling price (₹) — shown to customers, optional" : "आपका भाव (₹) — ग्राहक को इसी में मिलेगा (ज़रूरी नहीं)") + '</label><input class="pr-in" id="prO" inputmode="numeric" maxlength="9" value="' + esc(D.offer || "") + '" placeholder="900"><small style="display:block;color:#5b6475;margin-top:3px">' + (E ? "Example: MRP 1400, your price 900 → customers see ₹1400 struck and ₹900." : "जैसे: MRP 1400, आपका भाव 900 → ग्राहक को ₹1400 कटा हुआ और ₹900 दिखेगा।") + '</small>' +
+        '<label class="pr-f" for="prD">📝 ' + (E ? "Description — customers will read this" : "विवरण — ग्राहक यही पढ़ेगा") + '</label><textarea class="pr-in" id="prD" rows="3" maxlength="300" placeholder="' + (E ? "Short, true details about this product / service" : "इस product / service के बारे में छोटी, सच्ची जानकारी") + '">' + esc(D.dsc || "") + '</textarea>' +
+        '<label class="pr-tg"><span>🪄 ' + (E ? "Let AI write the description" : "AI से विवरण लिखवाएँ") + '<small>' + (E ? "Off = AI will not write; you type it yourself" : "बंद = AI नहीं लिखेगा, आप ख़ुद लिखें") + '</small></span><input type="checkbox" id="prDA"' + (D.dai ? " checked" : "") + '></label>' +
+        (D.dai ? '<input class="pr-in" id="prDH" maxlength="120" value="' + esc(D.dh || "") + '" placeholder="' + (E ? "Tell AI how (optional) — e.g. short, only uses" : "AI को बताएँ कैसा चाहिए (ज़रूरी नहीं) — जैसे: छोटा, सिर्फ़ इस्तेमाल") + '"><button type="button" class="pr-dl" id="prDG" style="margin-top:6px;background:#f2efff;color:#3b2bb5;border-color:#d6cffa">🪄 ' + (E ? "Write now" : "अभी लिखवाएँ") + '</button><small id="prDM" style="display:block;color:#5b6475;margin-top:3px"></small>' : "") +
         '<details class="pr-more"' + (D.open || hasX ? " open" : "") + '><summary>▸ ' + (E ? "More details (optional)" : "और जानकारी (ज़रूरी नहीं)") + '</summary>' +
         EXTRA.map(function (x, k) { return '<label class="pr-f" for="prX' + k + '">' + (E ? x[2] : x[1]) + '</label><input class="pr-in" id="prX' + k + '" maxlength="30" value="' + esc(D.x[x[0]] || "") + '" placeholder="' + esc(x[3]) + '">'; }).join("") +
         '<span class="pr-f">' + (E ? "Features (up to " + FMAX + ")" : "खूबियाँ (" + FMAX + " तक)") + '</span><div class="pr-ch" id="prC">' + (D.feats.length ? D.feats.map(function (f, k) { return '<span>' + esc(f) + '<button type="button" data-rf="' + k + '" aria-label="Remove">✕</button></span>'; }).join("") : '<small style="color:#5b6475">' + (E ? "None yet" : "अभी कोई नहीं") + '</small>') + '</div>' +
@@ -172,6 +178,20 @@
         (p ? '<button type="button" class="pr-dl" id="prDel">🗑️ ' + (E ? "Delete this product" : "यह Product हटाएँ") + '</button>' : "") + '</div>';
     }
     function paint() { sc.innerHTML = body(); wire(); }
+    /* 🪄 विवरण AI से: फ़ोटो + नाम + दुकानदार का हिंट (मर्यादा Worker में) */
+    async function genDsc(file, force) {
+      keep(); if (!window.PBImg || !PBImg.caption || !D.dai) return;
+      if (!force && String(D.dsc || "").trim()) return;
+      var m = sc.querySelector("#prDM"); if (m) m.textContent = E ? "🪄 AI is writing…" : "🪄 AI लिख रहा है…";
+      try {
+        if (!file) { var rr = await fetch(D.img); file = await rr.blob(); }
+        var hint = (E ? "Product/service: " : "Product/service: ") + String(D.name || "").slice(0, 60) + (D.size ? " (" + D.size + ")" : "") + ". " + (E ? "Write a short description (1-2 sentences) for customers. " : "ग्राहकों के लिए 1-2 छोटे वाक्य का विवरण लिखो। ") + (D.dh || "");
+        var t = await PBImg.caption(file, { slug: b.slug, hint: hint });
+        if (!sc.isConnected) return; keep();
+        if (t) { D.dsc = String(t).slice(0, 300); paint(); var m2 = sc.querySelector("#prDM"); if (m2) m2.textContent = E ? "🪄 AI wrote this — check it, edit if needed, then Save." : "🪄 AI ने लिखा है — देख लें, ग़लत हो तो बदलें, फिर Save करें।"; }
+        else if (m) { var m3 = sc.querySelector("#prDM"); if (m3) m3.textContent = E ? "AI could not write it now. You can type it yourself." : "AI अभी नहीं लिख पाया। आप ख़ुद लिख सकते हैं।"; }
+      } catch (e) { var m4 = sc.querySelector("#prDM"); if (m4) m4.textContent = ""; }
+    }
     function wire() {
       sc.querySelector("#prX").onclick = function () { sc.remove(); };
       sc.querySelector("#prZ").onclick = function (e) { var t = e.target.closest("button"); if (!t) return; keep(); D.size = D.size === t.textContent ? "" : t.textContent; sc.querySelector("#prCS").value = ""; paint(); };
@@ -179,6 +199,8 @@
       var af = sc.querySelector("#prAF");
       function addF() { var v = sc.querySelector("#prNF").value.trim(); if (!v) return; keep(); D.feats.push(v.slice(0, 40)); paint(); var nf = sc.querySelector("#prNF"); if (nf) nf.focus(); }
       if (af) { af.onclick = addF; sc.querySelector("#prNF").onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); addF(); } }; }
+      var dg = sc.querySelector("#prDG"); if (dg) dg.onclick = function () { genDsc(null, true); };
+      var dac = sc.querySelector("#prDA"); if (dac) dac.onchange = function () { keep(); paint(); };
       sc.querySelector("#prF").onchange = async function () {
         var f = this.files && this.files[0]; if (!f) return; keep();
         var er = sc.querySelector("#prE1"); er.textContent = E ? "Uploading…" : "Upload हो रहा है…";
@@ -202,6 +224,7 @@
               paint(); var e2 = sc.querySelector("#prE1"); if (e2) e2.textContent = E ? "🪄 AI filled this — please check, edit if needed, then Save." : "🪄 AI ने भरा है — देख लें, ग़लत हो तो बदलें, फिर Save करें।";
             } else { var e3 = sc.querySelector("#prE1"); if (e3) e3.textContent = ""; }
           }
+          if (D.dai && String(D.name || "").trim() && !String(D.dsc || "").trim()) genDsc(f, false);
         } catch (x) { var e1 = sc.querySelector("#prE1"); if (e1) e1.textContent = E ? "Could not upload the photo. Try again." : "फ़ोटो upload नहीं हुई। फिर कोशिश करें।"; }
       };
       sc.querySelector("#prSave").onclick = async function () {
@@ -212,7 +235,8 @@
         btn.disabled = true; er.textContent = "";
         try {
           ME = await PBA.session();
-          await rpc("pb_product_save", { p_slug: b.slug, p: { id: p ? p.id : null, name: D.name.trim(), size: D.size || "", mrp: D.mrp || "", feats: allFeats(), img: D.img, show: D.show, stock: D.stock } });
+          var sid = await rpc("pb_product_save", { p_slug: b.slug, p: { id: p ? p.id : null, name: D.name.trim(), size: D.size || "", mrp: D.mrp || "", feats: allFeats(), img: D.img, show: D.show, stock: D.stock } });
+          var pid = p ? p.id : sid; if (pid && (String(D.dsc || "").trim() || (p && DSC[b.slug] && DSC[b.slug][p.id]))) { try { await rpc("pb_product_desc_set", { p_slug: b.slug, p_id: pid, p_text: String(D.dsc || "").trim().slice(0, 300) }); } catch (e) {} }
           sc.remove(); refresh(b.slug);
         } catch (x) {
           btn.disabled = false; var m = String(x.message || "");

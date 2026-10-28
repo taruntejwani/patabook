@@ -115,7 +115,7 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 .psh .px{position:absolute;right:12px;top:12px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);font-size:15px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .pbig{border-radius:14px;overflow:hidden;background:#0d0d10;aspect-ratio:1;max-height:56vh;margin:0 auto}.pbig img{width:100%;height:100%;object-fit:contain;display:block}
 .psh h3{font-size:19px;margin-top:12px}.pmeta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:14px;font-weight:700;color:#123568}
-.pft{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pft span{background:#f1f4fa;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600}
+.pdesc{margin:8px 0 4px;color:#3a4254;font-size:14px;line-height:1.55;white-space:pre-line}.pft{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pft span{background:#f1f4fa;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600}
 .galc{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:640px){.galc{grid-template-columns:1fr 1fr}}
 .galc figure{margin:0;background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden}.galc figure button{display:block;width:100%;border:0;padding:0;aspect-ratio:4/3;background:#eef3fd;cursor:zoom-in}.galc img{width:100%;height:100%;object-fit:cover;display:block}
 .galc figcaption{padding:10px 13px 12px;font-size:13.5px;line-height:1.55;color:#2a3350;cursor:pointer}.galc .ct{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.galc figcaption.open .ct{display:block}.galc figcaption em{display:block;font-style:normal;font-weight:700;color:#1a73e8;margin-top:2px}.galc figcaption.open em{display:none}
@@ -356,6 +356,7 @@ const priceCard=(p,ask)=>{const o=offerOf(p);if(o&&p.mrp&&o<p.mrp)return '<span 
 const priceMeta=(p,ask,sv)=>{const o=offerOf(p);if(o&&p.mrp&&o<p.mrp){const pc=Math.round((p.mrp-o)*100/p.mrp);return '💰 <s style="color:#8a93a6">'+rsF(p.mrp)+'</s> <b style="color:#137333">'+rsF(o)+'</b> <span style="color:#c5221f;font-weight:700">'+sv(p.mrp-o,pc)+'</span>';}if(o)return '💰 <b style="color:#137333">'+rsF(o)+'</b>';return p.mrp?'💰 '+rsF(p.mrp)+' MRP':'💰 '+ask;};
 
 let B=null,PREM=false,SLAB="",GAL=[],CAPS={},PRODS=[],CT={k:"loading"};
+let DSCP={};
 
 const DAY_HI={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
 function hm12(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
@@ -443,6 +444,7 @@ async function loadPrem(){
     fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{GAL=j||[];}).catch(()=>{GAL=[];}),
     fetch(SB+"/rest/v1/rpc/pb_shop_label_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():"").then(j=>{SLAB=(j==="product"||j==="service")?j:"";}).catch(()=>{SLAB="";}),
     fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{CAPS={};(j||[]).forEach(c=>{if(c&&c.url&&c.caption)CAPS[c.url]=c.caption;});}).catch(()=>{CAPS={};}),
+    fetch(SB+"/rest/v1/rpc/pb_product_descs",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():{}).then(j=>{DSCP=(j&&typeof j==="object"&&!Array.isArray(j))?j:{};}).catch(()=>{DSCP={};}),
     fetch(SB+"/rest/v1/rpc/pb_shop_products_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{PRODS=j||[];}).catch(()=>{PRODS=[];})
   ]);
 }
@@ -667,6 +669,7 @@ function prodAsk(p){const wa=waNum();
 function prodSheet(p){const d=document.createElement("div");d.className="psh";
   d.innerHTML='<div class="pin"><button type="button" class="px" aria-label="Close">✕</button><div class="pbig"><img src="'+esc(p.img)+'" alt=""></div><h3>'+esc(p.name)+'</h3>'+
    '<div class="pmeta">'+(p.size?'<span>📦 '+esc(p.size)+'</span>':'')+'<span>'+priceMeta(p,L("कीमत पूछें","Ask price"),(a,pc)=>L("₹"+Number(a).toLocaleString("en-IN")+" की बचत","Save ₹"+Number(a).toLocaleString("en-IN")))+'</span>'+(p.stock===false?'<span style="color:#c5221f">⛔ '+L("Stock में नहीं","Out of stock")+'</span>':'')+'</div>'+
+   (DSCP[p.id]?'<p class="pdesc">'+esc(DSCP[p.id])+'</p>':'')+
    (featsOf(p).length?'<div class="pft">'+featsOf(p).map(f=>'<span>✔ '+esc(f)+'</span>').join("")+'</div>':'')+
    '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / order","Ask / order on WhatsApp")+'</button>'+
    '<button type="button" class="pshr big" id="pShr">📤 '+L("दोस्त को भेजें","Share with a friend")+'</button></div>';
