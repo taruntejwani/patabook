@@ -106,7 +106,7 @@
   window.prodLoad = async function (slug) {
     ME = await PBA.session();
     PRD[slug] = (await rpc("pb_my_products", { p_slug: slug })) || [];
-    try { DSC[slug] = (await rpc("pb_product_descs", { p_slug: slug })) || {}; } catch (e) { DSC[slug] = DSC[slug] || {}; }
+    try { DSC[slug] = (await rpc("pb_my_product_descs", { p_slug: slug })) || {}; } catch (e) { DSC[slug] = DSC[slug] || {}; }
     if (stage()) applyPend(slug);
   };
 
