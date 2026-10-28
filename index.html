@@ -107,6 +107,15 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc .pbg.pb-silver i,.nsc .pbg.pb-platinum i,.nsc .pbg.pb-gold i{white-space:nowrap;font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.4px;border-radius:5px;padding:2px 5px 2px 7px;line-height:1}
 .nsc .pbg.pb-silver i{background:linear-gradient(180deg,#f7f9fb,#c5ccd6);color:#39424e;border:1px solid #aab3bf}
 .nsc .pbg.pb-platinum i{background:linear-gradient(180deg,#bfe3ff,#4a6fa5 60%,#1c2539);color:#fff;border:1px solid #7fa6d6;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.nsc .pbg.pb-silver i,.nsc .pbg.pb-platinum i,.nsc .pbg.pb-gold i,.nsc.tc .tcb{font-family:Georgia,'Times New Roman',serif;font-size:7.5px!important;letter-spacing:.12em!important;font-weight:700!important}
+.nsc.tc .tcb{padding:3px 8px!important;position:static!important;align-self:flex-start;margin-bottom:6px;white-space:nowrap;border-radius:9px!important;line-height:1.3!important}
+.nsc .pbg i{white-space:nowrap}
+.nsc .new.dbc{font-family:Georgia,'Times New Roman',serif;font-size:7.5px;letter-spacing:.12em;font-weight:700;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:3px 8px;position:static;align-self:flex-start;margin-bottom:6px;white-space:nowrap;border-radius:9px;line-height:1.3;font-size:7px}
+.bcl{position:absolute;top:14px;right:16px;text-align:right;font-family:Georgia,'Times New Roman',serif;line-height:1.1}
+.bcl em{display:block;font-style:normal;font-weight:700;font-size:24px;letter-spacing:.2em;margin-right:-.2em}
+.bcl small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.32em;margin-top:3px;margin-right:-.32em;opacity:.9}
+.bcl-gold{color:#9a741f}.bcl-gold em{background:linear-gradient(180deg,#e9c65f,#b58a2a 55%,#7a5614);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bcl-platinum{color:#3d4d6e}.bcl-platinum em{background:linear-gradient(180deg,#6f86b3,#2f3f63 55%,#141c2c);-webkit-background-clip:text;background-clip:text;color:transparent}
 .nsc.tc{position:relative}.nsc.tc .tcb{position:absolute;top:7px;right:6px;display:flex;align-items:center;gap:3px;font-size:8.5px;font-weight:900;letter-spacing:.3px;border-radius:999px;padding:1px 6px 1px 2px}
 .nsc.tc .tcb img{width:14px;height:14px;border-radius:50%}
 .nsc.tc.pt-silver{background:linear-gradient(150deg,#ffffff 0%,#dfe4ea 100%)!important;color:#1f2833!important;border:2px solid #b8c0cb;box-shadow:0 6px 16px rgba(90,100,115,.2)!important}
@@ -449,8 +458,8 @@ function applyLang(){
     });
   }
   /* 👑 plan का निशान: Gold = सुनहरा crown + GOLD PREMIUM; Silver / Platinum = उसी crown पर अपना रंग */
-  function tcBadge(t){return '<span class="tcb"><img src="'+(t==="gold"?"pb-crown.webp":t==="platinum"?"pb-diamond.webp":"pb-crown-"+t+".webp")+'" alt="" width="14" height="14">'+({silver:"SILVER",gold:"GOLD",platinum:"PLATINUM"}[t]||"")+" MEMBER"+'</span>';}
-  function premBadge(t){t=t==="silver"||t==="platinum"?t:"gold";return '<span class="pbg pb-'+t+'"><img class="c" src="'+(t==="platinum"?"pb-diamond.webp":t==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="" width="16" height="16"><i>'+t.toUpperCase()+' MEMBER</i></span>';}
+  function tcBadge(t){return '<span class="tcb">'+{silver:"SILVER",gold:"GOLD",platinum:"PLATINUM"}[t]+"<br>BUSINESS CARD"+'</span>';}
+  function premBadge(t){t=t==="silver"||t==="platinum"?t:"gold";return '<span class="pbg pb-'+t+'"><i>'+t.toUpperCase()+' BUSINESS CARD</i></span>';}
   /* 🖼️ Banner (sql-30): दुकान का banner पट्टी में — दबाने पर दुकान खुले */
   function bannerHTML(b){return '<a class="nsc bn" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" loading="lazy" decoding="async"><span class="bnl">'+((PB.lang&&PB.lang()==="hi")?"विज्ञापन":"Ad")+'</span></a>';}
   let BANNERS=[];
@@ -476,7 +485,7 @@ function applyLang(){
       if(r.ok)(await r.json()).forEach(x=>{KM[x.slug]=kmTxt(x.latitude,x.longitude);});}
     document.querySelectorAll("#nst .dk[data-s]").forEach(e=>{e.textContent=KM[e.dataset.s]||"";});}catch(e){}}
   function cardHTML(b){
-    return (b._ban?bannerHTML(b):'<a class="nsc'+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">'+(b.category?ico(b.category)+' '+esc(b.category):'📍 '+esc(b.city||""))+'<span class="dk adr">'+esc(String(b.address||"").trim())+'</span></span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
+    return (b._ban?bannerHTML(b):'<a class="nsc'+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new dbc">DIGITAL<br>BUSINESS CARD</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">'+(b.category?ico(b.category)+' '+esc(b.category):'📍 '+esc(b.city||""))+'<span class="dk adr">'+esc(String(b.address||"").trim())+'</span></span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
@@ -588,9 +597,9 @@ function applyLang(){
   function auto(){clearInterval(timer);if(P.length>1&&!matchMedia("(prefers-reduced-motion: reduce)").matches)timer=setInterval(()=>go(i+1),4500);}
   /* Gold / Platinum दुकान जिसका आज poster नहीं: ऊपर वाली पट्टी जैसा चलता card (नीचे) */
   let GP=[],GL=[];const LOGO={},LRX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
-  function badge(t){return '<span class="pbg pb-'+t+'"><img class="c" src="'+(t==="platinum"?"pb-diamond.webp":"pb-crown.webp")+'" alt="" width="16" height="16"><i>'+t.toUpperCase()+' MEMBER</i></span>';}
+  function badge(t){return '<span class="pbg pb-'+t+'"><i>'+t.toUpperCase()+' BUSINESS CARD</i></span>';}
   function gcard(b){const lg=b._lg&&LOGO[b.slug];
-    return '<a class="nsc pm pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+badge(b._t)+(b._t==="platinum"||b._t==="gold"?'<img class="pe" src="pb-'+b._t+'-emblem.webp" alt="'+(b._t==="gold"?"Gold":"Platinum")+' Member" width="88" height="80">':"")+'<span class="ic'+(lg?' lg':'')+'">'+(lg?'<img src="'+esc(lg)+'" alt="" loading="lazy" decoding="async">':b._ic)+'</span><b>'+esc(b.name)+'</b><span class="ad">'+(b.category?b._ic+' '+esc(b.category):'📍 '+esc(b.address||b.city||""))+'</span><span class="vs">🛍️ '+(hi()?"दुकान देखें":"Visit shop")+' ›</span></a>';}
+    return '<a class="nsc pm pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+badge(b._t)+(b._t==="platinum"||b._t==="gold"?'<span class="bcl bcl-'+b._t+'"><em>'+b._t.toUpperCase()+'</em><small>BUSINESS CARD</small></span>':"")+'<span class="ic'+(lg?' lg':'')+'">'+(lg?'<img src="'+esc(lg)+'" alt="" loading="lazy" decoding="async">':b._ic)+'</span><b>'+esc(b.name)+'</b><span class="ad">'+(b.category?b._ic+' '+esc(b.category):'📍 '+esc(b.address||b.city||""))+'</span><span class="vs">🛍️ '+(hi()?"दुकान देखें":"Visit shop")+' ›</span></a>';}
   const G={i:0,drag:false,moved:0,on:false,tm:0,fx:0};
   /* नीचे की पट्टी: एक-एक पूरा pamphlet; 4 सेकंड रुकता है, फिर झट से अगला slide होकर आता है; उँगली से भी पलटा जा सकता है */
   function gdraw(){const w=document.getElementById("gpw"),t=document.getElementById("gpt"),pv=document.getElementById("pv");if(!w||!t)return;
