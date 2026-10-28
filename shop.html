@@ -516,10 +516,10 @@ function render(){drawSoc();
 function pbIntro(){try{
   if(window.__pbIntro||!B)return;const t=TIER();if(t!=="gold"&&t!=="platinum")return;
   if(document.body.classList.contains("pbe-on"))return;
-  /* 🖼️ दुकान का अपना poster (posters/<slug>.webp): पूरी screen, ~5 सेकंड timer, Skip / टैप से बंद; हर नई visit (browser session) में एक बार */
+  /* 🖼️ दुकान का अपना poster (posters/<slug>.webp): पूरी screen, ~5 सेकंड timer, Skip / टैप से बंद; लिंक जब भी खुले, हर बार */
   const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
   const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);
-  if(pk){const sk="pbp_"+pk;let seenS="";try{seenS=sessionStorage.getItem(sk)||"";}catch(_){}if(seenS)return;try{sessionStorage.setItem(sk,"1");}catch(_){}
+  if(pk){
     window.__pbIntro=1;const T=5,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
     e.innerHTML='<img alt="'+esc(B.name)+'" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
     const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
