@@ -98,7 +98,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nsc .ic.lg{background:#fff;overflow:hidden;padding:0}.nsc .ic.lg img{width:100%;height:100%;object-fit:cover;display:block}
 .nsc .new{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;background:var(--yellow);color:#12141c;border-radius:999px;padding:1px 6px}
 .nsc b{font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
-.nsc .ad .dk{display:block;margin-top:3px;font-weight:700}.nsc .ad .dk:empty{display:none}
+.nsc .ad .dk{display:block;margin-top:3px;font-weight:700}.nsc .ad .dk:empty{display:none}.nsc .ad .dk.adr{font-weight:500;font-size:11.5px;line-height:1.3;opacity:.92;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
 .nsc .ad{font-size:11.5px;line-height:1.3;opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* Premium दुकान: off-white card + सुनहरी किनारी + सुनहरा नाम */
 .nsc.bn{padding:0;overflow:hidden;position:relative;width:calc((min(560px,100vw) - 32px - 20px) / 3 * 2 + 10px);background:#eef2f8;border:2px solid #d6dde8}
@@ -477,7 +477,7 @@ function applyLang(){
       if(r.ok)(await r.json()).forEach(x=>{KM[x.slug]=kmTxt(x.latitude,x.longitude);});}
     document.querySelectorAll("#nst .dk[data-s]").forEach(e=>{e.textContent=KM[e.dataset.s]||"";});}catch(e){}}
   function cardHTML(b){
-    return (b._ban?bannerHTML(b):'<a class="nsc'+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">'+(b.category?ico(b.category)+' '+esc(b.category):'📍 '+esc(b.city||""))+'<span class="dk" data-s="'+esc(b.slug||"")+'">'+esc(KM[b.slug]||"")+'</span></span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
+    return (b._ban?bannerHTML(b):'<a class="nsc'+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new">'+((PB.lang&&PB.lang()==="hi")?"नई":"NEW")+'</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">'+(b.category?ico(b.category)+' '+esc(b.category):'📍 '+esc(b.city||""))+'<span class="dk adr">'+esc(String(b.address||"").trim())+'</span></span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
@@ -499,7 +499,7 @@ function applyLang(){
       const vw=document.getElementById("nsv").clientWidth;
       M.loop=t.scrollWidth>vw;                                /* स्क्रीन से ज़्यादा दुकानें: दो बार जोड़कर बिना रुके; कम: एक-एक बार, दाएँ से आकर बाएँ निकलती */
       if(M.loop){const o2=items().map(cardHTML).join("");t.innerHTML=o2+o2;}   /* logo / Premium पहले आ गए हों तो वे भी रहें */
-      const first=!M.per||M.per===1;measure();if(first&&!M.loop)M.p=M.vw;place();fillKm();
+      const first=!M.per||M.per===1;measure();if(first&&!M.loop)M.p=M.vw;place();
     });
   }
   function wire(){
@@ -537,7 +537,7 @@ function applyLang(){
   }
   function setCityTitle(city){
     const el=document.getElementById("nsT");if(!el)return;
-    el.textContent=city?("Shops in "+city):"Choose your city to see local shops";
+    el.textContent=(PB.lang&&PB.lang()==="hi")?"कच्छ की दुकानें":"Shops in Kutch";
   }
   let ALL_ROWS=[];
   async function load(){
@@ -554,16 +554,16 @@ function applyLang(){
   let RUN=0;
   async function refreshCityShops(){
     const run=++RUN,city=currentCity();setCityTitle(city);
-    let rows=ALL_ROWS.filter(b=>inCity(b,city)).slice(0,60);
+    let rows=ALL_ROWS.slice(0,60);   /* कच्छ की सारी दुकानें (शहर का filter नहीं) */
     if(rows.length&&window.PB_SITE&&PB_SITE.premium&&window.PBPlan){
       try{await PBPlan.load(rows.map(b=>b.slug).filter(Boolean));const gp=[];
         rows=rows.filter(b=>{const t=PBPlan.paid(b.slug)?PBPlan.tier(b.slug):"";if(t==="gold"||t==="platinum"){gp.push(Object.assign({_t:t,_ic:ico(b.category),_lg:PBPlan.has(b.slug,"logo")},b));return false;}return true;});
         if(run===RUN)document.dispatchEvent(new CustomEvent("pb-gp",{detail:gp}));}catch(e){}
     }else if(run===RUN)document.dispatchEvent(new CustomEvent("pb-gp",{detail:[]}));
     if(run!==RUN)return;
-    L=rows.slice(0,25);
+    L=rows.slice(0,60);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
-    if(!L.length){document.getElementById("nst").innerHTML=city?'<div class="nsc-empty">No shops found for this city yet.</div>':'';return;}   /* शहर नहीं चुना: ऊपर की लाइन ही काफ़ी */
+    if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">No shops found for this city yet.</div>';return;}   /* शहर नहीं चुना: ऊपर की लाइन ही काफ़ी */
     draw();if(!window.__pbStripOn){window.__pbStripOn=1;wire();start();}loadLogos();loadPrem();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);
