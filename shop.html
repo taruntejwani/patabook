@@ -355,7 +355,7 @@ const L=(hi,en)=>EN()?en:hi;
   const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
   const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);if(!pk||!document.body)return;
   window.__pbIntro=1;   /* पुराना intro दोबारा न चले */
-  const sk="pst_"+slug;try{if(sessionStorage.getItem(sk))return;sessionStorage.setItem(sk,"1");}catch(_){}   /* refresh / वापस आने पर नहीं; नया tab / नई बार खुलने पर फिर */
+  try{const nv=performance.getEntriesByType("navigation")[0],ty=nv?nv.type:"navigate";if(ty==="reload"||ty==="back_forward")return;}catch(_){}   /* refresh / Back से लौटने पर नहीं; search या लिंक से अंदर आने पर हर बार */
   const T=3,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
   e.innerHTML='<img alt="" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
   const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
