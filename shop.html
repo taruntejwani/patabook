@@ -389,7 +389,7 @@ const LOGO=()=>B&&PF("logo")&&IMG_RX.test(B.logo_url||"")?B.logo_url:"";
 const INI=()=>esc((String(B&&B.name||"").trim()[0]||"P").toUpperCase());
 /* plan (Silver / Gold / Platinum) में यह सुविधा ON है? — Admin → Plans */
 const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f)),TIER=()=>window.PBPlan?PBPlan.tier(slug):(PREM?"platinum":"free");
-const GALP=()=>PF("photos")?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
+const GALP=()=>[];   /* अलग Gallery हटा दी गई — अब सब कुछ "Product & Service" में */
 const PRODP=()=>PF("products")?(PRODS||[]).filter(p=>p&&p.name&&IMG_RX.test(p.img||"")):[];
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
 const listingUrl=()=>"business.html?slug="+encodeURIComponent(slug);
@@ -471,7 +471,7 @@ function render(){drawSoc();
     ["GST",gst?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
-  const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
+  const navs=[P.length&&["prods",L("Product और Service","Product & Service")],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
@@ -489,12 +489,12 @@ function render(){drawSoc();
        (PF("card")?'<button type="button" id="shareQa" class="isCard" data-pbh="share"><span>🪪</span>'+L("डिजिटल कार्ड","Digital Card")+'</button>':'<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>')+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',vis:''}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
-     (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
+     (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+L("Product और Service","Product & Service")+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
        '<div class="pcd"><button type="button" class="pim" data-pv="'+i+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+(p.size?'<span class="psz">'+esc(p.size)+'</span>':'')+
        (p.best?'<span class="pbs">⭐ '+L("सबसे ज़्यादा बिकता","Best seller")+'</span>':'')+(p.stock===false?'<span class="pout">'+L("अभी Stock में नहीं","Out of stock")+'</span>':'')+'</button>'+
        '<div class="pbd"><b>'+esc(p.name)+'</b>'+priceCard(p,L("कीमत पूछें","Ask price"))+
        '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'<section class="blk pbe-empty" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'products\')">➕ '+L("पहला product जोड़ें","Add your first product")+'</button></section>')+
-     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+' <small>('+G.length+')</small></h2>'+(G.some(u=>CAPS[u])?'<div class="galc">'+G.map((u,i)=>'<figure><button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="'+esc((CAPS[u]||"").slice(0,80))+'" loading="lazy"></button>'+(CAPS[u]?'<figcaption><span class="ct">'+esc(CAPS[u])+'</span>'+(CAPS[u].length>110?'<em>'+L("और पढ़ें","Read more")+'</em>':"")+'</figcaption>':"")+'</figure>').join("")+'</div>':'<div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div>')+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
+     
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
      '<section class="blk" id="vis"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div id="about" data-pbh="about">'+
