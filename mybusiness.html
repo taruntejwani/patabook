@@ -434,7 +434,7 @@ function posterDays(b,i){const P=PDAYS[b.slug],en=L()==="en";if(!P||!P.quota)ret
     '<div class="pdg">'+WD.map(w=>'<i>'+w+'</i>').join("")+cells+'</div>'+
     '<button type="button" class="pds" data-psv="'+i+'"'+(left<0?' disabled':'')+'>💾 '+(en?"Save days":"दिन Save करें")+'</button>'+
     (PMSG[b.slug]?'<div class="pdmsg">'+esc(PMSG[b.slug])+'</div>':'')+
-    '<small>'+(en?"Your poster shows only after PataBook approves it.":"Poster PataBook की मंज़ूरी के बाद ही दिखेगा।")+'</small></div>';}
+    '<small>'+(en?"Your poster goes live right after you add it. PataBook can remove it if it breaks the rules.":"Poster लगाते ही चालू हो जाता है। नियम तोड़ने वाला poster PataBook हटा सकता है।")+'</small></div>';}
 async function savePosterDays(i,btn){const b=ROWS[i],en=L()==="en",P=PDAYS[b.slug],S2=PSEL[b.slug];if(!P||!S2)return;btn.disabled=true;
   try{ME=await PBA.session();const days=[...S2].filter(d=>d>=P.today).sort();const r=await rpc("pb_poster_set",{p_slug:b.slug,p_days:days});
     PDAYS[b.slug]=await rpc("pb_poster_my",{p_slug:b.slug});delete PSEL[b.slug];PMSG[b.slug]=en?"✅ Saved":"✅ Save हो गया";}
