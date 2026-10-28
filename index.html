@@ -660,7 +660,7 @@ function applyLang(){
   document.addEventListener("pb-gp",e=>{GP=Array.isArray(e.detail)?e.detail:[];if(loaded)draw();});
   function draw(){const t=tk();if(!t)return;
     const city=String(document.getElementById("city")?.value||"").trim();
-    P=ALL.filter(b=>inCity(b,city));
+    P=ALL.slice();   /* पूरे Kutch के poster, शहर से नहीं छँटते */
     gdraw();
     t.innerHTML=P.length?P.map(slide).join(""):(loaded&&!GL.length?ph():"");
     document.getElementById("pdots").innerHTML=P.length>1?P.map(()=>"<i></i>").join(""):"";
