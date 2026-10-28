@@ -82,6 +82,7 @@
     ".pbe-rk{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.pbe-rk div{border:1.5px solid #ecdcb0;border-radius:16px;background:linear-gradient(180deg,#fffdf6,#fff6df);text-align:center;padding:10px 4px}.pbe-rk i{display:block;font-style:normal;font-size:22px}.pbe-rk b{display:block;font-size:21px;color:#123568;line-height:1.2;margin-top:2px}.pbe-rk small{display:block;font-size:11.5px;color:#5b6475;font-weight:700}" +
     ".pbe-gr{border:1px solid #eef1f6;border-radius:16px;padding:10px 10px 4px}.pbe-gr svg{width:100%;height:auto;display:block}.pbe-lg{display:flex;gap:14px;justify-content:center;font-size:12px;color:#5b6475;margin-top:8px}.pbe-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}" +
     ".pbe-hub.pbe-sc{align-items:center;padding:14px}.pbe-hub .pbe-sh{height:auto!important;max-height:80vh;max-width:460px;border-radius:22px;border:2px solid var(--pb-b,#cfe0fb)}.pbe-hub .pbe-tabs{display:none!important}.pbe-hub .pbe-bd{max-height:calc(80vh - 62px)}.pbe-hub .pbe-fr{height:62vh!important;min-height:0!important}" +
+    ".pbe-hub.big .pbe-sh{height:92vh!important;max-height:92vh;max-width:560px}.pbe-hub.big .pbe-bd{max-height:none;flex:1;min-height:0;overflow:hidden}.pbe-hub.big .pbe-fr{height:100%!important}" +
     ".pbe-hub .pbe-hd{background:var(--pb-g,#fff);border-bottom:1px solid var(--pb-b,#eef1f6)}.pbe-hub .pbe-hd b{color:var(--pb-c,#123568)}.pbe-hub .pbe-hd button.pbe-dn{background:rgba(255,255,255,.85);color:#1f2833;border:0;border-radius:999px;padding:7px 13px;font-weight:800}" +
     ".pbe-hub .pbe-b.p{background:var(--pb-g,#1a73e8)!important;color:var(--pb-c,#fff)!important;border:1.5px solid var(--pb-b,transparent)!important}.pbe-hub .pbe-b.p#pbeLs,.pbe-hub .pbe-b.p#pbePs{background:var(--pb-g,#1e9e57)!important}" +
     ".pbe-hub #pbeLs,.pbe-hub #pbePs,.pbe-hub #pbeSave,.pbe-hub #pbeVsv,.pbe-hub #pbeVv,.pbe-hub #pbeLgo{position:sticky;bottom:0;z-index:3;box-shadow:0 -8px 12px #fff}" +
@@ -129,12 +130,13 @@
   async function editProducts() {
     var cur = ""; try { cur = await rpc("pb_shop_label_get", { p_slug: O.slug }) || ""; } catch (x) {}
     var s = frame("🛍️ " + T("Product / Service बदलें", "Edit products / services"), "myproducts.html?slug=" + encodeURIComponent(O.slug), true);
+    if (HUB && HUB.sc) HUB.sc.classList.add("big");
     var bd = s.body, fr = bd.querySelector("iframe"); if (!fr) return;
     var bar = document.createElement("div"); bar.className = "pbe-lb";
-    bar.setAttribute("style", "flex:none;padding:9px 12px;background:#f6f1ff;border-bottom:1px solid #e1d8fb;font:13px system-ui");
+    bar.setAttribute("style", "flex:none;padding:6px 10px;background:#f6f1ff;border-bottom:1px solid #e1d8fb;font:13px system-ui");
     function paintBar(msg) {
-      bar.innerHTML = '<div style="color:#3b2a85;font-weight:700;margin-bottom:6px">🏷️ ' + T("यह हिस्सा पेज पर क्या कहलाए?", "What should this section be called?") + '</div><div style="display:flex;gap:8px">' +
-        ["product", "service", "both"].map(function (k) { var on = (cur || "both") === k; return '<button type="button" data-lb="' + k + '" style="flex:1;border:1.5px solid ' + (on ? "#6d3fe0" : "#d9cffa") + ';background:' + (on ? "#6d3fe0" : "#fff") + ';color:' + (on ? "#fff" : "#3b2a85") + ';border-radius:12px;padding:9px 4px;font:700 13px system-ui">' + (on ? "✔ " : "") + (k === "product" ? "Product" : k === "service" ? "Service" : "Product & Service") + '</button>'; }).join("") + '</div>' +
+      bar.innerHTML = '<div style="color:#3b2a85;font-weight:700;margin-bottom:4px;font-size:12px">🏷️ ' + T("यह हिस्सा पेज पर क्या कहलाए?", "What should this section be called?") + '</div><div style="display:flex;gap:6px">' +
+        ["product", "service", "both"].map(function (k) { var on = (cur || "both") === k; return '<button type="button" data-lb="' + k + '" style="flex:1;border:1.5px solid ' + (on ? "#6d3fe0" : "#d9cffa") + ';background:' + (on ? "#6d3fe0" : "#fff") + ';color:' + (on ? "#fff" : "#3b2a85") + ';border-radius:10px;padding:6px 3px;font:700 12.5px system-ui">' + (on ? "✔ " : "") + (k === "product" ? "Product" : k === "service" ? "Service" : "Product & Service") + '</button>'; }).join("") + '</div>' +
         (msg ? '<div style="margin-top:6px;color:#b3261e">' + msg + '</div>' : "");
     }
     paintBar(); bd.style.display = "flex"; bd.style.flexDirection = "column"; bd.insertBefore(bar, fr); fr.style.flex = "1"; fr.style.minHeight = "0"; fr.style.height = "auto";
@@ -614,6 +616,7 @@
       sc.querySelectorAll(".pbe-tabs button").forEach(function (b) { b.classList.toggle("on", b.dataset.t === k); });
       var tt0 = tabs.filter(function (x) { return x[0] === k; })[0], tte = sc.querySelector("#pbeTt"); if (tt0 && tte) tte.textContent = tt0[1];
       var on = sc.querySelector('.pbe-tabs button[data-t="' + k + '"]'); if (on && on.scrollIntoView) { try { on.scrollIntoView({ inline: "center", block: "nearest" }); } catch (e) {} }
+      sc.classList.remove("big"); h.body.style.display = ""; h.body.style.flexDirection = "";
       h.body.innerHTML = '<p style="color:#5b6475">…</p>'; h.body.style.padding = "";
       var t = tabs.filter(function (x) { return x[0] === k; })[0]; if (t) { try { t[2](a); } catch (e) { h.body.innerHTML = '<p class="pbe-er">' + T("खुल नहीं सका, फिर कोशिश करें।", "Could not open. Try again.") + '</p>'; } }
     };
