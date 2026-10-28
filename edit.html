@@ -8,13 +8,13 @@
 <link rel="icon" href="pin.png">
 <meta name="theme-color" content="#1a73e8">
 <script src="site-config.js"></script>
-<script>/* page के अंदर (✏️ Edit) खुलने पर ऊपर की पट्टी छिपाओ */window.PB_EMBED=/[?&]embed=1\b/.test(location.search);if(window.PB_EMBED)document.documentElement.classList.add("embed");</script>
+<script>/* page के अंदर (✏️ Edit) खुलने पर ऊपर की पट्टी छिपाओ */window.PB_EMBED=/[?&]embed=1\b/.test(location.search);if(window.PB_EMBED){document.documentElement.classList.add("embed");var _t=/[?&]t=(silver|gold|platinum)\b/.exec(location.search);if(_t)document.documentElement.classList.add("pt-"+_t[1]);}</script>
 <script>/* ✏️ किसी हिस्से की पेंसिल से खुला (?sec=about / visit): सिर्फ़ वही चीज़ें दिखें जो उस हिस्से में दिखती हैं */
 (function(){var m=location.search.match(/[?&]sec=(about|visit|numbers)\b/);if(!m)return;var k=m[1];
 var sh={about:["about","numbers"],visit:["visit"],numbers:["numbers"]}[k];
 var st=document.createElement("style");st.textContent='[data-sec]'+sh.map(function(x){return ':not([data-sec="'+x+'"])';}).join("")+'{display:none!important}';
 document.head.appendChild(st);})();</script>
-<style>.embed .top{display:none}.embed body{padding-top:6px}.embed #done .btn{display:none}</style>
+<style>.embed .top{display:none}.embed body{padding-top:6px}.embed #done .btn{display:none}.pt-silver #saveBtn{background:linear-gradient(135deg,#f3f5f8,#c3cbd6 50%,#8f9aa8);color:#1f2833}.pt-gold #saveBtn{background:linear-gradient(135deg,#f3d98a,#e7c36a 45%,#B58A2A);color:#3a2a08}.pt-platinum #saveBtn{background:linear-gradient(135deg,#8cc4f2,#3f6296 50%,#1c2539);color:#eef3ff}</style>
 <script src="pb-auth.js"></script>
 <script src="pb-imgcheck.js"></script>
 <style>
