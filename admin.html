@@ -30,6 +30,17 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .cnt{font-size:12.5px;color:var(--muted);padding:2px 2px 8px}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
 .card h3{font-size:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card.shop{padding:0;overflow:hidden}
+.card .hd{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;min-height:54px}
+.card .hd .nm{flex:1;min-width:0;font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .hd .tc{font-size:15px;flex:none}
+.card .hd .ar{flex:none;color:#98a2b3;transition:transform .25s;font-size:13px}
+.card.open .hd .ar{transform:rotate(180deg)}
+.card .bd{padding:0 14px 14px;border-top:1px solid var(--line)}
+.sw{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;padding:2px;cursor:pointer;font:inherit;font-size:12px;font-weight:800;color:#667085}
+.sw i{width:40px;height:24px;border-radius:99px;background:#d0d5dd;position:relative;transition:background .2s;display:block}
+.sw i:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:left .2s}
+.sw.on i{background:#3b2bb8}.sw.on i:after{left:19px}.sw.on{color:#3b2bb8}
 .st{font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px}
 .st.p{background:#fffaeb;color:#b54708}.st.a{background:#eaf2ff;color:#1a73e8}
 .meta{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}
@@ -300,13 +311,17 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     $('bOk').textContent = '✅ Approve' + (n ? ' (' + n + ')' : ''); $('bHold').textContent = '⏸ Pending' + (n ? ' (' + n + ')' : ''); $('bDel').textContent = '🗑 हटाएँ' + (n ? ' (' + n + ')' : '');
     document.querySelectorAll('#list .card').forEach(function (c) { var cb = c.querySelector('.pick'); if (cb) c.classList.toggle('sel', cb.checked); });
   }
+  var OPENS = {};
   function draw() {
     $('cnt').textContent = rows.length + ' दुकानें';
     var keep = {}; rows.forEach(function (b) { if (SEL[b.slug]) keep[b.slug] = 1; }); SEL = keep;
     $('list').innerHTML = rows.map(function (b, i) {
       var live = !!b.is_active, ph = String(b.phone || '').replace(/\D/g, '').slice(-10);
       var mapLink = (b.latitude != null && b.longitude != null) ? 'map.html?to=' + b.latitude + ',' + b.longitude + '&n=' + encodeURIComponent(b.name || '') : (b.address ? 'map.html?q=' + encodeURIComponent(b.address) + '&n=' + encodeURIComponent(b.name || '') : '');
-      return '<div class="card"><h3><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें">' + esc(b.name) + ' <span class="st ' + (live ? 'a">Live' : 'p">Pending') + '</span>' + (CODES[b.slug] ? ' <span class="bid">' + esc(CODES[b.slug]) + '</span>' : '') + '</h3>' +
+      var pOn = !!(PREMA && PREMA[b.slug]), tI = pOn ? ((TIERS.filter(function (t) { return t[0] === PMTIER[b.slug]; })[0] || [0, '💎'])[1]) : '';
+      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">Pending') + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') +
+        (PREMA ? '<button type="button" class="sw' + (pOn ? ' on' : '') + '" data-a="prem" data-i="' + i + '" role="switch" aria-checked="' + pOn + '" aria-label="Premium"><i></i>' + (pOn ? 'ON' : 'OFF') + '</button>' : '') + '<span class="ar">▼</span></div>' +
+        '<div class="bd"' + (OPENS[b.slug] ? '' : ' hidden') + '><h3 style="margin-top:10px">' + (CODES[b.slug] ? '<span class="bid">' + esc(CODES[b.slug]) + '</span>' : '') + '</h3>' +
         '<div class="meta">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '<br>👤 ' + esc(line(b.description, 'Owner') || '—') +
         (ph ? ' · 📞 <a href="tel:+91' + ph + '">' + ph + '</a> · <a href="https://wa.me/91' + ph + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
         ' · ' + (b.latitude != null ? '📍 location है' : '⚠ location नहीं') + '</div>' +
@@ -324,7 +339,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">' + (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 Premium') + ' ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
         (b.slug ? '<a class="lnk" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">प्रोफ़ाइल</a>' : '') +
         (mapLink ? '<a class="lnk" href="' + mapLink + '" target="_blank">मैप</a>' : '') +
-        '</div></div>';
+        '</div></div></div>';
     }).join('') || '<div class="msg"><p>कोई दुकान नहीं</p></div>';
     paintBulk();
   }
@@ -409,6 +424,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     addrSheet(items);
   };
   $('list').onclick = async function (e) {
+    var hd = e.target.closest('.hd');
+    if (hd && !e.target.closest('input,button,a')) {
+      var cd = hd.parentNode, sl = cd.querySelector('.pick').dataset.slug, was = cd.classList.contains('open');
+      document.querySelectorAll('#list .card.open').forEach(function (x) { x.classList.remove('open'); x.querySelector('.bd').hidden = true; });
+      OPENS = {}; if (!was) { cd.classList.add('open'); cd.querySelector('.bd').hidden = false; OPENS[sl] = 1; }
+      return;
+    }
     var b = e.target.closest('[data-a]'); if (!b) return;
     var r = rows[+b.dataset.i], a = b.dataset.a;
     if (a === 'prem') {
