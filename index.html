@@ -611,11 +611,15 @@ function applyLang(){
   function gcard(b){
     return '<a class="nsc pm pq pt-'+b._t+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'"><span class="bcl bcl-'+b._t+'"><small>'+b._t.toUpperCase()+' BUSINESS CARD</small></span><b>'+esc(b.name)+'</b>'+(b.category?'<span class="ad">'+esc(b.category)+'</span>':'')+'<span class="pqr" data-s="'+esc(b.slug||"")+'"></span></a>';}
   /* QR: pb-card.js का qr() इस्तेमाल (सिर्फ़ तब load होता है जब Gold/Platinum card दिखे) */
+  const SL={};   /* slug → छोटा link (patabook.in/नाम), दुकानदार ने बनाया हो तो */
   function gqr(){const els=[...document.querySelectorAll("#gpt .pqr")];if(!els.length)return;
-    const paint=()=>{if(!window.PBCard||!PBCard.qr)return;els.forEach(e=>{if(e.firstChild)return;try{const u="https://patabook.in/business.html?slug="+encodeURIComponent(e.dataset.s),Q=PBCard.qr(u),n=Q.length;let d="";for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(Q[y][x])d+="M"+(x+2)+" "+(y+2)+"h1v1h-1z";
-      e.innerHTML='<svg viewBox="0 0 '+(n+4)+' '+(n+4)+'" shape-rendering="crispEdges" role="img" aria-label="QR"><path fill="#0b2f73" d="'+d+'"/></svg>';}catch(_){}});};
-    if(window.PBCard&&PBCard.qr)return paint();
-    if(!window.__pbcLoad){const sc=document.createElement("script");sc.src="pb-card.js";sc.onload=()=>{window.__pbcDone=1;gqr();};document.head.appendChild(sc);window.__pbcLoad=1;}}
+    const paint=()=>{if(!window.PBCard||!PBCard.qr)return;els.forEach(e=>{const s=e.dataset.s,want=SL[s]?"https://patabook.in/"+SL[s]:"https://patabook.in/business.html?slug="+encodeURIComponent(s);if(e.dataset.u===want)return;
+      try{const Q=PBCard.qr(want),n=Q.length;let d="";for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(Q[y][x])d+="M"+(x+2)+" "+(y+2)+"h1v1h-1z";
+      e.innerHTML='<svg viewBox="0 0 '+(n+4)+' '+(n+4)+'" shape-rendering="crispEdges" role="img" aria-label="QR"><path fill="#0b2f73" d="'+d+'"/></svg>';e.dataset.u=want;}catch(_){}});};
+    if(!window.__pbcLoad){const sc=document.createElement("script");sc.src="pb-card.js";sc.onload=()=>gqr();document.head.appendChild(sc);window.__pbcLoad=1;}
+    paint();
+    [...new Set(els.map(e=>e.dataset.s))].filter(s=>s&&!(s in SL)).forEach(s=>{SL[s]="";
+      fetch(SBU+"/rest/v1/rpc/pb_link_of",{method:"POST",headers:H,body:JSON.stringify({p_slug:s})}).then(r=>r.ok?r.json():null).then(j=>{const l=j&&j.link;if(l&&/^[a-z0-9-]{3,60}$/i.test(l)){SL[s]=l;paint();}}).catch(()=>{});});}
   const G={i:0,drag:false,moved:0,on:false,tm:0,fx:0};
   /* नीचे की पट्टी: एक-एक पूरा pamphlet; 4 सेकंड रुकता है, फिर झट से अगला slide होकर आता है; उँगली से भी पलटा जा सकता है */
   function gdraw(){const w=document.getElementById("gpw"),t=document.getElementById("gpt"),pv=document.getElementById("pv");if(!w||!t)return;
