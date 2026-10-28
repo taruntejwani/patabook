@@ -447,7 +447,7 @@ function render(){drawSoc();
     ["GST",gst?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
-  const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("फ़ोटो","Photos")],["about",L("हमारे बारे में","About")],addr&&["visit",L("पता","Visit us")]].filter(Boolean);
+  const navs=[P.length&&["prods",L("Products","Products")],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+(G[0]?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
@@ -464,23 +464,23 @@ function render(){drawSoc();
        '<a data-pbh="addr" '+(dir?'href="'+esc(dir)+'"':'class="dis"')+'><span>🧭</span>'+L("रास्ता","Directions")+'</a>'+
        (PF("card")?'<button type="button" id="shareQa" class="isCard" data-pbh="share"><span>🪪</span>'+L("डिजिटल कार्ड","Digital Card")+'</button>':'<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>')+
      '</div>'+
-     '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',about:'about',visit:'addr'}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
+     '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',vis:''}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
      (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
        '<div class="pcd"><button type="button" class="pim" data-pv="'+i+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+(p.size?'<span class="psz">'+esc(p.size)+'</span>':'')+
        (p.best?'<span class="pbs">⭐ '+L("सबसे ज़्यादा बिकता","Best seller")+'</span>':'')+(p.stock===false?'<span class="pout">'+L("अभी Stock में नहीं","Out of stock")+'</span>':'')+'</button>'+
        '<div class="pbd"><b>'+esc(p.name)+'</b>'+(p.mrp?'<span class="pmr">'+rsF(p.mrp)+' <small>MRP</small></span>':'<span class="pmr" style="color:#5b6475;font-size:13px">'+L("कीमत पूछें","Ask price")+'</span>')+
        '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'<section class="blk pbe-empty" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'products\')">➕ '+L("पहला product जोड़ें","Add your first product")+'</button></section>')+
-     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
+     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
-     '<section class="blk" data-pbh="about" id="about"><h2>🏪 '+L("हमारे बारे में","About us")+'</h2>'+
+     '<section class="blk" id="vis"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div id="about" data-pbh="about">'+
        (rows.length||email||web||mobRow()?'<div class="rows">'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
        mobRow()+
        (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)?'<div class="row" data-pbh="web"><span>Email</span><b><a href="mailto:'+esc(email)+'">'+esc(email)+'</a></b></div>':'')+
        (web?'<div class="row" data-pbh="web"><span>Website</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+'</div>'
-       :'<p class="empty">'+L("दुकानदार ने अभी और जानकारी नहीं जोड़ी है।","The owner hasn't added more details yet.")+'</p>')+'</section>'+
-     (addr?'<section class="blk" data-pbh="addr" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
-       staticMap(b,dir)+'</section>':'')+
+       :'<p class="empty">'+L("दुकानदार ने अभी और जानकारी नहीं जोड़ी है।","The owner hasn't added more details yet.")+'</p>')+'</div>'+
+     (addr?'<div data-pbh="addr" id="visit" style="margin-top:14px"><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
+       staticMap(b,dir)+'</div>':'')+'</section>'+
      '<section class="blk" data-pbh="near" id="near" hidden><h2>📍 '+L("पास की दूसरी दुकानें","Other shops nearby")+'</h2><div class="near" id="nearBox"></div></section>'+
    '</div>'+
    '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
