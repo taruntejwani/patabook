@@ -68,6 +68,10 @@
     ".pbe-hd{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid #eef1f6}.pbe-hd b{flex:1;font-size:16.5px;color:#123568}.pbe-hd button.pbe-dn{border-radius:999px;border:0;background:#12141c;color:#fff;font:inherit;font-weight:800;font-size:14px;padding:8px 14px;cursor:pointer}" +
     ".pbe-bd{overflow:auto;padding:14px 16px calc(18px + env(safe-area-inset-bottom));font-size:14.5px;line-height:1.5}" +
     ".pbe-fr{width:100%;height:78vh;border:0;display:block}" +
+    ".pbe-hub .pbe-sh{height:92vh}.pbe-hub .pbe-bd{flex:1;min-height:0}" +
+    ".pbe-tabs{flex:none;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:9px 14px;border-bottom:1px solid #eef1f6;background:#fafbfe}.pbe-tabs::-webkit-scrollbar{display:none}" +
+    ".pbe-tabs button{flex:none;border:1px solid #cfe0fb;background:#fff;color:#0b3a94;border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer}.pbe-tabs button.on{background:#0b3a94;color:#fff;border-color:#0b3a94}" +
+    ".pbe-hub .pbe-fr{height:100%;min-height:62vh}" +
     ".pbe-row{display:flex;align-items:center;gap:12px;border:1px solid #e4eaf5;border-radius:14px;padding:12px;margin-bottom:10px}.pbe-row .t{flex:1;min-width:0}.pbe-row small{display:block;color:#5b6475;font-size:12.5px}" +
     ".pbe-sw{flex:none;width:52px;height:30px;border-radius:999px;border:0;background:#c9ced8;position:relative;cursor:pointer}.pbe-sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}.pbe-sw.on{background:#1e9e57}.pbe-sw.on i{left:25px}" +
     ".pbe-b{display:block;width:100%;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;margin-top:8px;text-align:center}.pbe-b.p{background:#1a73e8;color:#fff}.pbe-b.s{background:#f1f4f9;color:#12141c}.pbe-b.d{background:#fdecea;color:#c5221f}" +
@@ -81,7 +85,8 @@
   document.head.appendChild(css);
 
   /* ---------- sheet ---------- */
-  function sheet(title, html, onClose) {
+  function sheet(title, html, onClose) { return HUB && HUB.active ? hubSheet(title, html, onClose) : sheet0(title, html, onClose); }
+  function sheet0(title, html, onClose) {
     var sc = document.createElement("div"); sc.className = "pbe-sc";
     sc.innerHTML = '<div class="pbe-sh"><div class="pbe-hd"><b>' + title + '</b><button type="button" aria-label="Done" class="pbe-dn">✔ ' + T("Done", "Done") + '</button></div><div class="pbe-bd">' + html + '</div></div>';
     var o = { el: sc, body: sc.querySelector(".pbe-bd"), dirty: false, changed: false };
@@ -414,7 +419,56 @@
       }
     };
   }
-  var ACT = { link: editLink,  logo: editLogo, products: editProducts, photos: editPhotos, details: function () { editDetails(""); }, about: function () { editDetails("", "about"); }, visit: function () { editDetails("", "visit"); }, numbers: editNumbers, vacancy: editVacancy, visible: editVisible, report: editReport };
+  /* ✏️ एक ही Edit विंडो: ऊपर टैब (लोगो · प्रोडक्ट · गैलरी · जानकारी · नंबर · लिंक · क्या दिखे); हर टैब में वही पुराना editor */
+  var HUB = null;
+  function hubTabs() {
+    return [["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("प्रोडक्ट", "Products"), editProducts], ["photos", "🖼️ " + T("गैलरी", "Gallery"), editPhotos],
+      ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
+      ["link", "🔗 " + T("लिंक", "Link"), editLink], ["visible", "👁️ " + T("क्या दिखे", "Visibility"), editVisible]];
+  }
+  function hubSheet(title, html, onClose) {
+    var h = HUB, o = { el: h.sc, body: h.body, dirty: false, changed: false };
+    if (h.cur && h.cur.cleanup) h.cur.cleanup();
+    h.body.innerHTML = html; h.body.style.padding = "";
+    function onMsg(e) {
+      if (e.origin !== location.origin || !e.data) return;
+      if (e.data.pbEdit === "saved") { h.gone(); location.reload(); }
+      else if (e.data.pbEdit === "dirty") o.dirty = true;
+      else if (e.data.pbEdit === "clean") o.dirty = false;
+    }
+    window.addEventListener("message", onMsg);
+    o.cleanup = function () { window.removeEventListener("message", onMsg); };
+    o.remove = function () { o.cleanup(); if (h.cur === o) h.body.innerHTML = ""; };
+    o.close = function (force) { h.close(force); };
+    if (onClose) h.reload = true;
+    h.cur = o; return o;
+  }
+  function openHub(key, arg) {
+    var tabs = hubTabs();
+    if (HUB && HUB.active) { HUB.go(key, arg); return; }
+    var sc = document.createElement("div"); sc.className = "pbe-sc pbe-hub";
+    sc.innerHTML = '<div class="pbe-sh"><div class="pbe-hd"><b>✏️ ' + T("अपनी दुकान बदलें", "Edit your shop") + '</b><button type="button" class="pbe-dn">✔ Done</button></div><div class="pbe-tabs">' +
+      tabs.map(function (t) { return '<button type="button" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join("") + '</div><div class="pbe-bd"></div></div>';
+    var h = HUB = { sc: sc, body: sc.querySelector(".pbe-bd"), active: true, cur: null, reload: false };
+    h.gone = function () { if (h.cur && h.cur.cleanup) h.cur.cleanup(); sc.remove(); h.active = false; HUB = null; };
+    h.close = function (force) {
+      if (!force && h.cur && h.cur.dirty && !confirm(T("बदलाव Save नहीं हुए। फिर भी बंद करें?", "Changes are not saved. Close anyway?"))) return;
+      var rl = h.reload; h.gone(); if (rl) location.reload();
+    };
+    h.go = function (k, a) {
+      if (h.cur && h.cur.dirty && !confirm(T("इस टैब के बदलाव Save नहीं हुए। फिर भी दूसरे टैब पर जाएँ?", "This tab has unsaved changes. Switch anyway?"))) return;
+      if (h.cur && h.cur.cleanup) h.cur.cleanup(); h.cur = null;
+      sc.querySelectorAll(".pbe-tabs button").forEach(function (b) { b.classList.toggle("on", b.dataset.t === k); });
+      var on = sc.querySelector('.pbe-tabs button[data-t="' + k + '"]'); if (on && on.scrollIntoView) { try { on.scrollIntoView({ inline: "center", block: "nearest" }); } catch (e) {} }
+      h.body.innerHTML = '<p style="color:#5b6475">…</p>'; h.body.style.padding = "";
+      var t = tabs.filter(function (x) { return x[0] === k; })[0]; if (t) { try { t[2](a); } catch (e) { h.body.innerHTML = '<p class="pbe-er">' + T("खुल नहीं सका, फिर कोशिश करें।", "Could not open. Try again.") + '</p>'; } }
+    };
+    sc.querySelector(".pbe-dn").onclick = function () { h.close(); };
+    sc.addEventListener("click", function (e) { if (e.target === sc) h.close(); var b = e.target.closest && e.target.closest("[data-t]"); if (b) h.go(b.dataset.t); });
+    document.body.appendChild(sc);
+    h.go(key, arg);
+  }
+  var ACT = { link: function () { openHub("link"); }, logo: function () { openHub("logo"); }, products: function () { openHub("products"); }, photos: function () { openHub("photos"); }, details: function () { openHub("details"); }, about: function () { openHub("details", "about"); }, visit: function () { openHub("details", "visit"); }, numbers: function () { openHub("numbers"); }, vacancy: editVacancy, visible: function () { openHub("visible"); }, report: editReport };
 
   /* ---------- pencils ---------- */
   var MAP = {
