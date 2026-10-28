@@ -358,8 +358,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
     <div class="gpw" id="gpw" hidden><div class="nsv" id="gpv"><div class="nst" id="gpt"></div></div><div class="gdots" id="gdots" aria-hidden="true"></div></div>
   </section>
 
-  <a class="hsbtn" href="homeservices.html"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b id="hsT">Home Services</b><small id="hsS">Electrician, Plumber, AC Repair घर पर बुलाएं</small></span><span aria-hidden="true" class="go">›</span></a>
-  <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:10px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / Jobs</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
+  <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:16px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / Jobs</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
 
 
   <section class="results" id="results"></section>
@@ -388,7 +387,7 @@ function applyLang(){
   PB.apply();
   drawCats();drawDrawer();
   {const jb=document.getElementById("jobsBtn");if(jb)jb.hidden=!(window.PB_SITE&&PB_SITE.jobs);}
-  {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / Jobs";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";document.getElementById("hsS").textContent=en?"Call an Electrician, Plumber or AC Repair to your home":"Electrician, Plumber, AC Repair घर पर बुलाएं";}
+  {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / Jobs";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";}
 }
 /* ---- नई 25 दुकानें: एक-एक करके अपने-आप slide (नई दुकान आते ही सबसे पुरानी हट जाती है) ---- */
 (function(){
@@ -935,7 +934,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   function draw(){
     var n=document.getElementById("qcat");if(!n||typeof SUBS==="undefined")return;
     var T=function(k,d){try{var v=PB.t(k);return v&&v!==k?v:d}catch(e){return d}};
-    n.innerHTML=SUBS.map(function(c){return '<a href="category.html?cat='+encodeURIComponent(c[0])+'"><i aria-hidden="true">'+c[1]+'</i>'+T("c_"+c[0],c[0])+'</a>';}).join("");
+    n.innerHTML=SUBS.filter(function(c){return c[0]==="Home"}).concat(SUBS.filter(function(c){return c[0]!=="Home"})).map(function(c){return '<a href="category.html?cat='+encodeURIComponent(c[0])+'"><i aria-hidden="true">'+c[1]+'</i>'+T("c_"+c[0],c[0])+'</a>';}).join("");
   }
   draw();if(window.PB&&PB.onChange)PB.onChange(draw);
 })();
