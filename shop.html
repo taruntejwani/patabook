@@ -290,7 +290,10 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 html body .hero{background:linear-gradient(160deg,#3a2a08,#8a6417)!important;color:#fff!important;border:0!important;min-height:230px;display:flex;align-items:flex-end}
 html.t-platinum body .hero{background:linear-gradient(160deg,#0d1730,#2c4272)!important}
 html.t-silver body .hero{background:linear-gradient(160deg,#394250,#8591a1)!important}
-.hero .bg{display:block!important;opacity:.6!important;filter:none!important}.hero .bg.cvr{opacity:1!important}
+.hero .bg{display:block!important;opacity:.6!important;filter:none!important}
+.cvbar{display:block;width:100%;aspect-ratio:16/9;max-height:360px;overflow:hidden;background:#0d0d10}.cvbar img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+html body .hero.hascv{min-height:0!important}.hero.hascv::after{display:none!important}html body .hero.hascv .wrap{padding-top:18px!important;padding-bottom:18px!important;align-items:center!important}
+
 .hero::after{display:block!important;content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.72) 100%)!important}
 .hero .wrap{width:100%;align-items:flex-end!important;padding-top:70px!important;padding-bottom:18px!important}
 .hname h1{-webkit-text-fill-color:#fff!important;color:#fff!important;font-size:26px!important;text-shadow:0 2px 8px rgba(0,0,0,.45)}
@@ -502,7 +505,8 @@ function render(){drawSoc();
   ].filter(r=>r[1]);
   const navs=[P.length&&["prods",SECN()],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
-   '<div class="hero">'+((COVER||G[0])?'<div class="bg'+(COVER?' cvr':'')+'" data-pbh="photos" style="background-image:url(\''+esc(COVER||G[0])+'\')"></div>':'')+'<div class="wrap">'+
+   (COVER?'<div class="cvbar" data-pbh="photos"><img src="'+esc(COVER)+'" alt="" decoding="async"></div>':'')+
+   '<div class="hero'+(COVER?' hascv':'')+'">'+((!COVER&&G[0])?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'" data-pbh="logo">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
