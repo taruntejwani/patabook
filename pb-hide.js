@@ -2,7 +2,7 @@
    दुकान की जानकारी में line:  Hide: prods,photos,...   (जो key इस line में है, वह हिस्सा public से छिपा)
    page में हर हिस्से पर data-pbh="key" लगा है। Edit mode (.pbe-on) में मालिक को छिपे हिस्से धुंधले दिखते हैं। */
 (function () {
-  var KEYS = ["prods", "photos", "about", "hours", "addr", "gst", "web", "vac", "near", "share"];
+  var KEYS = ["prods", "photos", "about", "hours", "addr", "gst", "web", "vac", "near", "share", "logo"];
   var st = document.createElement("style"); document.head.appendChild(st);
   function parse(desc) {
     var m = String(desc || "").match(/^Hide:\s*(.+)$/mi), s = {};

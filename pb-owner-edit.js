@@ -409,12 +409,13 @@
     ["hours", "🕘", "खुलने-बंद होने का समय", "Opening hours"], ["addr", "📍", "पता और Directions", "Address & directions"],
     ["gst", "🧾", "GST Registered वाला निशान", "GST Registered badge"], ["web", "🌐", "Email / Website", "Email / Website"],
     ["vac", "💼", "Vacancy वाली पट्टी", "Vacancy strip"], ["near", "🏬", "आस-पास की दुकानें", "Nearby shops"],
-    ["share", "📤", "“दोस्त को भेजें” और Visiting card", "“Send to friend” & visiting card"]
+    ["share", "📤", "“दोस्त को भेजें” और Visiting card", "“Send to friend” & visiting card"],
+    ["logo", "🖼️", "Logo", "Logo"]
   ];
   function editVisible() {
     var H = {}, cur = window.PBHide ? PBHide.cur() : {}; Object.keys(cur).forEach(function (k) { H[k] = 1; });
     var s = sheet("👁️ " + T("Public को क्या दिखे", "What customers see"),
-      '<p class="pbe-note">' + T("🟢 चालू = ग्राहक को दिखेगा · ⚪ बंद = ग्राहक को नहीं दिखेगा। दुकान का नाम, Logo, Call / WhatsApp हमेशा दिखेंगे।", "🟢 ON = customers see it · ⚪ OFF = hidden. Shop name, logo, Call / WhatsApp always show.") + '</p>' +
+      '<p class="pbe-note">' + T("🟢 चालू = ग्राहक को दिखेगा · ⚪ बंद = ग्राहक को नहीं दिखेगा। दुकान का नाम, Call / WhatsApp हमेशा दिखेंगे।", "🟢 ON = customers see it · ⚪ OFF = hidden. Shop name, Call / WhatsApp always show.") + '</p>' +
       VIS.map(function (v) { return '<div class="pbe-row"><div class="t"><b>' + v[1] + ' ' + T(v[2], v[3]) + '</b></div><button type="button" class="pbe-sw' + (H[v[0]] ? "" : " on") + '" data-k="' + v[0] + '" aria-label="Switch"><i></i></button></div>'; }).join("") +
       '<button type="button" class="pbe-b p" id="pbeVsv">✔ ' + T("Save करें", "Save") + '</button><div class="pbe-er" id="pbeVer"></div>');
     s.body.querySelectorAll("[data-k]").forEach(function (b) { b.onclick = function () { b.classList.toggle("on"); if (b.classList.contains("on")) delete H[b.dataset.k]; else H[b.dataset.k] = 1; s.dirty = true; }; });

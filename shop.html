@@ -489,7 +489,7 @@ function render(){drawSoc();
   const wa=waNum(),ph=phNum();
   if(window.PBHide)PBHide.apply(b.description);
   /* ऊपर की पट्टी */
-  document.getElementById("tb").innerHTML=(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<span class="ini">'+INI()+'</span>')+'<b>'+esc(b.name)+'</b>';
+  document.getElementById("tb").innerHTML='<span data-pbh="logo" style="display:contents">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<span class="ini">'+INI()+'</span>')+'</span>'+'<b>'+esc(b.name)+'</b>';
   /* हिस्से */
   const rows=[
     [L("बिज़नेस का प्रकार","Business type"),line(b,"Type")],
@@ -503,7 +503,7 @@ function render(){drawSoc();
   const navs=[P.length&&["prods",SECN()],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    '<div class="hero">'+((COVER||G[0])?'<div class="bg'+(COVER?' cvr':'')+'" data-pbh="photos" style="background-image:url(\''+esc(COVER||G[0])+'\')"></div>':'')+'<div class="wrap">'+
-     '<div class="hlogo'+(PREM?' gold':'')+'">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
+     '<div class="hlogo'+(PREM?' gold':'')+'" data-pbh="logo">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
        '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Digital Silver Card",gold:"👑 Digital Gold Card",platinum:"💎 Digital Platinum Card"}[TIER()]||"👑 Premium")+'</span>':'')+
