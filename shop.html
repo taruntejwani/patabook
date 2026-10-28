@@ -234,6 +234,48 @@ html.t-silver .num.dir a.d,html.t-platinum .num.dir a.d{background:#123568;color
 .pmr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.4em}
 .pbig{background:#fff}
 .pbe-empty{display:none}.pbe-on .pbe-empty{display:block}.pbe-add{display:block;width:100%;border:2px dashed #e0b84a;background:#fffaf0;color:#7a4b00;border-radius:14px;padding:16px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+
+/* 💳 Premium Business Profile (v48): visiting-card जैसा साफ़ लेआउट — सफ़ेद, navy, हल्का silver/tier accent */
+html body{background:#fff!important}
+.top{background:rgba(255,255,255,.96)!important;border-bottom:1px solid var(--goldline)!important}
+.hero{background:#fff!important;border:0!important;border-top:3px solid var(--gold1)!important;border-bottom:1px solid var(--goldline)!important;color:var(--ink)}
+.hero .bg,.hero::after{display:none!important}
+.hero .wrap,.hero .wrap{flex-direction:row!important;text-align:left!important;gap:14px!important;padding-top:16px!important;padding-bottom:16px!important;align-items:center}
+.hlogo img,.hlogo .ini{width:78px!important;height:78px!important;border-radius:18px!important;box-shadow:0 0 0 1px var(--goldline)!important}
+.hlogo.gold img,.hlogo.gold .ini{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--gold1)!important}
+.hlogo .crn{width:30px!important;height:30px!important;right:-9px!important;top:-9px!important;filter:none!important}
+.hlogo .ini{background:linear-gradient(160deg,#1d4a96,#0b2f73)!important}
+.hname h1{font-size:22px!important;line-height:1.2;letter-spacing:0;background:none!important;-webkit-text-fill-color:#0b2f73!important;color:#0b2f73!important}
+.hname .sub{margin-top:3px;font-size:13.5px;color:var(--muted)!important}
+.chips{justify-content:flex-start!important;gap:6px;margin-top:8px}
+.chip{background:#fff!important;border:1px solid var(--goldline)!important;color:#3b4660!important;padding:3px 10px;font-size:12px;box-shadow:none!important}
+.chip.op{background:#e8f6ed!important;color:#137333!important;border-color:#bfe3cb!important}.chip.cl{background:#fdecea!important;color:#b42318!important;border-color:#f3c5c0!important}
+.chip.gold{background:linear-gradient(180deg,#fff,var(--cream2))!important;border:1px solid var(--gold1)!important;color:var(--gold3)!important;font-weight:800;letter-spacing:.02em}
+@media(max-width:380px){.hlogo img,.hlogo .ini{width:64px!important;height:64px!important;border-radius:15px!important}.hname h1{font-size:19px!important}}
+.qa{grid-auto-flow:row!important;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px!important}
+.qa a,.qa button{box-shadow:none!important;background:#fff!important;border:1px solid var(--goldline)!important;color:#0b2f73!important;border-radius:14px}
+.qa .pri{grid-column:span 1;flex-direction:row;justify-content:center;gap:8px;padding:14px 6px;font-size:16px;font-weight:800;border:0!important;color:#fff!important}
+.qa .pri span{font-size:19px}
+.qa .pri.c{background:#0b2f73!important}.qa .pri.w{background:#1e9e57!important}
+.qa a:not(.pri),.qa button:not(.pri){flex-direction:row;justify-content:center;gap:6px;padding:9px 6px;font-size:13.5px}
+.qa a:not(.pri) span,.qa button span{font-size:16px}
+.qa .dis{opacity:.4!important;filter:none!important}
+.snav{background:rgba(255,255,255,.96)!important;border-bottom:1px solid var(--goldline);padding:10px 0 8px}
+.snav a{background:#fff!important;border-color:var(--goldline)!important;color:#3b4660!important;font-size:13px;padding:6px 13px}
+html body .snav a.on{background:#0b2f73!important;color:#fff!important;border-color:#0b2f73!important}
+section.blk{background:#fff!important;border:1px solid var(--goldline)!important;box-shadow:none!important;border-radius:14px;padding:16px 14px;margin:10px 0 12px}
+h2{color:#0b2f73!important;font-size:17px;margin-bottom:12px}
+.addr,.num,.pcd,.near a{background:#fff}
+.shr.crd{background:#fff!important;border:1px solid var(--goldline)!important;border-radius:14px;padding:11px 12px;margin:0 0 10px}
+html body .shr.crd .ic,html body .shr.crd .go{background:#0b2f73!important;color:#fff!important}
+.shr.crd .ic{width:38px;height:38px;font-size:19px;border-radius:12px}
+html body .num a,html body .vbtn a.p{background:#0b2f73!important;color:#fff!important;border-color:#0b2f73!important}
+html body .num a.w{background:#1e9e57!important}
+.dock{background:rgba(255,255,255,.97)!important;border-top:1px solid var(--goldline)!important;padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important}
+.dock .in{gap:8px}
+html body .dock a{background:#0b2f73!important;color:#fff!important;padding:11px 8px;font-size:14.5px;border-radius:12px}
+html body .dock a.w{background:#1e9e57!important}
+body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 </style>
 </head><body>
 
@@ -386,10 +428,10 @@ function render(){drawSoc();
      '</div></div></div>'+
    '<div class="wrap">'+
      '<div class="qa">'+
-       '<a '+(ph?'href="tel:'+esc(ph)+'"':'class="dis"')+'><span>📞</span>'+L("Call","Call")+'</a>'+
-       '<a '+(wa?'href="https://wa.me/'+wa+'" target="_blank" rel="noopener"':'class="dis"')+'><span>💬</span>WhatsApp</a>'+
+       '<a '+(ph?'class="pri c" href="tel:'+esc(ph)+'"':'class="pri c dis"')+'><span>📞</span>'+L("Call करें","Call Now")+'</a>'+
+       '<a '+(wa?'class="pri w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener"':'class="pri w dis"')+'><span>💬</span>WhatsApp</a>'+
        '<a data-pbh="addr" '+(dir?'href="'+esc(dir)+'"':'class="dis"')+'><span>🧭</span>'+L("रास्ता","Directions")+'</a>'+
-       '<button type="button" id="shareQa"><span>📤</span>'+L("पता भेजें","Share Address")+'</button>'+
+       '<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>'+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',about:'about',visit:'addr'}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
      (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
@@ -399,9 +441,8 @@ function render(){drawSoc();
        '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'<section class="blk pbe-empty" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'products\')">➕ '+L("पहला product जोड़ें","Add your first product")+'</button></section>')+
      (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+' <small>('+G.length+')</small></h2><div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div></section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("फ़ोटो","Photos")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
      (addr?'<section class="blk" data-pbh="addr" id="visit"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
-       staticMap(b,dir)+'<div class="vbtn">'+(dir?'<a class="p" href="'+esc(dir)+'">🧭 '+L("रास्ता देखें","Directions")+'</a>':'')+'</div></section>':'')+
+       staticMap(b,dir)+'</section>':'')+
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
-     '<a class="shr" data-pbh="share" id="waShare" href="'+esc(waLink(b,window.PBHide&&PBHide.has('addr')?'':addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+L("दोस्त को पता और रास्ता भेजें","Send address & directions to a friend")+'</b><small>'+L("पता और map पर रास्ते का link, WhatsApp पर","Address + map route link on WhatsApp")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></a>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
      '<section class="blk" data-pbh="about" id="about"><h2>🏪 '+L("हमारे बारे में","About us")+'</h2>'+
        (rows.length||email||web||mobRow()?'<div class="rows">'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
@@ -430,7 +471,7 @@ function render(){drawSoc();
   const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
   document.getElementById("shareQa").onclick=()=>{window.open(waLink(b,window.PBHide&&PBHide.has("addr")?"":addr),"_blank","noopener");};
   document.getElementById("repBtn").onclick=openReport;
-  wireDir(b,addr,dir);const ws=document.getElementById("waShare");if(ws)ws.onclick=()=>{ws.href=waLink(b,addr);};drawOwn();
+  wireDir(b,addr,dir);drawOwn();
   if(document.getElementById("cardBtn"))document.getElementById("cardBtn").onclick=()=>{if(!window.PBCard)return;PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,tier:(window.PBPlan&&PBPlan.paid(b.slug)?PBPlan.tier(b.slug):""),phone:"",code:b.business_code||"",visitor:true});};
   drawVacFlag();drawNear();
   placeMap();spy();
