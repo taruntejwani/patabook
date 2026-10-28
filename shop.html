@@ -350,6 +350,19 @@ const slug=new URLSearchParams(location.search).get("slug")||"";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const EN=()=>!!(window.PB&&PB.lang&&PB.lang()!=="hi");
 const L=(hi,en)=>EN()?en:hi;
+/* 🖼️ दुकान का अपना poster सबसे पहले: पेज खुलते ही, data आने से पहले — profile / "लोड हो रहा है" की झलक नहीं दिखती */
+(function(){try{
+  const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
+  const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);if(!pk||!document.body)return;
+  window.__pbIntro=1;const T=5,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
+  e.innerHTML='<img alt="" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
+  const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
+  const x=()=>{if(done)return;done=1;clearInterval(tm);e.classList.add("out");setTimeout(()=>{if(e.parentNode)e.remove();},450);};
+  const lab=()=>{sk2.textContent=L("छोड़ें","Skip")+" "+n+" ›";};lab();
+  const go=()=>{if(tm)return;bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
+  im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2500);
+  e.onclick=x;document.body.appendChild(e);
+}catch(_){}})();
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 const IMG_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
 const rsF=n=>n?"₹"+Number(n).toLocaleString("en-IN"):"";
