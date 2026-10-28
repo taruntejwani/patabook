@@ -118,7 +118,25 @@
     var tt = sec === "about" ? "🏪 " + T("हमारे बारे में — बदलें", "About us — edit") : sec === "visit" ? "📍 " + T("पता और नक्शा — बदलें", "Address & map — edit") : "🏪 " + T("जानकारी बदलें", "Edit details");
     frame(tt, "edit.html?slug=" + encodeURIComponent(O.slug) + "&embed=1" + (focus ? "&focus=" + focus : "") + (sec ? "&sec=" + sec : ""), false);
   }
-  function editProducts() { frame("🛍️ " + T("Products बदलें", "Edit products"), "myproducts.html?slug=" + encodeURIComponent(O.slug), true); }
+  /* 🏷️ यह हिस्सा "Product" कहलाए या "Service" — दुकानदार चुनता है; शॉप पेज पर वही नाम दिखता है */
+  async function editProducts() {
+    var cur = ""; try { cur = await rpc("pb_shop_label_get", { p_slug: O.slug }) || ""; } catch (x) {}
+    var s = frame("🛍️ " + T("Product / Service बदलें", "Edit products / services"), "myproducts.html?slug=" + encodeURIComponent(O.slug), true);
+    var bd = s.body, fr = bd.querySelector("iframe"); if (!fr) return;
+    var bar = document.createElement("div"); bar.className = "pbe-lb";
+    bar.setAttribute("style", "flex:none;padding:9px 12px;background:#f6f1ff;border-bottom:1px solid #e1d8fb;font:13px system-ui");
+    function paintBar(msg) {
+      bar.innerHTML = '<div style="color:#3b2a85;font-weight:700;margin-bottom:6px">🏷️ ' + T("यह हिस्सा पेज पर क्या कहलाए?", "What should this section be called?") + '</div><div style="display:flex;gap:8px">' +
+        ["product", "service"].map(function (k) { var on = cur === k; return '<button type="button" data-lb="' + k + '" style="flex:1;border:1.5px solid ' + (on ? "#6d3fe0" : "#d9cffa") + ';background:' + (on ? "#6d3fe0" : "#fff") + ';color:' + (on ? "#fff" : "#3b2a85") + ';border-radius:12px;padding:9px;font:700 14px system-ui">' + (on ? "✔ " : "") + (k === "product" ? "Product" : "Service") + '</button>'; }).join("") + '</div>' +
+        (msg ? '<div style="margin-top:6px;color:#b3261e">' + msg + '</div>' : "");
+    }
+    paintBar(); bd.style.display = "flex"; bd.style.flexDirection = "column"; bd.insertBefore(bar, fr); fr.style.flex = "1"; fr.style.minHeight = "0"; fr.style.height = "auto";
+    bar.onclick = async function (e) {
+      var b = e.target.closest("[data-lb]"); if (!b || b.dataset.lb === cur) return; var v = b.dataset.lb;
+      try { await rpc("pb_shop_label_set", { p_slug: O.slug, p_label: v }); cur = v; if (HUB) HUB.reload = true; paintBar(); }
+      catch (x) { paintBar(T("अभी यह सुविधा चालू नहीं हुई है।", "This is not switched on yet.")); }
+    };
+  }
 
   function pickFile(cb) { var i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.onchange = function () { if (i.files && i.files[0]) cb(i.files[0]); }; i.click(); }
   async function upload(blob, name) {
