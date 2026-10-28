@@ -517,7 +517,7 @@ function drawQa(){
   else if(s.k==="locked")need=PBA.loginUrl("business.html?slug="+encodeURIComponent(slug));
   const ph2=s.k==="ok"?staffNo("Phone2"):"";
   const t=(href,ic,lb,cls,ext)=>href?'<a class="'+(cls||"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':'')+'><i>'+ic+'</i><b>'+lb+'</b></a>':'<a class="dis '+(cls||"")+'" aria-disabled="true"><i>'+ic+'</i><b>'+lb+'</b></a>';
-  const callLb=(en?"Call":"कॉल")+(ph?'<small>'+ph+'</small>':''),waLb='WhatsApp<small>'+(en?"Send message":"संदेश भेजें")+'</small>';
+  const callLb=(en?"Call":"कॉल"),waLb='WhatsApp<small>'+(en?"Send message":"संदेश भेजें")+'</small>';
   q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता (Directions)","qd");
   drawDock(ph,wa,en);
   if(mr){const L2=[];if(/^\d{10}$/.test(ph))L2.push('<a href="tel:+91'+ph+'">'+PBI("call")+'+91 '+ph+'</a>');if(/^\d{10}$/.test(ph2)&&ph2!==ph)L2.push('<a href="tel:+91'+ph2+'">'+PBI("call")+'+91 '+ph2+'</a>');if(/^\d{10}$/.test(wa)&&wa!==ph)L2.push('<a href="https://wa.me/91'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'+91 '+wa+'</a>');
