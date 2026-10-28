@@ -45,6 +45,7 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .search input,.search select{border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);width:100%;min-width:0}
 .gpsb{flex:none;width:30px;height:30px;margin:-3px -4px -3px 0;border-radius:50%;border:0;background:#e8f0fe;color:#1a73e8;display:grid;place-items:center;cursor:pointer;padding:0}.gpsb svg{width:18px;height:18px}.gpsb:active{background:#d2e3fc}.gpsb.busy{opacity:.5}
 .pgn{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 6px}.pgn button{border:1.5px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:800;font-size:14px;border-radius:999px;padding:9px 18px;cursor:pointer}.pgn button:disabled{opacity:.35;cursor:default}.pgn span{font-weight:700;color:var(--muted);font-size:14px}
+.flt{display:flex;gap:8px;margin:10px 0 0}.flt label{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--muted)}.flt select{font:inherit;font-size:14.5px;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:9px 8px;width:100%;min-width:0;text-overflow:ellipsis}.flt select.on{border-color:var(--navy);background:#eef4ff}.flt select:disabled{opacity:.55}.flt .au{font-weight:600;color:#137333}
 .search .f.loc{flex:1 1 55%;border-top:1px solid var(--line)}
 .search .go{flex:1 1 35%;background:var(--blue);color:#fff;font-weight:700;font-size:16px;border-radius:22px;padding:11px 18px}
 .hint{font-size:12.5px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
@@ -111,6 +112,10 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
    </label>
    <button class="go" type="submit" data-i="search">खोजें</button>
   </div>
+  <div class="flt" id="flt">
+   <label><span id="fCL">Category</span><select id="fCat"></select></label>
+   <label><span id="fWL">Work / Service</span><select id="fWork"></select></label>
+  </div>
   <p class="hint" data-i="s_hint"></p>
  </form>
 
@@ -168,12 +173,47 @@ function score(b,ts){
   return s+(b.is_verified?1:0);
 }
 
+/* 🗂️ Category + Work फ़िल्टर: Category शब्द से अपने-आप (बदल सकते हैं), Work = उसी Category की दुकानों में मिले असली काम */
+var CATSEL="",WORKSEL="",CATMAN=false;
+const FCATS=["Automobile","Food","Health","Shopping","Education","Home","Professional","Hotel"];
+const GUESS=[["Automobile",/(^|[\s,.-])(car|cars|bike|auto|tyre|tire|tyres|garage|mechanic|showroom|puncture|denting|battery|spare|scooter|motor|gaadi|गाड़ी|कार|बाइक|टायर|गैरेज)($|[\s,.-])/i],
+ ["Food",/(^|[\s,.-])(restaurant|food|sweet|sweets|bakery|cake|cafe|pizza|burger|thali|dhaba|tiffin|catering|snacks|chai|mithai|khana|रेस्टोरेंट|खाना|मिठाई|बेकरी|चाय)($|[\s,.-])/i],
+ ["Health",/(^|[\s,.-])(doctor|dentist|dental|clinic|hospital|medical|chemist|pharmacy|lab|diagnostic|gym|fitness|physio|डॉक्टर|अस्पताल|दवा|मेडिकल)($|[\s,.-])/i],
+ ["Shopping",/(^|[\s,.-])(mobile|cloth|clothes|clothing|garment|grocery|kirana|jewellery|jeweller|electronics|footwear|shoe|shoes|furniture|saree|boutique|stationery|gift|gifts|कपड़े|किराना|मोबाइल)($|[\s,.-])/i],
+ ["Education",/(^|[\s,.-])(school|college|tuition|coaching|classes|class|computer class|institute|training|स्कूल|कॉलेज|ट्यूशन|कोचिंग)($|[\s,.-])/i],
+ ["Home",/(^|[\s,.-])(plumber|electrician|carpenter|ac repair|ac service|painter|cleaning|pest|interior|construction|hardware|प्लंबर|इलेक्ट्रीशियन)($|[\s,.-])/i],
+ ["Professional",/(^|[\s,.-])(lawyer|advocate|ca|accountant|property|insurance|loan|photographer|photography|event|wedding|courier|transport|manufacturer|wholesale|वकील|प्रॉपर्टी)($|[\s,.-])/i],
+ ["Hotel",/(^|[\s,.-])(hotel|lodge|guest house|guesthouse|resort|dharamshala|होटल)($|[\s,.-])/i]];
+const FEN=()=>PB.lang&&PB.lang()!=="hi";
+const WORKS={};
+function catName(k){const v=T("c_"+k);return v&&v!=="c_"+k?v:k;}
+function drawCat(auto){const sel=$("fCat");if(!sel)return;
+  sel.innerHTML='<option value="">'+esc(FEN()?"All categories":"सभी Category")+'</option>'+FCATS.map(k=>'<option value="'+k+'"'+(k===CATSEL?' selected':'')+'>'+esc(catName(k))+'</option>').join("");
+  sel.className=CATSEL?"on":"";$("fCL").innerHTML=(FEN()?"Category":"Category")+(auto&&CATSEL?' <span class="au">· '+(FEN()?"auto":"अपने-आप")+'</span>':'');}
+function drawWork(){const sel=$("fWork");if(!sel)return;const w=WORKS[CATSEL]||[];
+  sel.disabled=!CATSEL;
+  sel.innerHTML='<option value="">'+esc(FEN()?"All work":"सभी काम")+'</option>'+w.map(x=>'<option value="'+esc(x[0])+'"'+(x[0]===WORKSEL?' selected':'')+'>'+esc(x[0])+' ('+x[1]+')</option>').join("");
+  sel.className=WORKSEL?"on":"";}
+async function loadWorks(cat){if(!cat||WORKS[cat])return;
+  try{const u=new URL(SB+"/rest/v1/businesses");u.searchParams.set("select","description");u.searchParams.set("is_active","eq.true");u.searchParams.set("deleted_at","is.null");u.searchParams.set("category","eq."+cat);u.searchParams.set("limit","400");
+    const r=await fetch(u,{headers:H});const d=await r.json();if(!r.ok||!Array.isArray(d))return;
+    const m={};d.forEach(b=>{const x=String(b.description||"").match(/Subcategory:\s*(.+)/);if(x){const k=x[1].trim();if(k)m[k]=(m[k]||0)+1;}});
+    WORKS[cat]=Object.entries(m).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));}catch(e){}
+  if(CATSEL===cat)drawWork();}
+function autoCat(q){if(CATMAN)return;let g="";for(const [k,re] of GUESS){if(re.test(q)){g=k;break;}}
+  if(g!==CATSEL){CATSEL=g;WORKSEL="";drawCat(true);drawWork();if(g)loadWorks(g);}else if(g)drawCat(true);}
+(function(){const P0=new URLSearchParams(location.search);const c0=P0.get("cat");if(FCATS.includes(c0)){CATSEL=c0;CATMAN=true;WORKSEL=P0.get("work")||"";loadWorks(c0);}
+  drawCat(false);drawWork();
+  $("fCat").onchange=function(){CATSEL=this.value;CATMAN=true;WORKSEL="";drawCat(false);drawWork();if(CATSEL)loadWorks(CATSEL);run(true);};
+  $("fWork").onchange=function(){WORKSEL=this.value;drawWork();run(true);};})();
 let reqN=0;
 async function run(push){
   const q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim(),list=$("list"),cnt=$("count");
   if(push){const u=new URL(location.href);u.searchParams.set("q",q);city?u.searchParams.set("city",city):u.searchParams.delete("city");history.replaceState(null,"",u);}
   const ts=terms(q);
-  if(!ts.length&&!city){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
+  autoCat(q);
+  if(push){const u=new URL(location.href);CATSEL?u.searchParams.set("cat",CATSEL):u.searchParams.delete("cat");WORKSEL?u.searchParams.set("work",WORKSEL):u.searchParams.delete("work");history.replaceState(null,"",u);}
+  if(!ts.length&&!city&&!CATSEL){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
   const n=++reqN;
   cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';
   if(JOBQ.test(q))return runJobs(q,city,n);   /* "hiring / job / नौकरी" → नौकरी वाली दुकानें (sql-26) */
@@ -185,7 +225,9 @@ async function run(push){
   const gs=ts.map(group);
   const cid=city&&(window.PB_CITY_IDS||{})[city.toLowerCase()];                 /* Approve हुआ शहर: city_id से भी (पते में शहर न लिखा हो तब भी मिले) */
   if(city)gs.push("or("+(cid?"city_id.eq."+cid+",":"")+"address.ilike.*"+city+"*,description.ilike.*"+city+"*)");
-  if(gs.length===1)u.searchParams.set("or",gs[0].slice(3,-1));else u.searchParams.set("and","("+gs.join(",")+")");
+  if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
+  if(WORKSEL)u.searchParams.append("description","ilike.*Subcategory: "+WORKSEL.replace(/[*,()]/g," ")+"*");
+  if(gs.length===1)u.searchParams.set("or",gs[0].slice(3,-1));else if(gs.length>1)u.searchParams.set("and","("+gs.join(",")+")");
   try{
     const r=await fetch(u,{headers:H});const data=await r.json();
     if(n!==reqN)return;
@@ -235,8 +277,8 @@ async function premiumFirst(rows){
 function premTags(b){const t=PREMS[b.slug];if(!t)return "";const en=PB.lang&&PB.lang()!=="hi",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";return (PBPlan.has(b.slug,"top")?'<span class="tag feat">⭐ Featured</span>':'')+'<span class="tag prem pt-'+t+'"><i>'+ic+'</i>'+esc(PBPlan.name(t,true))+' Member</span>';}
 const PGN=6;let PGI=0,PGK="";
 function render(rows,q,city,keep){
-  const list=$("list"),label=[q,city].filter(Boolean).join(" · ");
-  if(!keep){if(PGK!==label)PGI=0;PGK=label;}
+  const list=$("list"),label=[q,city,CATSEL?catName(CATSEL):"",WORKSEL].filter(Boolean).join(" · ");
+  const pk0=label+"|"+CATSEL+"|"+WORKSEL;if(!keep){if(PGK!==pk0)PGI=0;PGK=pk0;}
   const total=rows.length,pages=Math.max(1,Math.ceil(total/PGN));if(PGI>=pages)PGI=pages-1;const allRows=rows;rows=rows.slice(PGI*PGN,PGI*PGN+PGN);
   $("count").textContent=total?T("found",{n:total})+" · "+T("s_for",{q:label}):"";
   if(label&&window.PBT)PBT.once(total?"search":"search0",label);   /* traffic: क्या खोजा, नतीजा मिला या नहीं */
@@ -290,7 +332,7 @@ $("sform").onsubmit=e=>{e.preventDefault();$("q").blur();run(true);};
 $("city").onchange=()=>run(true);
 window.PB_CITY_RERUN=()=>{if($("city").value.trim())run(false);};
 PB.apply();PB.mount($("pbLang"));
-PB.onChange(()=>{PB.apply();run(false);});
+PB.onChange(()=>{PB.apply();drawCat(!CATMAN);drawWork();run(false);});
 run(false);
 if(!P.get("q"))$("q").focus();
 </script>
