@@ -121,6 +121,11 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
 /* ===== Add your shop: AI / खुद भरूँगा चुनाव ===== */
 body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!important}
 form.short .fo{display:none}
+.stp{display:flex;gap:2px;margin:10px 0 2px;overflow-x:auto;scrollbar-width:none}.stp::-webkit-scrollbar{display:none}
+.stp button{flex:1 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:2px 6px;min-width:56px;font:inherit;font-size:11.5px;font-weight:700;color:#9aa0a6;cursor:default}
+.stp i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#e8eaed;color:#5f6368;font-size:12.5px;font-weight:800;transition:transform .2s}
+.stp .on{color:#1a73e8}.stp .on i{background:#1a73e8;color:#fff;transform:scale(1.15);box-shadow:0 2px 8px rgba(26,115,232,.35)}
+.stp .done{color:#137333;cursor:pointer}.stp .done i{background:#1e9e57;color:#fff}
 .fullb{display:block;width:100%;margin-top:12px;background:none;border:0;color:#1a73e8;font-weight:700;font-size:14px;padding:10px;cursor:pointer;text-align:center}
 #choose h1{font-size:23px;margin:2px 0 4px;text-align:center;color:#0b2f73}
 #choose .sub{text-align:center;color:#5b6475;margin:0 0 16px;font-size:14.5px}
@@ -575,7 +580,11 @@ function mapUrl(){if(!$("maplink"))return "";   /* location वाला हि�
 function render(){
   steps.forEach((s,k)=>s.classList.toggle("on",k===i));
   $("bar").style.width=((i+1)/steps.length*100)+"%";
-  $("cnt").textContent=T("q_n",{a:i+1,b:steps.length});
+  /* ऊपर की पट्टी: सारे steps नाम के साथ (हो चुके = हरा ✓, अभी वाला = नीला, आगे वाले = धुँधले) */
+  {const NM={phone:["मोबाइल","Mobile"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
+   $("cnt").innerHTML='<div class="stp" role="list">'+steps.map((x,k)=>{const k2=x.dataset.s,st=k<i?"done":k===i?"on":"todo";
+     return '<button type="button" class="'+st+'" role="listitem" data-stp="'+k2+'"'+(k<i?'':' tabindex="-1"')+(k===i?' aria-current="step"':'')+'><i>'+(k<i?"✓":(k+1))+'</i><span>'+(NM[k2]?NM[k2][EN()?1:0]:k2)+'</span></button>';}).join("")+'</div>';
+   const cur=$("cnt").querySelector(".on");if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:"center",block:"nearest"});}catch(_){}}
   $("prev").style.visibility=i===0?"hidden":"visible";
   const key=steps[i].dataset.s;
   if(window.PBT)PBT.once("reg",(i+1)+"-"+key);   /* traffic: रजिस्ट्रेशन कहाँ तक पहुँचा */
@@ -746,6 +755,7 @@ window.addEventListener("popstate",e=>{
 $("skip").onclick=()=>{setErr("");i++;render();};
 function setMode(full){const k=steps[i].dataset.s;FULLF=!!full;steps=(FULLF?FULL_KEYS:SHORT_KEYS).map(stepBy);$("f").classList.toggle("short",!FULLF);const ix=steps.findIndex(x=>x.dataset.s===k);i=ix<0?0:ix;try{history.replaceState({pbst:i,pbk:k},"",location.pathname+location.search);}catch(_){}setErr("");render();}
 $("fullB").onclick=()=>setMode(!FULLF);
+$("cnt").addEventListener("click",e=>{const b=e.target.closest("[data-stp]");if(!b||!b.classList.contains("done"))return;const t=steps.findIndex(x=>x.dataset.s===b.dataset.stp);if(t<0||t>=i)return;setErr("");i=t;history.pushState({pbst:i,pbk:steps[i].dataset.s},"",location.pathname+location.search);render();});
 ["input","change"].forEach(ev=>$("f").addEventListener(ev,()=>{if(i===steps.length-1)summary();}));   /* आख़िरी स्टेप पर सार (summary) टाइप करते ही बदले */
 $("f").classList.add("short");
 $("later").onclick=()=>{   /* सीधे "काम / category" वाले आखिरी सवाल पर (वह ज़रूरी है) */
