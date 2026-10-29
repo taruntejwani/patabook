@@ -411,7 +411,7 @@ const EN=()=>!!(window.PB&&PB.lang&&PB.lang()!=="hi");
 const L=(hi,en)=>EN()?en:hi;
 /* 🖼️ दुकान का अपना poster सबसे पहले: पेज खुलते ही, data आने से पहले — profile / "लोड हो रहा है" की झलक नहीं दिखती */
 (function(){try{
-  const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
+  const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp","new-jai-shanker-restaurant-gandhidham":"posters/new-jai-shanker-restaurant-gandhidham.webp"};
   const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);if(!document.body||!slug)return;
   try{const nv=performance.getEntriesByType("navigation")[0],ty=nv?nv.type:"navigate";if(ty==="reload"||ty==="back_forward")return;}catch(_){}   /* refresh / Back से लौटने पर नहीं; search या लिंक से अंदर आने पर हर बार */
   const show=src=>{
@@ -626,7 +626,7 @@ function pbIntro(){try{
   if(window.__pbIntro||!B)return;const t=TIER();if(t!=="gold"&&t!=="platinum")return;
   if(document.body.classList.contains("pbe-on"))return;
   /* 🖼️ दुकान का अपना poster (posters/<slug>.webp): पूरी screen, ~3 सेकंड timer, Skip / टैप से बंद; लिंक जब भी खुले, हर बार */
-  const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp"};
+  const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp","new-jai-shanker-restaurant-gandhidham":"posters/new-jai-shanker-restaurant-gandhidham.webp"};
   const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);
   if(pk){
     window.__pbIntro=1;const T=3,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
