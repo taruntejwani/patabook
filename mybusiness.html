@@ -164,6 +164,11 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .planbn .ic{font-size:24px}.planbn .tx{flex:1;min-width:0}.planbn b{display:block;font-size:15px}.planbn small{display:block;opacity:.85;font-size:12.5px}
 .planbn .go{font-size:22px}
 .vjob{display:block;width:100%;margin-top:8px;border:1.5px dashed #f59e0b;background:#fffbeb;color:#92400e;border-radius:12px;padding:10px 12px;font:inherit;font-size:13.5px;font-weight:800;text-align:left;cursor:pointer}
+
+.setopen{display:flex;align-items:center;gap:8px;width:100%;margin-top:14px;text-align:left;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;border-radius:14px;padding:13px 14px;font-weight:800;font-size:15.5px}.setopen small{flex:1;font-weight:500;opacity:.85;font-size:12.5px}.setopen i{font-style:normal;font-size:22px}
+.setbar{display:flex;align-items:center;gap:10px;margin:2px 0 12px}.setbar button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;color:var(--navy)}.setbar b{font-size:17.5px;color:var(--navy)}
+.cats{display:grid;gap:10px}.cat{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 6px 18px rgba(26,115,232,.07)}.cat .ci{font-size:24px;width:46px;height:46px;border-radius:14px;background:#eef4ff;display:grid;place-items:center;flex:none}.cat .ct{flex:1;min-width:0}.cat .ct b{display:block;font-size:15.5px}.cat .ct small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}.cat i{font-style:normal;color:var(--blue);font-size:22px;font-weight:700}
+.stl{display:block;margin-top:12px;text-align:center;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:12px;font-size:14.5px}.stl.alt{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
 </style>
 <script src="pb-track.js"></script>
 </head>
@@ -173,6 +178,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
     <a class="pbh" href="index.html" id="backT" aria-label="PataBook Home"><img src="pin.png" alt="" width="26" height="26"><b>PataBook</b></a>
     <span id="pbLang"></span>
     <button type="button" class="ntb" id="ntBtn" hidden aria-label="Notifications" aria-expanded="false">🔔<i id="ntDot" hidden></i></button>
+    <button type="button" class="ntb" id="stBtn" hidden aria-label="Settings" aria-expanded="false">☰</button>
   </div>
   <div class="edrow"><a class="edtop vp" id="vpTop" href="#" hidden>🏪 <span>मेरी Profile</span></a><a class="edtop" id="edTop" href="#" hidden>✏️ <span>Edit Profile</span></a></div>
   <div class="ntsc" id="ntScrim" hidden></div>
@@ -199,13 +205,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
   </div>
 
   <div class="kick" id="kick" hidden></div>
-  <div id="list"><p class="note">…</p></div>
   <div class="who" id="who" hidden>
     <div class="wt"><span class="ok">✅</span><span><b id="whoT"></b><small id="whoS"></small></span></div>
     <div class="pinbox" id="pinBox" hidden></div>
     <div class="dv" id="dv" hidden></div>
     <button type="button" id="out"></button>
   </div>
+  <div id="list"><p class="note">…</p></div>
 </div>
 
 <script>
@@ -630,8 +636,44 @@ async function uploadLogo(i,file){
     LOGOS[b.slug]=pub;draw();
   }catch(x){er.style.color="";er.textContent=en?"Could not upload the logo. Try again.":"Logo upload नहीं हो सका। दोबारा कोशिश करें।";}
 }
+/* ⚙️ Settings: ☰ → वर्ग (category) → उसी पन्ने पर सीधी settings (इससे आगे कोई और पन्ना नहीं) */
+let SET={cat:null};   /* null = बंद · "" = वर्गों की सूची · "prof"/"num"/… = वह वर्ग */
+function setCats(en){return [
+  ["prof","👤",en?"Profile":"प्रोफ़ाइल",en?"Edit, Verify, % complete":"Edit, Verify, कितनी पूरी"],
+  ["num","📞",en?"Number & contact":"नंबर और संपर्क",en?"Show / hide number, change number":"नंबर दिखे / छुपे, नंबर बदलना"],
+  ["feat","🛠️",en?"Features":"सुविधाएँ",en?"Hiring, Home Service":"नौकरी (Hiring), Home Service"],
+  ["photo","🖼️",en?"Photos & promotion":"फ़ोटो और प्रचार","Logo, Profile Banner, Poster"],
+  ["rep","📊",en?"Report & notifications":"रिपोर्ट और सूचनाएँ",en?"Weekly report, phone alerts":"हफ़्ते की रिपोर्ट, फ़ोन पर सूचनाएँ"],
+  ["plan","💳","Member Plan",en?"Buy or renew your plan":"Plan खरीदें या आगे बढ़ाएँ"],
+  ["acct","🔐",en?"Account":"खाता",en?"Password, logout, delete":"पासवर्ड, लॉगआउट, खाता हटाएँ"]];}
+function catBody(k,b,i,en){
+  const sl=encodeURIComponent(b.slug);
+  if(k==="prof")return profBlock(b,i)+verifyBlock(b,i)+
+    '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos, products…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो, सामान…)")+'</a>'+
+    '<a class="stl alt" href="business.html?slug='+sl+'">🏪 '+(en?"See my profile":"मेरी Profile देखें")+'</a>';
+  if(k==="num")return phoneBlock(b,i)+
+    (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
+    (PBA.mobile&&PBA.mobile.enabled()?'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>':'');
+  if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
+  if(k==="photo")return (stripsBlock(b,i)||'<div class="pm"><small style="margin:0">'+(en?"Logo, Profile Banner and Poster come with a Member plan. See “Member Plan” in Settings.":"Logo, Profile Banner और Poster Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।")+'</small></div>')+
+    '<a class="stl alt" href="business.html?slug='+sl+'#edit">🛍️ '+(en?"Add / change photos & products":"फ़ोटो और सामान जोड़ें / बदलें")+'</a>';
+  if(k==="rep")return PH(b,"report")?(weekLine(b)||'')+reportHTML(b):'<div class="pm"><small style="margin:0">📊 '+(en?"The report (views, Call, WhatsApp) comes with a Member plan. See “Member Plan”.":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp) Member plan के साथ मिलती है। “Member Plan” देखें।")+'</small></div>';
+  if(k==="plan")return premBlock(b,i)||'<p class="note">—</p>';
+  return "";
+}
+function settingsView(en){
+  const C=setCats(en),cur=C.find(c=>c[0]===SET.cat);
+  if(!cur)return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"Back":"वापस")+'</button></div><div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
+  let h='<div class="setbar"><button type="button" data-setback="list">‹ Settings</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
+  if(cur[0]==="acct")return h+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
+  if(cur[0]==="rep"){const nb=notifBlock();if(nb)h+='<div class="card">'+nb+'</div>';}
+  const multi=ROWS.length>1;
+  h+=ROWS.map((b,i)=>{const body=catBody(cur[0],b,i,en);return '<div class="card">'+(multi?'<h2>🏪 '+esc(b.name)+'</h2>':'')+body+'</div>';}).join("");
+  return h;
+}
 function draw(){
   PB.apply();
+  {const _sb=$("stBtn");if(_sb)_sb.hidden=true;}
   ["h1","sub","gH","gB","pbT","pbS"].forEach(k=>{const e=$(k);if(e)e.textContent=tx(k);});
   const mOn=!!(PBA.mobile&&PBA.mobile.enabled&&PBA.mobile.enabled());
   $("mF").hidden=!mOn;$("gP").textContent=tx(mOn?"gP":"gPe");$("gB").className=mOn?"lnk":"btn";
@@ -643,7 +685,7 @@ function draw(){
   if(M.sent)$("mHint").textContent=tx("m_hint","+91 "+M.phone);
   document.title=tx("h1")+" — PataBook";
   $("gate").hidden=!!ME;$("who").hidden=!ME;
-  if(!ME){$("list").innerHTML="";return;}
+  if(!ME){SET.cat=null;$("list").innerHTML="";return;}
   /* मोबाइल login: नंबर Approve होकर बदल गया हो तो दुकान का अभी वाला नंबर दिखाओ */
   const ph=phoneOf(ME)?((ROWS&&ROWS.length===1&&String(ROWS[0].phone||"").replace(/\D/g,"").slice(-10))||phoneOf(ME)):"";
   const en=L()==="en";
@@ -666,14 +708,16 @@ function draw(){
   if(!ROWS.length){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
-  drawNt();{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=false;}const vp=$("vpTop");if(vp){vp.href="business.html?slug="+encodeURIComponent(ROWS[0].slug);vp.querySelector("span").textContent=en?"My Profile":"मेरी Profile";vp.hidden=false;}}list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
+  drawNt();if(SET.cat!==null&&$("ntBtn"))$("ntBtn").hidden=true;{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=false;}const vp=$("vpTop");if(vp){vp.href="business.html?slug="+encodeURIComponent(ROWS[0].slug);vp.querySelector("span").textContent=en?"My Profile":"मेरी Profile";vp.hidden=false;}}
+  const inSet=SET.cat!==null;
+  {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
+  $("who").hidden=!(inSet&&SET.cat==="acct");
+  if(inSet){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी settings एक ही जगह।";list.innerHTML=settingsView(en);return;}
+  list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+(b.is_active?"live":"pend")+'">'+esc(tx(b.is_active?"live":"pend"))+'</span></h2>'+
     (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+
-    (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(L()==="en"?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    stripsBlock(b,i)+tilesBlock(b,i)+(TAB[b.slug]==='p'?profBlock(b,i)+verifyBlock(b,i):'')+premBlock(b,i)+weekLine(b)+(TAB[b.slug]==='f'?phoneBlock(b,i)+(PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(L()==="en"?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+vacBlock(b,i)+homeBlock(b,i):'')+
-    '<div class="row2">'+
-    (PBA.mobile&&PBA.mobile.enabled()?'<a href="phone-update.html?slug='+encodeURIComponent(b.slug)+'">📱 '+(L()==="en"?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+' ›</a>':'')+
-    '</div></div>').join("")+
-    (PINST?'<button type="button" class="delacc" id="delAcc">🗑️ '+(L()==="en"?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
+    (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(en?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
+    weekLine(b)+
+    '<button type="button" class="setopen" data-setopen="1">⚙️ '+(en?"Settings":"Settings")+' <small>'+(en?"Profile, number, photos, plan…":"प्रोफ़ाइल, नंबर, फ़ोटो, plan…")+'</small><i>›</i></button></div>').join("");
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
   const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
@@ -851,7 +895,7 @@ $("dv").addEventListener("click",async e=>{
   b.disabled=true;
   try{await PBA.deviceKick(b.dataset.kick);DEV=await PBA.deviceCheck();draw();}catch(x){b.disabled=false;}
 });
-$("ntPanel").addEventListener("click",async e=>{
+const bellH=async e=>{
   const b=e.target.closest("#bellBtn");if(!b)return;
   const en=L()==="en",note=t=>{const n=$("bellNote");if(n){n.textContent=t||"";n.style.color="";}};
   b.disabled=true;note("…");
@@ -867,7 +911,8 @@ $("ntPanel").addEventListener("click",async e=>{
     try{localStorage.setItem("pb-own-bell","1");}catch(x){}
     BELL="on";draw();note(en?"✅ Turned on! A test notification should arrive now.":"✅ चालू हो गया! अभी एक test घंटी आनी चाहिए।");
   }catch(x){b.disabled=false;note(en?"Could not turn on. Try again in a while.":"चालू नहीं हो पाया। थोड़ी देर बाद दोबारा कोशिश करें।");}
-});
+};
+$("ntPanel").addEventListener("click",bellH);$("list").addEventListener("click",bellH);
 $("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
 async function start(){
   ME=await PBA.session();
@@ -883,6 +928,16 @@ async function start(){
   }
   draw();
 }
+$("stBtn").addEventListener("click",()=>{ntOpen(false);SET.cat=SET.cat===null?"":null;draw();window.scrollTo(0,0);});
+$("list").addEventListener("click",async e=>{
+  if(e.target.closest("[data-setopen]")){ntOpen(false);SET.cat="";draw();window.scrollTo(0,0);return;}
+  const c=e.target.closest("[data-setcat]");
+  if(c){SET.cat=c.dataset.setcat;draw();window.scrollTo(0,0);
+    if(SET.cat==="rep"){try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}}
+    return;}
+  const bk=e.target.closest("[data-setback]");
+  if(bk){SET.cat=bk.dataset.setback==="list"?"":null;draw();window.scrollTo(0,0);}
+});
 PB.mount($("pbLang"));
 PB.onChange(draw);
 start();
