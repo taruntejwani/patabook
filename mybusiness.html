@@ -649,8 +649,7 @@ function setCats(en){return [
 function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof")return profBlock(b,i)+verifyBlock(b,i)+
-    '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos, products…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो, सामान…)")+'</a>'+
-    '<a class="stl alt" href="business.html?slug='+sl+'">🏪 '+(en?"See my profile":"मेरी Profile देखें")+'</a>';
+    '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos, products…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो, सामान…)")+'</a>';
   if(k==="num")return phoneBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>':'');
@@ -928,15 +927,17 @@ async function start(){
   }
   draw();
 }
-$("stBtn").addEventListener("click",()=>{ntOpen(false);SET.cat=SET.cat===null?"":null;draw();window.scrollTo(0,0);});
-$("list").addEventListener("click",async e=>{
-  if(e.target.closest("[data-setopen]")){ntOpen(false);SET.cat="";draw();window.scrollTo(0,0);return;}
-  const c=e.target.closest("[data-setcat]");
-  if(c){SET.cat=c.dataset.setcat;draw();window.scrollTo(0,0);
-    if(SET.cat==="rep"){try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}}
-    return;}
-  const bk=e.target.closest("[data-setback]");
-  if(bk){SET.cat=bk.dataset.setback==="list"?"":null;draw();window.scrollTo(0,0);}
+/* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
+let SD=0;
+function setGo(cat){const d=cat===""?1:2;try{history.pushState({pbd:d,cat:cat},"");}catch(e){}SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
+  if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
+function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
+window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
+$("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null)setGo("");else if(SD>0)history.go(-SD);else{SET.cat=null;draw();}});
+$("list").addEventListener("click",e=>{
+  if(e.target.closest("[data-setopen]")){ntOpen(false);setGo("");return;}
+  const c=e.target.closest("[data-setcat]");if(c){setGo(c.dataset.setcat);return;}
+  if(e.target.closest("[data-setback]"))setBack();
 });
 PB.mount($("pbLang"));
 PB.onChange(draw);
