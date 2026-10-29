@@ -120,7 +120,8 @@ input:focus,textarea:focus,select.in:focus{border-color:#1a73e8;box-shadow:0 0 0
 
 /* ===== Add your shop: AI / खुद भरूँगा चुनाव ===== */
 body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!important}
-#choose,#aiBox{margin-top:14px}
+form.short .fo{display:none}
+.fullb{display:block;width:100%;margin-top:12px;background:none;border:0;color:#1a73e8;font-weight:700;font-size:14px;padding:10px;cursor:pointer;text-align:center}
 #choose h1{font-size:23px;margin:2px 0 4px;text-align:center;color:#0b2f73}
 #choose .sub{text-align:center;color:#5b6475;margin:0 0 16px;font-size:14.5px}
 .chb{display:flex;align-items:center;gap:14px;width:100%;text-align:start;border:2px solid #dfe1e5;background:#fff;border-radius:18px;padding:16px;margin-top:12px;cursor:pointer;font-family:inherit;color:#1f2a44}
@@ -150,20 +151,6 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
 <div class="wrap">
   <div class="top"><button class="back" type="button" onclick="location.href='index.html'" data-i="back">← वापस</button><div class="brand">PataBook</div><span id="pbLang" style="margin-inline-start:auto"></span></div>
   <div id="pw"><div class="prog"><i id="bar"></i></div><div class="count" id="cnt"></div></div>
-
-  <div class="card" id="choose" hidden>
-    <h1 id="chH"></h1><p class="sub" id="chS"></p>
-    <button type="button" class="chb ai" id="chAI"><i>🤖</i><span><b id="chAIt"></b><small id="chAIs"></small></span></button>
-    <button type="button" class="chb" id="chMan"><i>✍️</i><span><b id="chMt"></b><small id="chMs"></small></span></button>
-  </div>
-  <div class="card" id="aiBox" hidden>
-    <div class="aic" id="aiCard"></div>
-    <div id="aiMsgs" aria-live="polite"></div>
-    <form class="aif" id="aiF" autocomplete="off"><input id="aiI" maxlength="500"><button type="button" class="mic" id="aiMic" hidden aria-label="Mic">🎤</button><button type="submit" aria-label="Send">➤</button></form>
-    <button type="button" class="aiback" id="aiSkip" hidden></button>
-    <button type="button" class="btn" id="aiGo" disabled hidden></button>
-    <button type="button" class="aiback" id="aiBk"></button>
-  </div>
 
   <div class="card gate" id="gate" hidden>
     <div class="big">🔐</div>
@@ -198,8 +185,8 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
         <div class="emoji">🏪</div>
         <h1 data-i="shop_h">आपकी दुकान / बिज़नेस का नाम क्या है?</h1>
         <p class="hint" data-i="shop_hint">जैसा बोर्ड पर लिखा है, वैसा लिखें।</p>
-        <label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
-        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select>
+        <div class="fo"><label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
+        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select></div>
         <input id="shop" data-ip="shop_ph" placeholder="जैसे: श्री कृष्णा कार वॉश" maxlength="80">
         <div class="err"></div>
       </div>
@@ -218,19 +205,17 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
         <div class="emoji">🏠</div>
         <h1 id="locH">दुकान का पता लिखें</h1>
         <p class="hint" id="locHint">दुकान या ठेले पर हों तो बटन दबाएँ — ग्राहकों को सीधा रास्ता मिलेगा। बाकी सब वैकल्पिक है, सिर्फ़ शहर चुनना ज़रूरी है।</p>
-        <div class="row" style="margin-top:16px">
+        <div style="margin-top:16px"><div style="position:relative"><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" autocomplete="off" placeholder="Gandhidham"><datalist id="cityList"></datalist></div></div>
+        <div class="row">
           <div><label class="lbl" id="stateL">राज्य *</label><select id="state" class="in"><option selected>Gujarat</option><option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option><option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option></select></div>
           <div><label class="lbl" id="distL">ज़िला *</label><select id="distSel" class="in"></select><input id="district" autocomplete="off" placeholder="ज़िले का नाम" style="margin-top:8px" hidden></div>
         </div>
-        <div class="row">
-          <div style="position:relative"><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" autocomplete="off" placeholder="Gandhidham"><datalist id="cityList"></datalist></div>
-          <div><label class="lbl" id="areaL">इलाका / Area (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div>
-        </div>
+        <div class="fo"><div><label class="lbl" id="areaL">इलाका / Area (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div></div>
         <label class="lbl" id="addrL">पूरा पता *</label>
         <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
-        <label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
+        <div class="fo"><label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
         <input id="pin" inputmode="numeric" maxlength="6" placeholder="370201">
-        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला PIN नहीं।</p>
+        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला PIN नहीं।</p></div>
         <div class="err"></div>
       </div>
 
@@ -279,8 +264,8 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
         <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही category खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
         <textarea id="services" data-ip="svc_ph" placeholder="जैसे: car wash, polish, interior cleaning"></textarea>
         <div class="cat" id="cat"></div>
-        <label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (Home Service)</span></label>
-        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (Home Delivery)</span></label>
+        <div class="fo"><label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (Home Service)</span></label>
+        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (Home Delivery)</span></label></div>
         <div class="err"></div>
         <div class="sum" id="sum"></div>
       </div>
@@ -291,6 +276,7 @@ body.pre #gate,body.pre #mainCard,body.pre #pw,body.pre #who{display:none!import
         <button type="button" class="btn skip" id="skip" style="display:none" data-i="skip">छोड़ें</button>
         <button type="button" class="btn" id="next">आगे →</button>
       </div>
+      <button type="button" class="fullb" id="fullB"></button>
       <button type="button" class="later" id="later" hidden>बाकी बाद में भरें →</button>
     </form>
 
@@ -318,7 +304,10 @@ const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r
 const $=id=>document.getElementById(id);
 const T=(k,v)=>PB.t(k,v);
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const steps=[...document.querySelectorAll(".step")];
+const ALLST=[...document.querySelectorAll(".step")],stepBy=k=>ALLST.find(x=>x.dataset.s===k);
+/* ⚡ छोटा फ़ॉर्म: मोबाइल+OTP → दुकान का नाम → मालिक का नाम → क्या काम → पता (शहर, राज्य, ज़िला, पूरा पता) → जमा। पूरा फ़ॉर्म विकल्प के रूप में */
+const SHORT_KEYS=["phone","shop","owner","svc","addr"],FULL_KEYS=["phone","shop","owner","addr","contact","hours","online","svc"];
+let FULLF=false,steps=SHORT_KEYS.map(stepBy);
 let i=0,coords=null,sending=false;
 
 /* ---------- Category: Supabase "categories" table ki ASLI 78 categories (export 09-10-2026).
@@ -597,7 +586,8 @@ function render(){
   $("next").textContent=i===steps.length-1?T("submit"):T("next");
   if(key==="owner"){const n=$("shop").value.trim();$("ownerHint").textContent=n?T("owner_hint_n",{n:n}):T("owner_hint");}
   if(key==="svc"){if(!manual&&!sel)refresh();else showCat();}
-  if(i===steps.length-1)summary();
+  if(i===steps.length-1){steps[i].appendChild($("sum"));summary();}
+  {const fb=$("fullB");if(fb)fb.textContent=FULLF?(EN()?"← Back to the short form":"← छोटा फ़ॉर्म"):(EN()?"Want to add more details? Open the full form →":"और जानकारी देना चाहते हैं? पूरा फ़ॉर्म खोलें →");}
   const inp=steps[i].querySelector("input,textarea");if(inp&&key!=="loc"&&key!=="addr")setTimeout(()=>inp.focus({preventScroll:true}),50);
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -744,20 +734,24 @@ $("otpCode").addEventListener("input",async()=>{
 });
 $("next").onclick=()=>{
   if(!check())return;
-  if(i<steps.length-1){i++;history.pushState({pbst:i},"",location.pathname+location.search);render();}else submit();
+  if(i<steps.length-1){i++;history.pushState({pbst:i,pbk:steps[i].dataset.s},"",location.pathname+location.search);render();}else submit();
 };
 
 /* Phone का back बटन: form में पिछले सवाल पर जाए, page से बाहर न निकले */
 window.addEventListener("popstate",e=>{
   if($("done")&&$("done").style.display==="block")return;   /* जमा हो चुका */
-  const st=e.state&&typeof e.state.pbst==="number"?e.state.pbst:0;
+  let st=e.state&&typeof e.state.pbst==="number"?e.state.pbst:0;if(e.state&&e.state.pbk){const ix=steps.findIndex(x=>x.dataset.s===e.state.pbk);st=ix<0?0:ix;}
   if(st!==i){i=Math.max(0,Math.min(st,steps.length-1));setErr("");render();}
 });
 $("skip").onclick=()=>{setErr("");i++;render();};
+function setMode(full){const k=steps[i].dataset.s;FULLF=!!full;steps=(FULLF?FULL_KEYS:SHORT_KEYS).map(stepBy);$("f").classList.toggle("short",!FULLF);const ix=steps.findIndex(x=>x.dataset.s===k);i=ix<0?0:ix;try{history.replaceState({pbst:i,pbk:k},"",location.pathname+location.search);}catch(_){}setErr("");render();}
+$("fullB").onclick=()=>setMode(!FULLF);
+["input","change"].forEach(ev=>$("f").addEventListener(ev,()=>{if(i===steps.length-1)summary();}));   /* आख़िरी स्टेप पर सार (summary) टाइप करते ही बदले */
+$("f").classList.add("short");
 $("later").onclick=()=>{   /* सीधे "काम / category" वाले आखिरी सवाल पर (वह ज़रूरी है) */
   if(!check())return;
   const t=steps.findIndex(s=>s.dataset.s==="svc");if(t<=i)return;
-  setErr("");i=t;history.pushState({pbst:i},"",location.pathname+location.search);render();
+  setErr("");i=t;history.pushState({pbst:i,pbk:steps[i].dataset.s},"",location.pathname+location.search);render();
 };
 $("prev").onclick=()=>{if(history.state&&history.state.pbst>0){history.back();return;}if(i>0){i--;render();}};
 document.addEventListener("keydown",e=>{
@@ -810,15 +804,6 @@ $("city").addEventListener("change",()=>{const k=knownCity($("city").value);if(!
     fillCityList();
   }catch(e){}
 })();
-/* AI Worker से जानकारी साफ़ करवाना (9 सेकंड में जवाब न आए तो छोड़ देते हैं) */
-async function aiClean(o){
-  const base=(window.PB_SITE&&PB_SITE.aiUrl)||"";if(!base)return null;
-  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),9000);
-  try{
-    const r=await fetch(base.replace(/\/$/,"")+"/clean",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(o),signal:ctl.signal});
-    if(!r.ok)return null;const j=await r.json();return j&&j.name?j:null;
-  }catch(e){return null;}finally{clearTimeout(tm);}
-}
 async function submit(){
   if(sending)return;
   if($("hp").value){$("f").style.display="none";$("pw").style.display="none";$("done").style.display="block";$("doneTxt").textContent=T("thanks");return;}
@@ -826,16 +811,6 @@ async function submit(){
   sending=true;const btn=$("next");btn.disabled=true;btn.textContent=T("sending");setErr("");
   const S=sel,d=S?[S.db_key,S.typ]:["Other",""],city=$("city").value.trim(),phone=phoneClean(),m=mapUrl();
   let name=$("shop").value.trim(),area=$("area").value.trim(),addr=$("address").value.trim(),svc=$("services").value.trim();
-  /* ✨ AI: ग्राहक ने गलत खाने में जो लिखा (जैसे नाम की जगह पूरा पता) उसे सही खानों में सजाकर रखता है। AI न चले तो जो लिखा वही जाता है। */
-  btn.textContent="✨ AI आपकी जानकारी सुधार रहा है…";
-  const cl=await aiClean({shop:name,owner:$("owner").value.trim(),city:city,area:area,address:addr,services:svc,category:S?pathOf(S):""});
-  btn.textContent=T("sending");
-  if(cl){
-    const words=t=>String(t).toLowerCase().split(/[^\p{L}\p{M}\p{N}]+/u).filter(w=>w.length>1);
-    const src=words(name),got=words(cl.name||"");
-    const sane=got.length&&got.filter(w=>src.some(x=>x===w||x.indexOf(w)>-1||w.indexOf(x)>-1)).length>=Math.ceil(got.length*0.6)&&(cl.name||"").length>=2&&(cl.name||"").length<=60;
-    if(sane){name=cl.name;if(cl.area)area=cl.area;if(cl.address)addr=cl.address;if(cl.services)svc=cl.services;}
-  }
   const desc=[
     "Owner: "+$("owner").value.trim(),
     $("btype")&&$("btype").value?"Type: "+$("btype").value:"",
@@ -1124,113 +1099,6 @@ render();
 })();
 </script>
 <script>
-/* ===== Add Your Shop: "AI से जोड़ें" (एक-एक सवाल, लाइव कार्ड) या "खुद भरूँगा" ===== */
-(function(){
-  var $=function(i){return document.getElementById(i)};
-  function lg(){try{return window.PB&&PB.lang&&PB.lang()==="en"?"en":"hi"}catch(e){return"hi"}}
-  var STEPS=[
-    {k:"name",req:1},{k:"owner",req:1},{k:"city",req:1},{k:"area",req:0},{k:"address",req:1},{k:"hours",req:0},{k:"services",req:0}
-  ];
-  var X={
-   hi:{h:"दुकान कैसे जोड़ना चाहेंगे?",s:"AI एक-एक सवाल पूछकर आपकी दुकान बना देगा। खुद भरना भी आसान है।",ai:"AI से जोड़ें",ais:"AI सवाल पूछेगा, आप बोलकर या लिखकर जवाब दीजिए।",man:"खुद भरूँगा",mans:"एक-एक सवाल का जवाब देकर खुद भरें।",
-     nm:"दुकान का नाम",cat:"प्रकार",ow:"मालिक",ct:"शहर / गाँव",ar:"इलाका",ad:"पता",hr:"समय",sv:"सेवाएँ",ph:"अपना जवाब बोलिए या लिखिए…",title:"आपकी दुकान",
-     q_name:"आपकी दुकान / बिज़नेस का नाम क्या है? (जैसा बोर्ड पर लिखा है)",q_owner:"दुकान के मालिक का पूरा नाम क्या है?",q_city:"दुकान किस शहर या गाँव में है?",
-     q_area:"किस इलाके में है? (वैकल्पिक)",q_address:"दुकान का पूरा पता बताइए: दुकान नंबर, रोड, लैंडमार्क।",q_hours:"दुकान कब खुलती और कब बंद होती है? (वैकल्पिक)",q_services:"आप क्या-क्या काम या सामान देते हैं? (वैकल्पिक)",
-     need:"यह जानकारी ज़रूरी है, इसके बिना आगे नहीं बढ़ सकते।",
-     rev:"यह आपकी दुकान की पूरी जानकारी है। कुछ बदलना हो तो नीचे बताइए, जैसे \"समय रात 9 तक कर दो\"। सब ठीक हो तो \"सही है, आगे बढ़ें\" दबाइए।",
-     go:"सही है, आगे बढ़ें →",bk:"← वापस, खुद भरूँगा",skip:"छोड़ें →",think:"सोच रहा हूँ…",fail:"माफ़ कीजिए, AI अभी जवाब नहीं दे पाया। थोड़ी देर बाद फिर कोशिश करें, या \"खुद भरूँगा\" चुनें।",lim:"आज के लिए AI की सीमा पूरी हो गई। कृपया \"खुद भरूँगा\" से जोड़ें।",to:"से"},
-   en:{h:"How would you like to add your shop?",s:"The AI asks one question at a time and builds your shop. Filling it yourself is easy too.",ai:"Add with AI",ais:"The AI asks the questions; answer by voice or text.",man:"I'll fill it myself",mans:"Answer one question at a time.",
-     nm:"Shop name",cat:"Type",ow:"Owner",ct:"City / village",ar:"Area",ad:"Address",hr:"Timings",sv:"Services",ph:"Speak or type your answer…",title:"Your shop",
-     q_name:"What is the name of your shop / business? (as written on the board)",q_owner:"What is the owner's full name?",q_city:"Which city or village is the shop in?",
-     q_area:"Which area is it in? (optional)",q_address:"Please tell me the full address: shop number, road, landmark.",q_hours:"When does the shop open and close? (optional)",q_services:"What work or products do you offer? (optional)",
-     need:"This detail is required; we cannot go ahead without it.",
-     rev:"Here is the full information about your shop. If anything needs changing, tell me below, for example \"make closing time 9 pm\". If all is right, press \"Looks right, continue\".",
-     go:"Looks right, continue →",bk:"← Back, I'll fill it myself",skip:"Skip →",think:"Thinking…",fail:"Sorry, the AI could not answer right now. Please try again in a while, or choose \"I'll fill it myself\".",lim:"The AI limit for today is over. Please use \"I'll fill it myself\".",to:"to"}
-  };
-  function t(k){return X[lg()][k]}
-  var card={name:"",category:"",owner:"",city:"",area:"",address:"",open:"",close:"",services:""};
-  var skipped={},started=false,busy=false,cur=null,review=false;
-  function reg(){try{return localStorage.getItem("pb-reg")}catch(e){return null}}
-  try{sessionStorage.removeItem("pb-addmode")}catch(e){}
-  var mode=/[?&]m=manual\b/.test(location.search)?"manual":null;
-  var show=!mode&&!reg()&&!!(window.PB_SITE&&PB_SITE.aiExtract);   /* Worker में /extract डालने के बाद site-config में aiExtract:true करें */
-  if(show){document.body.classList.add("pre");$("choose").hidden=false;}
-  function lab(){
-    $("chH").textContent=t("h");$("chS").textContent=t("s");$("chAIt").textContent=t("ai");$("chAIs").textContent=t("ais");
-    $("chMt").textContent=t("man");$("chMs").textContent=t("mans");$("aiI").placeholder=t("ph");$("aiGo").textContent=t("go");$("aiBk").textContent=t("bk");$("aiSkip").textContent=t("skip");drawCard();
-  }
-  function esc(v){return String(v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-  function done(s){
-    if(s.k==="hours")return !!card.open||!!skipped.hours;
-    return !!card[s.k]||(!s.req&&!!skipped[s.k]);
-  }
-  function nextStep(){for(var i=0;i<STEPS.length;i++)if(!done(STEPS[i]))return STEPS[i];return null}
-  function reqOk(){return !!(card.name&&card.owner&&card.city&&card.address)}
-  var last={};
-  function drawCard(){
-    var hrs=card.open?(card.open+(card.close?" "+t("to")+" "+card.close:"")):(card.close?"… "+t("to")+" "+card.close:"");
-    var rows=[["nm",card.name],["cat",card.category],["ow",card.owner],["ct",card.city],["ar",card.area],["ad",card.address],["hr",hrs],["sv",card.services]];
-    var any=rows.some(function(r){return r[1]});
-    $("aiCard").hidden=!any;
-    if(any)$("aiCard").innerHTML='<h3>🏪 '+esc(card.name||t("title"))+'</h3>'+rows.filter(function(r){return review||r[1]}).map(function(r){var ch=r[1]&&last[r[0]]!==r[1];last[r[0]]=r[1];return '<div class="r'+(ch?' new':'')+'"><span>'+t(r[0])+'</span><b'+(r[1]?'':' class="e"')+'>'+(r[1]?esc(r[1]):"—")+'</b></div>'}).join("");
-    $("aiGo").hidden=!review;$("aiGo").disabled=!reqOk();
-    $("aiSkip").hidden=!(cur&&!cur.req&&!review);
-  }
-  function bubble(c,txt){var d=document.createElement("div");d.className="m "+c;d.textContent=txt;$("aiMsgs").appendChild(d);$("aiMsgs").scrollTop=1e6;return d}
-  function ask(prefix){
-    var s=nextStep();cur=s;
-    if(!s){review=true;drawCard();bubble("b",t("rev"));return}
-    bubble("b",(prefix?prefix+" ":"")+t("q_"+s.k));drawCard();
-  }
-  function leave(){document.body.classList.remove("pre");$("choose").hidden=true;$("aiBox").hidden=true;window.scrollTo(0,0)}
-  $("chMan").onclick=leave;
-  $("chAI").onclick=function(){$("choose").hidden=true;$("aiBox").hidden=false;if(!started){started=true;ask("")}drawCard();setTimeout(function(){$("aiI").focus()},50)};
-  $("aiBk").onclick=leave;
-  $("aiSkip").onclick=function(){if(!cur||cur.req)return;skipped[cur.k]=1;ask("")};
-  function setv(id,v){var e=$(id);if(!e||!v)return;e.value=v;try{e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}))}catch(x){}}
-  $("aiGo").onclick=function(){
-    if(!reqOk())return;leave();
-    setv("shop",card.name);setv("owner",card.owner);setv("city",card.city);setv("area",card.area);setv("address",card.address);setv("services",card.services);
-    if(/^\d\d:\d\d$/.test(card.open))setv("openT",card.open);if(/^\d\d:\d\d$/.test(card.close))setv("closeT",card.close);
-  };
-  async function send(txt){
-    if(busy||!txt)return;
-    var lm=/^\s*(?:(hindi|hindhi|हिन्दी|हिंदी)|(english|angrezi|अंग्रेज़ी|अंग्रेजी|इंग्लिश))(?:\s+\S+){0,3}\s*$/i.exec(txt);
-    if(lm&&!review){var nl=lm[1]?"hi":"en";if(window.PB&&PB.set&&nl!==lg()){try{sessionStorage.setItem("pb-aistate",JSON.stringify({card:card,skipped:skipped}))}catch(x){}PB.set(nl);setTimeout(function(){ask("")},60)}else ask("");return}
-    busy=true;bubble("u",txt);var th=bubble("b",t("think"));
-    var base=(window.PB_SITE&&PB_SITE.aiUrl)||"",ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},20000),ok=false;
-    try{
-      if(!base)throw 0;
-      var r=await fetch(base.replace(/\/$/,"")+"/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,card:card,lang:lg(),mode:review?"edit":"guided",ask:review||!cur?"":cur.k}),signal:ctl.signal});
-      if(r.status===429){th.textContent=t("lim");return}
-      if(!r.ok){var et="";try{et=(await r.text()).replace(/\s+/g," ").slice(0,140)}catch(x){}throw {st:r.status,d:et}}var j=await r.json();
-      if(!j||!j.card)throw {st:"nocard",d:JSON.stringify(j).slice(0,100)};
-      Object.keys(card).forEach(function(k){if(typeof j.card[k]==="string")card[k]=j.card[k]});
-      th.textContent=j.reply||"";if(!j.reply)th.remove();ok=true;
-    }catch(e){th.textContent=t("fail")+" ["+((e&&e.st)||(e&&e.name)||"net")+((e&&e.d)?": "+e.d:"")+"]"}
-    finally{clearTimeout(tm);busy=false}
-    if(ok){
-      if(review){drawCard();$("aiMsgs").scrollTop=1e6;return}
-      var was=cur,s0=nextStep();
-      if(was&&s0&&s0.k===was.k&&was.req)ask(t("need")); else ask("");
-    }
-  }
-  $("aiF").onsubmit=function(e){e.preventDefault();var v=$("aiI").value.trim();$("aiI").value="";send(v)};
-  $("aiI").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();e.stopPropagation();var v=$("aiI").value.trim();$("aiI").value="";send(v)}});
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(SR){var mic=$("aiMic");mic.hidden=false;var rec=null;
-    mic.onclick=function(){
-      if(rec){try{rec.stop()}catch(e){}return}
-      rec=new SR();rec.lang=lg()==="en"?"en-IN":"hi-IN";rec.interimResults=false;rec.maxAlternatives=1;
-      rec.onresult=function(ev){var v=ev.results[0][0].transcript;if(v)send(v)};
-      rec.onend=function(){rec=null;mic.classList.remove("on")};rec.onerror=function(){};
-      mic.classList.add("on");try{rec.start()}catch(e){rec=null;mic.classList.remove("on")}
-    };
-  }
-  lab();if(window.PB&&PB.onChange)PB.onChange(lab);
-  try{var sv=sessionStorage.getItem("pb-aistate");sessionStorage.removeItem("pb-aistate");
-    if(sv&&show){sv=JSON.parse(sv);Object.keys(card).forEach(function(k){if(typeof sv.card[k]==="string")card[k]=sv.card[k]});skipped=sv.skipped||{};$("chAI").onclick()}}catch(x){}
-})();
 </script>
 </body>
 </html>
