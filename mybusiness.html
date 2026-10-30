@@ -1064,7 +1064,7 @@ async function start(){
   draw();
   /* होम पेज की "Offline: प्रोफ़ाइल पूरी करो" पट्टी से सीधे Settings → प्रोफ़ाइल */
   if(ME&&ROWS&&ROWS.length&&location.hash==="#num"){try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("num");}
-  if(ME&&ROWS&&ROWS.length&&location.hash==="#prof"){try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("prof");}
+  if(ME&&ROWS&&ROWS.length&&/^#prof(=|$)/.test(location.hash)){const sg=decodeURIComponent(location.hash.slice(6)||"");try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("prof");const ix=sg?ROWS.findIndex(r=>r&&r.slug===sg):-1;if(ix>=0&&ROWS.length>1){SET.shop=ix;draw();}}
 }
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;

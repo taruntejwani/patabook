@@ -139,7 +139,7 @@ $("saveBtn").onclick=async()=>{
   if(!pos)return;const b=$("saveBtn");b.disabled=true;st("saveSt","");
   try{S=await PBA.session();if(!S){only("needLogin");return;}
     await rpc("pb_owner_set_location",{p_slug:slug,p_lat:pos.lat,p_lng:pos.lng});
-    $("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);}
+    $("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);setTimeout(function(){location.replace("mybusiness.html#prof="+encodeURIComponent(slug));},500);}
   catch(x){b.disabled=false;const m=String(x.message||"");
     st("saveSt",/rate limit/.test(m)?T("आज स्थान 3 बार बदल चुके हैं। कल फिर कोशिश करें।","Location was changed 3 times today. Try again tomorrow.")
       :/bad location/.test(m)?T("पिन भारत के अंदर रखें।","Put the pin inside India.")
