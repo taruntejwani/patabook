@@ -24,6 +24,14 @@ async function sendOtp(email,next){
   var r=await fetch(SB+"/auth/v1/otp?redirect_to="+encodeURIComponent(back),{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json",Authorization:"Bearer "+KEY},body:JSON.stringify({email:email,create_user:true})});
   if(!r.ok){var j=null;try{j=await r.json();}catch(e){}var err=new Error((j&&(j.msg||j.message||j.error_description))||("HTTP "+r.status));err.status=r.status;err.code=j&&(j.error_code||j.code);throw err;}
 }
+/* Google se login: Supabase /authorize par bhejo; wapas login.html#access_token=... aata hai (fromUrl lega).
+   next ko sessionStorage me rakhte hain taaki redirect_to bina query ke allow-list se match ho */
+function google(next){
+  try{sessionStorage.setItem("pb-g-next",next||"");}catch(e){}
+  var back=location.origin+location.pathname.replace(/[^\/]*$/,"")+"login.html";
+  location.href=SB+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(back);
+}
+function googleNext(){var n="";try{n=sessionStorage.getItem("pb-g-next")||"";sessionStorage.removeItem("pb-g-next");}catch(e){}return n;}
 /* email me aaya code verify karo */
 async function verifyOtp(email,code){
   var d;
@@ -155,5 +163,5 @@ var mobile={
   staffVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"staff_phone",slug:slug,phone:phone,code:code},true);}
 
 };
-window.PBA={otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
+window.PBA={google:google,googleNext:googleNext,otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
 })();
