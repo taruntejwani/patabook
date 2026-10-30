@@ -266,7 +266,8 @@ async function load(){
       b._d=(mode==="geo"&&me&&hasPos)?km(me.lat,me.lng,+b.latitude,+b.longitude):null;
       return b;
     }).filter(b=>mode!=="geo"||b._nopos||(b._d!=null&&b._d<=radius));
-    rows.sort((a,b)=>mode==="geo"?((a._nopos?1:0)-(b._nopos?1:0))||((a._d??0)-(b._d??0))||String(a.name).localeCompare(b.name):String(a.name).localeCompare(b.name));
+    const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
+    rows.sort((a,b)=>mode==="geo"?((a._nopos?1:0)-(b._nopos?1:0))||((a._d??0)-(b._d??0))||String(a.name).localeCompare(b.name):(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
     rows=await premiumFirst(rows);
     render();
   }catch(e){list.innerHTML=`<p class="note">${L.err}</p>`;}
