@@ -380,18 +380,18 @@ function render(){
   const rows=[
     [(PB.lang&&PB.lang()!=="hi")?"Business type":"बिज़नेस का प्रकार",btypeLabel(line(b,"Type"))],
     [(PB.lang&&PB.lang()!=="hi")?"Hours":"समय",hoursText(b),"hours"],
-    ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))?line(b,"GST"):"","gst"],
-    ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))?line(b,"Udyam"):""]
+    ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))&&/^yes$/i.test(line(b,"GST-Verified"))?line(b,"GST"):"","gst"],
+    ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))&&/^yes$/i.test(line(b,"Udyam-Verified"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
-  const en=PB.lang&&PB.lang()!=="hi",gst=/^[0-9A-Z]{15}$/.test(line(b,"GST")),gstV=gst&&/^yes$/i.test(line(b,"GST-Verified")),udy=/^UDYAM-/.test(line(b,"Udyam"));
+  const en=PB.lang&&PB.lang()!=="hi",gstV=/^[0-9A-Z]{15}$/.test(line(b,"GST"))&&/^yes$/i.test(line(b,"GST-Verified")),gst=gstV,udy=/^UDYAM-/.test(line(b,"Udyam"))&&/^yes$/i.test(line(b,"Udyam-Verified"));
   const wsrc=b.website||line(b,"Website"),web=/^https?:\/\//i.test(wsrc||"")?wsrc:"";
   const ost=openStatus(b),addr=fullAddr(b,city),lmk=line(b,"Landmark").replace(/[<>]/g,""),sub2=[line(b,"District"),line(b,"State")].filter(Boolean).filter(x=>!addr.toLowerCase().includes(x.toLowerCase())).join(", ");
   document.getElementById("app").innerHTML=
    '<section class="card'+(PREM?' pcard':'')+'"><div style="display:flex;align-items:center;gap:14px">'+(PF("logo")?'<div class="lgw" data-pbh="logo">'+((/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(b.logo_url||""))?'<img class="blogo" src="'+esc(b.logo_url)+'" alt="">':'<div class="blogo ini">'+esc((String(b.name||"").trim()[0]||"P").toUpperCase())+'</div>')+(PREM?'<img class="crn" src="pb-crown.webp" alt="" width="34" height="34">':'')+'</div>':'')+'<h1 style="min-width:0"'+(PREM?' class="goldname"':'')+'><span class="t">'+esc(b.name)+'</span>'+(PREM?'<span class="seal" title="Premium">💎</span>':'')+'</h1></div><div class="tags">'+
      [sub,b.category].filter(Boolean).filter((x,i,a)=>a.findIndex(y=>y.toLowerCase()===x.toLowerCase())===i).map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+(city?'<span class="tag city">'+PBI("pin")+esc(city)+'<b id="bDist" style="font-weight:800"></b></span>':'')+(PREM?'<img class="gpb" src="pb-gold-premium.webp" alt="Gold Premium" width="112" height="30">':'')+
      (b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
-     (gst?'<span class="tag" data-pbh="gst" style="background:#e3f7ea;color:#137333">'+PBI("check")+(gstV?(en?"GST Verified":"GST Verified"):(en?"GST Registered":"GST रजिस्टर्ड"))+'</span>':'')+
-     (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME (Udyam)":"MSME (उद्यम)")+'</span>':'')+
+     (gst?'<span class="tag" data-pbh="gst" style="background:#e3f7ea;color:#137333">'+PBI("check")+(gstV?(en?"GST Verified":"GST Verified"):"")+'</span>':'')+
+     (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME Verified":"MSME Verified")+'</span>':'')+
      (/^yes$/i.test(line(b,"Delivery"))?'<span class="tag" style="background:#fff4e5;color:#874d00">🚚 '+((PB.lang&&PB.lang()!=="hi")?"Home Delivery":"होम डिलीवरी")+'</span>':'')+
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()!=="hi")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
    '</div>'+(ost?'<div data-pbh="hours" class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+

@@ -335,6 +335,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '<button class="lnk" data-a="fix" data-i="' + i + '">✍️ सुधार माँगें</button>' +
         (b.address ? '<button class="lnk" data-a="addr" data-i="' + i + '">✨ पता सुधारें</button>' : '') +
         (line(b.description, 'GST') ? '<button class="' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'phon' : 'lnk') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
+        (line(b.description, 'Udyam') ? '<button class="' + (/^yes$/i.test(line(b.description, 'Udyam-Verified')) ? 'phon' : 'lnk') + '" data-a="udy" data-i="' + i + '">🏭 MSME ' + (/^yes$/i.test(line(b.description, 'Udyam-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
         (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">' + (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 Premium') + ' ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
         '<button class="lnk" data-a="rate" data-i="' + i + '">⭐ Ratings</button>' +
@@ -505,13 +506,19 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       catch (x) { b.disabled = false; alert(/phone in use/i.test(x.message) ? 'यह नंबर पहले से किसी दूसरी दुकान पर है।' : /function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-16 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
       return;
     }
-    if (a === 'gst') {
-      var g = line(r.description, 'GST'), isV = /^yes$/i.test(line(r.description, 'GST-Verified'));
-      if (!isV && !confirm('GST: ' + g + '\n\nसरकारी वेबसाइट (services.gst.gov.in → Search Taxpayer) पर यह नंबर खोजें। नाम और पता इस दुकान से मिलता है?\n\nOK = हाँ, सही है → दुकान के पेज पर "✅ GST Verified" दिखेगा।')) { try { window.open('https://services.gst.gov.in/services/searchtp', '_blank'); } catch (x) {} return; }
-      if (isV && !confirm('"GST Verified" का निशान हटाएँ?')) return;
+    if (a === 'gst' || a === 'udy') {
+      var isG = a === 'gst', key = isG ? 'GST' : 'Udyam', vk = key + '-Verified', label = isG ? 'GST' : 'MSME (Udyam)';
+      var num = line(r.description, key), isV = /^yes$/i.test(line(r.description, vk));
+      var site = isG ? 'https://services.gst.gov.in/services/searchtp' : 'https://udyamregistration.gov.in';
+      var how = isG ? 'वहाँ "Search by GSTIN/UIN" में यह नंबर और captcha डालें।' : 'वहाँ ☰ → Print / Verify → "Verify Udyam Registration Number" में यह नंबर और captcha डालें।';
+      if (isV) { if (!confirm('"' + label + ' Verified" का निशान हटाएँ?')) return; }
+      else {
+        try { navigator.clipboard.writeText(num); } catch (x) {}
+        if (!confirm(label + ' नंबर: ' + num + '\n(कॉपी हो गया)\n\n1) OK दबाने से पहले सरकारी साइट खोलकर जाँचें: ' + site + '\n' + how + '\n2) नाम, पता और मोबाइल इस दुकान से मिलें तो OK दबाएँ → दुकान के पेज पर "✅ ' + label + ' Verified" दिखेगा।\n\nCancel = सरकारी साइट खोलें (अभी Verify न करें)।')) { try { window.open(site, '_blank'); } catch (x) {} return; }
+      }
       b.disabled = true;
-      try { await rpc('pb_admin_gst_verify', { p_slug: r.slug, p_on: !isV }); load(); }
-      catch (x) { b.disabled = false; alert(/function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-19 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
+      try { await rpc(isG ? 'pb_admin_gst_verify' : 'pb_admin_udyam_verify', { p_slug: r.slug, p_on: !isV }); load(); }
+      catch (x) { b.disabled = false; alert(/function|schema cache/i.test(x.message) ? 'पहले Supabase में नया SQL चलाएँ।' : 'नहीं हो सका: ' + x.message); }
       return;
     }
     if (a === 'addr') {

@@ -86,6 +86,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .stp .s em{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;background:#eef2fb;color:#174ea6}
 .stp .s span{flex:1;min-width:0}.stp .s i{font-style:normal;font-weight:800;font-size:13px;color:#1a73e8}
 .stp .s.ok{background:#f1faf4;border-color:#cfe9d8;color:#137333}.stp .s.ok em{background:transparent;font-size:16px}.stp .s.ok i{color:#137333}
+.stp .s.ok.wt{background:#fff8e6;border-color:#f3dc9a;color:#7a5200}.stp .s.ok.wt i{color:#b06d00}
 .stp .s.nx{border-color:#1a73e8;box-shadow:0 0 0 3px #1a73e822}.stp .s.nx em{background:#1a73e8;color:#fff}
 .pm{margin-top:12px;border-radius:16px;padding:12px 14px;background:linear-gradient(135deg,#eef2ff,#f6efff);border:1px solid #d9d0ff}
 .pm .ph{display:flex;align-items:center;gap:8px;font-weight:800;color:#3b2bb8;font-size:15px}.pm small{display:block;color:#5b6475;font-size:12.5px;font-weight:500;margin-top:2px}
@@ -424,7 +425,8 @@ function profItems(b,i){
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ","pop:cSvc"],
     [has("PIN")||has("Pincode"),"📮",en?"PIN code":"PIN कोड","pop:cPin"],
     [has("Email")||has("Website"),"🌐",en?"Email or website":"ईमेल या वेबसाइट","pop:cOnline"],
-    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number":"GST या उद्यम (MSME) नंबर","pop:gstCard"]
+    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number":"GST या उद्यम (MSME) नंबर","pop:gstCard",
+      (has("GST")||has("Udyam"))?((!has("GST")||/^GST-Verified:\s*yes/mi.test(d))&&(!has("Udyam")||/^Udyam-Verified:\s*yes/mi.test(d))?"ok":"pend"):""]
   ];
 }
 let TAB={};
@@ -452,7 +454,7 @@ function stepsBlock(it,en,slugOf){
   return '<div class="stp"><div class="sh"><b>'+(en?done+" of "+it.length+" steps done":it.length+" में से "+done+" कदम पूरे")+'</b><span class="bar"><i style="width:'+Math.round(done/it.length*100)+'%"></i></span></div>'+
     (n?'<a class="next" '+lnk(n)+'>'+(en?"Step "+(nx+1)+": ":"कदम "+(nx+1)+": ")+esc(n[2])+' ›</a>':'')+
     it.map((x,k)=>x[0]
-      ?(x[3]?'<a class="s ok" '+lnk(x)+'><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Change ›":"बदलें ›")+'</i></a>':'<div class="s ok"><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Done":"हो गया")+'</i></div>')
+      ?(x[3]?'<a class="s ok'+(x[4]==="pend"?' wt':'')+'" '+lnk(x)+'><em>'+(x[4]==="pend"?"⏳":"✅")+'</em><span>'+esc(x[2])+'</span><i>'+(x[4]==="pend"?(en?"Pending check ›":"जाँच बाकी ›"):x[4]==="ok"?(en?"🔒 Verified ›":"🔒 Verified ›"):(en?"Change ›":"बदलें ›"))+'</i></a>':'<div class="s ok"><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Done":"हो गया")+'</i></div>')
       :'<a class="s'+(k===nx?' nx':'')+'" '+lnk(x)+'><em>'+(k+1)+'</em><span>'+x[1]+' '+esc(x[2])+'</span><i>'+(en?"Add ›":"भरें ›")+'</i></a>').join("")+'</div>';
 }
 function kickMsg(){

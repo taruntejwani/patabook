@@ -143,7 +143,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
 
   <div class="card" id="gstCard" data-sec="about">
    <h2 data-en="🧾 GST / Udyam (MSME) number">🧾 GST / उद्यम (MSME) नंबर</h2>
-   <p class="hint" style="margin:-4px 0 6px" data-en="Optional. Your shop page shows a “GST Registered” / “MSME” badge — customers trust it more. Don’t have one? Leave empty.">ज़रूरी नहीं। दुकान के पेज पर "GST रजिस्टर्ड" / "MSME" का निशान दिखेगा — ग्राहकों का भरोसा बढ़ता है। नहीं है तो खाली छोड़ें।</p>
+   <p class="hint" style="margin:-4px 0 6px" data-en="Optional. After PataBook verifies it, your shop page shows a “GST Verified” / “MSME Verified” badge. Don’t have one? Leave empty.">ज़रूरी नहीं। PataBook के जाँच लेने के बाद ही दुकान के पेज पर "GST Verified" / "MSME Verified" का निशान दिखेगा। नहीं है तो खाली छोड़ें।</p>
    <label class="lbl" for="gst" data-en="GST number (15 letters)">GST नंबर (15 अक्षर)</label>
    <input id="gst" type="text" maxlength="20" autocapitalize="characters" spellcheck="false" placeholder="24ABCDE1234F1Z5" style="text-transform:uppercase;letter-spacing:.06em">
    <label class="lbl" for="udyam" data-en="Udyam (MSME) number">उद्यम (MSME) नंबर</label>
@@ -260,6 +260,23 @@ $("main").addEventListener("submit",async e=>{
   catch(x){$("err").textContent=errText(x.message);}
   b.disabled=false;
 });
+/* GST / Udyam: भरा है तो ⏳ जाँच बाकी; Admin ने Verify कर दिया तो 🔒 लॉक + "बदलें" (बदलने पर दुकान फिर Pending) */
+function gstLock(ds){
+  const en=window.PB&&PB.lang&&PB.lang()!=="hi";
+  [["gst","GST-Verified"],["udyam","Udyam-Verified"]].forEach(([id,vk])=>{
+    const inp=$(id);if(!inp||!inp.value)return;
+    const ok=/^yes$/i.test(line(ds,vk)),box=document.createElement("div");
+    box.style.cssText="margin:6px 0 0;font-size:13.5px;font-weight:700;color:"+(ok?"#137333":"#8a5a00");
+    if(!ok){box.textContent=en?"⏳ Pending check — shows to customers once PataBook verifies it.":"⏳ जाँच बाकी — PataBook के Verify करने के बाद ही ग्राहकों को दिखेगा।";inp.after(box);return;}
+    inp.disabled=true;inp.style.opacity=".7";
+    box.innerHTML="🔒 "+(en?"Verified":"Verified")+' <button type="button" style="margin-left:8px;border:1px solid #1a73e8;background:#fff;color:#1a73e8;border-radius:999px;padding:5px 12px;font-weight:800;font-size:13px">'+(en?"Change":"बदलें")+"</button>";
+    inp.after(box);
+    box.querySelector("button").onclick=()=>{
+      if(!confirm(en?"⚠️ Changing this number will take your shop offline for now.\n\nYour number is verified. If you change it, the Verified badge will be removed, your shop will go to Pending and customers will not see it until PataBook checks and approves it again.\n\nChange anyway?":"⚠️ नंबर बदलने पर आपकी दुकान कुछ समय के लिए बंद हो जाएगी।\n\nआपका नंबर Verified है। इसे बदलने पर Verified निशान हट जाएगा, दुकान Pending में चली जाएगी और ग्राहकों को नहीं दिखेगी। PataBook की जाँच और मंज़ूरी के बाद ही दुकान फिर से Live होगी।\n\nफिर भी बदलें?"))return;
+      inp.disabled=false;inp.style.opacity="";inp.focus();box.textContent=en?"⚠️ After saving, your shop goes to Pending until re-checked.":"⚠️ सेव करने पर दुकान Pending में जाएगी, दोबारा जाँच के बाद Live होगी।";box.style.color="#b3261e";
+    };
+  });
+}
 (async function start(){
   fill();only("loading");
   if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
@@ -276,7 +293,7 @@ $("main").addEventListener("submit",async e=>{
     $("offDay").value=line(ds,"Closed");
     MAIN=n10(String(b.phone||""));$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
     $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");$("lmk").value=line(ds,"Landmark");
-    $("igIn").value=line(ds,"Instagram");$("fbIn").value=line(ds,"Facebook");ORIGSOC={ig:$("igIn").value,fb:$("fbIn").value};$("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
+    $("igIn").value=line(ds,"Instagram");$("fbIn").value=line(ds,"Facebook");ORIGSOC={ig:$("igIn").value,fb:$("fbIn").value};$("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");gstLock(ds);$("locLink").href="location.html?slug="+encodeURIComponent(slug);
     if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
     only("main");
     try{const fo=new URLSearchParams(location.search).get("focus");const fe=fo&&$(fo==="phone"?"wa":fo);if(fe)setTimeout(()=>{fe.scrollIntoView({block:"center"});},150);}catch(_){}
