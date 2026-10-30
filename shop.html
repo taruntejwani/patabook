@@ -22,6 +22,7 @@
 <script src="pb-backhome.js"></script>
 <script src="pb-hide.js"></script>
 <script src="pb-hiring.js"></script>
+<script src="pb-rate.js"></script>
 <script src="pb-owner-edit.js"></script>
 <style>
 /* दुकानदार की अपनी mini website (shop.html?slug=...) — business.html के "View all" से खुलती है */
@@ -589,6 +590,7 @@ function render(){drawSoc();
      
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
+     '<div id="pbRate"></div>'+
      '<section class="blk" id="vis"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div id="about" data-pbh="about">'+
        (rows.length||email||web||mobRow()?'<div class="rows">'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
        mobRow()+

@@ -150,6 +150,7 @@ h2 .pbi{width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:var(--
 <script src="pb-icons.js"></script>
 <script src="pb-track.js"></script>
 <script src="pb-hiring.js"></script>
+<script src="pb-rate.js"></script>
 <script src="site-config.js"></script>
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js"></script>
@@ -398,6 +399,7 @@ function render(){
    (PRODP().length?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods" data-pbh="prods"></div>':'')+
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
    '<section class="card" id="contact" hidden><div id="cbox"></div></section>'+
+   '<div id="pbRate"></div>'+
    ((DET=>DET?'<section class="card" id="det">'+DET+'</section>':'')(
    (GALP().length?'<div class="mos n'+(GALP().length>=5?5:GALP().length===4?3:GALP().length)+'" id="galM" data-pbh="photos"></div>':'')+
    '<h2>'+PBI("store")+esc(en?"About us":"हमारे बारे में")+'</h2>'+
