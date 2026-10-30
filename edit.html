@@ -267,11 +267,11 @@ function gstLock(ds){
     const inp=$(id);if(!inp||!inp.value)return;
     const ok=/^yes$/i.test(line(ds,vk)),box=document.createElement("div");
     box.style.cssText="margin:6px 0 0;font-size:13.5px;font-weight:700;color:"+(ok?"#137333":"#8a5a00");
-    if(!ok){box.textContent=en?"⏳ Pending check — shows to customers once PataBook verifies it.":"⏳ जाँच बाकी — PataBook के Verify करने के बाद ही ग्राहकों को दिखेगा।";inp.after(box);return;}
     inp.disabled=true;inp.style.opacity=".7";
-    box.innerHTML="🔒 "+(en?"Verified":"Verified")+' <button type="button" style="margin-left:8px;border:1px solid #1a73e8;background:#fff;color:#1a73e8;border-radius:999px;padding:5px 12px;font-weight:800;font-size:13px">'+(en?"Change":"बदलें")+"</button>";
+    box.innerHTML=(ok?"🔒 "+(en?"Verified":"Verified"):"🔒 "+(en?"Saved — ⏳ pending check by PataBook":"सेव है — ⏳ PataBook की जाँच बाकी"))+' <button type="button" style="margin-left:8px;border:1px solid #1a73e8;background:#fff;color:#1a73e8;border-radius:999px;padding:5px 12px;font-weight:800;font-size:13px">'+(en?"Change":"बदलें")+"</button>";
     inp.after(box);
     box.querySelector("button").onclick=()=>{
+      if(!ok){if(!confirm(en?"Change this number? It will be checked again by PataBook.":"यह नंबर बदलें? PataBook इसे दोबारा जाँचेगा।"))return;inp.disabled=false;inp.style.opacity="";inp.focus();box.textContent=en?"⏳ Pending check after you save.":"⏳ सेव करने के बाद जाँच बाकी रहेगी।";return;}
       if(!confirm(en?"⚠️ Changing this number will take your shop offline for now.\n\nYour number is verified. If you change it, the Verified badge will be removed, your shop will go to Pending and customers will not see it until PataBook checks and approves it again.\n\nChange anyway?":"⚠️ नंबर बदलने पर आपकी दुकान कुछ समय के लिए बंद हो जाएगी।\n\nआपका नंबर Verified है। इसे बदलने पर Verified निशान हट जाएगा, दुकान Pending में चली जाएगी और ग्राहकों को नहीं दिखेगी। PataBook की जाँच और मंज़ूरी के बाद ही दुकान फिर से Live होगी।\n\nफिर भी बदलें?"))return;
       inp.disabled=false;inp.style.opacity="";inp.focus();box.textContent=en?"⚠️ After saving, your shop goes to Pending until re-checked.":"⚠️ सेव करने पर दुकान Pending में जाएगी, दोबारा जाँच के बाद Live होगी।";box.style.color="#b3261e";
     };
