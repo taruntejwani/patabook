@@ -380,10 +380,10 @@ async function submitApproval(i,btn){
   try{
     /* मंज़ूरी के लिए भेजने से पहले: मोबाइल और Google दोनों verified होने चाहिए */
     const id=await PBA.identities();
-    if(id&&!(id.google&&id.mobile)){
+    /* मोबाइल नंबर दुकान जोड़ते समय ही OTP से verify हो चुका है; यहाँ सिर्फ़ Google जुड़ा होना चाहिए */
+    if(id&&!id.google){
       btn.disabled=false;
-      if(!id.mobile){if(er)er.textContent=en?"Please log in to My Shop with your mobile number (OTP), then add Google. Both are needed to send for approval.":"मंज़ूरी के लिए मोबाइल और Google दोनों verify चाहिए। पहले My Shop में मोबाइल नंबर (OTP) से login करें, फिर Google जोड़ें।";return;}
-      if(er){er.innerHTML='<div style="margin:8px 0">'+(en?"Mobile ✅ verified. One more step: add your Google account (needed for approval).":"मोबाइल ✅ verify है। एक कदम बाकी: अपना Google account जोड़ें (मंज़ूरी के लिए ज़रूरी)।")+'</div><button type="button" class="go" id="lkG'+i+'">'+(en?"Add Google":"Google जोड़ें")+'</button>';
+      if(er){er.innerHTML='<div style="margin:8px 0">'+(en?"One step left: add your Google account (needed for approval).":"एक कदम बाकी: अपना Google account जोड़ें (मंज़ूरी के लिए ज़रूरी)।")+'</div><button type="button" class="go" id="lkG'+i+'">'+(en?"Add Google":"Google जोड़ें")+'</button>';
         const k=$("lkG"+i);if(k)k.onclick=async()=>{k.disabled=true;try{await PBA.linkGoogle("mybusiness.html");}catch(x){k.disabled=false;er.textContent=en?"Could not add Google. Try again later.":"Google जोड़ नहीं पाए। थोड़ी देर बाद फिर कोशिश करें।";}};}
       return;}
     const j=await rpc("pb_submit_for_approval",{p_slug:b.slug}),live=!!(j&&j.status==="live");
