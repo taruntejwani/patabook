@@ -157,7 +157,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
   /* ───────── दुकानें ───────── */
   async function drawShops() {
     var b = $('body');
-    b.innerHTML = '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
+    b.innerHTML = '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
     $('sT').onclick = function (e) { var x = e.target.closest('[data-st]'); if (x) { shSt = x.dataset.st; drawShops(); } };
     var tm; $('sQ').oninput = function () { shQ = this.value; clearTimeout(tm); tm = setTimeout(loadShops, 350); };
     loadShops();
@@ -166,6 +166,21 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     var L = $('sL'); if (!L) return;
     try { SH = await rpc('pb_team_shops', { p_status: shSt, p_q: shQ || null, p_limit: 100 }) || []; } catch (e) { return L.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     L.innerHTML = SH.length ? SH.map(shopCard).join('') : '<p class="mut">कोई दुकान नहीं मिली।</p>';
+  }
+  /* प्रोफ़ाइल में क्या अधूरा है (दुकानदार के Settings वाली 10 बातें) */
+  function missOf(s) {
+    var d = s.description || '', has = function (k) { return !!ln(d, k); }, m = [];
+    if (!(s.name && s.address)) m.push('नाम / पता');
+    if (s.has_phone === false) m.push('मोबाइल');
+    if (s.latitude == null || s.longitude == null) m.push('Location');
+    if (!s.logo_url) m.push('Logo');
+    if (!has('Hours')) m.push('समय');
+    if (!has('Type')) m.push('प्रकार');
+    if (!has('Services')) m.push('सेवाएँ');
+    if (!(has('PIN') || has('Pincode'))) m.push('PIN');
+    if (!(has('Email') || has('Website'))) m.push('Email / वेबसाइट');
+    if (!(has('GST') || has('Udyam'))) m.push('GST / Udyam');
+    return m;
   }
   function vLine(d, k, lab) {
     var n = ln(d, k); if (!n) return '';
@@ -178,10 +193,11 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     if (can('gst') && g) btn += '<button class="btn ' + (gv ? 'o' : 'g') + '" data-sa="gst" data-on="' + (gv ? 0 : 1) + '">' + (gv ? '↩ GST Verified हटाएँ' : '✅ GST सही है') + '</button><button class="btn w" data-sa="gsite" data-n="' + esc(g) + '">🌐 GST साइट</button>';
     if (can('gst') && u) btn += '<button class="btn ' + (uv ? 'o' : 'g') + '" data-sa="udy" data-on="' + (uv ? 0 : 1) + '">' + (uv ? '↩ MSME Verified हटाएँ' : '✅ MSME सही है') + '</button><button class="btn w" data-sa="usite" data-n="' + esc(u) + '">🏭 MSME साइट</button>';
     if (can('addr')) btn += '<button class="btn w" data-sa="addr">📍 पता बदलें</button>';
-    if (!s.is_active) btn += '<button class="btn" data-sa="ready">📤 Approval के लिए भेजें</button>';
-    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">Live</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' +
+    if (!s.is_active && s.submitted_at) btn += '<button class="btn" data-sa="ready">📤 Approval के लिए भेजें</button>';
+    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">Live</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : !s.submitted_at ? '<span class="role off">अधूरी (Offline)</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' +
+      (function () { var m = missOf(s); return m.length ? '<div class="ln nv">⚠ अधूरा (' + m.length + '): ' + esc(m.join(' · ')) + '</div>' : '<div class="ln v">✅ प्रोफ़ाइल 100% पूरी</div>'; })() +
       vLine(d, 'GST', '🧾 GST') + vLine(d, 'Udyam', '🏭 Udyam') + (!g && !u ? '<div class="ln mut">GST / Udyam नंबर नहीं डाला</div>' : '') +
-      '<div class="row"><a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(s.slug) + '">👁 दुकान देखें</a>' + btn + '</div><div class="ed"></div><div class="msg"></div></div>';
+      '<div class="row">' + (s.is_active ? '<a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(s.slug) + '">👁 दुकान देखें</a>' : '') + btn + '</div><div class="ed"></div><div class="msg"></div></div>';
   }
   document.addEventListener('click', async function (e) {
     var a = e.target.closest('[data-sa]'); if (!a) return;
