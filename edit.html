@@ -180,11 +180,7 @@ const $=id=>document.getElementById(id),EN=!!window.PB_EN;
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
 /* बिज़नेस के प्रकार — "दुकान जोड़ें" form (list.html) वाली ही list */
 const BTYPES=[
- ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (Manufacturer)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Worker","जॉब वर्कर (Job Work)"],["Assembler","असेंबलर"]]],
- ["🚚 थोक / बीच के व्यापारी","🚚 Trade (bulk)",[["Importer","इम्पोर्टर"],["Exporter","एक्सपोर्टर"],["C&F / Super Stockist","C&F / सुपर स्टॉकिस्ट"],["Distributor","डिस्ट्रीब्यूटर"],["Wholesaler","होलसेलर (थोक)"],["Stockist","स्टॉकिस्ट"],["Authorised Dealer","अधिकृत डीलर"],["Trader / Commission Agent","ट्रेडर / दलाल"]]],
- ["🏪 ग्राहक तक","🏪 To customers",[["Retailer","रिटेलर (दुकान)"],["Showroom","शोरूम"],["Franchise","फ्रैंचाइज़ी"],["Online Seller","ऑनलाइन विक्रेता"],["Hawker / Street Vendor","फेरीवाला / ठेला"]]],
- ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (Service)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]],
- ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled Worker)"]]]
+ ["🏪 बिज़नेस का प्रकार","🏪 Business type",[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी (Wholesaler)"],["Manufacturer","निर्माता (Manufacturer)"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा (Service)"],["Repair & Service Centre","Repair और Service Centre"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]]]
 ];
 const DAYS=[["","कोई छुट्टी नहीं (सातों दिन खुला)","No weekly off (open all 7 days)"],["Sunday","रविवार","Sunday"],["Monday","सोमवार","Monday"],["Tuesday","मंगलवार","Tuesday"],["Wednesday","बुधवार","Wednesday"],["Thursday","गुरुवार","Thursday"],["Friday","शुक्रवार","Friday"],["Saturday","शनिवार","Saturday"]];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
