@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>टीम – PataBook</title>
+<link rel="icon" href="pin.png">
+<meta name="theme-color" content="#0b2f73">
+<script src="pb-auth.js"></script>
+<script src="site-config.js"></script>
+<style>
+:root{--b:#0b2f73;--bl:#1a73e8;--g:#1e9e57;--r:#d93025;--mu:#5f6368;--bd:#e1e6ef}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f4f7fc;color:#202124}
+header{background:var(--b);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0;flex:1}
+header a{color:#fff;font-size:13px;text-decoration:underline;font-weight:700}
+main{max-width:760px;margin:0 auto;padding:14px 16px 60px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.tabs button{border:1.5px solid var(--bd);background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;color:#3c4043}
+.tabs button.on{background:var(--b);color:#fff;border-color:var(--b)}
+.card{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h3{margin:0 0 4px;font-size:16px}
+.mut{color:var(--mu);font-size:13px;line-height:1.45}
+.role{display:inline-block;font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 9px;margin-left:6px;background:#eef3fd;color:var(--bl)}
+.role.m{background:#efeaff;color:#5b2bb8}.role.off{background:#fdecec;color:var(--r)}
+.btn{border:0;border-radius:12px;padding:10px 14px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;background:var(--bl);color:#fff}
+.btn.g{background:var(--g)}.btn.r{background:var(--r)}.btn.w{background:#eef3fd;color:var(--bl)}.btn.o{background:#fff;color:#3c4043;border:1.5px solid var(--bd)}
+.btn[disabled]{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+input,select,textarea{width:100%;border:2px solid #dfe1e5;border-radius:12px;padding:11px 12px;font:inherit;font-size:15px;background:#fff;margin-top:8px}
+label.ck{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px;font-weight:600}
+label.ck input{width:auto;margin:0}
+.err{color:var(--r);font-weight:700;font-size:14px;margin-top:8px}
+.ok{color:var(--g);font-weight:700;font-size:14px;margin-top:8px}
+.ln{font-size:13.5px;margin-top:6px;line-height:1.5}
+.v{color:var(--g);font-weight:800}.nv{color:#b26a00;font-weight:800}
+.sub{margin:10px 0 0 14px;padding-left:10px;border-left:3px solid #e8edf5}
+.gate{max-width:420px;margin:60px auto;text-align:center;padding:0 16px}
+.gate a{display:inline-block;margin-top:10px;background:var(--bl);color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:11px 16px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #eef1f6;padding:6px 4px;text-align:left;vertical-align:top}
+</style>
+</head>
+<body>
+<header><h1 id="ttl">👥 टीम</h1><a href="admin.html" id="adm" hidden>Admin</a></header>
+<main id="m"><div class="mut">लोड हो रहा है…</div></main>
+<script>
+(function () {
+  var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {};
+  var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।' };
+  function eMsg(e) { var m = String(e && e.message || e); for (var k in ER) if (m.indexOf(k) >= 0) return ER[k]; return 'गलती: ' + m; }
+
+  async function rpc(fn, args) {
+    var s = await PBA.session();
+    if (!s) { gate('login'); throw new Error('login'); }
+    var r = await fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) });
+    var j = null; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) { var e = new Error((j && (j.message || j.msg)) || ('HTTP ' + r.status)); e.status = r.status; throw e; }
+    return j;
+  }
+  function gate(kind, extra) {
+    $('m').innerHTML = kind === 'login'
+      ? '<div class="gate"><h2>🔒 लॉगिन करें</h2><p class="mut">अपने Google email से लॉगिन करें। यह वही email होना चाहिए जो Admin ने टीम में जोड़ा है।</p><a href="' + PBA.loginUrl('team.html') + '">✉️ Email से लॉगिन करें</a></div>'
+      : '<div class="gate"><h2>⛔ अनुमति नहीं</h2><p class="mut">यह email टीम में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '। Admin से कहें कि इसे टीम में जोड़ें, या सही Google email से लॉगिन करें।</p></div>';
+  }
+  function can(p) { if (ROLE === 'owner') return true; if (ROLE === 'manager') return p === 'photo' || p === 'gst' || p === 'addr'; return !!(ME && ME.perms && ME.perms[p] === true); }
+  function ln(d, k) { var m = String(d || '').match(new RegExp('^' + k + ':\\s*(.+)$', 'mi')); return m ? m[1].trim() : ''; }
+
+  async function boot() {
+    try {
+      ROLE = await rpc('pb_team_role', {});
+      if (!ROLE) { var s = await PBA.session(); return gate('noteam', s && s.email); }
+      if (ROLE !== 'owner') { var me = await rpc('pb_team_me', {}); ME = (me && me[0]) || null; }
+      else $('adm').hidden = false;
+    } catch (e) { if (e.message === 'login') return; return $('m').innerHTML = '<div class="gate"><p class="err">' + esc(eMsg(e)) + '</p></div>'; }
+    $('ttl').textContent = ROLE === 'owner' ? '👥 टीम (Owner)' : ROLE === 'manager' ? '👥 Manager' : '🧾 Staff';
+    TAB = ROLE === 'staff' ? 'shops' : 'team';
+    if (location.hash === '#shops') TAB = 'shops';
+    draw();
+  }
+  function tabs() {
+    var T = [];
+    if (ROLE !== 'staff') T.push(['team', ROLE === 'owner' ? '👥 टीम' : '👥 मेरे Staff']);
+    T.push(['shops', '🧾 दुकानें']);
+    if (ROLE === 'owner') T.push(['ready', '📬 जाँच पूरी']);
+    if (ROLE !== 'staff') T.push(['log', '📜 रिकॉर्ड']);
+    return '<div class="tabs">' + T.map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+  }
+  function draw() {
+    $('m').innerHTML = tabs() + '<div id="body"><div class="mut">लोड हो रहा है…</div></div>';
+    if (TAB === 'team') return drawTeam();
+    if (TAB === 'shops') return drawShops();
+    if (TAB === 'ready') return drawReady();
+    if (TAB === 'log') return drawLog();
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tab]'); if (t) { TAB = t.dataset.tab; draw(); }
+  });
+
+  /* ───────── टीम ───────── */
+  function permBoxes(id, perms) {
+    return '<label class="ck"><input type="checkbox" data-p="gst" ' + (perms && perms.gst ? 'checked' : '') + '> 🧾 GST / MSME जाँच</label><label class="ck"><input type="checkbox" data-p="addr" ' + (perms && perms.addr ? 'checked' : '') + '> 📍 पता सुधार</label>';
+  }
+  async function drawTeam() {
+    var b = $('body');
+    try { TEAM = await rpc('pb_team_list', {}) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    var mgrs = TEAM.filter(function (t) { return t.role === 'manager'; });
+    var h = '<div class="card"><h3>＋ ' + (ROLE === 'owner' ? 'नया Manager या Staff जोड़ें' : 'नया Staff जोड़ें') + '</h3><p class="mut">उसका <b>Google email</b> डालें। वह उसी email से लॉगिन करके अपना काम देखेगा।</p>' +
+      '<input id="aE" type="email" inputmode="email" placeholder="name@gmail.com" autocomplete="off"><input id="aN" placeholder="नाम (ज़रूरी नहीं)" maxlength="60">';
+    if (ROLE === 'owner') h += '<select id="aR"><option value="manager">👔 Manager</option><option value="staff">🧑‍💼 Staff (किसी Manager के नीचे)</option></select><select id="aP" hidden>' + mgrs.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name || m.email) + '</option>'; }).join('') + '</select>';
+    h += '<div id="aPerm" ' + (ROLE === 'owner' ? 'hidden' : '') + '>' + permBoxes('a', { gst: true, addr: true }) + '</div><div class="row"><button class="btn" id="aGo">जोड़ें</button></div><div id="aMsg"></div></div>';
+    var top = ROLE === 'owner' ? mgrs : TEAM.filter(function (t) { return t.role === 'staff'; });
+    h += top.length ? top.map(function (t) { return memberCard(t, ROLE === 'owner'); }).join('') : '<p class="mut">अभी कोई नहीं जुड़ा।</p>';
+    b.innerHTML = h;
+    var aR = $('aR'); if (aR) aR.onchange = function () { var st = aR.value === 'staff'; $('aP').hidden = !st; $('aPerm').hidden = !st; };
+    $('aGo').onclick = async function () {
+      var btn = this, role = ROLE === 'owner' ? $('aR').value : 'staff', perms = {};
+      $('aPerm').querySelectorAll('[data-p]').forEach(function (c) { if (c.checked) perms[c.dataset.p] = true; });
+      btn.disabled = true; $('aMsg').innerHTML = '';
+      try {
+        await rpc('pb_team_add', { p_email: $('aE').value, p_name: $('aN').value, p_role: role, p_parent: role === 'staff' && ROLE === 'owner' ? +$('aP').value || null : null, p_perms: perms });
+        MSG.t = 'जुड़ गया। अब वह इसी email से लॉगिन करके team.html खोले।'; await drawTeam(); $('aMsg').innerHTML = '<p class="ok">' + MSG.t + '</p>';
+      } catch (e) { btn.disabled = false; $('aMsg').innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    };
+  }
+  function memberCard(t, nest) {
+    var kids = nest ? TEAM.filter(function (x) { return x.parent_id === t.id; }) : [];
+    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || t.email) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(t.email) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' +
+      (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : '<div class="row">') +
+      '<button class="btn o" data-act="tog">' + (t.active ? '⏸ रोकें' : '▶ चालू करें') + '</button><button class="btn r" data-act="del">🗑 हटाएँ</button></div><div class="msg"></div>' +
+      (kids.length ? '<div class="sub">' + kids.map(function (k) { return memberCard(k, false); }).join('') + '</div>' : '') + '</div>';
+  }
+  document.addEventListener('click', async function (e) {
+    var a = e.target.closest('[data-act]'); if (!a || TAB !== 'team') return;
+    var card = a.closest('[data-id]'), id = +card.dataset.id, t = TEAM.filter(function (x) { return x.id === id; })[0], msg = card.querySelector('.msg');
+    var act = a.dataset.act; e.stopPropagation();
+    try {
+      if (act === 'del') {
+        if (a.dataset.sure !== '1') { a.dataset.sure = '1'; a.textContent = 'पक्का हटाएँ?'; return; }
+        await rpc('pb_team_remove', { p_id: id }); return drawTeam();
+      }
+      if (act === 'tog') { await rpc('pb_team_set', { p_id: id, p_active: !t.active }); return drawTeam(); }
+      if (act === 'save') {
+        var perms = {}; card.querySelector('[data-perm]').querySelectorAll('[data-p]').forEach(function (c) { if (c.checked) perms[c.dataset.p] = true; });
+        await rpc('pb_team_set', { p_id: id, p_perms: perms }); msg.innerHTML = '<p class="ok">सेव हो गया।</p>';
+      }
+    } catch (x) { msg.innerHTML = '<p class="err">' + esc(eMsg(x)) + '</p>'; }
+  });
+
+  /* ───────── दुकानें ───────── */
+  async function drawShops() {
+    var b = $('body');
+    b.innerHTML = '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
+    $('sT').onclick = function (e) { var x = e.target.closest('[data-st]'); if (x) { shSt = x.dataset.st; drawShops(); } };
+    var tm; $('sQ').oninput = function () { shQ = this.value; clearTimeout(tm); tm = setTimeout(loadShops, 350); };
+    loadShops();
+  }
+  async function loadShops() {
+    var L = $('sL'); if (!L) return;
+    try { SH = await rpc('pb_team_shops', { p_status: shSt, p_q: shQ || null, p_limit: 100 }) || []; } catch (e) { return L.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    L.innerHTML = SH.length ? SH.map(shopCard).join('') : '<p class="mut">कोई दुकान नहीं मिली।</p>';
+  }
+  function vLine(d, k, lab) {
+    var n = ln(d, k); if (!n) return '';
+    var ok = /^yes/i.test(ln(d, k + '-Verified'));
+    return '<div class="ln">' + lab + ': <b>' + esc(n) + '</b> · ' + (ok ? '<span class="v">✅ Verified</span>' : '<span class="nv">⏳ जाँच बाकी</span>') + '</div>';
+  }
+  function shopCard(s) {
+    var d = s.description || '', g = ln(d, 'GST'), u = ln(d, 'Udyam'), gv = /^yes/i.test(ln(d, 'GST-Verified')), uv = /^yes/i.test(ln(d, 'Udyam-Verified'));
+    var btn = '';
+    if (can('gst') && g) btn += '<button class="btn ' + (gv ? 'o' : 'g') + '" data-sa="gst" data-on="' + (gv ? 0 : 1) + '">' + (gv ? '↩ GST Verified हटाएँ' : '✅ GST सही है') + '</button><button class="btn w" data-sa="gsite" data-n="' + esc(g) + '">🌐 GST साइट</button>';
+    if (can('gst') && u) btn += '<button class="btn ' + (uv ? 'o' : 'g') + '" data-sa="udy" data-on="' + (uv ? 0 : 1) + '">' + (uv ? '↩ MSME Verified हटाएँ' : '✅ MSME सही है') + '</button><button class="btn w" data-sa="usite" data-n="' + esc(u) + '">🏭 MSME साइट</button>';
+    if (can('addr')) btn += '<button class="btn w" data-sa="addr">📍 पता बदलें</button>';
+    if (!s.is_active) btn += '<button class="btn" data-sa="ready">📤 Approval के लिए भेजें</button>';
+    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">Live</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' +
+      vLine(d, 'GST', '🧾 GST') + vLine(d, 'Udyam', '🏭 Udyam') + (!g && !u ? '<div class="ln mut">GST / Udyam नंबर नहीं डाला</div>' : '') +
+      '<div class="row"><a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(s.slug) + '">👁 दुकान देखें</a>' + btn + '</div><div class="ed"></div><div class="msg"></div></div>';
+  }
+  document.addEventListener('click', async function (e) {
+    var a = e.target.closest('[data-sa]'); if (!a) return;
+    var card = a.closest('[data-slug]'), slug = card.dataset.slug, msg = card.querySelector('.msg'), act = a.dataset.sa, ed = card.querySelector('.ed');
+    msg.innerHTML = '';
+    try {
+      if (act === 'gsite' || act === 'usite') {
+        try { await navigator.clipboard.writeText(a.dataset.n); } catch (x) {}
+        window.open(act === 'gsite' ? 'https://services.gst.gov.in/services/searchtp' : 'https://udyamregistration.gov.in/Udyam_Verify.aspx', '_blank', 'noopener');
+        msg.innerHTML = '<p class="ok">नंबर copy हो गया — साइट पर paste करें और दुकान का नाम मिलाएँ।</p>'; return;
+      }
+      if (act === 'gst' || act === 'udy') {
+        a.disabled = true; await rpc(act === 'gst' ? 'pb_admin_gst_verify' : 'pb_admin_udyam_verify', { p_slug: slug, p_on: a.dataset.on === '1' }); return loadShops();
+      }
+      if (act === 'addr') {
+        var s = SH.filter(function (x) { return x.slug === slug; })[0] || {};
+        ed.innerHTML = '<textarea id="eA" rows="3" maxlength="300">' + esc(s.address || '') + '</textarea><div class="row"><button class="btn g" data-sa="addrsave">सेव करें</button><button class="btn o" data-sa="addrx">रद्द</button></div>'; return;
+      }
+      if (act === 'addrx') { ed.innerHTML = ''; return; }
+      if (act === 'addrsave') { a.disabled = true; await rpc('pb_admin_set_address', { p_slug: slug, p_address: card.querySelector('#eA').value }); return loadShops(); }
+      if (act === 'ready') {
+        ed.innerHTML = '<input id="eN" maxlength="300" placeholder="Owner के लिए छोटा नोट (ज़रूरी नहीं)"><div class="row"><button class="btn g" data-sa="readygo">भेज दें</button><button class="btn o" data-sa="addrx">रद्द</button></div>'; return;
+      }
+      if (act === 'readygo') { a.disabled = true; await rpc('pb_team_ready', { p_slug: slug, p_note: card.querySelector('#eN').value || null }); return loadShops(); }
+    } catch (x) { a.disabled = false; msg.innerHTML = '<p class="err">' + esc(eMsg(x)) + '</p>'; }
+  });
+
+  /* ───────── जाँच पूरी (Owner) ───────── */
+  async function drawReady() {
+    var b = $('body'), R;
+    try { R = await rpc('pb_team_ready_list', {}) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    b.innerHTML = '<p class="mut">टीम ने इन दुकानों की जाँच पूरी कर दी है। Approve सिर्फ़ आप Admin से करेंगे।</p>' + (R.length ? R.map(function (r) {
+      return '<div class="card"><h3>' + esc(r.name) + '</h3><div class="mut">भेजने वाला: ' + esc(r.by_email) + ' · ' + new Date(r.at).toLocaleString('hi-IN') + '</div>' + (r.note ? '<div class="ln">📝 ' + esc(r.note) + '</div>' : '') + '<div class="row"><a class="btn" style="text-decoration:none" href="admin.html">✅ Admin में Approve करें</a><a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(r.slug) + '">👁 दुकान देखें</a></div></div>';
+    }).join('') : '<p class="mut">अभी कोई दुकान नहीं आई।</p>');
+  }
+
+  /* ───────── रिकॉर्ड ───────── */
+  async function drawLog() {
+    var b = $('body'), R;
+    try { R = await rpc('pb_team_log_list', { p_limit: 150 }) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    var N = { gst_verify: '🧾 GST', udyam_verify: '🏭 MSME', address: '📍 पता', ready: '📤 भेजी', team_add: '➕ जोड़ा', team_set: '✏️ बदला', team_remove: '🗑 हटाया' };
+    b.innerHTML = R.length ? '<div class="card"><table><tr><th>कब</th><th>किसने</th><th>क्या</th></tr>' + R.map(function (r) {
+      return '<tr><td>' + new Date(r.at).toLocaleString('hi-IN', { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + esc(r.by_email) + '</td><td>' + (N[r.action] || esc(r.action)) + (r.slug ? ' · ' + esc(r.slug) : '') + (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</td></tr>';
+    }).join('') + '</table></div>' : '<p class="mut">अभी कोई रिकॉर्ड नहीं।</p>';
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

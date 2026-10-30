@@ -621,7 +621,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try { c = await rpc('pb_admin_counts', {}); }
     catch (e) {
       if (e.message === 'login') return;
-      if (/not admin/i.test(e.message) || e.status === 403) { $('home').hidden = true; return gate('noadmin', sess && sess.email); }
+      if (/not admin/i.test(e.message) || e.status === 403) { $('home').hidden = true; try { if (await rpc('pb_team_role', {})) { location.replace('team.html'); return; } } catch (x) {} return gate('noadmin', sess && sess.email); }
       note = '⚠ गिनती के लिए Supabase में sql-09-complaints.sql चलाएँ।';
     }
     c = c || {};
@@ -640,7 +640,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0],
       ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
       ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0],
-      ['premium', '💎', '#efeaff', 'Premium', '–', 'चालू Premium दुकानें', 0]
+      ['premium', '💎', '#efeaff', 'Premium', '–', 'चालू Premium दुकानें', 0],
+      ['team', '👥', '#eef2ff', 'टीम (Manager / Staff)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
@@ -662,6 +663,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'edits') return showEdits();
     if (t === 'hsreq') return showHsReq();
     if (t === 'premium') return showPrem();
+    if (t === 'team') { location.href = 'team.html'; return; }
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : t === 'draft' ? 'draft' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
