@@ -90,6 +90,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 .bulk button:disabled{opacity:.4;cursor:default}
 .card.sel{border-color:#1a73e8;box-shadow:0 0 0 2px #1a73e833;background:#f8fbff}
 .phon{background:linear-gradient(90deg,#25d366,#1a73e8);color:#fff}.phoff{background:#e4e4e4;color:#555;filter:grayscale(1)}
+.acts .gr{background:#e7f8ee;color:#137a3f;box-shadow:inset 0 0 0 1.5px #7fd3a3}.acts .rd{background:#fdecec;color:#b42318;box-shadow:inset 0 0 0 1.5px #f1a7a0}
+.miss{font-size:12px;font-weight:700;margin-top:6px;line-height:1.5}.miss.bad{color:#b26a00}.miss.good{color:#137a3f}
 .kp{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:6px 0 12px}
 .kp div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}
 .kp b{display:block;font-size:26px;color:#0b2f73;font-variant-numeric:tabular-nums;line-height:1.1}.kp span{font-size:12px;color:var(--muted);font-weight:700}
@@ -291,7 +293,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   }
   function phBtn(b, i) {
     var on = ownOf(b).show_phone !== false;
-    return '<button class="' + (on ? 'phon' : 'phoff') + '" data-a="ph" data-i="' + i + '">📞 नंबर ' + (on ? 'ON' : 'OFF') + '</button>';
+    return '<button class="' + (on ? 'gr' : 'rd') + '" data-a="ph" data-i="' + i + '">📞 नंबर ' + (on ? 'ON' : 'OFF') + '</button>';
   }
   function homeOf(b) { return (HOME && HOME[b.slug]) || {}; }
   function cityNames(ids) { return (ids || []).map(function (id) { var c = (CITIES || []).filter(function (x) { return x.id === id; })[0]; return c ? c.name : id; }).join(', '); }
@@ -299,6 +301,21 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var h = homeOf(b), on = !!h.home_service;
     return '<button class="' + (on ? 'phon' : 'phoff') + '" data-a="hs" data-i="' + i + '">🏠 Home ' + (on ? 'ON' : 'OFF') + '</button>' +
       (on && h.city_ids && h.city_ids.length ? '<span class="meta" style="align-self:center">+ ' + esc(cityNames(h.city_ids)) + '</span>' : '');
+  }
+  /* 🚦 प्रोफ़ाइल में क्या अधूरा है — वही 10 बातें जो दुकानदार के Settings वाले steps में हैं */
+  function missOf(b) {
+    var d = b.description || '', has = function (k) { return !!line(d, k); }, m = [];
+    if (!(b.name && b.address)) m.push('नाम / पता');
+    if (!b.phone) m.push('मोबाइल');
+    if (b.latitude == null || b.longitude == null) m.push('Location');
+    if (!b.logo_url) m.push('Logo');
+    if (!has('Hours')) m.push('समय');
+    if (!has('Type')) m.push('प्रकार');
+    if (!has('Services')) m.push('सेवाएँ');
+    if (!(has('PIN') || has('Pincode'))) m.push('PIN');
+    if (!(has('Email') || has('Website'))) m.push('Email / वेबसाइट');
+    if (!(has('GST') || has('Udyam'))) m.push('GST / Udyam');
+    return m;
   }
   function line(desc, k) { var m = String(desc || '').match(new RegExp('^' + k + ':\\s*(.+)$', 'mi')); return m ? m[1].trim() : ''; }
   var SEL = {};   /* चुनी हुई दुकानें (slug) */
@@ -318,6 +335,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     $('list').innerHTML = rows.map(function (b, i) {
       var live = !!b.is_active, ph = String(b.phone || '').replace(/\D/g, '').slice(-10);
       var mapLink = (b.latitude != null && b.longitude != null) ? 'map.html?to=' + b.latitude + ',' + b.longitude + '&n=' + encodeURIComponent(b.name || '') : (b.address ? 'map.html?q=' + encodeURIComponent(b.address) + '&n=' + encodeURIComponent(b.name || '') : '');
+      var miss = missOf(b), gOk = /^yes$/i.test(line(b.description, 'GST-Verified')), uOk = /^yes$/i.test(line(b.description, 'Udyam-Verified')), hasLoc = b.latitude != null && b.longitude != null;
       var pOn = !!(PREMA && PREMA[b.slug]), tI = pOn ? ((TIERS.filter(function (t) { return t[0] === PMTIER[b.slug]; })[0] || [0, '💎'])[1]) : '';
       return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">' + (b.submitted_at ? 'Pending' : 'अधूरी (Offline)')) + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') +
         (PREMA ? '<button type="button" class="sw' + (pOn ? ' on' : '') + '" data-a="prem" data-i="' + i + '" role="switch" aria-checked="' + pOn + '" aria-label="Premium"><i></i>' + (pOn ? 'ON' : 'OFF') + '</button>' : '') + '<span class="ar">▼</span></div>' +
@@ -325,6 +343,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '<div class="meta">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '<br>👤 ' + esc(line(b.description, 'Owner') || '—') +
         (ph ? ' · 📞 <a href="tel:+91' + ph + '">' + ph + '</a> · <a href="https://wa.me/91' + ph + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
         ' · ' + (b.latitude != null ? '📍 location है' : '⚠ location नहीं') + '</div>' +
+        '<div class="miss ' + (miss.length ? 'bad">⚠ अधूरा (' + miss.length + '): ' + esc(miss.join(' · ')) : 'good">✅ प्रोफ़ाइल 100% पूरी') + '</div>' +
         ownLine(b) +
         (b.description ? '<div class="desc">' + esc(b.description) + '</div>' : '') +
         '<div class="acts">' +
@@ -334,13 +353,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '<button class="lnk" data-a="setph" data-i="' + i + '">📱 नंबर बदलें</button>' +
         '<button class="lnk" data-a="fix" data-i="' + i + '">✍️ सुधार माँगें</button>' +
         (b.address ? '<button class="lnk" data-a="addr" data-i="' + i + '">✨ पता सुधारें</button>' : '') +
-        (line(b.description, 'GST') ? '<button class="' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'phon' : 'lnk') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
-        (line(b.description, 'Udyam') ? '<button class="' + (/^yes$/i.test(line(b.description, 'Udyam-Verified')) ? 'phon' : 'lnk') + '" data-a="udy" data-i="' + i + '">🏭 MSME ' + (/^yes$/i.test(line(b.description, 'Udyam-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
+        (line(b.description, 'GST') ? '<button class="' + (gOk ? 'gr' : 'rd') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
+        (line(b.description, 'Udyam') ? '<button class="' + (uOk ? 'gr' : 'rd') + '" data-a="udy" data-i="' + i + '">🏭 MSME ' + (/^yes$/i.test(line(b.description, 'Udyam-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
         (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">' + (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 Premium') + ' ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
         '<button class="lnk" data-a="rate" data-i="' + i + '">⭐ Ratings</button>' +
-        (b.slug ? '<a class="lnk" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">प्रोफ़ाइल</a>' : '') +
-        (mapLink ? '<a class="lnk" href="' + mapLink + '" target="_blank">मैप</a>' : '') +
+        (b.slug ? '<a class="' + (miss.length ? 'rd' : 'gr') + '" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">' + (miss.length ? '⚠ प्रोफ़ाइल (' + miss.length + ')' : '✔ प्रोफ़ाइल') + '</a>' : '') +
+        (mapLink ? '<a class="' + (hasLoc ? 'gr' : 'rd') + '" href="' + mapLink + '" target="_blank">' + (hasLoc ? '✔ मैप' : '⚠ मैप') + '</a>' : '') +
         '</div></div></div>';
     }).join('') || '<div class="msg"><p>कोई दुकान नहीं</p></div>';
     paintBulk();
