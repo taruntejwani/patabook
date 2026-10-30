@@ -213,7 +213,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   <div id="panel" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
     <div class="bar">
-      <div class="tabs" id="tabs"><button data-s="pending" class="on">⏳ Pending</button><button data-s="active">✅ Live</button><button data-s="all">सभी</button></div>
+      <div class="tabs" id="tabs"><button data-s="pending" class="on">⏳ Pending</button><button data-s="draft">📝 अधूरी</button><button data-s="active">✅ Live</button><button data-s="all">सभी</button></div>
       <input class="q" id="q" type="search" placeholder="नाम, पता, मोबाइल या Business ID (PB-GIM-00001)">
     </div>
     <div class="cnt" id="cnt"></div>
@@ -319,7 +319,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       var live = !!b.is_active, ph = String(b.phone || '').replace(/\D/g, '').slice(-10);
       var mapLink = (b.latitude != null && b.longitude != null) ? 'map.html?to=' + b.latitude + ',' + b.longitude + '&n=' + encodeURIComponent(b.name || '') : (b.address ? 'map.html?q=' + encodeURIComponent(b.address) + '&n=' + encodeURIComponent(b.name || '') : '');
       var pOn = !!(PREMA && PREMA[b.slug]), tI = pOn ? ((TIERS.filter(function (t) { return t[0] === PMTIER[b.slug]; })[0] || [0, '💎'])[1]) : '';
-      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">Pending') + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') +
+      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">' + (b.submitted_at ? 'Pending' : 'अधूरी (Offline)')) + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') +
         (PREMA ? '<button type="button" class="sw' + (pOn ? ' on' : '') + '" data-a="prem" data-i="' + i + '" role="switch" aria-checked="' + pOn + '" aria-label="Premium"><i></i>' + (pOn ? 'ON' : 'OFF') + '</button>' : '') + '<span class="ar">▼</span></div>' +
         '<div class="bd"' + (OPENS[b.slug] ? '' : ' hidden') + '><h3 style="margin-top:10px">' + (CODES[b.slug] ? '<span class="bid">' + esc(CODES[b.slug]) + '</span>' : '') + '</h3>' +
         '<div class="meta">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '<br>👤 ' + esc(line(b.description, 'Owner') || '—') +
@@ -593,9 +593,10 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     c = c || {};
     var n = function (v) { return v == null ? '–' : v; };
     var T = [
-      ['shops', '🏪', '#eaf2ff', 'Public (दुकानें)', n(c.shops), 'कुल दुकानें · Pending + Live', 0],
+      ['shops', '🏪', '#eaf2ff', 'Public (दुकानें)', n(c.shops), 'कुल दुकानें · अधूरी + Pending + Live', 0],
       ['msgs', '📩', '#fdecec', 'शिकायत / संदेश', n(c.msg_all), (c.msg_new != null ? c.msg_new + ' नए' : 'Complaint & Support'), c.msg_new || 0],
-      ['pending', '⏳', '#fff4e5', 'Pending दुकानें', n(c.pending), 'Approve करना बाकी', c.pending || 0],
+      ['pending', '⏳', '#fff4e5', 'Pending दुकानें', n(c.pending), 'मालिक ने भेजी — Approve करना बाकी', c.pending || 0],
+      ['draft', '📝', '#f1f3f6', 'अधूरी दुकानें', n(c.draft), 'Offline — मालिक ने अभी भेजी नहीं', 0],
       ['live', '✅', '#e7f8ee', 'Live दुकानें', n(c.live), 'वेबसाइट पर दिख रहीं', 0],
       ['cats', '🗂', '#f1ebfb', 'Categories', n(c.cat_main), (c.cat_all != null ? 'main · कुल ' + c.cat_all + ' काम' : 'main categories'), 0],
       ['traffic', '📊', '#e6f6f4', 'Traffic (आज के लोग)', n(c.uv_today), (c.live_now != null ? '🟢 अभी ' + c.live_now + ' लोग साइट पर' : 'sql-11 चलाएँ'), 0],
@@ -627,7 +628,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'edits') return showEdits();
     if (t === 'hsreq') return showHsReq();
     if (t === 'premium') return showPrem();
-    status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : 'all';
+    status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : t === 'draft' ? 'draft' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
   };

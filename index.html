@@ -322,7 +322,21 @@ function pbMyShopLink(b,s){
     .then(function(r){return r.ok?r.json():null}).then(function(rows){if(!Array.isArray(rows))return;var sl=rows.map(function(r){return r&&r.slug}).filter(Boolean);
       try{localStorage.setItem("pb-my-shops",JSON.stringify(sl));}catch(e){}set(sl);}).catch(function(){});
 }
-document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";if(b)pbMyShopLink(b,s);var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
+/* 🔴 Offline दुकान (अधूरी, सिर्फ़ मालिक को दिखती) हो तो पट्टी पर टैग; ⏳ भेजी हुई हो तो "मंज़ूरी का इंतज़ार" */
+function pbOffTag(b,s){
+  function apply(m){if(!m)return;var v=Object.keys(m).map(function(k){return m[k]}),d=v.indexOf("draft")>-1,p=!d&&v.indexOf("pend")>-1;if(!d&&!p)return;
+    var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),t=b.querySelector("b"),m2=b.querySelector("small");
+    if(t){t.removeAttribute("data-i");t.textContent=d?(hi?"🔴 Offline — प्रोफ़ाइल पूरी करो":"🔴 Offline — complete your profile"):(hi?"⏳ मंज़ूरी का इंतज़ार":"⏳ Waiting for approval");}
+    if(m2){m2.removeAttribute("data-i");m2.textContent=d?(hi?"आपकी दुकान अभी सिर्फ़ आपको दिखती है — पूरी करके भेजें":"Your shop is visible only to you — finish and send it"):(hi?"PataBook आपकी दुकान जाँच रहा है":"PataBook is checking your shop");}
+    b.href=d?"mybusiness.html#prof":"mybusiness.html";}
+  var c=null;try{c=JSON.parse(localStorage.getItem("pb-my-shop-st")||"null");}catch(e){}
+  apply(c);
+  if(!s.access_token||!window.PATABOOK_SUPABASE)return;
+  fetch(PATABOOK_SUPABASE.url+"/rest/v1/rpc/pb_my_shop_states",{method:"POST",headers:{apikey:PATABOOK_SUPABASE.anonKey,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"})
+    .then(function(r){return r.ok?r.json():null}).then(function(rows){if(!Array.isArray(rows))return;var m={};rows.forEach(function(r){m[r.slug]=r.is_active?"live":(r.submitted_at?"pend":"draft");});
+      try{localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(e){}apply(m);}).catch(function(){});
+}
+document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";if(b){pbMyShopLink(b,s);pbOffTag(b,s);}var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
 </script>
 </head>
 <body>
