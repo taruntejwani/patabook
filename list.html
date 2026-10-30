@@ -943,23 +943,12 @@ function showStatus(x){
   }else if(x.status==="removed"){
     box.innerHTML='<div class="big">ℹ️</div><h2>'+LX("st_rm_h")+'</h2><p class="sub">'+LX("st_rm_s")+'</p><button type="button" class="btn" id="stNew">'+LX("st_new")+'</button>';
   }else{
-    const R=54,C=2*Math.PI*R;
-    box.innerHTML='<div class="big">🎉</div><h2>'+LX(x.fresh?"st_h":"st_h2")+'</h2><span class="pill p">⏳ '+LX("st_pend")+'</span>'+
-      '<p class="sub"><b>'+nm+'</b> '+LX("st_sub")+'</p>'+
-      '<div class="clock"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="'+R+'" fill="none" stroke="#e8eefb" stroke-width="10"/><circle id="ring" cx="60" cy="60" r="'+R+'" fill="none" stroke="#1a73e8" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="0"/></svg>'+
-      '<div class="t"><b id="tm">24:00</b><small id="tmS">'+LX("st_left")+'</small></div></div>'+
-      '<div class="info" id="stInfo">'+LX("st_info")+'</div>'+
-      '<button type="button" class="btn sec" id="stRef" style="width:100%">🔄 '+LX("st_ref")+'</button>'+
+    const en=EN();
+    box.innerHTML='<div class="big">🎉</div><h2>'+(en?"Your shop is saved!":"दुकान सेव हो गई!")+'</h2><span class="pill p">🔴 '+(en?"Offline — only you can see it":"Offline — अभी सिर्फ़ आपको दिखती है")+'</span>'+
+      '<p class="sub"><b>'+nm+'</b> '+(en?"has been added to PataBook.":"PataBook में जुड़ गई है।")+'</p>'+
+      '<div class="info" id="stInfo">'+(en?"1️⃣ Open <b>My Shop</b> and complete your profile to 100%.<br>2️⃣ Tap <b>“Send for approval”</b>.<br>3️⃣ PataBook checks it, and after approval your shop shows to everyone.":"1️⃣ <b>मेरी दुकान</b> खोलें और प्रोफ़ाइल 100% पूरी करें।<br>2️⃣ <b>“मंज़ूरी के लिए भेजें”</b> दबाएँ।<br>3️⃣ PataBook जाँचेगा, और मंज़ूरी के बाद आपकी दुकान सबको दिखेगी।")+'</div>'+
+      '<a class="btn" id="stMy" href="mybusiness.html" style="display:block;text-align:center">'+(en?"Open My Shop ›":"मेरी दुकान खोलें ›")+'</a>'+
       '<button type="button" class="lnk" id="stNew">'+LX("st_new")+'</button>';
-    const end=x.created+WAIT_MIN*60000;
-    const tick=()=>{
-      const left=end-(Date.now()-(x.skew||0)),tm=$("tm");if(!tm)return;
-      tm.textContent=fmt(left);if(left>0)$("tmS").textContent=LX(left>=3600000?"st_left_h":"st_left");
-      $("ring").setAttribute("stroke-dashoffset",(C*(1-Math.max(0,left)/(WAIT_MIN*60000))).toFixed(1));
-      if(left<=0){tm.textContent="00:00";$("tmS").textContent=LX("st_over_s");$("stInfo").innerHTML=LX("st_over");clearInterval(stTimer);}
-    };
-    tick();stTimer=setInterval(tick,1000);
-    $("stRef").onclick=()=>checkPhone(loadReg()&&loadReg().phone,true);
   }
   const nb=$("stNew");if(nb)nb.onclick=()=>{try{localStorage.removeItem("pb-reg");}catch(_){}showForm();};
   window.scrollTo({top:0,behavior:"smooth"});
