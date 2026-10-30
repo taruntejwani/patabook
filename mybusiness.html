@@ -819,6 +819,7 @@ function settingsView(en){
     /* दुकान का घर: ऊपर 9 कदम (हर कदम पर Edit), नीचे बाक़ी सेटिंग — कोई चीज़ दो बार नहीं */
     return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"My shops":"मेरी दुकानें")+'</button></div>'+
       '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
+      '<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"View my shop (as customers see it)":"मेरी दुकान देखें (जैसी ग्राहक देखते हैं)")+'</a>'+
       '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
       '<a class="stl" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit">✏️ '+(en?"Edit profile (photos, products…)":"प्रोफ़ाइल Edit करें (फ़ोटो, सामान…)")+'</a></div>'+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
@@ -892,7 +893,7 @@ function draw(){
   if(!ROWS.length){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
-  drawNt();if(SET.cat!==null&&$("ntBtn"))$("ntBtn").hidden=true;{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=false;}const vp=$("vpTop");if(vp){vp.href="business.html?slug="+encodeURIComponent(ROWS[0].slug);vp.querySelector("span").textContent=en?"My Profile":"मेरी Profile";vp.hidden=false;}}
+  drawNt();if(SET.cat!==null&&$("ntBtn"))$("ntBtn").hidden=true;{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=true;}const vp=$("vpTop");if(vp)vp.hidden=true;}
   const inSet=SET.cat!==null&&!!ROWS[SET.shop];
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");

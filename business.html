@@ -183,6 +183,17 @@ const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\
 let B=null,contactState={k:"loading"};
 
 /* NOTE: phone / whatsapp yahan public API se kabhi nahi maange jaate. Sirf login ke baad pb_contact() se. */
+/* मालिक अपनी Pending / Offline दुकान का पेज देख सके (जनता को नहीं दिखती) */
+async function ownerRow(){
+  try{if(!window.PBA)return null;const s=await PBA.session();if(!s)return null;
+    const H={apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"};
+    const post=(f,b)=>fetch(SB+"/rest/v1/rpc/"+f,{method:"POST",headers:H,body:JSON.stringify(b||{})}).then(r=>r.ok?r.json():null).catch(()=>null);
+    const [mine,prof,det,st]=await Promise.all([post("pb_my_businesses"),post("pb_my_profiles"),post("pb_my_details",{p_slug:slug}),post("pb_my_shop_states")]);
+    const m=Array.isArray(mine)&&mine.find(x=>x&&x.slug===slug);if(!m)return null;
+    const p=(prof&&prof[slug])||{},s2=(Array.isArray(st)&&st.find(x=>x&&x.slug===slug))||{};
+    return Object.assign({},m,{description:(det&&det.description)||p.d||"",latitude:p.lat,longitude:p.lng,_st:s2.owner_off?"off":(s2.submitted_at?"pend":"draft")});
+  }catch(e){return null;}
+}
 async function load(){
   const app=document.getElementById("app");
   if(!slug){app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_noslug"))+'</p></div>';return;}
@@ -201,8 +212,13 @@ async function load(){
     if(!r.ok){u.searchParams.set("select",COLS+",business_code,home_service");r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* logo column से पहले */
     if(!r.ok){u.searchParams.set("select",COLS+",business_code");r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* sql-06 से पहले */
     if(!r.ok){u.searchParams.set("select",COLS);r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* sql-05 से पहले */
-    const rows=await r.json();
-    if(!r.ok||!rows.length){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
+    let rows=await r.json(),ownSt="";
+    if(!r.ok||!Array.isArray(rows)||!rows.length){const ow=await ownerRow();if(ow){rows=[ow];ownSt=ow._st;}}
+    if(ownSt){try{var _n=document.createElement("meta");_n.name="robots";_n.content="noindex";document.head.appendChild(_n);}catch(_){}
+      const en0=PB.lang&&PB.lang()!=="hi",bn=document.createElement("div");bn.style.cssText="background:#fff4e5;color:#7a3b00;font-weight:700;font-size:14px;line-height:1.45;padding:10px 16px;text-align:center;border-bottom:1px solid #f3dc9a";
+      bn.textContent=ownSt==="pend"?(en0?"⏳ Waiting for approval — only you can see this shop right now.":"⏳ मंज़ूरी का इंतज़ार — यह दुकान अभी सिर्फ़ आपको दिखती है।"):(en0?"🔴 Offline — only you can see this shop right now.":"🔴 Offline — यह दुकान अभी सिर्फ़ आपको दिखती है।");
+      app.parentNode.insertBefore(bn,app);}
+    if(!rows||!rows.length){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
     B=rows[0];document.title=B.name+" — PataBook";try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, Call, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}try{var _u=location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),_ds=(document.querySelector('meta[name="description"]')||{}).content||"",_im=(!(window.PBHide&&PBHide.has("logo"))&&/^https?:\/\//.test(B.logo_url||""))?B.logo_url:"https://patabook.in/icon-512.png",_c=document.querySelector('link[rel="canonical"]');if(!_c){_c=document.createElement("link");_c.rel="canonical";document.head.appendChild(_c);}_c.href=_u;[["og:title",document.title],["og:description",_ds],["og:url",_u],["og:image",_im]].forEach(function(p){var m=document.querySelector('meta[property="'+p[0]+'"]');if(!m){m=document.createElement("meta");m.setAttribute("property",p[0]);document.head.appendChild(m);}m.setAttribute("content",p[1]);});}catch(_){}
     render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();loadOwner();loadLink();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
