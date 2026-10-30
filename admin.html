@@ -337,6 +337,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (line(b.description, 'GST') ? '<button class="' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'phon' : 'lnk') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
         (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">' + (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 Premium') + ' ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
+        '<button class="lnk" data-a="rate" data-i="' + i + '">⭐ Ratings</button>' +
         (b.slug ? '<a class="lnk" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">प्रोफ़ाइल</a>' : '') +
         (mapLink ? '<a class="lnk" href="' + mapLink + '" target="_blank">मैप</a>' : '') +
         '</div></div></div>';
@@ -388,6 +389,31 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       if (!x.ok) return ''; var j = await x.json(); return (j && j.address) || '';
     } catch (e) { return ''; }
   }
+  /* ⭐ किसी दुकान की ratings देखो / गलत वाली हटाओ */
+  async function rateSheet(r) {
+    var ov = document.createElement('div'); ov.className = 'adm-ov';
+    ov.innerHTML = '<div class="adm-sh"><h3>⭐ ' + esc(r.name) + ' — Ratings</h3><div id="rtL" style="margin:8px 0">…</div><p id="rtM" style="min-height:18px;margin:8px 0 0;font-size:13.5px"></p><div class="bt"><button class="no" id="rtX">बंद करें</button></div></div>';
+    document.body.appendChild(ov);
+    ov.onclick = function (e) { if (e.target === ov || e.target.id === 'rtX') ov.remove(); };
+    async function paint() {
+      var L = ov.querySelector('#rtL');
+      try {
+        var rs = await rpc('pb_admin_ratings', { p_slug: r.slug }) || [];
+        L.innerHTML = rs.length ? rs.map(function (x, k) {
+          return '<div class="adm-row" style="display:flex;align-items:center;gap:10px;justify-content:space-between"><div style="min-width:0"><b style="color:#b26a00">' + '★'.repeat(x.stars) + '☆'.repeat(5 - x.stars) + '</b><div style="font-size:13px;color:#5b6475;word-break:break-all">' + esc(x.email || x.user_id) + ' · ' + esc(String(x.created_at || '').slice(0, 10)) + '</div></div><button class="del" data-k="' + k + '">🗑 हटाओ</button></div>';
+        }).join('') : '<div class="msg"><p>कोई rating नहीं</p></div>';
+        L.querySelectorAll('[data-k]').forEach(function (bt) {
+          bt.onclick = async function () {
+            var x = rs[+bt.dataset.k]; if (!confirm('यह rating हटाएँ?')) return;
+            bt.disabled = true;
+            try { await rpc('pb_admin_delete_rating', { p_slug: r.slug, p_user: x.user_id }); ov.querySelector('#rtM').textContent = '✅ हटा दी'; paint(); load(); }
+            catch (e) { bt.disabled = false; ov.querySelector('#rtM').textContent = 'हट नहीं पाई। फिर कोशिश करें।'; }
+          };
+        });
+      } catch (e) { L.textContent = 'Ratings नहीं खुल पाईं। (SQL चली है?)'; }
+    }
+    paint();
+  }
   function addrSheet(items) {
     var ov = document.createElement('div'); ov.className = 'adm-ov';
     ov.innerHTML = '<div class="adm-sh"><h3>✨ AI से सुधरे पते (' + items.length + ')</h3><small style="color:#5b6475">लाल = अभी का पता, हरा = AI का पता (आप इसे बदल भी सकते हैं)। जो सही लगे उस पर ✔ रखें।</small>' +
@@ -433,6 +459,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     }
     var b = e.target.closest('[data-a]'); if (!b) return;
     var r = rows[+b.dataset.i], a = b.dataset.a;
+    if (a === 'rate') { rateSheet(r); return; }
     if (a === 'prem') {
       var pa = PREMA && PREMA[r.slug];
       if (pa) {
