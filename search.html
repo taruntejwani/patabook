@@ -139,6 +139,18 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
 const CATHI={"ऑटोमोबाइल":"Automobile","खाना":"Food","स्वास्थ्य":"Health","शॉपिंग":"Shopping","शिक्षा":"Education","होम":"Home","प्रोफेशनल":"Professional","होटल":"Hotel"};
 
+/* ✍️ spelling के रूप: बोलने/लिखने में Shriram, Shri Ram, Shree Ram, Sri Ram — सब एक दुकान तक पहुँचें ("*" = कुछ भी / खाली) */
+const HI2EN={"श्री":"shree","श्रीराम":"shree*ram","राम":"ram","कृष्णा":"krishna","कृष्ण":"krishna","गणेश":"ganesh","साई":"sai","शंकर":"shankar","जय":"jai","दुर्गा":"durga","लक्ष्मी":"laxmi","हनुमान":"hanuman","बालाजी":"balaji","महादेव":"mahadev","भवानी":"bhavani","अंबे":"ambe","खोडियार":"khodiyar","पटेल":"patel","शर्मा":"sharma"};
+function spell(w){
+  const out=[];const add=x=>{if(x&&x!==w&&!out.includes(x))out.push(x);};
+  if(HI2EN[w])add(HI2EN[w]);
+  if(/^(shree|shri|sri|shreee)$/.test(w))["shree","shri","sri"].forEach(add);
+  const m=w.match(/^(shreee|shree|shri|sri)(.{2,})$/);
+  if(m)["shree","shri","sri"].forEach(p=>add(p+"*"+m[2]));
+  [["ee","i"],["i","ee"],["oo","u"],["u","oo"],["aa","a"],["ph","f"],["f","ph"],["w","v"],["v","w"],["ck","k"],["ram","raam"],["raam","ram"]].forEach(r=>{if(w.includes(r[0]))add(w.replace(r[0],r[1]));});
+  return out.slice(0,6);
+}
+const rxOf=a=>new RegExp(a.replace(/[.+?^${}()|[\]\\]/g,"\\$&").replace(/\*/g,".*"),"i");
 /* query ko words me todo; har word ke liye alag roop (alias) */
 function terms(q){
   const ws=String(q||"").toLowerCase().replace(/[,()*\\"'%:;]/g," ").split(/\s+/).filter(w=>w.length>=2||/^\d+$/.test(w)).slice(0,5);
@@ -147,6 +159,7 @@ function terms(q){
     (ALIAS[w]||"").split(" ").filter(Boolean).slice(0,3).forEach(a=>alt.includes(a)||alt.push(a));
     if(CATHI[w])alt.push(CATHI[w].toLowerCase());
     if(w.length>4&&/[a-z]s$/.test(w))alt.push(w.slice(0,-1));       /* "plumbers" -> "plumber" */
+    if(!/^\d+$/.test(w))spell(w).forEach(a=>alt.includes(a)||alt.length>=8||alt.push(a));   /* Shriram = Shree Ram = Sri Ram */
     return {w,alt,pin:/^\d{6}$/.test(w),num:/^\d+$/.test(w)};
   });
 }
@@ -167,8 +180,9 @@ function score(b,ts){
         p=(cityOf(b)+" "+line(b,"Area")+" "+(b.address||"")).toLowerCase(),d=String(b.description||"").toLowerCase();
   let s=0;
   ts.forEach(t=>{let best=0;t.alt.forEach(a=>{
-    if(n.startsWith(a))best=Math.max(best,10);else if(n.includes(a))best=Math.max(best,7);
-    if(c.includes(a))best=Math.max(best,6);if(p.includes(a))best=Math.max(best,5);if(d.includes(a))best=Math.max(best,3);
+    const wl=a.includes("*"),rx=wl?rxOf(a):null,has=x=>wl?rx.test(x):x.includes(a),ex=a===t.w?1:0;   /* हूबहू मिलना ऊपर, मिलता-जुलता रूप थोड़ा नीचे */
+    if(!wl&&n.startsWith(a))best=Math.max(best,10);else if(has(n))best=Math.max(best,7-(ex?0:0.5));
+    if(has(c))best=Math.max(best,6);if(has(p))best=Math.max(best,5);if(has(d))best=Math.max(best,3);
   });s+=best;});
   return s+(b.is_verified?1:0);
 }
