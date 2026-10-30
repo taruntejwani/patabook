@@ -32,6 +32,23 @@ function google(next){
   location.href=SB+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(back);
 }
 function googleNext(){var n="";try{n=sessionStorage.getItem("pb-g-next")||"";sessionStorage.removeItem("pb-g-next");}catch(e){}return n;}
+/* is account me kaun-kaun se login jude hain (google / mobile) */
+async function identities(){
+  var s=await session();if(!s)return null;
+  var r=await fetch(SB+"/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+s.access_token}});
+  if(!r.ok)return null;var u=await r.json(),ids=u.identities||[],em=String(u.email||s.email||"");
+  return {google:ids.some(function(i){return i.provider==="google";}),mobile:/^m[6-9]\d{9}@phone\.patabook\.in$/i.test(em)||!!u.phone,email:em};
+}
+/* login hue account me Google jodo (Supabase me "Allow manual linking" ON hona chahiye) */
+async function linkGoogle(next){
+  var s=await session();if(!s)throw new Error("login");
+  try{sessionStorage.setItem("pb-g-next",next||"");}catch(e){}
+  var back=location.origin+location.pathname.replace(/[^\/]*$/,"")+"login.html";
+  var r=await fetch(SB+"/auth/v1/user/identities/authorize?provider=google&skip_http_redirect=true&redirect_to="+encodeURIComponent(back),{headers:{apikey:KEY,Authorization:"Bearer "+s.access_token}});
+  var j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok||!j||!j.url)throw new Error((j&&(j.msg||j.message||j.error_description))||("HTTP "+r.status));
+  location.href=j.url;
+}
 /* email me aaya code verify karo */
 async function verifyOtp(email,code){
   var d;
@@ -163,5 +180,5 @@ var mobile={
   staffVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"staff_phone",slug:slug,phone:phone,code:code},true);}
 
 };
-window.PBA={google:google,googleNext:googleNext,otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
+window.PBA={identities:identities,linkGoogle:linkGoogle,google:google,googleNext:googleNext,otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
 })();
