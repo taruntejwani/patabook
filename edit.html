@@ -9,6 +9,12 @@
 <meta name="theme-color" content="#1a73e8">
 <script src="site-config.js"></script>
 <script>/* page के अंदर (✏️ Edit) खुलने पर ऊपर की पट्टी छिपाओ */window.PB_EMBED=/[?&]embed=1\b/.test(location.search);if(window.PB_EMBED){document.documentElement.classList.add("embed");var _t=/[?&]t=(silver|gold|platinum)\b/.exec(location.search);if(_t)document.documentElement.classList.add("pt-"+_t[1]);}</script>
+<script>/* छोटी window (?card=cType|cTime|cAddr|cPin|cOnline|cSvc|gstCard): सिर्फ़ वही एक डिब्बा दिखे; ऊँचाई parent को बताओ */
+(function(){var m=location.search.match(/[?&]card=(cType|cTime|cAddr|cPin|cOnline|cSvc|gstCard)\b/);if(!m)return;
+var st=document.createElement("style");st.textContent='.card:not(#'+m[1]+'),a.card{display:none!important}.embed h1,.embed .lead{display:none}';document.head.appendChild(st);
+window.__pbCard=m[1];
+function tell(){try{parent.postMessage({pbEdit:"h",h:Math.ceil(document.documentElement.scrollHeight)},location.origin);}catch(_){}}
+addEventListener("load",function(){tell();setTimeout(tell,400);setTimeout(tell,1200);});if(window.ResizeObserver)new ResizeObserver(tell).observe(document.documentElement);})();</script>
 <script>/* ✏️ किसी हिस्से की पेंसिल से खुला (?sec=about / visit): सिर्फ़ वही चीज़ें दिखें जो उस हिस्से में दिखती हैं */
 (function(){var m=location.search.match(/[?&]sec=(about|visit|numbers)\b/);if(!m)return;var k=m[1];
 var sh={about:["about","numbers"],visit:["visit"],numbers:["numbers"]}[k];
@@ -76,12 +82,12 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम और category सिर्फ PataBook Admin बदल सकते हैं।</p>
   </div>
 
-  <div class="card" data-sec="about">
+  <div class="card" id="cType" data-sec="about">
    <h2 data-en="🏷️ Business type">🏷️ बिज़नेस का प्रकार</h2>
    <select id="btype"></select>
   </div>
 
-  <div class="card" data-sec="about">
+  <div class="card" id="cTime" data-sec="about">
    <h2 data-en="🕘 Timings">🕘 दुकान का समय</h2>
    <div class="two">
     <div><label class="lbl" for="openT" data-en="Opens at">खुलने का समय</label><input id="openT" type="time"></div>
@@ -98,13 +104,13 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <p class="hint" style="margin-top:12px"><span data-en="📱 Main (login) number:">📱 मुख्य (login) नंबर:</span> <b id="mainNo"></b> · <a id="mainChg" target="_top" href="#" style="color:#1a73e8;font-weight:700" data-en="Change (with OTP) ›">बदलें (OTP से) ›</a></p>
   </div>
 
-  <div class="card" data-sec="visit">
+  <div class="card" id="cAddr" data-sec="visit">
    <h2 data-en="📍 Shop address">📍 दुकान का पता</h2>
    <textarea id="addrIn" maxlength="250" rows="3" data-en-ph="e.g. Plot 17A, Apnanagar, Gandhidham" placeholder="जैसे: Plot 17A, Apnanagar, Gandhidham"></textarea>
    <p class="hint" data-en="Write the full address — shop no. / plot, area, city. It shows on your shop page and in search.">पूरा पता लिखें — दुकान / प्लॉट नंबर, इलाका, शहर। यही आपकी दुकान के पेज और search में दिखेगा।</p>
   </div>
 
-  <div class="card" data-sec="visit">
+  <div class="card" id="cPin" data-sec="visit">
    <h2 data-en="📍 PIN and delivery">📍 PIN और डिलीवरी</h2>
    <label class="lbl" for="pin" data-en="📮 Area postal PIN code">📮 शहर / इलाके का पिन कोड</label>
    <input id="pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंक" data-en-ph="6 digits">
@@ -114,7 +120,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <label class="chk" data-sec="delivery" style="margin-top:14px"><input id="homeDel" type="checkbox"><span data-en="🚚 We do home delivery">🚚 हम होम डिलीवरी करते हैं</span></label>
   </div>
 
-  <div class="card" data-sec="about">
+  <div class="card" id="cOnline" data-sec="about">
    <h2 data-en="🌐 Online">🌐 ऑनलाइन</h2>
    <label class="lbl" for="email" data-en="Email">ईमेल</label>
    <input id="email" type="email" inputmode="email" placeholder="name@gmail.com">
@@ -127,7 +133,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <p class="hint" data-en="If filled, Instagram / Facebook icons show at the top of your shop page.">भरने पर आपकी दुकान के page पर सबसे ऊपर Instagram / Facebook के icon दिखेंगे।</p>
   </div>
 
-  <div class="card" data-sec="about">
+  <div class="card" id="cSvc" data-sec="about">
    <h2 data-en="🛠️ What you sell / services">🛠️ आप क्या बेचते हैं / कौन-सी सेवाएँ</h2>
    <p data-en="👑 Premium shops: the first line is shown under your shop name on the home page card (e.g. Car Care Products Manufacturer)." style="margin:-4px 0 8px;font-size:12.5px;color:#8a6200;background:#fff6dc;border-radius:10px;padding:7px 10px;line-height:1.45">👑 Premium दुकान: इसकी पहली line Home page वाले card पर दुकान के नाम के नीचे दिखेगी (जैसे: Car Care Products Manufacturer)।</p>
    <textarea id="svc" maxlength="500" data-en-ph="e.g. Car shampoo, dashboard polish, wholesale supply" placeholder="जैसे: कार शैम्पू, डैशबोर्ड पॉलिश, थोक सप्लाई"></textarea>

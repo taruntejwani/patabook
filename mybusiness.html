@@ -71,6 +71,11 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .nt .bn{font-size:13px;margin-top:8px;line-height:1.45}.nt .bn:empty{display:none}
 .ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
+.popov{position:fixed;inset:0;z-index:100000;background:#0008;display:flex;align-items:flex-end;justify-content:center}
+.popsh{width:100%;max-width:520px;max-height:86vh;background:#fff;border-radius:20px 20px 0 0;overflow:hidden;display:flex;flex-direction:column}
+@media(min-width:600px){.popov{align-items:center}.popsh{border-radius:20px}}
+.pophd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e5e7eb;font-size:15px;color:#174ea6}.pophd button{border:0;background:#eef2fb;border-radius:99px;width:32px;height:32px;font-size:15px;cursor:pointer}
+.popfr{width:100%;border:0;display:block;background:#f4f7ff}
 .ovh{font-weight:800;color:#174ea6;margin:4px 0 8px;font-size:15px}
 .ov .ovr{display:flex;align-items:center;gap:14px}.ov .ring{flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center;position:relative}.ov .ring:before{content:"";position:absolute;inset:7px;background:#fff;border-radius:50%}.ov .ring span{position:relative;font-weight:800;font-size:14px;color:#174ea6}
 .ov .ovt{min-width:0}.ov .ovt b{display:block;font-size:16px;word-break:break-word}.ov .ovt small{display:block;color:#5b6475;margin-top:4px;font-size:13px}.ov .st{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px;background:#eef2fb;color:#174ea6}
@@ -343,6 +348,25 @@ function delShopBtns(en){
     '<small style="display:block;margin-top:4px;color:#5f6368;line-height:1.45">'+(ROWS.length>1?(en?"Each shop can be deleted separately. A number shared by 2+ shops cannot be changed until only one is left.":"हर दुकान अलग से हटा सकते हैं। जिस नंबर पर 2+ दुकानें हैं, वह नंबर तब तक नहीं बदलेगा जब तक एक ही न बचे।"):(en?"This removes the shop and its photos and products.":"इससे दुकान और उसकी फ़ोटो-सामान हट जाएँगे।"))+'</small>'+
     ROWS.map((b,i)=>'<button type="button" class="delshop" data-delshop="'+i+'">🗑️ '+esc(b.name)+'</button>').join("")+'</div>';
 }
+/* छोटी window: किसी कदम पर दबाने पर सिर्फ़ वही एक चीज़ (जैसे सिर्फ़ GST) भरने के लिए खुले */
+function popEdit(slug,card){
+  const en=L()==="en",ov=document.createElement("div");ov.className="popov";
+  ov.innerHTML='<div class="popsh"><div class="pophd"><b>'+(en?"Edit":"भरें / बदलें")+'</b><button type="button" aria-label="Close">✕</button></div><iframe class="popfr" title="edit" style="height:340px"></iframe></div>';
+  const fr=ov.querySelector("iframe"),sh=ov.querySelector(".popsh");let dirty=false;
+  fr.src="edit.html?slug="+encodeURIComponent(slug)+"&embed=1&card="+encodeURIComponent(card);
+  function gone(){window.removeEventListener("message",onMsg);ov.remove();document.body.style.overflow="";}
+  function close(f){if(!f&&dirty&&!confirm(en?"Changes are not saved. Close anyway?":"बदलाव Save नहीं हुए। फिर भी बंद करें?"))return;gone();}
+  async function onMsg(e){
+    if(e.origin!==location.origin||!e.data||e.source!==fr.contentWindow)return;
+    if(e.data.pbEdit==="saved"){gone();try{ME=await PBA.session();await loadProf();draw();}catch(x){location.reload();}}
+    else if(e.data.pbEdit==="dirty")dirty=true;
+    else if(e.data.pbEdit==="h"){fr.style.height=Math.min(Math.max(+e.data.h||0,200),Math.round(innerHeight*0.82)-48)+"px";}
+  }
+  window.addEventListener("message",onMsg);
+  ov.querySelector(".pophd button").onclick=()=>close();
+  ov.addEventListener("click",e=>{if(e.target===ov)close();});
+  document.body.appendChild(ov);document.body.style.overflow="hidden";
+}
 function profPct(b){const it=profItems(b,0);return it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null;}
 function offBlock(b,i,en){
   const s=shopSt(b);if(s==="live"||!SST)return "";
@@ -373,16 +397,16 @@ function profItems(b,i){
   const p=PROF&&PROF[b.slug];if(!p)return null;
   const d=p.d||"",has=k=>new RegExp("^"+k+":\\s*\\S","mi").test(d),en=L()==="en",E="edit.html?slug="+encodeURIComponent(b.slug);
   return [
-    [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता",""],
+    [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता","pop:cAddr"],
     [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
     ...(PH(b,"logo")?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
-    [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय",E+"#openT"],
-    [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार",E+"#btype"],
-    [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",E+"#svc"],
-    [has("PIN")||has("Pincode"),"📮",en?"PIN code":"PIN कोड",E+"#pin"],
-    [has("Email")||has("Website"),"🌐",en?"Email or website":"ईमेल या वेबसाइट",E+"#email"],
-    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number":"GST या उद्यम (MSME) नंबर",E+"#gst"]
+    [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय","pop:cTime"],
+    [has("Type"),"🏷️",en?"Business type":"बिज़नेस का प्रकार","pop:cType"],
+    [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ","pop:cSvc"],
+    [has("PIN")||has("Pincode"),"📮",en?"PIN code":"PIN कोड","pop:cPin"],
+    [has("Email")||has("Website"),"🌐",en?"Email or website":"ईमेल या वेबसाइट","pop:cOnline"],
+    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number":"GST या उद्यम (MSME) नंबर","pop:gstCard"]
   ];
 }
 let TAB={};
@@ -400,18 +424,18 @@ function profBlock(b,i){
   return '<div class="pf"><div class="ring" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></div>'+
     '<div class="pt"><b>'+(pc>=100?(en?"🎉 Profile 100% complete!":"🎉 प्रोफ़ाइल 100% पूरी!"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</b>'+
     '<small>'+(pc>=100?(en?"Great! Customers see full details of your shop.":"बहुत बढ़िया! ग्राहकों को आपकी दुकान की पूरी जानकारी दिख रही है।"):(en?"Complete it — shops with full details get more calls.":"पूरी करें — पूरी जानकारी वाली दुकानों को ज़्यादा Call आते हैं।"))+'</small></div></div>'+
-    stepsBlock(it,en)+'</div>';
+    stepsBlock(it,en,b.slug)+'</div>';
 }
 /* क्रम से कदम: Step 1, 2, 3 … पूरे हुए पर ✅, अगला कदम अलग दिखे + सीधा बटन */
-function stepsBlock(it,en){
+function stepsBlock(it,en,slugOf){
   const nx=it.findIndex(x=>!x[0]),done=it.filter(x=>x[0]).length;
   if(nx<0)return "";
-  const lnk=x=>'href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'');
+  const lnk=x=>String(x[3]).indexOf("pop:")===0?'href="#" data-pop="'+esc(x[3].slice(4))+'" data-popshop="'+esc(slugOf)+'"':'href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'');
   const n=it[nx];
   return '<div class="stp"><div class="sh"><b>'+(en?done+" of "+it.length+" steps done":it.length+" में से "+done+" कदम पूरे")+'</b><span class="bar"><i style="width:'+Math.round(done/it.length*100)+'%"></i></span></div>'+
     '<a class="next" '+lnk(n)+'>'+(en?"Step "+(nx+1)+": ":"कदम "+(nx+1)+": ")+esc(n[2])+' ›</a>'+
     it.map((x,k)=>x[0]
-      ?'<div class="s ok"><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Done":"हो गया")+'</i></div>'
+      ?(x[3]?'<a class="s ok" '+lnk(x)+'><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Change ›":"बदलें ›")+'</i></a>':'<div class="s ok"><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Done":"हो गया")+'</i></div>')
       :'<a class="s'+(k===nx?' nx':'')+'" '+lnk(x)+'><em>'+(k+1)+'</em><span>'+x[1]+' '+esc(x[2])+'</span><i>'+(en?"Add ›":"भरें ›")+'</i></a>').join("")+'</div>';
 }
 function kickMsg(){
@@ -1051,6 +1075,7 @@ window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat
 $("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null)setGo("");else if(SD>0)history.go(-SD);else{SET.cat=null;draw();}});
 $("list").addEventListener("click",e=>{
   if(e.target.closest("[data-setopen]")){ntOpen(false);setGo("");return;}
+  {const pp=e.target.closest("[data-pop]");if(pp){e.preventDefault();popEdit(pp.dataset.popshop,pp.dataset.pop);return;}}
   {const ps=e.target.closest("[data-profshop]");if(ps){SET.shop=+ps.dataset.profshop;draw();window.scrollTo(0,0);return;}}
   if(e.target.closest("[data-profback]")){SET.shop=null;draw();window.scrollTo(0,0);return;}
   if(e.target.closest("[data-setprof]")){setGo("prof");return;}
