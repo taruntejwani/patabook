@@ -325,7 +325,10 @@ function pbMyShopLink(b,s){
 }
 /* 🔴 Offline दुकान (अधूरी, सिर्फ़ मालिक को दिखती) हो तो पट्टी पर टैग; ⏳ भेजी हुई हो तो "मंज़ूरी का इंतज़ार" */
 function pbOffTag(b,s){
-  function apply(m){if(!m)return;var v=Object.keys(m).map(function(k){return m[k]}),d=v.indexOf("draft")>-1,p=!d&&v.indexOf("pend")>-1;if(!d&&!p)return;
+  function apply(m){if(!m)return;var v=Object.keys(m).map(function(k){return m[k]}),d=v.indexOf("draft")>-1,p=!d&&v.indexOf("pend")>-1;var t0=b.querySelector("b"),m0=b.querySelector("small");
+    if(!d&&!p){   /* कोई दुकान Offline / Pending नहीं (Approve हो गई) → पट्टी पहले जैसी "मेरी दुकान" */
+      if(b.classList.contains("dr")||b.classList.contains("pe")){b.classList.remove("dr","pe");var ic0=b.querySelector(".ic");if(ic0)ic0.textContent="🏪";if(t0)t0.setAttribute("data-i","myshop_bar");if(m0)m0.setAttribute("data-i","myshop_sub");b.href="mybusiness.html";try{if(window.PB&&PB.apply)PB.apply();}catch(e){}}
+      return;}
     var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),t=b.querySelector("b"),m2=b.querySelector("small");
     if(t){t.removeAttribute("data-i");t.textContent=d?(hi?"प्रोफ़ाइल अधूरी — पूरी करो":"Complete your profile"):(hi?"मंज़ूरी का इंतज़ार":"Waiting for approval");b.classList.toggle("dr",d);b.classList.toggle("pe",p);var ic=b.querySelector(".ic");if(ic)ic.textContent=d?"🔴":"⏳";}
     if(m2){m2.removeAttribute("data-i");m2.textContent=d?(hi?"आपकी दुकान अभी सिर्फ़ आपको दिखती है — पूरी करके भेजें":"Your shop is visible only to you — finish and send it"):(hi?"PataBook आपकी दुकान जाँच रहा है":"PataBook is checking your shop");}
