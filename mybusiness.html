@@ -71,6 +71,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .nt .bn{font-size:13px;margin-top:8px;line-height:1.45}.nt .bn:empty{display:none}
 .ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
+.stp{margin-top:12px;width:100%}.stp .sh{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#33395a;margin-bottom:8px}.stp .bar{flex:1;height:8px;border-radius:99px;background:#e8edf5;overflow:hidden}.stp .bar i{display:block;height:100%;background:#1e9e57;border-radius:99px}
+.stp .next{display:block;text-align:center;background:#1a73e8;color:#fff;font-weight:800;border-radius:14px;padding:13px;margin:0 0 10px;text-decoration:none;font-size:15.5px}
+.stp .s{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;margin-top:6px;color:inherit;text-decoration:none}
+.stp .s em{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;background:#eef2fb;color:#174ea6}
+.stp .s span{flex:1;min-width:0}.stp .s i{font-style:normal;font-weight:800;font-size:13px;color:#1a73e8}
+.stp .s.ok{background:#f1faf4;border-color:#cfe9d8;color:#137333}.stp .s.ok em{background:transparent;font-size:16px}.stp .s.ok i{color:#137333}
+.stp .s.nx{border-color:#1a73e8;box-shadow:0 0 0 3px #1a73e822}.stp .s.nx em{background:#1a73e8;color:#fff}
 .pm{margin-top:12px;border-radius:16px;padding:12px 14px;background:linear-gradient(135deg,#eef2ff,#f6efff);border:1px solid #d9d0ff}
 .pm .ph{display:flex;align-items:center;gap:8px;font-weight:800;color:#3b2bb8;font-size:15px}.pm small{display:block;color:#5b6475;font-size:12.5px;font-weight:500;margin-top:2px}
 .pm .pb{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.pm .pb button{border:1px solid #d9d0ff;background:#fff;border-radius:12px;padding:9px 4px;font:inherit;font-size:12.5px;font-weight:700;color:#3b2bb8;cursor:pointer}
@@ -380,7 +387,19 @@ function profBlock(b,i){
   return '<div class="pf"><div class="ring" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></div>'+
     '<div class="pt"><b>'+(pc>=100?(en?"🎉 Profile 100% complete!":"🎉 प्रोफ़ाइल 100% पूरी!"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</b>'+
     '<small>'+(pc>=100?(en?"Great! Customers see full details of your shop.":"बहुत बढ़िया! ग्राहकों को आपकी दुकान की पूरी जानकारी दिख रही है।"):(en?"Complete it — shops with full details get more calls.":"पूरी करें — पूरी जानकारी वाली दुकानों को ज़्यादा Call आते हैं।"))+'</small></div></div>'+
-    (miss.length?'<div class="pm">'+miss.map(x=>'<a href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'')+'><span>'+x[1]+'</span><span>'+esc(x[2])+'</span><i>'+(en?"Add ›":"भरें ›")+'</i></a>').join("")+'</div>':'');
+    stepsBlock(it,en)+'</div>';
+}
+/* क्रम से कदम: Step 1, 2, 3 … पूरे हुए पर ✅, अगला कदम अलग दिखे + सीधा बटन */
+function stepsBlock(it,en){
+  const nx=it.findIndex(x=>!x[0]),done=it.filter(x=>x[0]).length;
+  if(nx<0)return "";
+  const lnk=x=>'href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'');
+  const n=it[nx];
+  return '<div class="stp"><div class="sh"><b>'+(en?done+" of "+it.length+" steps done":it.length+" में से "+done+" कदम पूरे")+'</b><span class="bar"><i style="width:'+Math.round(done/it.length*100)+'%"></i></span></div>'+
+    '<a class="next" '+lnk(n)+'>'+(en?"Step "+(nx+1)+": ":"कदम "+(nx+1)+": ")+esc(n[2])+' ›</a>'+
+    it.map((x,k)=>x[0]
+      ?'<div class="s ok"><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Done":"हो गया")+'</i></div>'
+      :'<a class="s'+(k===nx?' nx':'')+'" '+lnk(x)+'><em>'+(k+1)+'</em><span>'+x[1]+' '+esc(x[2])+'</span><i>'+(en?"Add ›":"भरें ›")+'</i></a>').join("")+'</div>';
 }
 function kickMsg(){
   let r="";try{r=sessionStorage.getItem("pb-kicked")||"";sessionStorage.removeItem("pb-kicked");}catch(e){}
