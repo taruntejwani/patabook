@@ -37,6 +37,8 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .who .dv .d{display:flex;align-items:center;gap:8px;padding:4px 0}.who .dv .d span{flex:1;min-width:0}.who .dv .d button{color:#b42318;font-weight:700;font-size:12.5px;border:1px solid #f1c4c0;background:#fff;border-radius:999px;padding:3px 10px}
 .who #out{display:block;width:100%;margin-top:10px;border:1.5px solid #b42318;color:#b42318;background:#fff;font-weight:800;border-radius:12px;padding:10px;font-size:14.5px}
 .kick{background:#fff4e5;color:#7a3b00;border:1px solid #ffd8a8;border-radius:14px;padding:12px 14px;font-weight:700;line-height:1.5;margin-bottom:12px;font-size:14px}
+.delshop{display:block;width:100%;margin-top:10px;background:#fff;border:1.5px solid #b42318;color:#b42318;font:inherit;font-weight:800;font-size:14px;border-radius:12px;padding:11px;cursor:pointer;text-align:left}.delshop:disabled{opacity:.6}
+.nlock{margin-top:10px;background:#f3f4f8;border-radius:12px;padding:11px 12px;font-size:13.5px;color:#33395a;line-height:1.5}
 .delacc{display:block;width:100%;margin:22px 0 0;background:none;border:0;color:#b42318;font-weight:700;font-size:13.5px;padding:10px;text-decoration:underline}
 .addsm{display:block;text-align:center;margin:8px 0 0;color:var(--blue);font-weight:700;font-size:14px;padding:8px}
 .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
@@ -292,6 +294,26 @@ let SST=null;
 async function loadStates(){try{const r=await rpc("pb_my_shop_states")||[];SST={};const m={};r.forEach(x=>{SST[x.slug]=x;m[x.slug]=x.is_active?"live":(x.submitted_at?"pend":"draft");});try{localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(e){}}catch(e){SST=null;}}
 const shopSt=b=>b.is_active?"live":(SST&&SST[b.slug]&&!SST[b.slug].submitted_at?"draft":"pend");
 const stK=b=>{const s=shopSt(b);return s==="live"?"live":s==="draft"?"draft":"pend";};
+/* 🔒 एक नंबर पर 2+ दुकानें हों तो वह नंबर तब तक नहीं बदलता जब तक बाक़ी दुकानें हटा न दी जाएँ (सर्वर पर भी यही रोक है) */
+const d10=s=>{const d=String(s||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;};
+const phoneLocked=b=>{const p=d10(b.phone);return !!p&&(ROWS||[]).filter(r=>d10(r.phone)===p).length>=2;};
+async function delShop(i,btn){
+  const b=ROWS[i],en=L()==="en";if(!b)return;
+  if(!confirm(en?'Delete "'+b.name+'"? Its photos and products will be removed too. This cannot be undone.':'"'+b.name+'" हटाएँ? इसकी फ़ोटो और सामान भी हट जाएँगे। यह वापस नहीं होगा।'))return;
+  btn.disabled=true;
+  try{await rpc("pb_owner_delete_shop",{p_slug:b.slug});
+    ROWS=ROWS.filter(x=>x.slug!==b.slug);
+    try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r.slug)));const m=JSON.parse(localStorage.getItem("pb-my-shop-st")||"{}");delete m[b.slug];localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(x){}
+    if(!ROWS.length){SET.cat=null;SD=0;}
+    draw();}
+  catch(e){btn.disabled=false;alert(en?"Could not delete. Try again.":"हटा नहीं पाए। दोबारा कोशिश करें।");}
+}
+function delShopBtns(en){
+  if(!ROWS||!ROWS.length)return "";
+  return '<div class="card"><b>🏪 '+(en?"Delete a shop":"दुकान हटाएँ")+'</b>'+
+    '<small style="display:block;margin-top:4px;color:#5f6368;line-height:1.45">'+(ROWS.length>1?(en?"Each shop can be deleted separately. A number shared by 2+ shops cannot be changed until only one is left.":"हर दुकान अलग से हटा सकते हैं। जिस नंबर पर 2+ दुकानें हैं, वह नंबर तब तक नहीं बदलेगा जब तक एक ही न बचे।"):(en?"This removes the shop and its photos and products.":"इससे दुकान और उसकी फ़ोटो-सामान हट जाएँगे।"))+'</small>'+
+    ROWS.map((b,i)=>'<button type="button" class="delshop" data-delshop="'+i+'">🗑️ '+esc(b.name)+'</button>').join("")+'</div>';
+}
 function profPct(b){const it=profItems(b,0);return it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null;}
 function offBlock(b,i,en){
   const s=shopSt(b);if(s==="live"||!SST)return "";
@@ -674,7 +696,7 @@ function catBody(k,b,i,en){
     '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos, products…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो, सामान…)")+'</a>';
   if(k==="num")return phoneBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
-    (PBA.mobile&&PBA.mobile.enabled()?'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>':'');
+    (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (Settings → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>'):'');
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
   if(k==="photo")return (stripsBlock(b,i)||'<div class="pm"><small style="margin:0">'+(en?"Logo, Profile Banner and Poster come with a Member plan. See “Member Plan” in Settings.":"Logo, Profile Banner और Poster Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।")+'</small></div>')+
     '<a class="stl alt" href="business.html?slug='+sl+'#edit">🛍️ '+(en?"Add / change photos & products":"फ़ोटो और सामान जोड़ें / बदलें")+'</a>';
@@ -686,7 +708,7 @@ function settingsView(en){
   const C=setCats(en),cur=C.find(c=>c[0]===SET.cat);
   if(!cur)return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"Back":"वापस")+'</button></div><div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
   let h='<div class="setbar"><button type="button" data-setback="list">‹ Settings</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
-  if(cur[0]==="acct")return h+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
+  if(cur[0]==="acct")return h+delShopBtns(en)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
   if(cur[0]==="rep"){const nb=notifBlock();if(nb)h+='<div class="card">'+nb+'</div>';}
   const multi=ROWS.length>1;
   h+=ROWS.map((b,i)=>{const body=catBody(cur[0],b,i,en);return '<div class="card">'+(multi?'<h2>🏪 '+esc(b.name)+'</h2>':'')+body+'</div>';}).join("");
@@ -961,6 +983,7 @@ $("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null)setGo("
 $("list").addEventListener("click",e=>{
   if(e.target.closest("[data-setopen]")){ntOpen(false);setGo("");return;}
   if(e.target.closest("[data-setprof]")){setGo("prof");return;}
+  const dsb=e.target.closest("[data-delshop]");if(dsb){delShop(+dsb.dataset.delshop,dsb);return;}
   const sbt=e.target.closest("[data-submit]");if(sbt){submitApproval(+sbt.dataset.submit,sbt);return;}
   const c=e.target.closest("[data-setcat]");if(c){setGo(c.dataset.setcat);return;}
   if(e.target.closest("[data-setback]"))setBack();

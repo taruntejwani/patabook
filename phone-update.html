@@ -183,6 +183,9 @@ $("s2").onsubmit=async e=>{
     const b=(Array.isArray(rows)?rows:[]).find(x=>x&&x.slug===slug);
     if(!b){only("notOwner");return;}
     $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";
+    /* 🔒 एक नंबर पर 2+ दुकानें हों तो नंबर नहीं बदलता (बाक़ी दुकानें हटाने पर खुलेगा) */
+    const d10=s=>{const d=String(s||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;},same=(Array.isArray(rows)?rows:[]).filter(x=>x&&d10(x.phone)&&d10(x.phone)===d10(b.phone)).length;
+    if(same>=2){only("main");step(1);$("e1").textContent=window.PB_EN?"🔒 This number is used by "+same+" shops, so it cannot be changed now. First delete the other shops from My Shop → Settings → Account.":"🔒 इस नंबर पर "+same+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। पहले मेरी दुकान → Settings → खाता से बाक़ी दुकानें हटाएँ।";$("send").disabled=true;$("phone").disabled=true;return;}
     only("main");step(1);
   }catch(e){only("main");$("e1").textContent=msg({});}
 })();
