@@ -71,6 +71,10 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .nt .bn{font-size:13px;margin-top:8px;line-height:1.45}.nt .bn:empty{display:none}
 .ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
+.ovh{font-weight:800;color:#174ea6;margin:4px 0 8px;font-size:15px}
+.ov .ovr{display:flex;align-items:center;gap:14px}.ov .ring{flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center;position:relative}.ov .ring:before{content:"";position:absolute;inset:7px;background:#fff;border-radius:50%}.ov .ring span{position:relative;font-weight:800;font-size:14px;color:#174ea6}
+.ov .ovt{min-width:0}.ov .ovt b{display:block;font-size:16px;word-break:break-word}.ov .ovt small{display:block;color:#5b6475;margin-top:4px;font-size:13px}.ov .st{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px;background:#eef2fb;color:#174ea6}
+.ov .go{margin-top:12px;width:100%;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;background:#1e9e57;color:#fff;cursor:pointer}.ov .go.alt{background:#1a73e8}
 .stp{margin-top:12px;width:100%}.stp .sh{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#33395a;margin-bottom:8px}.stp .bar{flex:1;height:8px;border-radius:99px;background:#e8edf5;overflow:hidden}.stp .bar i{display:block;height:100%;background:#1e9e57;border-radius:99px}
 .stp .next{display:block;text-align:center;background:#1a73e8;color:#fff;font-weight:800;border-radius:14px;padding:13px;margin:0 0 10px;text-decoration:none;font-size:15.5px}
 .stp .s{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;margin-top:6px;color:inherit;text-decoration:none}
@@ -718,7 +722,7 @@ async function uploadLogo(i,file){
   }catch(x){er.style.color="";er.textContent=en?"Could not upload the logo. Try again.":"Logo upload नहीं हो सका। दोबारा कोशिश करें।";}
 }
 /* ⚙️ Settings: ☰ → वर्ग (category) → उसी पन्ने पर सीधी settings (इससे आगे कोई और पन्ना नहीं) */
-let SET={cat:null};   /* null = बंद · "" = वर्गों की सूची · "prof"/"num"/… = वह वर्ग */
+let SET={cat:null,shop:null};   /* null = बंद · "" = वर्गों की सूची · "prof"/"num"/… = वह वर्ग */
 function setCats(en){return [
   ["prof","👤",en?"Profile":"प्रोफ़ाइल",en?"Edit, Verify, % complete":"Edit, Verify, कितनी पूरी"],
   ["num","📞",en?"Number & contact":"नंबर और संपर्क",en?"Show / hide number, change number":"नंबर दिखे / छुपे, नंबर बदलना"],
@@ -741,6 +745,19 @@ function catBody(k,b,i,en){
   if(k==="plan")return premBlock(b,i)||'<p class="note">—</p>';
   return "";
 }
+/* कई दुकानें हों: हर दुकान का एक डिब्बा — नाम, स्थिति, कितने % पूरी; "पूरा करें" दबाने पर उसी दुकान के कदम */
+function profOverview(en){
+  return '<div class="ovh">'+(en?"Your shops — profile status":"आपकी दुकानें — प्रोफ़ाइल कितनी पूरी")+'</div>'+ROWS.map((b,i)=>{
+    const it=profItems(b,i),pc=it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null,s=shopSt(b);
+    const col=pc==null?"#9aa0a6":pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
+    const chip=s==="live"?'<span class="st live">✅ '+(en?"Online":"Online")+'</span>':s==="pend"?'<span class="st pend">⏳ '+(en?"Waiting for approval":"मंज़ूरी का इंतज़ार")+'</span>':'<span class="st draft">🔴 Offline</span>';
+    const full=pc===100,act=full
+      ?(s==="draft"?'<button type="button" class="go" data-submit="'+i+'">📤 '+(en?"Send for approval":"मंज़ूरी के लिए भेजें")+'</button><div class="err" id="sub'+i+'"></div>':'')
+      :'<button type="button" class="go alt" data-profshop="'+i+'">'+(en?"Complete it ›":"पूरा करें ›")+'</button>';
+    return '<div class="card ov"><div class="ovr"><div class="ring" style="background:conic-gradient('+col+' '+((pc||0)*3.6)+'deg,#e8edf5 0)"><span>'+(pc==null?"–":pc+"%")+'</span></div>'+
+      '<div class="ovt"><b>'+esc(b.name)+'</b>'+chip+'<small>'+(pc==null?"":full?(en?"Profile 100% complete ✅":"प्रोफ़ाइल 100% पूरी ✅"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</small></div></div>'+act+'</div>';
+  }).join("");
+}
 function settingsView(en){
   const C=setCats(en),cur=C.find(c=>c[0]===SET.cat);
   if(!cur)return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"Back":"वापस")+'</button></div><div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
@@ -748,6 +765,10 @@ function settingsView(en){
   if(cur[0]==="acct")return h+delShopBtns(en)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
   if(cur[0]==="rep"){const nb=notifBlock();if(nb)h+='<div class="card">'+nb+'</div>';}
   const multi=ROWS.length>1;
+  if(cur[0]==="prof"&&multi){
+    if(SET.shop==null)return h+profOverview(en);
+    const b=ROWS[SET.shop];if(b)return h+'<button type="button" class="lnk" data-profback="1" style="margin:0 0 8px">‹ '+(en?"All my shops":"मेरी सारी दुकानें")+'</button><div class="card"><h2>🏪 '+esc(b.name)+'</h2>'+catBody("prof",b,SET.shop,en)+'</div>';
+  }
   h+=ROWS.map((b,i)=>{const body=catBody(cur[0],b,i,en);return '<div class="card">'+(multi?'<h2>🏪 '+esc(b.name)+'</h2>':'')+body+'</div>';}).join("");
   return h;
 }
@@ -1014,13 +1035,15 @@ async function start(){
 }
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;
-function setGo(cat){const d=cat===""?1:2;try{history.pushState({pbd:d,cat:cat},"");}catch(e){}SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
+function setGo(cat){SET.shop=null;const d=cat===""?1:2;try{history.pushState({pbd:d,cat:cat},"");}catch(e){}SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
   if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
 function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
 window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
 $("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null)setGo("");else if(SD>0)history.go(-SD);else{SET.cat=null;draw();}});
 $("list").addEventListener("click",e=>{
   if(e.target.closest("[data-setopen]")){ntOpen(false);setGo("");return;}
+  {const ps=e.target.closest("[data-profshop]");if(ps){SET.shop=+ps.dataset.profshop;draw();window.scrollTo(0,0);return;}}
+  if(e.target.closest("[data-profback]")){SET.shop=null;draw();window.scrollTo(0,0);return;}
   if(e.target.closest("[data-setprof]")){setGo("prof");return;}
   const nsv=e.target.closest("[data-nsave]");if(nsv){const ni=+nsv.dataset.ni,sl=+nsv.dataset.nsave,v=($("nin"+ni+"_"+sl).value||"").replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,""),x=(NUMS[ROWS[ni].slug]||{})[sl];numSet(ni,sl,v,x?x.show:false,nsv);return;}
   const nrm=e.target.closest("[data-nrm]");if(nrm){const ni=+nrm.dataset.ni;if(confirm(L()==="en"?"Remove this number?":"यह नंबर हटाएँ?"))numSet(ni,+nrm.dataset.nrm,"",false,nrm);return;}
