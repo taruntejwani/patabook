@@ -234,6 +234,7 @@ function errText(m){
     "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
     "bad Instagram":["Instagram का link या username सही लिखें (जैसे instagram.com/yourshop)।","Enter a correct Instagram link or username (like instagram.com/yourshop)."],"bad Facebook":["Facebook page का link सही लिखें (जैसे facebook.com/yourshop)।","Enter a correct Facebook page link (like facebook.com/yourshop)."],"bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
+    "gst in use":["🚫 यह GST नंबर पहले से किसी दूसरी दुकान पर इस्तेमाल हो चुका है।","🚫 This GST number is already used by another shop."],"udyam in use":["🚫 यह उद्यम (MSME) नंबर पहले से किसी दूसरी दुकान पर इस्तेमाल हो चुका है।","🚫 This Udyam (MSME) number is already used by another shop."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."],"number not verified":["यह नंबर OTP से पक्का नहीं हुआ है। फिर से सेव दबाएँ और OTP डालें।","This number is not verified by OTP. Press Save again and enter the OTP."]};
   for(const k in f)if(m.indexOf(k)>-1)return f[k][EN?1:0];
@@ -252,6 +253,7 @@ $("main").addEventListener("submit",async e=>{
   const gst=$("gst").value.replace(/\s/g,"").toUpperCase(),udy=$("udyam").value.replace(/\s/g,"").toUpperCase();
   if(gst&&!gstOk(gst)){$("err").textContent=errText("bad GST");$("gst").focus();return;}
   if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
+  if(NT.gst||NT.udyam){$("err").textContent=errText(NT.gst?"gst in use":"udyam in use");$(NT.gst?"gst":"udyam").focus();return;}
   {const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR&&(ad.length<8||ad.length>250)){$("err").textContent=errText("bad address");$("addrIn").focus();return;}}
   const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
   /* नया (बदला हुआ) नंबर हो तो पहले उसी नंबर पर OTP से पक्का करें */
@@ -261,7 +263,22 @@ $("main").addEventListener("submit",async e=>{
   b.disabled=false;
 });
 /* GST / Udyam: भरा है तो ⏳ जाँच बाकी; Admin ने Verify कर दिया तो 🔒 लॉक + "बदलें" (बदलने पर दुकान फिर Pending) */
+/* 🚫 नंबर डालते ही जाँच: यही GST / Udyam किसी दूसरे मालिक की दुकान पर पहले से हो तो तुरंत लाल संदेश */
+const NT={gst:false,udyam:false};
+function numWatch(){
+  [["gst","GST",v=>/^[0-3]\d[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(v)],["udyam","Udyam",v=>/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(v)]].forEach(([id,key,fmt])=>{
+    const inp=$(id),box=document.createElement("div");box.id="nt_"+id;box.style.cssText="margin:6px 0 0;font-size:13.5px;font-weight:700;color:#b3261e";inp.after(box);
+    inp.addEventListener("input",()=>{NT[id]=false;box.textContent="";});
+    inp.addEventListener("blur",async()=>{
+      const v=inp.value.replace(/\s/g,"").toUpperCase();
+      if(!v||v===(inp.dataset.orig||"")||!fmt(v)||inp.disabled){NT[id]=false;box.textContent="";return;}
+      try{const t=await rpc("pb_number_taken",{p_slug:slug,p_key:key,p_val:v});NT[id]=t===true;box.textContent=NT[id]?errText(id+" in use"):"";}
+      catch(x){NT[id]=false;box.textContent="";}   /* जाँच न चले तो रोको मत — सर्वर सेव के समय फिर जाँचेगा */
+    });
+  });
+}
 function gstLock(ds){
+  ["gst","udyam"].forEach(id=>{const e=$(id);if(e)e.dataset.orig=e.value.replace(/\s/g,"").toUpperCase();});
   const en=window.PB&&PB.lang&&PB.lang()!=="hi";
   [["gst","GST-Verified"],["udyam","Udyam-Verified"]].forEach(([id,vk])=>{
     const inp=$(id);if(!inp||!inp.value)return;
@@ -277,6 +294,7 @@ function gstLock(ds){
     };
   });
 }
+numWatch();
 (async function start(){
   fill();only("loading");
   if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
