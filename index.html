@@ -261,8 +261,8 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .join{width:100%;margin:26px 0 8px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .join p{font-size:15px;font-weight:700;color:var(--navy)}
 .cta2{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--navy);font-weight:800;font-size:15px;border-radius:999px;padding:10px 34px;border:2px solid #c9d8f5}
-.mys{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:12px;margin:2px 0 12px;border-radius:16px;padding:11px 14px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;box-shadow:0 6px 16px rgba(26,115,232,.28);text-decoration:none}
-.mys .ic{font-size:24px}.mys .tx{flex:1;min-width:0}.mys b{display:block;font-size:15.5px}.mys small{display:block;opacity:.85;font-size:12.5px;margin-top:1px}.mys .go{font-size:22px}
+.mys{display:flex;width:fit-content;max-width:100%;box-sizing:border-box;align-items:center;gap:8px;margin:2px auto 10px;border-radius:999px;padding:7px 14px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;box-shadow:0 4px 12px rgba(26,115,232,.25);text-decoration:none}.mys.dr{background:linear-gradient(135deg,#b3261e,#e5484d);box-shadow:0 4px 12px rgba(229,72,77,.3)}.mys.pe{background:linear-gradient(135deg,#b26a00,#f5a623);box-shadow:0 4px 12px rgba(245,166,35,.3)}
+.mys .ic{font-size:18px}.mys .tx{flex:0 1 auto;min-width:0}.mys b{display:block;font-size:14px;white-space:nowrap}.mys small{display:none}.mys .go{font-size:18px}
 .cta{display:inline-flex;align-items:center;gap:8px;background:var(--yellow);color:var(--ink);font-weight:800;font-size:16px;border-radius:999px;padding:12px 24px;box-shadow:0 6px 16px rgba(255,210,31,.45)}
 .url{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:14px;border-radius:999px;padding:8px 20px}
 
@@ -326,7 +326,7 @@ function pbMyShopLink(b,s){
 function pbOffTag(b,s){
   function apply(m){if(!m)return;var v=Object.keys(m).map(function(k){return m[k]}),d=v.indexOf("draft")>-1,p=!d&&v.indexOf("pend")>-1;if(!d&&!p)return;
     var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),t=b.querySelector("b"),m2=b.querySelector("small");
-    if(t){t.removeAttribute("data-i");t.textContent=d?(hi?"🔴 Offline — प्रोफ़ाइल पूरी करो":"🔴 Offline — complete your profile"):(hi?"⏳ मंज़ूरी का इंतज़ार":"⏳ Waiting for approval");}
+    if(t){t.removeAttribute("data-i");t.textContent=d?(hi?"प्रोफ़ाइल अधूरी — पूरी करो":"Complete your profile"):(hi?"मंज़ूरी का इंतज़ार":"Waiting for approval");b.classList.toggle("dr",d);b.classList.toggle("pe",p);var ic=b.querySelector(".ic");if(ic)ic.textContent=d?"🔴":"⏳";}
     if(m2){m2.removeAttribute("data-i");m2.textContent=d?(hi?"आपकी दुकान अभी सिर्फ़ आपको दिखती है — पूरी करके भेजें":"Your shop is visible only to you — finish and send it"):(hi?"PataBook आपकी दुकान जाँच रहा है":"PataBook is checking your shop");}
     b.href=d?"mybusiness.html#prof":"mybusiness.html";}
   var c=null;try{c=JSON.parse(localStorage.getItem("pb-my-shop-st")||"null");}catch(e){}
