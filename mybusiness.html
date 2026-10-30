@@ -185,6 +185,24 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .vjob{display:block;width:100%;margin-top:8px;border:1.5px dashed #f59e0b;background:#fffbeb;color:#92400e;border-radius:12px;padding:10px 12px;font:inherit;font-size:13.5px;font-weight:800;text-align:left;cursor:pointer}
 
 .setopen{display:flex;align-items:center;gap:8px;width:100%;margin-top:14px;text-align:left;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;border-radius:14px;padding:13px 14px;font-weight:800;font-size:15.5px}.setopen small{flex:1;font-weight:500;opacity:.85;font-size:12.5px}.setopen i{font-style:normal;font-size:22px}
+.shg{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:12px}
+.shb{position:relative;aspect-ratio:1/1;background:#fff;border:1px solid var(--line);border-radius:20px;padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:6px;text-align:center;cursor:pointer;box-shadow:0 6px 18px rgba(26,115,232,.09);min-width:0}
+.shb:active{transform:scale(.98)}
+.shb .lg{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.shb .lg img{width:100%;height:100%;object-fit:cover}
+.shb .nm{font-weight:800;font-size:15px;line-height:1.25;color:var(--navy);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;max-width:100%}
+.shb .st{font-size:12px;padding:3px 9px}
+.shb .shr{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.shb .shr span{width:25px;height:25px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#33395a}
+.shb .swr{display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.shb .swr small{font-size:11.5px;color:var(--muted);font-weight:700}
+.shb .err{font-size:11px;line-height:1.3;margin:0}
+.tsw{position:relative;width:50px;height:28px;border-radius:999px;background:linear-gradient(90deg,#25d366,#1a73e8);flex:none;transition:background .25s;border:0;padding:0}
+.tsw::after{content:"";position:absolute;top:3px;left:25px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:left .2s}
+.tsw[aria-checked="false"]{background:#9a9a9a}.tsw[aria-checked="false"]::after{left:3px}
+.tsw:disabled{opacity:.55;cursor:wait}
+.shh{font-size:17px;font-weight:800;color:var(--navy);margin:2px 0 10px}
+.moreh{font-size:14px;font-weight:800;color:#33395a;margin:18px 0 8px}
 .setbar{display:flex;align-items:center;gap:10px;margin:2px 0 12px}.setbar button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;color:var(--navy)}.setbar b{font-size:17.5px;color:var(--navy)}
 .cats{display:grid;gap:10px}.cat{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 6px 18px rgba(26,115,232,.07)}.cat .ci{font-size:24px;width:46px;height:46px;border-radius:14px;background:#eef4ff;display:grid;place-items:center;flex:none}.cat .ct{flex:1;min-width:0}.cat .ct b{display:block;font-size:15.5px}.cat .ct small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}.cat i{font-style:normal;color:var(--blue);font-size:22px;font-weight:700}
 .stl{display:block;margin-top:12px;text-align:center;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:12px;font-size:14.5px}.stl.alt{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
@@ -325,9 +343,9 @@ let PREQ={},EVS=null,BELL="",DEV=null,PROF=null;
 async function loadProf(){try{PROF=await rpc("pb_my_profiles");}catch(e){PROF=null;}}   /* sql-19 अभी नहीं चली तो % नहीं दिखेगा */
 /* 🔴 Offline (अधूरी, सिर्फ़ मालिक को दिखती) → ⏳ मंज़ूरी बाक़ी (भेजी हुई) → ✅ Live (Admin ने Approve किया) */
 let SST=null;
-async function loadStates(){try{const r=await rpc("pb_my_shop_states")||[];SST={};const m={};r.forEach(x=>{SST[x.slug]=x;m[x.slug]=x.is_active?"live":(x.submitted_at?"pend":"draft");});try{localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(e){}}catch(e){SST=null;}}
-const shopSt=b=>b.is_active?"live":(SST&&SST[b.slug]&&!SST[b.slug].submitted_at?"draft":"pend");
-const stK=b=>{const s=shopSt(b);return s==="live"?"live":s==="draft"?"draft":"pend";};
+async function loadStates(){try{const r=await rpc("pb_my_shop_states")||[];SST={};const m={};r.forEach(x=>{SST[x.slug]=x;m[x.slug]=x.is_active?"live":(x.owner_off?"off":(x.submitted_at?"pend":"draft"));});try{localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(e){}}catch(e){SST=null;}}
+const shopSt=b=>b.is_active?"live":(SST&&SST[b.slug]&&SST[b.slug].owner_off?"off":(SST&&SST[b.slug]&&!SST[b.slug].submitted_at?"draft":"pend"));
+const stK=b=>{const s=shopSt(b);return s==="live"?"live":(s==="draft"||s==="off")?"draft":"pend";};
 /* 🔒 एक नंबर पर 2+ दुकानें हों तो वह नंबर तब तक नहीं बदलता जब तक बाक़ी दुकानें हटा न दी जाएँ (सर्वर पर भी यही रोक है) */
 const d10=s=>{const d=String(s||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;};
 const phoneLocked=b=>{const p=d10(b.phone);return !!p&&(ROWS||[]).filter(r=>d10(r.phone)===p).length>=2;};
@@ -338,15 +356,15 @@ async function delShop(i,btn){
   try{await rpc("pb_owner_delete_shop",{p_slug:b.slug});
     ROWS=ROWS.filter(x=>x.slug!==b.slug);
     try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r.slug)));const m=JSON.parse(localStorage.getItem("pb-my-shop-st")||"{}");delete m[b.slug];localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(x){}
-    if(!ROWS.length){SET.cat=null;SD=0;}
+    SET.cat=null;SET.shop=null;SD=0;
     draw();}
   catch(e){btn.disabled=false;alert(en?"Could not delete. Try again.":"हटा नहीं पाए। दोबारा कोशिश करें।");}
 }
-function delShopBtns(en){
+function delShopBtns(en,only){
   if(!ROWS||!ROWS.length)return "";
   return '<div class="card"><b>🏪 '+(en?"Delete a shop":"दुकान हटाएँ")+'</b>'+
     '<small style="display:block;margin-top:4px;color:#5f6368;line-height:1.45">'+(ROWS.length>1?(en?"Each shop can be deleted separately. A number shared by 2+ shops cannot be changed until only one is left.":"हर दुकान अलग से हटा सकते हैं। जिस नंबर पर 2+ दुकानें हैं, वह नंबर तब तक नहीं बदलेगा जब तक एक ही न बचे।"):(en?"This removes the shop and its photos and products.":"इससे दुकान और उसकी फ़ोटो-सामान हट जाएँगे।"))+'</small>'+
-    ROWS.map((b,i)=>'<button type="button" class="delshop" data-delshop="'+i+'">🗑️ '+esc(b.name)+'</button>').join("")+'</div>';
+    ROWS.map((b,i)=>only!=null&&only!==i?'':'<button type="button" class="delshop" data-delshop="'+i+'">🗑️ '+esc(b.name)+'</button>').join("")+'</div>';
 }
 /* छोटी window: किसी कदम पर दबाने पर सिर्फ़ वही एक चीज़ (जैसे सिर्फ़ GST) भरने के लिए खुले */
 function popEdit(slug,card){
@@ -369,11 +387,11 @@ function popEdit(slug,card){
 }
 function profPct(b){const it=profItems(b,0);return it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null;}
 function offBlock(b,i,en){
-  const s=shopSt(b);if(s==="live"||!SST)return "";
+  const s=shopSt(b);if(s==="live"||s==="off"||!SST)return "";
   if(s==="pend")return '<div class="offb pnd"><b>⏳ '+(en?"Sent for approval":"मंज़ूरी के लिए भेज दी")+'</b><small>'+(en?"PataBook will check your shop. Until then it is visible only to you.":"PataBook आपकी दुकान जाँचेगा। तब तक यह सिर्फ़ आपको दिखती है।")+'</small></div>';
   const pc=profPct(b),ok=pc===null||pc>=100;
   return '<div class="offb"><b>🔴 Offline — '+(en?"only you can see this shop":"यह दुकान अभी सिर्फ़ आपको दिखती है")+'</b><small>'+(ok?(en?"Your profile is complete. Send it to PataBook to go Online for everyone.":"प्रोफ़ाइल पूरी है। सबको दिखाने (Online) के लिए PataBook को भेजें।"):(en?"Complete your profile to 100% (now "+pc+"%), then send it for approval.":"पहले प्रोफ़ाइल 100% पूरी करें (अभी "+pc+"%), फिर मंज़ूरी के लिए भेजें।"))+'</small>'+
-    (ok?'<button type="button" class="go" data-submit="'+i+'">📤 '+(en?"Send for approval":"मंज़ूरी के लिए भेजें")+'</button>':'<button type="button" class="go alt" data-setprof="1">'+(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›")+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
+    (ok?'<button type="button" class="go" data-submit="'+i+'">📤 '+(en?"Send for approval":"मंज़ूरी के लिए भेजें")+'</button>':'<button type="button" class="go alt" data-setprof="'+i+'">'+(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›")+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
 }
 async function submitApproval(i,btn){
   const b=ROWS[i],en=L()==="en",er=$("sub"+i);if(!b)return;btn.disabled=true;if(er)er.textContent="…";
@@ -398,7 +416,7 @@ function profItems(b,i){
   const d=p.d||"",has=k=>new RegExp("^"+k+":\\s*\\S","mi").test(d),en=L()==="en",E="edit.html?slug="+encodeURIComponent(b.slug);
   return [
     [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता","pop:cAddr"],
-    [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified",""],
+    [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर verified","cat:num"],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर location","location.html?slug="+encodeURIComponent(b.slug)],
     ...(PH(b,"logo")?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"Logo / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय","pop:cTime"],
@@ -429,11 +447,10 @@ function profBlock(b,i){
 /* क्रम से कदम: Step 1, 2, 3 … पूरे हुए पर ✅, अगला कदम अलग दिखे + सीधा बटन */
 function stepsBlock(it,en,slugOf){
   const nx=it.findIndex(x=>!x[0]),done=it.filter(x=>x[0]).length;
-  if(nx<0)return "";
-  const lnk=x=>String(x[3]).indexOf("pop:")===0?'href="#" data-pop="'+esc(x[3].slice(4))+'" data-popshop="'+esc(slugOf)+'"':'href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'');
-  const n=it[nx];
+  const lnk=x=>String(x[3]).indexOf("cat:")===0?'href="#" data-setcat="'+esc(x[3].slice(4))+'"':String(x[3]).indexOf("pop:")===0?'href="#" data-pop="'+esc(x[3].slice(4))+'" data-popshop="'+esc(slugOf)+'"':'href="'+esc(x[3])+'"'+(x[3].charAt(0)==="#"?' data-scroll="'+esc(x[3].slice(1))+'"':'');
+  const n=nx>=0?it[nx]:null;
   return '<div class="stp"><div class="sh"><b>'+(en?done+" of "+it.length+" steps done":it.length+" में से "+done+" कदम पूरे")+'</b><span class="bar"><i style="width:'+Math.round(done/it.length*100)+'%"></i></span></div>'+
-    '<a class="next" '+lnk(n)+'>'+(en?"Step "+(nx+1)+": ":"कदम "+(nx+1)+": ")+esc(n[2])+' ›</a>'+
+    (n?'<a class="next" '+lnk(n)+'>'+(en?"Step "+(nx+1)+": ":"कदम "+(nx+1)+": ")+esc(n[2])+' ›</a>':'')+
     it.map((x,k)=>x[0]
       ?(x[3]?'<a class="s ok" '+lnk(x)+'><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Change ›":"बदलें ›")+'</i></a>':'<div class="s ok"><em>✅</em><span>'+esc(x[2])+'</span><i>'+(en?"Done":"हो गया")+'</i></div>')
       :'<a class="s'+(k===nx?' nx':'')+'" '+lnk(x)+'><em>'+(k+1)+'</em><span>'+x[1]+' '+esc(x[2])+'</span><i>'+(en?"Add ›":"भरें ›")+'</i></a>').join("")+'</div>';
@@ -792,18 +809,49 @@ function profOverview(en){
   }).join("");
 }
 function settingsView(en){
-  const C=setCats(en),cur=C.find(c=>c[0]===SET.cat);
-  if(!cur)return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"Back":"वापस")+'</button></div><div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
-  let h='<div class="setbar"><button type="button" data-setback="list">‹ Settings</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
-  if(cur[0]==="acct")return h+delShopBtns(en)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
-  if(cur[0]==="rep"){const nb=notifBlock();if(nb)h+='<div class="card">'+nb+'</div>';}
-  const multi=ROWS.length>1;
-  if(cur[0]==="prof"&&multi){
-    if(SET.shop==null)return h+profOverview(en);
-    const b=ROWS[SET.shop];if(b)return h+'<button type="button" class="lnk" data-profback="1" style="margin:0 0 8px">‹ '+(en?"All my shops":"मेरी सारी दुकानें")+'</button><div class="card"><h2>🏪 '+esc(b.name)+'</h2>'+catBody("prof",b,SET.shop,en)+'</div>';
+  const b=ROWS[SET.shop],i=SET.shop;
+  if(!b){SET.cat=null;SET.shop=null;return "";}
+  const C=setCats(en).filter(c=>c[0]!=="prof"&&c[0]!=="num"),cur=C.find(c=>c[0]===SET.cat);
+  const nm=esc(b.name);
+  if(!cur){
+    /* दुकान का घर: ऊपर 9 कदम (हर कदम पर Edit), नीचे बाक़ी सेटिंग — कोई चीज़ दो बार नहीं */
+    return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"My shops":"मेरी दुकानें")+'</button></div>'+
+      '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
+      '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
+      '<a class="stl" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit">✏️ '+(en?"Edit profile (photos, products…)":"प्रोफ़ाइल Edit करें (फ़ोटो, सामान…)")+'</a></div>'+
+      '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
+      '<div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
   }
-  h+=ROWS.map((b,i)=>{const body=catBody(cur[0],b,i,en);return '<div class="card">'+(multi?'<h2>🏪 '+esc(b.name)+'</h2>':'')+body+'</div>';}).join("");
-  return h;
+  let h='<div class="setbar"><button type="button" data-setback="list">‹ '+nm+'</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
+  if(cur[0]==="acct")return h+delShopBtns(en,i)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
+  if(cur[0]==="rep"){const nb=notifBlock();if(nb)h+='<div class="card">'+nb+'</div>';}
+  return h+'<div class="card">'+catBody(cur[0],b,i,en)+'</div>';
+}
+/* 🏪 My Shop मुख्य पन्ना: दो-दो चौकोर डिब्बे; हर डिब्बे पर Online/Offline स्विच */
+function shopTiles(en){
+  return '<div class="shg">'+ROWS.map((b,i)=>{
+    const s=shopSt(b),lg=LOGOS[b.slug],pc=profPct(b),has=!!(SST&&SST[b.slug]&&("owner_off" in SST[b.slug]));
+    const col=pc==null||pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
+    const chip=s==="live"?'<span class="st live">✅ Online</span>':s==="pend"?'<span class="st pend">⏳ '+(en?"Waiting":"मंज़ूरी का इंतज़ार")+'</span>':'<span class="st draft">🔴 Offline</span>';
+    const sw=s==="pend"?'':(s==="live"&&!has)?'':'<div class="swr"><small>'+(s==="live"?"Online":"Offline")+'</small><button type="button" class="tsw" role="switch" aria-checked="'+(s==="live")+'" aria-label="Online / Offline" data-tsw="'+i+'"></button></div><div class="err" id="sub'+i+'"></div>';
+    return '<div class="shb" role="button" tabindex="0" data-openshop="'+i+'">'+
+      (pc!=null&&pc<100?'<span class="shr" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></span>':'')+
+      '<span class="lg">'+(lg?'<img src="'+esc(lg)+'" alt="">':esc(String(b.name||"?").trim().charAt(0).toUpperCase()))+'</span>'+
+      '<span class="nm">'+esc(b.name)+'</span>'+chip+sw+'</div>';
+  }).join("")+'</div>';
+}
+/* स्विच: Live → Offline (तुरंत); Offline (पहले Live थी) → Online (तुरंत); कभी पास नहीं हुई दुकान → मंज़ूरी के लिए भेजो */
+async function tileSwitch(i,btn){
+  const b=ROWS[i],en=L()==="en",s=shopSt(b);if(!b)return;
+  if(s==="draft"){const pc=profPct(b);if(pc!==null&&pc<100){openShop(i,"");return;}submitApproval(i,btn);return;}
+  const on=s==="off";
+  if(!on&&!confirm(en?'Take "'+b.name+'" Offline? Customers will not see it until you turn it Online again.':'"'+b.name+'" Offline करें? दोबारा Online करने तक ग्राहकों को नहीं दिखेगी।'))return;
+  btn.disabled=true;const er=$("sub"+i);if(er)er.textContent="";
+  try{await rpc("pb_owner_set_online",{p_slug:b.slug,p_on:on});
+    b.is_active=on;SST=SST||{};const o=SST[b.slug]||{slug:b.slug,submitted_at:new Date().toISOString()};o.is_active=on;o.owner_off=!on;SST[b.slug]=o;
+    try{const m=JSON.parse(localStorage.getItem("pb-my-shop-st")||"{}");m[b.slug]=on?"live":"off";localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(x){}
+    draw();}
+  catch(e){btn.disabled=false;if(er)er.textContent=en?"Could not change. Try again.":"बदल नहीं पाए। दोबारा कोशिश करें।";}
 }
 function draw(){
   PB.apply();
@@ -843,15 +891,11 @@ function draw(){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
   drawNt();if(SET.cat!==null&&$("ntBtn"))$("ntBtn").hidden=true;{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=false;}const vp=$("vpTop");if(vp){vp.href="business.html?slug="+encodeURIComponent(ROWS[0].slug);vp.querySelector("span").textContent=en?"My Profile":"मेरी Profile";vp.hidden=false;}}
-  const inSet=SET.cat!==null;
+  const inSet=SET.cat!==null&&!!ROWS[SET.shop];
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");
-  if(inSet){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी settings एक ही जगह।";list.innerHTML=settingsView(en);return;}
-  list.innerHTML=ROWS.map((b,i)=>'<div class="card"><h2>'+esc(b.name)+' <span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></h2>'+
-    (b.address?'<div class="addr">📍 '+esc(b.address)+'</div>':'')+offBlock(b,i,en)+
-    (b.phone_update_pending?'<div class="err" style="background:#fff4e5;color:#7a3b00;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:12px">'+(en?"Complete OTP verification to update your mobile number.":"अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।")+'</div>':'')+
-    weekLine(b)+
-    '<button type="button" class="setopen" data-setopen="1">⚙️ '+(en?"Settings":"Settings")+' <small>'+(en?"Profile, number, photos, plan…":"प्रोफ़ाइल, नंबर, फ़ोटो, plan…")+'</small><i>›</i></button></div>').join("");
+  if(inSet&&ROWS[SET.shop]){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी settings एक ही जगह।";list.innerHTML=settingsView(en);return;}
+  list.innerHTML=shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
   const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
@@ -1063,27 +1107,31 @@ async function start(){
   }
   draw();
   /* होम पेज की "Offline: प्रोफ़ाइल पूरी करो" पट्टी से सीधे Settings → प्रोफ़ाइल */
-  if(ME&&ROWS&&ROWS.length&&location.hash==="#num"){try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("num");}
-  if(ME&&ROWS&&ROWS.length&&/^#prof(=|$)/.test(location.hash)){const sg=decodeURIComponent(location.hash.slice(6)||"");try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("prof");const ix=sg?ROWS.findIndex(r=>r&&r.slug===sg):-1;if(ix>=0&&ROWS.length>1){SET.shop=ix;draw();}}
+  if(ME&&ROWS&&ROWS.length&&/^#(num|prof(=|$))/.test(location.hash)){
+    const h=location.hash,sg=/^#prof=/.test(h)?decodeURIComponent(h.slice(6)||""):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
+    let ix=sg?ROWS.findIndex(r=>r&&r.slug===sg):-1;if(ix<0){ix=ROWS.findIndex(r=>shopSt(r)!=="live");if(ix<0)ix=0;}
+    openShop(ix,h==="#num"?"num":"");}
 }
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;
-function setGo(cat){SET.shop=null;const d=cat===""?1:2;try{history.pushState({pbd:d,cat:cat},"");}catch(e){}SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
+function setGo(cat){const d=cat===""?1:2;try{history.pushState({pbd:d,cat:cat,shop:SET.shop},"");}catch(e){}SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
   if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
+/* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
+function openShop(i,cat){if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
 function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
-window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
-$("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null)setGo("");else if(SD>0)history.go(-SD);else{SET.cat=null;draw();}});
+window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));SET.shop=SD===0?null:(st.shop==null?null:st.shop);ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
+$("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null){if(ROWS&&ROWS.length===1)openShop(0,"");else window.scrollTo(0,0);}else if(SD>0)history.go(-SD);else{SET.cat=null;draw();}});
 $("list").addEventListener("click",e=>{
-  if(e.target.closest("[data-setopen]")){ntOpen(false);setGo("");return;}
+  {const tw=e.target.closest("[data-tsw]");if(tw){e.preventDefault();e.stopPropagation();tileSwitch(+tw.dataset.tsw,tw);return;}}
+  {const ot=e.target.closest("[data-openshop]");if(ot){ntOpen(false);openShop(+ot.dataset.openshop,"");return;}}
   {const pp=e.target.closest("[data-pop]");if(pp){e.preventDefault();popEdit(pp.dataset.popshop,pp.dataset.pop);return;}}
-  {const ps=e.target.closest("[data-profshop]");if(ps){SET.shop=+ps.dataset.profshop;draw();window.scrollTo(0,0);return;}}
-  if(e.target.closest("[data-profback]")){SET.shop=null;draw();window.scrollTo(0,0);return;}
-  if(e.target.closest("[data-setprof]")){setGo("prof");return;}
+  {const ps=e.target.closest("[data-profshop]");if(ps){openShop(+ps.dataset.profshop,"");return;}}
+  {const sp=e.target.closest("[data-setprof]");if(sp){const i=+sp.dataset.setprof;if(SET.cat===""&&SET.shop===i){const t=document.querySelector(".stp");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}else openShop(i,"");return;}}
   const nsv=e.target.closest("[data-nsave]");if(nsv){const ni=+nsv.dataset.ni,sl=+nsv.dataset.nsave,v=($("nin"+ni+"_"+sl).value||"").replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,""),x=(NUMS[ROWS[ni].slug]||{})[sl];numSet(ni,sl,v,x?x.show:false,nsv);return;}
   const nrm=e.target.closest("[data-nrm]");if(nrm){const ni=+nrm.dataset.ni;if(confirm(L()==="en"?"Remove this number?":"यह नंबर हटाएँ?"))numSet(ni,+nrm.dataset.nrm,"",false,nrm);return;}
   const dsb=e.target.closest("[data-delshop]");if(dsb){delShop(+dsb.dataset.delshop,dsb);return;}
   const sbt=e.target.closest("[data-submit]");if(sbt){submitApproval(+sbt.dataset.submit,sbt);return;}
-  const c=e.target.closest("[data-setcat]");if(c){setGo(c.dataset.setcat);return;}
+  const c=e.target.closest("[data-setcat]");if(c){e.preventDefault();setGo(c.dataset.setcat);return;}
   if(e.target.closest("[data-setback]"))setBack();
 });
 PB.mount($("pbLang"));

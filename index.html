@@ -334,7 +334,7 @@ function pbOffTag(b,s){
   apply(c);
   if(!s.access_token||!window.PATABOOK_SUPABASE)return;
   fetch(PATABOOK_SUPABASE.url+"/rest/v1/rpc/pb_my_shop_states",{method:"POST",headers:{apikey:PATABOOK_SUPABASE.anonKey,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"})
-    .then(function(r){return r.ok?r.json():null}).then(function(rows){if(!Array.isArray(rows))return;var m={};rows.forEach(function(r){m[r.slug]=r.is_active?"live":(r.submitted_at?"pend":"draft");});
+    .then(function(r){return r.ok?r.json():null}).then(function(rows){if(!Array.isArray(rows))return;var m={};rows.forEach(function(r){m[r.slug]=r.is_active?"live":(r.owner_off?"off":(r.submitted_at?"pend":"draft"));});
       try{localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(e){}apply(m);}).catch(function(){});
 }
 document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";if(b){pbMyShopLink(b,s);pbOffTag(b,s);}var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
@@ -596,7 +596,7 @@ function applyLang(){
       const hh={apikey:KEY,Authorization:"Bearer "+ss.access_token,"Content-Type":"application/json"};
       const [a,b]=await Promise.all([fetch(SBU+"/rest/v1/rpc/pb_my_shop_states",{method:"POST",headers:hh,body:"{}"}),fetch(SBU+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:hh,body:"{}"})]);
       if(!a.ok||!b.ok)return [];
-      const st={};(await a.json()||[]).forEach(x=>{if(x&&!x.is_active)st[x.slug]=x.submitted_at?"pend":"draft";});
+      const st={};(await a.json()||[]).forEach(x=>{if(x&&!x.is_active&&!x.owner_off)st[x.slug]=x.submitted_at?"pend":"draft";});
       return (await b.json()||[]).filter(x=>x&&x.name&&st[x.slug]).map(x=>Object.assign({},x,{_off:st[x.slug]}));
     }catch(e){return [];}
   }
