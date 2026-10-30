@@ -34,6 +34,7 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .card .hd{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;min-height:54px}
 .card .hd .nm{flex:1;min-width:0;font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .hd .tc{font-size:15px;flex:none}
+.card .hd .src{font-size:11px;font-weight:800;background:#efeaff;color:#5b2bb8;border-radius:999px;padding:2px 8px;flex:none;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card .hd .ar{flex:none;color:#98a2b3;transition:transform .25s;font-size:13px}
 .card.open .hd .ar{transform:rotate(180deg)}
 .card .bd{padding:0 14px 14px;border-top:1px solid var(--line)}
@@ -233,7 +234,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var START = location.hash;
-  var status = 'pending', sess = null, rows = [], timer = null, OWN = null, CODES = {}, HOME = null, CITIES = null, PREMA = null;
+  var status = 'pending', sess = null, rows = [], timer = null, OWN = null, CODES = {}, HOME = null, CITIES = null, PREMA = null, SRC = null;
 
   async function rpc(fn, args) {
     sess = await PBA.session();
@@ -275,6 +276,9 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       /* मालिक और नंबर-स्विच (sql-03 चलने के बाद) */
       OWN = null;
       try { OWN = {}; (await rpc('pb_admin_owner_info') || []).forEach(function (o) { OWN[o.slug] = o; }); } catch (x) { OWN = null; }
+      /* दुकान किस Manager / Staff की तरफ़ से आई (pb_shop_source) */
+      SRC = null;
+      try { SRC = {}; (await rpc('pb_shop_source', { p_slugs: rows.map(function (b) { return b.slug; }) }) || []).forEach(function (s) { SRC[s.slug] = s; }); } catch (x) { SRC = null; }
       $('gate').innerHTML = ''; $('panel').hidden = false;
       draw();
     } catch (e) {
@@ -295,6 +299,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var on = ownOf(b).show_phone !== false;
     return '<button class="' + (on ? 'gr' : 'rd') + '" data-a="ph" data-i="' + i + '">📞 नंबर ' + (on ? 'ON' : 'OFF') + '</button>';
   }
+  /* 📋 "Manager / Staff की तरफ़ से" — छोटा निशान (हेडर) और पूरी लाइन (खोलने पर) */
+  function srcTxt(b) {
+    var s = SRC && SRC[b.slug]; if (!s) return '';
+    return s.by_role === 'staff' ? '🧑‍💼 Staff ' + (s.by_name || '') + (s.mgr_name ? ' (Manager ' + s.mgr_name + ' के)' : '') + ' की तरफ़ से' : '👔 Manager ' + (s.by_name || '') + ' की तरफ़ से';
+  }
+  function srcChip(b) { var t = srcTxt(b); return t ? '<span class="src" title="' + esc(t) + '">' + (SRC[b.slug].by_role === 'staff' ? '🧑‍💼 ' : '👔 ') + esc(SRC[b.slug].by_name || '') + '</span>' : ''; }
+  function srcLine(b) { var t = srcTxt(b); return t ? '<div class="meta"><b style="color:#5b2bb8">📋 ' + esc(t) + '</b></div>' : ''; }
   function homeOf(b) { return (HOME && HOME[b.slug]) || {}; }
   function cityNames(ids) { return (ids || []).map(function (id) { var c = (CITIES || []).filter(function (x) { return x.id === id; })[0]; return c ? c.name : id; }).join(', '); }
   function hsBtn(b, i) {
@@ -337,14 +348,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       var mapLink = (b.latitude != null && b.longitude != null) ? 'map.html?to=' + b.latitude + ',' + b.longitude + '&n=' + encodeURIComponent(b.name || '') : (b.address ? 'map.html?q=' + encodeURIComponent(b.address) + '&n=' + encodeURIComponent(b.name || '') : '');
       var miss = missOf(b), gOk = /^yes$/i.test(line(b.description, 'GST-Verified')), uOk = /^yes$/i.test(line(b.description, 'Udyam-Verified')), hasLoc = b.latitude != null && b.longitude != null;
       var pOn = !!(PREMA && PREMA[b.slug]), tI = pOn ? ((TIERS.filter(function (t) { return t[0] === PMTIER[b.slug]; })[0] || [0, '💎'])[1]) : '';
-      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">' + (b.submitted_at ? 'Pending' : 'अधूरी (Offline)')) + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') +
+      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">' + (b.submitted_at ? 'Pending' : 'अधूरी (Offline)')) + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') + srcChip(b) +
         (PREMA ? '<button type="button" class="sw' + (pOn ? ' on' : '') + '" data-a="prem" data-i="' + i + '" role="switch" aria-checked="' + pOn + '" aria-label="Premium"><i></i>' + (pOn ? 'ON' : 'OFF') + '</button>' : '') + '<span class="ar">▼</span></div>' +
         '<div class="bd"' + (OPENS[b.slug] ? '' : ' hidden') + '><h3 style="margin-top:10px">' + (CODES[b.slug] ? '<span class="bid">' + esc(CODES[b.slug]) + '</span>' : '') + '</h3>' +
         '<div class="meta">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '<br>👤 ' + esc(line(b.description, 'Owner') || '—') +
         (ph ? ' · 📞 <a href="tel:+91' + ph + '">' + ph + '</a> · <a href="https://wa.me/91' + ph + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
         ' · ' + (b.latitude != null ? '📍 location है' : '⚠ location नहीं') + '</div>' +
         '<div class="miss ' + (miss.length ? 'bad">⚠ अधूरा (' + miss.length + '): ' + esc(miss.join(' · ')) : 'good">✅ प्रोफ़ाइल 100% पूरी') + '</div>' +
-        ownLine(b) +
+        srcLine(b) + ownLine(b) +
         (b.description ? '<div class="desc">' + esc(b.description) + '</div>' : '') +
         '<div class="acts">' +
         (live ? '<button class="hold" data-a="hold" data-i="' + i + '">⏸ Pending करें</button>' : '<button class="ok" data-a="ok" data-i="' + i + '">✅ Approve</button>') +

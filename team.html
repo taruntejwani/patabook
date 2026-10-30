@@ -40,6 +40,10 @@ label.ck input{width:auto;margin:0}
 .gate{max-width:420px;margin:60px auto;text-align:center;padding:0 16px}
 .gate a{display:inline-block;margin-top:10px;background:var(--bl);color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:11px 16px}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #eef1f6;padding:6px 4px;text-align:left;vertical-align:top}
+.cx{color:var(--r);font-weight:800}.src{color:#5b2bb8;font-weight:800}
+.card.dim{opacity:.6}
+.tw{overflow-x:auto}.tw td:not(:first-child),.tw th:not(:first-child){text-align:right;white-space:nowrap}
+.big{font-size:20px;font-weight:900}
 </style>
 </head>
 <body>
@@ -50,8 +54,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
   var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {};
-  var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।' };
+  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {}, WORK = {}, SRC = {}, EARN = [], DED = null, EM = '';
+  var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ Owner कर सकता है।' };
   function eMsg(e) { var m = String(e && e.message || e); for (var k in ER) if (m.indexOf(k) >= 0) return ER[k]; return 'गलती: ' + m; }
 
   async function rpc(fn, args) {
@@ -89,6 +93,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     var T = [];
     if (ROLE !== 'staff') T.push(['team', ROLE === 'owner' ? '👥 टीम' : '👥 मेरे Staff']);
     T.push(['shops', '🧾 दुकानें']);
+    T.push(['earn', ROLE === 'staff' ? '💰 मेरी कमाई' : '💰 कमाई / काम']);
     if (ROLE === 'owner') T.push(['ready', '📬 जाँच पूरी']);
     if (ROLE !== 'staff') T.push(['log', '📜 रिकॉर्ड']);
     return '<div class="tabs">' + T.map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
@@ -97,6 +102,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     $('m').innerHTML = tabs() + '<div id="body"><div class="mut">लोड हो रहा है…</div></div>';
     if (TAB === 'team') return drawTeam();
     if (TAB === 'shops') return drawShops();
+    if (TAB === 'earn') return drawEarn();
     if (TAB === 'ready') return drawReady();
     if (TAB === 'log') return drawLog();
   }
@@ -112,6 +118,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     var b = $('body');
     try { TEAM = await rpc('pb_team_list', {}) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     var mgrs = TEAM.filter(function (t) { return t.role === 'manager'; });
+    WORK = {}; try { (await rpc('pb_team_work', {}) || []).forEach(function (w) { WORK[w.member_id] = w; }); } catch (e) { WORK = {}; }
     var h = '<div class="card"><h3>＋ ' + (ROLE === 'owner' ? 'नया Manager या Staff जोड़ें' : 'नया Staff जोड़ें') + '</h3><p class="mut">उसका <b>Google email या 10 अंकों का मोबाइल नंबर</b> डालें। वह उसी से लॉगिन करके अपना काम देखेगा।</p>' +
       '<input id="aE" inputmode="email" placeholder="name@gmail.com या 98XXXXXXXX" autocomplete="off"><input id="aN" placeholder="नाम (ज़रूरी नहीं)" maxlength="60">';
     if (ROLE === 'owner') h += '<select id="aR"><option value="manager">👔 Manager</option><option value="staff">🧑‍💼 Staff (किसी Manager के नीचे)</option></select><select id="aP" hidden>' + mgrs.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name || m.email) + '</option>'; }).join('') + '</select>';
@@ -130,9 +137,17 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
       } catch (e) { btn.disabled = false; $('aMsg').innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     };
   }
+  /* काम की गिनती + कमाई का % (Owner → Manager/Staff का, Manager → अपने Staff का) */
+  function pctBlock(t) {
+    var w = WORK[t.id]; if (!w) return '';
+    var can = ROLE === 'owner' || (ROLE === 'manager' && t.role === 'staff');
+    var lab = t.role === 'manager' ? 'आपके मुनाफ़े में हिस्सा' : (ROLE === 'owner' ? 'Manager के हिस्से में Staff का' : 'आपके हिस्से में इसका');
+    return '<div class="ln">📊 इस महीने <b>' + (w.shops_month || 0) + '</b> दुकान जोड़ी · <b>' + (w.sold_month || 0) + '</b> plan बिके · कुल <b>' + (w.live_total || 0) + '</b> दुकान Live</div>' +
+      (can ? '<div class="ln">💰 ' + lab + ': <input type="number" min="0" max="100" step="0.5" data-pct value="' + (w.pct != null ? +w.pct : 0) + '" style="width:84px;display:inline-block;margin:0"> % <button class="btn w" data-act="pct" style="padding:7px 12px">सेव</button></div>' : '');
+  }
   function memberCard(t, nest) {
     var kids = nest ? TEAM.filter(function (x) { return x.parent_id === t.id; }) : [];
-    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || show(t.email)) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(show(t.email)) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' +
+    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || show(t.email)) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(show(t.email)) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' + pctBlock(t) +
       (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : '<div class="row">') +
       '<button class="btn o" data-act="tog">' + (t.active ? '⏸ रोकें' : '▶ चालू करें') + '</button><button class="btn r" data-act="del">🗑 हटाएँ</button></div><div class="msg"></div>' +
       (kids.length ? '<div class="sub">' + kids.map(function (k) { return memberCard(k, false); }).join('') + '</div>' : '') + '</div>';
@@ -147,6 +162,11 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
         await rpc('pb_team_remove', { p_id: id }); return drawTeam();
       }
       if (act === 'tog') { await rpc('pb_team_set', { p_id: id, p_active: !t.active }); return drawTeam(); }
+      if (act === 'pct') {
+        var pv = +card.querySelector('[data-pct]').value;
+        await rpc('pb_team_set_pct', { p_id: id, p_pct: pv });
+        if (WORK[id]) WORK[id].pct = pv; msg.innerHTML = '<p class="ok">हिस्सा ' + pv + '% सेव हो गया।</p>'; return;
+      }
       if (act === 'save') {
         var perms = {}; card.querySelector('[data-perm]').querySelectorAll('[data-p]').forEach(function (c) { if (c.checked) perms[c.dataset.p] = true; });
         await rpc('pb_team_set', { p_id: id, p_perms: perms }); msg.innerHTML = '<p class="ok">सेव हो गया।</p>';
@@ -165,7 +185,15 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
   async function loadShops() {
     var L = $('sL'); if (!L) return;
     try { SH = await rpc('pb_team_shops', { p_status: shSt, p_q: shQ || null, p_limit: 100 }) || []; } catch (e) { return L.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    SRC = {};
+    if (SH.length) { try { (await rpc('pb_shop_source', { p_slugs: SH.map(function (s) { return s.slug; }) }) || []).forEach(function (x) { SRC[x.slug] = x; }); } catch (e) { SRC = {}; } }
     L.innerHTML = SH.length ? SH.map(shopCard).join('') : '<p class="mut">कोई दुकान नहीं मिली।</p>';
+  }
+  /* 📋 यह दुकान किसकी तरफ़ से आई */
+  function srcLn(slug) {
+    var s = SRC[slug]; if (!s) return '';
+    var t = s.by_role === 'staff' ? '🧑‍💼 Staff ' + (s.by_name || '') + (s.mgr_name ? ' (Manager ' + s.mgr_name + ' के)' : '') + ' की तरफ़ से' : '👔 Manager ' + (s.by_name || '') + ' की तरफ़ से';
+    return '<div class="ln src">📋 ' + esc(t) + '</div>';
   }
   /* प्रोफ़ाइल में क्या अधूरा है (दुकानदार के Settings वाली 10 बातें) */
   function missOf(s) {
@@ -194,7 +222,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     if (can('gst') && u) btn += '<button class="btn ' + (uv ? 'o' : 'g') + '" data-sa="udy" data-on="' + (uv ? 0 : 1) + '">' + (uv ? '↩ MSME Verified हटाएँ' : '✅ MSME सही है') + '</button><button class="btn w" data-sa="usite" data-n="' + esc(u) + '">🏭 MSME साइट</button>';
     if (can('addr')) btn += '<button class="btn w" data-sa="addr">📍 पता बदलें</button>';
     if (!s.is_active && s.submitted_at) btn += '<button class="btn" data-sa="ready">📤 Approval के लिए भेजें</button>';
-    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">Live</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : !s.submitted_at ? '<span class="role off">अधूरी (Offline)</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' +
+    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">Live</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : !s.submitted_at ? '<span class="role off">अधूरी (Offline)</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' + srcLn(s.slug) +
       (function () { var m = missOf(s); return m.length ? '<div class="ln nv">⚠ अधूरा (' + m.length + '): ' + esc(m.join(' · ')) + '</div>' : '<div class="ln v">✅ प्रोफ़ाइल 100% पूरी</div>'; })() +
       vLine(d, 'GST', '🧾 GST') + vLine(d, 'Udyam', '🏭 Udyam') + (!g && !u ? '<div class="ln mut">GST / Udyam नंबर नहीं डाला</div>' : '') +
       '<div class="row">' + (s.is_active ? '<a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(s.slug) + '">👁 दुकान देखें</a>' : '') + btn + '</div><div class="ed"></div><div class="msg"></div></div>';
@@ -225,6 +253,91 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     } catch (x) { a.disabled = false; msg.innerHTML = '<p class="err">' + esc(eMsg(x)) + '</p>'; }
   });
 
+  /* ───────── कमाई / काम ───────── */
+  function rs(n) { return '₹' + Math.round(+n || 0).toLocaleString('en-IN'); }
+  function mkey(d) { return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }).slice(0, 7); }
+  function mlabel(k) { return new Date(k + '-15').toLocaleDateString('hi-IN', { month: 'long', year: 'numeric' }); }
+  function dlabel(d) { return new Date(d + 'T12:00:00+05:30').toLocaleDateString('hi-IN', { day: 'numeric', month: 'long' }); }
+  function mine(r) { return ROLE === 'staff' ? (+r.staff_share || 0) : (r.mgr_share == null ? 0 : (+r.mgr_share || 0) - (+r.staff_share || 0)); }
+  function dedCard() {
+    if (!DED) return '<div class="card"><h3>⚙️ कटौती के switch</h3><p class="mut">यह हिस्सा नहीं खुला — Supabase में SQL का भाग 2 चला है?</p></div>';
+    var N = { gst: '🧾 GST (रकम में शामिल)', google: '🟦 Google Play फ़ीस', razorpay: '💳 Razorpay फ़ीस' };
+    return '<div class="card"><h3>⚙️ कटौती के switch</h3><p class="mut">जो switch चालू होगा, उतना % हर बिक्री से कटेगा और बचे मुनाफ़े पर Manager / Staff का हिस्सा बनेगा। सब बंद हों तो पूरी रकम गिनी जाती है। जो हिसाब 15 तारीख़ के बाद पक्का हो चुका, वह बाद में switch बदलने से नहीं बदलता।</p>' +
+      DED.map(function (d) { return '<div class="ln" style="display:flex;align-items:center;gap:8px"><label class="ck" style="flex:1;margin:0"><input type="checkbox" data-dk="' + d.k + '" ' + (d.enabled ? 'checked' : '') + '> ' + (N[d.k] || d.k) + '</label><input type="number" min="0" max="100" step="0.1" data-dp="' + d.k + '" value="' + (+d.pct) + '" style="width:84px;margin:0"><span>%</span></div>'; }).join('') +
+      '<div class="row"><button class="btn g" id="dedSave">सेव करें</button></div><div id="dedMsg"></div></div>';
+  }
+  function workCard(W) {
+    if (!W.length) return '';
+    var tot = function (list) { var o = { shops_month: 0, live_total: 0, sold_month: 0, sold_total: 0 }; list.forEach(function (x) { for (var k in o) o[k] += +x[k] || 0; }); return o; };
+    var tr = function (name, ind, o, tag) { return '<tr><td>' + (ind ? '&nbsp;&nbsp;↳ ' : '') + '<b>' + esc(name || '—') + '</b>' + (tag ? ' <span class="mut">' + tag + '</span>' : '') + '</td><td>' + o.shops_month + '</td><td>' + o.live_total + '</td><td>' + o.sold_month + '</td><td>' + o.sold_total + '</td></tr>'; };
+    var rows = '';
+    if (ROLE === 'staff') rows = W.map(function (x) { return tr(x.member_name, false, tot([x])); }).join('');
+    else W.filter(function (x) { return x.role === 'manager'; }).forEach(function (m) {
+      var kids = W.filter(function (x) { return x.parent_id === m.member_id; });
+      rows += tr(m.member_name, false, tot([m].concat(kids)), kids.length ? '(Staff समेत)' : '');
+      kids.forEach(function (k) { rows += tr(k.member_name, true, tot([k])); });
+    });
+    return '<div class="card"><h3>' + (ROLE === 'staff' ? '📊 मेरा काम' : '📊 किसने कितना काम किया') + '</h3><div class="tw"><table><tr><th>नाम</th><th>इस महीने दुकानें</th><th>Live (कुल)</th><th>इस महीने plan</th><th>कुल plan</th></tr>' + rows + '</table></div><p class="mut">"दुकानें" = इस महीने जोड़ी गई दुकानें। "plan" = बिके हुए Premium plan (नकद + gift)।</p></div>';
+  }
+  function earnSummary(rows, W) {
+    var B = {}, order = [], add = function (key, name, tag, fin, v) { if (!B[key]) { B[key] = { name: name, tag: tag, f: 0, p: 0 }; order.push(key); } B[key][fin ? 'f' : 'p'] += v; };
+    rows.forEach(function (r) {
+      if (r.status === 'cancelled') return;
+      var fin = r.status === 'final';
+      if (ROLE === 'staff') { add('s' + r.staff_id, r.staff_name || 'मैं', '', fin, +r.staff_share || 0); return; }
+      if (r.manager_id != null && r.mgr_share != null) add('m' + r.manager_id, r.manager_name, 'Manager', fin, (+r.mgr_share || 0) - (+r.staff_share || 0));
+      if (r.staff_id != null) add('s' + r.staff_id, r.staff_name, 'Staff', fin, +r.staff_share || 0);
+      if (ROLE === 'owner') add('o', 'आप (Owner)', '', fin, (+r.profit || 0) - (+r.mgr_share || 0));
+    });
+    var pctLine = '';
+    if (ROLE !== 'owner') {
+      var me = W.filter(function (x) { return x.role === ROLE; })[0];
+      if (me) pctLine = '<p class="mut">आपका हिस्सा: <b>' + (+me.pct) + '%</b> ' + (ROLE === 'manager' ? '(मुनाफ़े का; इसमें से Staff का हिस्सा कटता है)' : '(Manager के हिस्से का)') + '</p>';
+    }
+    var tr = order.map(function (k) { var b = B[k]; return '<tr><td><b>' + esc(b.name || '—') + '</b>' + (b.tag ? ' <span class="mut">' + b.tag + '</span>' : '') + '</td><td class="v">' + rs(b.f) + '</td><td class="nv">' + rs(b.p) + '</td></tr>'; }).join('');
+    return '<div class="card"><h3>💰 कमाई</h3>' + pctLine + (tr ? '<div class="tw"><table><tr><th>नाम</th><th>✅ पक्की</th><th>⏳ बाकी</th></tr>' + tr + '</table></div>' : '<p class="mut">इस अवधि में कोई कमाई नहीं बनी।</p>') +
+      '<p class="mut">"पक्की" = बिक्री के अगले महीने की 15 तारीख़ बीत चुकी। "बाकी" = अभी तारीख़ नहीं आई। 15 तारीख़ से पहले plan हटाया गया तो कमाई रद्द होती है।</p></div>';
+  }
+  function salesList(rows) {
+    if (!rows.length) return '';
+    return '<h3 style="margin:16px 2px 8px">🧾 बिक्री की सूची</h3>' + rows.map(function (r) {
+      var st = r.status === 'final' ? '<span class="v">✅ पक्की</span>' : r.status === 'cancelled' ? '<span class="cx">❌ रद्द (15 तारीख़ से पहले plan हटाया)</span>' : '<span class="nv">⏳ बाकी — ' + dlabel(r.settle_on) + ' को पक्की</span>';
+      var d = '';
+      if (r.status === 'cancelled') d = '';
+      else if (ROLE === 'staff') d = '<div class="ln">आपका हिस्सा: <b>' + rs(r.staff_share) + '</b></div>';
+      else {
+        d = '<div class="ln">मुनाफ़ा: <b>' + rs(r.profit) + '</b>' + (+r.gst || +r.fee_google || +r.fee_razor ? ' <span class="mut">(कटौती: ' + rs((+r.gst || 0) + (+r.fee_google || 0) + (+r.fee_razor || 0)) + ')</span>' : '') + '</div>';
+        d += ROLE === 'manager'
+          ? '<div class="ln">आपका: <b>' + rs(mine(r)) + '</b>' + (r.staff_id ? ' · Staff ' + esc(r.staff_name || '') + ': <b>' + rs(r.staff_share) + '</b>' : '') + '</div>'
+          : '<div class="ln">Manager ' + esc(r.manager_name || '—') + ': <b>' + rs(mine(r)) + '</b>' + (r.staff_id ? ' · Staff ' + esc(r.staff_name || '') + ': <b>' + rs(r.staff_share) + '</b>' : '') + ' · आपका: <b>' + rs((+r.profit || 0) - (+r.mgr_share || 0)) + '</b></div>';
+      }
+      return '<div class="card' + (r.status === 'cancelled' ? ' dim' : '') + '"><h3>' + esc(r.shop || r.slug) + '</h3><div class="mut">बिक्री: ' + new Date(r.sale_at).toLocaleDateString('hi-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }) + (r.amount != null ? ' · plan ' + rs(r.amount) : '') + '</div><div class="ln">' + st + '</div>' + d + '</div>';
+    }).join('');
+  }
+  async function drawEarn() {
+    var b = $('body'), W;
+    try { EARN = await rpc('pb_earn_rows', { p_months: 6 }) || []; W = await rpc('pb_team_work', {}) || []; }
+    catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p><p class="mut">अगर यह नया है तो Supabase में SQL का भाग 1 और 2 चलाना होगा।</p>'; }
+    DED = null; if (ROLE === 'owner') { try { DED = await rpc('pb_deduct_list', {}) || []; } catch (e) { DED = null; } }
+    var keys = []; EARN.forEach(function (r) { var k = mkey(r.sale_at); if (keys.indexOf(k) < 0) keys.push(k); });
+    keys.sort().reverse(); if (EM && keys.indexOf(EM) < 0) EM = '';
+    var rows = EM ? EARN.filter(function (r) { return mkey(r.sale_at) === EM; }) : EARN;
+    var sel = '<div class="card"><select id="eM" style="margin:0"><option value="">सभी (पिछले 6 महीने)</option>' + keys.map(function (k) { return '<option value="' + k + '"' + (k === EM ? ' selected' : '') + '>' + mlabel(k) + ' की बिक्री</option>'; }).join('') + '</select></div>';
+    b.innerHTML = (ROLE === 'owner' ? dedCard() : '') + workCard(W) + sel + earnSummary(rows, W) + salesList(rows);
+    $('eM').onchange = function () { EM = this.value; drawEarn(); };
+    var sv = $('dedSave');
+    if (sv) sv.onclick = async function () {
+      sv.disabled = true; $('dedMsg').innerHTML = '';
+      try {
+        var ks = (DED || []).map(function (d) { return d.k; });
+        for (var i = 0; i < ks.length; i++) {
+          await rpc('pb_deduct_set', { p_k: ks[i], p_enabled: b.querySelector('[data-dk="' + ks[i] + '"]').checked, p_pct: +b.querySelector('[data-dp="' + ks[i] + '"]').value || 0 });
+        }
+        await drawEarn(); $('dedMsg').innerHTML = '<p class="ok">सेव हो गया — नीचे का हिसाब नए switch से बन गया।</p>';
+      } catch (e) { sv.disabled = false; $('dedMsg').innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    };
+  }
+
   /* ───────── जाँच पूरी (Owner) ───────── */
   async function drawReady() {
     var b = $('body'), R;
@@ -238,7 +351,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
   async function drawLog() {
     var b = $('body'), R;
     try { R = await rpc('pb_team_log_list', { p_limit: 150 }) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
-    var N = { gst_verify: '🧾 GST', udyam_verify: '🏭 MSME', address: '📍 पता', ready: '📤 भेजी', team_add: '➕ जोड़ा', team_set: '✏️ बदला', team_remove: '🗑 हटाया' };
+    var N = { gst_verify: '🧾 GST', udyam_verify: '🏭 MSME', address: '📍 पता', ready: '📤 भेजी', team_add: '➕ जोड़ा', team_set: '✏️ बदला', team_remove: '🗑 हटाया', set_pct: '💰 हिस्सा %' };
     b.innerHTML = R.length ? '<div class="card"><table><tr><th>कब</th><th>किसने</th><th>क्या</th></tr>' + R.map(function (r) {
       return '<tr><td>' + new Date(r.at).toLocaleString('hi-IN', { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + esc(r.by_email) + '</td><td>' + (N[r.action] || esc(r.action)) + (r.slug ? ' · ' + esc(r.slug) : '') + (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</td></tr>';
     }).join('') + '</table></div>' : '<p class="mut">अभी कोई रिकॉर्ड नहीं।</p>';
