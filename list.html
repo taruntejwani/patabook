@@ -28,6 +28,13 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-s
 .card{background:#fff;border:1px solid #e5e7eb;border-radius:22px;padding:26px 22px;box-shadow:0 6px 24px #1a73e81a;overflow:hidden}
 .step{display:none;animation:in .3s ease}
 .step.on{display:block}
+.grp+.grp{margin-top:24px;padding-top:20px;border-top:1px solid #eef1f6}
+.grp+.grp .emoji{display:none}
+.grp+.grp h1{font-size:20px}
+.lgrid{display:grid;gap:12px;margin-top:18px}
+.lg{border:2px solid #dfe1e5;border-radius:16px;background:#fff;padding:18px;font:inherit;font-size:22px;font-weight:800;cursor:pointer;text-align:center;color:#0b2f73}
+.lg small{display:block;font-size:13px;font-weight:500;color:#5f6368;margin-top:2px}
+.lg.on,.lg:active{border-color:#1a73e8;background:#eef3fd}
 @keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
 .emoji{font-size:40px;line-height:1;margin-bottom:10px}
 .step h1{font-size:23px;line-height:1.3;margin:0 0 6px}
@@ -169,7 +176,16 @@ form.short .fo{display:none}
     <form id="f" autocomplete="off" onsubmit="return false">
       <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <!-- 1: दुकान का नाम -->
+      <!-- 1: भाषा (सिर्फ़ पहली बार) -->
+      <div class="step" data-s="lang">
+        <div class="emoji">🌐</div>
+        <h1>भाषा चुनें · Choose your language</h1>
+        <p class="hint">इस फ़ॉर्म की भाषा चुनें · Select the language of this form</p>
+        <div class="lgrid" id="lgrid"></div>
+        <div class="err"></div>
+      </div>
+
+      <!-- 2: मोबाइल + OTP -->
       <div class="step" data-s="phone">
         <div class="emoji">📞</div>
         <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
@@ -186,7 +202,9 @@ form.short .fo{display:none}
         <div class="err"></div>
       </div>
 
-      <div class="step" data-s="shop">
+      <!-- 3: दुकान का नाम + मालिक (एक स्क्रीन) -->
+      <div class="step" data-s="biz">
+      <div class="grp" data-s="shop">
         <div class="emoji">🏪</div>
         <h1 data-i="shop_h">व्यापार का नाम</h1>
         <div class="fo"><label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
@@ -195,32 +213,13 @@ form.short .fo{display:none}
         <div class="err"></div>
       </div>
 
-      <!-- 2: मालिक का नाम -->
-      <div class="step" data-s="owner">
+      <div class="grp" data-s="owner">
         <div class="emoji">🙋</div>
         <h1 data-i="owner_h">आपका नाम क्या है?</h1>
         <p class="hint" id="ownerHint">दुकान के मालिक या संचालक का नाम।</p>
         <input id="owner" data-ip="owner_ph" placeholder="आपका पूरा नाम" maxlength="60">
         <div class="err"></div>
       </div>
-
-      <!-- 3: location + पता (एक ही पेज) -->
-      <div class="step" data-s="addr">
-        <div class="emoji">🏠</div>
-        <h1 id="locH">दुकान का पता लिखें</h1>
-        <p class="hint" id="locHint">दुकान या ठेले पर हों तो बटन दबाएँ — ग्राहकों को सीधा रास्ता मिलेगा। बाकी सब वैकल्पिक है, सिर्फ़ शहर चुनना ज़रूरी है।</p>
-        <div style="margin-top:16px"><div style="position:relative"><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" autocomplete="off" placeholder="Gandhidham"><datalist id="cityList"></datalist></div></div>
-        <div class="row">
-          <div><label class="lbl" id="stateL">राज्य *</label><select id="state" class="in"><option selected>Gujarat</option><option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option><option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option></select></div>
-          <div><label class="lbl" id="distL">ज़िला *</label><select id="distSel" class="in"></select><input id="district" autocomplete="off" placeholder="ज़िले का नाम" style="margin-top:8px" hidden></div>
-        </div>
-        <div class="fo"><div><label class="lbl" id="areaL">इलाका / Area (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div></div>
-        <label class="lbl" id="addrL">पूरा पता *</label>
-        <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
-        <div class="fo"><label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
-        <input id="pin" inputmode="numeric" maxlength="6" placeholder="370201">
-        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला PIN नहीं।</p></div>
-        <div class="err"></div>
       </div>
 
       <!-- नया: समय + छुट्टी -->
@@ -249,8 +248,9 @@ form.short .fo{display:none}
         <div class="err"></div>
       </div>
 
-      <!-- 5: काम -->
-      <div class="step" data-s="svc">
+      <!-- 4: काम + पता (एक स्क्रीन) -->
+      <div class="step" data-s="work">
+      <div class="grp" data-s="svc">
         <div class="emoji">🛠️</div>
         <h1 data-i="svc_h">आप क्या काम / सामान बेचते हैं?</h1>
         <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही category खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
@@ -260,6 +260,24 @@ form.short .fo{display:none}
         <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (Home Delivery)</span></label></div>
         <div class="err"></div>
         <div class="sum" id="sum"></div>
+      </div>
+      <div class="grp" data-s="addr">
+        <div class="emoji">🏠</div>
+        <h1 id="locH">दुकान का पता लिखें</h1>
+        <p class="hint" id="locHint">दुकान या ठेले पर हों तो बटन दबाएँ — ग्राहकों को सीधा रास्ता मिलेगा। बाकी सब वैकल्पिक है, सिर्फ़ शहर चुनना ज़रूरी है।</p>
+        <div style="margin-top:16px"><div style="position:relative"><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" autocomplete="off" placeholder="Gandhidham"><datalist id="cityList"></datalist></div></div>
+        <div class="row">
+          <div><label class="lbl" id="stateL">राज्य *</label><select id="state" class="in"><option selected>Gujarat</option><option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option><option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option></select></div>
+          <div><label class="lbl" id="distL">ज़िला *</label><select id="distSel" class="in"></select><input id="district" autocomplete="off" placeholder="ज़िले का नाम" style="margin-top:8px" hidden></div>
+        </div>
+        <div class="fo"><div><label class="lbl" id="areaL">इलाका / Area (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div></div>
+        <label class="lbl" id="addrL">पूरा पता *</label>
+        <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
+        <div class="fo"><label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
+        <input id="pin" inputmode="numeric" maxlength="6" placeholder="370201">
+        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला PIN नहीं।</p></div>
+        <div class="err"></div>
+      </div>
       </div>
 
       <!-- 6: मोबाइल + submit -->
@@ -298,9 +316,14 @@ const T=(k,v)=>PB.t(k,v);
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ALLST=[...document.querySelectorAll(".step")],stepBy=k=>ALLST.find(x=>x.dataset.s===k);
 /* ⚡ छोटा फ़ॉर्म: मोबाइल+OTP → दुकान का नाम → मालिक का नाम → क्या काम → पता (शहर, राज्य, ज़िला, पूरा पता) → जमा। पूरा फ़ॉर्म विकल्प के रूप में */
-const SHORT_KEYS=["phone","shop","owner","svc","addr"],FULL_KEYS=["phone","shop","owner","addr","hours","online","svc"];
+/* 4 स्क्रीन: भाषा (सिर्फ़ पहली बार) → मोबाइल + OTP → दुकान का नाम + मालिक → काम + पता */
+const GROUP={biz:["shop","owner"],work:["svc","addr"]};
+function langChosen(){try{return localStorage.getItem("pb-lang-chosen")==="1";}catch(_){return true;}}   /* storage बंद हो तो भाषा वाली स्क्रीन छोड़ दो */
+function langFirst(){try{return sessionStorage.getItem("pb-lang-first")==="1";}catch(_){return false;}}  /* अभी-अभी भाषा चुनी (page reload के बाद भी 4 स्क्रीन दिखें) */
+const WITH_LANG=!langChosen()||langFirst();
+const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(["phone","biz","work"]),FULL_KEYS=SHORT_KEYS;
 let FULLF=false,steps=SHORT_KEYS.map(stepBy);
-let i=0,coords=null,sending=false;
+let i=(WITH_LANG&&langChosen())?1:0,coords=null,sending=false;
 
 /* ---------- Category: Supabase "categories" table ki ASLI 78 categories (export 09-10-2026).
    Public us table ko padh nahi sakta, isliye ID + naam yahan hain. Nayi category database me jodo to yahan bhi jodna. ---------- */
@@ -478,14 +501,14 @@ function showCat(){
 }
 function later(){clearTimeout(timer);timer=setTimeout(refresh,300);}
 $("services").addEventListener("input",()=>{if(!manual)later();});
-$("shop").addEventListener("input",()=>{if(steps[i]&&steps[i].dataset.s==="svc"&&!manual)later();});
+$("shop").addEventListener("input",()=>{if(steps[i]&&steps[i].dataset.s==="work"&&!manual)later();});
 
 /* ---------- category chunne ki list (bottom sheet): sirf asli 78 categories ---------- */
 let view={v:"main"};
 const sheet=$("sheet"),sl=$("sl"),sq=$("sq");
 function openSheet(){view={v:"main"};sq.value="";sheet.classList.add("on");$("pscrim").classList.add("on");document.body.style.overflow="hidden";drawSheet();}
 function closeSheet(){sheet.classList.remove("on");$("pscrim").classList.remove("on");document.body.style.overflow="";}
-function pick(e){sel=e;manual=true;closeSheet();showCat();if(steps[i].dataset.s==="svc")setErr("");if(steps[i].dataset.s==="phone")summary();}
+function pick(e){sel=e;manual=true;closeSheet();showCat();if(steps[i].dataset.s==="work")setErr("");if(steps[i].dataset.s==="phone")summary();}
 function row(attrs,title,sub,arrow){return '<button type="button" class="pr" '+attrs+'><span><b>'+esc(title)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><i>'+(arrow==null?"›":arrow)+'</i></button>';}
 const catRow=s=>row('data-c="'+s.id+'"',s.typ,s.typ===s.main?"":[s.main,s.grp].filter(Boolean).join(" › "),"");
 const otherRow=(sub)=>row('data-other="1"',T("o_row"),sub||T("o_sub"),"+");
@@ -568,7 +591,7 @@ function render(){
   steps.forEach((s,k)=>s.classList.toggle("on",k===i));
   $("bar").style.width=((i+1)/steps.length*100)+"%";
   /* ऊपर की पट्टी: सारे steps नाम के साथ (हो चुके = हरा ✓, अभी वाला = नीला, आगे वाले = धुँधले) */
-  {const NM={phone:["मोबाइल","Mobile"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
+  {const NM={lang:["भाषा","Language"],phone:["मोबाइल","Mobile"],biz:["दुकान और मालिक","Business"],work:["काम और पता","Work & Address"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
    $("cnt").innerHTML='<div class="stp" role="list">'+steps.map((x,k)=>{const k2=x.dataset.s,st=k<i?"done":k===i?"on":"todo";
      return '<button type="button" class="'+st+'" role="listitem" data-stp="'+k2+'"'+(k<i?'':' tabindex="-1"')+(k===i?' aria-current="step"':'')+'><i>'+(k<i?"✓":(k+1))+'</i><span>'+(NM[k2]?NM[k2][EN()?1:0]:k2)+'</span></button>';}).join("")+'</div>';
    const cur=$("cnt").querySelector(".on");if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:"center",block:"nearest"});}catch(_){}}
@@ -580,36 +603,48 @@ function render(){
   const opt=key==="hours"||key==="online";$("later").hidden=!opt;
   if(opt)$("later").innerHTML=(EN()?"Fill the rest later →":"बाकी बाद में भरें →")+"<small>"+(EN()?"You can add these anytime from “My Shop → ✏️ Edit details”":"ये सब कभी भी \"मेरी दुकान → ✏️ जानकारी बदलें\" से भर सकते हैं")+"</small>";
   $("next").textContent=i===steps.length-1?T("submit"):T("next");
-  if(key==="owner"){const n=$("shop").value.trim();$("ownerHint").textContent=n?T("owner_hint_n",{n:n}):T("owner_hint");}
-  if(key==="svc"){if(!manual&&!sel)refresh();else showCat();}
+  $("btns").style.display=key==="lang"?"none":"";   /* भाषा चुनते ही अपने-आप आगे जाता है — "आगे" बटन नहीं */
+  if(key==="biz"){$("ownerHint").textContent=T("owner_hint");}
+  if(key==="work"){if(!manual&&!sel)refresh();else showCat();}
   if(i===steps.length-1){steps[i].appendChild($("sum"));summary();}
   {const fb=$("fullB");if(fb)fb.textContent=FULLF?(EN()?"← Back to the short form":"← छोटा फ़ॉर्म"):(EN()?"Want to add more details? Open the full form →":"और जानकारी देना चाहते हैं? पूरा फ़ॉर्म खोलें →");}
-  const inp=steps[i].querySelector("input,textarea");if(inp&&key!=="loc"&&key!=="addr")setTimeout(()=>inp.focus({preventScroll:true}),50);
+  const inp=steps[i].querySelector("input,textarea");if(inp&&key!=="loc"&&key!=="addr"&&key!=="work"&&key!=="lang")setTimeout(()=>inp.focus({preventScroll:true}),50);
   window.scrollTo({top:0,behavior:"smooth"});
 }
-function setErr(m){steps[i].querySelector(".err").textContent=m||"";}
+/* गलती उसी हिस्से के नीचे जहाँ खाना है (एक स्क्रीन पर दो हिस्से हों तो); k न हो तो स्क्रीन की आख़िरी गलती-लाइन */
+function setErr(m,k){
+  const st=steps[i];if(!st)return;
+  if(!m){st.querySelectorAll(".err").forEach(e=>{e.textContent="";});return;}
+  const e=(k&&st.querySelector('.grp[data-s="'+k+'"] .err'))||[...st.querySelectorAll(".err")].pop();
+  if(e)e.textContent=m;
+}
 
-function check(){
-  const key=steps[i].dataset.s;setErr("");
-  if(key==="shop"&&$("shop").value.trim().length<2){setErr(T("e_shop"));return false;}
-
+function checkKey(key){
+  const E=m=>setErr(m,key);
+  if(key==="shop"&&$("shop").value.trim().length<2){E(T("e_shop"));$("shop").focus();return false;}
+  if(key==="owner"&&$("owner").value.trim().length<2){E(T("e_owner"));$("owner").focus();return false;}
+  if(key==="svc"&&!categoryIdFor(sel)){E(T("e_cat"));openSheet();return false;}
   if(key==="addr"&&$("pin")&&/^[1-9]\d{5}$/.test($("pin").value.trim())&&!pinFitsState($("pin").value.trim(),$("state").value)){
-    setErr(EN()?"This PIN code is not of "+$("state").value+". Check the post office PIN of your area (or leave it empty).":"यह पिन कोड "+$("state").value+" का नहीं है। अपने इलाके का डाकघर वाला पिन कोड जाँचें (या खाली छोड़ दें)।");$("pin").focus();return false;}
-  if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){setErr(EN()?"PIN code must be 6 digits (or leave it empty).":"PIN कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
-  if(key==="online"&&$("email").value.trim()&&!/^[^\s@]{1,64}@[^\s@]{1,100}\.[a-z]{2,}$/i.test($("email").value.trim())){setErr(EN()?"The email looks wrong (or leave it empty).":"Email सही नहीं लगता (या खाली छोड़ दें)।");$("email").focus();return false;}
-  if(key==="online"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){setErr(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
-  if(key==="owner"&&$("owner").value.trim().length<2){setErr(T("e_owner"));return false;}
+    E(EN()?"This PIN code is not of "+$("state").value+". Check the post office PIN of your area (or leave it empty).":"यह पिन कोड "+$("state").value+" का नहीं है। अपने इलाके का डाकघर वाला पिन कोड जाँचें (या खाली छोड़ दें)।");$("pin").focus();return false;}
+  if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){E(EN()?"PIN code must be 6 digits (or leave it empty).":"PIN कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
+  if(key==="online"&&$("email").value.trim()&&!/^[^\s@]{1,64}@[^\s@]{1,100}\.[a-z]{2,}$/i.test($("email").value.trim())){E(EN()?"The email looks wrong (or leave it empty).":"Email सही नहीं लगता (या खाली छोड़ दें)।");$("email").focus();return false;}
+  if(key==="online"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){E(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
   if(key==="addr"){
     const cv=$("city").value.trim();
-    if(cv.length<2||/[0-9<>@\/\\:;{}=_|]/.test(cv)){setErr(LX("e_city2"));$("city").focus();return false;}
+    if(cv.length<2||/[0-9<>@\/\\:;{}=_|]/.test(cv)){E(LX("e_city2"));$("city").focus();return false;}
     const kc=knownCity(cv);if(kc){$("city").value=kc;const inf=CITY_INFO[kc]||{};if(inf.state)$("state").value=inf.state;if(inf.district)setDist(inf.district);}
-    const dv=distVal();if(dv.length<2||/[<>@\/\\:;{}=_|]/.test(dv)){setErr(LX("e_dist"));(!$("distSel").hidden&&$("distSel").value!==DIST_OTHER?$("distSel"):$("district")).focus();return false;}
-    if($("address").value.trim().length<5){setErr(T("e_addr"));$("address").focus();return false;}   /* पूरा पता ज़रूरी */
+    const dv=distVal();if(dv.length<2||/[<>@\/\\:;{}=_|]/.test(dv)){E(LX("e_dist"));(!$("distSel").hidden&&$("distSel").value!==DIST_OTHER?$("distSel"):$("district")).focus();return false;}
+    if($("address").value.trim().length<5){E(T("e_addr"));$("address").focus();return false;}   /* पूरा पता ज़रूरी */
   }
-  if(key==="svc"&&!categoryIdFor(sel)){setErr(T("e_cat"));openSheet();return false;}
-  if(key==="phone"&&!validPhone(phoneClean())){setErr(T("e_phone"));return false;}
-  if(key==="phone"&&OWNP[ph10()]>=3){setErr(LX("limit2"));return false;}
-  if(key==="phone"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){setErr(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
+  if(key==="phone"&&!validPhone(phoneClean())){E(T("e_phone"));return false;}
+  if(key==="phone"&&OWNP[ph10()]>=3){E(LX("limit2"));return false;}
+  if(key==="phone"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){E(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
+  return true;
+}
+function check(){
+  const key=steps[i].dataset.s;setErr("");
+  if(key==="lang")return true;
+  for(const k of (GROUP[key]||[key])){if(!checkKey(k))return false;}
   return true;
 }
 
@@ -761,7 +796,7 @@ $("cnt").addEventListener("click",e=>{const b=e.target.closest("[data-stp]");if(
 $("f").classList.add("short");
 $("later").onclick=()=>{   /* सीधे "काम / category" वाले आखिरी सवाल पर (वह ज़रूरी है) */
   if(!check())return;
-  const t=steps.findIndex(s=>s.dataset.s==="svc");if(t<=i)return;
+  const t=steps.findIndex(s=>s.dataset.s==="work");if(t<=i)return;
   setErr("");i=t;history.pushState({pbst:i,pbk:steps[i].dataset.s},"",location.pathname+location.search);render();
 };
 $("prev").onclick=()=>{if(history.state&&history.state.pbst>0){history.back();return;}if(i>0){i--;render();}};
@@ -1040,9 +1075,21 @@ PB.mount($("pbLang"));
 PB.onChange(()=>{
   PB.apply();fixHint();gateText();btypeFill();document.title=T("addshop")+" — PataBook";
   if(!sending)render();
-  if(steps[i]&&steps[i].dataset.s==="svc")showCat();
+  if(steps[i]&&steps[i].dataset.s==="work")showCat();
   if(sheet.classList.contains("on"))drawSheet();
+  if(waitLang){waitLang=false;goPhone();}
 });
+/* पहली स्क्रीन: भाषा चुनें (सिर्फ़ पहली बार) — चुनते ही मोबाइल वाली स्क्रीन */
+let waitLang=false;
+function goPhone(){const ix=steps.findIndex(s=>s.dataset.s==="phone");i=ix<0?0:ix;try{history.pushState({pbst:i,pbk:"phone"},"",location.pathname+location.search);}catch(_){}render();}
+(function(){
+  const g=$("lgrid");if(!g)return;
+  (PB.langs||[]).forEach(L=>{const b=document.createElement("button");b.type="button";b.className="lg"+(langChosen()&&PB.lang()===L[0]?" on":"");b.dataset.lc=L[0];b.innerHTML=esc(L[1])+(L[2]&&L[2]!==L[1]?"<small>"+esc(L[2])+"</small>":"");g.appendChild(b);});
+  g.onclick=e=>{const b=e.target.closest("[data-lc]");if(!b)return;const c=b.dataset.lc;
+    try{localStorage.setItem("pb-lang-chosen","1");sessionStorage.setItem("pb-lang-first","1");}catch(_){}
+    if(c===PB.lang())goPhone();else{waitLang=true;PB.set(c);}   /* English ↔ हिन्दी बदलने पर page खुद reload होता है और सीधे मोबाइल वाली स्क्रीन पर खुलता है */
+  };
+})();
 render();
 /* पेज दोबारा खुला और पहले रजिस्ट्रेशन किया था → सीधे स्टेटस */
 (function(){const r=loadReg();if(r&&r.phone){if(r.created)showStatus({status:"pending",name:r.name,slug:r.slug,created:r.created,skew:r.skew||0});checkPhone(r.phone,true);}})();

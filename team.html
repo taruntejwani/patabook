@@ -177,7 +177,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
   /* ───────── दुकानें ───────── */
   async function drawShops() {
     var b = $('body');
-    b.innerHTML = '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
+    b.innerHTML = '<a href="list.html" style="display:block;text-align:center;background:#1a73e8;color:#fff;font-weight:800;text-decoration:none;border-radius:12px;padding:13px;margin-bottom:10px">➕ नई दुकान जोड़ें</a>'
+      + '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
     $('sT').onclick = function (e) { var x = e.target.closest('[data-st]'); if (x) { shSt = x.dataset.st; drawShops(); } };
     var tm; $('sQ').oninput = function () { shQ = this.value; clearTimeout(tm); tm = setTimeout(loadShops, 350); };
     loadShops();
