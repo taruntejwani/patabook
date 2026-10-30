@@ -164,6 +164,9 @@ var mobile={
   enabled:function(){return !!otpBase();},
   adminSend:function(phone){return otpCall("/send",{purpose:"admin_login",phone:phone},false);},
   adminVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"admin_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
+  /* टीम (Manager / Staff): Admin ने जिस नंबर को टीम में जोड़ा है, उसी नंबर + OTP से login */
+  teamSend:function(phone){return otpCall("/send",{purpose:"team_login",phone:phone},false);},
+  teamVerify:async function(phone,code){var j=await otpCall("/verify",{purpose:"team_login",phone:phone,code:code},false);return verifyTokenHash(j.token_hash,j.email);},
   /* "मेरी दुकान": जिस नंबर से दुकान जोड़ी, उसी नंबर + OTP से login (email ज़रूरी नहीं) */
   ownerSend:function(phone){return otpCall("/send",{purpose:"owner_login",phone:phone},false);},
   /* मोबाइल नंबर + 6 अंकों का PIN (SMS नहीं) */

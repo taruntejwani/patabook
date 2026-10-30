@@ -64,9 +64,12 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
   }
   function gate(kind, extra) {
     $('m').innerHTML = kind === 'login'
-      ? '<div class="gate"><h2>🔒 लॉगिन करें</h2><p class="mut">अपने Google email से लॉगिन करें। यह वही email होना चाहिए जो Admin ने टीम में जोड़ा है।</p><a href="' + PBA.loginUrl('team.html') + '">✉️ Email से लॉगिन करें</a></div>'
+      ? '<div class="gate"><h2>🔒 लॉगिन करें</h2><p class="mut">अपने Google email या मोबाइल OTP से लॉगिन करें। यह वही email या नंबर होना चाहिए जो Admin ने टीम में जोड़ा है।</p><a href="' + PBA.loginUrl('team.html') + '">✉️ Email से लॉगिन करें</a>' + (PBA.mobile && PBA.mobile.enabled() ? '<br><a href="team-login.html" style="background:#0b2f73">📱 Mobile OTP से लॉगिन करें</a>' : '') + '</div>'
       : '<div class="gate"><h2>⛔ अनुमति नहीं</h2><p class="mut">यह email टीम में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '। Admin से कहें कि इसे टीम में जोड़ें, या सही Google email से लॉगिन करें।</p></div>';
   }
+  /* 10 अंकों का मोबाइल नंबर हो तो login वाली पहचान (m98XXXXXXXX@phone.patabook.in) बनाओ */
+  function idOf(v) { var d = String(v || '').replace(/[\s\-()]/g, '').replace(/^\+/, ''); if (d.length === 12 && d.indexOf('91') === 0) d = d.slice(2); else if (d.length === 11 && d.charAt(0) === '0') d = d.slice(1); return /^[6-9]\d{9}$/.test(d) ? 'm' + d + '@phone.patabook.in' : v; }
+  function show(e) { var m = /^m([6-9]\d{9})@phone\.patabook\.in$/.exec(e || ''); return m ? '📱 ' + m[1] : e; }
   function can(p) { if (ROLE === 'owner') return true; if (ROLE === 'manager') return p === 'photo' || p === 'gst' || p === 'addr'; return !!(ME && ME.perms && ME.perms[p] === true); }
   function ln(d, k) { var m = String(d || '').match(new RegExp('^' + k + ':\\s*(.+)$', 'mi')); return m ? m[1].trim() : ''; }
 
@@ -109,8 +112,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     var b = $('body');
     try { TEAM = await rpc('pb_team_list', {}) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     var mgrs = TEAM.filter(function (t) { return t.role === 'manager'; });
-    var h = '<div class="card"><h3>＋ ' + (ROLE === 'owner' ? 'नया Manager या Staff जोड़ें' : 'नया Staff जोड़ें') + '</h3><p class="mut">उसका <b>Google email</b> डालें। वह उसी email से लॉगिन करके अपना काम देखेगा।</p>' +
-      '<input id="aE" type="email" inputmode="email" placeholder="name@gmail.com" autocomplete="off"><input id="aN" placeholder="नाम (ज़रूरी नहीं)" maxlength="60">';
+    var h = '<div class="card"><h3>＋ ' + (ROLE === 'owner' ? 'नया Manager या Staff जोड़ें' : 'नया Staff जोड़ें') + '</h3><p class="mut">उसका <b>Google email या 10 अंकों का मोबाइल नंबर</b> डालें। वह उसी से लॉगिन करके अपना काम देखेगा।</p>' +
+      '<input id="aE" inputmode="email" placeholder="name@gmail.com या 98XXXXXXXX" autocomplete="off"><input id="aN" placeholder="नाम (ज़रूरी नहीं)" maxlength="60">';
     if (ROLE === 'owner') h += '<select id="aR"><option value="manager">👔 Manager</option><option value="staff">🧑‍💼 Staff (किसी Manager के नीचे)</option></select><select id="aP" hidden>' + mgrs.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name || m.email) + '</option>'; }).join('') + '</select>';
     h += '<div id="aPerm" ' + (ROLE === 'owner' ? 'hidden' : '') + '>' + permBoxes('a', { gst: true, addr: true }) + '</div><div class="row"><button class="btn" id="aGo">जोड़ें</button></div><div id="aMsg"></div></div>';
     var top = ROLE === 'owner' ? mgrs : TEAM.filter(function (t) { return t.role === 'staff'; });
@@ -122,14 +125,14 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
       $('aPerm').querySelectorAll('[data-p]').forEach(function (c) { if (c.checked) perms[c.dataset.p] = true; });
       btn.disabled = true; $('aMsg').innerHTML = '';
       try {
-        await rpc('pb_team_add', { p_email: $('aE').value, p_name: $('aN').value, p_role: role, p_parent: role === 'staff' && ROLE === 'owner' ? +$('aP').value || null : null, p_perms: perms });
-        MSG.t = 'जुड़ गया। अब वह इसी email से लॉगिन करके team.html खोले।'; await drawTeam(); $('aMsg').innerHTML = '<p class="ok">' + MSG.t + '</p>';
+        await rpc('pb_team_add', { p_email: idOf($('aE').value), p_name: $('aN').value, p_role: role, p_parent: role === 'staff' && ROLE === 'owner' ? +$('aP').value || null : null, p_perms: perms });
+        MSG.t = 'जुड़ गया। अब वह इसी email या नंबर से लॉगिन करके team.html खोले।'; await drawTeam(); $('aMsg').innerHTML = '<p class="ok">' + MSG.t + '</p>';
       } catch (e) { btn.disabled = false; $('aMsg').innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     };
   }
   function memberCard(t, nest) {
     var kids = nest ? TEAM.filter(function (x) { return x.parent_id === t.id; }) : [];
-    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || t.email) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(t.email) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' +
+    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || show(t.email)) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(show(t.email)) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' +
       (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : '<div class="row">') +
       '<button class="btn o" data-act="tog">' + (t.active ? '⏸ रोकें' : '▶ चालू करें') + '</button><button class="btn r" data-act="del">🗑 हटाएँ</button></div><div class="msg"></div>' +
       (kids.length ? '<div class="sub">' + kids.map(function (k) { return memberCard(k, false); }).join('') + '</div>' : '') + '</div>';
