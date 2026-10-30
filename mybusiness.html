@@ -253,6 +253,24 @@ async function rpc(fn,args){
   if(!r.ok){const e=new Error((j&&(j.message||j.msg))||("HTTP "+r.status));e.status=r.status;throw e;}
   return j;
 }
+/* ---------- 📞 अतिरिक्त 2 नंबर (बिना OTP; हर नंबर का अपना ON/OFF) ---------- */
+let NUMS={},NUMS_OK=false;
+async function loadNums(){try{const r=await rpc("pb_my_numbers")||[];NUMS={};r.forEach(x=>{(NUMS[x.slug]=NUMS[x.slug]||{})[x.slot]={phone:x.phone,show:!!x.show};});NUMS_OK=true;}catch(e){NUMS_OK=false;}}
+function numsBlock(b,i){
+  if(!NUMS_OK)return "";const en=L()==="en",M=NUMS[b.slug]||{};
+  const row=sl=>{const x=M[sl],on=!!(x&&x.show);
+    return '<div class="phone'+(x&&on?"":" off")+'" style="margin-top:10px;flex-wrap:wrap"><span class="ic" aria-hidden="true">'+(sl===2?"☎️":"💬")+'</span>'+
+    '<span class="tx" style="flex:1;min-width:0"><b>'+(en?"Extra number ":"अतिरिक्त नंबर ")+(sl-1)+'</b><small>'+(x?(on?(en?"Visible to customers":"ग्राहकों को दिख रहा है"):(en?"Hidden":"छुपा है")):(en?"Not added":"जोड़ा नहीं"))+'</small></span>'+
+    (x?'<button type="button" class="sw" role="switch" aria-checked="'+on+'" data-nslot="'+sl+'" data-ni="'+i+'"></button>':'')+
+    '<div style="flex-basis:100%;display:flex;gap:8px;margin-top:8px"><input id="nin'+i+'_'+sl+'" type="tel" inputmode="numeric" maxlength="14" placeholder="98XXXXXXXX" value="'+esc(x?x.phone:"")+'" style="flex:1;min-width:0;padding:10px;border:1px solid #cfd3e6;border-radius:10px;font-size:16px">'+
+    '<button type="button" class="stl" data-nsave="'+sl+'" data-ni="'+i+'" style="margin:0;padding:8px 10px;font-size:13px;flex:none;width:auto">'+(en?"Save":"सेव")+'</button>'+(x?'<button type="button" class="stl alt" data-nrm="'+sl+'" data-ni="'+i+'" style="margin:0;padding:8px 10px;font-size:13px;flex:none;width:auto">'+(en?"Remove":"हटाएँ")+'</button>':'')+'</div></div>';};
+  return '<p class="note" style="margin-top:14px">'+(en?"Add up to 2 more numbers (shop / staff). No OTP needed. Customers see a number only when its switch is ON, with Call and WhatsApp buttons.":"2 और नंबर जोड़ सकते हैं (दुकान / staff)। OTP नहीं चाहिए। जिस नंबर का switch ON होगा वही ग्राहकों को दिखेगा — Call और WhatsApp दोनों बटन के साथ।")+'</p>'+row(2)+row(3)+'<div class="err" id="nerr'+i+'"></div>';
+}
+async function numSet(i,sl,phone,show,btn){
+  const b=ROWS[i],en=L()==="en",er=$("nerr"+i);er.textContent="";if(btn)btn.disabled=true;
+  try{ME=await PBA.session();await rpc("pb_owner_set_number",{p_slug:b.slug,p_slot:sl,p_phone:phone,p_show:show});await loadNums();draw();}
+  catch(x){if(btn)btn.disabled=false;const m=String(x&&x.message||"");er.textContent=/duplicate|already/i.test(m)?(en?"This number is already added.":"यह नंबर पहले से जुड़ा है।"):/main|same/i.test(m)?(en?"This is already your main number.":"यह तो आपका मुख्य नंबर है।"):/invalid|10/i.test(m)?(en?"Enter a valid 10-digit mobile number.":"सही 10 अंकों का मोबाइल नंबर डालें।"):(en?"Could not save. Try again.":"सेव नहीं हो सका। दोबारा कोशिश करें।");}
+}
 function phoneBlock(b,i){
   const on=b.show_phone!==false;
   return '<div class="phone'+(on?"":" off")+'" id="ph'+i+'"><span class="ic" aria-hidden="true">📞</span>'+
@@ -694,7 +712,7 @@ function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof")return offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
     '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos, products…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो, सामान…)")+'</a>';
-  if(k==="num")return phoneBlock(b,i)+
+  if(k==="num")return phoneBlock(b,i)+numsBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (Settings → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>'):'');
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
@@ -818,6 +836,7 @@ $("list").addEventListener("click",async e=>{
     return;
   }
   const sw=e.target.closest(".sw");if(!sw)return;
+  if(sw.dataset.nslot){const ni=+sw.dataset.ni,sl=+sw.dataset.nslot,x=((NUMS[ROWS[ni].slug]||{})[sl]);if(x)numSet(ni,sl,x.phone,!x.show,sw);return;}
   const i=+sw.dataset.i,b=ROWS[i],want=!(b.show_phone!==false);
   sw.disabled=true;$("er"+i).textContent="";
   try{const v=await rpc("pb_set_show_phone",{p_slug:b.slug,p_on:want});b.show_phone=(v===false)?false:want;draw();}
@@ -963,7 +982,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadCovers();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await loadStates();await bellState();
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadCovers();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
@@ -971,6 +990,7 @@ async function start(){
   }
   draw();
   /* होम पेज की "Offline: प्रोफ़ाइल पूरी करो" पट्टी से सीधे Settings → प्रोफ़ाइल */
+  if(ME&&ROWS&&ROWS.length&&location.hash==="#num"){try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("num");}
   if(ME&&ROWS&&ROWS.length&&location.hash==="#prof"){try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}setGo("prof");}
 }
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
@@ -983,6 +1003,8 @@ $("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null)setGo("
 $("list").addEventListener("click",e=>{
   if(e.target.closest("[data-setopen]")){ntOpen(false);setGo("");return;}
   if(e.target.closest("[data-setprof]")){setGo("prof");return;}
+  const nsv=e.target.closest("[data-nsave]");if(nsv){const ni=+nsv.dataset.ni,sl=+nsv.dataset.nsave,v=($("nin"+ni+"_"+sl).value||"").replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,""),x=(NUMS[ROWS[ni].slug]||{})[sl];numSet(ni,sl,v,x?x.show:false,nsv);return;}
+  const nrm=e.target.closest("[data-nrm]");if(nrm){const ni=+nrm.dataset.ni;if(confirm(L()==="en"?"Remove this number?":"यह नंबर हटाएँ?"))numSet(ni,+nrm.dataset.nrm,"",false,nrm);return;}
   const dsb=e.target.closest("[data-delshop]");if(dsb){delShop(+dsb.dataset.delshop,dsb);return;}
   const sbt=e.target.closest("[data-submit]");if(sbt){submitApproval(+sbt.dataset.submit,sbt);return;}
   const c=e.target.closest("[data-setcat]");if(c){setGo(c.dataset.setcat);return;}

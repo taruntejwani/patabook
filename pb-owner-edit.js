@@ -317,6 +317,7 @@
   function n10(v) { var d = String(v || "").replace(/\D/g, ""); return d.length > 10 ? d.slice(-10) : d; }
 
   function editNumbers() {
+    location.href = "mybusiness.html#num"; return;
     var on = O.show_phone !== false, on0 = on, main = n10(O.phone);
     var cur = { Phone2: n10(ln("Phone2")), WhatsApp: n10(ln("WhatsApp")) }, next = { Phone2: cur.Phone2, WhatsApp: cur.WhatsApp }, VER = {}, ed = null;
     var ROW = [["Phone2", "☎️ " + T("दुकान / staff का Call नंबर", "Shop / staff call number")], ["WhatsApp", "💬 " + T("दुकान / staff का WhatsApp", "Shop / staff WhatsApp")]];
@@ -531,7 +532,7 @@
       ["products", T("कम से कम 3 Product / Service", "At least 3 products / services"), st.prods == null ? null : st.prods >= 3],
       ["svc", T("Services लिखी हैं", "Services written"), !!ln("Services")],
       ["details", T("दुकान का समय भरा है", "Timings filled"), !!ln("Hours")],
-      ["numbers", T("Call / WhatsApp नंबर", "Call / WhatsApp number"), !!(n10(ln("Phone2")) || n10(ln("WhatsApp")) || n10(O.phone))]
+      ["numbers", T("Call / WhatsApp नंबर", "Call / WhatsApp number"), !!n10(O.phone)]
     ].filter(function (c) { return c[2] !== null; });
     var done = chk.filter(function (c) { return c[2]; }).length, pct = chk.length ? Math.round(done * 100 / chk.length) : 0;
     function home() {

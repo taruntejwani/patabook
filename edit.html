@@ -94,11 +94,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   <div class="card" data-sec="numbers">
    <h2 data-en="📞 Numbers for customers (shop / staff)">📞 ग्राहकों के लिए नंबर (दुकान / staff)</h2>
    <p class="hint" data-en="Login always stays on your own (main) number. If you hide your main number, customers see only these numbers.">Login हमेशा आपके अपने (मुख्य) नंबर से ही होगा। मुख्य नंबर छिपाएँगे तो ग्राहकों को सिर्फ़ ये नंबर दिखेंगे।</p>
-   <label class="lbl" for="wa" data-en="💬 WhatsApp number (if different from main number)">💬 WhatsApp नंबर (अगर मुख्य नंबर से अलग है)</label>
-   <input id="wa" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
-   <label class="lbl" for="ph2" data-en="☎️ Call number for customers (shop / staff)">☎️ ग्राहकों के लिए Call नंबर (दुकान / staff)</label>
-   <input id="ph2" type="tel" inputmode="numeric" maxlength="16" placeholder="98XXXXXXXX">
-   <p class="note" id="hidNote" hidden data-en="Your main number is hidden, so customers will see only the numbers above. (If both are empty, nobody can call you.)">आपका मुख्य नंबर छिपा है, इसलिए ग्राहकों को सिर्फ़ ऊपर वाले नंबर दिखेंगे। (दोनों खाली हों तो कोई call नहीं कर पाएगा।)</p>
+   <a class="hint" id="numLink" href="mybusiness.html#num" target="_top" style="display:block;color:#1a73e8;font-weight:700;margin:10px 0" data-en="➕ Add / manage extra numbers (Call + WhatsApp, with ON/OFF) ›">➕ अतिरिक्त नंबर जोड़ें / संभालें (Call + WhatsApp, ON/OFF के साथ) ›</a>
    <p class="hint" style="margin-top:12px"><span data-en="📱 Main (login) number:">📱 मुख्य (login) नंबर:</span> <b id="mainNo"></b> · <a id="mainChg" target="_top" href="#" style="color:#1a73e8;font-weight:700" data-en="Change (with OTP) ›">बदलें (OTP से) ›</a></p>
   </div>
 
@@ -247,9 +243,7 @@ $("main").addEventListener("submit",async e=>{
   e.preventDefault();$("err").textContent="";
   const o=$("openT").value,c=$("closeT").value;
   if((o&&!c)||(!o&&c)){$("err").textContent=errText("bad Hours");return;}
-  const wa=n10($("wa").value),p2=n10($("ph2").value),pin=$("pin").value.trim(),web=webNorm($("web").value),em=$("email").value.trim();
-  if(wa&&!/^[6-9]\d{9}$/.test(wa)){$("err").textContent=errText("bad WhatsApp");$("wa").focus();return;}
-  if(p2&&!/^[6-9]\d{9}$/.test(p2)){$("err").textContent=errText("bad Phone2");$("ph2").focus();return;}
+  const wa="",p2="",pin=$("pin").value.trim(),web=webNorm($("web").value),em=$("email").value.trim();
   if(pin&&!/^[1-9]\d{5}$/.test(pin)){$("err").textContent=errText("bad PIN");$("pin").focus();return;}
   if(web===null){$("err").textContent=errText("bad Website");$("web").focus();return;}
   if(em&&!/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(em)){$("err").textContent=errText("bad Email");$("email").focus();return;}
@@ -259,12 +253,6 @@ $("main").addEventListener("submit",async e=>{
   {const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR&&(ad.length<8||ad.length>250)){$("err").textContent=errText("bad address");$("addrIn").focus();return;}}
   const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
   /* नया (बदला हुआ) नंबर हो तो पहले उसी नंबर पर OTP से पक्का करें */
-  const have=[ORIG.wa,ORIG.p2,MAIN];
-  for(const [n,lb] of [[wa,EN?"WhatsApp":"WhatsApp"],[p2,EN?"Shop / staff call number":"दुकान / staff का Call नंबर"]]){
-    if(!n||have.includes(n)||VERI[n])continue;
-    const ok=await verifyNum(n,lb);
-    if(!ok){$("err").textContent=EN?"Number not saved: OTP was not verified.":"नंबर save नहीं हुआ: OTP से पक्का नहीं हुआ।";return;}
-  }
   const b=$("saveBtn");b.disabled=true;
   try{S=await PBA.session();if(!S){only("needLogin");return;}const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR){await rpc("pb_owner_set_address",{p_slug:slug,p_address:ad});ORIGADDR=ad;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});const ig=$("igIn").value.trim(),fb=$("fbIn").value.trim();if(ig!==ORIGSOC.ig||fb!==ORIGSOC.fb){await rpc("pb_owner_set_social",{p_slug:slug,p_instagram:ig,p_facebook:fb});ORIGSOC={ig,fb};}$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
   catch(x){$("err").textContent=errText(x.message);}
@@ -284,11 +272,10 @@ $("main").addEventListener("submit",async e=>{
     $("btype").value=t;
     const h=line(ds,"Hours").match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);if(h){$("openT").value=h[1];$("closeT").value=h[2];}
     $("offDay").value=line(ds,"Closed");
-    $("wa").value=line(ds,"WhatsApp");$("ph2").value=line(ds,"Phone2");ORIG={wa:n10($("wa").value),p2:n10($("ph2").value)};MAIN=n10(String(b.phone||""));$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
+    MAIN=n10(String(b.phone||""));$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
     $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");$("lmk").value=line(ds,"Landmark");
     $("igIn").value=line(ds,"Instagram");$("fbIn").value=line(ds,"Facebook");ORIGSOC={ig:$("igIn").value,fb:$("fbIn").value};$("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");$("locLink").href="location.html?slug="+encodeURIComponent(slug);
     if(location.hash){const t=document.querySelector(location.hash);if(t)setTimeout(()=>t.scrollIntoView({block:"center"}),100);}
-    $("hidNote").hidden=!(d&&d.show_phone===false);
     only("main");
     try{const fo=new URLSearchParams(location.search).get("focus");const fe=fo&&$(fo==="phone"?"wa":fo);if(fe)setTimeout(()=>{fe.scrollIntoView({block:"center"});},150);}catch(_){}
   }catch(e){
