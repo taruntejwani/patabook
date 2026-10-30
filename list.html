@@ -623,7 +623,8 @@ function check(){
   }
   if(key==="svc"&&!categoryIdFor(sel)){setErr(T("e_cat"));openSheet();return false;}
   if(key==="phone"&&!validPhone(phoneClean())){setErr(T("e_phone"));return false;}
-  if(key==="phone"&&OTP_URL&&(!regToken||regPhone!==ph10())){setErr(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
+  if(key==="phone"&&OWNP[ph10()]>=3){setErr(LX("limit2"));return false;}
+  if(key==="phone"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){setErr(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
   return true;
 }
 
@@ -636,6 +637,23 @@ function summary(){
 
 /* ---------- दुकान जोड़ने से पहले मोबाइल OTP ---------- */
 let regToken="",regPhone="",otpTimer=null,loginTicket="";
+/* 🔑 पहले से login मालिक: इसी नंबर पर दूसरी / तीसरी दुकान बिना OTP (pb_register_open खुद जाँचता है कि दुकान इसी खाते की है) */
+let OWNP={},OWNMODE=false;   /* OWNP = {नंबर: इस खाते की उस नंबर वाली दुकानों की गिनती} */
+function ownSync(){
+  const p=ph10(),own=!!OWNP[p];
+  if(own){OWNMODE=true;$("otpBox").classList.add("ok");
+    otpMsg(OWNP[p]>=3?LX("limit2"):(EN()?"✅ You are logged in and this is your verified number — no OTP needed.":"✅ आप login हैं और यह आपका verify नंबर है — OTP की ज़रूरत नहीं।"),OWNP[p]>=3);}
+  else if(OWNMODE){OWNMODE=false;if(!regToken){$("otpBox").classList.remove("ok");otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");}}
+}
+async function loadOwnPhones(){
+  try{const ses=await PBA.session();if(!ses)return;
+    const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ses.access_token,"Content-Type":"application/json"},body:"{}"});
+    if(!r.ok)return;const rows=await r.json();OWNP={};
+    (Array.isArray(rows)?rows:[]).forEach(b=>{const p=n10(b&&b.phone);if(/^[6-9]\d{9}$/.test(p))OWNP[p]=(OWNP[p]||0)+1;});
+    const first=Object.keys(OWNP)[0];if(first&&!$("phone").value.trim())$("phone").value=first;
+    ownSync();
+  }catch(_){}
+}
 const OTP_URL=String((window.PB_SITE&&PB_SITE.otpUrl)||"").replace(/\/$/,"");
 const EN=()=>!!(window.PB&&PB.lang&&PB.lang()!=="hi");
 /* बिज़नेस का प्रकार (Manufacturer / Wholesaler / Retailer …) — description में "Type:" line बनकर जाता है */
@@ -702,6 +720,7 @@ function otpCool(sec){let left=sec||60;const b=$("otpSend");b.disabled=true;clea
   const tick=()=>{b.textContent=(EN()?"Resend":"फिर भेजें")+" ("+left+")";if(left--<=0){clearInterval(otpTimer);b.disabled=false;b.textContent=EN()?"Resend":"फिर भेजें";}};tick();otpTimer=setInterval(tick,1000);}
 /* OTP box के शब्द चुनी हुई भाषा में (page खुलते समय और भाषा बदलने पर) */
 function otpLang(){
+  if(OWNMODE){ownSync();return;}
   if(regToken){otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");return;}
   const b=$("otpSend");if(!b.disabled)b.textContent=EN()?"Send OTP":"OTP भेजें";
   $("otpCode").placeholder="OTP ••••••";
@@ -714,7 +733,8 @@ $("phone").addEventListener("input",e=>{   /* सिर्फ अंक, ज़�
   else if(d.length>10&&/^0/.test(d))d=d.slice(1,11);
   else d=d.slice(0,10);
   e.target.value=d;
-  if(regToken&&ph10()!==regPhone)otpReset();});
+  if(regToken&&ph10()!==regPhone)otpReset();
+  ownSync();});
 $("otpSend").onclick=async()=>{
   const p=ph10();if(!/^[6-9]\d{9}$/.test(p)){otpMsg(otpErr({code:"bad_phone"}),true);return;}
   const b=$("otpSend");b.disabled=true;
@@ -861,7 +881,7 @@ async function submit(){
     let j=null;try{j=await rr.json();}catch(_){}
     if(rr.ok){done(name,S,d,{phone:phone,slug:(j&&j.slug)||row.slug,created_at:j&&j.created_at,now:j&&j.now});return;}
     const rt=(j&&(j.message||j.msg))||"";
-    if(/limit1|limit2|duplicate|already/i.test(rt))return fail(LX("limit2"));
+    if(/limit1|limit2|limit3|duplicate|already/i.test(rt))return fail(LX("limit2"));
     if(/too many|rate/i.test(rt))return fail(LX("rate"));
     if(/bad address/i.test(rt))return fail(T("e_addr"));
     if(/otp required/i.test(rt)){otpReset();return fail(EN()?"Your OTP verification expired. Please verify the mobile number again.":"OTP verification की समय-सीमा खत्म हो गई। मोबाइल नंबर फिर से verify करें।");}
@@ -1009,7 +1029,7 @@ const LXT={
       st_live_p:"✅ Live",st_live_h:"आपकी दुकान Live हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
       st_rm_h:"यह रजिस्ट्रेशन हटा दिया गया है",st_rm_s:"ज़्यादा जानकारी के लिए PataBook से संपर्क करें, या नई दुकान फिर से जोड़ें।",
       ck_h:"रजिस्ट्रेशन का स्टेटस देखें",ck_s:"जिस मोबाइल नंबर से दुकान जोड़ी थी, वह डालें।",ck_b:"स्टेटस देखें",ck_none:"इस नंबर से कोई रजिस्ट्रेशन नहीं मिला।",ck_fail:"अभी स्टेटस नहीं मिल सका। थोड़ी देर बाद कोशिश करें।",
-      g_h:"दुकान जोड़ने से पहले लॉगिन करें",limit2:"इस मोबाइल नंबर से पहले ही एक दुकान जुड़ी है। एक नंबर से सिर्फ 1 दुकान जोड़ सकते हैं।",many:"इस ईमेल से बहुत सारी दुकानें जुड़ चुकी हैं। मदद के लिए PataBook से संपर्क करें।",pub:"📞 क्या आपका नंबर ग्राहकों को दिखे?",mine:"मेरी दुकान देखें ›",g_p:"आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।",g_b:"ईमेल से लॉगिन करें →",who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",
+      g_h:"दुकान जोड़ने से पहले लॉगिन करें",limit2:"इस मोबाइल नंबर से 3 दुकानें पहले ही जुड़ चुकी हैं। एक नंबर से ज़्यादा से ज़्यादा 3 दुकानें जोड़ सकते हैं।",many:"इस ईमेल से बहुत सारी दुकानें जुड़ चुकी हैं। मदद के लिए PataBook से संपर्क करें।",pub:"📞 क्या आपका नंबर ग्राहकों को दिखे?",mine:"मेरी दुकान देखें ›",g_p:"आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।",g_b:"ईमेल से लॉगिन करें →",who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",
       pending:"जाँच (approval) के बाद आपकी दुकान PataBook पर दिखेगी।",
       loc_hint:"दुकान पर हों तो बटन दबाकर location जोड़ें, ताकि ग्राहक सीधे रास्ता देख सकें। हर दुकान जाँच के बाद चालू होती है।"},
   en:{rate:"Too many attempts. Please try again in a little while.",setup:"Registration is not open right now. Please try again later.",autoc:"📍 City picked from your location: {c} (you can change it)",
@@ -1024,7 +1044,7 @@ const LXT={
       st_live_p:"✅ Live",st_live_h:"Your shop is live! 🎉",st_live_s:"is now visible to everyone on PataBook.",st_see:"See your shop ›",
       st_rm_h:"This registration was removed",st_rm_s:"Contact PataBook for details, or add your shop again.",
       ck_h:"Check registration status",ck_s:"Enter the mobile number you used to add the shop.",ck_b:"Check status",ck_none:"No registration found for this number.",ck_fail:"Could not get the status right now. Please try again shortly.",
-      g_h:"Log in before adding a shop",limit2:"A shop is already added with this mobile number. Only 1 shop is allowed per number.",many:"This email already has many shops. Contact PataBook for help.",pub:"📞 Should customers see your number?",mine:"See my shop ›",g_p:"We will email you an OTP code. Enter it and you will come right back here.",g_b:"Log in with email →",who:"✅ Logged in as {e}",out:"Log out",
+      g_h:"Log in before adding a shop",limit2:"3 shops are already added with this mobile number. Only 3 shops are allowed per number.",many:"This email already has many shops. Contact PataBook for help.",pub:"📞 Should customers see your number?",mine:"See my shop ›",g_p:"We will email you an OTP code. Enter it and you will come right back here.",g_b:"Log in with email →",who:"✅ Logged in as {e}",out:"Log out",
       pending:"Your shop will appear on PataBook after review.",
       loc_hint:"If you are at the shop, tap the button to add its location so customers get direct directions. Every shop goes live after review."}
 };
@@ -1038,6 +1058,7 @@ async function checkLogin(){
   ME=await PBA.session();
   $("gate").hidden=true;$("mainCard").hidden=false;$("who").hidden=!ME;   /* लॉगिन अब ज़रूरी नहीं */
   gateText();
+  if(ME)loadOwnPhones();else{OWNP={};ownSync();}
 }
 $("whoOut").onclick=async()=>{await PBA.logout();checkLogin();};
 checkLogin();
