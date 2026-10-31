@@ -731,7 +731,7 @@ let OWN=false;
 async function loadOwner(){
   try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
-    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();if(OWN)document.documentElement.classList.add("own");if(OWN&&!document.getElementById("myShopA")){const hb=document.getElementById("backA");if(hb){const m=document.createElement("a");m.id="myShopA";m.className="ib pbhome mys";m.href="mybusiness.html";m.setAttribute("aria-label","My Shop");m.innerHTML='<span class="mi">🏪</span><b>My Shop</b>';hb.after(m);}}}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
+    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
 function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const gz=document.getElementById("gearTop");if(gz)gz.hidden=!OWN;const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
 function contactHTML(){
