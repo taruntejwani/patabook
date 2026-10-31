@@ -326,6 +326,7 @@ async function run(push){
   const q0=q;
   WIDE="";
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
+  const hard=!!det;   /* शहर खोज-शब्द में लिखा हो → सिर्फ़ वही शहर; खाने से चुना → उसे ऊपर, बाकी भी */
   if(det){q=det.rest.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");city=det.city;$("city").value=det.city;}
   else if(city){try{const fc=await fixCityBox(city);if(fc&&fc!==city){city=fc;$("city").value=fc;}}catch(e){}}
   if(push){const u=new URL(location.href);u.searchParams.set("q",q0);city?u.searchParams.set("city",city):u.searchParams.delete("city");history.replaceState(null,"",u);}
@@ -339,8 +340,12 @@ async function run(push){
   try{
     let rows=await gatherRows(q,city,ts,n);if(rows===null)return;
     WIDE="";
-    if(!rows.length&&city&&ts.length&&!WORKSEL){   /* चुने शहर में कुछ न मिला → सभी शहरों में (कभी खाली नहीं) */
-      const w=await gatherRows(q,"",ts,n);if(w===null)return;if(w.length){rows=w;WIDE=city;}else LOOSEMISS="";
+    if(city&&ts.length&&!WORKSEL){   /* चुने शहर में कुछ न मिला → सभी शहरों में; मिला तो बाकी शहरों की भी नीचे (कभी खाली नहीं) */
+      const keepFz=FZN,keepLM=LOOSEMISS;
+      if(!rows.length){const w=await gatherRows(q,"",ts,n);if(w===null)return;if(w.length){rows=w;WIDE=city;}else LOOSEMISS="";}
+      else if(!hard){const w=await gatherRows(q,"",ts,n);if(w===null)return;
+        const seen=new Set(rows.map(b=>b.slug));const more=w.filter(b=>b.slug&&!seen.has(b.slug)).slice(0,20);
+        FZN=keepFz;LOOSEMISS=keepLM;if(more.length){more.forEach(b=>b._o=1);rows=rows.concat(more);}}
     }
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
     render(rows,q,WIDE?"":city);
@@ -427,10 +432,11 @@ function render(rows,q,city,keep){
   }
   const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(LOOSEMISS?(FEN()?"No shop found for \u201c"+LOOSEMISS+"\u201d \u2014 showing the closest shops:":"\u201c"+LOOSEMISS+"\u201d के लिए कोई दुकान नहीं मिली \u2014 ये सबसे मिलती-जुलती दुकानें हैं:"):(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:"))+'</p>':'';
   const wNote=WIDE?'<p class="note" style="margin:0 0 10px">'+esc(FEN()?"Nothing found in "+WIDE+" \u2014 showing shops from other cities:":WIDE+" में कुछ नहीं मिला \u2014 दूसरे शहरों की दुकानें:")+'</p>':'';
-  list.innerHTML=wNote+fzNote+rows.map(b=>{
+  const oNote='<p class="note" style="margin:14px 0 10px">'+esc(FEN()?"Shops from other cities:":"दूसरे शहरों की दुकानें:")+'</p>';
+  list.innerHTML=wNote+fzNote+rows.map((b,i)=>{
     const dir=pbDir(b);
     const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
-    return '<article class="card'+(PREMS[b.slug]?' isprem':'')+'"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
+    return ((b._o&&(i===0||!rows[i-1]._o))?oNote:'')+'<article class="card'+(PREMS[b.slug]?' isprem':'')+'"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
       premTags(b)+(cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
       '</div></div>'+(b.address?'<p class="addr">'+esc(b.address)+'</p>':'')+
       '<div class="acts"><a class="call" href="'+link+'#contact">'+esc("📞 "+T("c_title"))+'</a>'+
@@ -447,7 +453,7 @@ const P=new URLSearchParams(location.search);
 $("q").value=P.get("q")||"";
 if(P.get("city"))$("city").value=P.get("city");
 /* 📍 शहर: बाहर (home) की तरह — याद रखा शहर अपने-आप, और GPS बटन से अपनी location का शहर */
-if(!P.get("city")){try{const c0=localStorage.getItem("pb-city");if(c0)$("city").value=c0;}catch(e){}}
+/* याद रखा शहर अपने-आप नहीं भरता — खोज पूरे भारत में; शहर आप खुद चुनें या खोज में लिखें */
 (function(){
   const g=document.getElementById("gpsBtn"),inp=$("city");if(!g||!inp)return;
   const en=()=>PB.lang&&PB.lang()!=="hi";
