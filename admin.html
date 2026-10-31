@@ -139,7 +139,12 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 </div></header>
 <main class="wrap">
   <div id="gate"></div>
+  <div id="hub" hidden>
+    <div class="hh"><h2>🛠 Admin</h2><button class="backd" id="hubRf" style="margin:0">🔄</button></div>
+    <div class="tiles" id="hubTiles"></div>
+  </div>
   <div id="home" hidden>
+    <button class="backd" id="homeBack">← मुख्य</button>
     <div class="hh"><h2>📊 Dashboard</h2><span style="display:flex;gap:8px"><button class="backd" id="hBell" style="margin:0">🔔</button><button class="backd" id="hRef" style="margin:0">🔄</button></span></div>
     <p class="cnt" id="bellNote" hidden></p>
     <div class="tiles" id="tiles"></div>
@@ -193,7 +198,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div id="pBody"></div>
   </div>
   <div id="stov" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
+    <button class="backd" id="stBack">← मुख्य</button>
     <div class="hh"><h2>💾 Storage / डेटा उपयोग</h2><button class="xl" id="stRf">🔄</button></div>
     <div id="stBody"></div>
   </div>
@@ -588,7 +593,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     sess = await PBA.session();
     if (!sess) return gate('login');
     $('who').textContent = sess.email || ''; $('out').hidden = false;
-    showHome();
+    if (START === '#stov') showStorage(); else if (START) showHome(); else showHub();
     if (START === '#edv') showEdits(); else if (START === '#phv') showPhReq(); else if (START === '#hsv') showHsReq(); else if (START === '#pmv') showPrem(); else if (START === '#repv') showReports(); else if (START === '#msgs') showMsgs('new');
     bellState();
   })();
@@ -632,23 +637,24 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv', 'pmv', 'stov'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv', 'pmv', 'stov', 'hub'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
   function navMark(id) {
     if (NAV) return;
-    var st = history.state || {};
-    if (id === 'home') { if (st.pbv) history.replaceState(null, '', location.pathname); return; }
-    if (st.pbv) history.replaceState({ pbv: id }, '', location.pathname + '#' + id);
-    else history.pushState({ pbv: id }, '', location.pathname + '#' + id);
+    var st = history.state || {}, base = location.pathname;
+    if (id === 'hub') { if (st.pbv) history.replaceState(null, '', base); return; }
+    if (id === 'home') { if (!st.pbv) history.pushState({ pbv: 'home' }, '', base + '#home'); else if (st.pbv !== 'home') history.replaceState({ pbv: 'home' }, '', base + '#home'); return; }
+    if (st.pbv && st.pbv !== 'home') history.replaceState({ pbv: id }, '', base + '#' + id);
+    else history.pushState({ pbv: id }, '', base + '#' + id);
   }
   if (location.hash) history.replaceState(null, '', location.pathname);
   window.addEventListener('popstate', function (e) {
     var st = e.state || {};
     if (!$('md').hidden) { $('md').hidden = true; if (st.pbm) return; }
     if (st.pbm) return;
-    NAV = true; try { if (st.pbv && st.pbv !== 'home') view(st.pbv); else showHome(); } finally { NAV = false; }
+    NAV = true; try { if (st.pbv === 'home') showHome(); else if (st.pbv === 'stov') showStorage(); else if (st.pbv) view(st.pbv); else showHub(); } finally { NAV = false; }
   });
   async function showHome() {
     view('home');
@@ -676,14 +682,13 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
       ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0],
       ['premium', '💎', '#efeaff', 'Premium', '–', 'चालू Premium दुकानें', 0],
-      ['team', '👥', '#eef2ff', 'टीम (Manager / Staff)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0],
-      ['storage', '💾', '#e8f4fd', 'Storage / डेटा', '–', 'फ़ोटो में कितना डेटा लगा', 0]
+      ['team', '👥', '#eef2ff', 'टीम (Manager / Staff)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
-    repBadge(); phBadge(); edBadge(); hsBadge(); pmBadge(); stBadge();
+    repBadge(); phBadge(); edBadge(); hsBadge(); pmBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -699,7 +704,6 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'edits') return showEdits();
     if (t === 'hsreq') return showHsReq();
     if (t === 'premium') return showPrem();
-    if (t === 'storage') return showStorage();
     if (t === 'team') { location.href = 'team.html'; return; }
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : t === 'draft' ? 'draft' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
@@ -892,15 +896,26 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var ST_CAP = 1024 * 1048576;   /* Supabase Free = 1 GB */
   var ST_NAME = { logo: 'Logo', photo: 'Gallery फ़ोटो', banner: 'Banner / Home Ad', cover: 'Cover', open: 'Opening Photo', prod: 'Products', other: 'अन्य' };
   function fmtB(b) { b = +b || 0; return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB'; }
+  document.addEventListener('click', function (e) {
+    var h = e.target.closest('[data-h]'); if (h) { if (h.dataset.h === 'storage') showStorage(); else showHome(); return; }
+    if (e.target.closest('#homeBack') || e.target.closest('#stBack')) { if (history.state && history.state.pbv) history.back(); else showHub(); }
+  });
+  function showHub() {
+    view('hub');
+    $('hubTiles').innerHTML =
+      '<button class="tile" data-h="storage"><i class="ic" style="background:#e8f4fd">💾</i><b id="hubSt">–</b><span>Data / Storage</span><small id="hubStN">फ़ोटो में कितना डेटा लगा · कितना बाकी</small></button>' +
+      '<button class="tile" data-h="dash"><i class="ic" style="background:#eaf2ff">📊</i><b>Dashboard</b><span>दुकानें · संदेश · Traffic · Team</span><small>पहले वाला पूरा Admin</small></button>';
+    $('hubRf').onclick = showHub; stBadge();
+  }
   async function stBadge() {
     try {
-      var j = await rpc('pb_admin_storage_stats', {}), b = document.querySelector('#tiles [data-t="storage"]'); if (!b || !j) return;
-      b.querySelector('b').textContent = fmtB(j.total_bytes);
-      b.querySelector('small').textContent = (j.total_files || 0) + ' फ़ाइलें · 1 GB में से ' + ((+j.total_bytes || 0) / ST_CAP * 100).toFixed(1) + '%';
-    } catch (e) {}
+      var j = await rpc('pb_admin_storage_stats', {}); if (!j || !$('hubSt')) return;
+      $('hubSt').textContent = fmtB(j.total_bytes);
+      $('hubStN').textContent = (j.total_files || 0) + ' फ़ाइलें · बाकी ' + fmtB(Math.max(0, ST_CAP - (+j.total_bytes || 0))) + ' (1 GB में से)';
+    } catch (e) { if ($('hubStN')) $('hubStN').textContent = 'पहले storage SQL चलाएँ'; }
   }
   function stDraw(j, orph) {
-    var usedPct = Math.min(100, (+j.total_bytes || 0) / ST_CAP * 100), pct = Math.max(0.5, usedPct), by = j.by || {}, bk = j.buckets || {};
+    var avgKb = (+j.total_files ? Math.round((+j.total_bytes) / j.total_files / 1024) : 60) || 60, usedPct = Math.min(100, (+j.total_bytes || 0) / ST_CAP * 100), pct = Math.max(0.5, usedPct), by = j.by || {}, bk = j.buckets || {};
     var rows = Object.keys(by).sort(function (a, b) { return by[b].bytes - by[a].bytes; }).map(function (k) {
       return '<tr><td>' + esc(ST_NAME[k] || k) + '</td><td style="text-align:right">' + by[k].files + '</td><td style="text-align:right"><b>' + fmtB(by[k].bytes) + '</b></td></tr>';
     }).join('');
@@ -920,6 +935,31 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px">' +
       (orph ? '<b>🧹 बेकार फ़ाइलें</b><div style="margin-top:6px;font-size:15px">' + orph.orphan_files + ' फ़ाइलें · <b>' + fmtB(orph.orphan_bytes) + '</b> (किसी दुकान से जुड़ी नहीं)</div>'
             : '<b>🧹 बेकार फ़ाइलें</b><div style="color:#5b6475;font-size:14px;margin:6px 0 10px">जो फ़ाइलें किसी दुकान से जुड़ी नहीं हैं, उन्हें गिनें (थोड़ा समय लगता है)।</div><button class="xl" id="stOrph" style="margin:0">🔍 बेकार फ़ाइलें गिनो</button>') + '</div>';
+    $('stBody').insertAdjacentHTML('beforeend',
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:14px;margin-top:12px"><b>🧮 Calculator (अंदाज़ा)</b>' +
+      '<div style="color:#5b6475;font-size:13px;margin:4px 0 10px">Traffic आपकी साइट के असली आँकड़ों से; बाकी दो बातें बदल सकते हैं।</div>' +
+      '<div id="cfPv" style="font-size:14px;margin-bottom:8px">Traffic लोड हो रहा है…</div>' +
+      '<label style="display:block;font-size:14px;margin:6px 0">एक पन्ने पर औसत फ़ोटो <input id="cfPh" type="number" min="1" value="6" style="width:70px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
+      '<label style="display:block;font-size:14px;margin:6px 0">एक फ़ोटो औसत कितने KB की <input id="cfKb" type="number" min="1" value="' + avgKb + '" style="width:80px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
+      '<label style="display:block;font-size:14px;margin:6px 0">रोज़ कितनी नई फ़ोटो जुड़ती हैं <input id="cfNew" type="number" min="0" value="10" style="width:70px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
+      '<div id="cfOut" style="margin-top:10px;font-size:14.5px;line-height:1.7"></div></div>');
+    var PV30 = null;
+    function cf() {
+      var ph = +$('cfPh').value || 0, kb = +$('cfKb').value || 0, nw = +$('cfNew').value || 0, out = '';
+      var capGB = 5, left = Math.max(0, ST_CAP - (+j.total_bytes || 0));
+      if (PV30 != null) {
+        var gb = PV30 * ph * kb / 1048576, pc = gb / capGB * 100, perPage = ph * kb / 1048576, maxPages = perPage ? capGB / perPage : 0, maxDay = maxPages / 30;
+        var col = pc < 50 ? '#1a8a3c' : pc < 80 ? '#c98a00' : '#d92d20', tag = pc < 50 ? '🟢 सुरक्षित' : pc < 80 ? '🟡 ध्यान दें' : '🔴 खतरा';
+        out += '<div>📡 महीने का Bandwidth: <b style="color:' + col + '">' + gb.toFixed(2) + ' GB</b> / 5 GB (' + pc.toFixed(1) + '%) ' + tag + '</div>' +
+               '<div>👥 रोज़ लगभग <b>' + fmt(Math.round(maxDay / 1)) + '</b> पन्ने खुलें तब 5 GB भरेगा</div>';
+      }
+      var perDay = nw * kb * 1024;
+      out += '<div>💾 रोज़ ' + nw + ' नई फ़ोटो पर बाकी ' + fmtB(left) + ' लगभग <b>' + (perDay ? (left / perDay >= 3650 ? '10 साल से ज़्यादा' : Math.floor(left / perDay) + ' दिन (' + (left / perDay / 30).toFixed(1) + ' महीने)') : '—') + '</b> चलेगा</div>';
+      $('cfOut').innerHTML = out;
+    }
+    ['cfPh', 'cfKb', 'cfNew'].forEach(function (id) { $(id).oninput = cf; }); cf();
+    rpc('pb_admin_stats', { p_days: 30 }).then(function (d) { PV30 = +(d && (d.pv_period != null ? d.pv_period : d.pv_30)) || 0; $('cfPv').innerHTML = '📈 पिछले 30 दिन: <b>' + fmt(d.uv_30) + '</b> लोग · <b>' + fmt(PV30) + '</b> पेज खुले'; cf(); })
+      .catch(function () { $('cfPv').textContent = 'Traffic का आँकड़ा नहीं मिला (sql-11 चलाएँ)।'; });
     var ob = $('stOrph'); if (ob) ob.onclick = async function () {
       ob.disabled = true; ob.textContent = 'गिन रहे हैं…';
       try { var j2 = await rpc('pb_admin_storage_stats', { p_orphans: true }); stDraw(j2, j2); }
