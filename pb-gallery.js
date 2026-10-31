@@ -59,6 +59,9 @@
         MSG[s] = "🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…") + (files.length > 1 ? " (" + (f + 1) + "/" + files.length + ")" : ""); draw();
         var ck = window.PBImg ? await PBImg.check(file, k === "logo" ? { slug: s, kind: "logo" } : { slug: s, kind: "shop", poster: k === "cover" || k === "front" }) : { ok: true };
         if (!ck.ok) { MSG[s] = ck.msg; draw(); continue; }
+        var hh = await dhash(file), dup = false;
+        if (hh) { try { dup = await rpc("pb_img_dup", { p_slug: s, p_hash: hh }); } catch (e2) { dup = false; } }
+        if (dup === true) { MSG[s] = "🚫 " + T("यह फ़ोटो किसी दूसरी दुकान की है। कृपया अपनी खुद की फ़ोटो डालें।", "This photo belongs to another shop. Please upload your own photo."); draw(); continue; }
         MSG[s] = T("Upload हो रहा है…", "Uploading…"); draw();
         ME = await PBA.session();
         var blob = k === "logo" ? await squareImage(file) : k === "cover" ? await coverImage(file) : k === "front" ? await bannerImage(file) : await resizeImage(file, 1000);
@@ -72,6 +75,7 @@
           await rpc("pb_lib_add", { p_slug: s, p_kind: k, p_url: pub });
           if (!active(b, k)) { try { await setActive(b, k, pub); } catch (e) {} }   /* पहली फ़ोटो अपने-आप चालू */
         }
+        if (hh) { try { await rpc("pb_img_reg", { p_slug: s, p_hash: hh }); } catch (e3) {} }
         MSG[s] = "";
       } catch (x) {
         var m = String(x && x.message || "");
@@ -87,6 +91,25 @@
     if (k === "logo") { await rpc("pb_set_logo", { p_slug: s, p_url: url || null }); LOGOS[s] = url || ""; }
     else if (k === "cover") { await rpc("pb_profile_banner_set", { p_slug: s, p_url: url || "" }); COVER[s] = url || ""; }
     else if (k === "front") { if (url) { await rpc("pb_banner_set", { p_slug: s, p_url: url }); BAN[s] = await rpc("pb_my_banner", { p_slug: s }); } else { await rpc("pb_banner_remove", { p_slug: s }); BAN[s] = null; } }
+  }
+
+
+  /* दोहराई फ़ोटो की पहचान: 64-bit "उंगलियों का निशान" (dHash)। फ़ोटो थोड़ी छोटी-बड़ी हो तो भी वही रहता है */
+  function dhash(file) {
+    return new Promise(function (res) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        try {
+          var c = document.createElement("canvas"); c.width = 9; c.height = 8; var x = c.getContext("2d"); x.drawImage(im, 0, 0, 9, 8);
+          var d = x.getImageData(0, 0, 9, 8).data, g = [], i, j, bits = "", ones = 0;
+          for (i = 0; i < 72; i++) g.push(d[i * 4] * .299 + d[i * 4 + 1] * .587 + d[i * 4 + 2] * .114);
+          for (i = 0; i < 8; i++) for (j = 0; j < 8; j++) { var b = g[i * 9 + j] > g[i * 9 + j + 1] ? 1 : 0; ones += b; bits += b; }
+          var hex = ""; for (i = 0; i < 64; i += 4) hex += parseInt(bits.substr(i, 4), 2).toString(16);
+          URL.revokeObjectURL(u); res(ones < 6 || ones > 58 ? null : hex);   /* सादी / एक रंग की फ़ोटो पर जाँच नहीं */
+        } catch (e) { URL.revokeObjectURL(u); res(null); }
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); res(null); }; im.src = u;
+    });
   }
 
   function light(i, k, n) {
