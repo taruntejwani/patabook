@@ -1124,9 +1124,10 @@ async function start(){
   draw();
   /* होम पेज की "Offline: प्रोफ़ाइल पूरी करो" पट्टी से सीधे Settings → प्रोफ़ाइल */
   /* होम के ☰ मेन्यू से सीधे Gallery / Report: #go=photo | #go=rep (एक दुकान हो तो वही खुलती है, ज़्यादा हों तो दुकान चुनने पर) */
-  if(ME&&ROWS&&ROWS.length&&/^#go=(photo|rep)$/.test(location.hash)){
-    const gc=location.hash.slice(4);try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
-    if(ROWS.length===1)openShop(0,gc);else PENDCAT=gc;}
+  if(ME&&ROWS&&ROWS.length&&/^#go=(photo|rep)(&s=.*)?$/.test(location.hash)){
+    const hm=location.hash.match(/^#go=(photo|rep)(?:&s=(.*))?$/),gc=hm[1],gs=hm[2]?decodeURIComponent(hm[2]):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
+    let gi=gs?ROWS.findIndex(r=>r&&r.slug===gs):-1;if(gi<0&&ROWS.length===1)gi=0;
+    if(gi>=0)openShop(gi,gc);else PENDCAT=gc;}
   if(ME&&ROWS&&ROWS.length&&/^#(num|prof(=|$))/.test(location.hash)){
     const h=location.hash,sg=/^#prof=/.test(h)?decodeURIComponent(h.slice(6)||""):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
     let ix=sg?ROWS.findIndex(r=>r&&r.slug===sg):-1;if(ix<0){ix=ROWS.findIndex(r=>shopSt(r)!=="live");if(ix<0)ix=0;}

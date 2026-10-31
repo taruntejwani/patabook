@@ -1075,26 +1075,50 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   var bar=document.getElementById("mysBar");if(!bar)return;
   function hi(){return !(window.PB&&PB.lang&&PB.lang()!=="hi");}
   function slugs(){try{var c=JSON.parse(localStorage.getItem("pb-my-shops")||"null");return Array.isArray(c)?c:[];}catch(e){return [];}}
-  var ov=null,gone=true;
+  var ov=null;
   function kill(){if(ov){ov.remove();ov=null;}}
-  function open(){
-    if(ov)return;var h=hi(),sl=slugs(),one=sl.length===1;
-    var items=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile",one?"business.html?slug="+encodeURIComponent(sl[0]):"mybusiness.html"],
-      ["🖼️",h?"गैलरी":"Gallery","mybusiness.html#go=photo"],["📊",h?"रिपोर्ट":"Report","mybusiness.html#go=rep"],
-      ["⚙️",h?"सेटिंग":"Settings","mybusiness.html"],["🚪",h?"लॉग आउट":"Log out",""]];
+  /* दुकानों की असली सूची (नाम सहित): login से सीधे लाओ; न मिले तो सेव की हुई slug सूची */
+  async function myShops(){
+    try{var ss=window.PBA&&PBA.session?await PBA.session():null;
+      if(ss&&ss.access_token&&window.PATABOOK_SUPABASE){
+        var r=await fetch(PATABOOK_SUPABASE.url+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:PATABOOK_SUPABASE.anonKey,Authorization:"Bearer "+ss.access_token,"Content-Type":"application/json"},body:"{}"});
+        if(r.ok){var j=await r.json();if(Array.isArray(j)){var a=j.filter(function(x){return x&&x.slug;}).map(function(x){return {slug:x.slug,name:x.name||x.slug};});try{localStorage.setItem("pb-my-shops",JSON.stringify(a.map(function(x){return x.slug;})));}catch(e){}return a;}}}
+    }catch(e){}
+    return slugs().map(function(s){return {slug:s,name:s};});
+  }
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  var ROW='display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;font-weight:700;font-size:15.5px;text-decoration:none;';
+  async function open(){
+    if(ov)return;var h=hi(),shops=null;
     ov=document.createElement("div");ov.style.cssText="position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
     var r=bar.getBoundingClientRect(),pn=document.createElement("div");
-    pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:210px;background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
-    pn.innerHTML=items.map(function(it,i){return '<a data-mi="'+i+'" href="'+(it[2]||"#")+'" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;color:'+(i===4?"#c5221f":"#0b2f73")+';font-weight:700;font-size:15.5px;text-decoration:none'+(i===4?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
+    pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
     ov.appendChild(pn);document.body.appendChild(ov);
-    ov.addEventListener("click",function(e){
-      var a=e.target.closest("[data-mi]");
-      if(!a){if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
-      if(a.dataset.mi==="4"){e.preventDefault();
+    var MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
+    function href(kind,sl){return kind==="pv"?"business.html?slug="+encodeURIComponent(sl):kind==="set"?"mybusiness.html":"mybusiness.html#go="+kind+"&s="+encodeURIComponent(sl);}
+    function main(){
+      pn.innerHTML=MAIN.map(function(it,i){var out=it[2]==="out";return '<a data-k="'+it[2]+'" href="#" style="'+ROW+'color:'+(out?"#c5221f":"#0b2f73")+(out?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
+    }
+    function pick(kind,label){   /* एक से ज़्यादा दुकान: पहले दुकान चुनो */
+      pn.innerHTML='<div style="padding:8px 14px 6px;font-size:12.5px;color:#5b6475;font-weight:700">'+esc(label)+' — '+(h?"दुकान चुनें":"choose shop")+'</div>'+
+        shops.map(function(s){return '<a href="'+href(kind,s.slug)+'" style="'+ROW+'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">🏪</span>'+esc(s.name)+'</a>';}).join("")+
+        '<a data-k="back" href="#" style="'+ROW+'color:#5b6475;border-top:1px solid #eef1f7;margin-top:4px">‹ '+(h?"वापस":"Back")+'</a>';
+    }
+    main();
+    ov.addEventListener("click",async function(e){
+      var a=e.target.closest("[data-k]");
+      if(!a){if(e.target.closest("a[href]"))return;if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
+      e.preventDefault();var k=a.dataset.k;
+      if(k==="back"){main();return;}
+      if(k==="out"){
         if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;
         try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(x){}
-        (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(function(){}).then(function(){kill();bar.style.display="none";location.reload();});
-      }
+        (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(function(){}).then(function(){kill();bar.style.display="none";location.reload();});return;}
+      if(k==="set"){location.href="mybusiness.html";return;}
+      a.style.opacity=".6";if(!shops)shops=await myShops();
+      if(!shops.length){location.href="mybusiness.html";return;}
+      if(shops.length===1){location.href=href(k,shops[0].slug);return;}
+      pick(k,a.innerText.trim());
     });
     if(window.PBBack)PBBack.open(kill);
   }
