@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="hi"><head><meta charset="utf-8"><link rel="preconnect" href="https://kkvbpzysktozghnxplxv.supabase.co" crossorigin><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="दुकान की अपनी website — सारे products, फ़ोटो, पता और WhatsApp। Powered by PataBook.">
 <title>Shop — PataBook</title>
 <meta property="og:site_name" content="PataBook">
@@ -320,6 +320,7 @@ html body .hero.hascv{min-height:0!important}.hero.hascv::after{display:none!imp
 .qa .pri span{display:flex;align-items:center}.qa .pri svg,.dock a svg{width:22px!important;height:22px!important;margin:0!important;vertical-align:0}
 .pbx.pst{padding:0;background:#071a52;animation:pbPstIn .35s ease-out both;transition:opacity .45s ease}.pbx.pst.out{opacity:0;pointer-events:none}
 .pbx.pst img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}.pbx.pst.wide img{object-fit:contain;object-position:center}
+.pbx.pst.rm img{object-fit:contain;object-position:center}.pbx.pst .pbbg{position:absolute;inset:-24px;background:center/cover no-repeat;filter:blur(26px) brightness(.85);transform:scale(1.1)}.pbx.pst .pbsp{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:pbspin .8s linear infinite}.pbx.pst.ld .pbsp{display:none}@keyframes pbspin{to{transform:rotate(360deg)}}
 .pbx.pst .pbsk{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:2;border:1px solid rgba(255,255,255,.45);background:rgba(7,26,82,.55);color:#fff;font:700 13px/1 system-ui,sans-serif;border-radius:999px;padding:8px 14px;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .pbx.pst .pbbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25);z-index:2}.pbx.pst .pbbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d9b257,#fff3c4)}
 @keyframes pbPstIn{from{opacity:0}to{opacity:1}}
@@ -415,21 +416,27 @@ const L=(hi,en)=>EN()?en:hi;
   const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp","new-jai-shanker-restaurant-gandhidham":"posters/new-jai-shanker-restaurant-gandhidham.webp"};
   const pk=Object.keys(PST).find(k=>slug===k||slug.indexOf(k+"-")===0);if(!document.body||!slug)return;
   try{const nv=performance.getEntriesByType("navigation")[0],ty=nv?nv.type:"navigate";if(ty==="reload"||ty==="back_forward")return;}catch(_){}   /* refresh / Back से लौटने पर नहीं; search या लिंक से अंदर आने पर हर बार */
-  const show=src=>{
+  const show=(src,remote)=>{
     if(document.getElementById("pbIntro"))return;window.__pbIntro=1;   /* पुराना intro दोबारा न चले */
-    const T=3,e=document.createElement("div");e.className="pbx pst";e.id="pbIntro";
-    e.innerHTML='<img alt="" decoding="async"><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
-    const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i");let n=T,tm=0,done=0;
+    const T=3,e=document.createElement("div");e.className="pbx pst"+(remote?" rm":"");e.id="pbIntro";
+    e.innerHTML=(remote?'<div class="pbbg"></div>':'')+'<img alt="" decoding="async"><span class="pbsp"></span><button type="button" class="pbsk"></button><span class="pbbar"><i></i></span>';
+    const im=e.querySelector("img"),sk2=e.querySelector(".pbsk"),bar=e.querySelector(".pbbar i"),bg=e.querySelector(".pbbg");let n=T,tm=0,done=0;
     const x=()=>{if(done)return;done=1;clearInterval(tm);e.classList.add("out");setTimeout(()=>{if(e.parentNode)e.remove();},450);};
     const lab=()=>{sk2.textContent=L("छोड़ें","Skip")+" "+n+" ›";};lab();
-    const go=()=>{if(tm)return;if(im.naturalWidth&&im.naturalWidth/im.naturalHeight>1.15)e.classList.add("wide");bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
-    im.onload=go;im.onerror=x;im.src=src;setTimeout(go,2000);
+    const go=()=>{if(tm)return;e.classList.add("ld");if(!remote&&im.naturalWidth&&im.naturalWidth/im.naturalHeight>1.15)e.classList.add("wide");bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
+    im.onload=go;im.onerror=x;im.src=src;if(bg)bg.style.backgroundImage='url("'+src+'")';
+    /* अपनी (local) poster: पहले जैसा; दुकान की अपनी फ़ोटो: फ़ोटो आने पर ही 3 सेकंड की घड़ी, 8 सेकंड में न आए तो चुपचाप हटे */
+    if(remote)setTimeout(()=>{if(!tm)x();},8000);else setTimeout(go,2000);
     e.onclick=x;document.body.appendChild(e);};
   if(pk){show(PST[pk]);return;}
   /* हर दुकान: उसकी Opening Photo चालू हो तो वही पहले (तारीख़ का कोई system नहीं) */
   const RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\/[^/]+\/open-/;
+  const CK="pbo_"+slug;let cu="";try{cu=localStorage.getItem(CK)||"";}catch(_){}
+  if(cu&&RX.test(cu))show(cu,1);   /* पहले देखी हो तो तुरंत (फ़ोटो फ़ोन में सहेजी है) */
   fetch(SB+"/rest/v1/rpc/pb_open_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():null).then(u=>{
-    if(typeof u==="string"&&RX.test(u))show(u);}).catch(()=>{});
+    const ok=typeof u==="string"&&RX.test(u);
+    try{if(ok){localStorage.setItem(CK,u);new Image().src=u;}else if(u===null||u===""||typeof u==="string")localStorage.removeItem(CK);}catch(_){}
+    if(ok)show(u,1);}).catch(()=>{});
 }catch(_){}})();
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 const IMG_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
