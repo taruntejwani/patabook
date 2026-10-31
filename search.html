@@ -192,7 +192,7 @@ function spell(w){
 }
 const rxOf=a=>new RegExp(a.replace(/[.+?^${}()|[\]\\]/g,"\\$&").replace(/\*/g,".*"),"i");
 /* query ko words me todo; har word ke liye alag roop (alias) */
-const STOPW=new Set(["shop","shops","store","stores","dukan","dukaan","dukane","dukano","dukaanein","दुकान","दुकानें","दुकाने","शॉप","near","nearby","me","in","at","ka","ki","ke","ko","the","for","and","best","top","list","पास","में","का","की","के"]);
+const STOPW=new Set(["shop","shops","store","stores","dukan","dukaan","dukane","dukano","dukaanein","दुकान","दुकानें","दुकाने","शॉप","near","nearby","me","nearest","paas","aaspass","najdik","nazdik","mein","आसपास","नज़दीक","नजदीक","in","at","ka","ki","ke","ko","the","for","and","best","top","list","पास","में","का","की","के"]);
 function terms(q,keepEmpty){
   let ws=String(q||"").toLowerCase().replace(/[,()*\\"'%:;]/g," ").split(/\s+/).filter(w=>w.length>=2||/^\d+$/.test(w)).slice(0,6);
   const w2=ws.filter(w=>!STOPW.has(w));if(w2.length||keepEmpty)ws=w2;   /* "shop / store / dukan" जैसे आम शब्द खोज में नहीं गिनते (सिर्फ़ वही लिखा हो तब छोड़कर) */
@@ -416,7 +416,22 @@ async function run(push){
       if(nc){const k=nc.toLowerCase(),loc=b=>cityOf(b).toLowerCase()===k;rows=rows.filter(loc).concat(rows.filter(b=>!loc(b)));}
     }
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
-    try{BIGROW=bestMatch(rows,q);}catch(e){BIGROW=null;}
+    const NEARQ=/(^|\s)(near\s*me|nearby|near\s*by|nearest|paas\s*(me|mein|main)|pass\s*(me|mein)|aas\s*pass|aaspass|najdik|nazdik|आसपास|आस-पास|पास\s*में|नज़दीक|नजदीक)(\s|$)/i.test(q0);
+    rows.forEach(b=>{b._km=null;});
+    if(rows.length>1){   /* सिर्फ़ पते में शब्द मिलने वाली दुकानें (नाम/Category में नहीं), जब Category पता हो → नीचे */
+      const ws=q.toLowerCase().split(/\s+/).filter(w=>w.length>=3&&!STOPW.has(w));
+      const hit=b=>b.category===CATSEL||ws.some(w=>String(b.name||"").toLowerCase().includes(w)||String(catOf(b)||"").toLowerCase().includes(w));
+      const dem=()=>{if(CATSEL&&!(CATMAN||WORKSEL)&&ws.length){const kp=rows.filter(hit);if(kp.length&&kp.length<rows.length)rows=kp.concat(rows.filter(b=>!hit(b)));}};
+      if(NEARQ){   /* "near me" → फ़ोन की लोकेशन से पास वाली पहले; अनुमति न मिले तो जैसा था वैसा */
+        const me=await new Promise(res=>{try{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({la:p.coords.latitude,ln:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:300000});}catch(e){res(null);}});
+        if(n!==reqN)return;
+        if(me){rows.forEach(b=>{b._km=+b.latitude&&+b.longitude?kmTo(me,{la:+b.latitude,ln:+b.longitude}):null;});
+          const dk=b=>b._km==null?1e9:b._km;rows=rows.map((b,i)=>[b,i]).sort((x,y)=>dk(x[0])-dk(y[0])||x[1]-y[1]).map(x=>x[0]);}
+        BIGROW=null;
+      }
+      dem();
+    }
+    if(!NEARQ){try{BIGROW=bestMatch(rows,q);}catch(e){BIGROW=null;}}
     if(BIGROW)rows=rows.filter(b=>b.slug!==BIGROW.slug);
     if(NLI&&!BIGROW&&FZN>0&&LOOSEMISS&&rows.length)NFHIDE=true;   /* सवाल में दुकान का नाम था और मिला नहीं → पहले साफ़ बताओ, बेमेल दुकानें छिपाकर रखो */
     LASTROWS=rows;
@@ -763,7 +778,7 @@ function render0(rows,q,city,keep){
     const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
     return ((b._o&&(i===0||!rows[i-1]._o))?oNote:'')+'<article class="card'+(PREMS[b.slug]?' isprem':'')+'"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
       premTags(b)+(cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+
-      '</div></div>'+(b.address?'<p class="addr">'+esc(b.address)+'</p>':'')+
+      (b._km!=null?'<span class="tag">📏 '+(b._km<1?Math.round(b._km*1000)+" m":b._km.toFixed(1)+" km")+'</span>':'')+'</div></div>'+(b.address?'<p class="addr">'+esc(b.address)+'</p>':'')+
       '<div class="acts"><a class="call" href="'+link+'#contact">'+esc("📞 "+T("c_title"))+'</a>'+
       (dir?'<a href="'+esc(dir)+'">'+esc(T("dir"))+'</a>':'')+
       '<a href="'+link+'">'+esc(T("details"))+'</a></div></article>';
