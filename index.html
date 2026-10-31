@@ -263,7 +263,7 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .join p{font-size:15px;font-weight:700;color:var(--navy)}
 .cta2{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--navy);font-weight:800;font-size:15px;border-radius:999px;padding:10px 34px;border:2px solid #c9d8f5}
 .mys{display:flex;width:fit-content;max-width:100%;box-sizing:border-box;align-items:center;gap:8px;margin:2px 0 10px auto;border-radius:999px;padding:7px 14px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;box-shadow:0 4px 12px rgba(26,115,232,.25);text-decoration:none}.mys.dr{background:linear-gradient(135deg,#b3261e,#e5484d);box-shadow:0 4px 12px rgba(229,72,77,.3)}.mys.pe{background:linear-gradient(135deg,#b26a00,#f5a623);box-shadow:0 4px 12px rgba(245,166,35,.3)}
-.mys .ic{font-size:18px}.mys .tx{flex:0 1 auto;min-width:0}.mys b{display:block;font-size:14px;white-space:nowrap}.mys small{display:none}.mys .go{font-size:18px}
+.mys{padding:0;width:42px;height:42px;justify-content:center;border-radius:50%;gap:0}.mys .tx,.mys .go{display:none}.mys .ic{font-size:21px}.mys .ic{font-size:18px}.mys .tx{flex:0 1 auto;min-width:0}.mys b{display:block;font-size:14px;white-space:nowrap}.mys small{display:none}.mys .go{font-size:18px}
 .cta{display:inline-flex;align-items:center;gap:8px;background:var(--yellow);color:var(--ink);font-weight:800;font-size:16px;border-radius:999px;padding:12px 24px;box-shadow:0 6px 16px rgba(255,210,31,.45)}
 .url{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:14px;border-radius:999px;padding:8px 20px}
 
@@ -314,7 +314,7 @@ window.PATABOOK_SUPABASE={
 /* दुकानदार login है (मोबाइल OTP / ईमेल) तो सबसे ऊपर "मेरी दुकान" का बटन */
 /* 🏪 "मेरी दुकान" पट्टी: दुकान का वही पेज खुले जो ग्राहक देखते हैं (बदलने के लिए उस पेज पर "यहाँ से संभालें") ; 2+ दुकानें हों तो list */
 function pbMyShopLink(b,s){
-  function set(sl){if(!Array.isArray(sl)||sl.length!==1)return;b.href="business.html?slug="+encodeURIComponent(sl[0]);
+  function set(sl){return;b.href="business.html?slug="+encodeURIComponent(sl[0]);
     var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),m=b.querySelector("small");if(m){m.removeAttribute("data-i");m.textContent=hi?"अपनी दुकान देखें — जैसी ग्राहक देखते हैं":"See your shop — as customers see it";}}
   var c=null;try{c=JSON.parse(localStorage.getItem("pb-my-shops")||"null");}catch(e){}
   if(Array.isArray(c)){set(c);return;}
@@ -327,7 +327,7 @@ function pbMyShopLink(b,s){
 function pbOffTag(b,s){
   function apply(m){if(!m)return;var v=Object.keys(m).map(function(k){return m[k]}),d=v.indexOf("draft")>-1,p=!d&&v.indexOf("pend")>-1;var t0=b.querySelector("b"),m0=b.querySelector("small");
     if(!d&&!p){   /* कोई दुकान Offline / Pending नहीं (Approve हो गई) → पट्टी पहले जैसी "मेरी दुकान" */
-      if(b.classList.contains("dr")||b.classList.contains("pe")){b.classList.remove("dr","pe");var ic0=b.querySelector(".ic");if(ic0)ic0.textContent="🏪";if(t0)t0.setAttribute("data-i","myshop_bar");if(m0)m0.setAttribute("data-i","myshop_sub");b.href="mybusiness.html";try{if(window.PB&&PB.apply)PB.apply();}catch(e){}}
+      if(b.classList.contains("dr")||b.classList.contains("pe")){b.classList.remove("dr","pe");var ic0=b.querySelector(".ic");if(ic0)ic0.textContent="⚙️";if(t0)t0.setAttribute("data-i","myshop_bar");if(m0)m0.setAttribute("data-i","myshop_sub");b.href="mybusiness.html";try{if(window.PB&&PB.apply)PB.apply();}catch(e){}}
       return;}
     var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),t=b.querySelector("b"),m2=b.querySelector("small");
     if(t){t.removeAttribute("data-i");t.textContent=d?(hi?"प्रोफ़ाइल अधूरी — पूरी करो":"Complete your profile"):(hi?"मंज़ूरी का इंतज़ार":"Waiting for approval");b.classList.toggle("dr",d);b.classList.toggle("pe",p);var ic=b.querySelector(".ic");if(ic)ic.textContent=d?"🔴":"⏳";}
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 </aside>
 
 <main>
-  <a class="mys" id="mysBar" href="mybusiness.html" style="display:none"><span class="ic" aria-hidden="true">🏪</span><span class="tx"><b data-i="myshop_bar">मेरी दुकान</b><small data-i="myshop_sub">आप लॉगिन हैं — अपनी दुकान संभालें</small></span><span class="go" aria-hidden="true">›</span></a>
+  <a class="mys" id="mysBar" href="mybusiness.html" style="display:none" aria-label="My Shop Settings" title="Settings"><span class="ic" aria-hidden="true">⚙️</span><span class="tx"><b data-i="myshop_bar">मेरी दुकान</b><small data-i="myshop_sub">आप लॉगिन हैं — अपनी दुकान संभालें</small></span><span class="go" aria-hidden="true">›</span></a>
   <section class="lb" id="lb" hidden aria-label="PataBook launch">
     <canvas id="lbFx" aria-hidden="true"></canvas>
     <button type="button" class="lbx" id="lbX" aria-label="बंद करें">✕</button>
