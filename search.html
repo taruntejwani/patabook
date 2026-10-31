@@ -362,7 +362,7 @@ async function gatherRows(q,city,ts,n){
   if(city)gs.push("or("+(cid?"city_id.eq."+cid+",":"")+"address.ilike.*"+city+"*,description.ilike.*"+city+"*)");
   if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
   if(WORKSEL)u.searchParams.append("description","ilike.*Subcategory: "+WORKSEL.replace(/[*,()]/g," ")+"*");
-  if(gs.length===1)u.searchParams.set("or",gs[0].slice(3,-1));else if(gs.length>1)u.searchParams.set("and","("+gs.join(",")+")");
+  if(gs.length)u.searchParams.set("and","("+gs.join(",")+")");   /* हमेशा and=(or(..),..) — कोष्ठक-रहित or= पर "column oraddress does not exist" error आता था */
   let r=await fetch(u,{headers:H}),data=await r.json().catch(()=>null);
   if(!r.ok&&cid&&city){   /* शहर-id वाली खोज फेल हुई तो सिर्फ़ पते/विवरण में शहर के नाम से दोबारा */
     const u2=new URL(u);const o=u2.searchParams.get("or"),a2=u2.searchParams.get("and");
