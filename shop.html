@@ -46,9 +46,9 @@ button{font:inherit}
 @media(max-width:520px){html.own .ib.pbhome b{display:none}html.own .ib.pbhome{width:38px;padding:0;justify-content:center}}@media(max-width:340px){.ib.pbhome b{display:none}.ib.pbhome{width:38px;padding:0;justify-content:center}}.top .wrap.hsoc .ib.pbhome b{font-size:12.5px}
 .ib{flex:none;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:17px;cursor:pointer}
 #pbLang{flex:none}
-#socTop{flex:none;display:flex;gap:6px;margin-left:auto}
+#topR{flex:none;display:flex;gap:6px;margin-left:auto;align-items:center}#gearTop{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#0b2f73;box-shadow:0 2px 8px rgba(0,0,0,.15)}#gearTop[hidden]{display:none}#gearTop svg{width:20px;height:20px}#socTop{flex:none;display:flex;gap:6px}
 @media(max-width:520px){.top .wrap.hsoc .tb{display:none}.top .wrap.hsoc{gap:7px}}#socTop:empty{display:none}#socTop a{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}#socTop svg{width:20px;height:20px}#socTop .ig{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}#socTop .fb{background:#1877f2}
-@media(max-width:420px){#socTop a{width:30px;height:30px;border-radius:9px}#socTop svg{width:18px;height:18px}#socTop{gap:5px}}
+@media(max-width:420px){#gearTop{width:30px;height:30px;border-radius:9px}#gearTop svg{width:18px;height:18px}#socTop a{width:30px;height:30px;border-radius:9px}#socTop svg{width:18px;height:18px}#socTop{gap:5px}}
 
 /* Hero */
 .hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(135deg,#0b2f73 0%,#123f96 55%,#1a73e8 100%)}
@@ -394,7 +394,7 @@ html.t-silver body .dock a:not(.w){background:linear-gradient(135deg,#4c5664,#2f
 <div class="top"><div class="wrap">
  <a class="ib pbhome" id="backA" href="index.html" aria-label="PataBook Home"><img src="pin.png" alt="PataBook" width="24" height="24"><b>PataBook</b></a>
  <div class="tb" id="tb"></div>
- <span id="socTop"></span>
+ <span id="topR"><a id="gearTop" href="mybusiness.html" aria-label="My Shop Settings" title="Settings" hidden><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a><span id="socTop"></span></span>
  <span id="pbLang"></span>
 </div></div>
 
@@ -488,7 +488,7 @@ const phNum=()=>CT.k==="ok"?String(CT.phone||"").replace(/[^\d+]/g,""):"";
 /* 📸 Instagram / Facebook — दुकानदार ने link डाला हो तभी ऊपर icon (sql-28) */
 function socUrl(k){const ok=u=>/^https:\/\/www\.(instagram|facebook)\.com\/[A-Za-z0-9.\-_\/=?&%]{1,150}$/.test(u)&&u.indexOf(k==="Instagram"?"instagram.com":"facebook.com")>0;
   let u=B?line(B,k):"";if(ok(u))return u;const w=B?line(B,"Website").replace(/^https?:\/\/(m\.|web\.)?(www\.)?/i,"https://www."):"";return ok(w)?w:"";}
-function drawSoc(){const e=document.getElementById("socTop");if(!e)return;const ig=socUrl("Instagram"),fb=socUrl("Facebook");e.parentNode.classList.toggle("hsoc",!!(ig||fb));
+function drawSoc(){const e=document.getElementById("socTop");if(!e)return;const ig=socUrl("Instagram"),fb=socUrl("Facebook");e.closest(".wrap").classList.toggle("hsoc",!!(ig||fb));
   e.innerHTML=(ig?'<a class="ig" href="'+esc(ig)+'" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="#fff" stroke="none"/></svg></a>':'')+
     (fb?'<a class="fb" href="'+esc(fb)+'" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path fill="#fff" d="M13.6 21v-7.6h2.6l.4-3h-3V8.5c0-.9.3-1.5 1.5-1.5h1.6V4.3c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.6V21z"/></svg></a>':'');}
 /* 📞 About में मोबाइल नंबर — वही नंबर जो Call / WhatsApp बटन पर (मालिक का switch और staff नंबर वाले नियम) */
@@ -733,7 +733,7 @@ async function loadOwner(){
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
     if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();if(OWN)document.documentElement.classList.add("own");if(OWN&&!document.getElementById("myShopA")){const hb=document.getElementById("backA");if(hb){const m=document.createElement("a");m.id="myShopA";m.className="ib pbhome mys";m.href="mybusiness.html";m.setAttribute("aria-label","My Shop");m.innerHTML='<span class="mi">🏪</span><b>My Shop</b>';hb.after(m);}}}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
-function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const gz=document.getElementById("gearTop");if(gz)gz.hidden=!OWN;const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const N=CT.k==="ok"?((CT.nums&&CT.nums.length)?CT.nums:[String(CT.phone||"").replace(/\D/g,"").slice(-10)].filter(x=>/^\d{10}$/.test(x))):[];
