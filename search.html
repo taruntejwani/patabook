@@ -220,6 +220,43 @@ function autoCat(q){if(CATMAN)return;let g="";for(const [k,re] of GUESS){if(re.t
   drawCat(false);drawWork();
   $("fCat").onchange=function(){CATSEL=this.value;CATMAN=true;WORKSEL="";drawCat(false);drawWork();if(CATSEL)loadWorks(CATSEL);run(true);};
   $("fWork").onchange=function(){WORKSEL=this.value;drawWork();run(true);};})();
+/* 🔎 ग़लत spelling पर भी खोज: सीधा मिलान कम मिले तो Supabase का pb_search_fuzzy (sql: fuzzy) मिलते-जुलते नाम ढूँढता है */
+var FZN=0;
+function deva2rom(t){   /* देवनागरी → रोमन (खोज के लिए मोटा रूप): तेजवानी → tejavani/tejwani */
+  const V={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ए":"e","ऐ":"ai","ओ":"o","औ":"au","ऑ":"o"},
+        M={"ा":"a","ि":"i","ी":"ee","ु":"u","ू":"oo","े":"e","ै":"ai","ो":"o","ौ":"au","ॉ":"o","ं":"n","ँ":"n","ः":"h"},
+        C={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"chh","ज":"j","झ":"jh","ट":"t","ठ":"th","ड":"d","ढ":"dh","ण":"n","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"f","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ळ":"l","ड़":"d","ढ़":"dh"};
+  let o="",pe=false;const a=Array.from(String(t||"").normalize("NFC"));   /* pe = पिछले अक्षर में साफ़ मात्रा थी (तब बीच का "अ" छोड़ देते हैं: तेजवानी → tejvanee) */
+  for(let k=0;k<a.length;k++){const c=a[k],n=a[k+1];
+    if(C[c]!==undefined){o+=C[c];
+      if(n==="्"){k++;pe=false;}
+      else if(n&&M[n]!==undefined){pe=true;}
+      else if(n&&(C[n]!==undefined||V[n]!==undefined)){ if(!pe)o+="a"; pe=false; }
+      else pe=false;}
+    else if(M[c]!==undefined){o+=M[c];pe=true;}
+    else if(V[c]!==undefined){o+=V[c];pe=true;}
+    else if(c==="़"||c==="्")continue;else{o+=c;pe=false;}}
+  return o;
+}
+async function fuzzyRows(q,city,cid,have){
+  try{
+    let qq=String(q||"");if(/[\u0A80-\u0AFF]/.test(qq))qq=qq.replace(/[\u0A80-\u0AFF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));   /* ગુજરાતી → देवनागरी (दोनों लिपियों का क्रम एक जैसा है) */
+    if(/[\u0900-\u097F]/.test(qq))qq=deva2rom(qq);
+    if(qq.replace(/[^a-z0-9]/gi,"").length<3)return [];
+    const r=await fetch(SB+"/rest/v1/rpc/pb_search_fuzzy",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),
+      body:JSON.stringify({p_q:qq,p_city:city||null,p_city_id:cid?String(cid):null,p_limit:20})});
+    if(!r.ok)return [];const ids=await r.json();if(!Array.isArray(ids)||!ids.length)return [];
+    const seen=new Set((have||[]).map(b=>b.slug)),want=ids.filter(x=>!seen.has(x.slug));if(!want.length)return [];
+    const u=new URL(SB+"/rest/v1/businesses");
+    u.searchParams.set("select","name,slug,address,description,category,rating,review_count,is_verified,latitude,longitude");
+    u.searchParams.set("is_active","eq.true");u.searchParams.set("deleted_at","is.null");
+    u.searchParams.set("slug","in.("+want.map(x=>'"'+String(x.slug).replace(/["\\]/g,"")+'"').join(",")+")");
+    if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
+    const r2=await fetch(u,{headers:H});const rows=await r2.json();if(!r2.ok||!Array.isArray(rows))return [];
+    const sc={};want.forEach(x=>sc[x.slug]=x.score);
+    return rows.sort((a,b)=>(sc[b.slug]||0)-(sc[a.slug]||0));
+  }catch(e){return [];}
+}
 let reqN=0;
 async function run(push){
   const q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim(),list=$("list"),cnt=$("count");
@@ -249,6 +286,8 @@ async function run(push){
     const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
     let rows=data.map(b=>(b._s=score(b,ts),b)).sort((a,b)=>b._s-a._s||(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
     rows=await premiumFirst(rows);if(n!==reqN)return;
+    FZN=0;
+    if(rows.length<3&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows);if(n!==reqN)return;if(ex.length){FZN=ex.length;rows=rows.concat(ex);}}
     render(rows,q,city);
   }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p>';}}
 }
@@ -301,7 +340,8 @@ function render(rows,q,city,keep){
     list.innerHTML='<div class="empty"><p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
     return;
   }
-  list.innerHTML=rows.map(b=>{
+  const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:")+'</p>':'';
+  list.innerHTML=fzNote+rows.map(b=>{
     const dir=pbDir(b);
     const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
     return '<article class="card'+(PREMS[b.slug]?' isprem':'')+'"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
