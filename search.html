@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PataBook">
 <script src="site-config.js"></script>
-<script src="i18n.js"></script><script src="pb-voice.js" defer></script>
+<script src="i18n.js"></script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script>
 <script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -52,6 +52,18 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .sbox{position:relative}
 .sgb{position:absolute;left:0;right:0;top:62px;z-index:30;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px rgba(11,47,115,.16);overflow:auto;max-height:min(55vh,360px);display:none}
 .sgb.on{display:block}
+.card.bigc{border:2px solid var(--blue);padding:16px 16px 14px}
+.card.bigc .okl{font-size:12px;font-weight:800;color:#188038;margin-bottom:6px}
+.card.bigc h2{font-size:21px}
+.card.bigc .addr{font-size:15px;color:var(--ink);margin:10px 0}
+.card.bigc .addr.em{font-weight:700}
+.card.bigc .acts a{font-size:15px;padding:11px 16px}
+.card.bigc .ist{font-size:13.5px;font-weight:700;margin:8px 0}
+.card.bigc .ist.op{color:#188038}.card.bigc .ist.cl{color:#b3261e}
+.card.bigc .hint{font-size:13px;color:var(--muted);margin:6px 0 2px}
+.nfbox{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:18px;text-align:center}
+.nfbox p{margin:6px 0}
+.nfbox button{margin-top:8px;font:inherit;font-size:14px;font-weight:700;background:#e8f0fe;color:#1a73e8;border:0;border-radius:99px;padding:9px 16px;cursor:pointer}
 .search{flex-wrap:nowrap}
 .search .f.loc{display:none}
 .search .f:first-child{flex:1 1 auto}
@@ -361,12 +373,13 @@ async function suggestWords(q,limit){
     const low=t.toLowerCase();return d.map(x=>x&&x.label).filter(x=>x&&String(x).toLowerCase()!==low).slice(0,limit||6);
   }catch(e){return [];}
 }
-var WIDE="";
+var WIDE="",NLI=null,BIGROW=null,NFHIDE=false,LASTROWS=[];
 let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
-  WIDE="";
+  WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
+  try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
   const hard=!!det;   /* शहर खोज-शब्द में लिखा हो → सिर्फ़ वही शहर; खाने से चुना → उसे ऊपर, बाकी भी */
   if(det){q=det.rest.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");city=det.city;$("city").value=det.city;}
@@ -395,6 +408,10 @@ async function run(push){
       if(nc){const k=nc.toLowerCase(),loc=b=>cityOf(b).toLowerCase()===k;rows=rows.filter(loc).concat(rows.filter(b=>!loc(b)));}
     }
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
+    try{BIGROW=bestMatch(rows,q);}catch(e){BIGROW=null;}
+    if(BIGROW)rows=rows.filter(b=>b.slug!==BIGROW.slug);
+    if(NLI&&!BIGROW&&FZN>0&&LOOSEMISS&&rows.length)NFHIDE=true;   /* सवाल में दुकान का नाम था और मिला नहीं → पहले साफ़ बताओ, बेमेल दुकानें छिपाकर रखो */
+    LASTROWS=rows;
     render(rows,q,WIDE?"":city);
   }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p><p class="note" style="font-size:11px;opacity:.6">'+esc(String(e&&e.message||e).slice(0,160))+'</p>';}}
 }
@@ -468,13 +485,54 @@ async function premiumFirst(rows){
 }
 function premTags(b){const t=PREMS[b.slug];if(!t)return "";const en=PB.lang&&PB.lang()!=="hi",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";return (PBPlan.has(b.slug,"top")?'<span class="tag feat">⭐ Featured</span>':'')+'<span class="tag prem pt-'+t+'"><i>'+ic+'</i>'+esc(PBPlan.name(t,true))+' Member</span>';}
 const PGN=6;let PGI=0,PGK="";
+/* 🎯 नाम ठीक-ठीक मिले → वही दुकान सबसे ऊपर बड़े कार्ड में (सिर्फ़ तब जब ठीक एक दुकान मिले) */
+const GENW=new Set(["restaurant","restaurants","resturant","hotel","hotels","shop","store","stores","dukan","dukaan","garage","medical","hardware","car","wash","care","auto","general","glass","mobile","mobiles","property","dealer","dealers","traders","trader","enterprise","enterprises","company","centre","center","clinic","school","classes","services","service","salon","parlour","parlor","gym","bakery","sweet","sweets","cafe","chemist","pharmacy","and","new","the","restorent","restorant","restoran","restoreant","rest"]);
+function nameWords(b){let n=String(b.name||"").toLowerCase();let w=n.split(/[^a-z0-9ऀ-ॿ઀-૿]+/).filter(Boolean);
+  const extra=[];w.forEach(x=>{if(/[઀-૿]/.test(x))x=x.replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));if(/[ऀ-ॿ]/.test(x)){try{extra.push(...deva2rom(x).split(/\s+/))}catch(e){}}});
+  return w.concat(extra).filter(Boolean);}
+function nkey(w){return String(w||"").toLowerCase().replace(/ph/g,"f").replace(/sh/g,"s").replace(/ee/g,"i").replace(/oo/g,"u").replace(/y/g,"i").replace(/w/g,"v").replace(/z/g,"j").replace(/(.)\1+/g,"$1");}   /* jay=jai, shankar=sankar, tejwani=tejvani */
+function skel(w){w=nkey(w);return w.charAt(0)+w.slice(1).replace(/[aeiou]/g,"");}
+function tokHit(t,W,joined){const kt=nkey(t),st=skel(t);return W.some(w=>{const kw=nkey(w);return kw===kt||(st.length>=3&&skel(w)===st)||(kt.length>=4&&kw.length>=4&&lev(kw,kt)<=1);})||W.some(w=>w===t||(t.length>=3&&w.startsWith(t))||(t.length>=5&&Math.abs(w.length-t.length)<=2&&lev(w,t)<=(t.length>=8?2:1)))||(t.length>=6&&joined.some(j=>lev(j.slice(0,t.length+1),t)<=1));}
+function bestMatch(rows,q){
+  let qq=String(q||"");if(/[઀-૿]/.test(qq))qq=qq.replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));if(/[ऀ-ॿ]/.test(qq))qq=deva2rom(qq);
+  const D=qq.toLowerCase().replace(/[^a-z0-9 ]+/g," ").split(/\s+/).filter(t=>t.length>=2&&!/^\d+$/.test(t)&&!STOPW.has(t)&&!GENW.has(t)&&!ALIAS[t]&&!CATHI[t]);
+  if(!D.length||!rows.length)return null;
+  const hits=rows.slice(0,25).filter(b=>{const W=nameWords(b),joined=W.slice(0,-1).map((w,i)=>w+W[i+1]);return D.every(t=>tokHit(t,W,joined));});
+  return hits.length===1?hits[0]:null;
+}
+function openSt(b){
+  const en=FEN(),h=line(b,"Hours"),off=line(b,"Closed"),m=h.match(/^(\d{2}):(\d{2})-(\d{2}):(\d{2})$/);if(!m)return null;
+  const a=+m[1]*60+ +m[2],z=+m[3]*60+ +m[4],now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),cur=now.getHours()*60+now.getMinutes();
+  const DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],DH={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
+  const hm=t=>{let[x,y]=t.split(":").map(Number);const ap=x>=12?"PM":"AM";x=x%12||12;return x+":"+String(y).padStart(2,"0")+" "+ap;};
+  const isOpen=DN[now.getDay()]!==off&&(a<=z?cur>=a&&cur<z:cur>=a||cur<z),ot=m[1]+":"+m[2],ct=m[3]+":"+m[4];
+  if(isOpen)return {open:true,t:en?"Open now · closes "+hm(ct):"अभी खुला है · "+hm(ct)+" पर बंद होगा"};
+  if(DN[now.getDay()]!==off&&cur<a)return {open:false,t:en?"Closed now · opens today "+hm(ot):"अभी बंद · आज "+hm(ot)+" पर खुलेगा"};
+  for(let d=1;d<=7;d++){const dn=DN[(now.getDay()+d)%7];if(dn===off)continue;const when=d===1?(en?"tomorrow":"कल"):(en?dn:(DH[dn]||dn)+" को");
+    return {open:false,t:en?"Closed now · opens "+when+" "+hm(ot):"अभी बंद · "+when+" "+hm(ot)+" पर खुलेगा"};}
+  return {open:false,t:en?"Closed now":"अभी बंद"};
+}
+function bigCard(b){
+  const en=FEN(),link="business.html?slug="+encodeURIComponent(b.slug||""),dir=pbDir(b),ct=cityOf(b),cg=catOf(b),it=NLI&&NLI.intent||"",os=openSt(b);
+  const hint=it==="phone"?(en?"To see the phone number, tap Contact (shown after login).":"फ़ोन नंबर देखने के लिए 📞 Contact दबाएँ (login के बाद दिखता है)।"):"";
+  const ist=(it==="open"||os)&&(it==="open")?(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'<div class="ist">'+esc(en?"Timing not listed — please call to check.":"समय दर्ज नहीं है — पक्का करने के लिए Contact करें।")+'</div>'):(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'');
+  const P='<a class="call" href="'+link+'#contact">'+esc("📞 "+T("c_title"))+'</a>',D=dir?'<a href="'+esc(dir)+'">'+esc("🧭 "+T("dir"))+'</a>':'',X='<a href="'+link+'">'+esc(T("details"))+'</a>';
+  const acts=it==="dir"?D+P+X:P+D+X;
+  return '<article class="card bigc'+(PREMS[b.slug]?' isprem':'')+'"><div class="okl">✔ '+esc(en?"Found this shop":"यही दुकान मिली")+'</div><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+premTags(b)+(cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+'</div>'+
+    (b.address?'<p class="addr'+(it==="addr"||it==="where"?' em':'')+'"><b>'+esc(en?"Address: ":"पता: ")+'</b>'+esc(b.address)+'</p>':'')+ist+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+'<div class="acts">'+acts+'</div></article>';
+}
 function render(rows,q,city,keep){
   const list=$("list"),label=[q,city,CATSEL?catName(CATSEL):"",WORKSEL].filter(Boolean).join(" · ");
   const pk0=label+"|"+CATSEL+"|"+WORKSEL;if(!keep){if(PGK!==pk0)PGI=0;PGK=pk0;}
-  const total=rows.length,pages=Math.max(1,Math.ceil(total/PGN));if(PGI>=pages)PGI=pages-1;const allRows=rows;rows=rows.slice(PGI*PGN,PGI*PGN+PGN);
+  const hasBig=!!BIGROW;
+  const total=rows.length+(hasBig?1:0),pages=Math.max(1,Math.ceil(rows.length/PGN));if(PGI>=pages)PGI=pages-1;const allRows=rows;rows=rows.slice(PGI*PGN,PGI*PGN+PGN);
   $("count").textContent=total?T("found",{n:total})+" · "+T("s_for",{q:label}):"";
   if(label&&window.PBT)PBT.once(total?"search":"search0",label);   /* traffic: क्या खोजा, नतीजा मिला या नहीं */
-  if(!rows.length){
+  if(NFHIDE&&!keep){
+    const en=FEN();list.innerHTML='<div class="nfbox"><p><b>'+esc(en?"No shop named \u201c"+q+"\u201d was found on PataBook.":"\u201c"+q+"\u201d नाम की कोई दुकान PataBook पर नहीं मिली।")+'</b></p><p>'+esc(T("s_tip"))+'</p><button type="button" id="nfShow">'+esc(en?"Show the closest shops":"सबसे मिलती-जुलती दुकानें दिखाएँ")+'</button><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
+    $("count").textContent="";const nb=$("nfShow");if(nb)nb.onclick=()=>{NFHIDE=false;render(LASTROWS,q,city);};return;
+  }
+  if(!rows.length&&!hasBig){
     const dym=DYM.length?'<p><b>'+esc(FEN()?"Did you mean:":"क्या आपका मतलब:")+'</b> '+DYM.map(x=>'<a href="#" class="dym" data-q="'+esc(x)+'">'+esc(x)+'</a>').join(' · ')+'</p>':'';
     list.innerHTML='<div class="empty">'+dym+'<p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
     return;
@@ -482,7 +540,8 @@ function render(rows,q,city,keep){
   const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(LOOSEMISS?(FEN()?"No shop found for \u201c"+LOOSEMISS+"\u201d \u2014 showing the closest shops:":"\u201c"+LOOSEMISS+"\u201d के लिए कोई दुकान नहीं मिली \u2014 ये सबसे मिलती-जुलती दुकानें हैं:"):(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:"))+'</p>':'';
   const wNote=WIDE?'<p class="note" style="margin:0 0 10px">'+esc(FEN()?"Nothing found in "+WIDE+" \u2014 showing shops from other cities:":WIDE+" में कुछ नहीं मिला \u2014 दूसरे शहरों की दुकानें:")+'</p>':'';
   const oNote='<p class="note" style="margin:14px 0 10px">'+esc(FEN()?"Shops from other cities:":"दूसरे शहरों की दुकानें:")+'</p>';
-  list.innerHTML=wNote+fzNote+rows.map((b,i)=>{
+  const bigHtml=(hasBig&&PGI===0)?bigCard(BIGROW)+(rows.length?'<p class="note" style="margin:14px 0 8px">'+esc(FEN()?"Similar shops":"मिलती-जुलती दुकानें")+'</p>':''):'';
+  list.innerHTML=bigHtml+wNote+fzNote+rows.map((b,i)=>{
     const dir=pbDir(b);
     const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
     return ((b._o&&(i===0||!rows[i-1]._o))?oNote:'')+'<article class="card'+(PREMS[b.slug]?' isprem':'')+'"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
