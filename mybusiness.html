@@ -1162,7 +1162,7 @@ async function start(){
   /* होम पेज की "Offline: प्रोफ़ाइल पूरी करो" पट्टी से सीधे Settings → प्रोफ़ाइल */
   /* होम के ☰ मेन्यू से सीधे Gallery / Report: #go=photo | #go=rep (एक दुकान हो तो वही खुलती है, ज़्यादा हों तो दुकान चुनने पर) */
   if(ME&&ROWS&&ROWS.length&&/^#go=(photo|rep|nt)(&s=.*)?$/.test(location.hash)){
-    const hm=location.hash.match(/^#go=(photo|rep|nt)(?:&s=(.*))?$/),gc=hm[1],gs=hm[2]?decodeURIComponent(hm[2]):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
+    const hm=location.hash.match(/^#go=(photo|rep|nt)(?:&s=(.*))?$/),gc=hm[1],gs=hm[2]?decodeURIComponent(hm[2]):"";
     let gi=gs?ROWS.findIndex(r=>r&&r.slug===gs):-1;if(gi<0&&ROWS.length===1)gi=0;
     if(gi>=0){DEEP=1;openShop(gi,gc);}else PENDCAT=gc;}
   if(ME&&ROWS&&ROWS.length&&/^#(num|prof(=|$))/.test(location.hash)){
@@ -1173,7 +1173,7 @@ async function start(){
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;
 let DEEP=0,DEEPN=0;
-function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{(DEEP?history.replaceState:history.pushState).call(history,Object.assign({},history.state||{},{pbd:d,cat:cat,shop:SET.shop}),"");}catch(e){}DEEP=0;SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
+function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROWS[SET.shop]?ROWS[SET.shop].slug:"",_u=location.pathname+location.search+(/^(photo|rep|nt)$/.test(cat)&&_sl?"#go="+cat+"&s="+encodeURIComponent(_sl):"");(DEEP?history.replaceState:history.pushState).call(history,Object.assign({},history.state||{},{pbd:d,cat:cat,shop:SET.shop}),"",_u);}catch(e){}DEEP=0;SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
   if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
 /* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
 let PENDCAT="";function openShop(i,cat){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
