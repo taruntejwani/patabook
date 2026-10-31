@@ -645,7 +645,7 @@ function openSt(b){
     if(!box){box=document.createElement("div");box.id="phelp";list.parentNode.insertBefore(box,list);
       box.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a.hq");if(!a)return;e.preventDefault();$("q").value=a.dataset.q;run(true);});}
     const en=FEN();
-    box.innerHTML='<article class="card bigc"><div class="okl">ℹ️ PataBook</div><h2>'+esc(en?"What PataBook can tell you":"PataBook ये सब बताता है")+'</h2><p style="margin:6px 0 8px;color:#1c2540;line-height:1.6">'+esc(en?"PataBook is a digital business directory for Kutch and Gujarat: find shops and services, their address, phone, timing, photos, distance and route. Tap an example to try:":"PataBook कच्छ और गुजरात की दुकानों और सेवाओं की डिजिटल Business Directory है: दुकान या सेवा ढूँढिए, उसका पता, फ़ोन, समय, फ़ोटो, दूरी और रास्ता देखिए। नीचे किसी उदाहरण को दबाकर आज़माइए:")+'</p>'+
+    box.innerHTML='<article class="card bigc"><div class="okl">ℹ️ PataBook</div><h2>'+esc(en?"What PataBook can tell you":"PataBook ये सब बताता है")+'</h2><p style="margin:6px 0 8px;color:#1c2540;line-height:1.6">'+esc(en?"PataBook is a Digital Business Directory: find shops and services, their address, phone, timing, photos, distance and route. Tap an example to try:":"PataBook दुकानों और सेवाओं की डिजिटल Business Directory है: दुकान या सेवा ढूँढिए, उसका पता, फ़ोन, समय, फ़ोटो, दूरी और रास्ता देखिए। नीचे किसी उदाहरण को दबाकर आज़माइए:")+'</p>'+
       HELPQ.map(x=>'<div style="margin:6px 0"><a href="#" class="hq" data-q="'+esc(x[0])+'" style="color:#0b4db3;font-weight:700;text-decoration:underline">🔎 '+esc(en?x[0]:x[1])+'</a></div>').join("")+'</article>';
   };
   window.pbP2P=async function(q){
