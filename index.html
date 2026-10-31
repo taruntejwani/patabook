@@ -1094,7 +1094,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     var r=bar.getBoundingClientRect(),pn=document.createElement("div");
     pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
     ov.appendChild(pn);document.body.appendChild(ov);
-    var MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
+    var MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
     function href(kind,sl){return kind==="pv"?"business.html?slug="+encodeURIComponent(sl):kind==="set"?"mybusiness.html":"mybusiness.html#go="+kind+"&s="+encodeURIComponent(sl);}
     function main(){
       pn.innerHTML=MAIN.map(function(it,i){var out=it[2]==="out";return '<a data-k="'+it[2]+'" href="#" style="'+ROW+'color:'+(out?"#c5221f":"#0b2f73")+(out?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
