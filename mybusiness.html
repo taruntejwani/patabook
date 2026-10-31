@@ -383,18 +383,19 @@ function popEdit(slug,card){
   ov.innerHTML='<div class="popsh"><div class="pophd"><b>'+(en?"Edit":"भरें / बदलें")+'</b><button type="button" aria-label="Close">✕</button></div><iframe class="popfr" title="edit" style="height:340px"></iframe></div>';
   const fr=ov.querySelector("iframe"),sh=ov.querySelector(".popsh");let dirty=false;
   fr.src="edit.html?slug="+encodeURIComponent(slug)+"&embed=1&card="+encodeURIComponent(card);
-  function gone(){window.removeEventListener("message",onMsg);ov.remove();document.body.style.overflow="";}
-  function close(f){if(!f&&dirty&&!confirm(en?"Changes are not saved. Close anyway?":"बदलाव Save नहीं हुए। फिर भी बंद करें?"))return;gone();}
+  let dead=false;function gone(){if(dead)return;dead=true;window.removeEventListener("message",onMsg);ov.remove();document.body.style.overflow="";}
+  function byBack(){if(dirty&&!confirm(en?"Changes are not saved. Close anyway?":"बदलाव Save नहीं हुए। फिर भी बंद करें?")){if(window.PBBack)PBBack.open(byBack);return;}gone();}
+  function close(f){if(!f&&dirty&&!confirm(en?"Changes are not saved. Close anyway?":"बदलाव Save नहीं हुए। फिर भी बंद करें?"))return;if(window.PBBack&&!dead)PBBack.close();else gone();}
   async function onMsg(e){
     if(e.origin!==location.origin||!e.data||e.source!==fr.contentWindow)return;
-    if(e.data.pbEdit==="saved"){gone();try{ME=await PBA.session();await loadProf();draw();}catch(x){location.reload();}}
+    if(e.data.pbEdit==="saved"){dirty=false;if(window.PBBack&&!dead)PBBack.close();else gone();try{ME=await PBA.session();await loadProf();draw();}catch(x){location.reload();}}
     else if(e.data.pbEdit==="dirty")dirty=true;
     else if(e.data.pbEdit==="h"){fr.style.height=Math.min(Math.max(+e.data.h||0,200),Math.round(innerHeight*0.82)-48)+"px";}
   }
   window.addEventListener("message",onMsg);
   ov.querySelector(".pophd button").onclick=()=>close();
   ov.addEventListener("click",e=>{if(e.target===ov)close();});
-  document.body.appendChild(ov);document.body.style.overflow="hidden";
+  document.body.appendChild(ov);document.body.style.overflow="hidden";if(window.PBBack)PBBack.open(byBack);
 }
 function profPct(b){const it=profItems(b,0);return it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null;}
 function offBlock(b,i,en){
@@ -1159,7 +1160,7 @@ start();
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-watermark.js"></script>
-<script src="pb-gallery.js"></script>
+<script src="pb-back.js"></script><script src="pb-gallery.js"></script>
 
 </body>
 </html>

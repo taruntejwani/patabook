@@ -92,10 +92,10 @@
   function light(i, k, n) {
     var b = ROWS[i], s = b.slug, arr = listOf(b, k), x = arr[n]; if (!x) return;
     var act = k !== "photo" && active(b, k) === x.url, ov = document.createElement("div");
-    ov.style.cssText = "position:fixed;inset:0;z-index:300;background:rgba(8,16,36,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:12px";
+    ov.style.cssText = "position:fixed;inset:0;z-index:300;background:rgba(8,16,36,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 10px 14px;gap:10px";
     var btn = "border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;";
     ov.innerHTML = '<button type="button" data-x aria-label="Close" style="position:absolute;top:12px;right:14px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:22px;cursor:pointer">✕</button>' +
-      '<img src="' + esc(x.url) + '" alt="" style="max-width:100%;max-height:68vh;border-radius:14px;object-fit:contain;background:#000">' +
+      '<img src="' + esc(x.url) + '" alt="" style="width:100%;flex:1 1 auto;min-height:0;max-height:calc(100dvh - 170px);border-radius:10px;object-fit:contain;background:#000">' +
       (act ? '<div style="color:#8ef0b0;font-weight:800">✔ ' + T("अभी यही चालू है", "This one is in use") + '</div>' : "") + (x.hidden ? '<div style="color:#ffd28a;font-weight:800">' + T("यह फ़ोटो छिपी है", "This photo is hidden") + '</div>' : "") +
       '<div id="gbr" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' +
       (k === "photo" ? '<button type="button" data-a="hide" style="' + btn + 'background:' + (x.hidden ? '#1e9e57' : '#fff') + ';color:' + (x.hidden ? '#fff' : '#0b2f73') + '">' + (x.hidden ? "👁️ " + T("दिखाओ", "Show") : "🙈 " + T("छिपाओ", "Hide")) + '</button>'
@@ -103,7 +103,10 @@
       '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("Delete", "Delete") + '</button></div><div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px"></div>';
     document.body.appendChild(ov);
     var prev = document.body.style.overflow; document.body.style.overflow = "hidden";
-    function close() { ov.remove(); document.body.style.overflow = prev; }
+    var gone = false;
+    function gc() { if (gone) return; gone = true; ov.remove(); document.body.style.overflow = prev; }
+    function close() { if (window.PBBack) PBBack.close(); else gc(); }
+    if (window.PBBack) PBBack.open(gc);
     ov.addEventListener("click", async function (e) {
       if (e.target === ov || e.target.closest("[data-x]")) { close(); return; }
       var a = e.target.closest("[data-a]"); if (!a) return; var w = a.dataset.a, em = ov.querySelector("#gme"); a.disabled = true;
@@ -122,7 +125,7 @@
     });
   }
 
-  window.addEventListener("popstate", function () { var any = false; for (var k in GO) if (GO[k]) { any = true; GO[k] = ""; } if (any) draw(); });
+  window.addEventListener("popstate", function (ev) { if (ev.state && ev.state.pbgal) return; var any = false; for (var k in GO) if (GO[k]) { any = true; GO[k] = ""; } if (any) draw(); });
   document.getElementById("list").addEventListener("click", function (e) {
     var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
