@@ -146,7 +146,7 @@ h2 .pbi{width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:var(--
 .qa3 a.dis{opacity:.45;pointer-events:none;filter:grayscale(1)}
 #mobRow:empty{display:none}
 #cardBtn{display:none!important}
-</style><script src="pb-guard.js" defer></script><script src="pb-back.js"></script><script src="pb-backhome.js"></script>
+</style><script src="pb-guard.js" defer></script><script src="pb-back.js"></script><script src="pb-pgal.js"></script><script src="pb-backhome.js"></script>
 <script src="pb-icons.js"></script>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script><script src="pb-protect.js"></script>
 <script src="pb-hiring.js"></script>
@@ -322,16 +322,17 @@ async function loadPrem(){
   if(window.PBPlan){try{await PBPlan.load([B.slug]);}catch(e){}}
   if(!PF("photos")){render();return;}
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GAL=r.ok?(await r.json()||[]):[];}catch(e){GAL=[];}
+  try{const rc=await fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GCAP={};if(rc.ok)(await rc.json()||[]).forEach(c=>{if(c&&c.url&&c.caption)GCAP[c.url]=c.caption;});}catch(e){GCAP={};}
   render();bizDist();
 }
 const GAL_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
+let GCAP={};
 function GALP(){return PF("photos")?(GAL||[]).filter(u=>GAL_RX.test(u)):[];}
-function drawGal(){const sec=document.getElementById("gal");if(sec)sec.hidden=true;
-  const box=document.getElementById("galM"),L=GALP();if(!box||!L.length)return;
-  const en=PB.lang&&PB.lang()!=="hi",n=L.length>=5?5:L.length===4?3:L.length;
-  box.innerHTML=L.slice(0,n).map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy">'+(i===0?'<span class="cnt">📷 '+L.length+' '+(en?(L.length>1?"Photos":"Photo"):"फ़ोटो")+'</span>':'')+(i===n-1&&L.length>n?'<span class="more">+'+(L.length-n)+'</span>':'')+'</button>').join("");
-  box.onclick=e=>{const b=e.target.closest("[data-g]");if(b)lightbox(L,+b.dataset.g);};
-  const gb=document.getElementById("gphBtn");if(gb)gb.onclick=()=>lightbox(L,0);}
+function drawGal(){const sec=document.getElementById("gal"),L=GALP();if(!sec)return;
+  if(!L.length){sec.hidden=true;return;}
+  const en=PB.lang&&PB.lang()!=="hi";
+  sec.hidden=false;sec.innerHTML='<h2>🖼️ '+esc(PBPGal.title(L,GCAP,!en))+' <small style="font-weight:600;color:#5b6475">('+L.length+')</small></h2>'+PBPGal.grid(L,GCAP);
+  if(!sec.__pg){sec.__pg=1;sec.addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b)PBPGal.view(GALP(),+b.dataset.g,GCAP);});}}
 /* 🛍️ Products (sql-24, सिर्फ़ Premium) — पूछने के लिए वही संपर्क नियम: नंबर दिखता हो तो WhatsApp, नहीं तो संपर्क वाला हिस्सा */
 function PRODP(){return [];}   /* Products हटा दिए */
 const rsF=n=>n?"₹"+Number(n).toLocaleString("en-IN"):"";
@@ -415,7 +416,7 @@ function render(){
    '<section class="card" id="contact" hidden><div id="cbox"></div></section>'+
    '<div id="pbRate"></div>'+
    ((DET=>DET?'<section class="card" id="det">'+DET+'</section>':'')(
-   (GALP().length?'<div class="mos n'+(GALP().length>=5?5:GALP().length===4?3:GALP().length)+'" id="galM" data-pbh="photos"></div>':'')+
+   ''+
    '<h2>'+PBI("store")+esc(en?"About us":"हमारे बारे में")+'</h2>'+
    '<div class="rows" data-pbh="about">'+
      (addr?'<div class="row" data-pbh="addr"><span>'+esc(en?"Address":"पता")+'</span><b>'+esc(addr)+(sub2?'<br><small style="color:#5b6475;font-weight:600">'+esc(sub2)+'</small>':'')+(lmk?'<br><small style="color:#874d00;font-weight:700">'+PBI("flag")+esc(en?"Landmark: ":"पहचान: ")+esc(lmk)+'</small>':'')+'</b></div>':'')+

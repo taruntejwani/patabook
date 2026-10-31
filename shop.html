@@ -19,7 +19,7 @@
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js"></script>
 <script src="pb-icons.js"></script>
-<script src="pb-back.js"></script><script src="pb-backhome.js"></script>
+<script src="pb-back.js"></script><script src="pb-pgal.js"></script><script src="pb-backhome.js"></script>
 <script src="pb-hide.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-rate.js"></script>
@@ -580,7 +580,7 @@ function render(){drawSoc();
        (PF("card")?'<button type="button" id="shareQa" class="isCard" data-pbh="share"><span>🪪</span>'+L("डिजिटल कार्ड","Digital Card")+'</button>':'<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>')+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',vis:''}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
-     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+' <small>('+G.length+')</small></h2>'+(G.some(u=>CAPS[u])?'<div class="galc">'+G.map((u,i)=>'<figure><button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="'+esc((CAPS[u]||"").slice(0,80))+'" loading="lazy"></button>'+(CAPS[u]?'<figcaption><span class="ct">'+esc(CAPS[u])+'</span>'+(CAPS[u].length>110?'<em>'+L("और पढ़ें","Read more")+'</em>':"")+'</figcaption>':"")+'</figure>').join("")+'</div>':'<div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div>')+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
+     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+PBPGal.title(G,CAPS,!EN())+' <small>('+G.length+')</small></h2>'+PBPGal.grid(G,CAPS)+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
      
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
@@ -608,7 +608,7 @@ function render(){drawSoc();
   const pr=document.getElementById("prods");if(pr)pr.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(P[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)return prodAsk(P[+a.dataset.pa]);const sh=e.target.closest("[data-ps]");if(sh)prodShare(P[+sh.dataset.ps]);};
   /* दोस्त का भेजा link (#p<id>) खुले तो वही product सामने खुले */
   if(!window.__pOpened){const hm=location.hash.match(/^#p(\d+)$/);if(hm){const q=P.find(x=>String(x.id)===hm[1]);if(q){window.__pOpened=1;setTimeout(()=>{const s2=document.getElementById("prods");if(s2)s2.scrollIntoView({block:"start"});prodSheet(q);},300);}}}
-  const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const c=e.target.closest("figcaption");if(c){c.classList.toggle("open");return;}const g=e.target.closest("[data-g]");if(g)lightbox(G,+g.dataset.g);};
+  const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)PBPGal.view(G,+g.dataset.g,CAPS);};
   document.getElementById("shareQa").onclick=document.getElementById("shareQa").classList.contains("isCard")?()=>{const c=document.getElementById("cardBtn");if(c)c.click();}:()=>{window.open(waLink(b,window.PBHide&&PBHide.has("addr")?"":addr),"_blank","noopener");};
   document.getElementById("repBtn").onclick=openReport;
   wireDir(b,addr,dir);drawOwn();
