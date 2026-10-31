@@ -818,7 +818,9 @@ document.getElementById("q").addEventListener("input",showSug);
   q.addEventListener("focus",()=>{
     if(!window.matchMedia("(max-width:820px)").matches)return;
     document.body.style.paddingBottom="55vh";
-    setTimeout(()=>{try{const b=q.closest("form,.search,label")||q,r=b.getBoundingClientRect();window.scrollTo({top:window.scrollY+r.top-10,behavior:"smooth"});}catch(e){}},320);
+    /* बॉक्स को हेडर के ठीक नीचे रखो; दो बार जाँचकर ठीक करो (keyboard खुलने के बाद + पेज लोड रुकने के बाद), ताकि browser के अपने खिसकाव से जुड़कर ऊपर न निकल जाए */
+    const fit=()=>{try{if(document.activeElement!==q)return;const b=q.closest("form,.search,label")||q,vv=window.visualViewport,off=vv?vv.offsetTop:0,r=b.getBoundingClientRect(),want=off+90,d=r.top-want;if(Math.abs(d)>14)window.scrollBy({top:d,behavior:"auto"});}catch(e){}};
+    setTimeout(fit,350);setTimeout(fit,900);
   });
   q.addEventListener("blur",()=>setTimeout(()=>{document.body.style.paddingBottom="";},250));
 })();
