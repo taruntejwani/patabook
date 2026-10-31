@@ -639,6 +639,8 @@ function openSt(b){
       const far=km>150&&(!ga.k||!gb.k);
       const lbl=(en?"Found: ":"मिला: ")+(ga.lab||A)+" → "+(gb.lab||B);
       out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small><small>📍 "+esc(lbl)+"</small>"+(far?"<small style=\"color:#b3261e;font-weight:700\">⚠ "+esc(en?"This is far away — a place may be matched wrongly. Please write the full name, e.g. \u201cBharat Nagar Gandhidham\u201d.":"यह बहुत दूर है — कोई जगह गलत पकड़ी गई हो सकती है। पूरा नाम लिखें, जैसे \u201cBharat Nagar Gandhidham\u201d।")+"</small>":"");
+      const gm="https://www.google.com/maps/dir/?api=1&origin="+ul+","+ug+"&destination="+tl+","+tg+"&travelmode=driving";
+      out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"Directions (रास्ता चलाएँ)")+'</a></div>');
       if(line)drawMap(card,line,ul,ug,tl,tg);
     }catch(_){if(my===P2S)box.remove();}
   };
