@@ -223,7 +223,8 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .ptk{display:flex;height:100%;transition:transform .45s ease;will-change:transform}
 .ptk.nd{transition:none}
 .ps{flex:0 0 100%;height:100%;position:relative;display:block;overflow:hidden}
-.ps img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.ps::before{content:"";position:absolute;inset:-14px;background:var(--pi) center/cover no-repeat;filter:blur(18px);transform:scale(1.05)}
+.ps img{position:relative;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 .ps .pl{position:absolute;left:5px;top:5px;font-size:8.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff}
 .ps .pl.pt-gold{background:linear-gradient(90deg,#b8860b,#f3c64b);color:#3a2700}
 .ps .pl.pt-silver{background:linear-gradient(90deg,#8d99a6,#e3e8ee);color:#1d2630}
@@ -636,7 +637,7 @@ function applyLang(){
   let ALL=[],P=[],i=0,timer=null,loaded=false;
   const tk=()=>document.getElementById("ptk");
   function slide(b){const t=b.tier==="platinum"||b.tier==="silver"?b.tier:"gold";
-    return '<a class="ps" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 Digital Platinum Card",gold:"👑 Digital Gold Card",silver:"🥈 Digital Silver Card"}[t])+'</span></a>';}
+    return '<a class="ps" style="--pi:url(\''+esc(b.url)+'\')" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 Digital Platinum Card",gold:"👑 Digital Gold Card",silver:"🥈 Digital Silver Card"}[t])+'</span></a>';}
   function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का Poster यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"Gold और Platinum Member अपना poster यहाँ पूरे size में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
   function go(n,anim){const t=tk();if(!t)return;i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
     document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===i));}
