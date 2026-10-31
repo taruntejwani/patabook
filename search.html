@@ -61,6 +61,12 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .card.bigc .ist{font-size:13.5px;font-weight:700;margin:8px 0}
 .card.bigc .ist.op{color:#188038}.card.bigc .ist.cl{color:#b3261e}
 .card.bigc .hint{font-size:13px;color:var(--muted);margin:6px 0 2px}
+.vtabs{display:flex;gap:8px;margin:2px 0 12px}.vtabs button{border:1px solid var(--line);background:#fff;color:#1c2b4a;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer}.vtabs button.on{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.igrid{columns:2;column-gap:10px}@media(min-width:700px){.igrid{columns:3}}@media(min-width:1000px){.igrid{columns:4}}
+.itile{break-inside:avoid;margin:0 0 10px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:block;text-decoration:none;color:inherit}
+.itile .ph{display:block;width:100%;background:#eef3fd;min-height:90px}.itile img{display:block;width:100%;height:auto}
+.itile .ini{aspect-ratio:4/3;display:grid;place-items:center;font-size:44px;font-weight:700;color:#fff}
+.itile .cap{padding:8px 10px 10px}.itile .cap b{display:block;font-size:13.5px;line-height:1.3}.itile .cap span{font-size:12px;color:#5b6b8c}
 .nfbox{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:18px;text-align:center}
 .nfbox p{margin:6px 0}
 .nfbox button{margin-top:8px;font:inherit;font-size:14px;font-weight:700;background:#e8f0fe;color:#1a73e8;border:0;border-radius:99px;padding:9px 16px;cursor:pointer}
@@ -153,6 +159,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
  </form>
 
  <div class="count" id="count"></div>
+ <div class="vtabs" id="vtabs" hidden><button type="button" id="tabAll" class="on">📋 <span id="tabAllT"></span></button><button type="button" id="tabImg">🖼️ Images</button></div>
  <div class="list" id="list"></div>
 </main>
 
@@ -521,7 +528,41 @@ function bigCard(b){
   return '<article class="card bigc'+(PREMS[b.slug]?' isprem':'')+'"><div class="okl">✔ '+esc(en?"Found this shop":"यही दुकान मिली")+'</div><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+premTags(b)+(cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+'</div>'+
     (b.address?'<p class="addr'+(it==="addr"||it==="where"?' em':'')+'"><b>'+esc(en?"Address: ":"पता: ")+'</b>'+esc(b.address)+'</p>':'')+ist+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+'<div class="acts">'+acts+'</div></article>';
 }
+var VIEW="all",IMGC={};
+const TINTS=["#1a73e8","#0f9d58","#e8710a","#9334e6","#d93025","#00897b","#5f6b8a"];
+async function imgData(slugs){
+  const need=slugs.filter(x=>!(x in IMGC));
+  if(need.length){
+    const ph={},lg={};
+    try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_bulk",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify({p_slugs:need.slice(0,60)})});if(r.ok){const j=await r.json();Object.keys(j||{}).forEach(k=>{ph[k]=(j[k]||[]).filter(u=>/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(u));});}}catch(e){}
+    try{const r=await fetch(SB+"/rest/v1/businesses?select=slug,logo_url&slug=in.("+encodeURIComponent(need.slice(0,60).map(x=>'"'+String(x).replace(/"/g,"")+'"').join(","))+")",{headers:H});if(r.ok)(await r.json()).forEach(x=>{if(/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//.test(x.logo_url||"")&&window.PBPlan&&PBPlan.has(x.slug,"logo"))lg[x.slug]=x.logo_url;});}catch(e){}
+    need.slice(0,60).forEach(k=>{IMGC[k]={ph:ph[k]||[],logo:lg[k]||""};});
+  }
+  return IMGC;
+}
+async function renderImgs(rows,q){
+  const list=$("list"),all=(BIGROW?[BIGROW]:[]).concat(rows).slice(0,60);
+  list.innerHTML='<p class="note">'+esc(FEN()?"Loading photos…":"फ़ोटो आ रही हैं…")+'</p>';
+  const tok=++IMGTOK;await imgData(all.map(b=>b.slug));if(tok!==IMGTOK||VIEW!=="img")return;
+  const tiles=[];
+  all.forEach((b,i)=>{
+    const d=IMGC[b.slug]||{ph:[],logo:""},link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cap='<div class="cap"><b>'+esc(b.name)+'</b><span>'+esc(ct||catOf(b)||"")+'</span></div>';
+    const imgs=d.ph.length?d.ph:(d.logo?[d.logo]:[]);
+    if(imgs.length)imgs.forEach(u=>tiles.push('<a class="itile" href="'+link+'"><span class="ph"><img loading="lazy" src="'+esc(u)+'" alt="'+esc(b.name)+'"></span>'+cap+'</a>'));
+    else tiles.push('<a class="itile" href="'+link+'"><div class="ini" style="background:'+TINTS[i%TINTS.length]+'">'+esc(String(b.name||"?").trim().charAt(0).toUpperCase())+'</div>'+cap+'</a>');
+  });
+  list.innerHTML=tiles.length?'<div class="igrid">'+tiles.join("")+'</div>':'<div class="empty"><p>'+esc(FEN()?"No photos found.":"कोई फ़ोटो नहीं मिली।")+'</p></div>';
+}
+var IMGTOK=0,LASTR=null;
+function setView(v){VIEW=v;if(LASTR)render.apply(null,LASTR.concat([true]));}
 function render(rows,q,city,keep){
+  LASTR=[rows,q,city];
+  const tb=$("vtabs");
+  if(tb){const has=(rows&&rows.length)||BIGROW;tb.hidden=!has||(NFHIDE&&!keep);if(!tb.hidden){$("tabAllT").textContent=FEN()?"All":"सब";$("tabAll").className=VIEW==="all"?"on":"";$("tabImg").className=VIEW==="img"?"on":"";}}
+  if(VIEW==="img"&&!(NFHIDE&&!keep)&&((rows&&rows.length)||BIGROW)){const total=rows.length+(BIGROW?1:0);$("count").textContent=T("found",{n:total});return renderImgs(rows,q);}
+  return render0(rows,q,city,keep);
+}
+function render0(rows,q,city,keep){
   const list=$("list"),label=[q,city,CATSEL?catName(CATSEL):"",WORKSEL].filter(Boolean).join(" · ");
   const pk0=label+"|"+CATSEL+"|"+WORKSEL;if(!keep){if(PGK!==pk0)PGI=0;PGK=pk0;}
   const hasBig=!!BIGROW;
@@ -559,6 +600,7 @@ function render(rows,q,city,keep){
 
 const P=new URLSearchParams(location.search);
 $("q").value=P.get("q")||"";
+$("tabAll").onclick=()=>setView("all");$("tabImg").onclick=()=>setView("img");
 if(P.get("city"))$("city").value=P.get("city");
 /* 📍 शहर: बाहर (home) की तरह — याद रखा शहर अपने-आप, और GPS बटन से अपनी location का शहर */
 /* याद रखा शहर अपने-आप नहीं भरता — खोज पूरे भारत में; शहर आप खुद चुनें या खोज में लिखें */
