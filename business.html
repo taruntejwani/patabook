@@ -328,6 +328,21 @@ async function loadPrem(){
 const GAL_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
 let GCAP={};
 function GALP(){return PF("photos")?(GAL||[]).filter(u=>GAL_RX.test(u)):[];}
+/* Free दुकान + फ़ोटो: Premium पेज जैसे दो टैब (Gallery | Visit us) */
+let BTAB="g";
+function drawTabs(){
+  const app=document.getElementById("app"),g=document.getElementById("gal"),old=document.getElementById("btabs");if(old)old.remove();
+  if(!app)return;app.classList.remove("tabG","tabV");
+  if(PREM||!g||g.hidden||!GALP().length)return;
+  if(!document.getElementById("btabCss")){const st=document.createElement("style");st.id="btabCss";
+    st.textContent="#btabs{display:flex;gap:8px;margin:2px 0 12px}#btabs button{border:1.5px solid #cfd8ea;background:#fff;color:#0b2f73;font:700 14.5px system-ui,sans-serif;padding:9px 18px;border-radius:999px;cursor:pointer}#btabs button.on{background:#1a73e8;border-color:#1a73e8;color:#fff}#app.tabG>*:not(.card:first-child):not(#gal):not(#btabs):not(#contact){display:none!important}#app.tabV>#gal{display:none!important}";document.head.appendChild(st);}
+  const en=PB.lang&&PB.lang()!=="hi",d=document.createElement("div");d.id="btabs";
+  d.innerHTML='<button type="button" data-t="g">'+(en?"Gallery":"गैलरी")+'</button><button type="button" data-t="v">'+(en?"Visit us":"हमसे मिलें")+'</button>';
+  g.insertAdjacentElement("beforebegin",d);
+  const set=t=>{BTAB=t;app.classList.toggle("tabG",t==="g");app.classList.toggle("tabV",t==="v");d.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.t===t));};
+  d.addEventListener("click",e=>{const b=e.target.closest("button[data-t]");if(b)set(b.dataset.t);});
+  set(BTAB);
+}
 function drawGal(){const sec=document.getElementById("gal"),L=GALP();if(!sec)return;
   if(!L.length){sec.hidden=true;return;}
   const en=PB.lang&&PB.lang()!=="hi";
@@ -441,7 +456,7 @@ function render(){
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()!=="hi")?"Vacancy — post a job (shop owner)":"Vacancy — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
    '<p id="ownBox" hidden style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:700">✏️ '+((PB.lang&&PB.lang()!=="hi")?"Your shop — manage it here ›":"आपकी दुकान — यहां से संभालें ›")+'</a>'+(PF("report")?' &nbsp;·&nbsp; <button type="button" onclick="window.PBEdit&&PBEdit.act(\'report\')" style="border:0;background:none;padding:0;font:inherit;color:#1a73e8;font-weight:700;cursor:pointer">📊 '+((PB.lang&&PB.lang()!=="hi")?"Report":"रिपोर्ट")+'</button>':'')+'</p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()!=="hi")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>'+'<div id="whoBot" style="text-align:center;margin:0 0 14px"></div>';
-  drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();drawProds();
+  drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();drawTabs();drawProds();
   wireDir(b,addr,map);
   const ws=document.getElementById("waShare");if(ws)ws.onclick=()=>{ws.href=waLink(b,addr);};   /* नंबर बाद में आता है, इसलिए दबाते समय link बनाओ */
   drawOwn();
