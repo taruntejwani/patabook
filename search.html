@@ -385,7 +385,7 @@ let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
-  try{window.pbP2P&&window.pbP2P(q0);}catch(e){}
+  try{window.pbP2P&&window.pbP2P(q0);}catch(e){}try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
@@ -615,6 +615,23 @@ function openSt(b){
     }
     return null;
   }
+  /* "PataBook क्या है / क्या-क्या बता सकता है" — मदद कार्ड */
+  const HELPQ=[["Gandhidham AC repair","Gandhidham में AC repair"],["Jay Shankar restaurant ka phone number","Jay Shankar restaurant का फ़ोन नंबर"],["Tejwani detergent kaha hai","Tejwani detergent कहाँ है (पता)"],["Shri Ram hardware kab tak khula hai","Shri Ram hardware कब तक खुला है"],["Shri Ram hardware ka rasta batao","Shri Ram hardware का रास्ता / दूरी"],["Bharat Nagar to Kandla","Bharat Nagar से Kandla का रास्ता"]];
+  function isHelpQ(q){
+    const t=String(q||"").toLowerCase().replace(/[?!।.,]+/g," ").replace(/\s+/g," ").trim();if(!t||t.length>80)return false;
+    const brand=/(patabook|pata book|पताबुक|पता बुक)/.test(t),ask=/(\bkya\b|क्या|\bkaam\b|काम|\bwork\b|\bbata|बता|\bhelp\b|मदद|madad|\buse\b|kaise|कैसे|\bwhat\b|\bhow\b|sakta|सकता|\bkare|करे|kaun|कौन|\babout\b)/.test(t);
+    if(brand&&ask)return true;
+    return /^(help|madad|मदद|kya kya (kar|bata) sakta hai|what can you do|how to use|kaise use kare|kaise use karu)$/.test(t);
+  }
+  window.pbHelp=function(q){
+    const list=document.getElementById("list");let box=document.getElementById("phelp");
+    if(!isHelpQ(q)||!list){if(box)box.remove();return;}
+    if(!box){box=document.createElement("div");box.id="phelp";list.parentNode.insertBefore(box,list);
+      box.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a.hq");if(!a)return;e.preventDefault();$("q").value=a.dataset.q;run(true);});}
+    const en=FEN();
+    box.innerHTML='<article class="card bigc"><div class="okl">ℹ️ PataBook</div><h2>'+esc(en?"What PataBook can tell you":"PataBook ये सब बताता है")+'</h2><p style="margin:6px 0 8px;color:#1c2540;line-height:1.6">'+esc(en?"PataBook is a digital business directory for Kutch and Gujarat: find shops and services, their address, phone, timing, photos, distance and route. Tap an example to try:":"PataBook कच्छ और गुजरात की दुकानों और सेवाओं की डिजिटल Business Directory है: दुकान या सेवा ढूँढिए, उसका पता, फ़ोन, समय, फ़ोटो, दूरी और रास्ता देखिए। नीचे किसी उदाहरण को दबाकर आज़माइए:")+'</p>'+
+      HELPQ.map(x=>'<div style="margin:6px 0"><a href="#" class="hq" data-q="'+esc(x[0])+'" style="color:#0b4db3;font-weight:700;text-decoration:underline">🔎 '+esc(en?x[0]:x[1])+'</a></div>').join("")+'</article>';
+  };
   window.pbP2P=async function(q){
     const my=++P2S,list=document.getElementById("list");let box=document.getElementById("ptp");
     const pr=p2pParse(q);
