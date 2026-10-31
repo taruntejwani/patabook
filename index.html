@@ -750,11 +750,40 @@ function sugKm(b){const la=+b.latitude,ln=+b.longitude;if(!MYPOS||!la||!ln)retur
   return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
 function sugD(b){const la=+b.latitude,ln=+b.longitude;if(!MYPOS||!la||!ln)return 1e9;return (la-MYPOS[0])**2+((ln-MYPOS[1])*Math.cos(la*Math.PI/180))**2;}
 sugPos();document.addEventListener("pb-city-auto",sugPos);
+/* 🔎 ग़लत spelling पर सही सुझाव: "resturient" → "restaurant", "restaurant gandhidham" (pb_suggest; सूची दुकानों से हर बार बनती है) */
+var SUGW=[],sugWReq=0,sugWTimer=null,SUGW_OK=true;
+function sugRom(t){   /* देवनागरी/ગુજરાતી → रोमन (मोटा रूप) */
+  t=String(t||"").replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));
+  if(!/[ऀ-ॿ]/.test(t))return t;
+  const V={"अ":"a","आ":"aa","इ":"i","ई":"ee","उ":"u","ऊ":"oo","ए":"e","ऐ":"ai","ओ":"o","औ":"au","ऑ":"o"},M={"ा":"a","ि":"i","ी":"ee","ु":"u","ू":"oo","े":"e","ै":"ai","ो":"o","ौ":"au","ॉ":"o","ं":"n","ँ":"n","ः":"h"},
+    C={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"chh","ज":"j","झ":"jh","ट":"t","ठ":"th","ड":"d","ढ":"dh","ण":"n","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"f","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ळ":"l"};
+  let o="",pe=false;const a=Array.from(t.normalize("NFC"));
+  for(let k=0;k<a.length;k++){const c=a[k],n=a[k+1];
+    if(C[c]!==undefined){o+=C[c];if(n==="्"){k++;pe=false;}else if(n&&M[n]!==undefined){pe=true;}else if(n&&(C[n]!==undefined||V[n]!==undefined)){if(!pe)o+="a";pe=false;}else pe=false;}
+    else if(M[c]!==undefined){o+=M[c];pe=true;}else if(V[c]!==undefined){o+=V[c];pe=true;}else if(c==="़"||c==="्")continue;else{o+=c;pe=false;}}
+  return o;
+}
+function sugWords(v){
+  clearTimeout(sugWTimer);
+  if(!SUGW_OK||v.length<3){if(SUGW.length){SUGW=[];drawSug();}return;}
+  sugWTimer=setTimeout(async()=>{
+    const n=++sugWReq;
+    try{
+      const r=await fetch(SBU+"/rest/v1/rpc/pb_suggest",{method:"POST",headers:{apikey:SKEY,Authorization:"Bearer "+SKEY,"Content-Type":"application/json"},body:JSON.stringify({p_q:sugRom(v).slice(0,60),p_limit:6})});
+      if(r.status===404){SUGW_OK=false;return;}   /* function न हो तो पुराने सुझाव ही चलें */
+      if(!r.ok||n!==sugWReq)return;
+      const d=await r.json();if(!Array.isArray(d))return;
+      const low=v.toLowerCase();
+      SUGW=d.filter(x=>x&&x.label&&String(x.label).toLowerCase()!==low).slice(0,4);drawSug();
+    }catch(e){}
+  },250);
+}
 function drawSug(){
   const v=document.getElementById("q").value.trim().toLowerCase(),box=document.getElementById("sug"),en=PB.lang&&PB.lang()!=="hi";
   if(!v){box.className="sug";box.innerHTML="";return;}
   const m=ALL.filter(x=>x.k.split(/[\s&]+/).some(w=>w.startsWith(v))).slice(0,SHOPS.length?4:8);
   let h="";
+  if(SUGW.length)h+='<div class="sh">'+(en?"DID YOU MEAN":"क्या आपका मतलब")+'</div>'+SUGW.map(x=>`<a data-n="${esc(x.label)}"><i>🔍</i>${esc(x.label)}</a>`).join("");
   if(SHOPS.length)h+='<div class="sh">'+(en?"SHOPS":"दुकानें")+'</div>'+SHOPS.map(b=>{const d=sugKm(b),lg=SUG_LOGO.test(b.logo_url||"");
     return `<a class="shop" data-slug="${esc(b.slug)}">${lg?`<img class="slg" src="${esc(b.logo_url)}" alt="" loading="lazy">`:'<i>🏪</i>'}<span><b>${esc(b.name)}</b><em>📍 ${esc(b.address||"")}</em></span>${d?`<small class="km">${d}</small>`:""}</a>`;}).join("");
   if(m.length)h+=(SHOPS.length?'<div class="sh">'+(en?"CATEGORIES":"कैटेगरी")+'</div>':"")+m.map(x=>`<a data-n="${esc(x.n)}"><i>${x.e}</i>${esc(x.n)}<small>${x.n===x.cat?"":esc(x.cat)}</small></a>`).join("");
@@ -764,7 +793,8 @@ function showSug(){
   const v=document.getElementById("q").value.trim();
   clearTimeout(shopTimer);
   const clean=v.replace(/[*,()%\\:."']/g," ").trim();
-  if(clean.length<3){SHOPS=[];drawSug();return;}
+  if(clean.length<3){SHOPS=[];SUGW=[];drawSug();return;}
+  sugWords(clean);
   drawSug();
   shopTimer=setTimeout(async()=>{
     const n=++shopReq,city=document.getElementById("city").value;
