@@ -187,8 +187,9 @@ function terms(q,keepEmpty){
     return {w,alt,pin:/^\d{6}$/.test(w),num:/^\d+$/.test(w)};
   });
 }
+var ALTOK=true;   /* alt_names (दूसरे नाम) भी खोज में; permission न हो तो अपने-आप बंद */
 function group(t){
-  const f=t.num?["address","description"]:["name","category","description","address"];
+  const f=t.num?["address","description"]:(ALTOK?["name","alt_names","category","description","address"]:["name","category","description","address"]);
   const parts=[];t.alt.forEach(a=>f.forEach(c=>parts.push(c+".ilike.*"+a+"*")));
   return "or("+parts.join(",")+")";
 }
@@ -265,19 +266,25 @@ function deva2rom(t){   /* देवनागरी → रोमन (खोज 
 var LOOSEMISS="";
 async function fuzzyRows(q,city,cid,have,loose){
   try{
-    let qq=String(q||"");if(/[\u0A80-\u0AFF]/.test(qq))qq=qq.replace(/[\u0A80-\u0AFF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));   /* ગુજરાતી → देवनागरी (दोनों लिपियों का क्रम एक जैसा है) */
-    if(/[\u0900-\u097F]/.test(qq))qq=deva2rom(qq);
-    qq=qq.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");
-    if(qq.replace(/[^a-z0-9]/gi,"").length<3)return [];
-    const r=await fetch(SB+"/rest/v1/rpc/pb_search_fuzzy",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),
-      body:JSON.stringify(loose?{p_q:qq,p_limit:12,p_loose:true}:{p_q:qq,p_city:city||null,p_city_id:cid?String(cid):null,p_limit:20})});
-    if(!r.ok)return [];const ids=await r.json();if(!Array.isArray(ids)||!ids.length)return [];
+    let raw=String(q||"").trim(),qq=raw;if(/[\u0A80-\u0AFF]/.test(qq))qq=qq.replace(/[\u0A80-\u0AFF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));   /* ગુજરાતી → देवनागरी (दोनों लिपियों का क्रम एक जैसा) */
+    const nonLatin=/[\u0900-\u097F]/.test(qq);
+    const clean=t=>t.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");
+    const variants=[];if(nonLatin){const o=clean(qq);if(o.length>=2)variants.push(o);}   /* असली देवनागरी रूप भी (alt_names में हिंदी नाम हो तो सीधे मिले) */
+    const rom=clean(nonLatin?deva2rom(qq):qq);if(rom.replace(/[^a-z0-9]/gi,"").length>=3)variants.push(rom);
+    if(!variants.length)return [];
+    let ids=null;
+    for(const v of variants){
+      const r=await fetch(SB+"/rest/v1/rpc/pb_search_fuzzy",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),
+        body:JSON.stringify(loose?{p_q:v,p_limit:12,p_loose:true}:{p_q:v,p_city:city||null,p_city_id:cid?String(cid):null,p_limit:20})});
+      if(!r.ok)continue;const d=await r.json();if(Array.isArray(d)&&d.length){ids=d;break;}
+    }
+    if(!ids)return [];
     const seen=new Set((have||[]).map(b=>b.slug)),want=ids.filter(x=>!seen.has(x.slug));if(!want.length)return [];
     const u=new URL(SB+"/rest/v1/businesses");
     u.searchParams.set("select","name,slug,address,description,category,rating,review_count,is_verified,latitude,longitude");
     u.searchParams.set("is_active","eq.true");u.searchParams.set("deleted_at","is.null");
     u.searchParams.set("slug","in.("+want.map(x=>'"'+String(x.slug).replace(/["\\]/g,"")+'"').join(",")+")");
-    if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
+    if(CATSEL&&(CATMAN||WORKSEL))u.searchParams.set("category","eq."+CATSEL);
     const r2=await fetch(u,{headers:H});const rows=await r2.json();if(!r2.ok||!Array.isArray(rows))return [];
     if(loose){const ms=[];ids.forEach(x=>{String(x.missed||"").split(" ").forEach(w=>{if(w&&!ms.includes(w))ms.push(w);});});LOOSEMISS=ms.slice(0,3).join(", ");}
     const sc={};want.forEach(x=>sc[x.slug]=x.score);
@@ -400,7 +407,7 @@ async function gatherRows(q,city,ts,n){
   const gs=ts.map(group);
   const cid=city&&(window.PB_CITY_IDS||{})[city.toLowerCase()];                 /* Approve हुआ शहर: city_id से भी (पते में शहर न लिखा हो तब भी मिले) */
   if(city)gs.push("or("+(cid?"city_id.eq."+cid+",":"")+"address.ilike.*"+city+"*,description.ilike.*"+city+"*)");
-  if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
+  if(CATSEL&&(CATMAN||WORKSEL))u.searchParams.set("category","eq."+CATSEL);   /* अपने-आप चुनी category सिर्फ़ ऊपर रखती है, दुकान छिपाती नहीं (Hotel Sagar Restaurant) */
   if(WORKSEL)u.searchParams.append("description","ilike.*Subcategory: "+WORKSEL.replace(/[*,()]/g," ")+"*");
   if(gs.length)u.searchParams.set("and","("+gs.join(",")+")");   /* हमेशा and=(or(..),..) — कोष्ठक-रहित or= पर "column oraddress does not exist" error आता था */
   let r=await fetch(u,{headers:H}),data=await r.json().catch(()=>null);
@@ -411,9 +418,11 @@ async function gatherRows(q,city,ts,n){
     r=await fetch(u2,{headers:H});data=await r.json().catch(()=>null);
   }
   if(n!==reqN)return null;
+  if(!r.ok&&ALTOK&&/alt_names|permission denied/i.test(String(data&&data.message||""))){ALTOK=false;return gatherRows(q,city,ts,n);}
   if(!r.ok||!Array.isArray(data))throw new Error((data&&data.message)||("HTTP "+r.status));
   const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
   let rows=data.map(b=>(b._s=score(b,ts),b)).sort((a,b)=>b._s-a._s||(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
+  if(CATSEL&&!(CATMAN||WORKSEL))rows=rows.filter(b=>b.category===CATSEL).concat(rows.filter(b=>b.category!==CATSEL));
   rows=await premiumFirst(rows);if(n!==reqN)return null;
   FZN=0;LOOSEMISS="";
   if(rows.length<3&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows);if(n!==reqN)return null;if(ex.length){FZN=ex.length;rows=rows.concat(ex);}}
