@@ -73,7 +73,8 @@
         if (dup === true) { MSG[s] = "🚫 " + T("यह फ़ोटो किसी दूसरी दुकान की है। कृपया अपनी खुद की फ़ोटो डालें।", "This photo belongs to another shop. Please upload your own photo."); draw(); continue; }
         MSG[s] = T("Upload हो रहा है…", "Uploading…"); draw();
         ME = await PBA.session();
-        var blob = k === "logo" ? await squareImage(file) : k === "cover" ? await coverImage(file) : k === "front" ? await bannerImage(file) : k === "open" ? await packImg(file, 1080, 1920, 150000, [1, .8, .64]) : await resizeImage(file, 1000);
+        var ef = await enhance(file);
+        var blob = k === "logo" ? await squareImage(ef) : k === "cover" ? await coverImage(ef) : k === "front" ? await bannerImage(ef) : k === "open" ? await packImg(ef, 1080, 1920, 150000, [1, .8, .64]) : await resizeImage(ef, 1000);
         var ext = blob.type === "image/webp" ? "webp" : "jpg", pre = k === "logo" ? "logo-" : k === "cover" ? "cover-" : k === "front" ? "banner-" : k === "open" ? "open-" : "photo-";
         var path = encodeURIComponent(s) + "/" + pre + Date.now() + "-" + f + "." + ext;
         var r = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
@@ -133,6 +134,42 @@
       var m = String(er && er.message || "");
       MSG[s] = /rate/.test(m) ? T("आज बहुत बार बदला। कल कोशिश करें।", "Too many changes today. Try tomorrow.") : /premium|not in plan/.test(m) ? T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") : T("नहीं हो सका। दोबारा कोशिश करें।", "Could not do it. Try again."); draw();
     }
+  }
+
+
+  /* ✨ Auto-सुधार: रोशनी / रंग / तीखापन थोड़ा ठीक (फ़ोटो की चीज़ें नहीं बदलतीं)। कुछ गड़बड़ हो तो असली फ़ोटो ही लौटती है */
+  function enhance(file) {
+    return new Promise(function (res) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onerror = function () { URL.revokeObjectURL(u); res(file); };
+      im.onload = function () {
+        try {
+          var k = Math.min(1, 1600 / Math.max(im.width, im.height)), w = Math.max(1, Math.round(im.width * k)), h = Math.max(1, Math.round(im.height * k));
+          var c = document.createElement("canvas"); c.width = w; c.height = h; var x = c.getContext("2d");
+          x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h); URL.revokeObjectURL(u);
+          var id = x.getImageData(0, 0, w, h), d = id.data, n = w * h, hist = new Array(256).fill(0), i, L;
+          for (i = 0; i < n; i++) { L = (d[i * 4] * 299 + d[i * 4 + 1] * 587 + d[i * 4 + 2] * 114) / 1000 | 0; hist[L]++; }
+          var acc = 0, lo = 0, hi = 255; for (i = 0; i < 256; i++) { acc += hist[i]; if (acc >= n * .01) { lo = i; break; } }
+          acc = 0; for (i = 255; i >= 0; i--) { acc += hist[i]; if (acc >= n * .01) { hi = i; break; } }
+          lo = Math.min(lo, 40); hi = Math.max(hi, 215);                    /* ज़्यादा खींचना नहीं */
+          var sc = 255 / (hi - lo), sum = 0;
+          for (i = 0; i < 256; i++) sum += hist[i] * Math.min(255, Math.max(0, (i - lo) * sc));
+          var mean = Math.max(20, Math.min(235, sum / n)), g = Math.log(.48) / Math.log(mean / 255); g = Math.max(.8, Math.min(1.25, g));
+          var lut = new Uint8ClampedArray(256); for (i = 0; i < 256; i++) lut[i] = 255 * Math.pow(Math.min(255, Math.max(0, (i - lo) * sc)) / 255, g);
+          for (i = 0; i < n; i++) {
+            var r = lut[d[i * 4]], gg = lut[d[i * 4 + 1]], b = lut[d[i * 4 + 2]], y = .299 * r + .587 * gg + .114 * b;
+            d[i * 4] = y + (r - y) * 1.08; d[i * 4 + 1] = y + (gg - y) * 1.08; d[i * 4 + 2] = y + (b - y) * 1.08;
+          }
+          /* हल्का तीखापन (unsharp): असली रंग वही, सिर्फ़ किनारे साफ़ */
+          var src = new Uint8ClampedArray(d), a = .22, row = w * 4, ch, p;
+          for (var yy = 1; yy < h - 1; yy++) for (var xx = 1; xx < w - 1; xx++) { p = (yy * w + xx) * 4;
+            for (ch = 0; ch < 3; ch++) d[p + ch] = src[p + ch] * (1 + 4 * a) - a * (src[p + ch - 4] + src[p + ch + 4] + src[p + ch - row] + src[p + ch + row]); }
+          x.putImageData(id, 0, 0);
+          c.toBlob(function (bl) { res(bl ? new File([bl], "e.webp", { type: bl.type }) : file); }, "image/webp", .95);
+        } catch (e) { try { URL.revokeObjectURL(u); } catch (e2) {} res(file); }
+      };
+      im.src = u;
+    });
   }
 
   function light(i, k, n) {
