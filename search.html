@@ -317,11 +317,11 @@ async function suggestWords(q,limit){
     const low=t.toLowerCase();return d.map(x=>x&&x.label).filter(x=>x&&String(x).toLowerCase()!==low).slice(0,limit||6);
   }catch(e){return [];}
 }
-let reqN=0;
+let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
-  let det=null;try{det=await detectCity(q);}catch(e){}
+  let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
   if(det){q=det.rest.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");city=det.city;$("city").value=det.city;}
   else if(city){try{const fc=await fixCityBox(city);if(fc&&fc!==city){city=fc;$("city").value=fc;}}catch(e){}}
   if(push){const u=new URL(location.href);u.searchParams.set("q",q0);city?u.searchParams.set("city",city):u.searchParams.delete("city");history.replaceState(null,"",u);}
@@ -344,9 +344,15 @@ async function run(push){
   if(WORKSEL)u.searchParams.append("description","ilike.*Subcategory: "+WORKSEL.replace(/[*,()]/g," ")+"*");
   if(gs.length===1)u.searchParams.set("or",gs[0].slice(3,-1));else if(gs.length>1)u.searchParams.set("and","("+gs.join(",")+")");
   try{
-    const r=await fetch(u,{headers:H});const data=await r.json();
+    let r=await fetch(u,{headers:H}),data=await r.json().catch(()=>null);
+    if(!r.ok&&cid&&city){   /* शहर-id वाली खोज फेल हुई तो सिर्फ़ पते/विवरण में शहर के नाम से दोबारा */
+      const u2=new URL(u);const o=u2.searchParams.get("or"),a2=u2.searchParams.get("and");
+      const fx=x=>x&&x.split("city_id.eq."+cid+",").join("");
+      if(o!=null)u2.searchParams.set("or",fx(o));if(a2!=null)u2.searchParams.set("and",fx(a2));
+      r=await fetch(u2,{headers:H});data=await r.json().catch(()=>null);
+    }
     if(n!==reqN)return;
-    if(!r.ok)throw new Error(data&&data.message||"x");
+    if(!r.ok||!Array.isArray(data))throw new Error((data&&data.message)||("HTTP "+r.status));
     const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
     let rows=data.map(b=>(b._s=score(b,ts),b)).sort((a,b)=>b._s-a._s||(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
     rows=await premiumFirst(rows);if(n!==reqN)return;
@@ -356,7 +362,7 @@ async function run(push){
     if(!rows.length&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows,true);if(n!==reqN)return;if(ex.length){FZN=ex.length;rows=ex;}else LOOSEMISS="";}   /* Google जैसा: सारे शब्द न मिलें तो जितने मिलें उनसे */
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
     render(rows,q,city);
-  }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p>';}}
+  }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p><p class="note" style="font-size:11px;opacity:.6">'+esc(String(e&&e.message||e).slice(0,160))+'</p>';}}
 }
 /* 💼 नौकरी वाली दुकानें — पास वाली पहले (location की इजाज़त पहले से हो तो) */
 const JOBQ=/(^|\s)(hiring|hire|vacancy|vacancies|job|jobs|naukri|nokri|नौकरी|नौकरियाँ|नौकरियां|भर्ती|वैकेंसी|जॉब)(\s|$)/i;
@@ -434,7 +440,9 @@ if(!P.get("city")){try{const c0=localStorage.getItem("pb-city");if(c0)$("city").
   const g=document.getElementById("gpsBtn"),inp=$("city");if(!g||!inp)return;
   const en=()=>PB.lang&&PB.lang()!=="hi";
   const LL={"Gandhidham":[23.0753,70.1337],"Adipur":[23.0717,70.0886],"Anjar":[23.1132,70.0283],"Bhuj":[23.2420,69.6669],"Mundra":[22.8390,69.7210],"Mandvi":[22.8324,69.3532],"Nakhatrana":[23.3474,69.2645],"Bhachau":[23.2964,70.3437],"Rapar":[23.5721,70.6432],"Naliya":[23.2606,68.8269],"Dayapar":[23.6380,68.9010]};
-  function done(c){if(!c)return;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}run(true);}
+  inp.addEventListener("input",()=>{CITYUSER=true;});
+  $("q").addEventListener("input",()=>{CITYUSER=false;});
+  function done(c){if(!c)return;CITYUSER=true;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}run(true);}
   function note(t){let d=document.getElementById("locMsg");if(!d){d=document.createElement("div");d.id="locMsg";d.style.cssText="position:fixed;left:12px;right:12px;top:70px;z-index:99;background:#fff4e5;color:#7a3b00;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;font-size:13.5px";document.body.appendChild(d);}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
   g.addEventListener("click",e=>{e.preventDefault();
     if(!navigator.geolocation){note(en()?"Location not available":"Location नहीं मिली");return;}
