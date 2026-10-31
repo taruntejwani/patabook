@@ -1,4 +1,4 @@
-/* PataBook — My Shop → Gallery: 4 फ़ोल्डर (Logo · Photos · Banner · Shop Front Photo)
+/* PataBook — My Shop → Gallery: 5 फ़ोल्डर (Logo · Profile Banner · Gallery · Home Ad · Opening Photo)
    हर फ़ोल्डर में ＋ से फ़ोटो जुड़ती है; फ़ोटो पर tap → बड़ी होकर Delete / Set (Photos में दिखाओ-छिपाओ).
    कुल सीमा = plan की "photos" संख्या (सारे फ़ोल्डर मिलाकर, Admin → Plans).
    mybusiness.html की चीज़ें इस्तेमाल होती हैं: rpc, esc, L, $, ME, PBA, SB, KEY, ROWS, draw, PH, PREM, PHOTOS, LOGOS, COVER, BAN,
@@ -6,18 +6,20 @@
 (function () {
   var LIB = {}, LOAD = {}, GO = {}, MSG = {};
   var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
-  var KINDS = [["logo", "🖼️", "Logo", "Logo"], ["photo", "📷", "Photos", "फ़ोटो"], ["cover", "🌄", "Banner", "Banner"], ["front", "🏪", "Shop Front Photo", "दुकान के सामने की फ़ोटो"]];
+  var KINDS = [["logo", "🖼️", "Logo", "Logo"], ["cover", "🌄", "Profile Banner", "Profile Banner"], ["photo", "📷", "Gallery", "Gallery"], ["front", "📢", "Home Ad", "Home Ad"], ["open", "🚪", "Opening Photo", "Opening Photo"]];
+  var OPEN = {};
   function en() { return L() === "en"; }
   function T(h, e) { return en() ? e : h; }
   function paid(b) { return !!(PREM && PREM[b.slug] && PREM[b.slug].until); }
-  function can(b, k) { return k === "logo" ? PH(b, "logo") : k === "photo" ? PH(b, "photos") : k === "front" ? PH(b, "banner") : paid(b); }
+  function can(b, k) { return k === "logo" ? PH(b, "logo") : k === "photo" ? PH(b, "photos") : k === "front" || k === "open" ? PH(b, "banner") : paid(b); }
   function lim(b) { return (window.PBPlan && PBPlan.lim(b.slug, "photos")) || 0; }
   function listOf(b, k) { return k === "photo" ? (PHOTOS[b.slug] || []) : (LIB[b.slug] || []).filter(function (x) { return x.kind === k; }); }
   function total(b) { return (PHOTOS[b.slug] || []).length + (LIB[b.slug] || []).length; }
-  function active(b, k) { return k === "logo" ? (LOGOS[b.slug] || "") : k === "cover" ? (COVER[b.slug] || "") : k === "front" ? ((BAN[b.slug] && BAN[b.slug].url) || "") : ""; }
+  function active(b, k) { return k === "logo" ? (LOGOS[b.slug] || "") : k === "cover" ? (COVER[b.slug] || "") : k === "front" ? ((BAN[b.slug] && BAN[b.slug].url) || "") : k === "open" ? (OPEN[b.slug] || "") : ""; }
   async function load(s) {
     try { LIB[s] = (await rpc("pb_lib_my", { p_slug: s })) || []; } catch (e) { LIB[s] = LIB[s] || []; }
     try { PHOTOS[s] = (await rpc("pb_my_photos", { p_slug: s })) || []; } catch (e) {}
+    try { var ou = await rpc("pb_open_get", { p_slug: s }); OPEN[s] = typeof ou === "string" ? ou : ""; } catch (e) {}
     draw();
   }
   function reload(b) { LOAD[b.slug] = 1; return load(b.slug); }
@@ -34,19 +36,26 @@
         (ok ? '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>' : '') + '</div>';
       var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") + '</small></div>'
         : arr.length ? '<div class="gg3">' + arr.map(function (x, n) {
-          var on = k !== "photo" && act && x.url === act;
-          return '<button type="button" class="gt' + (x.hidden ? ' hid' : '') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (on ? '<span class="gok">✔</span>' : '') + (x.hidden ? '<span class="ghd">' + T("छिपी", "hidden") + '</span>' : '') + '</button>';
+          var on = k === "photo" ? !x.hidden : !!(act && x.url === act);
+          return '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy"><span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span></button>';
         }).join("") + '</div>'
         : '<div class="gbd"><small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>' + sizeNote(k) + '</div>';
-      if (k === "front" && ok && PDAYS[s] && PDAYS[s].quota) body = '<div class="bb" style="margin:8px 2px"><button type="button" class="sd" data-pdt="' + i + '">📅 ' + T("Date चुनें", "Set Date") + '</button></div>' + (PDOPEN[s] ? posterDays(b, i) : "") + body;
-      return bar + msg + body;
+      var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो public को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
+      return bar + msg + (arr.length ? sizeNote(k) : "") + hint + body;
     }
     return msg + '<div class="gl">' + KINDS.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
-    }).join("") + '</div>';
+    }).join("") + '</div>' + (function () {
+      var parts = KINDS.map(function (K) { return esc(K[2]) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
+      return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + total(b) + '</b> / ' + (lim(b) || 100) + '</div></div>';
+    })();
   };
   function sizeNote(k) {
-    var t = k === "logo" ? T("चौकोर फ़ोटो सबसे अच्छी (400×400)।", "Square works best (400×400).") : k === "cover" ? T("चौड़ी फ़ोटो 16:9 (1200×675)।", "Wide 16:9 (1200×675).") : k === "front" ? T("पेज खुलते ही पूरी screen पर कुछ सेकंड दिखती है (1200×600)।", "Shown full-screen for a few seconds when your page opens (1200×600).") : T("दुकान / काम / टीम की फ़ोटो। जो ‘दिखाओ’ पर हैं वही ग्राहकों को दिखती हैं।", "Shop, work or team photos. Only the ‘shown’ ones are visible to customers.");
+    var t = k === "logo" ? T("चौकोर फ़ोटो (400×400)। नाम के पास दिखता है।", "Square (400×400). Shown beside your name.")
+      : k === "cover" ? T("आड़ी फ़ोटो 16:9 (1200×675)। नाम के पीछे सबसे ऊपर दिखती है।", "Wide 16:9 (1200×675). Shown behind your name at the top.")
+      : k === "photo" ? T("कोई भी फ़ोटो (लंबा किनारा 1000 तक)। shop पेज पर नीचे दिखती है।", "Any photo (long side up to 1000). Shown on your shop page.")
+      : k === "front" ? T("आड़ी फ़ोटो 2:1 (1200×600)। Home पेज पर नीचे चलने वाला poster।", "Wide 2:1 (1200×600). The poster that slides on the Home page.")
+      : T("खड़ी फ़ोटो 9:16 (1080×1920)। link खुलते ही पूरी screen पर कुछ सेकंड दिखती है।", "Tall 9:16 (1080×1920). Shown full-screen for a few seconds when your link opens.");
     return '<div class="szn">📐 ' + t + '</div>';
   }
 
@@ -64,8 +73,8 @@
         if (dup === true) { MSG[s] = "🚫 " + T("यह फ़ोटो किसी दूसरी दुकान की है। कृपया अपनी खुद की फ़ोटो डालें।", "This photo belongs to another shop. Please upload your own photo."); draw(); continue; }
         MSG[s] = T("Upload हो रहा है…", "Uploading…"); draw();
         ME = await PBA.session();
-        var blob = k === "logo" ? await squareImage(file) : k === "cover" ? await coverImage(file) : k === "front" ? await bannerImage(file) : await resizeImage(file, 1000);
-        var ext = blob.type === "image/webp" ? "webp" : "jpg", pre = k === "logo" ? "logo-" : k === "cover" ? "cover-" : k === "front" ? "banner-" : "photo-";
+        var blob = k === "logo" ? await squareImage(file) : k === "cover" ? await coverImage(file) : k === "front" ? await bannerImage(file) : k === "open" ? await packImg(file, 1080, 1920, 150000, [1, .8, .64]) : await resizeImage(file, 1000);
+        var ext = blob.type === "image/webp" ? "webp" : "jpg", pre = k === "logo" ? "logo-" : k === "cover" ? "cover-" : k === "front" ? "banner-" : k === "open" ? "open-" : "photo-";
         var path = encodeURIComponent(s) + "/" + pre + Date.now() + "-" + f + "." + ext;
         var r = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
         if (!r.ok) throw new Error("upload");
@@ -91,6 +100,7 @@
     if (k === "logo") { await rpc("pb_set_logo", { p_slug: s, p_url: url || null }); LOGOS[s] = url || ""; }
     else if (k === "cover") { await rpc("pb_profile_banner_set", { p_slug: s, p_url: url || "" }); COVER[s] = url || ""; }
     else if (k === "front") { if (url) { await rpc("pb_banner_set", { p_slug: s, p_url: url }); BAN[s] = await rpc("pb_my_banner", { p_slug: s }); } else { await rpc("pb_banner_remove", { p_slug: s }); BAN[s] = null; } }
+    else if (k === "open") { await rpc("pb_open_set", { p_slug: s, p_url: url || "" }); OPEN[s] = url || ""; }
   }
 
 
@@ -110,6 +120,19 @@
       };
       im.onerror = function () { URL.revokeObjectURL(u); res(null); }; im.src = u;
     });
+  }
+
+  async function tick(i, k, n) {
+    var b = ROWS[i], s = b.slug, x = listOf(b, k)[n]; if (!x) return;
+    try {
+      ME = await PBA.session();
+      if (k === "photo") await rpc("pb_photo_hide", { p_slug: s, p_id: x.id, p_hidden: !x.hidden });
+      else await setActive(b, k, active(b, k) === x.url ? "" : x.url);
+      MSG[s] = ""; await reload(b);
+    } catch (er) {
+      var m = String(er && er.message || "");
+      MSG[s] = /rate/.test(m) ? T("आज बहुत बार बदला। कल कोशिश करें।", "Too many changes today. Try tomorrow.") : /premium|not in plan/.test(m) ? T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") : T("नहीं हो सका। दोबारा कोशिश करें।", "Could not do it. Try again."); draw();
+    }
   }
 
   function light(i, k, n) {
@@ -152,6 +175,7 @@
   document.getElementById("list").addEventListener("click", function (e) {
     var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
+    var gk = e.target.closest("[data-gk]"); if (gk) { e.stopPropagation(); tick(+gk.dataset.i, gk.dataset.gk, +gk.dataset.n); return; }
     var gv = e.target.closest("[data-gv]"); if (gv) { light(+gv.dataset.i, gv.dataset.gv, +gv.dataset.n); return; }
   });
   document.getElementById("list").addEventListener("change", function (e) {

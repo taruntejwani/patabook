@@ -426,10 +426,10 @@ const L=(hi,en)=>EN()?en:hi;
     im.onload=go;im.onerror=x;im.src=src;setTimeout(go,2000);
     e.onclick=x;document.body.appendChild(e);};
   if(pk){show(PST[pk]);return;}
-  /* हर दुकान: आज उसका approved poster चालू हो तो वही पहले */
-  const RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\/[^/]+\/banner-/;
-  fetch(SB+"/rest/v1/rpc/pb_banners_today",{method:"POST",headers:H,body:"{}"}).then(r=>r.ok?r.json():[]).then(j=>{
-    const m=(j||[]).find(b=>b&&b.slug===slug&&RX.test(b.url||""));if(m)show(m.url);}).catch(()=>{});
+  /* हर दुकान: उसकी Opening Photo चालू हो तो वही पहले (तारीख़ का कोई system नहीं) */
+  const RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\/[^/]+\/open-/;
+  fetch(SB+"/rest/v1/rpc/pb_open_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():null).then(u=>{
+    if(typeof u==="string"&&RX.test(u))show(u);}).catch(()=>{});
 }catch(_){}})();
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 const IMG_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
