@@ -1154,7 +1154,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
 })();
 </script>
 <script>
-/* 🏀 P वाला पिन: उँगली लगते ही गेंद की तरह नीचे गिरता है, 2 बार उछलता है, फिर अपनी जगह लौट आता है (पन्ना सामान्य चलता रहता है) */
+/* 🎈 P वाला पिन: उँगली लगते ही हवा भरे गुब्बारे जैसा फूलता है, नीचे गिरकर 2 बार उछलता है, हवा निकलकर पिचकता है, फिर अपनी जगह लौट आता है (पन्ना सामान्य चलता रहता है) */
 (function(){
   var pin=document.querySelector(".art .pin");if(!pin)return;
   var busy=false,RM=false;try{RM=matchMedia("(prefers-reduced-motion:reduce)").matches;}catch(e){}
@@ -1171,19 +1171,32 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     c.style.cssText="position:fixed;left:"+r.left+"px;top:"+r.top+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;z-index:7000;pointer-events:none;transform-origin:50% 100%;will-change:transform;filter:drop-shadow(0 6px 6px rgba(11,47,115,.25))";
     document.body.appendChild(c);pin.style.visibility="hidden";
     var H=Math.max(40,innerHeight-r.bottom-4);        /* ज़मीन = स्क्रीन का निचला किनारा */
-    var T=function(y,sx,sy){return "translateY("+y+"px) scale("+sx+","+sy+")";};
-    var a=c.animate([
-      {offset:0,transform:T(0,1,1),easing:"cubic-bezier(.5,0,.9,.55)"},
-      {offset:.30,transform:T(H,1.14,.84),easing:"cubic-bezier(.2,.6,.4,1)"},
-      {offset:.33,transform:T(H,1,1),easing:"cubic-bezier(.2,.6,.4,1)"},
-      {offset:.47,transform:T(H*.64,1,1),easing:"cubic-bezier(.5,0,.9,.55)"},
-      {offset:.61,transform:T(H,1.1,.88)},
-      {offset:.64,transform:T(H,1,1),easing:"cubic-bezier(.2,.6,.4,1)"},
-      {offset:.72,transform:T(H*.89,1,1),easing:"cubic-bezier(.5,0,.9,.55)"},
-      {offset:.80,transform:T(H,1.05,.94)},
-      {offset:.86,transform:T(H,1,1)},
-      {offset:1,transform:T(H,1,1)}
-    ],{duration:1900,fill:"forwards"});
+    var T=function(y,sx,sy,rot){return "translateY("+y+"px) rotate("+(rot||0)+"deg) scale("+sx+","+sy+")";};
+    var IN="cubic-bezier(.5,0,.9,.55)",OUT="cubic-bezier(.2,.6,.4,1)",F=1.9;   /* F = हवा भरकर कितना फूलेगा */
+    var a=c.animate([                                 /* 1) हवा भरना (गुब्बारे जैसा फूलना) */
+      {offset:0,transform:T(0,1,1),easing:OUT},
+      {offset:.05,transform:T(-6,1.3,1.12),easing:OUT},
+      {offset:.09,transform:T(-10,1.62,1.75),easing:OUT},
+      {offset:.14,transform:T(-14,F,F),easing:OUT},
+      {offset:.17,transform:T(-14,F-.06,F+.1),easing:OUT},
+      {offset:.22,transform:T(-14,F,F),easing:IN},
+                                                      /* 2) फूला हुआ नीचे गिरे + दो उछाल */
+      {offset:.40,transform:T(H,F+.25,F-.3),easing:OUT},
+      {offset:.43,transform:T(H,F,F),easing:OUT},
+      {offset:.52,transform:T(H*.62,F,F),easing:IN},
+      {offset:.62,transform:T(H,F+.2,F-.25),easing:OUT},
+      {offset:.65,transform:T(H,F,F),easing:OUT},
+      {offset:.71,transform:T(H*.86,F,F),easing:IN},
+      {offset:.77,transform:T(H,F+.1,F-.15)},
+      {offset:.79,transform:T(H,F,F)},
+                                                      /* 3) हवा निकलना: फिस्स, लहराते हुए पिचकना */
+      {offset:.83,transform:T(H,1.55,1.3,-9)},
+      {offset:.87,transform:T(H,1.2,.95,8)},
+      {offset:.90,transform:T(H,.9,.78,-5)},
+      {offset:.93,transform:T(H,.72,.6,3)},
+      {offset:.97,transform:T(H,1,1,0)},
+      {offset:1,transform:T(H,1,1,0)}
+    ],{duration:3600,fill:"forwards"});
     function done(){
       var r2=pin.getBoundingClientRect(),dy=H-(r2.top-r.top),dx=r2.left-r.left;   /* लौटने की जगह दोबारा नापो (स्क्रॉल हुआ हो तो) */
       var b=c.animate([{transform:T(H,1,1)},{transform:"translate("+dx+"px,"+(r2.top-r.top)+"px) scale(1,1)"}],{duration:650,easing:"cubic-bezier(.45,0,.2,1)",fill:"forwards"});
