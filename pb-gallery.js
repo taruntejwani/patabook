@@ -15,6 +15,16 @@
   function lim(b) { return (window.PBPlan && PBPlan.lim(b.slug, "photos")) || 0; }
   function listOf(b, k) { return k === "photo" ? (PHOTOS[b.slug] || []) : (LIB[b.slug] || []).filter(function (x) { return x.kind === k; }); }
   function total(b) { return (PHOTOS[b.slug] || []).length + (LIB[b.slug] || []).length; }
+  /* 🗑️ फ़ोटो हटने पर उसकी फ़ाइल भी Storage से हटाओ (सिर्फ़ इसी दुकान के folder की; गड़बड़ हो तो चुप रहो) */
+  async function purge(slug, url) {
+    try {
+      var m = String(url || "").match(/\/storage\/v1\/object\/public\/shop-logos\/(.+?)(?:\?.*)?$/);
+      if (!m || m[1].indexOf(encodeURIComponent(slug) + "/") !== 0) return;
+      var sess = await PBA.session(); if (!sess || !sess.access_token) return;
+      await fetch(SB + "/storage/v1/object/shop-logos/" + m[1], { method: "DELETE", headers: { apikey: KEY, Authorization: "Bearer " + sess.access_token } });
+    } catch (e) {}
+  }
+  window.pbPurge = purge;
   function active(b, k) { return k === "logo" ? (LOGOS[b.slug] || "") : k === "cover" ? (COVER[b.slug] || "") : k === "front" ? ((BAN[b.slug] && BAN[b.slug].url) || "") : k === "open" ? (OPEN[b.slug] || "") : ""; }
   async function load(s) {
     try { LIB[s] = (await rpc("pb_lib_my", { p_slug: s })) || []; } catch (e) { LIB[s] = LIB[s] || []; }
@@ -196,7 +206,7 @@
       try {
         if (w === "del") {
           if (!confirm(T("यह फ़ोटो हटाएँ?" + (act ? " (यही चालू है — हट जाएगी)" : ""), "Delete this photo?"))) { a.disabled = false; return; }
-          if (k === "photo") await rpc("pb_photo_remove", { p_slug: s, p_id: x.id }); else { await rpc("pb_lib_remove", { p_slug: s, p_id: x.id }); if (act) { if (k === "logo") LOGOS[s] = ""; else if (k === "cover") COVER[s] = ""; else BAN[s] = null; } }
+          if (k === "photo") { await rpc("pb_photo_remove", { p_slug: s, p_id: x.id }); purge(s, x.url); } else { await rpc("pb_lib_remove", { p_slug: s, p_id: x.id }); purge(s, x.url); if (act) { if (k === "logo") LOGOS[s] = ""; else if (k === "cover") COVER[s] = ""; else BAN[s] = null; } }
         } else if (w === "hide") await rpc("pb_photo_hide", { p_slug: s, p_id: x.id, p_hidden: !x.hidden });
         else if (w === "set") await setActive(b, k, x.url);
         else if (w === "unset") await setActive(b, k, "");

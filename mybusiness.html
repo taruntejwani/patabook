@@ -1033,7 +1033,7 @@ $("list").addEventListener("click",async e=>{
     return;}
   const prm=e.target.closest("[data-prm]");
   if(prm){const i=+prm.dataset.i,b=ROWS[i];if(!confirm(L()==="en"?"Remove this photo?":"यह फ़ोटो हटाएँ?"))return;
-    try{await rpc("pb_photo_remove",{p_slug:b.slug,p_id:+prm.dataset.prm});PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}catch(x){}return;}
+    try{const old=(PHOTOS[b.slug]||[]).find(q=>q.id==+prm.dataset.prm);await rpc("pb_photo_remove",{p_slug:b.slug,p_id:+prm.dataset.prm});if(old&&window.pbPurge)pbPurge(b.slug,old.url);PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}catch(x){}return;}
   const prq=e.target.closest("[data-preq]");
   if(prq){const i=+prq.dataset.preq,b=ROWS[i];prq.disabled=true;
     try{ME=await PBA.session();await rpc("pb_owner_premium_request",{p_slug:b.slug,p_note:($("pmn"+i)||{}).value||null});await loadPrem();draw();}
