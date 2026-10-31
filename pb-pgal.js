@@ -7,7 +7,7 @@
   if (window.PBPGal) return;
   var css = document.createElement("style");
   css.textContent =
-    ".pgal{display:grid;grid-template-columns:1fr;gap:14px;max-width:560px}" +
+    ".pgal{display:grid;grid-template-columns:1fr;gap:14px;max-width:560px;margin:0 auto}" +
     ".pgal figure{margin:0;min-width:0;background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(20,40,90,.07)}" +
     ".pgal figure>button{display:block;width:100%;border:0;padding:0;background:#fff;cursor:zoom-in}" +
     ".pgal img{width:100%;height:auto;display:block;pointer-events:none}" +
