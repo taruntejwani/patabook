@@ -578,7 +578,11 @@ function applyLang(){
   }
   function setCityTitle(city){
     const el=document.getElementById("nsT");if(!el)return;
-    el.textContent=(PB.lang&&PB.lang()==="hi")?"कच्छ की दुकानें":"Shops in Kutch";
+    /* जिले का नाम: दिख रही दुकानों के district में सबसे ज़्यादा जो है वही; न मिले तो Kutch */
+    var src=(typeof L!=="undefined"&&Array.isArray(L)&&L.length&&L[0]&&L[0].slug!==undefined)?L:ALL_ROWS,cnt={},best="",bn=0;
+    (src||[]).forEach(function(b){var d=String((b&&b.district)||"").trim();if(!d)return;if(/^(kutch|kachchh|kachh|kuchchh|कच्छ)$/i.test(d))d="Kutch";cnt[d]=(cnt[d]||0)+1;if(cnt[d]>bn){bn=cnt[d];best=d;}});
+    var dn=best||"Kutch",hi=PB.lang&&PB.lang()==="hi";
+    el.textContent=hi?((dn==="Kutch"?"कच्छ":dn)+" की दुकानें"):("Shops in "+dn);
   }
   let ALL_ROWS=[];
   async function load(){
