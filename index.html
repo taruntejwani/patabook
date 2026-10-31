@@ -812,6 +812,16 @@ function showSug(){
   },250);
 }
 document.getElementById("q").addEventListener("input",showSug);
+/* 📱 keyboard खुलते ही search-box ऊपर आए (सुझाव keyboard के पीछे न छुपें) */
+(function(){
+  const q=document.getElementById("q");if(!q)return;
+  q.addEventListener("focus",()=>{
+    if(!window.matchMedia("(max-width:820px)").matches)return;
+    document.body.style.paddingBottom="55vh";
+    setTimeout(()=>{try{const b=q.closest("form,.search,label")||q,r=b.getBoundingClientRect();window.scrollTo({top:window.scrollY+r.top-10,behavior:"smooth"});}catch(e){}},320);
+  });
+  q.addEventListener("blur",()=>setTimeout(()=>{document.body.style.paddingBottom="";},250));
+})();
 document.getElementById("sug").addEventListener("click",e=>{const a=e.target.closest("a");if(a&&a.dataset.slug){location.href="business.html?slug="+encodeURIComponent(a.dataset.slug);return;}if(a){document.getElementById("q").value=a.dataset.n;showSug();document.getElementById("sug").className="sug";searchNow();}});
 document.getElementById("closeBtn").onclick=()=>openMenu(false);
 document.getElementById("scrim").onclick=()=>openMenu(false);
