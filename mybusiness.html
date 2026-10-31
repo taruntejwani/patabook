@@ -884,7 +884,7 @@ function settingsView(en){
       '<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"Preview profile":"प्रोफ़ाइल Preview")+'</a>'+
       '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+'</div>'+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
-      '<div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
+      '<div class="cats">'+C.filter(c=>!/^(photo|rep|nt)$/.test(c[0])).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
   }
   let h='<div class="setbar"><button type="button" data-setback="list">‹ '+nm+'</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
   if(cur[0]==="acct")return h+delShopBtns(en,i)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
