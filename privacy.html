@@ -62,7 +62,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <div data-l="hi">
 <h1>गोपनीयता नीति (Privacy Policy)</h1>
 <div class="upd">अंतिम अपडेट: <span data-s="updated"></span></div>
-<p>PataBook (www.PataBook.in) एक लोकल बिज़नेस डायरेक्टरी है। यह नीति बताती है कि हम कौन-सी जानकारी लेते हैं, क्यों लेते हैं और उसे कैसे सुरक्षित रखते हैं। यह भारत के डिजिटल व्यक्तिगत डेटा संरक्षण अधिनियम, 2023 और IT नियमों को ध्यान में रखकर बनाई गई है।</p>
+<p>PataBook (www.PataBook.in) एक Digital Business Directory है। यह नीति बताती है कि हम कौन-सी जानकारी लेते हैं, क्यों लेते हैं और उसे कैसे सुरक्षित रखते हैं। यह भारत के डिजिटल व्यक्तिगत डेटा संरक्षण अधिनियम, 2023 और IT नियमों को ध्यान में रखकर बनाई गई है।</p>
 <h2>1. हम कौन-सी जानकारी लेते हैं</h2>
 <ul>
 <li><b>दुकान जोड़ने वाले से:</b> दुकान का नाम, मालिक का नाम, मोबाइल/WhatsApp नंबर, पता, शहर, कैटेगरी, सेवाएँ और (अगर आप दें) दुकान की मैप location।</li>
@@ -95,6 +95,8 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <p>नौकरी ढूँढने वाले से सिर्फ मोबाइल नंबर (OTP verification के लिए) लिया जाता है, और यह गिना जाता है कि उसने किस दिन किन vacancies के लिए संपर्क किया (रोज़ 5 की सीमा के लिए)। उम्मीदवार का नंबर दुकानदार को हम नहीं देते — संपर्क उम्मीदवार खुद Call/WhatsApp से करता है।</p>
 <h2>2B. दुकान की शिकायत (Report)</h2>
 <p>कोई भी व्यक्ति दुकान के page पर "🚩 शिकायत करें" से गलत, नकली या आपत्तिजनक listing की शिकायत कर सकता है। इसके लिए login की ज़रूरत नहीं। हम सिर्फ शिकायत का कारण, आपका लिखा संदेश (अगर लिखा हो) और spam रोकने के लिए आपके IP address का एक-तरफ़ा code (hash) रखते हैं — असली IP नहीं। शिकायत की जाँच के बाद ज़रूरत हो तो listing हटा दी जाती है।</p>
+<h2>2C. दुकान की Rating</h2>
+<p>कोई भी लॉगिन किया हुआ व्यक्ति दुकान को 1 से 5 सितारे दे सकता है। इसके लिए हम सिर्फ़ यह रखते हैं कि किस दुकान को कितने सितारे मिले और किस लॉगिन खाते से — ताकि एक खाते से एक दुकान को एक ही rating गिनी जाए। आपकी rating दुकान पर सिर्फ़ औसत और गिनती के रूप में दिखती है, आपका नाम या नंबर नहीं। दुकानदार अपनी ही दुकान को rating नहीं दे सकता।</p>
 <h2>3. मोबाइल नंबर की सुरक्षा</h2>
 <p>दुकान जोड़ते समय दुकानदार खुद चुनता है कि उसका नंबर ग्राहकों को दिखे या छिपा रहे, और बाद में "मेरी दुकान" से कभी भी ON/OFF कर सकता है। OFF होने पर नंबर किसी को नहीं दिखता। हम किसी का नंबर या जानकारी <b>बेचते नहीं</b>।</p>
 <h2>4. जानकारी किनके साथ साझा होती है</h2>
@@ -102,7 +104,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <li>Supabase (database, लॉगिन और logo storage), Cloudflare (वेबसाइट और OTP सेवा की hosting, और "मैं robot नहीं हूँ" वाली जाँच — Turnstile), Fast2SMS (OTP वाला SMS भेजने के लिए — सिर्फ मोबाइल नंबर और OTP)।</li>
 <li>सूचनाएँ आपके ब्राउज़र की push सेवा से जाती हैं (Android पर Google Firebase Cloud Messaging)।</li>
 <li>BigDataCloud — home page पर आपका शहर पहचानने के लिए सिर्फ GPS के अंक (latitude/longitude) भेजे जाते हैं, कोई नाम या नंबर नहीं।</li>
-<li>मैप सेवाएँ: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — मैप, खोज और रास्ते के लिए।</li>
+<li>मैप सेवाएँ: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — मैप और खोज के लिए। OSRM / Valhalla (OpenStreetMap Germany के routing server) — रास्ता निकालने के लिए सिर्फ़ शुरू और मंज़िल के GPS अंक भेजे जाते हैं, कोई नाम या नंबर नहीं।</li>
 <li>Google Maps सिर्फ तब, जब आप खुद "Google Maps में खोलें" दबाएँ।</li>
 <li>Google (Gemini AI) — upload होने वाली फ़ोटो की छोटी copy, सिर्फ़ जाँच के लिए।</li>
 <li>भुगतान: अगर आप app / website से plan खरीदते हैं, तो वह payment कंपनी (जैसे Google Play या payment gateway) जिसके ज़रिए भुगतान होता है।</li>
@@ -130,7 +132,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <div data-l="en">
 <h1>Privacy Policy</h1>
 <div class="upd">Last updated: <span data-s="updated"></span></div>
-<p>PataBook (www.PataBook.in) is a local business directory. This policy explains what we collect, why, and how we protect it, keeping in mind India's Digital Personal Data Protection Act, 2023 and the IT Rules.</p>
+<p>PataBook (www.PataBook.in) is a Digital Business Directory. This policy explains what we collect, why, and how we protect it, keeping in mind India's Digital Personal Data Protection Act, 2023 and the IT Rules.</p>
 <h2>1. What we collect</h2>
 <ul>
 <li><b>From shop owners:</b> shop name, owner name, mobile/WhatsApp number, address, city, category, services and (if given) the shop's map location.</li>
@@ -158,10 +160,12 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <p>From job seekers we collect only the mobile number (for OTP verification) and a count of which vacancies they contacted on which day (for the 5-a-day limit). We do not give a candidate’s number to shop owners — candidates contact shops themselves by call/WhatsApp.</p>
 <h2>2B. Reporting a listing</h2>
 <p>Anyone can report a wrong, fake or offensive listing with “🚩 Report this listing” on the shop page; no login is needed. We keep only the reason, your note (if any) and a one-way code (hash) of your IP address to stop spam — not the IP itself. After review, the listing is removed if needed.</p>
+<h2>2C. Shop ratings</h2>
+<p>Any logged-in person can give a shop 1 to 5 stars. We keep only which shop got how many stars and from which login account — so that one account counts once per shop. On the shop page your rating appears only as an average and a count, never your name or number. A shop owner cannot rate their own shop.</p>
 <h2>3. Protection of phone numbers</h2>
 <p>When adding a shop, the owner chooses whether the number is shown to customers or kept hidden, and can switch it ON/OFF anytime from "My Shop". When OFF, nobody can see it. We do <b>not sell</b> anyone's number or data.</p>
 <h2>4. Who we share data with</h2>
-<ul><li>Supabase (database, login and logo storage), Cloudflare (hosting of the website and OTP service, and the "I am not a robot" check — Turnstile), Fast2SMS (to send the OTP SMS — only the mobile number and OTP).</li><li>Notifications go through your browser's push service (on Android, Google Firebase Cloud Messaging).</li><li>BigDataCloud — on the home page, only GPS numbers (latitude/longitude) are sent to find your city; no name or number.</li><li>Map services: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — for maps, search and directions.</li><li>Google Maps only if you choose "Open in Google Maps".</li><li>Google (Gemini AI) — a small copy of uploaded photos, only for checking.</li><li>Payments: if you buy a plan through the app / website, the payment company (such as Google Play or a payment gateway) that processes it.</li><li>Government authorities when required by law.</li></ul>
+<ul><li>Supabase (database, login and logo storage), Cloudflare (hosting of the website and OTP service, and the "I am not a robot" check — Turnstile), Fast2SMS (to send the OTP SMS — only the mobile number and OTP).</li><li>Notifications go through your browser's push service (on Android, Google Firebase Cloud Messaging).</li><li>BigDataCloud — on the home page, only GPS numbers (latitude/longitude) are sent to find your city; no name or number.</li><li>Map services: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — for maps and search. OSRM / Valhalla (OpenStreetMap Germany routing servers) — to work out a route, only the start and destination GPS coordinates are sent, no name or number.</li><li>Google Maps only if you choose "Open in Google Maps".</li><li>Google (Gemini AI) — a small copy of uploaded photos, only for checking.</li><li>Payments: if you buy a plan through the app / website, the payment company (such as Google Play or a payment gateway) that processes it.</li><li>Government authorities when required by law.</li></ul>
 <h2>5. Retention</h2>
 <p>A listing stays until the owner deletes it or we remove it for breaking the rules. OTP records expire automatically within minutes. The list of logged-in phones/PCs stays until logout or removal. Notification messages are shown in "My Shop" for 30 days. <b>Payment, receipt and invoice records of Member plans are kept for as long as tax / accounting laws require (several years) — they are not erased when the account is deleted</b>, but are never shown to anyone.</p>
 <h2 id="delete-en">5A. Deleting your account and data</h2>
