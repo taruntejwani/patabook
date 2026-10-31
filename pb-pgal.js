@@ -7,11 +7,18 @@
   if (window.PBPGal) return;
   var css = document.createElement("style");
   css.textContent =
-    ".pgal{display:grid;grid-template-columns:1fr 1fr;gap:12px}" +
-    "@media(min-width:900px){.pgal{grid-template-columns:repeat(2,minmax(0,360px));justify-content:start;gap:16px}}" +
+    ".pgal{display:grid;grid-template-columns:1fr;gap:14px;max-width:560px}" +
     ".pgal figure{margin:0;min-width:0;background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(20,40,90,.07)}" +
-    ".pgal figure>button{display:block;width:100%;border:0;padding:0;aspect-ratio:1/1;background:#f4f7fc;cursor:zoom-in}" +
-    ".pgal img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
+    ".pgal figure>button{display:block;width:100%;border:0;padding:0;background:#fff;cursor:zoom-in}" +
+    ".pgal img{width:100%;height:auto;display:block;pointer-events:none}" +
+    ".pgmore{display:block;width:100%;max-width:560px;margin:14px 0 2px;padding:13px;border:1.5px solid #1a4fb0;border-radius:14px;background:#fff;color:#1a4fb0;font:800 16px system-ui,sans-serif;cursor:pointer}" +
+    ".pgp{position:fixed;inset:0;z-index:10000;background:#f4f7fc;overflow-y:auto;-webkit-overflow-scrolling:touch}" +
+    ".pgp .hd{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:#fff;border-bottom:1px solid #e4eaf5;font:800 18px system-ui,sans-serif;color:#1c2540}" +
+    ".pgp .hd button{border:0;background:#eef2f9;width:40px;height:40px;border-radius:50%;font-size:22px;color:#1c2540;cursor:pointer}" +
+    ".pgp .gr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px}" +
+    "@media(min-width:700px){.pgp .gr{grid-template-columns:repeat(5,1fr)}}" +
+    ".pgp .gr button{border:0;padding:0;aspect-ratio:1/1;background:#fff;border-radius:8px;overflow:hidden;cursor:zoom-in}" +
+    ".pgp .gr img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
     ".pgal figcaption{padding:9px 11px 11px;font-size:13.5px;font-weight:700;line-height:1.35;color:#1c2540;text-align:center;border-top:1px solid #eef2f9;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
     ".pgv{position:fixed;inset:0;z-index:10001;background:rgba(5,10,20,.95);display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden;-webkit-user-select:none;user-select:none}" +
     ".pgv img{max-width:100vw;max-height:100vh;object-fit:contain;transform-origin:0 0;will-change:transform;pointer-events:none;-webkit-user-drag:none}" +
@@ -23,14 +30,35 @@
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* जाली का HTML: urls = फ़ोटो की list, caps = {url: नाम} */
+  var LIM = 5, cur = { urls: [], caps: {} };
   function grid(urls, caps) {
-    caps = caps || {};
-    return '<div class="pgal">' + urls.map(function (u, i) {
+    caps = caps || {}; cur = { urls: urls, caps: caps };
+    var h = '<div class="pgal">' + urls.slice(0, LIM).map(function (u, i) {
       var c = caps[u] ? String(caps[u]) : "";
       return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || "Photo " + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
         (c ? '<figcaption>' + esc(c) + '</figcaption>' : '') + '</figure>';
     }).join("") + '</div>';
+    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="1">More (' + (urls.length - LIM) + ') ›</button>';
+    return h;
   }
+  /* पूरा Gallery पन्ना: 3 कॉलम की छोटी फ़ोटो; दबाने पर बड़ी + zoom; Back एक-एक परत बंद करता है */
+  function page(urls, caps, hi) {
+    caps = caps || {};
+    var d = document.createElement("div"); d.className = "pgp";
+    d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="Back">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + ' (' + urls.length + ')</span></div><div class="gr">' +
+      urls.map(function (u, i) { return '<button type="button" data-pg="' + i + '" aria-label="Photo ' + (i + 1) + '"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></button>'; }).join("") + '</div>';
+    function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; }
+    d.addEventListener("click", function (e) {
+      if (e.target.closest(".bk")) { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); return; }
+      var b = e.target.closest("[data-pg]"); if (b) view(urls, +b.dataset.pg, caps);
+    });
+    document.body.appendChild(d); document.documentElement.style.overflow = "hidden";
+    if (window.PBBack) PBBack.open(close, d);
+  }
+  document.addEventListener("click", function (e) {
+    var m = e.target.closest && e.target.closest("[data-gm]");
+    if (m && cur.urls.length) page(cur.urls, cur.caps, !!(window.PB && PB.lang && PB.lang() === "hi"));
+  });
   /* सारी फ़ोटो पर नाम लिखा हो तो "Products & Services", वरना "Gallery" */
   function title(urls, caps, hi) {
     var all = urls.length && urls.every(function (u) { return caps && caps[u]; });
@@ -119,5 +147,5 @@
     if (!root) return;
     root.addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (b && root.contains(b)) view(urls, +b.dataset.g, caps); });
   }
-  window.PBPGal = { grid: grid, title: title, view: view, bind: bind };
+  window.PBPGal = { grid: grid, title: title, view: view, bind: bind, page: page };
 })();
