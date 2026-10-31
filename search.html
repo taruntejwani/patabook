@@ -597,7 +597,24 @@ function openSt(b){
     return [a,b];
   }
   const cap=x=>x.replace(/(^|\s)(\S)/g,(m,s1,c)=>s1+c.toUpperCase());
-  async function geoP(n){const bias=[23.07,70.13];let g=await geo(n,bias);if(!g)g=await geo(n+", Gujarat",bias);return g;}
+  const KB="68.5,22.3,71.3,24.4";   /* Kutch इलाका (lon,lat बॉक्स) */
+  async function geoP(n){
+    const key="pbgeo2:"+n.toLowerCase();
+    try{const v=JSON.parse(localStorage.getItem(key)||"null");if(v&&Date.now()-v.t<30*864e5&&v.ll)return v;}catch(_){}
+    const vs=[n],m=n.match(/^(\S{3,})(nagar|pur|wadi|vas)$/i);if(m)vs.push(m[1]+" "+m[2]);
+    const tries=[];vs.forEach(v=>tries.push([v,1],[v+" Gandhidham",1]));vs.forEach(v=>tries.push([v+" Gujarat",0]));
+    for(const [q,k] of tries){
+      try{
+        const j=await getJ(PHO+"?q="+encodeURIComponent(q)+"&limit=1&lat=23.07&lon=70.13"+(k?"&bbox="+KB:""));
+        const f=(j.features||[])[0];if(!f)continue;
+        const pr=f.properties||{},lab=[pr.name,pr.district||pr.city||pr.county].filter(Boolean).join(", ");
+        const r={t:Date.now(),ll:f.geometry.coordinates,vague:/^(city|district|state|county|country)$/.test(pr.type||""),k,lab};
+        try{localStorage.setItem(key,JSON.stringify(r));}catch(_){}
+        return r;
+      }catch(_){}
+    }
+    return null;
+  }
   window.pbP2P=async function(q){
     const my=++P2S,list=document.getElementById("list");let box=document.getElementById("ptp");
     const pr=p2pParse(q);
@@ -619,7 +636,9 @@ function openSt(b){
       if(my!==P2S)return;
       const kmT=km<1?Math.round(km*1000)+" m":km.toFixed(1)+" km";
       const note=(exact?(en?"Road distance and time (OpenStreetMap), preferring main roads.":"सड़क की दूरी और समय (OpenStreetMap), बड़ी सड़क को तरजीह।"):(en?"Approximate (straight-line estimate).":"यह अंदाज़ा है (सीधी दूरी से)।"))+(ga.vague||gb.vague?(en?" A place name is not exact, so the point may be roughly right.":" किसी जगह का नाम पक्का नहीं मिला, इसलिए बिंदु थोड़ा आगे-पीछे हो सकता है।"):"");
-      out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small>";
+      const far=km>150&&(!ga.k||!gb.k);
+      const lbl=(en?"Found: ":"मिला: ")+(ga.lab||A)+" → "+(gb.lab||B);
+      out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small><small>📍 "+esc(lbl)+"</small>"+(far?"<small style=\"color:#b3261e;font-weight:700\">⚠ "+esc(en?"This is far away — a place may be matched wrongly. Please write the full name, e.g. \u201cBharat Nagar Gandhidham\u201d.":"यह बहुत दूर है — कोई जगह गलत पकड़ी गई हो सकती है। पूरा नाम लिखें, जैसे \u201cBharat Nagar Gandhidham\u201d।")+"</small>":"");
       if(line)drawMap(card,line,ul,ug,tl,tg);
     }catch(_){if(my===P2S)box.remove();}
   };
