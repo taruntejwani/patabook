@@ -11,7 +11,7 @@
   function en() { return L() === "en"; }
   function T(h, e) { return en() ? e : h; }
   function paid(b) { return !!(PREM && PREM[b.slug] && PREM[b.slug].until); }
-  function can(b, k) { return k === "logo" ? PH(b, "logo") : k === "photo" ? PH(b, "photos") : k === "front" || k === "open" ? PH(b, "banner") : paid(b); }
+  function can(b, k) { return k === "logo" ? true : k === "photo" ? PH(b, "photos") : k === "front" || k === "open" ? PH(b, "banner") : paid(b); }
   function lim(b) { return (window.PBPlan && PBPlan.lim(b.slug, "photos")) || 0; }
   function listOf(b, k) { return k === "photo" ? (PHOTOS[b.slug] || []) : (LIB[b.slug] || []).filter(function (x) { return x.kind === k; }); }
   function total(b) { return (PHOTOS[b.slug] || []).length + (LIB[b.slug] || []).length; }
@@ -47,7 +47,7 @@
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
     }).join("") + '</div>' + (function () {
       var parts = KINDS.map(function (K) { return esc(K[2]) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
-      return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + total(b) + '</b> / ' + (lim(b) || 100) + '</div></div>';
+      return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
   };
   function sizeNote(k) {
