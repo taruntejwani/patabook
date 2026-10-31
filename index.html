@@ -1153,5 +1153,45 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   bar.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();open();});
 })();
 </script>
+<script>
+/* 🏀 P वाला पिन: उँगली लगते ही गेंद की तरह नीचे गिरता है, 2 बार उछलता है, फिर अपनी जगह लौट आता है (पन्ना सामान्य चलता रहता है) */
+(function(){
+  var pin=document.querySelector(".art .pin");if(!pin)return;
+  var busy=false,RM=false;try{RM=matchMedia("(prefers-reduced-motion:reduce)").matches;}catch(e){}
+  pin.style.cursor="pointer";pin.style.webkitTapHighlightColor="transparent";
+  pin.style.pointerEvents="auto";
+  pin.addEventListener("click",function(e){
+    e.preventDefault();e.stopPropagation();
+    if(busy||!pin.animate)return;busy=true;
+    var oldAnim=pin.style.animation;
+    pin.style.animation="none";                       /* असली जगह की सही नाप (उछाल-चाल रोककर) */
+    var r=pin.getBoundingClientRect();
+    if(RM||!r.width){pin.style.animation=oldAnim;busy=false;return;}
+    var c=pin.cloneNode(false);c.removeAttribute("class");c.removeAttribute("id");c.setAttribute("aria-hidden","true");
+    c.style.cssText="position:fixed;left:"+r.left+"px;top:"+r.top+"px;width:"+r.width+"px;height:"+r.height+"px;margin:0;z-index:7000;pointer-events:none;transform-origin:50% 100%;will-change:transform;filter:drop-shadow(0 6px 6px rgba(11,47,115,.25))";
+    document.body.appendChild(c);pin.style.visibility="hidden";
+    var H=Math.max(40,innerHeight-r.bottom-4);        /* ज़मीन = स्क्रीन का निचला किनारा */
+    var T=function(y,sx,sy){return "translateY("+y+"px) scale("+sx+","+sy+")";};
+    var a=c.animate([
+      {offset:0,transform:T(0,1,1),easing:"cubic-bezier(.5,0,.9,.55)"},
+      {offset:.30,transform:T(H,1.14,.84),easing:"cubic-bezier(.2,.6,.4,1)"},
+      {offset:.33,transform:T(H,1,1),easing:"cubic-bezier(.2,.6,.4,1)"},
+      {offset:.47,transform:T(H*.64,1,1),easing:"cubic-bezier(.5,0,.9,.55)"},
+      {offset:.61,transform:T(H,1.1,.88)},
+      {offset:.64,transform:T(H,1,1),easing:"cubic-bezier(.2,.6,.4,1)"},
+      {offset:.72,transform:T(H*.89,1,1),easing:"cubic-bezier(.5,0,.9,.55)"},
+      {offset:.80,transform:T(H,1.05,.94)},
+      {offset:.86,transform:T(H,1,1)},
+      {offset:1,transform:T(H,1,1)}
+    ],{duration:1900,fill:"forwards"});
+    function done(){
+      var r2=pin.getBoundingClientRect(),dy=H-(r2.top-r.top),dx=r2.left-r.left;   /* लौटने की जगह दोबारा नापो (स्क्रॉल हुआ हो तो) */
+      var b=c.animate([{transform:T(H,1,1)},{transform:"translate("+dx+"px,"+(r2.top-r.top)+"px) scale(1,1)"}],{duration:650,easing:"cubic-bezier(.45,0,.2,1)",fill:"forwards"});
+      b.onfinish=b.oncancel=function(){c.remove();pin.style.visibility="";pin.style.animation=oldAnim;busy=false;};
+    }
+    a.onfinish=done;a.oncancel=function(){c.remove();pin.style.visibility="";pin.style.animation=oldAnim;busy=false;};
+  });
+})();
+</script>
 </body>
 </html>
