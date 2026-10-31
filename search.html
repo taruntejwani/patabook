@@ -52,6 +52,7 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .sbox{position:relative}
 .sgb{position:absolute;left:0;right:0;top:62px;z-index:30;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px rgba(11,47,115,.16);overflow:auto;max-height:min(55vh,360px);display:none}
 .sgb.on{display:block}
+.sgb.cgb{left:auto;right:0;width:min(340px,100%)}
 .sgb .sh{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);background:#f5f8ff;padding:7px 14px}
 .sgb a{display:flex;gap:10px;align-items:center;padding:11px 14px;font-size:15.5px;color:var(--ink);border-bottom:1px solid #f1f3f4;cursor:pointer}
 .sgb a:last-child{border:0}.sgb a:hover,.sgb a:active{background:#f1f6ff}
@@ -118,12 +119,13 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
   <div class="search">
    <label class="f"><input id="q" type="search" enterkeyhint="search" data-ip="ph" placeholder="क्या ढूंढ रहे हैं?"></label>
    <label class="f loc">
-    <span aria-hidden="true" style="font-size:15px">📍</span><input id="city" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist>
+    <span aria-hidden="true" style="font-size:15px">📍</span><input id="city" autocomplete="off" autocapitalize="words" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist>
    <button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी location से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
    </label>
    <button class="go" type="submit" data-i="search">खोजें</button>
   </div>
   <div class="sgb" id="sgb" role="listbox"></div>
+  <div class="sgb cgb" id="cgb" role="listbox"></div>
   <div class="flt" id="flt">
    <label><span id="fCL">Category</span><select id="fCat"></select></label>
    <label><span id="fWL">Work / Service</span><select id="fWork"></select></label>
@@ -186,7 +188,7 @@ function group(t){
 
 /* description se jaankari */
 const line=(b,k)=>{const m=String(b.description||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
-function cityOf(b){return line(b,"City")||String(b.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";}
+function cityOf(b){const pm=String(b.address||"").match(/([^,]+?)\s*[–—-]\s*\d{6}\s*$/);if(pm&&pm[1].trim())return pm[1].trim();return line(b,"City")||String(b.address||"").split(",").map(s=>s.trim()).filter(Boolean).pop()||"";}
 function catOf(b){return line(b,"Subcategory")||b.category||"";}
 
 /* sabse sahi result upar */
@@ -317,10 +319,12 @@ async function suggestWords(q,limit){
     const low=t.toLowerCase();return d.map(x=>x&&x.label).filter(x=>x&&String(x).toLowerCase()!==low).slice(0,limit||6);
   }catch(e){return [];}
 }
+var WIDE="";
 let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
+  WIDE="";
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
   if(det){q=det.rest.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");city=det.city;$("city").value=det.city;}
   else if(city){try{const fc=await fixCityBox(city);if(fc&&fc!==city){city=fc;$("city").value=fc;}}catch(e){}}
@@ -332,6 +336,17 @@ async function run(push){
   const n=++reqN;
   cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';
   if(JOBQ.test(q))return runJobs(q,city,n);   /* "hiring / job / नौकरी" → नौकरी वाली दुकानें (sql-26) */
+  try{
+    let rows=await gatherRows(q,city,ts,n);if(rows===null)return;
+    WIDE="";
+    if(!rows.length&&city&&ts.length&&!WORKSEL){   /* चुने शहर में कुछ न मिला → सभी शहरों में (कभी खाली नहीं) */
+      const w=await gatherRows(q,"",ts,n);if(w===null)return;if(w.length){rows=w;WIDE=city;}else LOOSEMISS="";
+    }
+    DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
+    render(rows,q,WIDE?"":city);
+  }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p><p class="note" style="font-size:11px;opacity:.6">'+esc(String(e&&e.message||e).slice(0,160))+'</p>';}}
+}
+async function gatherRows(q,city,ts,n){
   const u=new URL(SB+"/rest/v1/businesses");
   u.searchParams.set("select","name,slug,address,description,category,rating,review_count,is_verified,latitude,longitude");   /* phone/whatsapp nahi: sirf login ke baad business page par */
   u.searchParams.set("is_active","eq.true");
@@ -343,26 +358,22 @@ async function run(push){
   if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
   if(WORKSEL)u.searchParams.append("description","ilike.*Subcategory: "+WORKSEL.replace(/[*,()]/g," ")+"*");
   if(gs.length===1)u.searchParams.set("or",gs[0].slice(3,-1));else if(gs.length>1)u.searchParams.set("and","("+gs.join(",")+")");
-  try{
-    let r=await fetch(u,{headers:H}),data=await r.json().catch(()=>null);
-    if(!r.ok&&cid&&city){   /* शहर-id वाली खोज फेल हुई तो सिर्फ़ पते/विवरण में शहर के नाम से दोबारा */
-      const u2=new URL(u);const o=u2.searchParams.get("or"),a2=u2.searchParams.get("and");
-      const fx=x=>x&&x.split("city_id.eq."+cid+",").join("");
-      if(o!=null)u2.searchParams.set("or",fx(o));if(a2!=null)u2.searchParams.set("and",fx(a2));
-      r=await fetch(u2,{headers:H});data=await r.json().catch(()=>null);
-    }
-    if(n!==reqN)return;
-    if(!r.ok||!Array.isArray(data))throw new Error((data&&data.message)||("HTTP "+r.status));
-    const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
-    let rows=data.map(b=>(b._s=score(b,ts),b)).sort((a,b)=>b._s-a._s||(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
-    rows=await premiumFirst(rows);if(n!==reqN)return;
-    FZN=0;
-    if(rows.length<3&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows);if(n!==reqN)return;if(ex.length){FZN=ex.length;rows=rows.concat(ex);}}
-    LOOSEMISS="";
-    if(!rows.length&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows,true);if(n!==reqN)return;if(ex.length){FZN=ex.length;rows=ex;}else LOOSEMISS="";}   /* Google जैसा: सारे शब्द न मिलें तो जितने मिलें उनसे */
-    DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
-    render(rows,q,city);
-  }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p><p class="note" style="font-size:11px;opacity:.6">'+esc(String(e&&e.message||e).slice(0,160))+'</p>';}}
+  let r=await fetch(u,{headers:H}),data=await r.json().catch(()=>null);
+  if(!r.ok&&cid&&city){   /* शहर-id वाली खोज फेल हुई तो सिर्फ़ पते/विवरण में शहर के नाम से दोबारा */
+    const u2=new URL(u);const o=u2.searchParams.get("or"),a2=u2.searchParams.get("and");
+    const fx=x=>x&&x.split("city_id.eq."+cid+",").join("");
+    if(o!=null)u2.searchParams.set("or",fx(o));if(a2!=null)u2.searchParams.set("and",fx(a2));
+    r=await fetch(u2,{headers:H});data=await r.json().catch(()=>null);
+  }
+  if(n!==reqN)return null;
+  if(!r.ok||!Array.isArray(data))throw new Error((data&&data.message)||("HTTP "+r.status));
+  const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
+  let rows=data.map(b=>(b._s=score(b,ts),b)).sort((a,b)=>b._s-a._s||(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
+  rows=await premiumFirst(rows);if(n!==reqN)return null;
+  FZN=0;LOOSEMISS="";
+  if(rows.length<3&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows);if(n!==reqN)return null;if(ex.length){FZN=ex.length;rows=rows.concat(ex);}}
+  if(!rows.length&&!city&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows,true);if(n!==reqN)return null;if(ex.length){FZN=ex.length;rows=ex;}}   /* Google जैसा: सारे शब्द न मिलें तो जितने मिलें उनसे */
+  return rows;
 }
 /* 💼 नौकरी वाली दुकानें — पास वाली पहले (location की इजाज़त पहले से हो तो) */
 const JOBQ=/(^|\s)(hiring|hire|vacancy|vacancies|job|jobs|naukri|nokri|नौकरी|नौकरियाँ|नौकरियां|भर्ती|वैकेंसी|जॉब)(\s|$)/i;
@@ -415,7 +426,8 @@ function render(rows,q,city,keep){
     return;
   }
   const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(LOOSEMISS?(FEN()?"No shop found for \u201c"+LOOSEMISS+"\u201d \u2014 showing the closest shops:":"\u201c"+LOOSEMISS+"\u201d के लिए कोई दुकान नहीं मिली \u2014 ये सबसे मिलती-जुलती दुकानें हैं:"):(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:"))+'</p>':'';
-  list.innerHTML=fzNote+rows.map(b=>{
+  const wNote=WIDE?'<p class="note" style="margin:0 0 10px">'+esc(FEN()?"Nothing found in "+WIDE+" \u2014 showing shops from other cities:":WIDE+" में कुछ नहीं मिला \u2014 दूसरे शहरों की दुकानें:")+'</p>':'';
+  list.innerHTML=wNote+fzNote+rows.map(b=>{
     const dir=pbDir(b);
     const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
     return '<article class="card'+(PREMS[b.slug]?' isprem':'')+'"><div class="info"><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+
@@ -486,6 +498,46 @@ if(!P.get("city")){try{const c0=localStorage.getItem("pb-city");if(c0)$("city").
     if(a.dataset.q!=null){q.value=a.dataset.q;hide();q.blur();run(true);}});
   q.addEventListener("blur",()=>setTimeout(hide,150));
   document.addEventListener("keydown",e=>{if(e.key==="Escape")hide();});
+})();
+/* 📍 शहर-खाने में लिखते ही शहरों की सूची (दुकानों वाले + Approve हुए शहर, गलत spelling भी चलेगी) */
+(function(){
+  const inp=$("city"),box=$("cgb");if(!inp||!box)return;
+  let seq=0;
+  const hide=()=>{box.className="sgb cgb";box.innerHTML="";};
+  async function show(){
+    const n=++seq;let v=inp.value.trim();
+    if(/[઀-૿]/.test(v))v=v.replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));
+    if(/[ऀ-ॿ]/.test(v))v=deva2rom(v);
+    const l=tokClean(v),P=await placesMap();if(n!==seq||document.activeElement!==inp)return;
+    const all=[...P.values()].sort((a,b)=>a.localeCompare(b));
+    let out=[];
+    if(!l)out=all.slice(0,8);
+    else{
+      const pre=[],has=[],fz=[];
+      for(const [k,d] of P){const kk=tokClean(k);
+        if(kk.startsWith(l))pre.push(d);
+        else if(l.length>=3&&kk.includes(l))has.push(d);
+        else if(l.length>=3&&(kk[0]===l[0]||l.length>=5)&&Math.abs(kk.length-l.length)<=3&&lev(kk.slice(0,l.length+1),l)<=(l.length>=6?2:1))fz.push(d);
+        else if(l.length>=5&&lev(kk,l)<=2)fz.push(d);}
+      out=[...new Set([...pre,...has,...fz])].slice(0,6);
+    }
+    let h="";
+    if(inp.value.trim())h+='<a data-c=""><span>🌐</span><span>'+esc(FEN()?"All places":"सभी जगह")+'</span></a>';
+    h+=out.map(x=>'<a data-c="'+esc(x)+'"><span>📍</span><span>'+esc(x)+'</span></a>').join("");
+    try{const fr=inp.closest(".loc")||inp,sr=$("sform").getBoundingClientRect(),r=fr.getBoundingClientRect(),w=Math.min(340,sr.width);
+      box.style.top=Math.round(r.bottom-sr.top+6)+"px";box.style.width=w+"px";box.style.right="auto";
+      box.style.left=Math.round(Math.max(0,Math.min(r.left-sr.left,sr.width-w)))+"px";}catch(e){}
+    box.innerHTML=h;box.className=h?"sgb cgb on":"sgb cgb";
+  }
+  inp.addEventListener("input",show);
+  inp.addEventListener("focus",()=>{setTimeout(show,0);});
+  box.addEventListener("pointerdown",e=>e.preventDefault());
+  box.addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;
+    const c=a.dataset.c||"";inp.value=c;CITYUSER=true;try{c?localStorage.setItem("pb-city",c):localStorage.removeItem("pb-city");}catch(x){}
+    hide();inp.blur();run(true);});
+  inp.addEventListener("blur",()=>setTimeout(hide,150));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")hide();});
+  $("sform").addEventListener("submit",hide);
 })();
 /* 📱 keyboard खुलते ही search-box ऊपर आए (सुझाव keyboard के पीछे न छुपें) */
 (function(){
