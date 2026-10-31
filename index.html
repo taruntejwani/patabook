@@ -327,7 +327,7 @@ function pbMyShopLink(b,s){
 function pbOffTag(b,s){
   function apply(m){if(!m)return;var v=Object.keys(m).map(function(k){return m[k]}),d=v.indexOf("draft")>-1,p=!d&&v.indexOf("pend")>-1;var t0=b.querySelector("b"),m0=b.querySelector("small");
     if(!d&&!p){   /* कोई दुकान Offline / Pending नहीं (Approve हो गई) → पट्टी पहले जैसी "मेरी दुकान" */
-      if(b.classList.contains("dr")||b.classList.contains("pe")){b.classList.remove("dr","pe");var ic0=b.querySelector(".ic");if(ic0)ic0.textContent="⚙️";if(t0)t0.setAttribute("data-i","myshop_bar");if(m0)m0.setAttribute("data-i","myshop_sub");b.href="mybusiness.html";try{if(window.PB&&PB.apply)PB.apply();}catch(e){}}
+      if(b.classList.contains("dr")||b.classList.contains("pe")){b.classList.remove("dr","pe");var ic0=b.querySelector(".ic");if(ic0)ic0.textContent="☰";if(t0)t0.setAttribute("data-i","myshop_bar");if(m0)m0.setAttribute("data-i","myshop_sub");b.href="mybusiness.html";try{if(window.PB&&PB.apply)PB.apply();}catch(e){}}
       return;}
     var hi=!(window.PB&&PB.lang&&PB.lang()!=="hi"),t=b.querySelector("b"),m2=b.querySelector("small");
     if(t){t.removeAttribute("data-i");t.textContent=d?(hi?"प्रोफ़ाइल अधूरी — पूरी करो":"Complete your profile"):(hi?"मंज़ूरी का इंतज़ार":"Waiting for approval");b.classList.toggle("dr",d);b.classList.toggle("pe",p);var ic=b.querySelector(".ic");if(ic)ic.textContent=d?"🔴":"⏳";}
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 </aside>
 
 <main>
-  <a class="mys" id="mysBar" href="mybusiness.html" style="display:none" aria-label="My Shop Settings" title="Settings"><span class="ic" aria-hidden="true">⚙️</span><span class="tx"><b data-i="myshop_bar">मेरी दुकान</b><small data-i="myshop_sub">आप लॉगिन हैं — अपनी दुकान संभालें</small></span><span class="go" aria-hidden="true">›</span></a>
+  <a class="mys" id="mysBar" href="mybusiness.html" style="display:none" aria-label="Menu" title="Menu" aria-haspopup="true"><span class="ic" aria-hidden="true">☰</span><span class="tx"><b data-i="myshop_bar">मेरी दुकान</b><small data-i="myshop_sub">आप लॉगिन हैं — अपनी दुकान संभालें</small></span><span class="go" aria-hidden="true">›</span></a>
   <section class="lb" id="lb" hidden aria-label="PataBook launch">
     <canvas id="lbFx" aria-hidden="true"></canvas>
     <button type="button" class="lbx" id="lbX" aria-label="बंद करें">✕</button>
@@ -1066,6 +1066,39 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
       if(app){history.go(-(history.length-1));setTimeout(function(){try{window.close()}catch(e){}},150);}else{history.back();}
     });
   }catch(e){}
+})();
+</script>
+<script src="pb-back.js"></script>
+<script>
+/* ☰ मेन्यू (सिर्फ़ दुकान के मालिक को): Preview · Gallery · Report · Settings · Log out. बाहर दबाने / फ़ोन के Back से बंद */
+(function(){
+  var bar=document.getElementById("mysBar");if(!bar)return;
+  function hi(){return !(window.PB&&PB.lang&&PB.lang()!=="hi");}
+  function slugs(){try{var c=JSON.parse(localStorage.getItem("pb-my-shops")||"null");return Array.isArray(c)?c:[];}catch(e){return [];}}
+  var ov=null,gone=true;
+  function kill(){if(ov){ov.remove();ov=null;}}
+  function open(){
+    if(ov)return;var h=hi(),sl=slugs(),one=sl.length===1;
+    var items=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile",one?"business.html?slug="+encodeURIComponent(sl[0]):"mybusiness.html"],
+      ["🖼️",h?"गैलरी":"Gallery","mybusiness.html#go=photo"],["📊",h?"रिपोर्ट":"Report","mybusiness.html#go=rep"],
+      ["⚙️",h?"सेटिंग":"Settings","mybusiness.html"],["🚪",h?"लॉग आउट":"Log out",""]];
+    ov=document.createElement("div");ov.style.cssText="position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
+    var r=bar.getBoundingClientRect(),pn=document.createElement("div");
+    pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:210px;background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
+    pn.innerHTML=items.map(function(it,i){return '<a data-mi="'+i+'" href="'+(it[2]||"#")+'" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;color:'+(i===4?"#c5221f":"#0b2f73")+';font-weight:700;font-size:15.5px;text-decoration:none'+(i===4?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
+    ov.appendChild(pn);document.body.appendChild(ov);
+    ov.addEventListener("click",function(e){
+      var a=e.target.closest("[data-mi]");
+      if(!a){if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
+      if(a.dataset.mi==="4"){e.preventDefault();
+        if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;
+        try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(x){}
+        (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(function(){}).then(function(){kill();bar.style.display="none";location.reload();});
+      }
+    });
+    if(window.PBBack)PBBack.open(kill);
+  }
+  bar.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();open();});
 })();
 </script>
 </body>
