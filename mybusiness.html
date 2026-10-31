@@ -95,6 +95,12 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pm ul{margin:8px 0 0 18px;font-size:13px;color:#33395a}.pm li{margin:3px 0}
 .pm textarea{width:100%;margin-top:8px;border:1px solid #d9d0ff;border-radius:10px;padding:8px;font:inherit;font-size:13.5px;min-height:56px}
 .pm .go{margin-top:8px;width:100%;border:0;border-radius:12px;padding:11px;font:inherit;font-weight:800;background:#3b2bb8;color:#fff;cursor:pointer}
+.gcnt{font-size:13.5px;color:#2a3350;margin:2px 0 8px}.gf{margin-top:8px;background:#fff;border:1px solid #e1e8f5;border-radius:14px;overflow:hidden}.gfr{display:flex;align-items:stretch}
+.gfh{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:#fff;padding:12px;font:inherit;text-align:left;cursor:pointer}.gfh.on{background:#f4f8ff}.gfh .gi{font-size:22px}.gfh .gn{flex:1;min-width:0}.gfh .gn b{display:block;font-size:15px;color:#0b2f73}.gfh .gn small{color:#5b6475;font-size:12.5px}.gfh i{font-style:normal;background:#eef3fc;color:#1a4fb4;border-radius:999px;padding:2px 9px;font-size:12.5px;font-weight:800}.gfh i:empty{display:none}.gfh em{font-style:normal;color:#5b6475}
+.gplus{flex:none;width:52px;display:grid;place-items:center;background:#1a73e8;color:#fff;font-size:28px;font-weight:700;cursor:pointer;line-height:1}
+.gbd{padding:10px 12px 12px;border-top:1px solid #e8eef8}.gg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}@media(min-width:560px){.gg{grid-template-columns:repeat(5,1fr)}}
+.gt{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:12px;overflow:hidden;background:#eef3fd;cursor:pointer}.gt img{width:100%;height:100%;object-fit:cover;display:block}.gt.hid img{opacity:.35}
+.gt .gok{position:absolute;top:5px;left:5px;background:#1e9e57;color:#fff;border-radius:999px;padding:1px 7px;font-size:13px;font-weight:800}.gt .ghd{position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,.65);color:#fff;border-radius:8px;padding:1px 7px;font-size:11.5px}
 .pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.pg .t{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#fff}.pg img{width:100%;height:100%;object-fit:cover;display:block}
 .pg .t button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;cursor:pointer}
 .pg .add{display:grid;place-items:center;border:2px dashed #c9b8ff;border-radius:10px;aspect-ratio:1;color:#3b2bb8;font-size:22px;background:#fff;cursor:pointer}
@@ -435,7 +441,7 @@ function tilesBlock(b,i){
   let pc=100;if(it&&it.length)pc=Math.round(it.filter(x=>x[0]).length/it.length*100);
   const col=pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
   return '<div class="tiles"><button type="button" class="tile'+(t==="p"?" on":"")+'" data-tab="p" data-i="'+i+'"><span class="tr" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></span><b>'+(en?"Profile":"प्रोफ़ाइल")+'</b><small>'+(en?"Profile & Verify":"प्रोफ़ाइल और Verify")+'</small></button>'+
-    '<button type="button" class="tile'+(t==="f"?" on":"")+'" data-tab="f" data-i="'+i+'"><span class="ti">⚙️</span><b>'+(en?"Features":"सुविधाएँ")+'</b><small>'+(en?"Number, Hiring, Home Service":"नंबर, Hiring, Home Service")+'</small></button></div>';
+    '<button type="button" class="tile'+(t==="f"?" on":"")+'" data-tab="f" data-i="'+i+'"><span class="ti">⚙️</span><b>'+(en?"Advance Features":"Advance Features")+'</b><small>'+(en?"Number, Hiring, Home Service":"नंबर, Hiring, Home Service")+'</small></button></div>';
 }
 function profBlock(b,i){
   const it=profItems(b,i);if(!it)return "";
@@ -784,8 +790,8 @@ let SET={cat:null,shop:null};   /* null = बंद · "" = वर्गों �
 function setCats(en){return [
   ["prof","👤",en?"Profile":"प्रोफ़ाइल",en?"Edit, Verify, % complete":"Edit, Verify, कितनी पूरी"],
   ["num","📞",en?"Number & contact":"नंबर और संपर्क",en?"Show / hide number, change number":"नंबर दिखे / छुपे, नंबर बदलना"],
-  ["feat","🛠️",en?"Features":"सुविधाएँ",en?"Hiring, Home Service":"नौकरी (Hiring), Home Service"],
-  ["photo","🖼️",en?"Photos & promotion":"फ़ोटो और प्रचार","Logo, Profile Banner, Poster"],
+  ["feat","🛠️",en?"Advance Features":"Advance Features",en?"Hiring, Home Service":"नौकरी (Hiring), Home Service"],
+  ["photo","🖼️","Gallery","Logo, Photos, Banner, Shop Front"],
   ["rep","📊",en?"Report & notifications":"रिपोर्ट और सूचनाएँ",en?"Weekly report, phone alerts":"हफ़्ते की रिपोर्ट, फ़ोन पर सूचनाएँ"],
   ["plan","💳","Member Plan",en?"Buy or renew your plan":"Plan खरीदें या आगे बढ़ाएँ"],
   ["acct","🔐",en?"Account":"खाता",en?"Password, logout, delete":"पासवर्ड, लॉगआउट, खाता हटाएँ"]];}
@@ -797,7 +803,7 @@ function catBody(k,b,i,en){
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (Settings → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>'):'');
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
-  if(k==="photo")return (stripsBlock(b,i)||'<div class="pm"><small style="margin:0">'+(en?"Logo, Profile Banner and Poster come with a Member plan. See “Member Plan” in Settings.":"Logo, Profile Banner और Poster Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।")+'</small></div>');
+  if(k==="photo")return window.galleryBlock?galleryBlock(b,i):"";
   if(k==="rep")return PH(b,"report")?(weekLine(b)||'')+reportHTML(b):'<div class="pm"><small style="margin:0">📊 '+(en?"The report (views, Call, WhatsApp) comes with a Member plan. See “Member Plan”.":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp) Member plan के साथ मिलती है। “Member Plan” देखें।")+'</small></div>';
   if(k==="plan")return premBlock(b,i)||'<p class="note">—</p>';
   return "";
@@ -898,7 +904,7 @@ function draw(){
   if(!ROWS.length){
     list.innerHTML='<div class="card empty"><div class="big">🏪</div><h2>'+esc(tx(phoneOf(ME)?"ph_none_h":"e_none_h"))+'</h2><p>'+esc(tx("e_none_p"))+'</p><a class="btn y" href="list.html">'+esc(tx("add"))+' ›</a></div>';return;
   }
-  drawNt();if(SET.cat!==null&&$("ntBtn"))$("ntBtn").hidden=true;{const ed=$("edTop");if(ed){ed.href="business.html?slug="+encodeURIComponent(ROWS[0].slug)+"#edit";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=true;}const vp=$("vpTop");if(vp)vp.hidden=true;}
+  drawNt();if(SET.cat!==null&&$("ntBtn"))$("ntBtn").hidden=true;{const ed=$("edTop");if(ed){ed.href="#";ed.querySelector("span").textContent=en?"Edit Profile":"प्रोफ़ाइल Edit करें";ed.hidden=true;}const vp=$("vpTop");if(vp)vp.hidden=true;}
   const inSet=SET.cat!==null&&!!ROWS[SET.shop];
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");
@@ -1149,6 +1155,7 @@ start();
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-watermark.js"></script>
+<script src="pb-gallery.js"></script>
 
 </body>
 </html>
