@@ -217,6 +217,12 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .shh{font-size:17px;font-weight:800;color:var(--navy);margin:2px 0 10px}
 .moreh{font-size:14px;font-weight:800;color:#33395a;margin:18px 0 8px}
 .setbar{display:flex;align-items:center;gap:10px;margin:2px 0 12px}.setbar button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;color:var(--navy)}.setbar b{font-size:17.5px;color:var(--navy)}
+.tp{--tb:#1a73e8;--tt:#fff}.tp-silver{--tb:#4b5563}.tp-gold{--tb:#d4a017;--tt:#3b2a00}.tp-platinum{--tb:#0b2f73}
+.tp .setbar button{background:var(--tb);color:var(--tt);border-color:var(--tb)}
+.tp .stl.alt{background:var(--tb);color:var(--tt);border-color:var(--tb)}
+.tp .stp .s:not(.wt) i{background:var(--tb);color:var(--tt);border-radius:999px;padding:3px 11px;font-style:normal;font-weight:800;font-size:12.5px}
+.tp .vf .go:not(:disabled){background:var(--tb);color:var(--tt)}.tp .vf .go:disabled{background:var(--tb);color:var(--tt);opacity:.45}
+.tp .cat .ci{background:var(--tb);color:var(--tt);border-radius:12px}.tp .cat>i{background:var(--tb);color:var(--tt);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-style:normal}
 .cats{display:grid;gap:10px}.cat{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 6px 18px rgba(26,115,232,.07)}.cat .ci{font-size:24px;width:46px;height:46px;border-radius:14px;background:#eef4ff;display:grid;place-items:center;flex:none}.cat .ct{flex:1;min-width:0}.cat .ct b{display:block;font-size:15.5px}.cat .ct small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}.cat i{font-style:normal;color:var(--blue);font-size:22px;font-weight:700}
 .stl{display:block;margin-top:12px;text-align:center;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:12px;font-size:14.5px}.stl.alt{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
 </style>
@@ -879,12 +885,12 @@ function settingsView(en){
   const nm=esc(b.name);
   if(!cur){
     /* दुकान का घर: ऊपर 9 कदम (हर कदम पर Edit), नीचे बाक़ी सेटिंग — कोई चीज़ दो बार नहीं */
-    return '<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"My shops":"मेरी दुकानें")+'</button></div>'+
+    return '<div class="tp tp-'+tierOf(b)+'"><div class="setbar"><button type="button" data-setback="close">‹ '+(en?"My shops":"मेरी दुकानें")+'</button></div>'+
       '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
       '<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"Preview profile":"प्रोफ़ाइल Preview")+'</a>'+
       '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+'</div>'+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
-      '<div class="cats">'+C.filter(c=>!/^(photo|rep|nt)$/.test(c[0])).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
+      '<div class="cats">'+C.filter(c=>!/^(photo|rep|nt)$/.test(c[0])).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div></div>';
   }
   let h='<div class="setbar"><button type="button" data-setback="list">‹ '+nm+'</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
   if(cur[0]==="acct")return h+delShopBtns(en,i)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
