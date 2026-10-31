@@ -581,18 +581,32 @@ function applyLang(){
     /* जिले का नाम: दिख रही दुकानों के district में सबसे ज़्यादा जो है वही; न मिले तो Kutch */
     var src=(typeof L!=="undefined"&&Array.isArray(L)&&L.length&&L[0]&&L[0].slug!==undefined)?L:ALL_ROWS,cnt={},best="",bn=0;
     (src||[]).forEach(function(b){var d=String((b&&b.district)||"").trim();if(!d)return;if(/^(kutch|kachchh|kachh|kuchchh|कच्छ)$/i.test(d))d="Kutch";cnt[d]=(cnt[d]||0)+1;if(cnt[d]>bn){bn=cnt[d];best=d;}});
-    var dn=best||"Kutch",hi=PB.lang&&PB.lang()==="hi";
+    var dn=(window.__pbDist||best||"Kutch"),hi=PB.lang&&PB.lang()==="hi";
+    if(/^(kutch|kachchh|kachh|kuchchh|कच्छ)$/i.test(dn))dn="Kutch";
     el.textContent=hi?((dn==="Kutch"?"कच्छ":dn)+" की दुकानें"):("Shops in "+dn);
   }
   let ALL_ROWS=[];
-  async function load(){
-    let rows=null;
-    try{const r=await fetch(SBU+"/rest/v1/rpc/pb_latest_shops",{method:"POST",headers:H,body:"{}"});if(r.ok)rows=await r.json();}catch(e){}
-    if(!Array.isArray(rows)){
-      try{const u=SBU+"/rest/v1/businesses?select=slug,name,address,category,city,city_name,town,district,location&is_active=eq.true&deleted_at=is.null&order=created_at.desc&limit=100";
-        const r=await fetch(u,{headers:H});if(r.ok)rows=await r.json();}catch(e){}
+  /* शहर -> जिला (pb_public_cities से), ताकि पट्टी में सिर्फ़ उसी जिले की दुकानें आएँ */
+  let DMAP=null,LASTD=null;
+  async function cityDistrict(city){
+    if(!city)return "Kutch";   /* शहर नहीं चुना: पहले की तरह कच्छ */
+    if(!DMAP){DMAP={};
+      try{const r=await fetch(SBU+"/rest/v1/rpc/pb_public_cities",{method:"POST",headers:H,body:"{}"});
+        if(r.ok){const j=await r.json();(Array.isArray(j)?j:[]).forEach(c=>{if(c&&c.name)DMAP[normCity(c.name)]=c.district||"";});}}catch(e){}
     }
-    ALL_ROWS=(Array.isArray(rows)?rows:[]).filter(b=>b&&b.name);
+    return DMAP[normCity(city)]||"";
+  }
+  async function fetchRows(dist){
+    let rows=null;
+    try{const r=await fetch(SBU+"/rest/v1/rpc/pb_latest_shops_d",{method:"POST",headers:H,body:JSON.stringify({p_district:dist||null})});if(r.ok)rows=await r.json();}catch(e){}
+    if(!Array.isArray(rows)){
+      try{const r=await fetch(SBU+"/rest/v1/rpc/pb_latest_shops",{method:"POST",headers:H,body:"{}"});if(r.ok)rows=await r.json();}catch(e){}
+    }
+    return (Array.isArray(rows)?rows:[]).filter(b=>b&&b.name);
+  }
+  async function load(){
+    const d=await cityDistrict(currentCity());
+    ALL_ROWS=await fetchRows(d);LASTD=d;window.__pbDist=d;
     refreshCityShops();
   }
   /* पट्टी में सिर्फ़ Free + Silver दुकानें (Gold / Platinum नीचे poster में आती हैं) */
@@ -610,7 +624,9 @@ function applyLang(){
   }
   let RUN=0;
   async function refreshCityShops(){
-    const run=++RUN,city=currentCity();setCityTitle(city);
+    const run=++RUN,city=currentCity();
+    if(LASTD!==null){const d=await cityDistrict(city);if(run!==RUN)return;if(d!==LASTD){const nr=await fetchRows(d);if(run!==RUN)return;ALL_ROWS=nr;LASTD=d;window.__pbDist=d;}}
+    setCityTitle(city);
     let rows=ALL_ROWS.slice(0,60);   /* कच्छ की सारी दुकानें (शहर का filter नहीं) */
     if(rows.length&&window.PB_SITE&&PB_SITE.premium&&window.PBPlan){
       try{await PBPlan.load(rows.map(b=>b.slug).filter(Boolean));const gp=[];
