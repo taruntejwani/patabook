@@ -380,7 +380,7 @@ async function suggestWords(q,limit){
     const low=t.toLowerCase();return d.map(x=>x&&x.label).filter(x=>x&&String(x).toLowerCase()!==low).slice(0,limit||6);
   }catch(e){return [];}
 }
-var WIDE="",NLI=null,BIGROW=null,NFHIDE=false,LASTROWS=[];
+var NEARG="",WIDE="",NLI=null,BIGROW=null,NFHIDE=false,LASTROWS=[];
 let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
@@ -418,6 +418,7 @@ async function run(push){
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
     const NEARQ=/(^|\s)(near\s*me|nearby|near\s*by|nearest|paas\s*(me|mein|main)|pass\s*(me|mein)|aas\s*pass|aaspass|najdik|nazdik|आसपास|आस-पास|पास\s*में|नज़दीक|नजदीक)(\s|$)/i.test(q0);
     rows.forEach(b=>{b._km=null;});
+    NEARG=NEARQ?q0.replace(/(^|\s)(near\s*me|nearby|near\s*by|nearest|paas\s*(me|mein|main)|pass\s*(me|mein)|aas\s*pass|aaspass|najdik|nazdik|आसपास|आस-पास|पास\s*में|नज़दीक|नजदीक)(?=\s|$)/ig," ").replace(/\s+/g," ").trim():"";
     if(rows.length>1){   /* सिर्फ़ पते में शब्द मिलने वाली दुकानें (नाम/Category में नहीं), जब Category पता हो → नीचे */
       const ws=q.toLowerCase().split(/\s+/).filter(w=>w.length>=3&&!STOPW.has(w));
       const hit=b=>b.category===CATSEL||ws.some(w=>String(b.name||"").toLowerCase().includes(w)||String(catOf(b)||"").toLowerCase().includes(w));
@@ -766,7 +767,7 @@ function render0(rows,q,city,keep){
   }
   if(!rows.length&&!hasBig){
     const dym=DYM.length?'<p><b>'+esc(FEN()?"Did you mean:":"क्या आपका मतलब:")+'</b> '+DYM.map(x=>'<a href="#" class="dym" data-q="'+esc(x)+'">'+esc(x)+'</a>').join(' · ')+'</p>':'';
-    list.innerHTML='<div class="empty">'+dym+'<p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
+    list.innerHTML='<div class="empty">'+dym+'<p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a>'+(NEARG?'<p style="margin-top:14px"><a class="btn" style="background:#eef4ff;color:#0b4db3;border:1.5px solid #1a73e8" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(NEARG+" near me")+'">🗺 '+esc(FEN()?"See \u201c"+NEARG+"\u201d near you on Google Maps":"Google Maps में \u201c"+NEARG+"\u201d पास में देखें")+'</a></p>':'')+'</div>';
     return;
   }
   const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(LOOSEMISS?(FEN()?"No shop found for \u201c"+LOOSEMISS+"\u201d \u2014 showing the closest shops:":"\u201c"+LOOSEMISS+"\u201d के लिए कोई दुकान नहीं मिली \u2014 ये सबसे मिलती-जुलती दुकानें हैं:"):(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:"))+'</p>':'';
