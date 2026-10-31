@@ -108,7 +108,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.pg .t{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#fff}.pg img{width:100%;height:100%;object-fit:cover;display:block}
 .pg .t button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;cursor:pointer}
 .pg .add{display:grid;place-items:center;border:2px dashed #c9b8ff;border-radius:10px;aspect-ratio:1;color:#3b2bb8;font-size:22px;background:#fff;cursor:pointer}
-.rp{margin-top:10px;background:#fff;border-radius:12px;padding:10px}.rp svg{display:block;width:100%;height:auto}.rp .tt{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:#33395a;margin-top:6px}.rp .tt b{color:#0b2f73}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}.rbx{background:#f5f8ff;border:1px solid #e4eaf5;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.rbx i{font-style:normal;font-size:22px}.rbx b{font-size:26px;color:#0b2f73;line-height:1.1}.rbx span{font-size:12.5px;color:#4a5578;font-weight:700}.rbx svg{width:100%;height:auto;margin-top:4px}.rp{margin-top:10px;background:#fff;border-radius:12px;padding:10px}.rp svg{display:block;width:100%;height:auto}.rp .tt{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:#33395a;margin-top:6px}.rp .tt b{color:#0b2f73}
 .wk{margin-top:10px;font-size:13px;color:#0b2f73;background:#eef4ff;border-radius:12px;padding:8px 12px;font-weight:600}
 .pf{display:flex;align-items:center;gap:14px;margin-top:12px;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:12px}
 .pf .ring{flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center}
@@ -653,7 +653,7 @@ function premBlock(b,i){
     if(o==="pr"&&window.prodBody)body=prodBody(b,i);
     const t=tierOf(b),tn=window.PBPlan?PBPlan.name(t,en):"Premium",ic={silver:"🥈",gold:"👑",platinum:"💎"}[t]||"💎";
     return '<div class="pm pt-'+t+'"><div class="ph">'+ic+' PataBook '+esc(window.PBPlan?PBPlan.name(t,true):tn)+' Member</div><small>'+(en?"Active till "+till:till+" तक चालू")+(PH(b,"top")?(en?" · ⭐ your shop shows on top":" · ⭐ आपकी दुकान ऊपर दिखती है"):"")+'</small>'+
-      (PH(b,"report")?'<small style="margin-top:6px">📊 '+(en?"Report (views, Call, WhatsApp): on your shop page, at the bottom":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp): अपनी दुकान के page पर सबसे नीचे")+'</small>':'')+
+      (PH(b,"report")?'<small style="margin-top:6px">📊 '+(en?"Report: Settings → Report & notifications":"रिपोर्ट: Settings → रिपोर्ट और सूचनाएँ")+'</small>':'')+
       buyBlock(b,i,true)+'</div>';
   }
   if(window.PBPlay&&PBPlay.on()&&PLAYP&&PLAYP.length)return buyBlock(b,i,false);
@@ -669,18 +669,16 @@ function premBlock(b,i){
 }
 function reportHTML(b){
   const R=REPORT[b.slug],en=L()==="en";if(!R)return '<div class="rp"><small>…</small></div>';
-  const days=R.days||30,end=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));const D=[];
+  const days=R.days||7,end=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));const D=[];
   for(let k=days-1;k>=0;k--){const d=new Date(end);d.setDate(d.getDate()-k);D.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"));}
   const M={};(R.rows||[]).forEach(x=>{(M[x.day]=M[x.day]||{})[x.kind]=x.n;});
-  const tot={view:0,call:0,wa:0,dir:0};D.forEach(d=>{const m=M[d]||{};for(const k in tot)tot[k]+=(m[k]||0);});
-  const mx=Math.max(1,...D.map(d=>(M[d]||{}).view||0)),W=300,H=90,bw=W/D.length;
-  let bars="";D.forEach((d,k)=>{const m=M[d]||{},v=m.view||0,h=v/mx*(H-14),x=k*bw;
-    bars+='<rect x="'+(x+bw*.15).toFixed(1)+'" y="'+(H-12-h).toFixed(1)+'" width="'+(bw*.7).toFixed(1)+'" height="'+Math.max(h,v?1.5:0).toFixed(1)+'" rx="1.5" fill="#6b5cf0"><title>'+d+': '+v+'</title></rect>';
-    if((m.call||0)+(m.wa||0))bars+='<circle cx="'+(x+bw/2).toFixed(1)+'" cy="'+(H-12-h-4).toFixed(1)+'" r="2.2" fill="#1e9e57"/>';});
-  const lab=(t,x,a)=>'<text x="'+x+'" y="'+(H-1)+'" font-size="8" fill="#8a93a3" text-anchor="'+a+'">'+t+'</text>';
-  return '<div class="rp"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="views per day">'+bars+'<line x1="0" x2="'+W+'" y1="'+(H-12)+'" y2="'+(H-12)+'" stroke="#e4eaf5"/>'+lab(D[0].slice(5),0,"start")+lab(en?"today":"आज",W,"end")+'</svg>'+
-    '<div class="tt"><span>👀 <b>'+tot.view+'</b> '+(en?"views":"ने देखा")+'</span><span>📞 <b>'+tot.call+'</b> Call</span><span>💬 <b>'+tot.wa+'</b> WhatsApp</span><span>🧭 <b>'+tot.dir+'</b> '+(en?"directions":"रास्ता")+'</span></div>'+
-    '<small>'+(en?"Last "+days+" days · purple bar = views, green dot = a call/WhatsApp that day":"पिछले "+days+" दिन · बैंगनी = कितनों ने देखा, हरा बिंदु = उस दिन Call/WhatsApp")+'</small></div>';
+  const KS=[["view","👀",en?"Profile views":"प्रोफ़ाइल देखी","#6b5cf0"],["call","📞",en?"Call clicks":"Call पर click","#1e9e57"],["wa","💬",en?"WhatsApp clicks":"WhatsApp पर click","#25a244"],["dir","🧭",en?"Directions":"रास्ता (Map)","#1a73e8"],["photo","🖼️",en?"Photo clicks":"Photos पर click","#e8710a"],["share","🔗",en?"Shares":"Share किया","#d6336c"]];
+  const W=120,H=34,bw=W/D.length;
+  const box=k=>{const v=D.map(d=>(M[d]||{})[k[0]]||0),t=v.reduce((a,c)=>a+c,0),mx=Math.max(1,...v);
+    const bars=v.map((n,i)=>'<rect x="'+(i*bw+bw*.12).toFixed(1)+'" y="'+(H-n/mx*(H-2)).toFixed(1)+'" width="'+(bw*.76).toFixed(1)+'" height="'+Math.max(n/mx*(H-2),n?1.5:0).toFixed(1)+'" rx="1" fill="'+k[3]+'"/>').join("");
+    return '<div class="rbx"><i>'+k[1]+'</i><b>'+t+'</b><span>'+k[2]+'</span><svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'+bars+'<line x1="0" x2="'+W+'" y1="'+H+'" y2="'+H+'" stroke="#e4eaf5"/></svg></div>';};
+  return '<div class="rp"><div class="rgrid">'+KS.map(box).join("")+'</div>'+
+    '<small>'+(en?"Last "+days+" days · counts only, no names or numbers are stored. Photo clicks and shares count from today.":"पिछले "+days+" दिन · सिर्फ़ गिनती, किसी का नाम या नंबर नहीं। Photos click और Share की गिनती आज से शुरू है।")+'</small></div>';
 }
 function resizeImage(file,maxSide){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
   img.onload=()=>{const k=Math.min(1,maxSide/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);

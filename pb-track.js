@@ -81,6 +81,11 @@
     return '';
   }
   document.addEventListener('click', function (e) {
+    var tg = e.target.closest && e.target.closest('[data-g],[data-pbh="share"],#pShr,#shareQa');
+    if (tg && (page() === 'business' || page() === 'shop') && slug) {
+      var kk = tg.hasAttribute('data-g') ? 'photo' : 'share';
+      ev(kk, slug); flush(); ping(slug, kk);
+    }
     var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
     var h = a.getAttribute('href') || '', k = '';
     if (/^tel:/i.test(h)) k = 'call';
