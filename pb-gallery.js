@@ -26,29 +26,24 @@
     var s = b.slug;
     if (!paid(b)) return '<div class="pm"><small style="margin:0">' + T("Logo, Photos, Banner और Shop Front Photo Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।", "Logo, Photos, Banner and Shop Front Photo come with a Member plan. See “Member Plan” in Settings.") + '</small></div>';
     if (!LOAD[s]) { LOAD[s] = 1; load(s); }
-    var L0 = lim(b), used = total(b);
-    var h = '<div class="gcnt">🗂️ ' + T("कुल फ़ोटो", "Total photos") + ': <b>' + used + ' / ' + (L0 || 0) + '</b></div>' + (MSG[s] ? '<div class="err" style="margin:6px 0">' + esc(MSG[s]) + '</div>' : '');
-    h += KINDS.map(function (K) {
-      var k = K[0], open = GO[s] === k, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
-      var cnt = arr.length ? arr.length : "";
-      var sub = (k === "photo") ? (arr.filter(function (x) { return !x.hidden; }).length + " " + T("दिख रही", "visible")) : (act ? "✔ " + T("चालू", "in use") : T("कोई नहीं लगी", "none set"));
-      var head = '<div class="gfr"><button type="button" class="gfh' + (open ? ' on' : '') + '" data-gf="' + k + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b><small>' + (ok ? esc(sub) : T("plan में नहीं", "not in plan")) + '</small></span><i>' + cnt + '</i><em>' + (open ? '▴' : '▾') + '</em></button>' +
-        (ok ? '<label class="gplus" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>' : '') + '</div>';
-      var body = "";
-      if (open) {
-        if (!ok) body = '<div class="gbd"><small>' + T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") + '</small></div>';
-        else {
-          body = '<div class="gbd">' + (arr.length ? '<div class="gg">' + arr.map(function (x, n) {
-            var on = k !== "photo" && act && x.url === act;
-            return '<button type="button" class="gt' + (x.hidden ? ' hid' : '') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (on ? '<span class="gok">✔</span>' : '') + (x.hidden ? '<span class="ghd">' + T("छिपी", "hidden") + '</span>' : '') + '</button>';
-          }).join("") + '</div>' : '<small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>') + sizeNote(k);
-          if (k === "front" && PDAYS[s] && PDAYS[s].quota) body += '<div class="bb" style="margin-top:8px"><button type="button" class="sd" data-pdt="' + i + '">📅 ' + T("Date चुनें", "Set Date") + '</button></div>' + (PDOPEN[s] ? posterDays(b, i) : "");
-          body += '</div>';
-        }
-      }
-      return '<div class="gf">' + head + body + '</div>';
-    }).join("");
-    return h;
+    var msg = MSG[s] ? '<div class="err" style="margin:6px 2px">' + esc(MSG[s]) + '</div>' : '';
+    var open = GO[s];
+    if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
+      var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
+      var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="Back">‹</button><b>' + esc(K[2]) + '</b><span>' + arr.length + '</span>' +
+        (ok ? '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>' : '') + '</div>';
+      var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") + '</small></div>'
+        : arr.length ? '<div class="gg3">' + arr.map(function (x, n) {
+          var on = k !== "photo" && act && x.url === act;
+          return '<button type="button" class="gt' + (x.hidden ? ' hid' : '') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (on ? '<span class="gok">✔</span>' : '') + (x.hidden ? '<span class="ghd">' + T("छिपी", "hidden") + '</span>' : '') + '</button>';
+        }).join("") + '</div>'
+        : '<div class="gbd"><small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>' + sizeNote(k) + '</div>';
+      if (k === "front" && ok && PDAYS[s] && PDAYS[s].quota) body = '<div class="bb" style="margin:8px 2px"><button type="button" class="sd" data-pdt="' + i + '">📅 ' + T("Date चुनें", "Set Date") + '</button></div>' + (PDOPEN[s] ? posterDays(b, i) : "") + body;
+      return bar + msg + body;
+    }
+    return msg + '<div class="gl">' + KINDS.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
+      return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
+    }).join("") + '</div>';
   };
   function sizeNote(k) {
     var t = k === "logo" ? T("चौकोर फ़ोटो सबसे अच्छी (400×400)।", "Square works best (400×400).") : k === "cover" ? T("चौड़ी फ़ोटो 16:9 (1200×675)।", "Wide 16:9 (1200×675).") : k === "front" ? T("पेज खुलते ही पूरी screen पर कुछ सेकंड दिखती है (1200×600)।", "Shown full-screen for a few seconds when your page opens (1200×600).") : T("दुकान / काम / टीम की फ़ोटो। जो ‘दिखाओ’ पर हैं वही ग्राहकों को दिखती हैं।", "Shop, work or team photos. Only the ‘shown’ ones are visible to customers.");
@@ -127,8 +122,10 @@
     });
   }
 
+  window.addEventListener("popstate", function () { var any = false; for (var k in GO) if (GO[k]) { any = true; GO[k] = ""; } if (any) draw(); });
   document.getElementById("list").addEventListener("click", function (e) {
-    var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = GO[b.slug] === gf.dataset.gf ? "" : gf.dataset.gf; draw(); return; }
+    var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
+    var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
     var gv = e.target.closest("[data-gv]"); if (gv) { light(+gv.dataset.i, gv.dataset.gv, +gv.dataset.n); return; }
   });
   document.getElementById("list").addEventListener("change", function (e) {
