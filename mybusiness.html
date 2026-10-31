@@ -1164,21 +1164,22 @@ async function start(){
   if(ME&&ROWS&&ROWS.length&&/^#go=(photo|rep|nt)(&s=.*)?$/.test(location.hash)){
     const hm=location.hash.match(/^#go=(photo|rep|nt)(?:&s=(.*))?$/),gc=hm[1],gs=hm[2]?decodeURIComponent(hm[2]):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
     let gi=gs?ROWS.findIndex(r=>r&&r.slug===gs):-1;if(gi<0&&ROWS.length===1)gi=0;
-    if(gi>=0)openShop(gi,gc);else PENDCAT=gc;}
+    if(gi>=0){DEEP=1;openShop(gi,gc);}else PENDCAT=gc;}
   if(ME&&ROWS&&ROWS.length&&/^#(num|prof(=|$))/.test(location.hash)){
     const h=location.hash,sg=/^#prof=/.test(h)?decodeURIComponent(h.slice(6)||""):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
     let ix=sg?ROWS.findIndex(r=>r&&r.slug===sg):-1;if(ix<0){ix=ROWS.findIndex(r=>shopSt(r)!=="live");if(ix<0)ix=0;}
-    openShop(ix,h==="#num"?"num":"");}
+    DEEP=1;openShop(ix,h==="#num"?"num":"");}
 }
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;
-function setGo(cat){const d=cat===""?1:2;try{history.pushState({pbd:d,cat:cat,shop:SET.shop},"");}catch(e){}SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
+let DEEP=0,DEEPN=0;
+function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{(DEEP?history.replaceState:history.pushState).call(history,Object.assign({},history.state||{},{pbd:d,cat:cat,shop:SET.shop}),"");}catch(e){}DEEP=0;SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
   if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
 /* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
 let PENDCAT="";function openShop(i,cat){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
 function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
 window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));SET.shop=SD===0?null:(st.shop==null?null:st.shop);ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
-$("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null){if(ROWS&&ROWS.length===1)openShop(0,"");else window.scrollTo(0,0);}else if(SD>0)history.go(-SD);else{SET.cat=null;draw();}});
+$("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null){if(ROWS&&ROWS.length===1)openShop(0,"");else window.scrollTo(0,0);}else if(SD>0)history.go(-Math.max(1,SD-DEEPN));else{SET.cat=null;draw();}});
 $("list").addEventListener("click",e=>{
   {const np=e.target.closest("[data-ntp]");if(np&&!np.disabled){NTPG+=+np.dataset.ntp;draw();window.scrollTo(0,0);return;}}
   {const ar=e.target.closest("[data-arng]");if(ar){ARNG[ROWS[+ar.dataset.i].slug]=+ar.dataset.arng;draw();return;}
