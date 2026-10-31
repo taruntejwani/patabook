@@ -1099,13 +1099,16 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     function main(){
       pn.innerHTML=MAIN.map(function(it,i){var out=it[2]==="out";return '<a data-k="'+it[2]+'" href="#" style="'+ROW+'color:'+(out?"#c5221f":"#0b2f73")+(out?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
     }
+    function locked(kind,sl){try{if(!window.PBPlan)return false;return kind==="photo"?!PBPlan.paid(sl):kind==="rep"?!PBPlan.has(sl,"report"):false;}catch(e){return false;}}
     function pick(kind,label){   /* एक से ज़्यादा दुकान: पहले दुकान चुनो */
       pn.innerHTML='<div style="padding:8px 14px 6px;font-size:12.5px;color:#5b6475;font-weight:700">'+esc(label)+' — '+(h?"दुकान चुनें":"choose shop")+'</div>'+
-        shops.map(function(s){return '<a href="'+href(kind,s.slug)+'" style="'+ROW+'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">🏪</span>'+esc(s.name)+'</a>';}).join("")+
+        shops.map(function(s){var lk=locked(kind,s.slug);return '<a '+(lk?'data-lock="'+esc(s.name)+'" href="#"':'href="'+href(kind,s.slug)+'"')+' style="'+ROW+'color:'+(lk?"#8a93a6":"#0b2f73")+'"><span style="font-size:20px;width:24px;text-align:center">'+(lk?"🔒":"🏪")+'</span>'+esc(s.name)+'</a>';}).join("")+'<div id="lkMsg" style="display:none;margin:4px 10px 8px;padding:9px 11px;border-radius:10px;background:#fff6e5;color:#8a5a00;font-size:12.5px;font-weight:700;line-height:1.4"></div>'+
         '<a data-k="back" href="#" style="'+ROW+'color:#5b6475;border-top:1px solid #eef1f7;margin-top:4px">‹ '+(h?"वापस":"Back")+'</a>';
     }
     main();
     ov.addEventListener("click",async function(e){
+      var lk=e.target.closest("[data-lock]");
+      if(lk){e.preventDefault();var m=document.getElementById("lkMsg");if(m){m.style.display="block";m.textContent="🔒 "+lk.dataset.lock+(h?" के plan में यह सुविधा नहीं है। Member Plan लेने पर मिलेगी।":": this feature is not in the current plan. Get a Member Plan to unlock it.");}return;}
       var a=e.target.closest("[data-k]");
       if(!a){if(e.target.closest("a[href]"))return;if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
       e.preventDefault();var k=a.dataset.k;
@@ -1116,6 +1119,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
         (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(function(){}).then(function(){kill();bar.style.display="none";location.reload();});return;}
       if(k==="set"){location.href="mybusiness.html";return;}
       a.style.opacity=".6";if(!shops)shops=await myShops();
+      try{if(window.PBPlan&&shops.length>1)await PBPlan.load(shops.map(function(x){return x.slug;}));}catch(x){}
       if(!shops.length){location.href="mybusiness.html";return;}
       if(shops.length===1){location.href=href(k,shops[0].slug);return;}
       pick(k,a.innerText.trim());
