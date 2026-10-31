@@ -385,6 +385,7 @@ let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
+  try{window.pbP2P&&window.pbP2P(q0);}catch(e){}
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
@@ -584,6 +585,44 @@ function openSt(b){
       m.on("error",e=>{if(e&&e.error&&/style|Failed to fetch/i.test(String(e.error.message||"")))div.remove();});
     }catch(_){if(div.parentNode)div.remove();}
   }
+  /* "A to B" / "A se B" — एक जगह से दूसरी जगह का रास्ता (दुकान की खोज के ऊपर कार्ड) */
+  const NOISE=/\s+(?:tak|tk|तक|સુધી|ka|ki|ke|का|की|के|rasta|raasta|route|रास्ता|रूट|distance|dur|door|दूर|kitna|kitni|कितना|कितनी|batao|bataiye|btao|बताओ|बताइए|jana|jaana|jane|jaye|jaaye|hai|है|kaise|कैसे|જવું|કેટલું)\s*$/i;
+  let P2S=0;
+  function p2pParse(q){
+    let t=String(q||"").replace(/[?!।.,]+/g," ").replace(/\s+/g," ").trim();if(t.length<5||t.length>90)return null;
+    const m=t.match(/^(?:(?:mujhe|muje|mereko|मुझे)\s+)?(.{2,40}?)\s+(?:to|se|से|થી|tho)\s+(.{2,40})$/i);if(!m)return null;
+    let a=m[1].trim(),b=m[2].trim(),g=0;while(g++<8&&NOISE.test(b))b=b.replace(NOISE,"").trim();
+    a=a.replace(/^(?:from|se)\s+/i,"").trim();
+    if(a.length<2||b.length<2||a.toLowerCase()===b.toLowerCase())return null;
+    return [a,b];
+  }
+  const cap=x=>x.replace(/(^|\s)(\S)/g,(m,s1,c)=>s1+c.toUpperCase());
+  async function geoP(n){const bias=[23.07,70.13];let g=await geo(n,bias);if(!g)g=await geo(n+", Gujarat",bias);return g;}
+  window.pbP2P=async function(q){
+    const my=++P2S,list=document.getElementById("list");let box=document.getElementById("ptp");
+    const pr=p2pParse(q);
+    if(!pr||!list){if(box)box.remove();return;}
+    if(!box){box=document.createElement("div");box.id="ptp";list.parentNode.insertBefore(box,list);}
+    const en=FEN(),A=cap(pr[0]),B=cap(pr[1]);
+    box.innerHTML='<article class="card bigc"><div class="okl">🧭 '+esc(en?"Route":"रास्ता")+'</div><h2>'+esc(A)+' → '+esc(B)+'</h2><div class="gto">'+esc(en?"Finding the places…":"जगहें ढूँढ रहे हैं…")+'</div></article>';
+    const out=box.querySelector(".gto"),card=box.firstChild;
+    try{
+      const [ga,gb]=await Promise.all([geoP(pr[0]),geoP(pr[1])]);
+      if(my!==P2S)return;
+      if(!ga||!gb){box.remove();return;}   /* जगह न मिले → कार्ड नहीं, सामान्य खोज ही */
+      const ul=ga.ll[1],ug=ga.ll[0],tl=gb.ll[1],tg=gb.ll[0];
+      out.textContent=en?"Calculating the route…":"रास्ता निकाल रहे हैं…";
+      let km,dm,wm,exact=false,line=null;const sl=hv(ul,ug,tl,tg);
+      try{let c;try{c=await routeV(ul,ug,tl,tg);}catch(_){c=await route(OSRMC,ul,ug,tl,tg,true);}km=c.m/1000;dm=c.s/60;exact=true;if(c.g&&c.g.length>1)line=c.g;
+        if(km<=8){try{const w=await route(OSRMF,ul,ug,tl,tg);wm=w.s/60;}catch(_){wm=km/4.5*60;}}
+      }catch(_){const road=sl*1.3;km=road;dm=road/(road<15?25:40)*60;wm=road/4.5*60;}
+      if(my!==P2S)return;
+      const kmT=km<1?Math.round(km*1000)+" m":km.toFixed(1)+" km";
+      const note=(exact?(en?"Road distance and time (OpenStreetMap), preferring main roads.":"सड़क की दूरी और समय (OpenStreetMap), बड़ी सड़क को तरजीह।"):(en?"Approximate (straight-line estimate).":"यह अंदाज़ा है (सीधी दूरी से)।"))+(ga.vague||gb.vague?(en?" A place name is not exact, so the point may be roughly right.":" किसी जगह का नाम पक्का नहीं मिला, इसलिए बिंदु थोड़ा आगे-पीछे हो सकता है।"):"");
+      out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small>";
+      if(line)drawMap(card,line,ul,ug,tl,tg);
+    }catch(_){if(my===P2S)box.remove();}
+  };
   document.addEventListener("click",e=>{
     const bt=e.target.closest&&e.target.closest(".gtb");if(!bt)return;
     const box=bt.closest(".gt"),out=box.querySelector(".gto"),en=FEN();
