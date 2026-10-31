@@ -519,14 +519,37 @@ function openSt(b){
     return {open:false,t:en?"Closed now · opens "+when+" "+hm(ot):"अभी बंद · "+when+" "+hm(ot)+" पर खुलेगा"};}
   return {open:false,t:en?"Closed now":"अभी बंद"};
 }
+(function(){
+  const st=document.createElement("style");st.textContent=".gt{margin:10px 0 2px}.gtb{border:1.5px solid #1a73e8;background:#eef4ff;color:#0b4db3;font:700 14.5px system-ui,sans-serif;padding:10px 14px;border-radius:12px;cursor:pointer}.gtb[disabled]{opacity:.6}.gto{margin-top:8px;font-size:15px;line-height:1.7;color:#1c2540}.gto b{color:#0b4db3}.gto small{display:block;color:#667085;font-size:12.5px}";document.head.appendChild(st);
+  const hv=(a,b,c,d)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dn=r(d-b),h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h));};
+  const fm=m=>m<60?Math.max(1,Math.round(m))+(FEN()?" min":" मिनट"):Math.floor(m/60)+(FEN()?" h ":" घंटे ")+(Math.round(m%60)?Math.round(m%60)+(FEN()?" min":" मिनट"):"");
+  document.addEventListener("click",e=>{
+    const bt=e.target.closest&&e.target.closest(".gtb");if(!bt)return;
+    const box=bt.closest(".gt"),out=box.querySelector(".gto"),en=FEN();
+    if(!navigator.geolocation){out.textContent=en?"Location is not available on this device. Use the Directions button.":"इस फ़ोन में लोकेशन नहीं मिल सकती। नीचे 🧭 रास्ता वाला बटन दबाइए।";return;}
+    bt.disabled=true;out.textContent=en?"Finding your location…":"आपकी लोकेशन ढूँढ रहे हैं…";
+    navigator.geolocation.getCurrentPosition(pos=>{
+      bt.disabled=false;
+      const sl=hv(pos.coords.latitude,pos.coords.longitude,+box.dataset.lat,+box.dataset.lng),road=sl*1.3,
+        drive=road/(road<15?25:40)*60,walk=road/4.5*60;
+      const kmT=road<1?Math.round(road*1000)+" m":road.toFixed(1)+" km";
+      out.innerHTML=(en?"About ":"लगभग ")+"<b>"+kmT+"</b> · 🚗 "+fm(drive)+(road<=8?" · 🚶 "+fm(walk):"")+"<small>"+esc(en?"Approximate (straight-line estimate). Tap Directions for the exact road route.":"यह अंदाज़ा है (सीधी दूरी से)। पक्के रास्ते के लिए 🧭 Directions दबाइए।")+"</small>";
+    },err=>{
+      bt.disabled=false;
+      out.textContent=err&&err.code===1?(en?"Location permission was not given. Allow it in the browser, or tap Directions.":"लोकेशन की अनुमति नहीं मिली। browser में अनुमति दें, या 🧭 Directions दबाइए।"):(en?"Could not find your location. Tap Directions.":"लोकेशन नहीं मिली। 🧭 Directions दबाइए।");
+    },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+  });
+})();
 function bigCard(b){
   const en=FEN(),link="business.html?slug="+encodeURIComponent(b.slug||""),dir=pbDir(b),ct=cityOf(b),cg=catOf(b),it=NLI&&NLI.intent||"",os=openSt(b);
   const hint=it==="phone"?(en?"To see the phone number, tap Contact (shown after login).":"फ़ोन नंबर देखने के लिए 📞 Contact दबाएँ (login के बाद दिखता है)।"):"";
   const ist=(it==="open"||os)&&(it==="open")?(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'<div class="ist">'+esc(en?"Timing not listed — please call to check.":"समय दर्ज नहीं है — पक्का करने के लिए Contact करें।")+'</div>'):(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'');
   const P='<a class="call" href="'+link+'#contact">'+esc("📞 "+T("c_title"))+'</a>',D=dir?'<a href="'+esc(dir)+'">'+esc("🧭 "+T("dir"))+'</a>':'',X='<a href="'+link+'">'+esc(T("details"))+'</a>';
   const acts=it==="dir"?D+P+X:P+D+X;
+  const hasLL=b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude)&&!(+b.latitude===0&&+b.longitude===0);
+  const gt=it==="dir"&&hasLL?'<div class="gt" data-lat="'+(+b.latitude)+'" data-lng="'+(+b.longitude)+'"><button type="button" class="gtb">📍 '+esc(en?"See distance from my location":"मेरी लोकेशन से दूरी देखें")+'</button><div class="gto"></div></div>':'';
   return '<article class="card bigc'+(PREMS[b.slug]?' isprem':'')+'"><div class="okl">✔ '+esc(en?"Found this shop":"यही दुकान मिली")+'</div><h2><a href="'+link+'">'+esc(b.name)+'</a></h2><div class="tags">'+premTags(b)+(cg?'<span class="tag">'+esc(cg)+'</span>':'')+(ct?'<span class="tag city">📍 '+esc(ct)+'</span>':'')+(b.is_verified?'<span class="tag ver">'+esc(T("ver"))+'</span>':'')+'</div>'+
-    (b.address?'<p class="addr'+(it==="addr"||it==="where"?' em':'')+'"><b>'+esc(en?"Address: ":"पता: ")+'</b>'+esc(b.address)+'</p>':'')+ist+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+'<div class="acts">'+acts+'</div></article>';
+    (b.address?'<p class="addr'+(it==="addr"||it==="where"?' em':'')+'"><b>'+esc(en?"Address: ":"पता: ")+'</b>'+esc(b.address)+'</p>':'')+ist+(hint?'<div class="hint">'+esc(hint)+'</div>':'')+gt+'<div class="acts">'+acts+'</div></article>';
 }
 var VIEW="all",IMGC={};
 const TINTS=["#1a73e8","#0f9d58","#e8710a","#9334e6","#d93025","#00897b","#5f6b8a"];
