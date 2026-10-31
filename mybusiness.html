@@ -1230,7 +1230,43 @@ function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROW
 let PENDCAT="";function openShop(i,cat){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
 function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
 window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));SET.shop=SD===0?null:(st.shop==null?null:st.shop);ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
-$("stBtn").addEventListener("click",()=>{ntOpen(false);if(SET.cat===null){if(ROWS&&ROWS.length===1)openShop(0,"");else window.scrollTo(0,0);}else if(SD>0)history.go(-Math.max(1,SD-DEEPN));else{SET.cat=null;draw();}});
+/* ☰ मेन्यू: Home जैसा — Preview, Gallery, Report, Notifications, Settings, Log out (एक से ज़्यादा दुकान हो तो दुकान चुनो; plan में न हो तो 🔒) */
+let OMOV=null;
+function ownMenu(){
+  if(OMOV||!ROWS||!ROWS.length)return;const h=L()!=="en",bar=$("stBtn");
+  const ROW='display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;font-weight:700;font-size:15.5px;text-decoration:none;cursor:pointer;';
+  const ov=OMOV=document.createElement("div");ov.style.cssText="position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
+  const r=bar.getBoundingClientRect(),pn=document.createElement("div");
+  pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
+  ov.appendChild(pn);document.body.appendChild(ov);
+  const kill=()=>{if(OMOV){OMOV.remove();OMOV=null;}};
+  const MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
+  const locked=(kind,b)=>{try{return kind==="photo"?!PH(b,"photos"):kind==="rep"?!PH(b,"report"):false;}catch(e){return false;}};
+  const main=()=>{pn.innerHTML=MAIN.map(it=>{const o=it[2]==="out";return '<a data-k="'+it[2]+'" style="'+ROW+'color:'+(o?"#c5221f":"#0b2f73")+(o?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");};
+  const pick=(k,label)=>{pn.innerHTML='<div style="padding:8px 14px 6px;font-size:12.5px;color:#5b6475;font-weight:700">'+esc(label)+' — '+(h?"दुकान चुनें":"choose shop")+'</div>'+
+    ROWS.map((b,i)=>{const lk=locked(k,b);return '<a data-i="'+i+'"'+(lk?' data-lock="'+esc(b.name)+'"':'')+' style="'+ROW+'color:'+(lk?"#8a93a6":"#0b2f73")+'"><span style="font-size:20px;width:24px;text-align:center">'+(lk?"🔒":"🏪")+'</span>'+esc(b.name)+'</a>';}).join("")+
+    '<div id="omMsg" style="display:none;margin:4px 10px 8px;padding:9px 11px;border-radius:10px;background:#fff6e5;color:#8a5a00;font-size:12.5px;font-weight:700;line-height:1.4"></div><a data-k="back" style="'+ROW+'color:#5b6475;border-top:1px solid #eef1f7;margin-top:4px">‹ '+(h?"वापस":"Back")+'</a>';ov.dataset.k=k;};
+  const go=(k,i)=>{const b=ROWS[i];if(k==="pv"){location.href="business.html?slug="+encodeURIComponent(b.slug);return;}
+    if(locked(k,b)){return;}
+    if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();
+    setTimeout(()=>{ntOpen(false);DEEP=0;openShop(i,k==="set"?"":k);},150);};
+  main();
+  ov.addEventListener("click",e=>{
+    const lk=e.target.closest("[data-lock]");
+    if(lk){const m=$("omMsg");if(m){m.style.display="block";m.textContent="🔒 "+lk.dataset.lock+(h?" के plan में यह सुविधा नहीं है। Member Plan लेने पर मिलेगी।":": this feature is not in the current plan. Get a Member Plan to unlock it.");}return;}
+    const ai=e.target.closest("[data-i]");if(ai){go(ov.dataset.k,+ai.dataset.i);return;}
+    const a=e.target.closest("[data-k]");
+    if(!a){if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
+    const k=a.dataset.k;
+    if(k==="back"){main();return;}
+    if(k==="out"){if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(x){}
+      (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(()=>{}).then(()=>{kill();location.href="index.html";});return;}
+    if(ROWS.length===1){go(k,0);return;}
+    pick(k,a.innerText.trim());
+  });
+  if(window.PBBack)PBBack.open(kill);
+}
+$("stBtn").addEventListener("click",e=>{e.preventDefault();ntOpen(false);ownMenu();});
 $("list").addEventListener("click",e=>{
   {const np=e.target.closest("[data-ntp]");if(np&&!np.disabled){NTPG+=+np.dataset.ntp;draw();window.scrollTo(0,0);return;}}
   {const ar=e.target.closest("[data-arng]");if(ar){ARNG[ROWS[+ar.dataset.i].slug]=+ar.dataset.arng;draw();return;}
