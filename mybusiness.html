@@ -199,6 +199,8 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .shg{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:12px}
 .shb{position:relative;aspect-ratio:1/1;background:#fff;border:1px solid var(--line);border-radius:20px;padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:6px;text-align:center;cursor:pointer;box-shadow:0 6px 18px rgba(26,115,232,.09);min-width:0}
 .shb:active{transform:scale(.98)}
+.shb .lke{position:absolute;top:8px;left:8px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}.shb .lkt{font-size:11.5px;color:#1a4fb4;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lko{position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.5);display:flex;align-items:flex-end;justify-content:center}.lks{background:#fff;width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:16px 16px 22px;box-sizing:border-box}.lks h3{margin:0 0 8px;font-size:17px;color:#0b2f73;display:flex;justify-content:space-between;align-items:center}.lks h3 button{border:0;background:#eef3fc;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer}.lks .lkr{display:flex;align-items:center;gap:4px;font-weight:700}.lks input{flex:1;min-width:0;font:inherit;border:1px solid #cfd6e4;border-radius:10px;padding:10px}.lks .lkb{width:100%;margin-top:6px;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;background:#1a73e8;color:#fff;cursor:pointer}.lks .lkb:disabled{opacity:.45}
 .shb .lg{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
 .shb .lg img{width:100%;height:100%;object-fit:cover}
 .shb .nm{font-weight:800;font-size:15px;line-height:1.25;color:var(--navy);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;max-width:100%}
@@ -880,6 +882,36 @@ function settingsView(en){
   if(cur[0]==="nt")return h+'<div class="card">'+notifPage()+'</div>';
   return h+'<div class="card">'+catBody(cur[0],b,i,en)+'</div>';
 }
+const LINKS={};
+async function loadLinks(){try{await Promise.all(ROWS.map(async b=>{try{LINKS[b.slug]=await rpc("pb_link_of",{p_slug:b.slug});}catch(e){}}));if(SET.shop==null)draw();}catch(e){}}
+function lkOpen(i){
+  const b=ROWS[i],en=L()==="en",cur=LINKS[b.slug]||{},left=cur.left==null?2:cur.left,T=(h,e)=>en?e:h;
+  const fix=v=>String(v||"").toLowerCase().trim().replace(/[\s_]+/g,"-").replace(/[^a-z0-9-]/g,"").replace(/-+/g,"-").replace(/^-+/,"").slice(0,30);
+  const ov=document.createElement("div");ov.className="lko";
+  if(cur.link&&left<=0){ov.innerHTML='<div class="lks"><h3>🔗 '+T("आपका link","Your link")+'<button type="button" data-x>✕</button></h3><p>patabook.in/<b>'+esc(cur.link)+'</b></p><p style="color:#5b6475;font-size:13px">'+T("यह link बदला जा चुका है और अब नहीं बदल सकता। ज़रूरत हो तो Support से संपर्क करें।","This link is already changed and is now locked. Contact Support if needed.")+'</p></div>';}
+  else ov.innerHTML='<div class="lks"><h3>🔗 '+T("आपका link","Your link")+'<button type="button" data-x>✕</button></h3><p style="margin:0 0 8px;color:#5b6475;font-size:13px">'+(cur.link?T("link बदलें — "+(left<=1?"यह आख़िरी बदलाव होगा।":"अभी "+left+" बदलाव बाकी हैं।"),"Change your link — "+(left<=1?"this is your last change.":left+" changes left.")):T("अपनी दुकान का छोटा link चुनें (space की जगह - लगेगा)।","Choose your shop\'s short link (spaces become -)."))+'</p><div class="lkr">patabook.in/<input maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" value="'+esc(cur.link||fix(b.name))+'"></div><div class="lkst" style="min-height:24px;margin:8px 0;font-weight:700"></div><button type="button" class="lkb" disabled>Save</button><div class="lker" style="color:#c5221f;font-size:13px;margin-top:6px"></div></div>';
+  document.body.appendChild(ov);
+  const kill=()=>{if(ov.isConnected)ov.remove();};
+  if(window.PBBack)PBBack.open(kill,ov);
+  const close=()=>{if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();};
+  ov.addEventListener("click",e=>{if(e.target===ov||e.target.closest("[data-x]"))close();});
+  const inp=ov.querySelector("input");if(!inp)return;
+  const st=ov.querySelector(".lkst"),go=ov.querySelector(".lkb"),er=ov.querySelector(".lker");let tm=null,okv="";
+  const chk=()=>{const v=fix(inp.value);if(v!==inp.value)inp.value=v;okv="";go.disabled=true;er.textContent="";clearTimeout(tm);st.style.color="#5b6475";
+    if(v.length<3){st.textContent=T("कम से कम 3 अक्षर","At least 3 characters");return;}
+    if(cur.link&&v===cur.link){st.textContent=T("यही अभी का link है","This is your current link");return;}
+    st.textContent="…";
+    tm=setTimeout(async()=>{try{const r=await rpc("pb_link_check",{p_link:v});if(fix(inp.value)!==v)return;
+      if(r&&r.ok){okv=v;go.disabled=false;st.style.color="#1e9e57";st.textContent="✅ "+T("यह नाम मिल सकता है","Available");}
+      else{st.style.color="#c5221f";st.textContent="❌ "+(r&&r.reason==="taken"?T("यह नाम किसी और का है","Already taken"):r&&r.reason==="reserved"?T("यह नाम साइट के लिए रखा है","Reserved name"):T("सिर्फ़ a-z, 0-9 और - (3 से 30 अक्षर)","Only a-z, 0-9 and - (3 to 30 characters)"));}
+    }catch(x){st.style.color="#c5221f";st.textContent=T("जाँच नहीं हो सकी, फिर कोशिश करें।","Could not check. Try again.");}},450);};
+  inp.oninput=chk;chk();
+  go.onclick=async()=>{if(!okv)return;const after=Math.max(0,left-1);
+    if(!confirm(T("आपका link बनेगा:\n\npatabook.in/"+okv+"\n\n"+(after>0?"इसके बाद आप इसे सिर्फ़ "+after+" बार और बदल सकेंगे।":"यह आख़िरी बदलाव है — इसके बाद link बदला नहीं जा सकेगा।")+"\n\nपक्का करें?","Your link will be:\n\npatabook.in/"+okv+"\n\n"+(after>0?"After this you can change it "+after+" more time(s).":"This is the last change — it cannot be changed after this.")+"\n\nConfirm?")))return;
+    go.disabled=true;er.style.color="#5b6475";er.textContent=T("Save हो रहा है…","Saving…");
+    try{await rpc("pb_owner_set_link",{p_slug:b.slug,p_link:okv});LINKS[b.slug]=await rpc("pb_link_of",{p_slug:b.slug});close();draw();}
+    catch(x){const m=x.message||"";er.style.color="#c5221f";er.textContent=/link_taken/.test(m)?T("यह नाम अभी किसी और ने ले लिया।","Someone just took this name."):/link_locked/.test(m)?T("link बदलने की सीमा पूरी हो चुकी है।","Change limit reached."):/link_reserved/.test(m)?T("यह नाम नहीं मिल सकता।","This name is not allowed."):T("Save नहीं हुआ, फिर कोशिश करें।","Could not save. Try again.");go.disabled=false;}};
+}
 /* 🏪 My Shop मुख्य पन्ना: दो-दो चौकोर डिब्बे; हर डिब्बे पर Online/Offline स्विच */
 function shopTiles(en){
   return '<div class="shg">'+ROWS.map((b,i)=>{
@@ -889,8 +921,9 @@ function shopTiles(en){
     const sw=s==="pend"?'':(s==="live"&&!has)?'':'<div class="swr"><small>'+(s==="live"?"Online":"Offline")+'</small><button type="button" class="tsw" role="switch" aria-checked="'+(s==="live")+'" aria-label="Online / Offline" data-tsw="'+i+'"></button></div><div class="err" id="sub'+i+'"></div>';
     return '<div class="shb" role="button" tabindex="0" data-openshop="'+i+'">'+
       (pc!=null&&pc<100?'<span class="shr" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></span>':'')+
+      '<button type="button" class="lke" data-lk="'+i+'" aria-label="Link">✏️</button>'+
       '<span class="lg">'+(lg?'<img src="'+esc(lg)+'" alt="">':esc(String(b.name||"?").trim().charAt(0).toUpperCase()))+'</span>'+
-      '<span class="nm">'+esc(b.name)+'</span>'+chip+sw+'</div>';
+      '<span class="nm">'+esc(b.name)+'</span>'+(LINKS[b.slug]&&LINKS[b.slug].link?'<span class="lkt">patabook.in/'+esc(LINKS[b.slug].link)+'</span>':'')+chip+sw+'</div>';
   }).join("")+'</div>';
 }
 /* स्विच: Live → Offline (तुरंत); Offline (पहले Live थी) → Online (तुरंत); कभी पास नहीं हुई दुकान → मंज़ूरी के लिए भेजो */
@@ -1152,7 +1185,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadCovers();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}await loadLogos();await loadCovers();await loadVac();await loadPrem();await loadVer();await loadHome();await loadPreq();await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
@@ -1185,6 +1218,7 @@ $("list").addEventListener("click",e=>{
   {const ar=e.target.closest("[data-arng]");if(ar){ARNG[ROWS[+ar.dataset.i].slug]=+ar.dataset.arng;draw();return;}
    const ae=e.target.closest("[data-aexp]");if(ae){reportCSV(+ae.dataset.aexp);return;}
    const ap=e.target.closest(".anpt");if(ap){const t=$("antip");if(t)t.textContent=ap.dataset.t;return;}}
+  {const lk=e.target.closest("[data-lk]");if(lk){e.preventDefault();e.stopPropagation();lkOpen(+lk.dataset.lk);return;}}
   {const tw=e.target.closest("[data-tsw]");if(tw){e.preventDefault();e.stopPropagation();tileSwitch(+tw.dataset.tsw,tw);return;}}
   {const ot=e.target.closest("[data-openshop]");if(ot){ntOpen(false);openShop(+ot.dataset.openshop,"");return;}}
   {const pp=e.target.closest("[data-pop]");if(pp){e.preventDefault();popEdit(pp.dataset.popshop,pp.dataset.pop);return;}}
