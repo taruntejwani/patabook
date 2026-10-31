@@ -1028,7 +1028,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   var PMTAB = 'active', PMDATA = null, PMREQ = [], PLANCFG = null, PMTIER = {}, BANS = null, VERS = null, VSIGN = {};
   /* 🥈 Silver · 👑 Gold · 💎 Platinum (sql-30) */
   var TIERS = [['free', '🆓', 'Free'], ['silver', '🥈', 'Silver'], ['gold', '👑', 'Gold'], ['platinum', '💎', 'Platinum']];
-  var FEATS = [['logo', '🖼️ Logo'], ['products', '🛍️ Products'], ['photos', '📷 फ़ोटो gallery'], ['hiring', '💼 नौकरी (Hiring)'], ['card', '🪪 विज़िटिंग कार्ड'], ['report', '📊 रिपोर्ट'], ['top', '⭐ Search / category में ऊपर'], ['strip', '🏠 Home पट्टी में बड़ा card'], ['banner', '📢 Banner (विज्ञापन)'], ['social', '📸 Instagram / Facebook']];
+  var FEATS = [['logo', '🖼️ Logo'], ['photos', '📷 फ़ोटो gallery'], ['hiring', '💼 नौकरी (Hiring)'], ['card', '🪪 विज़िटिंग कार्ड'], ['report', '📊 रिपोर्ट'], ['top', '⭐ Search / category में ऊपर'], ['strip', '🏠 Home पट्टी में बड़ा card'], ['banner', '📢 Banner (विज्ञापन)'], ['social', '📸 Instagram / Facebook']];
   function tierName(t) { var x = TIERS.filter(function (y) { return y[0] === t; })[0]; return x ? x[1] + ' ' + x[2] : '💎 Premium'; }
   async function pmBadge() {
     var b = document.querySelector('#tiles [data-t="premium"]'); if (!b) return;
@@ -1089,8 +1089,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:8px 0">' + FEATS.map(function (x) {
           return '<label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" data-f="' + x[0] + '"' + (f[x[0]] ? ' checked' : '') + ' style="width:20px;height:20px">' + x[1] + '</label>'; }).join('') + '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:14px">' +
-          '<label>📷 फ़ोटो <input type="number" min="0" max="60" data-n="photos" value="' + (c.photos || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"></label>' +
-          '<label>🛍️ Products <input type="number" min="0" max="100" data-n="products" value="' + (c.products || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"></label>' +
+          '<label>📷 फ़ोटो <input type="number" min="0" max="100" data-n="photos" value="' + (c.photos || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"></label>' +
           (fr ? '' : ('poster_days' in c ? '<label>📢 Poster: साल में <input type="number" min="0" max="366" data-n="poster_days" value="' + (c.poster_days || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन <small style="color:#5b6475">(365 = रोज़; दुकानदार My Shop से तारीख़ें चुनता है)</small></label>'
             : '<label>📢 Banner: <input type="number" min="1" max="30" data-n="banner_on" value="' + (c.banner_on || 1) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन चले, फिर <input type="number" min="0" max="60" data-n="banner_off" value="' + (c.banner_off || 0) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन बंद <small style="color:#5b6475">(0 = हर दिन)</small></label>')) +
         '</div><div class="acts"><button data-psave="' + t[0] + '" style="background:#137333;color:#fff">💾 Save</button></div></div>';

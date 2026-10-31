@@ -625,7 +625,7 @@ function buyBlock(b,i,paid){
   return '<div class="buy"><div class="bh2">💳 '+(paid?(en?"Renew or upgrade":"Plan आगे बढ़ाएँ या बड़ा लें"):(en?"Become a PataBook Member":"PataBook Member बनें"))+'</div><small>'+(en?"1 year · paid once · no auto-renewal · via Google Play":"1 साल · एक बार भुगतान · अपने-आप renew नहीं · Google Play से")+'</small>'+
     PLAYP.map(p=>{const t=p.tier,n=window.PBPlan?PBPlan.name(t,true):t;
       return '<div class="bp pt-'+t+'"><div class="bt"><b>'+(ic[t]||"")+' '+esc(n)+' Member</b><span>'+price(p)+'<small>/'+(en?"year":"साल")+'</small></span></div>'+
-        '<div class="bf">'+(window.PBPlan?((PBPlan.limT(t,"photos")?'<i>📷 '+PBPlan.limT(t,"photos")+(en?" photos":" फ़ोटो")+'</i>':'')+'<i>🛍️ '+PBPlan.limT(t,"products")+(en?" products":" सामान")+'</i>'+F.filter(f=>PBPlan.hasT(t,f[0])).map(f=>'<i>'+(f[0]==="banner"&&PBPlan.limT(t,"poster_days")?(PBPlan.limT(t,"poster_days")>=365?(en?"📢 Home poster every day":"📢 Home poster रोज़"):(en?"📢 Home poster "+PBPlan.limT(t,"poster_days")+" days/yr":"📢 Home poster साल में "+PBPlan.limT(t,"poster_days")+" दिन")):f[1])+'</i>').join("")):'')+'</div>'+
+        '<div class="bf">'+(window.PBPlan?((PBPlan.limT(t,"photos")?'<i>📷 '+PBPlan.limT(t,"photos")+(en?" photos":" फ़ोटो")+'</i>':'')+F.filter(f=>PBPlan.hasT(t,f[0])).map(f=>'<i>'+(f[0]==="banner"&&PBPlan.limT(t,"poster_days")?(PBPlan.limT(t,"poster_days")>=365?(en?"📢 Home poster every day":"📢 Home poster रोज़"):(en?"📢 Home poster "+PBPlan.limT(t,"poster_days")+" days/yr":"📢 Home poster साल में "+PBPlan.limT(t,"poster_days")+" दिन")):f[1])+'</i>').join("")):'')+'</div>'+
         (verLocked(b)?'<div class="lock">🔒 '+(en?"Verify your shop first (above)":"पहले दुकान verify करवाएँ (ऊपर)")+'</div>':inApp?'<button type="button" data-buy="'+i+'" data-p="'+esc(p.product)+'">'+(en?"Buy with Google Play":"Google Play से खरीदें")+'</button>':'<a href="'+store+'" target="_blank" rel="noopener">'+(en?"Buy in the PataBook app ›":"PataBook app में खरीदें ›")+'</a>')+'</div>';}).join("")+
     '<small style="margin-top:8px">'+(en?"By buying you accept the ":"खरीदकर आप ")+'<a href="terms.html">'+(en?"Terms":"नियम")+'</a> · <a href="refund.html">'+(en?"Refund Policy":"Refund नीति")+'</a>'+(en?".":" मानते हैं।")+'</small><div class="err" id="bye'+i+'"></div></div>';
 }
@@ -786,13 +786,13 @@ function setCats(en){return [
 function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof")return offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
-    '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos, products…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो, सामान…)")+'</a>';
+    '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो…)")+'</a>';
   if(k==="num")return phoneBlock(b,i)+numsBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (Settings → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>'):'');
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
   if(k==="photo")return (stripsBlock(b,i)||'<div class="pm"><small style="margin:0">'+(en?"Logo, Profile Banner and Poster come with a Member plan. See “Member Plan” in Settings.":"Logo, Profile Banner और Poster Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।")+'</small></div>')+
-    '<a class="stl alt" href="business.html?slug='+sl+'#edit">🛍️ '+(en?"Add / change photos & products":"फ़ोटो और सामान जोड़ें / बदलें")+'</a>';
+    '<a class="stl alt" href="business.html?slug='+sl+'#edit">🛍️ '+(en?"Add / change photos":"फ़ोटो जोड़ें / बदलें")+'</a>';
   if(k==="rep")return PH(b,"report")?(weekLine(b)||'')+reportHTML(b):'<div class="pm"><small style="margin:0">📊 '+(en?"The report (views, Call, WhatsApp) comes with a Member plan. See “Member Plan”.":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp) Member plan के साथ मिलती है। “Member Plan” देखें।")+'</small></div>';
   if(k==="plan")return premBlock(b,i)||'<p class="note">—</p>';
   return "";
@@ -821,7 +821,7 @@ function settingsView(en){
       '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
       '<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"View my shop (as customers see it)":"मेरी दुकान देखें (जैसी ग्राहक देखते हैं)")+'</a>'+
       '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
-      '<a class="stl" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit">✏️ '+(en?"Edit profile (photos, products…)":"प्रोफ़ाइल Edit करें (फ़ोटो, सामान…)")+'</a></div>'+
+      '<a class="stl" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit">✏️ '+(en?"Edit profile (photos…)":"प्रोफ़ाइल Edit करें (फ़ोटो…)")+'</a></div>'+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
       '<div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
   }
@@ -1144,6 +1144,6 @@ start();
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-watermark.js"></script>
-<script src="pb-products-owner.js"></script>
+
 </body>
 </html>

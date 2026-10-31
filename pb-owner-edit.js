@@ -407,7 +407,7 @@
   }
   /* 👁️ public को क्या दिखे — हर हिस्से का switch; दुकान की जानकारी में "Hide:" line बनकर save */
   var VIS = [
-    ["prods", "🛍️", "Products", "Products"], ["about", "🏪", "हमारे बारे में (जानकारी)", "About us (details)"],
+    ["photos", "📷", "फ़ोटो", "Photos"], ["about", "🏪", "हमारे बारे में (जानकारी)", "About us (details)"],
     ["hours", "🕘", "खुलने-बंद होने का समय", "Opening hours"], ["addr", "📍", "पता और Directions", "Address & directions"],
     ["gst", "🧾", "GST Registered वाला निशान", "GST Registered badge"], ["web", "🌐", "Email / Website", "Email / Website"],
     ["vac", "💼", "Vacancy वाली पट्टी", "Vacancy strip"], ["near", "🏬", "आस-पास की दुकानें", "Nearby shops"],
@@ -524,12 +524,11 @@
     function go(k) { if (HUB) HUB.go(k); }
     function bub(h) { return '<div style="background:#f1ebff;border-radius:16px 16px 16px 4px;padding:12px 14px;color:#2d1b69;margin-bottom:10px">' + h + '</div>'; }
     function btn(k, ic, t, sm) { return '<button type="button" data-ai="' + k + '" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1.5px solid #e1d8fb;background:#fff;border-radius:14px;padding:11px 13px;margin-top:8px;font:inherit;cursor:pointer"><span style="font-size:22px">' + ic + '</span><span><b style="display:block;font-size:14.5px;color:#26145e">' + t + '</b><small style="color:#5b6475">' + sm + '</small></span></button>'; }
-    var st = { prods: null, phs: null };
-    try { var pl = await rpc("pb_my_products", { p_slug: O.slug }); st.prods = (pl || []).length; } catch (e) {}
+    var st = { phs: null };
     try { var ph = await rpc("pb_my_photos", { p_slug: O.slug }); st.phs = (ph || []).length; } catch (e) {}
     if (!HUB || HUB.cur !== s) return;
     var chk = [
-      ["products", T("कम से कम 3 Product / Service", "At least 3 products / services"), st.prods == null ? null : st.prods >= 3],
+      ["photos", T("कम से कम 3 Gallery फ़ोटो", "At least 3 gallery photos"), st.phs == null ? null : st.phs >= 3],
       ["svc", T("Services लिखी हैं", "Services written"), !!ln("Services")],
       ["details", T("दुकान का समय भरा है", "Timings filled"), !!ln("Hours")],
       ["numbers", T("Call / WhatsApp नंबर", "Call / WhatsApp number"), !!n10(O.phone)]
@@ -540,7 +539,7 @@
         '<div style="margin:6px 0 4px;font-size:13px;color:#5b6475">' + T("आपकी profile कितनी पूरी है", "How complete your profile is") + ': <b style="color:#26145e">' + pct + '%</b></div>' +
         '<div style="height:8px;background:#eee8fb;border-radius:8px;overflow:hidden"><i style="display:block;height:100%;width:' + pct + '%;background:linear-gradient(90deg,#8b5cf6,#1e9e57)"></i></div>' +
         '<div style="margin:8px 0 2px">' + chk.map(function (c) { return '<div data-ai="' + (c[0] === "svc" ? "svc" : c[0]) + '" style="font-size:13px;padding:3px 0;color:' + (c[2] ? "#1e9e57" : "#b3261e") + ';cursor:pointer">' + (c[2] ? "✅ " : "⬜ ") + c[1] + '</div>'; }).join("") + '</div>' +
-        btn("products", "📷", T("Product / Service जोड़ें (फ़ोटो चुनें)", "Add product / service (pick a photo)"), T("फ़ोटो चुनें — नाम, size और खूबियाँ AI भर देगा", "Pick a photo — AI fills name, size and features")) +
+        btn("photos", "🖼️", T("Gallery की फ़ोटो", "Gallery photos"), T("दुकान / काम / टीम की फ़ोटो", "Shop, work or team photos")) +
         btn("svc", "✍️", T("अपनी सेवाएँ AI से लिखवाएँ", "Let AI write your services"), T("AI आपके काम के हिसाब से 3 सवाल पूछेगा", "AI asks 3 questions about your work")) +
         btn("details", "🏪", T("समय, पता और बाकी जानकारी", "Timings, address & details"), T("खुलने-बंद होने का समय, छुट्टी, website", "Opening hours, weekly off, website")) +
         btn("numbers", "📞", T("Call / WhatsApp नंबर", "Call / WhatsApp numbers"), T("ग्राहक किस नंबर पर बात करें", "Which numbers customers can use")) +
@@ -581,7 +580,7 @@
   }
   var HUB = null;
   function hubTabs() {
-    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["products", "🛍️ " + T("Product और Service", "Product & Service"), editProducts], ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
+    return [["ai", "🤖 AI", editAI], ["logo", "🖼️ " + T("लोगो", "Logo"), editLogo], ["details", "🏪 " + T("जानकारी", "Details"), function (arg) { editDetails("", arg || ""); }], ["numbers", "📞 " + T("नंबर", "Numbers"), editNumbers],
       ["link", "🔗 " + T("लिंक", "Link"), editLink], ["visible", "👁️ " + T("क्या दिखे", "Visibility"), editVisible]];
   }
   function hubSheet(title, html, onClose) {
@@ -628,12 +627,12 @@
     document.body.appendChild(sc);
     h.go(key, arg);
   }
-  var ACT = { link: function () { openHub("link"); }, logo: function () { openHub("logo"); }, products: function () { openHub("products"); }, photos: function () { openHub("products"); }, details: function () { openHub("details"); }, about: function () { openHub("details", "about"); }, visit: function () { openHub("details", "visit"); }, numbers: function () { openHub("numbers"); }, vacancy: editVacancy, visible: function () { openHub("visible"); }, report: editReport };
+  var ACT = { link: function () { openHub("link"); }, logo: function () { openHub("logo"); }, photos: function () { openHub("photos"); }, details: function () { openHub("details"); }, about: function () { openHub("details", "about"); }, visit: function () { openHub("details", "visit"); }, numbers: function () { openHub("numbers"); }, vacancy: editVacancy, visible: function () { openHub("visible"); }, report: editReport };
 
   /* ---------- pencils ---------- */
   var MAP = {
-    shop: [[".hlogo", "logo"], ["#prods", "products"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], [".qa", "numbers"], ["#vacFlag", "vacancy"]],
-    biz: [[".lgw", "logo"], ["#prods", "products"], ["#det", "details"], ["#lnkRow", "link"], ["#contact", "numbers"], [".qa3", "numbers"], ["#vacFlag", "vacancy"]]
+    shop: [[".hlogo", "logo"], ["#photos", "photos"], ["#about", "about"], ["#visit", "visit"], ["#contact", "numbers"], [".qa", "numbers"], ["#vacFlag", "vacancy"]],
+    biz: [[".lgw", "logo"], ["#galM", "photos"], ["#det", "details"], ["#lnkRow", "link"], ["#contact", "numbers"], [".qa3", "numbers"], ["#vacFlag", "vacancy"]]
   };
   function pens() {
     if (!ON) return;
@@ -650,7 +649,7 @@
   }
   function bar() {
     var d = document.createElement("div"); d.className = "pbe-bar";
-    var P = prem(), items = [["logo", "🖼️ Logo"]].concat(P ? [["products", "🛍️ Products"]] : []).concat([["details", "🏪 " + T("जानकारी", "Details")], ["numbers", "📞 " + T("नंबर", "Numbers")], ["vacancy", "💼 Vacancy"], ["visible", "👁️ " + T("क्या दिखाएँ", "Show / hide")]]);
+    var P = prem(), items = [["logo", "🖼️ Logo"]].concat(P ? [["photos", "📷 " + T("फ़ोटो", "Photos")]] : []).concat([["details", "🏪 " + T("जानकारी", "Details")], ["numbers", "📞 " + T("नंबर", "Numbers")], ["vacancy", "💼 Vacancy"], ["visible", "👁️ " + T("क्या दिखाएँ", "Show / hide")]]);
     d.innerHTML = '<div class="h"><span>✏️</span><b>' + T("आप अपना page बदल रहे हैं — पीली ✏️ दबाएँ", "You are editing your page — tap a yellow ✏️") + '</b><button type="button" id="pbeDone">✔ ' + T("हो गया", "Done") + '</button></div><div class="g">' +
       items.map(function (x) { return '<button type="button" data-a="' + x[0] + '">' + x[1] + '</button>'; }).join("") + '</div>';
     d.onclick = function (e) { var b = e.target.closest("[data-a]"); if (b) return ACT[b.dataset.a](); if (e.target.closest("#pbeDone")) toggle(false); };

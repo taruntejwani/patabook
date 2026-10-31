@@ -320,10 +320,8 @@ async function loadPrem(){
   const H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:H,body:JSON.stringify({p_slugs:[B.slug]})});if(!r.ok)return;const j=await r.json();PREM=!!(j&&j[B.slug]);}catch(e){return;}
   if(window.PBPlan){try{await PBPlan.load([B.slug]);}catch(e){}}
-  if(!PF("photos")&&!PF("products")){render();return;}
+  if(!PF("photos")){render();return;}
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GAL=r.ok?(await r.json()||[]):[];}catch(e){GAL=[];}
-  try{const r=await fetch(SB+"/rest/v1/rpc/pb_product_descs",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});const j=r.ok?await r.json():{};DSCP=(j&&typeof j==="object"&&!Array.isArray(j))?j:{};}catch(e){DSCP={};}
-  try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_products_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});PRODS=r.ok?(await r.json()||[]):[];}catch(e){PRODS=[];}   /* sql-24 */
   render();bizDist();
 }
 const GAL_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
@@ -335,7 +333,7 @@ function drawGal(){const sec=document.getElementById("gal");if(sec)sec.hidden=tr
   box.onclick=e=>{const b=e.target.closest("[data-g]");if(b)lightbox(L,+b.dataset.g);};
   const gb=document.getElementById("gphBtn");if(gb)gb.onclick=()=>lightbox(L,0);}
 /* 🛍️ Products (sql-24, सिर्फ़ Premium) — पूछने के लिए वही संपर्क नियम: नंबर दिखता हो तो WhatsApp, नहीं तो संपर्क वाला हिस्सा */
-function PRODP(){return PF("products")?(PRODS||[]).filter(p=>p&&p.name&&GAL_RX.test(p.img||"")):[];}
+function PRODP(){return [];}   /* Products हटा दिए */
 const rsF=n=>n?"₹"+Number(n).toLocaleString("en-IN"):"";
 const offerOf=p=>{for(const f of (p.feats||[])){const m=String(f).match(/^Offer:\s*(\d+)/i);if(m)return +m[1];}return 0;};
 const featsOf=p=>(p.feats||[]).filter(f=>!/^Offer:/i.test(f));
@@ -412,7 +410,7 @@ function render(){
      (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()!=="hi")?"Home Service":"Home Service उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
    '</div>'+(ost?'<div data-pbh="hours" class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+
    '<div class="qa3" id="qa3"></div>'+
-   (PRODP().length?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods" data-pbh="prods"></div>':'')+
+   ((PREM||GALP().length)?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods" data-pbh="prods"></div>':'')+
    (b.business_code?'<p style="margin-top:10px;font-size:11.5px;color:#8a93a3;letter-spacing:.03em">Business ID: '+esc(b.business_code)+'</p>':'')+'</section>'+
    '<section class="card" id="contact" hidden><div id="cbox"></div></section>'+
    '<div id="pbRate"></div>'+

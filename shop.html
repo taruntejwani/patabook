@@ -475,8 +475,8 @@ const INI=()=>esc((String(B&&B.name||"").trim()[0]||"P").toUpperCase());
 /* plan (Silver / Gold / Platinum) में यह सुविधा ON है? — Admin → Plans */
 const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f)),TIER=()=>window.PBPlan?PBPlan.tier(slug):(PREM?"platinum":"free");
 const SECN=()=>SLAB==="product"?"Product":SLAB==="service"?"Service":L("Product और Service","Product & Service");
-const GALP=()=>[];   /* अलग Gallery हटा दी गई — अब सब कुछ "Product & Service" में */
-const PRODP=()=>PF("products")?(PRODS||[]).filter(p=>p&&p.name&&IMG_RX.test(p.img||"")):[];
+const GALP=()=>PF("photos")?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
+const PRODP=()=>[];   /* Products हटा दिए (सिर्फ़ Logo, Banner, Gallery, Front photo) */
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
 const listingUrl=()=>"business.html?slug="+encodeURIComponent(slug);
 
@@ -523,13 +523,11 @@ async function loadPrem(){
   if(window.PBPlan){try{await PBPlan.load([slug]);}catch(e){}}
   document.documentElement.classList.add("t-"+TIER());
   await fetch(SB+"/rest/v1/rpc/pb_profile_banner_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():"").then(j=>{COVER=(typeof j==="string"&&IMG_RX.test(j))?j:"";}).catch(()=>{COVER="";});
-  if(!PF("photos")&&!PF("products"))return;
+  if(!PF("photos"))return;
   await Promise.all([
     fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{GAL=j||[];}).catch(()=>{GAL=[];}),
     fetch(SB+"/rest/v1/rpc/pb_shop_label_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():"").then(j=>{SLAB=(j==="product"||j==="service")?j:"";}).catch(()=>{SLAB="";}),
-    fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{CAPS={};(j||[]).forEach(c=>{if(c&&c.url&&c.caption)CAPS[c.url]=c.caption;});}).catch(()=>{CAPS={};}),
-    fetch(SB+"/rest/v1/rpc/pb_product_descs",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():{}).then(j=>{DSCP=(j&&typeof j==="object"&&!Array.isArray(j))?j:{};}).catch(()=>{DSCP={};}),
-    fetch(SB+"/rest/v1/rpc/pb_shop_products_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{PRODS=j||[];}).catch(()=>{PRODS=[];})
+    fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{CAPS={};(j||[]).forEach(c=>{if(c&&c.url&&c.caption)CAPS[c.url]=c.caption;});}).catch(()=>{CAPS={};})
   ]);
 }
 async function loadContact(){
@@ -563,7 +561,7 @@ function render(){drawSoc();
     ["GST",gst?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))&&/^yes$/i.test(line(b,"Udyam-Verified"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
-  const navs=[P.length&&["prods",SECN()],G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
+  const navs=[G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
   document.getElementById("app").innerHTML=
    (COVER?'<div class="cvbar" data-pbh="photos"><img src="'+esc(COVER)+'" alt="" decoding="async"></div>':'')+
    '<div class="hero'+(COVER?' hascv':'')+'">'+((!COVER&&G[0])?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
@@ -582,11 +580,7 @@ function render(){drawSoc();
        (PF("card")?'<button type="button" id="shareQa" class="isCard" data-pbh="share"><span>🪪</span>'+L("डिजिटल कार्ड","Digital Card")+'</button>':'<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>')+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',vis:''}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
-     (P.length?'<section class="blk" data-pbh="prods" id="prods"><h2>🛍️ '+SECN()+' <small>('+P.length+')</small></h2><div class="pgr">'+P.map((p,i)=>
-       '<div class="pcd"><button type="button" class="pim" data-pv="'+i+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+(p.size?'<span class="psz">'+esc(p.size)+'</span>':'')+
-       (p.best?'<span class="pbs">⭐ '+L("सबसे ज़्यादा बिकता","Best seller")+'</span>':'')+(p.stock===false?'<span class="pout">'+L("अभी Stock में नहीं","Out of stock")+'</span>':'')+'</button>'+
-       '<div class="pbd"><b>'+esc(p.name)+'</b>'+priceCard(p,L("कीमत पूछें","Ask price"))+
-       '<div class="pbt"><button type="button" class="pask" data-pa="'+i+'">💬 '+L("पूछें","Ask")+'</button><button type="button" class="pshr" data-ps="'+i+'" aria-label="'+L("दोस्त को भेजें","Share with a friend")+'">📤 '+L("शेयर","Share")+'</button></div></div></div>').join("")+'</div></section>':'<section class="blk pbe-empty" id="prods"><h2>🛍️ '+L("हमारे Products","Our Products")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'products\')">➕ '+L("पहला product जोड़ें","Add your first product")+'</button></section>')+
+     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+' <small>('+G.length+')</small></h2>'+(G.some(u=>CAPS[u])?'<div class="galc">'+G.map((u,i)=>'<figure><button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="'+esc((CAPS[u]||"").slice(0,80))+'" loading="lazy"></button>'+(CAPS[u]?'<figcaption><span class="ct">'+esc(CAPS[u])+'</span>'+(CAPS[u].length>110?'<em>'+L("और पढ़ें","Read more")+'</em>':"")+'</figcaption>':"")+'</figure>').join("")+'</div>':'<div class="gal">'+G.map((u,i)=>'<button type="button" data-g="'+i+'"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join("")+'</div>')+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
      
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
