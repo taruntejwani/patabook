@@ -52,7 +52,14 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .sbox{position:relative}
 .sgb{position:absolute;left:0;right:0;top:62px;z-index:30;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px rgba(11,47,115,.16);overflow:auto;max-height:min(55vh,360px);display:none}
 .sgb.on{display:block}
-.sgb.cgb{left:auto;right:0;width:min(340px,100%)}
+.search{flex-wrap:nowrap}
+.search .f.loc{display:none}
+.search .f:first-child{flex:1 1 auto}
+.search .go{flex:0 0 auto;padding:11px 22px}
+.cchip{display:none;margin:8px 4px 0}
+.cchip.on{display:flex}
+.cchip button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:600;border-radius:999px;padding:6px 8px 6px 12px;cursor:pointer}
+.cchip button b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e8f0fe;color:#1a73e8;font-size:12px}
 .sgb .sh{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);background:#f5f8ff;padding:7px 14px}
 .sgb a{display:flex;gap:10px;align-items:center;padding:11px 14px;font-size:15.5px;color:var(--ink);border-bottom:1px solid #f1f3f4;cursor:pointer}
 .sgb a:last-child{border:0}.sgb a:hover,.sgb a:active{background:#f1f6ff}
@@ -125,7 +132,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
    <button class="go" type="submit" data-i="search">खोजें</button>
   </div>
   <div class="sgb" id="sgb" role="listbox"></div>
-  <div class="sgb cgb" id="cgb" role="listbox"></div>
+  <div class="cchip" id="cchip"><button type="button" id="cchipBtn" aria-label="Clear city"></button></div>
   <div class="flt" id="flt">
    <label><span id="fCL">Category</span><select id="fCat"></select></label>
    <label><span id="fWL">Work / Service</span><select id="fWork"></select></label>
@@ -296,6 +303,34 @@ async function placesMap(){
 }
 const tokClean=t=>String(t||"").toLowerCase().replace(/[^a-zऀ-ॿ઀-૿]/g,"");
 function nearPlace(l,P){if(l.length<5)return null;for(const [pl,pd] of P){if(pl[0]===l[0]&&Math.abs(pl.length-l.length)<=2&&lev(pl,l)<=(l.length>=8?2:1))return pd;}return null;}
+function cityMatch(l,P){   /* लिखे अक्षरों से शहर: शुरुआत → बीच → ग़लत spelling */
+  if(l.length<2)return [];const pre=[],has=[],fz=[];
+  for(const [k,d] of P){const kk=tokClean(k);
+    if(kk.startsWith(l))pre.push(d);
+    else if(l.length>=3&&kk.includes(l))has.push(d);
+    else if(l.length>=3&&(kk[0]===l[0]||l.length>=5)&&Math.abs(kk.length-l.length)<=3&&lev(kk.slice(0,l.length+1),l)<=(l.length>=6?2:1))fz.push(d);
+    else if(l.length>=5&&lev(kk,l)<=2)fz.push(d);}
+  return [...new Set([...pre,...has,...fz])];
+}
+/* 📍 आपका शहर चुपचाप (URL ?near= → याद → IP) — सिर्फ़ आपके शहर वाली दुकानें ऊपर रखने के लिए, कहीं दिखता नहीं */
+var NEARP=null;
+function getNear(){
+  if(NEARP)return NEARP;
+  NEARP=(async()=>{
+    try{
+      const P=await placesMap(),pick=c=>{c=String(c||"").trim().toLowerCase();if(!c)return null;
+        for(const [k,d] of P){if(k===c)return d;}
+        for(const [k,d] of P){if(c.includes(k)||k.includes(c))return d;}return null;};
+      const u=new URLSearchParams(location.search).get("near");let r=pick(u);if(r)return r;
+      try{const c=sessionStorage.getItem("pb-near");if(c)return pick(c);}catch(e){}
+      const resp=await fetch("https://get.geojs.io/v1/ip/geo.json",{cache:"no-store"});const d=await resp.json();
+      r=pick(d&&d.city);try{sessionStorage.setItem("pb-near",r||"");}catch(e){}return r;
+    }catch(e){return null;}
+  })();
+  return NEARP;
+}
+function setChip(city){const c=$("cchip"),b=$("cchipBtn");if(!c||!b)return;
+  if(city){b.innerHTML='\ud83d\udccd '+esc(city)+' <b>\u2715</b>';c.className="cchip on";}else{b.innerHTML="";c.className="cchip";}}
 async function detectCity(q){
   const toks=String(q||"").split(/[\s,]+/).filter(Boolean);if(!toks.length)return null;
   const P=await placesMap();let hit=null,idx=-1;
@@ -331,6 +366,7 @@ async function run(push){
   else if(city){try{const fc=await fixCityBox(city);if(fc&&fc!==city){city=fc;$("city").value=fc;}}catch(e){}}
   if(push){const u=new URL(location.href);u.searchParams.set("q",q0);city?u.searchParams.set("city",city):u.searchParams.delete("city");history.replaceState(null,"",u);}
   const ts=terms(q,!!city);
+  setChip(city);
   autoCat(q);
   if(push){const u=new URL(location.href);CATSEL?u.searchParams.set("cat",CATSEL):u.searchParams.delete("cat");WORKSEL?u.searchParams.set("work",WORKSEL):u.searchParams.delete("work");history.replaceState(null,"",u);}
   if(!ts.length&&!city&&!CATSEL){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
@@ -346,6 +382,10 @@ async function run(push){
       else if(!hard){const w=await gatherRows(q,"",ts,n);if(w===null)return;
         const seen=new Set(rows.map(b=>b.slug));const more=w.filter(b=>b.slug&&!seen.has(b.slug)).slice(0,20);
         FZN=keepFz;LOOSEMISS=keepLM;if(more.length){more.forEach(b=>b._o=1);rows=rows.concat(more);}}
+    }
+    if(!city&&rows.length>1){   /* शहर नहीं चुना → आपके शहर की दुकानें ऊपर (चुपचाप) */
+      const nc=await Promise.race([getNear(),new Promise(r=>setTimeout(()=>r(null),1500))]);if(n!==reqN)return;
+      if(nc){const k=nc.toLowerCase(),loc=b=>cityOf(b).toLowerCase()===k;rows=rows.filter(loc).concat(rows.filter(b=>!loc(b)));}
     }
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
     render(rows,q,WIDE?"":city);
@@ -487,6 +527,8 @@ if(P.get("city"))$("city").value=P.get("city");
     if(v.length<3){seq++;hide();return;}
     tm=setTimeout(async()=>{
       const n=++seq;
+      let cities=[];try{let lt=(v.split(/\s+/).pop()||"");if(/[઀-૿]/.test(lt))lt=lt.replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));if(/[ऀ-ॿ]/.test(lt))lt=deva2rom(lt);
+        const lc=tokClean(lt);if(lc.length>=3&&!STOPW.has(lc)){const PP=await placesMap();cities=cityMatch(lc,PP).slice(0,3);}}catch(e){}
       const [w,shops]=await Promise.all([OKS?suggestWords(v,4):Promise.resolve([]),(async()=>{try{
         const clean=v.replace(/[*,()%\\:."']/g," ").trim();if(clean.length<3)return [];
         const u=new URL(SB+"/rest/v1/businesses");u.searchParams.set("select","slug,name,address");u.searchParams.set("is_active","eq.true");u.searchParams.set("deleted_at","is.null");u.searchParams.set("limit","4");u.searchParams.set("name","ilike.*"+clean+"*");
@@ -494,56 +536,19 @@ if(P.get("city"))$("city").value=P.get("city");
       if(n!==seq||document.activeElement!==q)return;
       let h="";
       if(w.length)h+='<div class="sh">'+esc(FEN()?"DID YOU MEAN":"क्या आपका मतलब")+'</div>'+w.map(x=>'<a data-q="'+esc(x)+'"><span>🔍</span><span>'+esc(x)+'</span></a>').join("");
+      if(cities.length){const pre=v.split(/\s+/).slice(0,-1).join(" ");
+        h+='<div class="sh">'+esc(FEN()?"CITY":"शहर")+'</div>'+cities.map(c=>'<a data-q="'+esc((pre+" "+c).trim())+'"><span>📍</span><span>'+esc((pre+" "+c).trim())+'</span></a>').join("");}
       if(shops.length)h+='<div class="sh">'+esc(FEN()?"SHOPS":"दुकानें")+'</div>'+shops.map(b=>'<a data-slug="'+esc(b.slug)+'"><span>🏪</span><span>'+esc(b.name)+'<small>📍 '+esc(b.address||"")+'</small></span></a>').join("");
       box.innerHTML=h;box.className=h?"sgb on":"sgb";
     },250);
   });
+  { const cb=$("cchipBtn");if(cb)cb.addEventListener("click",()=>{$("city").value="";CITYUSER=false;run(true);}); }
   box.addEventListener("pointerdown",e=>e.preventDefault());   /* दबाने पर keyboard/focus न छूटे */
   box.addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;
     if(a.dataset.slug){location.href="business.html?slug="+encodeURIComponent(a.dataset.slug);return;}
     if(a.dataset.q!=null){q.value=a.dataset.q;hide();q.blur();run(true);}});
   q.addEventListener("blur",()=>setTimeout(hide,150));
   document.addEventListener("keydown",e=>{if(e.key==="Escape")hide();});
-})();
-/* 📍 शहर-खाने में लिखते ही शहरों की सूची (दुकानों वाले + Approve हुए शहर, गलत spelling भी चलेगी) */
-(function(){
-  const inp=$("city"),box=$("cgb");if(!inp||!box)return;
-  let seq=0;
-  const hide=()=>{box.className="sgb cgb";box.innerHTML="";};
-  async function show(){
-    const n=++seq;let v=inp.value.trim();
-    if(/[઀-૿]/.test(v))v=v.replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));
-    if(/[ऀ-ॿ]/.test(v))v=deva2rom(v);
-    const l=tokClean(v),P=await placesMap();if(n!==seq||document.activeElement!==inp)return;
-    const all=[...P.values()].sort((a,b)=>a.localeCompare(b));
-    let out=[];
-    if(!l)out=all.slice(0,8);
-    else{
-      const pre=[],has=[],fz=[];
-      for(const [k,d] of P){const kk=tokClean(k);
-        if(kk.startsWith(l))pre.push(d);
-        else if(l.length>=3&&kk.includes(l))has.push(d);
-        else if(l.length>=3&&(kk[0]===l[0]||l.length>=5)&&Math.abs(kk.length-l.length)<=3&&lev(kk.slice(0,l.length+1),l)<=(l.length>=6?2:1))fz.push(d);
-        else if(l.length>=5&&lev(kk,l)<=2)fz.push(d);}
-      out=[...new Set([...pre,...has,...fz])].slice(0,6);
-    }
-    let h="";
-    if(inp.value.trim())h+='<a data-c=""><span>🌐</span><span>'+esc(FEN()?"All places":"सभी जगह")+'</span></a>';
-    h+=out.map(x=>'<a data-c="'+esc(x)+'"><span>📍</span><span>'+esc(x)+'</span></a>').join("");
-    try{const fr=inp.closest(".loc")||inp,sr=$("sform").getBoundingClientRect(),r=fr.getBoundingClientRect(),w=Math.min(340,sr.width);
-      box.style.top=Math.round(r.bottom-sr.top+6)+"px";box.style.width=w+"px";box.style.right="auto";
-      box.style.left=Math.round(Math.max(0,Math.min(r.left-sr.left,sr.width-w)))+"px";}catch(e){}
-    box.innerHTML=h;box.className=h?"sgb cgb on":"sgb cgb";
-  }
-  inp.addEventListener("input",show);
-  inp.addEventListener("focus",()=>{setTimeout(show,0);});
-  box.addEventListener("pointerdown",e=>e.preventDefault());
-  box.addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;
-    const c=a.dataset.c||"";inp.value=c;CITYUSER=true;try{c?localStorage.setItem("pb-city",c):localStorage.removeItem("pb-city");}catch(x){}
-    hide();inp.blur();run(true);});
-  inp.addEventListener("blur",()=>setTimeout(hide,150));
-  document.addEventListener("keydown",e=>{if(e.key==="Escape")hide();});
-  $("sform").addEventListener("submit",hide);
 })();
 /* 📱 keyboard खुलते ही search-box ऊपर आए (सुझाव keyboard के पीछे न छुपें) */
 (function(){

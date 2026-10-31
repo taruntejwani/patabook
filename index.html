@@ -723,8 +723,7 @@ function card(b){return `<a class="item" href="business.html?slug=${encodeURICom
 /* Search ab alag page (search.html) par: naam, category, shahar, gaon ya PIN se */
 function searchNow(){
   const q=document.getElementById("q").value.trim();let city=document.getElementById("city").value;
-  try{if(localStorage.getItem("pb-city-by")!=="me")city="";}catch(e){}   /* अपने-आप मिला शहर खोज में नहीं जाता — खोज पूरे भारत में */
-  const u=new URLSearchParams();if(q)u.set("q",q);if(city)u.set("city",city);
+  const u=new URLSearchParams();if(q)u.set("q",q);if(city)u.set("near",city);   /* Google जैसा: शहर फ़िल्टर नहीं; सिर्फ़ "आपके पास" की पहचान */
   location.href="search.html"+(u.toString()?"?"+u:"");
   return false;
 }
