@@ -686,7 +686,7 @@ async function addPhoto(i,file){const b=ROWS[i],en=L()==="en",er=$("pe"+i);if(er
     if(!up.ok)throw new Error("upload");
     await rpc("pb_photo_add",{p_slug:b.slug,p_url:SB+"/storage/v1/object/public/shop-logos/"+path});
     PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();
-  }catch(x){const e2=$("pe"+i);if(e2)e2.textContent=/too many/.test(x.message||"")?(en?"Max 8 photos.":"8 से ज़्यादा फ़ोटो नहीं।"):(en?"Could not upload. Try again.":"फ़ोटो upload नहीं हुई। दोबारा कोशिश करें।");}}
+  }catch(x){const e2=$("pe"+i);if(e2)e2.textContent=/too many/.test(x.message||"")?(en?"Photo limit reached for your plan.":"आपके plan की फ़ोटो की सीमा पूरी हो गई।"):(en?"Could not upload. Try again.":"फ़ोटो upload नहीं हुई। दोबारा कोशिश करें।");}}
 function weekLine(b){
   if(!PH(b,"report"))return "";   /* रिपोर्ट: plan में ON हो तो */
   const w=EVS&&EVS.week&&EVS.week[b.slug];if(!w)return "";
@@ -741,9 +741,15 @@ let SOPEN={};
 function stripsBlock(b,i){const P=PREM&&PREM[b.slug];if(!(P&&P.until))return "";const en=L()==="en",t=tierOf(b),o=SOPEN[b.slug]||"";
   const note=(w,h,what)=>'<div class="szn">📐 '+(en?"Best size: ":"सही size: ")+'<b>'+w+' × '+h+' px</b> · '+(en?"Ask ChatGPT: “Make a "+w+"×"+h+" px "+what+" for my shop”":"ChatGPT से बनवाने के लिए बोलें: “Make a "+w+"×"+h+" px "+what+" for my shop”")+'</div>';
   const hasP=PH(b,"banner"),x=BAN[b.slug];
+  const galBody=()=>{const lim=(window.PBPlan&&PBPlan.lim(b.slug,"photos"))||0,L8=PHOTOS[b.slug]||[];
+    if(!PH(b,"photos")||!lim)return '<div class="ban"><small>🖼️ '+(en?"Gallery is not in your plan.":"Gallery आपके plan में नहीं है।")+'</small></div>';
+    return '<div class="pg">'+L8.map(x=>'<div class="t"><img src="'+esc(x.url)+'" alt="" loading="lazy"><button type="button" data-prm="'+x.id+'" data-i="'+i+'" aria-label="Remove">✕</button></div>').join("")+
+      (L8.length<lim?'<label class="add">＋<input type="file" accept="image/*" hidden data-pup="'+i+'"></label>':'')+'</div>'+
+      '<small>'+(en?L8.length+" / "+lim+" photos · shown on your shop page and in Images":L8.length+" / "+lim+" फ़ोटो · दुकान के पेज और Images में दिखती हैं")+'</small><div class="err" id="pe'+i+'"></div>'+note(1000,750,"shop photo");};
+  const galSt=(window.PBPlan&&PBPlan.lim(b.slug,"photos")&&PH(b,"photos"))?((PHOTOS[b.slug]||[]).length+" / "+PBPlan.lim(b.slug,"photos")):(en?"not in plan":"plan में नहीं");
   const rows=[["logo","🖼️",en?"Logo":"Logo",LOGOS[b.slug]?(en?"✅ added":"✅ लगा है"):(en?"empty":"खाली"),logoBlock(b,i)+note(400,400,"logo")],
     ["cover","🌄","Profile Banner",COVER[b.slug]?(en?"✅ added":"✅ लगा है"):(en?"empty":"खाली"),coverBlock(b,i)+note(1200,675,"banner")],
-    ["poster","📢","Poster",!hasP?(en?"not in plan":"plan में नहीं"):x?(en?"✅ added":"✅ लगा है"):(en?"empty":"खाली"),(hasP?banBlock(b,i)+note(1200,600,"poster"):'<div class="ban"><small>📢 '+(en?"Poster is not in your plan yet.":"Poster अभी आपके plan में चालू नहीं है।")+'</small></div>')]];
+    ["poster","📢","Poster",!hasP?(en?"not in plan":"plan में नहीं"):x?(en?"✅ added":"✅ लगा है"):(en?"empty":"खाली"),(hasP?banBlock(b,i)+note(1200,600,"poster"):'<div class="ban"><small>📢 '+(en?"Poster is not in your plan yet.":"Poster अभी आपके plan में चालू नहीं है।")+'</small></div>')],["gal","🖼️","Gallery",galSt,galBody()]];
   return '<div class="strips st-'+t+'">'+rows.map(r=>'<div class="sx'+(o===r[0]?' on':'')+'"><button type="button" class="sxh" data-so="'+r[0]+'" data-i="'+i+'" aria-expanded="'+(o===r[0])+'"><span>'+r[1]+' <b>'+r[2]+'</b></span><i>'+r[3]+'</i><em>'+(o===r[0]?'▴':'▾')+'</em></button>'+(o===r[0]?'<div class="sxb">'+r[4]+'</div>':'')+'</div>').join("")+'</div>';}
 async function loadLogos(){
   if(!ROWS||!ROWS.length)return;
@@ -786,13 +792,12 @@ function setCats(en){return [
 function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof")return offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
-    '<a class="stl" href="business.html?slug='+sl+'#edit">✏️ '+(en?"Edit profile (name, address, timing, photos…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो…)")+'</a>';
+    '<a class="stl" href="#" data-pop="all" data-popshop="'+b.slug+'">✏️ '+(en?"Edit profile (name, address, timing, photos…)":"प्रोफ़ाइल Edit करें (नाम, पता, समय, फ़ोटो…)")+'</a>';
   if(k==="num")return phoneBlock(b,i)+numsBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" Admin की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (Settings → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर Verify करें":"नंबर बदलें"))+'</a>'):'');
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
-  if(k==="photo")return (stripsBlock(b,i)||'<div class="pm"><small style="margin:0">'+(en?"Logo, Profile Banner and Poster come with a Member plan. See “Member Plan” in Settings.":"Logo, Profile Banner और Poster Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।")+'</small></div>')+
-    '<a class="stl alt" href="business.html?slug='+sl+'#edit">🛍️ '+(en?"Add / change photos":"फ़ोटो जोड़ें / बदलें")+'</a>';
+  if(k==="photo")return (stripsBlock(b,i)||'<div class="pm"><small style="margin:0">'+(en?"Logo, Profile Banner and Poster come with a Member plan. See “Member Plan” in Settings.":"Logo, Profile Banner और Poster Member plan के साथ मिलते हैं। Settings में “Member Plan” देखें।")+'</small></div>');
   if(k==="rep")return PH(b,"report")?(weekLine(b)||'')+reportHTML(b):'<div class="pm"><small style="margin:0">📊 '+(en?"The report (views, Call, WhatsApp) comes with a Member plan. See “Member Plan”.":"रिपोर्ट (कितनों ने देखा, Call, WhatsApp) Member plan के साथ मिलती है। “Member Plan” देखें।")+'</small></div>';
   if(k==="plan")return premBlock(b,i)||'<p class="note">—</p>';
   return "";
@@ -821,7 +826,7 @@ function settingsView(en){
       '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
       '<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"View my shop (as customers see it)":"मेरी दुकान देखें (जैसी ग्राहक देखते हैं)")+'</a>'+
       '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+
-      '<a class="stl" href="business.html?slug='+encodeURIComponent(b.slug)+'#edit">✏️ '+(en?"Edit profile (photos…)":"प्रोफ़ाइल Edit करें (फ़ोटो…)")+'</a></div>'+
+      '<a class="stl" href="#" data-pop="all" data-popshop="'+esc(b.slug)+'">✏️ '+(en?"Edit profile (photos…)":"प्रोफ़ाइल Edit करें (फ़ोटो…)")+'</a></div>'+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
       '<div class="cats">'+C.map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div>';
   }
@@ -966,7 +971,7 @@ $("list").addEventListener("change",e=>{const g=e.target.closest("[data-cup]");i
 $("list").addEventListener("click",async e=>{
   const cr=e.target.closest("[data-crm]");if(cr){const b=ROWS[+cr.dataset.crm],en=L()==="en";if(!confirm(en?"Delete your profile banner?":"Profile Banner हटाएँ?"))return;cr.disabled=true;
     try{ME=await PBA.session();await rpc("pb_profile_banner_set",{p_slug:b.slug,p_url:null});delete COVER[b.slug];draw();}catch(x){cr.disabled=false;alert(en?"Could not delete.":"हटा नहीं सके।");}return;}
-  const so=e.target.closest("[data-so]");if(so){const b=ROWS[+so.dataset.i];SOPEN[b.slug]=SOPEN[b.slug]===so.dataset.so?"":so.dataset.so;draw();return;}
+  const so=e.target.closest("[data-so]");if(so){const b=ROWS[+so.dataset.i];SOPEN[b.slug]=SOPEN[b.slug]===so.dataset.so?"":so.dataset.so;draw();if(SOPEN[b.slug]==="gal"){try{PHOTOS[b.slug]=await rpc("pb_my_photos",{p_slug:b.slug})||[];draw();}catch(x){}}return;}
   const pdt=e.target.closest("[data-pdt]");if(pdt){const b=ROWS[+pdt.dataset.pdt];PDOPEN[b.slug]=!PDOPEN[b.slug];draw();return;}
   const bt=e.target.closest("[data-lg]");if(!bt)return;
   const i=+bt.dataset.i,b=ROWS[i];
