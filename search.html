@@ -253,14 +253,15 @@ function deva2rom(t){   /* देवनागरी → रोमन (खोज 
     else if(c==="़"||c==="्")continue;else{o+=c;pe=false;}}
   return o;
 }
-async function fuzzyRows(q,city,cid,have){
+var LOOSEMISS="";
+async function fuzzyRows(q,city,cid,have,loose){
   try{
     let qq=String(q||"");if(/[\u0A80-\u0AFF]/.test(qq))qq=qq.replace(/[\u0A80-\u0AFF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));   /* ગુજરાતી → देवनागरी (दोनों लिपियों का क्रम एक जैसा है) */
     if(/[\u0900-\u097F]/.test(qq))qq=deva2rom(qq);
     qq=qq.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ");
     if(qq.replace(/[^a-z0-9]/gi,"").length<3)return [];
     const r=await fetch(SB+"/rest/v1/rpc/pb_search_fuzzy",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),
-      body:JSON.stringify({p_q:qq,p_city:city||null,p_city_id:cid?String(cid):null,p_limit:20})});
+      body:JSON.stringify(loose?{p_q:qq,p_limit:12,p_loose:true}:{p_q:qq,p_city:city||null,p_city_id:cid?String(cid):null,p_limit:20})});
     if(!r.ok)return [];const ids=await r.json();if(!Array.isArray(ids)||!ids.length)return [];
     const seen=new Set((have||[]).map(b=>b.slug)),want=ids.filter(x=>!seen.has(x.slug));if(!want.length)return [];
     const u=new URL(SB+"/rest/v1/businesses");
@@ -269,6 +270,7 @@ async function fuzzyRows(q,city,cid,have){
     u.searchParams.set("slug","in.("+want.map(x=>'"'+String(x.slug).replace(/["\\]/g,"")+'"').join(",")+")");
     if(CATSEL)u.searchParams.set("category","eq."+CATSEL);
     const r2=await fetch(u,{headers:H});const rows=await r2.json();if(!r2.ok||!Array.isArray(rows))return [];
+    if(loose){const ms=[];ids.forEach(x=>{String(x.missed||"").split(" ").forEach(w=>{if(w&&!ms.includes(w))ms.push(w);});});LOOSEMISS=ms.slice(0,3).join(", ");}
     const sc={};want.forEach(x=>sc[x.slug]=x.score);
     return rows.sort((a,b)=>(sc[b.slug]||0)-(sc[a.slug]||0));
   }catch(e){return [];}
@@ -309,7 +311,7 @@ async function suggestWords(q,limit){
   try{
     let t=String(q||"");t=t.replace(/[઀-૿]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));if(/[ऀ-ॿ]/.test(t))t=deva2rom(t);
     t=t.split(/\s+/).filter(w=>w&&!STOPW.has(w.toLowerCase())).join(" ").slice(0,60);
-    if(t.replace(/[^a-z0-9]/gi,"").length<3)return [];
+    if(t.replace(/[^a-z0-9]/gi,"").length<3||t.split(/\s+/).length>4)return [];
     const r=await fetch(SB+"/rest/v1/rpc/pb_suggest",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify({p_q:t,p_limit:limit||6})});
     if(!r.ok)return [];const d=await r.json();if(!Array.isArray(d))return [];
     const low=t.toLowerCase();return d.map(x=>x&&x.label).filter(x=>x&&String(x).toLowerCase()!==low).slice(0,limit||6);
@@ -350,6 +352,8 @@ async function run(push){
     rows=await premiumFirst(rows);if(n!==reqN)return;
     FZN=0;
     if(rows.length<3&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows);if(n!==reqN)return;if(ex.length){FZN=ex.length;rows=rows.concat(ex);}}
+    LOOSEMISS="";
+    if(!rows.length&&ts.length&&!WORKSEL){const ex=await fuzzyRows(q,city,cid,rows,true);if(n!==reqN)return;if(ex.length){FZN=ex.length;rows=ex;}else LOOSEMISS="";}   /* Google जैसा: सारे शब्द न मिलें तो जितने मिलें उनसे */
     DYM=[];if(!rows.length&&ts.length){DYM=await suggestWords(q,4);if(n!==reqN)return;}
     render(rows,q,city);
   }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p>';}}
@@ -404,7 +408,7 @@ function render(rows,q,city,keep){
     list.innerHTML='<div class="empty">'+dym+'<p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a></div>';
     return;
   }
-  const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:")+'</p>':'';
+  const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(LOOSEMISS?(FEN()?"No shop found for \u201c"+LOOSEMISS+"\u201d \u2014 showing the closest shops:":"\u201c"+LOOSEMISS+"\u201d के लिए कोई दुकान नहीं मिली \u2014 ये सबसे मिलती-जुलती दुकानें हैं:"):(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:"))+'</p>':'';
   list.innerHTML=fzNote+rows.map(b=>{
     const dir=pbDir(b);
     const link="business.html?slug="+encodeURIComponent(b.slug||""),ct=cityOf(b),cg=catOf(b);
