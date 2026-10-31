@@ -192,6 +192,11 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="mtabs" id="pTabs"><button data-p="pending" class="on">⏳ बाकी</button><button data-p="done">✔ हो चुकी</button></div>
     <div id="pBody"></div>
   </div>
+  <div id="stov" hidden>
+    <button class="backd" data-home="1">← Dashboard</button>
+    <div class="hh"><h2>💾 Storage / डेटा उपयोग</h2><button class="xl" id="stRf">🔄</button></div>
+    <div id="stBody"></div>
+  </div>
   <div id="pmv" hidden>
     <button class="backd" data-home="1">← Dashboard</button>
     <div class="hh"><h2>💎 Premium</h2></div>
@@ -627,7 +632,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= Dashboard: 5 icons ================= */
   var TOPIC = { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान सुधार', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' };
   var STAT = { new: 'नया', read: 'पढ़ा', done: 'निपटा' };
-  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv', 'pmv'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
+  function view(id) { ['home', 'msgs', 'catv', 'panel', 'stats', 'cityv', 'jobv', 'repv', 'phv', 'edv', 'hsv', 'pmv', 'stov'].forEach(function (v) { $(v).hidden = v !== id; }); $('gate').innerHTML = ''; window.scrollTo(0, 0); navMark(id); }
   /* Phone का back बटन: panel के अंदर पिछले हिस्से पर लौटे, website से बाहर न जाए */
   function closeMd() { $('md').hidden = true; if (history.state && history.state.pbm) history.back(); }
   var NAV = false;
@@ -671,13 +676,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
       ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0],
       ['premium', '💎', '#efeaff', 'Premium', '–', 'चालू Premium दुकानें', 0],
-      ['team', '👥', '#eef2ff', 'टीम (Manager / Staff)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0]
+      ['team', '👥', '#eef2ff', 'टीम (Manager / Staff)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0],
+      ['storage', '💾', '#e8f4fd', 'Storage / डेटा', '–', 'फ़ोटो में कितना डेटा लगा', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
     }).join('');
     $('hNote').textContent = note;
-    repBadge(); phBadge(); edBadge(); hsBadge(); pmBadge();
+    repBadge(); phBadge(); edBadge(); hsBadge(); pmBadge(); stBadge();
     if (c.shops != null) { try { localStorage.setItem('pb-notrack', '1'); } catch (e) {} }   /* admin का अपना फ़ोन traffic में नहीं गिना जाएगा */
   }
   $('tiles').onclick = function (e) {
@@ -693,6 +699,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'edits') return showEdits();
     if (t === 'hsreq') return showHsReq();
     if (t === 'premium') return showPrem();
+    if (t === 'storage') return showStorage();
     if (t === 'team') { location.href = 'team.html'; return; }
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : t === 'draft' ? 'draft' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
@@ -881,6 +888,50 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= 🏙 शहर / गाँव ================= */
   var CT = [], CTF = 'new';
   $('ctTabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; CTF = b.dataset.c; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawCities(); };
+  /* ---- 💾 Storage / डेटा उपयोग (सिर्फ़ कुल आँकड़े; किसने क्या डाला — नहीं) ---- */
+  var ST_CAP = 1024 * 1048576;   /* Supabase Free = 1 GB */
+  var ST_NAME = { logo: 'Logo', photo: 'Gallery फ़ोटो', banner: 'Banner / Home Ad', cover: 'Cover', open: 'Opening Photo', prod: 'Products', other: 'अन्य' };
+  function fmtB(b) { b = +b || 0; return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB'; }
+  async function stBadge() {
+    try {
+      var j = await rpc('pb_admin_storage_stats', {}), b = document.querySelector('#tiles [data-t="storage"]'); if (!b || !j) return;
+      b.querySelector('b').textContent = fmtB(j.total_bytes);
+      b.querySelector('small').textContent = (j.total_files || 0) + ' फ़ाइलें · 1 GB में से ' + ((+j.total_bytes || 0) / ST_CAP * 100).toFixed(1) + '%';
+    } catch (e) {}
+  }
+  function stDraw(j, orph) {
+    var usedPct = Math.min(100, (+j.total_bytes || 0) / ST_CAP * 100), pct = Math.max(0.5, usedPct), by = j.by || {}, bk = j.buckets || {};
+    var rows = Object.keys(by).sort(function (a, b) { return by[b].bytes - by[a].bytes; }).map(function (k) {
+      return '<tr><td>' + esc(ST_NAME[k] || k) + '</td><td style="text-align:right">' + by[k].files + '</td><td style="text-align:right"><b>' + fmtB(by[k].bytes) + '</b></td></tr>';
+    }).join('');
+    var brow = Object.keys(bk).map(function (k) { return '<tr><td>' + esc(k) + '</td><td style="text-align:right">' + bk[k].files + '</td><td style="text-align:right"><b>' + fmtB(bk[k].bytes) + '</b></td></tr>'; }).join('');
+    $('stBody').innerHTML =
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:16px;margin-bottom:12px">' +
+      '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">' +
+      '<svg width="130" height="130" viewBox="0 0 42 42" style="flex:none"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#e3f1e3" stroke-width="6"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#1a73e8" stroke-width="6" stroke-dasharray="' + pct.toFixed(2) + ' ' + (100 - pct).toFixed(2) + '" transform="rotate(-90 21 21)"/><text x="21" y="22.5" text-anchor="middle" font-size="6.5" font-weight="800" fill="#1c2540">' + usedPct.toFixed(1) + '%</text><text x="21" y="28" text-anchor="middle" font-size="3.4" fill="#5b6475">भरा</text></svg>' +
+      '<div style="flex:1;min-width:150px;line-height:1.9;font-size:15px">' +
+      '<div><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#e3f1e3;margin-right:7px"></span>कुल मिला: <b>' + fmtB(ST_CAP) + '</b></div>' +
+      '<div><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#1a73e8;margin-right:7px"></span>इस्तेमाल: <b>' + fmtB(j.total_bytes) + '</b> (' + (j.total_files || 0) + ' फ़ाइलें)</div>' +
+      '<div><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#2e9e4f;margin-right:7px"></span>बाकी: <b>' + fmtB(Math.max(0, ST_CAP - (+j.total_bytes || 0))) + '</b></div></div></div>' +
+      '<div style="height:12px;background:#e3f1e3;border-radius:8px;overflow:hidden;margin-top:14px"><div style="height:100%;width:' + pct + '%;background:#1a73e8"></div></div>' +
+      '<div style="color:#5b6475;font-size:12.5px;margin-top:6px">1 GB = Supabase Free plan की सीमा</div></div>' +
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px;margin-bottom:12px"><b>📂 प्रकार के हिसाब से (फ़ोटो)</b><table style="width:100%;margin-top:8px;border-collapse:collapse"><tbody>' + (rows || '<tr><td>कुछ नहीं</td></tr>') + '</tbody></table></div>' +
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px;margin-bottom:12px"><b>🗄 Storage bucket</b><table style="width:100%;margin-top:8px;border-collapse:collapse"><tbody>' + brow + '</tbody></table></div>' +
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px">' +
+      (orph ? '<b>🧹 बेकार फ़ाइलें</b><div style="margin-top:6px;font-size:15px">' + orph.orphan_files + ' फ़ाइलें · <b>' + fmtB(orph.orphan_bytes) + '</b> (किसी दुकान से जुड़ी नहीं)</div>'
+            : '<b>🧹 बेकार फ़ाइलें</b><div style="color:#5b6475;font-size:14px;margin:6px 0 10px">जो फ़ाइलें किसी दुकान से जुड़ी नहीं हैं, उन्हें गिनें (थोड़ा समय लगता है)।</div><button class="xl" id="stOrph" style="margin:0">🔍 बेकार फ़ाइलें गिनो</button>') + '</div>';
+    var ob = $('stOrph'); if (ob) ob.onclick = async function () {
+      ob.disabled = true; ob.textContent = 'गिन रहे हैं…';
+      try { var j2 = await rpc('pb_admin_storage_stats', { p_orphans: true }); stDraw(j2, j2); }
+      catch (e) { ob.disabled = false; ob.textContent = '🔍 बेकार फ़ाइलें गिनो'; alert('नहीं हो सका: ' + e.message); }
+    };
+  }
+  async function showStorage() {
+    view('stov'); $('stBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
+    $('stRf').onclick = showStorage;
+    try { stDraw(await rpc('pb_admin_storage_stats', {}), null); }
+    catch (e) { if (e.message === 'login') return; $('stBody').innerHTML = '<p class="cnt">⚠ पहले Supabase में storage-stats वाला SQL चलाएँ। (' + esc(e.message) + ')</p>'; }
+  }
   function showCities() { view('cityv'); loadCities(); }
   /* ---- 🚩 दुकानों की शिकायतें (sql-10) ---- */
   var RTAB = 'new', RDATA = [];
