@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#1a73e8">
 <link rel="icon" href="pin.png">
 <link rel="manifest" href="manifest.json">
-<title>PataBook Map – दुकानें और रास्ता</title>
+<title>PataBook नक्शा – दुकानें और रास्ता</title>
 <script>
 /* Mapbox (best quality) पहले; Mapbox बंद/सीमा पार हो तो अपने-आप मुफ़्त नक्शा */
 var PB_USE_MAPBOX = true;
@@ -237,7 +237,7 @@ body.nav .top,body.nav .sbar,body.nav .sres,body.nav .chips,body.nav .sheet,body
   <button id="locate" aria-label="My location"><svg viewBox="0 0 24 24"><path fill="#1a73e8" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 3h-2.06A7 7 0 0 0 13 5.06V3h-2v2.06A7 7 0 0 0 5.06 11H3v2h2.06A7 7 0 0 0 11 18.94V21h2v-2.06A7 7 0 0 0 18.94 13H21zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></button>
 </div>
 <button type="button" class="recenter" id="recenter" hidden><span id="rcIco">⌖</span> <span id="rcTxt" data-t="recenter">वापस मेरी जगह</span></button>
-<div class="basic" id="basic" hidden><span data-t="basic">बेसिक नक्शा</span><button type="button" id="premium" data-t="premium_on">Premium चालू करें</button></div>
+<div class="basic" id="basic" hidden><span data-t="basic">बेसिक नक्शा</span><button type="button" id="premium" data-t="premium_on">प्रीमियम चालू करें</button></div>
 <div class="status" id="status"></div>
 
 <section class="sheet" id="sheet" hidden>
@@ -300,12 +300,12 @@ var TX = {
     start_nav: 'चलना शुरू करें', steps: 'स्टेप्स', gmaps: 'Google Maps में भी खोलें', stop: 'रोकें', all: 'सभी', health: 'अस्पताल', worship: 'मंदिर',
     food: 'खाना', hotel: 'होटल', fuel: 'पेट्रोल', bank: 'बैंक', school: 'स्कूल', shop: 'दुकान', travel: 'बस/रेल',
     nolib: 'मैप लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।', pb_n: '{n} PataBook दुकानें मैप पर', pb_fail: 'PataBook दुकानें लोड नहीं हुईं',
-    finding: 'आपकी लोकेशन ढूँढ रहे हैं…', loc_fail: 'लोकेशन नहीं मिली। फोन में Location चालू करें और अनुमति दें।', follow: 'चलने वाला मोड: नक्शा आपकी दिशा में घूमेगा',
+    finding: 'आपकी लोकेशन ढूँढ रहे हैं…', loc_fail: 'लोकेशन नहीं मिली। फोन में लोकेशन चालू करें और अनुमति दें।', follow: 'चलने वाला मोड: नक्शा आपकी दिशा में घूमेगा',
     directions: 'रास्ता देखें', profile: 'प्रोफ़ाइल', approx: 'जगह पते से अंदाज़े से लगाई गई है', routing: 'रास्ता बना रहे हैं…',
     route_fail: 'रास्ता नहीं बन सका। इंटरनेट जाँचकर दोबारा कोशिश करें।', no_route: 'इन दोनों जगहों के बीच सड़क का रास्ता नहीं मिला।',
     tap_start: 'लोकेशन नहीं मिली — नक्शे पर अपनी शुरुआत की जगह टैप करें', addr_fail: 'यह पता नक्शे पर नहीं मिला', est: 'ट्रैफ़िक के बिना अंदाज़ा',
     arrived: 'आप पहुँच गए', reroute: 'नया रास्ता बना रहे हैं', pb: 'PataBook दुकानें', places: 'जगहें', none: 'कुछ नहीं मिला',
-    rem: 'बाकी', m: 'मी.', km: 'किमी', min: 'मिनट', hr: 'घंटा', in_m: '{d} बाद', now: 'अब', voice_on: 'आवाज़ चालू', voice_off: 'आवाज़ बंद', shop_t: 'दुकान', nokey: 'सैटेलाइट फ़ोटो के लिए MapTiler key अभी नहीं डाली गई है' },
+    rem: 'बाकी', m: 'मी.', km: 'किमी', min: 'मिनट', hr: 'घंटा', in_m: '{d} बाद', now: 'अब', voice_on: 'आवाज़ चालू', voice_off: 'आवाज़ बंद', shop_t: 'दुकान', nokey: 'सैटेलाइट फ़ोटो के लिए MapTiler चाबी अभी नहीं डाली गई है' },
   en: { loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
     start_nav: 'Start', steps: 'Steps', gmaps: 'Also open in Google Maps', stop: 'Stop', all: 'All', health: 'Hospital', worship: 'Temple',
     food: 'Food', hotel: 'Hotel', fuel: 'Petrol', bank: 'Bank', school: 'School', shop: 'Shops', travel: 'Bus/Rail',
@@ -318,8 +318,8 @@ var TX = {
     rem: 'left', m: 'm', km: 'km', min: 'min', hr: 'h', in_m: 'In {d}', now: 'Now', voice_on: 'Voice on', voice_off: 'Voice off', shop_t: 'Shop', nokey: 'Satellite needs a MapTiler key (not added yet)' }
 };
 TX.hi.recenter = 'वापस मेरी जगह'; TX.en.recenter = 'Back to my location';
-TX.hi.call = 'कॉल'; TX.en.call = 'Call'; TX.hi.via_on = 'चुनी हुई जगह से होकर'; TX.en.via_on = 'Via the point you tapped'; TX.hi.via_off = '✕ सीधा रास्ता'; TX.en.via_off = '✕ Direct route'; TX.hi.via_tip = '👆 दूसरा रास्ता देखना हो तो map पर किसी सड़क को छुएँ'; TX.en.via_tip = '👆 Tap any road on the map to see another route'; TX.hi.via_more = 'सीधे रास्ते से {d} ज़्यादा'; TX.en.via_more = '{d} more than the direct route'; TX.hi.via_less = 'सीधे रास्ते से {d} कम'; TX.en.via_less = '{d} less than the direct route'; TX.hi.call_login = 'नंबर देखने के लिए लॉगिन करें'; TX.en.call_login = 'Log in to see the number'; TX.hi.call_limit = 'आज की सीमा पूरी हो गई'; TX.en.call_limit = 'Daily limit reached'; TX.hi.call_fail = 'नंबर नहीं मिल सका'; TX.en.call_fail = 'Could not get the number';
-TX.hi.basic = 'बेसिक नक्शा'; TX.en.basic = 'Basic map'; TX.hi.premium_on = 'Premium चालू करें'; TX.en.premium_on = 'Turn on Premium';
+TX.hi.call = 'कॉल'; TX.en.call = 'Call'; TX.hi.via_on = 'चुनी हुई जगह से होकर'; TX.en.via_on = 'Via the point you tapped'; TX.hi.via_off = '✕ सीधा रास्ता'; TX.en.via_off = '✕ Direct route'; TX.hi.via_tip = '👆 दूसरा रास्ता देखना हो तो नक्शा पर किसी सड़क को छुएँ'; TX.en.via_tip = '👆 Tap any road on the map to see another route'; TX.hi.via_more = 'सीधे रास्ते से {d} ज़्यादा'; TX.en.via_more = '{d} more than the direct route'; TX.hi.via_less = 'सीधे रास्ते से {d} कम'; TX.en.via_less = '{d} less than the direct route'; TX.hi.call_login = 'नंबर देखने के लिए लॉगिन करें'; TX.en.call_login = 'Log in to see the number'; TX.hi.call_limit = 'आज की सीमा पूरी हो गई'; TX.en.call_limit = 'Daily limit reached'; TX.hi.call_fail = 'नंबर नहीं मिल सका'; TX.en.call_fail = 'Could not get the number';
+TX.hi.basic = 'बेसिक नक्शा'; TX.en.basic = 'Basic map'; TX.hi.premium_on = 'प्रीमियम चालू करें'; TX.en.premium_on = 'Turn on Premium';
 TX.hi.sat_zoom = 'ज़्यादा ज़ूम पर साफ़ नक्शा दिखाया गया'; TX.en.sat_zoom = 'Switched to map for a clearer close view';
 TX.hi.start = 'चलना शुरू करें'; TX.hi.start_on = '{r} पर चलना शुरू करें'; TX.hi.rb = 'गोल चक्कर से {n} रास्ता लें'; TX.hi.rb0 = 'गोल चक्कर से निकलें';
 TX.en.start = 'Start'; TX.en.start_on = 'Start on {r}'; TX.en.rb = 'At the roundabout take the {n} exit'; TX.en.rb0 = 'Exit the roundabout';

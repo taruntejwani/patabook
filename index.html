@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <body>
 
 <div class="top">
-  <label class="locchip" title="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="मेरी location से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी location से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></label>
+  <label class="locchip" title="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="मेरी लोकेशन से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी लोकेशन से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></label>
   <div class="tr"><a class="addtop" id="addTop" href="list.html">＋ <span data-i="addtop">दुकान जोड़ें</span></a><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
   <span id="pbLang"></span></div>
 </div>
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
     <canvas id="lbFx" aria-hidden="true"></canvas>
     <button type="button" class="lbx" id="lbX" aria-label="बंद करें">✕</button>
     <div class="lbt"><span class="lbr">🚀</span> <span id="lbH">आज PataBook का पहला दिन है!</span></div>
-    <p id="lbP">सबसे पहले जुड़ने वाले दुकानदार <b>"नई दुकानें"</b> पट्टी में सबसे ऊपर दिखेंगे। आज ही जुड़ें — बिल्कुल FREE।</p>
+    <p id="lbP">सबसे पहले जुड़ने वाले दुकानदार <b>"नई दुकानें"</b> पट्टी में सबसे ऊपर दिखेंगे। आज ही जुड़ें — बिल्कुल मुफ़्त।</p>
     <a class="lba" href="list.html" id="lbA">🏪 दुकान जोड़ें ›</a>
   </section>
   <section class="ns" id="ns" hidden aria-label="New shops">
@@ -400,7 +400,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
     <div class="gpw" id="gpw" hidden><div class="nsv" id="gpv"><div class="nst" id="gpt"></div></div><div class="gdots" id="gdots" aria-hidden="true"></div></div>
   </section>
 
-  <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:16px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / Jobs</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
+  <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:16px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / नौकरियाँ</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
 
 
   <section class="results" id="results"></section>
@@ -429,7 +429,7 @@ function applyLang(){
   PB.apply();
   drawCats();drawDrawer();
   {const jb=document.getElementById("jobsBtn");if(jb)jb.hidden=!(window.PB_SITE&&PB_SITE.jobs);}
-  {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / Jobs";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";}
+  {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / नौकरियाँ";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";}
 }
 /* ---- नई 25 दुकानें: एक-एक करके अपने-आप slide (नई दुकान आते ही सबसे पुरानी हट जाती है) ---- */
 (function(){
@@ -518,7 +518,7 @@ function applyLang(){
       if(r.ok)(await r.json()).forEach(x=>{KM[x.slug]=kmTxt(x.latitude,x.longitude);});}
     document.querySelectorAll("#nst .dk[data-s]").forEach(e=>{e.textContent=KM[e.dataset.s]||"";});}catch(e){}}
   function cardHTML(b){
-    return (b._ban?bannerHTML(b):'<a class="nsc'+(b._off?' off':'')+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(b._off?'<span class="new dbc">'+(b._off==="pend"?"⏳ ":"🔴 ")+((PB.lang&&PB.lang()==="hi")?(b._off==="pend"?"मंज़ूरी का इंतज़ार · सिर्फ़ आपको":"OFFLINE · सिर्फ़ आपको"):(b._off==="pend"?"WAITING · ONLY YOU":"OFFLINE · ONLY YOU"))+'</span>':PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new dbc">DIGITAL BUSINESS CARD</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">'+(b.category?ico(b.category)+' '+esc(b.category):'📍 '+esc(b.city||""))+'<span class="dk adr">'+esc(String(b.address||"").trim())+'</span></span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
+    return (b._ban?bannerHTML(b):'<a class="nsc'+(b._off?' off':'')+(PREMS[b.slug]?' pm pt-'+PREMS[b.slug]:TC[b.slug]?' tc pt-'+TC[b.slug]:'')+'" href="business.html?slug='+encodeURIComponent(b.slug||"")+'">'+(b._off?'<span class="new dbc">'+(b._off==="pend"?"⏳ ":"🔴 ")+((PB.lang&&PB.lang()==="hi")?(b._off==="pend"?"मंज़ूरी का इंतज़ार · सिर्फ़ आपको":"ऑफ़लाइन · सिर्फ़ आपको"):(b._off==="pend"?"WAITING · ONLY YOU":"OFFLINE · ONLY YOU"))+'</span>':PREMS[b.slug]?premBadge(PREMS[b.slug]):TC[b.slug]?tcBadge(TC[b.slug]):'<span class="new dbc">DIGITAL BUSINESS CARD</span>')+'<span class="ic'+(LG(b.slug)?' lg':'')+'" data-s="'+esc(b.slug||"")+'">'+(LG(b.slug)?'<img src="'+esc(LG(b.slug))+'" alt="" loading="lazy" decoding="async">':ico(b.category))+'</span><b>'+esc(b.name)+'</b>'+(PREMS[b.slug]&&premLine(b)?'<span class="ad wk">'+ico(b.category)+' '+esc(premLine(b))+'</span>':'<span class="ad">'+(b.category?ico(b.category)+' '+esc(b.category):'📍 '+esc(b.city||""))+'<span class="dk adr">'+esc(String(b.address||"").trim())+'</span></span>')+(PREMS[b.slug]&&premWork(b)?'<span class="vs wkp">'+esc(premWork(b))+'</span>':'<span class="vs">🛍️ '+((PB.lang&&PB.lang()==="hi")?"दुकान देखें":"Visit shop")+' ›</span>')+'</a>');
   }
   /* पट्टी: अपने-आप धीरे चलती है; उँगली / mouse से पकड़कर आगे-पीछे घुमा सकते हैं, छोड़ने के ~1.5 सेकंड बाद वहीं से फिर चलती है */
   const M={p:0,per:1,loop:false,vw:0,w:0,speed:30,drag:false,v:0,idle:0,moved:0,last:0};
@@ -658,7 +658,7 @@ function applyLang(){
   const tk=()=>document.getElementById("ptk");
   function slide(b){const t=b.tier==="platinum"||b.tier==="silver"?b.tier:"gold";
     return '<a class="ps" style="--pi:url(\''+esc(b.url)+'\')" href="business.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 Digital Platinum Card",gold:"👑 Digital Gold Card",silver:"🥈 Digital Silver Card"}[t])+'</span></a>';}
-  function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का Poster यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"Gold और Platinum Member अपना poster यहाँ पूरे size में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
+  function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का पोस्टर यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"गोल्ड और प्लैटिनम सदस्य अपना पोस्टर यहाँ पूरे साइज़ में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
   function go(n,anim){const t=tk();if(!t)return;i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
     document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===i));}
   function auto(){clearInterval(timer);if(P.length>1&&!matchMedia("(prefers-reduced-motion: reduce)").matches)timer=setInterval(()=>go(i+1),4500);}
@@ -903,8 +903,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
     inp.dispatchEvent(new Event("change",{bubbles:true}));document.dispatchEvent(new Event("pb-city-auto"));}
   function msg(t){inp.value="";inp.placeholder=t;}
   function go(e){e.preventDefault();e.stopPropagation();
-    if(!navigator.geolocation){msg(en()?"Location not available":"Location नहीं मिली");return;}
-    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"Location ढूँढ रहे हैं…";b.style.opacity=".5";if(g)g.classList.add("busy");
+    if(!navigator.geolocation){msg(en()?"Location not available":"लोकेशन नहीं मिली");return;}
+    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"लोकेशन ढूँढ रहे हैं…";b.style.opacity=".5";if(g)g.classList.add("busy");
     const fail=t=>{b.style.opacity="";if(g)g.classList.remove("busy");inp.value=old;inp.placeholder=ph;if(t)alertBox(t);};
     navigator.geolocation.getCurrentPosition(p=>{
       b.style.opacity="";if(g)g.classList.remove("busy");inp.placeholder=ph;
@@ -915,8 +915,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
         .then(r=>r.json()).then(d=>{const c=d.city||d.locality||"";if(c)done(c);else fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।");})
         .catch(()=>fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।"));
     },err=>{fail(err&&err.code===1
-      ?(en()?"Location permission is blocked for this site. Allow it in browser settings (🔒 next to the address → Permissions → Location).":"इस site के लिए Location की इजाज़त बंद है। Browser में address के पास 🔒 → Permissions → Location → Allow करें।")
-      :(en()?"Could not get your location. Turn on GPS and try again.":"Location नहीं मिली। GPS चालू करके दोबारा 📍 दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+      ?(en()?"Location permission is blocked for this site. Allow it in browser settings (🔒 next to the address → Permissions → Location).":"इस साइट के लिए लोकेशन की इजाज़त बंद है। ब्राउज़र में पता के पास 🔒 → अनुमतियाँ → लोकेशन → अनुमति दें करें।")
+      :(en()?"Could not get your location. Turn on GPS and try again.":"लोकेशन नहीं मिली। GPS चालू करके दोबारा 📍 दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
   }
   function alertBox(t){let d=document.getElementById("locMsg");if(!d){d=document.createElement("div");d.id="locMsg";d.style.cssText="position:fixed;left:12px;right:12px;top:70px;z-index:99;background:#fff4e5;color:#7a3b00;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.12)";document.body.appendChild(d);}
     d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
@@ -947,27 +947,27 @@ document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){
 /* launch पट्टी + "नई दुकानें" — सभी भाषाओं में (sat / mni: अभी English) */
 window.PB_LB={
 en:{h:"Today is PataBook’s first day!",p:"The first shops to join appear at the top of the <b>“New shops”</b> strip. Join today — completely FREE.",a:"🏪 Add your shop ›",ns:"New shops on PataBook"},
-hi:{h:"आज PataBook का पहला दिन है!",p:"सबसे पहले जुड़ने वाले दुकानदार <b>\"नई दुकानें\"</b> पट्टी में सबसे ऊपर दिखेंगे। आज ही जुड़ें — बिल्कुल FREE।",a:"🏪 दुकान जोड़ें ›",ns:"PataBook पर नई दुकानें"},
-"sd-deva":{h:"अजु PataBook जो पहिरियों डींहुं आहे!",p:"सभ खां पहिरीं जुड़ण वारा दुकानदार <b>\"नयूं दुकानूं\"</b> पट्टीअ में सभ खां मथे डिसंदा। अजु ई जुड़ो — बिल्कुल FREE।",a:"🏪 दुकान जोड़ियो ›",ns:"PataBook ते नयूं दुकानूं"},
+hi:{h:"आज PataBook का पहला दिन है!",p:"सबसे पहले जुड़ने वाले दुकानदार <b>\"नई दुकानें\"</b> पट्टी में सबसे ऊपर दिखेंगे। आज ही जुड़ें — बिल्कुल मुफ़्त।",a:"🏪 दुकान जोड़ें ›",ns:"PataBook पर नई दुकानें"},
+"sd-deva":{h:"अजु PataBook जो पहिरियों डींहुं आहे!",p:"सभ खां पहिरीं जुड़ण वारा दुकानदार <b>\"नयूं दुकानूं\"</b> पट्टीअ में सभ खां मथे डिसंदा। अजु ई जुड़ो — बिल्कुल मुफ़्त।",a:"🏪 दुकान जोड़ियो ›",ns:"PataBook ते नयूं दुकानूं"},
 gu:{h:"આજે PataBook નો પહેલો દિવસ છે!",p:"સૌથી પહેલા જોડાનાર દુકાનદારો <b>\"નવી દુકાનો\"</b> પટ્ટીમાં સૌથી ઉપર દેખાશે. આજે જ જોડાઓ — બિલકુલ FREE.",a:"🏪 દુકાન ઉમેરો ›",ns:"PataBook પર નવી દુકાનો"},
-mr:{h:"आज PataBook चा पहिला दिवस आहे!",p:"सर्वात आधी जोडले जाणारे दुकानदार <b>\"नवी दुकाने\"</b> पट्टीत सर्वात वर दिसतील. आजच जोडा — पूर्णपणे FREE.",a:"🏪 दुकान जोडा ›",ns:"PataBook वर नवी दुकाने"},
-bn:{h:"আজ PataBook-এর প্রথম দিন!",p:"সবার আগে যুক্ত হওয়া দোকানদাররা <b>\"নতুন দোকান\"</b> তালিকার একদম উপরে দেখা যাবে। আজই যুক্ত হন — সম্পূর্ণ FREE।",a:"🏪 দোকান যোগ করুন ›",ns:"PataBook-এ নতুন দোকান"},
+mr:{h:"आज PataBook चा पहिला दिवस आहे!",p:"सर्वात आधी जोडले जाणारे दुकानदार <b>\"नवी दुकाने\"</b> पट्टीत सर्वात वर दिसतील. आजच जोडा — पूर्णपणे मुफ़्त.",a:"🏪 दुकान जोडा ›",ns:"PataBook वर नवी दुकाने"},
+bn:{h:"আজ PataBook-এর প্রথম দিন!",p:"সবার আগে যুক্ত হওয়া দোকানদাররা <b>\"নতুন দোকান\"</b> তালিকার একদম উপরে দেখা যাবে। আজই যুক্ত হন — সম্পূর্ণ मुफ़्त।",a:"🏪 দোকান যোগ করুন ›",ns:"PataBook-এ নতুন দোকান"},
 ta:{h:"இன்று PataBook-இன் முதல் நாள்!",p:"முதலில் இணையும் கடைகள் <b>\"புதிய கடைகள்\"</b> பட்டியலில் மேலே தெரியும். இன்றே இணையுங்கள் — முற்றிலும் FREE.",a:"🏪 கடையைச் சேர்க்கவும் ›",ns:"PataBook-இல் புதிய கடைகள்"},
 te:{h:"ఈరోజు PataBook మొదటి రోజు!",p:"ముందుగా చేరే దుకాణాలు <b>\"కొత్త దుకాణాలు\"</b> వరుసలో పైన కనిపిస్తాయి. ఈరోజే చేరండి — పూర్తిగా FREE.",a:"🏪 దుకాణం జోడించండి ›",ns:"PataBook లో కొత్త దుకాణాలు"},
 kn:{h:"ಇಂದು PataBook ನ ಮೊದಲ ದಿನ!",p:"ಮೊದಲು ಸೇರುವ ಅಂಗಡಿಗಳು <b>\"ಹೊಸ ಅಂಗಡಿಗಳು\"</b> ಪಟ್ಟಿಯಲ್ಲಿ ಮೇಲೆ ಕಾಣಿಸುತ್ತವೆ. ಇಂದೇ ಸೇರಿ — ಸಂಪೂರ್ಣ FREE.",a:"🏪 ಅಂಗಡಿ ಸೇರಿಸಿ ›",ns:"PataBook ನಲ್ಲಿ ಹೊಸ ಅಂಗಡಿಗಳು"},
 ml:{h:"ഇന്ന് PataBook-ന്റെ ആദ്യ ദിവസം!",p:"ആദ്യം ചേരുന്ന കടകൾ <b>\"പുതിയ കടകൾ\"</b> നിരയിൽ ഏറ്റവും മുകളിൽ കാണാം. ഇന്നുതന്നെ ചേരൂ — പൂർണ്ണമായും FREE.",a:"🏪 കട ചേർക്കൂ ›",ns:"PataBook-ൽ പുതിയ കടകൾ"},
-or:{h:"ଆଜି PataBook ର ପ୍ରଥମ ଦିନ!",p:"ସବୁଠୁ ପ୍ରଥମେ ଯୋଡ଼ି ହେଉଥିବା ଦୋକାନ <b>\"ନୂଆ ଦୋକାନ\"</b> ତାଲିକାର ସବୁଠୁ ଉପରେ ଦେଖାଯିବ। ଆଜି ହିଁ ଯୋଡ଼ନ୍ତୁ — ସମ୍ପୂର୍ଣ୍ଣ FREE।",a:"🏪 ଦୋକାନ ଯୋଡ଼ନ୍ତୁ ›",ns:"PataBook ରେ ନୂଆ ଦୋକାନ"},
-as:{h:"আজি PataBook-ৰ প্ৰথম দিন!",p:"সকলোতকৈ আগতে যোগ দিয়া দোকানবোৰ <b>\"নতুন দোকান\"</b> তালিকাৰ একেবাৰে ওপৰত দেখা যাব। আজিয়েই যোগ দিয়ক — সম্পূৰ্ণ FREE।",a:"🏪 দোকান যোগ কৰক ›",ns:"PataBook-ত নতুন দোকান"},
-mai:{h:"आइ PataBook केर पहिल दिन अछि!",p:"सभसँ पहिने जुड़ए वला दोकानदार <b>\"नव दोकान\"</b> पट्टीमे सभसँ ऊपर देखाएत। आइए जुड़ू — बिल्कुल FREE।",a:"🏪 दोकान जोड़ू ›",ns:"PataBook पर नव दोकान"},
-pa:{h:"ਅੱਜ PataBook ਦਾ ਪਹਿਲਾ ਦਿਨ ਹੈ!",p:"ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਜੁੜਨ ਵਾਲੇ ਦੁਕਾਨਦਾਰ <b>\"ਨਵੀਆਂ ਦੁਕਾਨਾਂ\"</b> ਪੱਟੀ ਵਿੱਚ ਸਭ ਤੋਂ ਉੱਪਰ ਦਿਖਣਗੇ। ਅੱਜ ਹੀ ਜੁੜੋ — ਬਿਲਕੁਲ FREE।",a:"🏪 ਦੁਕਾਨ ਜੋੜੋ ›",ns:"PataBook ਉੱਤੇ ਨਵੀਆਂ ਦੁਕਾਨਾਂ"},
-sa:{h:"अद्य PataBook इत्यस्य प्रथमः दिवसः!",p:"प्रथमं संयुज्यमानाः आपणिकाः <b>\"नूतनाः आपणाः\"</b> इति पट्टिकायां सर्वोपरि दृश्यन्ते। अद्यैव संयुज्यताम् — सर्वथा FREE।",a:"🏪 आपणं योजयतु ›",ns:"PataBook इत्यत्र नूतनाः आपणाः"},
+or:{h:"ଆଜି PataBook ର ପ୍ରଥମ ଦିନ!",p:"ସବୁଠୁ ପ୍ରଥମେ ଯୋଡ଼ି ହେଉଥିବା ଦୋକାନ <b>\"ନୂଆ ଦୋକାନ\"</b> ତାଲିକାର ସବୁଠୁ ଉପରେ ଦେଖାଯିବ। ଆଜି ହିଁ ଯୋଡ଼ନ୍ତୁ — ସମ୍ପୂର୍ଣ୍ଣ मुफ़्त।",a:"🏪 ଦୋକାନ ଯୋଡ଼ନ୍ତୁ ›",ns:"PataBook ରେ ନୂଆ ଦୋକାନ"},
+as:{h:"আজি PataBook-ৰ প্ৰথম দিন!",p:"সকলোতকৈ আগতে যোগ দিয়া দোকানবোৰ <b>\"নতুন দোকান\"</b> তালিকাৰ একেবাৰে ওপৰত দেখা যাব। আজিয়েই যোগ দিয়ক — সম্পূৰ্ণ मुफ़्त।",a:"🏪 দোকান যোগ কৰক ›",ns:"PataBook-ত নতুন দোকান"},
+mai:{h:"आइ PataBook केर पहिल दिन अछि!",p:"सभसँ पहिने जुड़ए वला दोकानदार <b>\"नव दोकान\"</b> पट्टीमे सभसँ ऊपर देखाएत। आइए जुड़ू — बिल्कुल मुफ़्त।",a:"🏪 दोकान जोड़ू ›",ns:"PataBook पर नव दोकान"},
+pa:{h:"ਅੱਜ PataBook ਦਾ ਪਹਿਲਾ ਦਿਨ ਹੈ!",p:"ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਜੁੜਨ ਵਾਲੇ ਦੁਕਾਨਦਾਰ <b>\"ਨਵੀਆਂ ਦੁਕਾਨਾਂ\"</b> ਪੱਟੀ ਵਿੱਚ ਸਭ ਤੋਂ ਉੱਪਰ ਦਿਖਣਗੇ। ਅੱਜ ਹੀ ਜੁੜੋ — ਬਿਲਕੁਲ मुफ़्त।",a:"🏪 ਦੁਕਾਨ ਜੋੜੋ ›",ns:"PataBook ਉੱਤੇ ਨਵੀਆਂ ਦੁਕਾਨਾਂ"},
+sa:{h:"अद्य PataBook इत्यस्य प्रथमः दिवसः!",p:"प्रथमं संयुज्यमानाः आपणिकाः <b>\"नूतनाः आपणाः\"</b> इति पट्टिकायां सर्वोपरि दृश्यन्ते। अद्यैव संयुज्यताम् — सर्वथा मुफ़्त।",a:"🏪 आपणं योजयतु ›",ns:"PataBook इत्यत्र नूतनाः आपणाः"},
 ur:{h:"آج PataBook کا پہلا دن ہے!",p:"سب سے پہلے جڑنے والے دکاندار <b>\"نئی دکانیں\"</b> پٹی میں سب سے اوپر نظر آئیں گے۔ آج ہی جڑیں — بالکل FREE۔",a:"🏪 دکان شامل کریں ›",ns:"PataBook پر نئی دکانیں"},
 sd:{h:"اڄ PataBook جو پهريون ڏينهن آهي!",p:"سڀ کان پهرين جڙڻ وارا دڪاندار <b>\"نيون دڪانون\"</b> پٽيءَ ۾ سڀ کان مٿي ڏسبا. اڄ ئي جڙو — بلڪل FREE.",a:"🏪 دڪان شامل ڪريو ›",ns:"PataBook تي نيون دڪانون"},
 ks:{h:"از چھُ PataBook ہُند گۄڈنیُک دۄہ!",p:"گۄڈنِتھ جُڑن وٲلۍ دُکاندار یِن <b>\"نوۍ دُکانہٕ\"</b> پٹی منٛز سارِوٕے کھۄتہٕ ہیٚور نَظرِ۔ اَزٕے جُڑیو — بِلکُل FREE۔",a:"🏪 دُکان جوڑیو ›",ns:"PataBook پیٹھ نوۍ دُکانہٕ"},
-ne:{h:"आज PataBook को पहिलो दिन हो!",p:"सबैभन्दा पहिले जोडिने पसलहरू <b>\"नयाँ पसल\"</b> पट्टीमा सबैभन्दा माथि देखिनेछन्। आजै जोडिनुहोस् — पूर्ण रूपमा FREE।",a:"🏪 पसल थप्नुहोस् ›",ns:"PataBook मा नयाँ पसलहरू"},
-kok:{h:"आयज PataBook चो पयलो दीस!",p:"सगळ्यांत पयलीं जोडपी दुकानदार <b>\"नवीं दुकानां\"</b> पट्टेंत सगळ्यांत वयर दिसतले. आयजूच जोडात — पुराय FREE.",a:"🏪 दुकान जोडात ›",ns:"PataBook चेर नवीं दुकानां"},
-doi:{h:"अज्ज PataBook दा पैहला दिन ऐ!",p:"सारें शा पैह्लें जुड़ने आह्ले दुकानदार <b>\"नमियां दुकानां\"</b> पट्टी च सारें शा उप्पर दिक्खङन। अज्ज गै जुड़ो — बिल्कुल FREE।",a:"🏪 दुकान जोड़ो ›",ns:"PataBook पर नमियां दुकानां"},
-brx:{h:"दिनै PataBook नि गिबि सान!",p:"गिबियावनो जरायनाय दुखानफोरा <b>\"गोदान दुखान\"</b> सारियाव सबायखौ सिगाङाव नुजाथिनो। दिनैनो जरायनो — गोबाव FREE।",a:"🏪 दुखान दाजाबदेर ›",ns:"PataBook आव गोदान दुखानफोर"}
+ne:{h:"आज PataBook को पहिलो दिन हो!",p:"सबैभन्दा पहिले जोडिने पसलहरू <b>\"नयाँ पसल\"</b> पट्टीमा सबैभन्दा माथि देखिनेछन्। आजै जोडिनुहोस् — पूर्ण रूपमा मुफ़्त।",a:"🏪 पसल थप्नुहोस् ›",ns:"PataBook मा नयाँ पसलहरू"},
+kok:{h:"आयज PataBook चो पयलो दीस!",p:"सगळ्यांत पयलीं जोडपी दुकानदार <b>\"नवीं दुकानां\"</b> पट्टेंत सगळ्यांत वयर दिसतले. आयजूच जोडात — पुराय मुफ़्त.",a:"🏪 दुकान जोडात ›",ns:"PataBook चेर नवीं दुकानां"},
+doi:{h:"अज्ज PataBook दा पैहला दिन ऐ!",p:"सारें शा पैह्लें जुड़ने आह्ले दुकानदार <b>\"नमियां दुकानां\"</b> पट्टी च सारें शा उप्पर दिक्खङन। अज्ज गै जुड़ो — बिल्कुल मुफ़्त।",a:"🏪 दुकान जोड़ो ›",ns:"PataBook पर नमियां दुकानां"},
+brx:{h:"दिनै PataBook नि गिबि सान!",p:"गिबियावनो जरायनाय दुखानफोरा <b>\"गोदान दुखान\"</b> सारियाव सबायखौ सिगाङाव नुजाथिनो। दिनैनो जरायनो — गोबाव मुफ़्त।",a:"🏪 दुखान दाजाबदेर ›",ns:"PataBook आव गोदान दुखानफोर"}
 };
 window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]||PB_LB.en;return d[k]||PB_LB.en[k];};
 </script>
@@ -1074,7 +1074,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     var armed=false,tm=0,done=false;
     var hi=function(){return !(window.PB&&PB.lang&&PB.lang()!=="hi")};
     function toast(){
-      var d=document.createElement("div");d.textContent=hi()?"बाहर निकलने के लिए फिर से Back दबाएँ":"Press Back again to exit";
+      var d=document.createElement("div");d.textContent=hi()?"बाहर निकलने के लिए फिर से वापस दबाएँ":"Press Back again to exit";
       d.style.cssText="position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(20,24,38,.92);color:#fff;font:600 14px/1.3 system-ui,sans-serif;padding:10px 16px;border-radius:999px;z-index:99999;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:88vw;text-align:center";
       document.body.appendChild(d);setTimeout(function(){d.remove()},2300);
     }
@@ -1118,7 +1118,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
     ov.appendChild(pn);document.body.appendChild(ov);
     pn.className="pbmp";glyph(true);
-    var MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
+    var MAIN=[["👁️",h?"प्रोफ़ाइल प्रीव्यू":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
     function href(kind,sl){return kind==="pv"?"business.html?slug="+encodeURIComponent(sl):kind==="set"?"mybusiness.html":"mybusiness.html#go="+kind+"&s="+encodeURIComponent(sl);}
     function main(){
       pn.innerHTML=MAIN.map(function(it,i){var out=it[2]==="out";return '<a data-k="'+it[2]+'" href="#" style="'+ROW+'color:'+(out?"#c5221f":"#0b2f73")+(out?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
@@ -1132,7 +1132,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     main();
     ov.addEventListener("click",async function(e){
       var lk=e.target.closest("[data-lock]");
-      if(lk){e.preventDefault();var m=document.getElementById("lkMsg");if(m){m.style.display="block";m.textContent="🔒 "+lk.dataset.lock+(h?" के plan में यह सुविधा नहीं है। Member Plan लेने पर मिलेगी।":": this feature is not in the current plan. Get a Member Plan to unlock it.");}return;}
+      if(lk){e.preventDefault();var m=document.getElementById("lkMsg");if(m){m.style.display="block";m.textContent="🔒 "+lk.dataset.lock+(h?" के प्लान में यह सुविधा नहीं है। सदस्य प्लान लेने पर मिलेगी।":": this feature is not in the current plan. Get a Member Plan to unlock it.");}return;}
       var a=e.target.closest("[data-k]");
       if(!a){if(e.target.closest("a[href]"))return;if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
       e.preventDefault();var k=a.dataset.k;

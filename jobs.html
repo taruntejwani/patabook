@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="PataBook नौकरी — अपने शहर की दुकानों में खाली नौकरियाँ (Helper, Driver, Salesman…) देखें और सीधे दुकान से बात करें। Local shop jobs in your city.">
-<title>💼 नौकरी / Jobs — PataBook</title>
+<title>💼 नौकरी / नौकरियाँ — PataBook</title>
 <link rel="icon" href="pin.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a73e8">
@@ -106,13 +106,13 @@ function ago(s){const d=(Date.now()-new Date(s))/864e5;if(d<1)return T("आज",
 $("back").textContent=T("← होम","← Home");
 $("h1").textContent=T("💼 नौकरी — दुकानों में खाली जगह","💼 Jobs — vacancies at local shops");
 $("sub").textContent=T("अपने शहर की दुकानों में कौन-सी नौकरी खाली है, देखें और सीधे दुकान से बात करें।","See which local shops are hiring and talk to the shop directly.");
-$("warn").textContent=T("⚠️ PataBook और कोई भी सही दुकानदार नौकरी के लिए कभी पैसे नहीं माँगता। कोई “फीस / रजिस्ट्रेशन” के नाम पर पैसे माँगे तो न दें और Contact पेज पर शिकायत करें।","⚠️ PataBook and genuine shopkeepers never ask for money for a job. If anyone asks for a “fee / registration”, don’t pay and report it on the Contact page.");
-$("city").placeholder=T("शहर (जैसे Gandhidham)","City (e.g. Gandhidham)");$("q").placeholder=T("काम (जैसे Helper, Driver)","Work (e.g. Helper, Driver)");
+$("warn").textContent=T("⚠️ PataBook और कोई भी सही दुकानदार नौकरी के लिए कभी पैसे नहीं माँगता। कोई “फीस / रजिस्ट्रेशन” के नाम पर पैसे माँगे तो न दें और संपर्क पेज पर शिकायत करें।","⚠️ PataBook and genuine shopkeepers never ask for money for a job. If anyone asks for a “fee / registration”, don’t pay and report it on the Contact page.");
+$("city").placeholder=T("शहर (जैसे गांधीधाम)","City (e.g. Gandhidham)");$("q").placeholder=T("काम (जैसे हेल्पर, ड्राइवर)","Work (e.g. Helper, Driver)");
 $("go").textContent=T("खोजें","Search");
-$("ownerLink").textContent=T("🏪 दुकानदार हैं? अपनी दुकान खोलकर “💼 Vacancy” दबाएँ →","🏪 Shop owner? Open your shop page and tap “💼 Vacancy” →");
-$("skH").textContent=T("📱 मोबाइल नंबर verify करें","📱 Verify your mobile number");
-$("skP").textContent=T("दुकानदार से बात करने के लिए एक बार OTP से अपना नंबर verify करें (30 दिन चलेगा)। आप रोज़ ज़्यादा से ज़्यादा 5 दुकानों से संपर्क कर सकते हैं।","Verify your number once with OTP to contact shops (valid 30 days). You can contact up to 5 shops a day.");
-$("sks").textContent=T("OTP भेजें","Send OTP");$("skv").textContent=T("Verify करें","Verify");$("skx").textContent=T("बंद करें","Close");
+$("ownerLink").textContent=T("🏪 दुकानदार हैं? अपनी दुकान खोलकर “💼 नौकरी” दबाएँ →","🏪 Shop owner? Open your shop page and tap “💼 Vacancy” →");
+$("skH").textContent=T("📱 मोबाइल नंबर जाँच करें","📱 Verify your mobile number");
+$("skP").textContent=T("दुकानदार से बात करने के लिए एक बार OTP से अपना नंबर जाँच करें (30 दिन चलेगा)। आप रोज़ ज़्यादा से ज़्यादा 5 दुकानों से संपर्क कर सकते हैं।","Verify your number once with OTP to contact shops (valid 30 days). You can contact up to 5 shops a day.");
+$("sks").textContent=T("OTP भेजें","Send OTP");$("skv").textContent=T("जाँच करें","Verify");$("skx").textContent=T("बंद करें","Close");
 
 let city="";try{city=localStorage.getItem("pb-city")||"";}catch(e){}
 if(!city)city=(window.PB_SITE&&PB_SITE.city||"").split(",")[0].trim();
@@ -124,7 +124,7 @@ async function search(){
   try{JOBS=await rpc("pb_public_jobs",{p_city:$("city").value.trim()||null,p_q:$("q").value.trim()||null,p_slug:null})||[];}
   catch(e){$("cnt").textContent=T("जानकारी नहीं मिल सकी। थोड़ी देर बाद कोशिश करें।","Could not load. Please try later.");return;}
   $("cnt").textContent=JOBS.length?T(JOBS.length+(JOBS.length===1?" नौकरी":" नौकरियाँ"),JOBS.length+(JOBS.length===1?" job":" jobs")):"";
-  if(!JOBS.length){$("list").innerHTML='<div class="empty">'+T("अभी यहाँ कोई vacancy नहीं है।<br>दूसरा शहर या काम खोजकर देखें।","No vacancies here right now.<br>Try another city or work.")+'</div>';return;}
+  if(!JOBS.length){$("list").innerHTML='<div class="empty">'+T("अभी यहाँ कोई नौकरी नहीं है।<br>दूसरा शहर या काम खोजकर देखें।","No vacancies here right now.<br>Try another city or work.")+'</div>';return;}
   render();
 }
 function render(){
@@ -145,11 +145,11 @@ async function contact(id){
   const box=$("a-"+id);
   try{const r=await rpc("pb_job_contact",{p_token:t,p_job_id:id});
     const ph=r.phone,wa=r.whatsapp||ph;
-    box.innerHTML='<a class="c" href="tel:+91'+ph+'">📞 Call +91 '+ph+'</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+wa+'?text='+encodeURIComponent(T("नमस्ते, PataBook पर आपकी vacancy देखी — ","Hello, I saw your vacancy on PataBook — ")+(JOBS.find(x=>x.id===id)||{}).title)+'">💬 WhatsApp</a>'+
+    box.innerHTML='<a class="c" href="tel:+91'+ph+'">📞 Call +91 '+ph+'</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+wa+'?text='+encodeURIComponent(T("नमस्ते, PataBook पर आपकी नौकरी देखी — ","Hello, I saw your vacancy on PataBook — ")+(JOBS.find(x=>x.id===id)||{}).title)+'">💬 WhatsApp</a>'+
       '<div class="left" style="flex-basis:100%">'+T("आज "+r.left+" दुकानों से और संपर्क कर सकते हैं।","You can contact "+r.left+" more shops today.")+'</div>';
   }catch(e){
     if(/login required/i.test(e.message)){setSeek("");pendingJob=id;openSheet();return;}
-    alert(/daily limit/i.test(e.message)?T("आज के 5 संपर्क पूरे हो गए। कल फिर कोशिश करें।","You have used today’s 5 contacts. Try again tomorrow."):/no phone/i.test(e.message)?T("इस दुकान ने नंबर छिपा रखा है — दुकान पर जाकर मिलें।","This shop keeps its number hidden — please visit the shop."):T("यह vacancy अब उपलब्ध नहीं है।","This vacancy is no longer available."));
+    alert(/daily limit/i.test(e.message)?T("आज के 5 संपर्क पूरे हो गए। कल फिर कोशिश करें।","You have used today’s 5 contacts. Try again tomorrow."):/no phone/i.test(e.message)?T("इस दुकान ने नंबर छिपा रखा है — दुकान पर जाकर मिलें।","This shop keeps its number hidden — please visit the shop."):T("यह नौकरी अब उपलब्ध नहीं है।","This vacancy is no longer available."));
   }
 }
 $("list").onclick=e=>{const b=e.target.closest("[data-c]");if(b)contact(+b.dataset.c);};

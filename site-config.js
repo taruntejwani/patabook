@@ -11,6 +11,8 @@ window.PB_SITE = {
   grievanceEmail: 'patabook.in@gmail.com',   // शिकायत अधिकारी का email (खाली हो तो ऊपर वाला email)
   city: 'Gandhidham, Kutch, Gujarat',
   updated: '31 October 2026',
+  /* हिन्दी भाषा में दिखने वाले मान */
+  hi: { owner: 'तरुण तेजवानी', address: 'अपनानगर, गांधीधाम, कच्छ, गुजरात – 370201', grievanceName: 'तरुण तेजवानी', city: 'गांधीधाम, कच्छ, गुजरात', updated: '31 अक्टूबर 2026' },
 
   /* AI Poster: 'PataBook AI' Worker का पता (जैसे 'https://patabook-ai.XXXX.workers.dev'). खाली रहे तो AI बटन नहीं दिखेगा। */
   aiUrl: 'https://patabook-ai.tejwani512.workers.dev',

@@ -189,14 +189,14 @@ form.short .fo{display:none}
       <div class="step" data-s="phone">
         <div class="emoji">📞</div>
         <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
-        <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर call / WhatsApp करेंगे।</p>
+        <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर कॉल / WhatsApp करेंगे।</p>
         <input id="phone" type="tel" inputmode="numeric" maxlength="13" autocomplete="tel-national" placeholder="98XXXXXXXX">
         <div class="otpb" id="otpBox">
           <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
-          <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।</p>
+          <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर जाँच करें।</p>
         </div>
         <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
-        <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)</span></label>
+        <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक कॉल / WhatsApp कर सकें)</span></label>
         <label class="hsv" for="spN" style="margin-top:8px"><input type="radio" name="showPh" id="spN" value="0"> <span id="spNt">🔒 नहीं, नंबर छिपा रहे</span></label>
         <p class="hint" id="spNote" style="margin:8px 0 0;font-size:12.5px">बाद में "मेरी दुकान" पेज से कभी भी बदल सकते हैं।</p>
         <div class="err"></div>
@@ -239,9 +239,9 @@ form.short .fo{display:none}
       <!-- नया: email + website -->
       <div class="step" data-s="online">
         <div class="emoji">🌐</div>
-        <h1 id="onH">Email और वेबसाइट</h1>
+        <h1 id="onH">ईमेल और वेबसाइट</h1>
         <p class="hint" id="onHint">अगर है तो लिखें, नहीं तो खाली छोड़कर "आगे" दबाएँ।</p>
-        <label for="email" id="emL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">✉️ Email (वैकल्पिक)</label>
+        <label for="email" id="emL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">✉️ ईमेल (वैकल्पिक)</label>
         <input id="email" type="email" inputmode="email" autocomplete="email" maxlength="100" placeholder="name@gmail.com">
         <label for="web" id="webL" style="display:block;margin:14px 0 6px;font-size:14px;font-weight:700;color:#3c4043">🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span></label>
         <input id="web" type="url" inputmode="url" autocomplete="url" placeholder="जैसे: www.meridukaan.com" maxlength="200">
@@ -253,11 +253,11 @@ form.short .fo{display:none}
       <div class="grp" data-s="svc">
         <div class="emoji">🛠️</div>
         <h1 data-i="svc_h">आप क्या काम / सामान बेचते हैं?</h1>
-        <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही category खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
-        <textarea id="services" data-ip="svc_ph" placeholder="जैसे: car wash, polish, interior cleaning"></textarea>
+        <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही श्रेणी खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
+        <textarea id="services" data-ip="svc_ph" placeholder="जैसे: कार वॉश, पॉलिश, इंटीरियर सफ़ाई"></textarea>
         <div class="cat" id="cat"></div>
-        <div class="fo"><label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (Home Service)</span></label>
-        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (Home Delivery)</span></label></div>
+        <div class="fo"><label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (होम सर्विस)</span></label>
+        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (होम डिलीवरी)</span></label></div>
         <div class="err"></div>
         <div class="sum" id="sum"></div>
       </div>
@@ -270,12 +270,12 @@ form.short .fo{display:none}
           <div><label class="lbl" id="stateL">राज्य *</label><select id="state" class="in"><option selected>Gujarat</option><option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option><option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option></select></div>
           <div><label class="lbl" id="distL">ज़िला *</label><select id="distSel" class="in"></select><input id="district" autocomplete="off" placeholder="ज़िले का नाम" style="margin-top:8px" hidden></div>
         </div>
-        <div class="fo"><div><label class="lbl" id="areaL">इलाका / Area (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div></div>
+        <div class="fo"><div><label class="lbl" id="areaL">इलाका / इलाका (वैकल्पिक)</label><input id="area" placeholder="Sector 5"></div></div>
         <label class="lbl" id="addrL">पूरा पता *</label>
         <textarea id="address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
-        <div class="fo"><label class="lbl" id="pinL" for="pin">PIN कोड (वैकल्पिक)</label>
+        <div class="fo"><label class="lbl" id="pinL" for="pin">पिन कोड (वैकल्पिक)</label>
         <input id="pin" inputmode="numeric" maxlength="6" placeholder="370201">
-        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला PIN नहीं।</p></div>
+        <p class="hint" id="pinH" style="margin-top:6px;font-size:12.5px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला पिन नहीं।</p></div>
         <div class="err"></div>
       </div>
       </div>
@@ -303,9 +303,9 @@ form.short .fo{display:none}
 
 <footer style="padding:0 16px 18px"><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav></footer>
 <div class="pscrim" id="pscrim"></div>
-<div class="sheet" id="sheet" role="dialog" aria-label="Category चुनें">
-  <div class="sh"><b data-i="sheet_t">Category चुनें</b><button type="button" id="sclose" aria-label="Close">✕</button></div>
-  <div class="sb"><input id="sq" autocomplete="off" data-ip="sq_ph" placeholder="खोजें: जैसे plumber, school, कपड़े"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="श्रेणी चुनें">
+  <div class="sh"><b data-i="sheet_t">श्रेणी चुनें</b><button type="button" id="sclose" aria-label="Close">✕</button></div>
+  <div class="sb"><input id="sq" autocomplete="off" data-ip="sq_ph" placeholder="खोजें: जैसे प्लंबर, स्कूल, कपड़े"></div>
   <div class="sl" id="sl"></div>
 </div>
 
@@ -375,8 +375,8 @@ const NEW_CAT_WORDS={"appliance-repair":"appliance,appliance repair,washing mach
   "cleaning-services":"cleaning,home cleaning,deep cleaning,sofa cleaning,bathroom cleaning,pest control,safai",
   "other-home-services":"home service,home services,repair,handyman",
   /* सफ़ाई का सामान बेचने वाली दुकान (सेवा नहीं): Shopping → Grocery & Daily Needs → Cleaning Products */
-  "pbx-cleaning-products-store-50f810":"housekeeping,housekeeping product,housekeeping products,housekeeping material,cleaning product,cleaning products,cleaning material,cleaning materials,cleaning item,cleaning items,safai saman,safai ka saman,safai ka samaan,floor cleaner,toilet cleaner,glass cleaner,phenyl,phenyle,harpic,broom,mop,dustbin,सफाई का सामान,सफाई सामान,सफ़ाई का सामान,फिनाइल,झाड़ू,पोछा"};
-const OTHER_LABEL="Other (जोड़ी गई)";
+  "pbx-cleaning-products-store-50f810":"हाउसकीपिंग,हाउसकीपिंग उत्पाद,हाउसकीपिंग उत्पाद,हाउसकीपिंग सामान,सफ़ाई उत्पाद,सफ़ाई उत्पाद,सफ़ाई सामान,सफ़ाई materials,सफ़ाई सामान,सफ़ाई सामान,safai saman,safai ka saman,safai ka samaan,मंज़िल सफ़ाईकर्मी,टॉयलेट सफ़ाईकर्मी,काँच सफ़ाईकर्मी,phenyl,phenyle,harpic,झाड़ू,पोछा,कूड़ेदान,सफाई का सामान,सफाई सामान,सफ़ाई का सामान,फिनाइल,झाड़ू,पोछा"};
+const OTHER_LABEL="अन्य (जोड़ी गई)";
 const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
 const words=s=>String(s||"").toLowerCase().split(/[^a-z0-9ऀ-ॿ]+/).filter(w=>w.length>1);
 const stem=w=>w.length>3&&/[^s]s$/.test(w)?w.slice(0,-1):w;          /* products -> product */
@@ -626,9 +626,9 @@ function checkKey(key){
   if(key==="svc"&&!categoryIdFor(sel)){E(T("e_cat"));openSheet();return false;}
   if(key==="addr"&&$("pin")&&/^[1-9]\d{5}$/.test($("pin").value.trim())&&!pinFitsState($("pin").value.trim(),$("state").value)){
     E(EN()?"This PIN code is not of "+$("state").value+". Check the post office PIN of your area (or leave it empty).":"यह पिन कोड "+$("state").value+" का नहीं है। अपने इलाके का डाकघर वाला पिन कोड जाँचें (या खाली छोड़ दें)।");$("pin").focus();return false;}
-  if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){E(EN()?"PIN code must be 6 digits (or leave it empty).":"PIN कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
-  if(key==="online"&&$("email").value.trim()&&!/^[^\s@]{1,64}@[^\s@]{1,100}\.[a-z]{2,}$/i.test($("email").value.trim())){E(EN()?"The email looks wrong (or leave it empty).":"Email सही नहीं लगता (या खाली छोड़ दें)।");$("email").focus();return false;}
-  if(key==="online"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){E(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का link सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
+  if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){E(EN()?"PIN code must be 6 digits (or leave it empty).":"पिन कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
+  if(key==="online"&&$("email").value.trim()&&!/^[^\s@]{1,64}@[^\s@]{1,100}\.[a-z]{2,}$/i.test($("email").value.trim())){E(EN()?"The email looks wrong (or leave it empty).":"ईमेल सही नहीं लगता (या खाली छोड़ दें)।");$("email").focus();return false;}
+  if(key==="online"&&$("web")&&$("web").value.trim()&&webNorm($("web").value)===null){E(EN()?"The website link looks wrong. Example: www.myshop.com (or leave it empty)":"वेबसाइट का लिंक सही नहीं लगता। जैसे: www.meridukaan.com (या खाली छोड़ दें)");return false;}
   if(key==="addr"){
     const cv=$("city").value.trim();
     if(cv.length<2||/[0-9<>@\/\\:;{}=_|]/.test(cv)){E(LX("e_city2"));$("city").focus();return false;}
@@ -638,7 +638,7 @@ function checkKey(key){
   }
   if(key==="phone"&&!validPhone(phoneClean())){E(T("e_phone"));return false;}
   if(key==="phone"&&OWNP[ph10()]>=3){E(LX("limit2"));return false;}
-  if(key==="phone"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){E(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से verify करें।");return false;}
+  if(key==="phone"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){E(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से जाँच करें।");return false;}
   return true;
 }
 function check(){
@@ -662,8 +662,8 @@ let OWNP={},OWNMODE=false;   /* OWNP = {नंबर: इस खाते की
 function ownSync(){
   const p=ph10(),own=!!OWNP[p];
   if(own){OWNMODE=true;$("otpBox").classList.add("ok");
-    otpMsg(OWNP[p]>=3?LX("limit2"):(EN()?"✅ You are logged in and this is your verified number — no OTP needed.":"✅ आप login हैं और यह आपका verify नंबर है — OTP की ज़रूरत नहीं।"),OWNP[p]>=3);}
-  else if(OWNMODE){OWNMODE=false;if(!regToken){$("otpBox").classList.remove("ok");otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");}}
+    otpMsg(OWNP[p]>=3?LX("limit2"):(EN()?"✅ You are logged in and this is your verified number — no OTP needed.":"✅ आप लॉगिन हैं और यह आपका जाँच नंबर है — OTP की ज़रूरत नहीं।"),OWNP[p]>=3);}
+  else if(OWNMODE){OWNMODE=false;if(!regToken){$("otpBox").classList.remove("ok");otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर जाँच करें।");}}
 }
 async function loadOwnPhones(){
   try{const ses=await PBA.session();if(!ses)return;
@@ -678,11 +678,11 @@ const OTP_URL=String((window.PB_SITE&&PB_SITE.otpUrl)||"").replace(/\/$/,"");
 const EN=()=>!!(window.PB&&PB.lang&&PB.lang()!=="hi");
 /* बिज़नेस का प्रकार (Manufacturer / Wholesaler / Retailer …) — description में "Type:" line बनकर जाता है */
 const BTYPES=[
- ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (Manufacturer)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Worker","जॉब वर्कर (Job Work)"],["Assembler","असेंबलर"]]],
+ ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (निर्माता)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Worker","जॉब वर्कर (नौकरी काम)"],["Assembler","असेंबलर"]]],
  ["🚚 थोक / बीच के व्यापारी","🚚 Trade (bulk)",[["Importer","इम्पोर्टर"],["Exporter","एक्सपोर्टर"],["C&F / Super Stockist","C&F / सुपर स्टॉकिस्ट"],["Distributor","डिस्ट्रीब्यूटर"],["Wholesaler","होलसेलर (थोक)"],["Stockist","स्टॉकिस्ट"],["Authorised Dealer","अधिकृत डीलर"],["Trader / Commission Agent","ट्रेडर / दलाल"]]],
  ["🏪 ग्राहक तक","🏪 To customers",[["Retailer","रिटेलर (दुकान)"],["Showroom","शोरूम"],["Franchise","फ्रैंचाइज़ी"],["Online Seller","ऑनलाइन विक्रेता"],["Hawker / Street Vendor","फेरीवाला / ठेला"]]],
- ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (Service)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]],
- ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled Worker)"]]]
+ ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (सेवा)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]],
+ ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled कर्मचारी)"]]]
 ];
 function webNorm(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);if(!/\.[a-z]{2,}$/i.test(u.hostname))return null;return u.href.slice(0,200);}catch(e){return null;}}
 function n10(v){const d=String(v||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;}
@@ -693,12 +693,12 @@ function extrasFill(){
   set("hrH","दुकान कब खुलती है?","When is your shop open?");
   set("hrHint","ग्राहक बिना फ़ोन किए जान लेंगे कि दुकान अभी खुली है या नहीं। ज़रूरी नहीं।","Customers can see if you are open without calling. Optional.");
   set("opL","खुलने का समय","Opens at");set("clL","बंद होने का समय","Closes at");set("offL","🗓️ हफ़्ते में छुट्टी","🗓️ Weekly off");
-  set("onH","Email और वेबसाइट","Email and website");
+  set("onH","ईमेल और वेबसाइट","Email and website");
   set("onHint","अगर है तो लिखें, नहीं तो खाली छोड़कर \"आगे\" दबाएँ।","Add them if you have them, or leave empty and tap Next.");
-  set("emL","✉️ Email (वैकल्पिक)","✉️ Email (optional)");
+  set("emL","✉️ ईमेल (वैकल्पिक)","✉️ Email (optional)");
   set("pinL","📮 शहर / इलाके का पिन कोड (वैकल्पिक)","📮 Area postal PIN code (optional)");
-  set("pinH","डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला PIN नहीं।","The 6-digit post office code, like 370201 — not your ATM / bank PIN.");
-  set("hdlTxt","🚚 घर पर सामान पहुँचाते हैं (Home Delivery)","🚚 We deliver to your home (Home Delivery)");
+  set("pinH","डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला पिन नहीं।","The 6-digit post office code, like 370201 — not your ATM / bank PIN.");
+  set("hdlTxt","🚚 घर पर सामान पहुँचाते हैं (होम डिलीवरी)","🚚 We deliver to your home (Home Delivery)");
   const od=$("offDay");if(od){const v=od.value;od.innerHTML=DAYS.map(d=>'<option value="'+d[0]+'">'+(en?d[2]:d[1])+'</option>').join("");od.value=v;}
 }
 function btypeFill(){
@@ -731,16 +731,16 @@ async function otpCall(path,body){
   return j;}
 function otpReset(){regToken="";regPhone="";$("otpBox").classList.remove("ok");$("otpCode").value="";$("otpCode").disabled=true;
   clearInterval(otpTimer);const b=$("otpSend");b.disabled=false;b.textContent=EN()?"Send OTP":"OTP भेजें";
-  otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");}
+  otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर जाँच करें।");}
 function otpCool(sec){let left=sec||60;const b=$("otpSend");b.disabled=true;clearInterval(otpTimer);
   const tick=()=>{b.textContent=(EN()?"Resend":"फिर भेजें")+" ("+left+")";if(left--<=0){clearInterval(otpTimer);b.disabled=false;b.textContent=EN()?"Resend":"फिर भेजें";}};tick();otpTimer=setInterval(tick,1000);}
 /* OTP box के शब्द चुनी हुई भाषा में (page खुलते समय और भाषा बदलने पर) */
 function otpLang(){
   if(OWNMODE){ownSync();return;}
-  if(regToken){otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");return;}
+  if(regToken){otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर जाँच हो गया");return;}
   const b=$("otpSend");if(!b.disabled)b.textContent=EN()?"Send OTP":"OTP भेजें";
   $("otpCode").placeholder="OTP ••••••";
-  if(!$("otpMsg").style.color)otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर verify करें।");
+  if(!$("otpMsg").style.color)otpMsg(EN()?"Verify this number with the OTP sent by SMS.":"इस नंबर पर SMS से आया OTP डालकर नंबर जाँच करें।");
 }
 otpLang();if(window.PB&&PB.onChange)PB.onChange(otpLang);
 $("phone").addEventListener("input",e=>{   /* सिर्फ अंक, ज़्यादा से ज़्यादा 10 (+91 / 0 अपने-आप हटे) */
@@ -772,7 +772,7 @@ $("otpCode").addEventListener("input",async()=>{
       await PBA.mobile.useTokenHash(j.token_hash,j.email);clearInterval(otpTimer);location.href="mybusiness.html";return;
     }
     regToken=j.reg_token;regPhone=p;loginTicket=j.login_ticket||"";clearInterval(otpTimer);$("otpBox").classList.add("ok");
-    otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर verify हो गया");setErr("");
+    otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर जाँच हो गया");setErr("");
   }catch(e){
     if(e.code==="admin_owned"||e.code==="owner_missing"){otpMsg(EN()?"A shop is already added with this number. Please contact PataBook to manage it.":"इस नंबर से दुकान पहले से जुड़ी है। उसे संभालने के लिए PataBook से संपर्क करें।",true);$("otpCode").value="";return;}
     otpMsg(otpErr(e),true);$("otpCode").disabled=false;$("otpCode").value="";$("otpCode").focus();}
@@ -823,7 +823,7 @@ function fillDistricts(keep){
   if(!L.length){ds.hidden=true;inp.hidden=false;if(!keep)inp.value="";return;}
   ds.hidden=false;
   ds.innerHTML='<option value="">'+(en?"Choose district":"ज़िला चुनें")+'</option>'+L.map(n=>'<option value="'+n.replace(/"/g,"&quot;")+'">'+n+(n==="Kutch"?" (Kachchh)":"")+'</option>').join("")+
-    '<option value="'+DIST_OTHER+'">'+(en?"➕ Not in list — write it":"➕ list में नहीं है — लिखें")+'</option>';
+    '<option value="'+DIST_OTHER+'">'+(en?"➕ Not in list — write it":"➕ सूची में नहीं है — लिखें")+'</option>';
   const cur=keep?inp.value.trim():"";
   const hit=cur&&L.find(n=>n.toLowerCase()===cur.toLowerCase()||(n==="Kutch"&&/^ka?c+h+$|^kutch$/i.test(cur)));
   if(hit){ds.value=hit;inp.hidden=true;inp.value=hit;}
@@ -898,7 +898,7 @@ async function submit(){
     if(/limit1|limit2|limit3|duplicate|already/i.test(rt))return fail(LX("limit2"));
     if(/too many|rate/i.test(rt))return fail(LX("rate"));
     if(/bad address/i.test(rt))return fail(T("e_addr"));
-    if(/otp required/i.test(rt)){otpReset();return fail(EN()?"Your OTP verification expired. Please verify the mobile number again.":"OTP verification की समय-सीमा खत्म हो गई। मोबाइल नंबर फिर से verify करें।");}
+    if(/otp required/i.test(rt)){otpReset();return fail(EN()?"Your OTP verification expired. Please verify the mobile number again.":"OTP जाँच की समय-सीमा खत्म हो गई। मोबाइल नंबर फिर से जाँच करें।");}
     if(/bad phone/i.test(rt))return fail(T("e_phone"));
     if(/bad city|bad state|bad district/i.test(rt))return fail(LX("e_city2"));
     if(/bad category/i.test(rt))return fail(T("e_cat"));
@@ -934,7 +934,7 @@ async function autoLogin(){
       if(r.ok&&j&&j.ok&&j.token_hash){
         await PBA.mobile.useTokenHash(j.token_hash,j.email);
         const box=$("stBox");if(box){const d=document.createElement("a");d.href="mybusiness.html";d.className="btn";d.style.cssText="display:block;text-align:center;margin-top:12px;background:#137333";
-          d.textContent=EN()?"✅ You are logged in — open My Shop ›":"✅ आप अपनी दुकान में login हैं — मेरी दुकान खोलें ›";box.appendChild(d);}
+          d.textContent=EN()?"✅ You are logged in — open My Shop ›":"✅ आप अपनी दुकान में लॉगिन हैं — मेरी दुकान खोलें ›";box.appendChild(d);}
         return;
       }
       if(!(r.status===404))return;   /* दुकान अभी बन रही है तो थोड़ा रुककर दोबारा */
@@ -978,7 +978,7 @@ function showStatus(x){
     box.innerHTML='<div class="big">ℹ️</div><h2>'+LX("st_rm_h")+'</h2><p class="sub">'+LX("st_rm_s")+'</p><button type="button" class="btn" id="stNew">'+LX("st_new")+'</button>';
   }else{
     const en=EN();
-    box.innerHTML='<div class="big">🎉</div><h2>'+(en?"Your shop is saved!":"दुकान सेव हो गई!")+'</h2><span class="pill p">🔴 '+(en?"Offline — only you can see it":"Offline — अभी सिर्फ़ आपको दिखती है")+'</span>'+
+    box.innerHTML='<div class="big">🎉</div><h2>'+(en?"Your shop is saved!":"दुकान सेव हो गई!")+'</h2><span class="pill p">🔴 '+(en?"Offline — only you can see it":"ऑफ़लाइन — अभी सिर्फ़ आपको दिखती है")+'</span>'+
       '<p class="sub"><b>'+nm+'</b> '+(en?"has been added to PataBook.":"PataBook में जुड़ गई है।")+'</p>'+
       '<div class="info" id="stInfo">'+(en?"1️⃣ Open <b>My Shop</b> and complete your profile to 100%.<br>2️⃣ Tap <b>“Send for approval”</b>.<br>3️⃣ PataBook checks it, and after approval your shop shows to everyone.":"1️⃣ <b>मेरी दुकान</b> खोलें और प्रोफ़ाइल 100% पूरी करें।<br>2️⃣ <b>“मंज़ूरी के लिए भेजें”</b> दबाएँ।<br>3️⃣ PataBook जाँचेगा, और मंज़ूरी के बाद आपकी दुकान सबको दिखेगी।")+'</div>'+
       '<a class="btn" id="stMy" href="mybusiness.html" style="display:block;text-align:center">'+(en?"Open My Shop ›":"मेरी दुकान खोलें ›")+'</a>'+
@@ -1020,21 +1020,21 @@ function showCheck(msg){
 $("chkBtn").onclick=()=>{location.href="mybusiness.html";};   /* नंबर डालकर किसी की भी दुकान का status देखना बंद (privacy) */
 /* ---------- लॉगिन (ईमेल OTP) ---------- */
 const LXT={
-  hi:{rate:"बहुत बार कोशिश हुई। थोड़ी देर बाद फिर से भेजें।",setup:"अभी रजिस्ट्रेशन चालू नहीं है। थोड़ी देर बाद कोशिश करें।",autoc:"📍 आपकी location से शहर चुना गया: {c} (बदल सकते हैं)",
-      locH:"दुकान का पता लिखें",locHint:"भारत में कहीं भी — शहर / गाँव का नाम लिखना शुरू करें और list से चुनें, राज्य और ज़िला अपने-आप भर जाएँगे (न भरें तो खुद चुनें)। फिर और पूरा पता साफ़ लिखें (दुकान नंबर, रोड, लैंडमार्क)। ठेला / लारी हो तो वह जहाँ लगती है वह जगह लिखें।",
-      mlk:"Google Maps का link (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (list में न हो तो ➕ से लिखें)।",areaL:"इलाका / Area (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है",
-      chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना FREE डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का poster शेयर करें",chkB:"मेरी दुकान देखें",
-      st_h:"बधाई हो! आपका रजिस्ट्रेशन हो गया 🎊",st_h2:"आपका रजिस्ट्रेशन मिल गया है",st_pend:"Pending — जाँच चल रही है",
-      st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द Live कर देगी।",st_left:"मिनट बाकी",st_left_h:"घंटे बाकी",
-      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ हमारी टीम जाँच करके <b>24 घंटे</b> के अंदर आपकी दुकान PataBook पर Live कर देगी (अक्सर इससे जल्दी)।<br>🔄 यह पेज बंद हो जाए तो इसी फ़ोन पर यह पेज दोबारा खोलें — स्टेटस अपने-आप दिखेगा।",
-      st_over:"⏳ <b>बस थोड़ी देर और!</b> आपकी दुकान जाँच में है और जल्द Live होगी। यह पेज अपने-आप अपडेट हो जाएगा।",st_over_s:"जल्द Live",
+  hi:{rate:"बहुत बार कोशिश हुई। थोड़ी देर बाद फिर से भेजें।",setup:"अभी रजिस्ट्रेशन चालू नहीं है। थोड़ी देर बाद कोशिश करें।",autoc:"📍 आपकी लोकेशन से शहर चुना गया: {c} (बदल सकते हैं)",
+      locH:"दुकान का पता लिखें",locHint:"भारत में कहीं भी — शहर / गाँव का नाम लिखना शुरू करें और सूची से चुनें, राज्य और ज़िला अपने-आप भर जाएँगे (न भरें तो खुद चुनें)। फिर और पूरा पता साफ़ लिखें (दुकान नंबर, रोड, लैंडमार्क)। ठेला / लारी हो तो वह जहाँ लगती है वह जगह लिखें।",
+      mlk:"Google Maps का लिंक (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (सूची में न हो तो ➕ से लिखें)।",areaL:"इलाका / इलाका (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है",
+      chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना मुफ़्त डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का पोस्टर शेयर करें",chkB:"मेरी दुकान देखें",
+      st_h:"बधाई हो! आपका रजिस्ट्रेशन हो गया 🎊",st_h2:"आपका रजिस्ट्रेशन मिल गया है",st_pend:"लंबित — जाँच चल रही है",
+      st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द लाइव कर देगी।",st_left:"मिनट बाकी",st_left_h:"घंटे बाकी",
+      st_info:"✅ आपको कुछ नहीं करना है।<br>⏱️ हमारी टीम जाँच करके <b>24 घंटे</b> के अंदर आपकी दुकान PataBook पर लाइव कर देगी (अक्सर इससे जल्दी)।<br>🔄 यह पेज बंद हो जाए तो इसी फ़ोन पर यह पेज दोबारा खोलें — स्टेटस अपने-आप दिखेगा।",
+      st_over:"⏳ <b>बस थोड़ी देर और!</b> आपकी दुकान जाँच में है और जल्द लाइव होगी। यह पेज अपने-आप अपडेट हो जाएगा।",st_over_s:"जल्द लाइव",
       st_ref:"स्टेटस फिर से देखें",st_new:"+ नई दुकान जोड़ें",
-      st_live_p:"✅ Live",st_live_h:"आपकी दुकान Live हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
+      st_live_p:"✅ Live",st_live_h:"आपकी दुकान लाइव हो गई! 🎉",st_live_s:"अब PataBook पर सबको दिखती है।",st_see:"अपनी दुकान देखें ›",
       st_rm_h:"यह रजिस्ट्रेशन हटा दिया गया है",st_rm_s:"ज़्यादा जानकारी के लिए PataBook से संपर्क करें, या नई दुकान फिर से जोड़ें।",
       ck_h:"रजिस्ट्रेशन का स्टेटस देखें",ck_s:"जिस मोबाइल नंबर से दुकान जोड़ी थी, वह डालें।",ck_b:"स्टेटस देखें",ck_none:"इस नंबर से कोई रजिस्ट्रेशन नहीं मिला।",ck_fail:"अभी स्टेटस नहीं मिल सका। थोड़ी देर बाद कोशिश करें।",
       g_h:"दुकान जोड़ने से पहले लॉगिन करें",limit2:"इस मोबाइल नंबर से 3 दुकानें पहले ही जुड़ चुकी हैं। एक नंबर से ज़्यादा से ज़्यादा 3 दुकानें जोड़ सकते हैं।",many:"इस ईमेल से बहुत सारी दुकानें जुड़ चुकी हैं। मदद के लिए PataBook से संपर्क करें।",pub:"📞 क्या आपका नंबर ग्राहकों को दिखे?",mine:"मेरी दुकान देखें ›",g_p:"आपके ईमेल पर एक OTP कोड आएगा। उसे डालते ही आप यहीं वापस आ जाएँगे।",g_b:"ईमेल से लॉगिन करें →",who:"✅ आप {e} से लॉगिन हैं",out:"लॉगआउट",
-      pending:"जाँच (approval) के बाद आपकी दुकान PataBook पर दिखेगी।",
-      loc_hint:"दुकान पर हों तो बटन दबाकर location जोड़ें, ताकि ग्राहक सीधे रास्ता देख सकें। हर दुकान जाँच के बाद चालू होती है।"},
+      pending:"जाँच (मंज़ूरी) के बाद आपकी दुकान PataBook पर दिखेगी।",
+      loc_hint:"दुकान पर हों तो बटन दबाकर लोकेशन जोड़ें, ताकि ग्राहक सीधे रास्ता देख सकें। हर दुकान जाँच के बाद चालू होती है।"},
   en:{rate:"Too many attempts. Please try again in a little while.",setup:"Registration is not open right now. Please try again later.",autoc:"📍 City picked from your location: {c} (you can change it)",
       locH:"Write your shop address",locHint:"Anywhere in India — start typing your city / village and pick it from the list; state and district fill in automatically (choose them if they don’t). Then the full address clearly (shop no., road, landmark). For a stall/cart, write where it stands.",
       mlk:"Google Maps link (optional)",cityL:"City / Village *",distL:"District *",stateL:"State *",e_city2:"Write the city / village name (letters only).",e_dist:"Choose the district (not in list? use ➕ to write it).",areaL:"Area (optional)",addrL:"Full address *",addrPh:"Shop no., road, landmark — or where your stall/cart stands",
@@ -1069,7 +1069,7 @@ checkLogin();
 function hsvByType(){const t=$("btype"),c=$("homeSvc");if(!t||!c)return;const ind=["Employee (Job)","Freelancer / Self-employed","Skilled Worker"].includes(t.value);
   const l=c.closest("label");if(l)l.style.display=ind?"none":"";if(ind)c.checked=false;}
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="btype")hsvByType();});
-function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const en=(PB.lang&&PB.lang()!=="hi");[["spYt",en?"✅ Yes, show it to everyone (customers can Call / WhatsApp)":"✅ हाँ, सबको दिखे (ग्राहक Call / WhatsApp कर सकें)"],["spNt",en?"🔒 No, keep my number hidden":"🔒 नहीं, नंबर छिपा रहे"],["spNote",en?"You can change this anytime from the \u201cMy Shop\u201d page.":"बाद में \"मेरी दुकान\" पेज से कभी भी बदल सकते हैं।"]].forEach(x=>{const e=$(x[0]);if(e)e.textContent=x[1];});const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()!=="hi")?"🏠 Our shop provides service at customers\u2019 homes (Home Service)":"🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (Home Service)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");$("district").placeholder=(PB.lang&&PB.lang()!=="hi")?"District name":"ज़िले का नाम";try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
+function fixHint(){const pn=$("pubNote");if(pn)pn.textContent=LX("pub");const en=(PB.lang&&PB.lang()!=="hi");[["spYt",en?"✅ Yes, show it to everyone (customers can Call / WhatsApp)":"✅ हाँ, सबको दिखे (ग्राहक कॉल / WhatsApp कर सकें)"],["spNt",en?"🔒 No, keep my number hidden":"🔒 नहीं, नंबर छिपा रहे"],["spNote",en?"You can change this anytime from the \u201cMy Shop\u201d page.":"बाद में \"मेरी दुकान\" पेज से कभी भी बदल सकते हैं।"]].forEach(x=>{const e=$(x[0]);if(e)e.textContent=x[1];});const hv=$("hsvTxt");if(hv)hv.textContent=(PB.lang&&PB.lang()!=="hi")?"🏠 Our shop provides service at customers\u2019 homes (Home Service)":"🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (होम सर्विस)";["locH","locHint","cityL","distL","stateL","areaL","addrL","chkQ"].forEach(k=>{const e=$(k);if(e)e.textContent=LX(k);});$("chkBtn").textContent=LX("chkB");$("address").placeholder=LX("addrPh");$("district").placeholder=(PB.lang&&PB.lang()!=="hi")?"District name":"ज़िले का नाम";try{$("district").value=distVal();fillDistricts(true);}catch(_){}}
 PB.apply();fixHint();btypeFill();document.title=T("addshop")+" — PataBook";
 PB.mount($("pbLang"));
 PB.onChange(()=>{

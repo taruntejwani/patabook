@@ -139,26 +139,26 @@ function otpErr(e){const c=e&&e.code;
   if(c==="captcha_failed"||c==="captcha_required")return T("“मैं रोबोट नहीं हूँ” जाँच पूरी नहीं हुई। पेज रीफ़्रेश करके फिर कोशिश करें।","The “I’m not a robot” check did not complete. Refresh and try again.");
   if(c==="sms_failed")return T("SMS नहीं भेजा जा सका। थोड़ी देर बाद कोशिश करें।","The SMS could not be sent. Try again later.");
   if(c==="shop_not_found")return T("यह दुकान नहीं मिली।","Shop not found.");
-  if(c==="payments_off")return T("Payment अभी चालू नहीं है। थोड़ी देर बाद कोशिश करें।","Payments are not on yet. Please try later.");
+  if(c==="payments_off")return T("भुगतान अभी चालू नहीं है। थोड़ी देर बाद कोशिश करें।","Payments are not on yet. Please try later.");
   return T("कुछ गड़बड़ हुई। इंटरनेट जाँचकर फिर कोशिश करें।","Something went wrong. Check your internet and try again.");
 }
 
 /* ---------- static text ---------- */
 $("backLink").textContent=T("← दुकान","← Shop");$("backLink").href=slug?"business.html?slug="+encodeURIComponent(slug):"index.html";
-$("nsH").textContent=T("दुकान नहीं मिली","Shop not found");$("nsP").textContent=T("अपनी दुकान का पेज खोलकर वहाँ “💼 Vacancy” बटन दबाएँ।","Open your shop page and tap the “💼 Vacancy” button there.");$("nsB").textContent=T("अपनी दुकान खोजें","Find your shop");
-$("lgH").textContent=T("💼 Vacancy डालें","💼 Post a vacancy");
+$("nsH").textContent=T("दुकान नहीं मिली","Shop not found");$("nsP").textContent=T("अपनी दुकान का पेज खोलकर वहाँ “💼 नौकरी” बटन दबाएँ।","Open your shop page and tap the “💼 Vacancy” button there.");$("nsB").textContent=T("अपनी दुकान खोजें","Find your shop");
+$("lgH").textContent=T("💼 नौकरी डालें","💼 Post a vacancy");
 $("lgP").textContent=T("यह हिस्सा सिर्फ दुकान के मालिक के लिए है। दुकान जिस मोबाइल नंबर से जुड़ी है, उसी पर OTP आएगा।","This is only for the shop owner. The OTP goes to the mobile number registered with the shop.");
 $("send").textContent=T("दुकान के नंबर पर OTP भेजें","Send OTP to the shop's number");
-$("verify").textContent=T("Verify करें","Verify");$("resend").textContent=T("OTP फिर भेजें","Resend OTP");
+$("verify").textContent=T("जाँच करें","Verify");$("resend").textContent=T("OTP फिर भेजें","Resend OTP");
 $("lgNote").textContent=T("दुकान का नंबर बदल गया है? पहले “मेरी दुकान” से नंबर बदलें।","Shop number changed? First update it from “My Shop”.");
-$("fH").textContent=T("➕ नई vacancy","➕ New vacancy");
+$("fH").textContent=T("➕ नई नौकरी","➕ New vacancy");
 $("lT").textContent=T("काम / पद *  (जैसे: हेल्पर, ड्राइवर, सेल्समैन)","Job / position *  (e.g. Helper, Driver, Salesman)");
 $("lS").textContent=T("तनख्वाह","Salary");$("js").placeholder=T("जैसे ₹9,000/महीना","e.g. ₹9,000/month");
 $("lO").textContent=T("कितने लोग","Openings");
 $("lTm").textContent=T("काम का समय","Work timing");$("jtm").placeholder=T("जैसे सुबह 10 – शाम 7","e.g. 10 am – 7 pm");
 $("lD").textContent=T("और जानकारी (अनुभव, उम्र, जगह…)","More details (experience, age, place…)");
-$("jSave").textContent=T("Vacancy डालें","Post vacancy");$("jCancel").textContent=T("रद्द करें","Cancel");
-$("myH").textContent=T("मेरी vacancies","My vacancies");$("logout").textContent=T("बाहर निकलें","Log out");
+$("jSave").textContent=T("नौकरी डालें","Post vacancy");$("jCancel").textContent=T("रद्द करें","Cancel");
+$("myH").textContent=T("मेरी नौकरियाँ","My vacancies");$("logout").textContent=T("बाहर निकलें","Log out");
 
 /* ---------- OTP login ---------- */
 let sending=false;
@@ -189,17 +189,17 @@ async function load(){
   const until=S.plan_until?new Date(S.plan_until):null,on=until&&until>new Date(S.now||Date.now());
   let h="";
   if(on){
-    h='<div class="plan on">💎 '+T("Premium चालू है — "+fmtD(S.plan_until)+" तक। जितनी चाहें vacancy डालें।","Premium active — till "+fmtD(S.plan_until)+". Post as many vacancies as you like.")+'</div>';
+    h='<div class="plan on">💎 '+T("प्रीमियम चालू है — "+fmtD(S.plan_until)+" तक। जितनी चाहें नौकरी डालें।","Premium active — till "+fmtD(S.plan_until)+". Post as many vacancies as you like.")+'</div>';
   }else{
-    h='<div class="plan off">'+T(until?"⏳ आपका Premium "+fmtD(S.plan_until)+" को खत्म हो गया। आपकी vacancies अभी किसी को नहीं दिख रहीं।":"💼 Vacancy डालना PataBook Premium का हिस्सा है। Premium चालू होते ही यहाँ vacancy डाल सकेंगे।",until?"⏳ Your Premium ended on "+fmtD(S.plan_until)+". Your vacancies are not shown now.":"💼 Posting vacancies is part of PataBook Premium. Once Premium is active you can post here.")+'</div>'+
-      '<p class="note">'+T("मुफ़्त \"Vacancy available\" switch \"मेरी दुकान\" में पहले की तरह चालू है।","The free \"Vacancy available\" switch in My Shop still works.")+'</p>';
+    h='<div class="plan off">'+T(until?"⏳ आपका प्रीमियम "+fmtD(S.plan_until)+" को खत्म हो गया। आपकी नौकरियाँ अभी किसी को नहीं दिख रहीं।":"💼 नौकरी डालना PataBook प्रीमियम का हिस्सा है। प्रीमियम चालू होते ही यहाँ नौकरी डाल सकेंगे।",until?"⏳ Your Premium ended on "+fmtD(S.plan_until)+". Your vacancies are not shown now.":"💼 Posting vacancies is part of PataBook Premium. Once Premium is active you can post here.")+'</div>'+
+      '<p class="note">'+T("मुफ़्त \"नौकरी उपलब्ध\" बदलें \"मेरी दुकान\" में पहले की तरह चालू है।","The free \"Vacancy available\" switch in My Shop still works.")+'</p>';
   }
-  if(S.is_active===false)h+='<p class="note">⚠️ '+T("आपकी दुकान अभी Pending है — admin के approve करने के बाद ही vacancies दिखेंगी।","Your shop is still pending — vacancies show only after the admin approves the shop.")+'</p>';
+  if(S.is_active===false)h+='<p class="note">⚠️ '+T("आपकी दुकान अभी लंबित है — एडमिन के मंज़ूर करने के बाद ही नौकरियाँ दिखेंगी।","Your shop is still pending — vacancies show only after the admin approves the shop.")+'</p>';
   $("planBox").innerHTML=h;const pb=$("payBtn");if(pb)pb.onclick=pay;
   $("formCard").hidden=!on;
   const jobs=S.jobs||[];$("listCard").hidden=!jobs.length;
   $("myJobs").innerHTML=jobs.map(j=>{const live=on&&j.status==="live"&&new Date(j.expires_at)>new Date();
-    return '<div class="job"><b>'+esc(j.title)+'</b><span class="pill '+(live?"l":"x")+'">'+(live?T("दिख रही","Live"):j.status==="hidden"?T("admin ने छिपाई","Hidden by admin"):T("बंद","Off"))+'</span>'+
+    return '<div class="job"><b>'+esc(j.title)+'</b><span class="pill '+(live?"l":"x")+'">'+(live?T("दिख रही","Live"):j.status==="hidden"?T("एडमिन ने छिपाई","Hidden by admin"):T("बंद","Off"))+'</span>'+
       '<div class="m">'+[j.salary&&("💰 "+esc(j.salary)),j.timing&&("🕘 "+esc(j.timing)),"👥 "+(j.openings||1)].filter(Boolean).join(" · ")+'<br>'+T("डाली: ","Posted: ")+fmtD(j.created_at)+' · '+T("दिखेगी: ","Shows till: ")+fmtD(j.expires_at)+'</div>'+
       '<div class="a">'+(on?'<button data-e="'+j.id+'">✏️ '+T("बदलें","Edit")+'</button>':'')+'<button class="del" data-d="'+j.id+'">🗑 '+T("हटाएँ","Delete")+'</button></div></div>';}).join("");
 }
@@ -207,19 +207,19 @@ $("myJobs").onclick=async e=>{
   const ed=e.target.closest("[data-e]"),dl=e.target.closest("[data-d]");
   if(ed){const j=(S.jobs||[]).find(x=>String(x.id)===ed.dataset.e);if(!j)return;
     $("jid").value=j.id;$("jt").value=j.title||"";$("js").value=j.salary||"";$("jo").value=j.openings||1;$("jtm").value=j.timing||"";$("jd").value=j.details||"";
-    $("fH").textContent=T("✏️ Vacancy बदलें","✏️ Edit vacancy");$("jSave").textContent=T("बदलाव सेव करें","Save changes");$("jCancel").hidden=false;
+    $("fH").textContent=T("✏️ नौकरी बदलें","✏️ Edit vacancy");$("jSave").textContent=T("बदलाव सेव करें","Save changes");$("jCancel").hidden=false;
     $("formCard").scrollIntoView({behavior:"smooth"});}
-  if(dl){if(!confirm(T("यह vacancy हटाएँ?","Delete this vacancy?")))return;
+  if(dl){if(!confirm(T("यह नौकरी हटाएँ?","Delete this vacancy?")))return;
     try{await rpc("pb_vac_delete",{p_token:getTok(),p_id:+dl.dataset.d});await load();}catch(x){alert(otpErr(x));}}
 };
-function resetForm(){$("jf").reset();$("jid").value="";$("jo").value=1;$("fH").textContent=T("➕ नई vacancy","➕ New vacancy");$("jSave").textContent=T("Vacancy डालें","Post vacancy");$("jCancel").hidden=true;$("eJ").textContent="";}
+function resetForm(){$("jf").reset();$("jid").value="";$("jo").value=1;$("fH").textContent=T("➕ नई नौकरी","➕ New vacancy");$("jSave").textContent=T("नौकरी डालें","Post vacancy");$("jCancel").hidden=true;$("eJ").textContent="";}
 $("jCancel").onclick=resetForm;
 $("jf").onsubmit=async ev=>{ev.preventDefault();$("eJ").textContent="";
   const p={id:$("jid").value||null,title:$("jt").value.trim(),salary:$("js").value.trim(),openings:$("jo").value,timing:$("jtm").value.trim(),details:$("jd").value.trim()};
   if(p.title.length<2){$("eJ").textContent=T("काम / पद का नाम लिखें।","Write the job / position.");$("jt").focus();return;}
   $("jSave").disabled=true;
   try{await rpc("pb_vac_save",{p_token:getTok(),p:p});resetForm();await load();}
-  catch(x){$("eJ").textContent=/plan required/i.test(x.message)?T("Premium चालू नहीं है।","Premium is not active."):/too many/i.test(x.message)?T("एक साथ 100 से ज़्यादा vacancy नहीं।","Max 100 vacancies at a time."):/login required/i.test(x.message)?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(x);
+  catch(x){$("eJ").textContent=/plan required/i.test(x.message)?T("प्रीमियम चालू नहीं है।","Premium is not active."):/too many/i.test(x.message)?T("एक साथ 100 से ज़्यादा नौकरी नहीं।","Max 100 vacancies at a time."):/login required/i.test(x.message)?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(x);
     if(/login required/i.test(x.message)){setTok("");show("login");}}
   $("jSave").disabled=false;};
 $("logout").onclick=()=>{setTok("");location.reload();};
@@ -231,16 +231,16 @@ async function pay(){
   try{
     const o=await PBA.otp("/pay/order",{token:getTok()});
     await loadRz();
-    const rz=new Razorpay({key:o.key_id,order_id:o.order_id,amount:o.amount,currency:o.currency||"INR",name:"PataBook",description:T("Vacancy plan — 30 दिन","Vacancy plan — 30 days"),
+    const rz=new Razorpay({key:o.key_id,order_id:o.order_id,amount:o.amount,currency:o.currency||"INR",name:"PataBook",description:T("नौकरी प्लान — 30 दिन","Vacancy plan — 30 days"),
       notes:{slug:slug},theme:{color:"#1a73e8"},
       handler:async function(r){
-        $("ePay").textContent=T("Payment की जाँच हो रही है…","Checking the payment…");
+        $("ePay").textContent=T("भुगतान की जाँच हो रही है…","Checking the payment…");
         try{await PBA.otp("/pay/verify",{order_id:r.razorpay_order_id,payment_id:r.razorpay_payment_id,signature:r.razorpay_signature});$("ePay").textContent="";await load();
-          alert(T("✅ Plan चालू हो गया! अब vacancy डालें।","✅ Plan activated! You can now post vacancies."));}
-        catch(x){$("ePay").textContent=T("Payment मिल गया है, plan कुछ मिनट में चालू हो जाएगा। पेज refresh करके देखें।","Payment received; the plan will activate within a few minutes. Refresh the page to check.");}
+          alert(T("✅ प्लान चालू हो गया! अब नौकरी डालें।","✅ Plan activated! You can now post vacancies."));}
+        catch(x){$("ePay").textContent=T("भुगतान मिल गया है, प्लान कुछ मिनट में चालू हो जाएगा। पेज रीफ़्रेश करके देखें।","Payment received; the plan will activate within a few minutes. Refresh the page to check.");}
       },
       modal:{ondismiss:function(){b.disabled=false;}}});
-    rz.on("payment.failed",function(){$("ePay").textContent=T("Payment नहीं हुआ। दोबारा कोशिश करें — पैसे कटे हों तो अपने-आप वापस आ जाएँगे।","Payment failed. Please try again — any deducted amount is refunded automatically.");b.disabled=false;});
+    rz.on("payment.failed",function(){$("ePay").textContent=T("भुगतान नहीं हुआ। दोबारा कोशिश करें — पैसे कटे हों तो अपने-आप वापस आ जाएँगे।","Payment failed. Please try again — any deducted amount is refunded automatically.");b.disabled=false;});
     rz.open();
   }catch(e){$("ePay").textContent=e&&e.code==="login_required"?T("फिर से OTP से लॉगिन करें।","Please log in again with OTP."):otpErr(e);b.disabled=false;
     if(e&&e.code==="login_required"){setTok("");show("login");}}

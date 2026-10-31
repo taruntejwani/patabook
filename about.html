@@ -70,11 +70,11 @@ details{border-top:1px solid #eef1f6;padding:10px 0}details:first-of-type{border
 <h2>हमारा मकसद</h2>
 <p>छोटे और लोकल दुकानदारों को ऑनलाइन पहचान देना, और ग्राहकों को अपने आस-पास की सही दुकान तक जल्दी पहुँचाना।</p>
 <h2>दुकानदारों के लिए</h2>
-<ul><li>दुकान की सामान्य listing <b>हमेशा मुफ़्त</b> है।</li><li>दुकान का नाम, पता, फ़ोन, फ़ोटो और समय आप खुद बदल सकते हैं।</li><li>ज़्यादा पहचान के लिए 🥈 Silver, 👑 Gold और 💎 Platinum Member plan भी हैं (<a href="terms.html">शर्तें</a>)।</li></ul>
+<ul><li>दुकान की सामान्य सूची <b>हमेशा मुफ़्त</b> है।</li><li>दुकान का नाम, पता, फ़ोन, फ़ोटो और समय आप खुद बदल सकते हैं।</li><li>ज़्यादा पहचान के लिए 🥈 सिल्वर, 👑 गोल्ड और 💎 प्लैटिनम सदस्य प्लान भी हैं (<a href="terms.html">शर्तें</a>)।</li></ul>
 <h2>ग्राहकों के लिए</h2>
-<ul><li>नाम या सेवा लिखकर खोजें, श्रेणी चुनें, या <a href="map.html">नक्शे</a> पर पास की दुकानें देखें।</li><li>दुकान को सीधे कॉल करें या Directions खोलें।</li></ul>
+<ul><li>नाम या सेवा लिखकर खोजें, श्रेणी चुनें, या <a href="map.html">नक्शे</a> पर पास की दुकानें देखें।</li><li>दुकान को सीधे कॉल करें या रास्ता खोलें।</li></ul>
 <h2>शुरुआत</h2>
-<p>PataBook की शुरुआत <b>गांधीधाम</b> से हुई है और इसे Tarun Tejwani ने बनाया है। हम धीरे-धीरे और शहरों में जा रहे हैं।</p>
+<p>PataBook की शुरुआत <b>गांधीधाम</b> से हुई है और इसे तरुण तेजवानी ने बनाया है। हम धीरे-धीरे और शहरों में जा रहे हैं।</p>
 <div class="note">PataBook पर दिखने वाली जानकारी दुकानदार खुद डालते हैं। खरीदारी या लेन-देन से पहले दुकान से खुद पुष्टि कर लें।</div>
 <div class="btns"><a href="list.html">＋ दुकान जोड़ें</a><a class="alt" href="faq.html">सवाल-जवाब</a><a class="alt" href="contact.html">संपर्क करें</a></div>
 </div>
@@ -98,7 +98,7 @@ details{border-top:1px solid #eef1f6;padding:10px 0}details:first-of-type{border
 <script>
 (function () {
   var S = window.PB_SITE || {};
-  function val(k) { return String(S[k] || '').trim(); }
+  function val(k) { var h = S.hi; if (h && h[k] && window.PB && PB.lang && PB.lang() === 'hi') return String(h[k]).trim(); return String(S[k] || '').trim(); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function lang() { return window.PB && PB.lang && PB.lang() === 'en' ? 'en' : 'hi'; }
   var SOON = { hi: 'जल्द जोड़ा जाएगा', en: 'Will be added soon' };

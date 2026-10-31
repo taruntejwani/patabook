@@ -79,7 +79,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   <div class="card">
    <h1 data-en="✏️ Edit details">✏️ जानकारी बदलें</h1>
    <p class="shop" id="shopName"></p><p class="addr" id="shopAddr"></p>
-   <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम और category सिर्फ PataBook Admin बदल सकते हैं।</p>
+   <p class="hint" data-en="Fill only what you want. Empty boxes are not shown on your shop page. Name and category can be changed by PataBook Admin only.">जो चाहें वही भरें — खाली खाने दुकान के पेज पर नहीं दिखेंगे। नाम और श्रेणी सिर्फ PataBook एडमिन बदल सकते हैं।</p>
   </div>
 
   <div class="card" id="cType" data-sec="about">
@@ -98,23 +98,23 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   </div>
 
   <div class="card" data-sec="numbers">
-   <h2 data-en="📞 Numbers for customers (shop / staff)">📞 ग्राहकों के लिए नंबर (दुकान / staff)</h2>
-   <p class="hint" data-en="Login always stays on your own (main) number. If you hide your main number, customers see only these numbers.">Login हमेशा आपके अपने (मुख्य) नंबर से ही होगा। मुख्य नंबर छिपाएँगे तो ग्राहकों को सिर्फ़ ये नंबर दिखेंगे।</p>
-   <a class="hint" id="numLink" href="mybusiness.html#num" target="_top" style="display:block;color:#1a73e8;font-weight:700;margin:10px 0" data-en="➕ Add / manage extra numbers (Call + WhatsApp, with ON/OFF) ›">➕ अतिरिक्त नंबर जोड़ें / संभालें (Call + WhatsApp, ON/OFF के साथ) ›</a>
-   <p class="hint" style="margin-top:12px"><span data-en="📱 Main (login) number:">📱 मुख्य (login) नंबर:</span> <b id="mainNo"></b> · <a id="mainChg" target="_top" href="#" style="color:#1a73e8;font-weight:700" data-en="Change (with OTP) ›">बदलें (OTP से) ›</a></p>
+   <h2 data-en="📞 Numbers for customers (shop / staff)">📞 ग्राहकों के लिए नंबर (दुकान / स्टाफ)</h2>
+   <p class="hint" data-en="Login always stays on your own (main) number. If you hide your main number, customers see only these numbers.">लॉगिन हमेशा आपके अपने (मुख्य) नंबर से ही होगा। मुख्य नंबर छिपाएँगे तो ग्राहकों को सिर्फ़ ये नंबर दिखेंगे।</p>
+   <a class="hint" id="numLink" href="mybusiness.html#num" target="_top" style="display:block;color:#1a73e8;font-weight:700;margin:10px 0" data-en="➕ Add / manage extra numbers (Call + WhatsApp, with ON/OFF) ›">➕ अतिरिक्त नंबर जोड़ें / संभालें (कॉल + WhatsApp, ON/OFF के साथ) ›</a>
+   <p class="hint" style="margin-top:12px"><span data-en="📱 Main (login) number:">📱 मुख्य (लॉगिन) नंबर:</span> <b id="mainNo"></b> · <a id="mainChg" target="_top" href="#" style="color:#1a73e8;font-weight:700" data-en="Change (with OTP) ›">बदलें (OTP से) ›</a></p>
   </div>
 
   <div class="card" id="cAddr" data-sec="visit">
    <h2 data-en="📍 Shop address">📍 दुकान का पता</h2>
-   <textarea id="addrIn" maxlength="250" rows="3" data-en-ph="e.g. Plot 17A, Apnanagar, Gandhidham" placeholder="जैसे: Plot 17A, Apnanagar, Gandhidham"></textarea>
-   <p class="hint" data-en="Write the full address — shop no. / plot, area, city. It shows on your shop page and in search.">पूरा पता लिखें — दुकान / प्लॉट नंबर, इलाका, शहर। यही आपकी दुकान के पेज और search में दिखेगा।</p>
+   <textarea id="addrIn" maxlength="250" rows="3" data-en-ph="e.g. Plot 17A, Apnanagar, Gandhidham" placeholder="जैसे: Plot 17A, Apnanagar, गांधीधाम"></textarea>
+   <p class="hint" data-en="Write the full address — shop no. / plot, area, city. It shows on your shop page and in search.">पूरा पता लिखें — दुकान / प्लॉट नंबर, इलाका, शहर। यही आपकी दुकान के पेज और खोज में दिखेगा।</p>
   </div>
 
   <div class="card" id="cPin" data-sec="visit">
-   <h2 data-en="📍 PIN and delivery">📍 PIN और डिलीवरी</h2>
+   <h2 data-en="📍 PIN and delivery">📍 पिन और डिलीवरी</h2>
    <label class="lbl" for="pin" data-en="📮 Area postal PIN code">📮 शहर / इलाके का पिन कोड</label>
    <input id="pin" type="text" inputmode="numeric" maxlength="6" placeholder="6 अंक" data-en-ph="6 digits">
-   <p class="hint" data-en="The 6-digit post office code, like 370201 — not your ATM / bank PIN.">डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला PIN नहीं।</p>
+   <p class="hint" data-en="The 6-digit post office code, like 370201 — not your ATM / bank PIN.">डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला पिन नहीं।</p>
    <label class="lbl" for="lmk" style="margin-top:14px" data-en="🏁 Landmark (a known place nearby)">🏁 पहचान (पास की कोई जानी-मानी जगह)</label>
    <input id="lmk" type="text" maxlength="80" data-en-ph="e.g. Near Apnanagar Circle" placeholder="जैसे: Apnanagar Circle के पास">
    <label class="chk" data-sec="delivery" style="margin-top:14px"><input id="homeDel" type="checkbox"><span data-en="🚚 We do home delivery">🚚 हम होम डिलीवरी करते हैं</span></label>
@@ -124,18 +124,18 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
    <h2 data-en="🌐 Online">🌐 ऑनलाइन</h2>
    <label class="lbl" for="email" data-en="Email">ईमेल</label>
    <input id="email" type="email" inputmode="email" placeholder="name@gmail.com">
-   <label class="lbl" for="web" data-en="Website / Instagram / Facebook link">वेबसाइट / Instagram / Facebook link</label>
+   <label class="lbl" for="web" data-en="Website / Instagram / Facebook link">वेबसाइट / Instagram / Facebook लिंक</label>
    <input id="web" type="url" inputmode="url" placeholder="www.example.com">
-   <label class="lbl" for="igIn" data-en="📸 Instagram (link or username)">📸 Instagram (link या username)</label>
+   <label class="lbl" for="igIn" data-en="📸 Instagram (link or username)">📸 Instagram (लिंक या यूज़रनेम)</label>
    <input id="igIn" type="text" inputmode="url" maxlength="200" autocapitalize="off" spellcheck="false" placeholder="instagram.com/yourshop">
    <label class="lbl" for="fbIn" data-en="📘 Facebook page (link)">📘 Facebook page (link)</label>
    <input id="fbIn" type="text" inputmode="url" maxlength="200" autocapitalize="off" spellcheck="false" placeholder="facebook.com/yourshop">
-   <p class="hint" data-en="If filled, Instagram / Facebook icons show at the top of your shop page.">भरने पर आपकी दुकान के page पर सबसे ऊपर Instagram / Facebook के icon दिखेंगे।</p>
+   <p class="hint" data-en="If filled, Instagram / Facebook icons show at the top of your shop page.">भरने पर आपकी दुकान के पेज पर सबसे ऊपर Instagram / Facebook के आइकन दिखेंगे।</p>
   </div>
 
   <div class="card" id="cSvc" data-sec="about">
    <h2 data-en="🛠️ What you sell / services">🛠️ आप क्या बेचते हैं / कौन-सी सेवाएँ</h2>
-   <p data-en="👑 Premium shops: the first line is shown under your shop name on the home page card (e.g. Car Care Products Manufacturer)." style="margin:-4px 0 8px;font-size:12.5px;color:#8a6200;background:#fff6dc;border-radius:10px;padding:7px 10px;line-height:1.45">👑 Premium दुकान: इसकी पहली line Home page वाले card पर दुकान के नाम के नीचे दिखेगी (जैसे: Car Care Products Manufacturer)।</p>
+   <p data-en="👑 Premium shops: the first line is shown under your shop name on the home page card (e.g. Car Care Products Manufacturer)." style="margin:-4px 0 8px;font-size:12.5px;color:#8a6200;background:#fff6dc;border-radius:10px;padding:7px 10px;line-height:1.45">👑 प्रीमियम दुकान: इसकी पहली लाइन होम पेज वाले कार्ड पर दुकान के नाम के नीचे दिखेगी (जैसे: कार Care उत्पाद निर्माता)।</p>
    <textarea id="svc" maxlength="500" data-en-ph="e.g. Car shampoo, dashboard polish, wholesale supply" placeholder="जैसे: कार शैम्पू, डैशबोर्ड पॉलिश, थोक सप्लाई"></textarea>
    <button type="button" id="aiSvcBtn" style="display:none;margin-top:8px;width:100%;border:1.5px dashed #8b5cf6;background:#f6f1ff;color:#5b2fc9;font:700 14px system-ui;border-radius:12px;padding:11px">🪄 <span data-en="Let AI write this for me">AI से लिखवाएँ</span></button>
    <div id="aiSvcBox" style="display:none;margin-top:8px;background:#f6f1ff;border-radius:14px;padding:12px"></div>
@@ -143,7 +143,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
 
   <div class="card" id="gstCard" data-sec="about">
    <h2 data-en="🧾 GST / Udyam (MSME) number">🧾 GST / उद्यम (MSME) नंबर</h2>
-   <p class="hint" style="margin:-4px 0 6px" data-en="Optional. After PataBook verifies it, your shop page shows a “GST Verified” / “MSME Verified” badge. Don’t have one? Leave empty.">ज़रूरी नहीं। PataBook के जाँच लेने के बाद ही दुकान के पेज पर "GST Verified" / "MSME Verified" का निशान दिखेगा। नहीं है तो खाली छोड़ें।</p>
+   <p class="hint" style="margin:-4px 0 6px" data-en="Optional. After PataBook verifies it, your shop page shows a “GST Verified” / “MSME Verified” badge. Don’t have one? Leave empty.">ज़रूरी नहीं। PataBook के जाँच लेने के बाद ही दुकान के पेज पर "GST जाँचा हुआ" / "MSME जाँचा हुआ" का निशान दिखेगा। नहीं है तो खाली छोड़ें।</p>
    <label class="lbl" for="gst" data-en="GST number (15 letters)">GST नंबर (15 अक्षर)</label>
    <input id="gst" type="text" maxlength="20" autocapitalize="characters" spellcheck="false" placeholder="24ABCDE1234F1Z5" style="text-transform:uppercase;letter-spacing:.06em">
    <label class="lbl" for="udyam" data-en="Udyam (MSME) number">उद्यम (MSME) नंबर</label>
@@ -151,7 +151,7 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   </div>
 
   <a class="card" id="locLink" data-sec="visit" href="#" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
-   <span style="font-size:26px">📍</span><span style="flex:1"><b style="display:block;font-size:15.5px;color:#0b2f73" data-en="Shop location on map">नक्शे पर दुकान की location</b><small style="color:#5b6475" data-en="Set it while standing at your shop — customers get the exact way">दुकान पर खड़े होकर लगाएँ — ग्राहकों को सही रास्ता मिलेगा</small></span><span style="font-size:22px;color:#1a73e8">›</span>
+   <span style="font-size:26px">📍</span><span style="flex:1"><b style="display:block;font-size:15.5px;color:#0b2f73" data-en="Shop location on map">नक्शे पर दुकान की लोकेशन</b><small style="color:#5b6475" data-en="Set it while standing at your shop — customers get the exact way">दुकान पर खड़े होकर लगाएँ — ग्राहकों को सही रास्ता मिलेगा</small></span><span style="font-size:22px;color:#1a73e8">›</span>
   </a>
 
   <div class="save">
@@ -180,7 +180,7 @@ const $=id=>document.getElementById(id),EN=!!window.PB_EN;
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
 /* बिज़नेस के प्रकार — "दुकान जोड़ें" form (list.html) वाली ही list */
 const BTYPES=[
- ["🏪 बिज़नेस का प्रकार","🏪 Business type",[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी (Wholesaler)"],["Manufacturer","निर्माता (Manufacturer)"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा (Service)"],["Repair & Service Centre","Repair और Service Centre"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]]]
+ ["🏪 बिज़नेस का प्रकार","🏪 Business type",[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी (थोक विक्रेता)"],["Manufacturer","निर्माता (निर्माता)"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा (सेवा)"],["Repair & Service Centre","मरम्मत और सेवा Centre"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]]]
 ];
 const DAYS=[["","कोई छुट्टी नहीं (सातों दिन खुला)","No weekly off (open all 7 days)"],["Sunday","रविवार","Sunday"],["Monday","सोमवार","Monday"],["Tuesday","मंगलवार","Tuesday"],["Wednesday","बुधवार","Wednesday"],["Thursday","गुरुवार","Thursday"],["Friday","शुक्रवार","Friday"],["Saturday","शनिवार","Saturday"]];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -204,14 +204,14 @@ async function rpc(fn,args){
 }
 /* 📱 दुकान / staff का नंबर: नया नंबर डालने पर उसी नंबर पर OTP — बिना OTP के नंबर save नहीं होगा */
 let ORIG={wa:"",p2:""},MAIN="",VERI={},ORIGADDR="",ORIGSOC={ig:"",fb:""};
-const OTPERR={invalid_otp:["OTP गलत है।","Wrong OTP."],otp_expired:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],otp_expired_or_missing:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],too_many_attempts:["3 बार गलत OTP। नया OTP मँगाएँ।","3 wrong tries. Request a new OTP."],resend_too_soon:["थोड़ी देर बाद दोबारा मँगाएँ।","Please wait before asking again."],rate_limited_mobile:["इस नंबर पर आज के OTP पूरे हो गए। कल कोशिश करें।","Today's OTP limit for this number is used. Try tomorrow."],rate_limited_ip:["बहुत ज़्यादा कोशिशें। थोड़ी देर बाद करें।","Too many attempts. Try later."],sms_failed:["SMS नहीं जा सका। थोड़ी देर बाद कोशिश करें।","SMS failed. Try again later."],login_required:["Login की समय-सीमा खत्म हो गई। पेज दोबारा खोलें।","Login expired. Reopen the page."],captcha_failed:["\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज refresh करें।","Robot check failed. Refresh the page."]};
+const OTPERR={invalid_otp:["OTP गलत है।","Wrong OTP."],otp_expired:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],otp_expired_or_missing:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],too_many_attempts:["3 बार गलत OTP। नया OTP मँगाएँ।","3 wrong tries. Request a new OTP."],resend_too_soon:["थोड़ी देर बाद दोबारा मँगाएँ।","Please wait before asking again."],rate_limited_mobile:["इस नंबर पर आज के OTP पूरे हो गए। कल कोशिश करें।","Today's OTP limit for this number is used. Try tomorrow."],rate_limited_ip:["बहुत ज़्यादा कोशिशें। थोड़ी देर बाद करें।","Too many attempts. Try later."],sms_failed:["SMS नहीं जा सका। थोड़ी देर बाद कोशिश करें।","SMS failed. Try again later."],login_required:["लॉगिन की समय-सीमा खत्म हो गई। पेज दोबारा खोलें।","Login expired. Reopen the page."],captcha_failed:["\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज रीफ़्रेश करें।","Robot check failed. Refresh the page."]};
 function otpMsg(e){const c=(e&&(e.code||e.message))||"";const m=OTPERR[c];return (m?m[EN?1:0]:(EN?"Something went wrong. Try again.":"कुछ गड़बड़ हुई। फिर कोशिश करें."))+(c==="invalid_otp"&&e.attempts_left?(EN?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");}
 function verifyNum(num,label){
   return new Promise(res=>{
     if(!PBA.mobile||!PBA.mobile.enabled()){res(false);return;}
     const ov=document.createElement("div");
     ov.style.cssText="position:fixed;inset:0;z-index:99;background:rgba(10,20,40,.6);display:flex;align-items:center;justify-content:center;padding:16px";
-    ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:18px;font:inherit"><b style="display:block;font-size:16.5px;color:#123568">📱 '+(EN?"Verify this number":"यह नंबर पक्का करें")+'</b><p style="margin:8px 0 12px;font-size:14px;line-height:1.5;color:#334">'+(EN?label+" +91 "+num+". We will send an OTP to this number; only after the OTP it will show on your page.":label+" +91 "+num+" — इस नंबर पर OTP जाएगा। OTP डालने के बाद ही यह आपके page पर दिखेगा।")+'</p><input id="vnC" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #cfd8ea;border-radius:12px;font:inherit;font-size:18px;letter-spacing:4px;text-align:center" hidden><div id="vnE" style="color:#c5221f;font-size:13px;font-weight:700;min-height:18px;margin:8px 0 2px"></div><button type="button" id="vnG" style="width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:800;background:#1a73e8;color:#fff;cursor:pointer">'+(EN?"Send OTP":"OTP भेजें")+'</button><button type="button" id="vnX" style="width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;background:#f1f4f9;color:#123;cursor:pointer">'+(EN?"Cancel":"रद्द करें")+'</button></div>';
+    ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:18px;font:inherit"><b style="display:block;font-size:16.5px;color:#123568">📱 '+(EN?"Verify this number":"यह नंबर पक्का करें")+'</b><p style="margin:8px 0 12px;font-size:14px;line-height:1.5;color:#334">'+(EN?label+" +91 "+num+". We will send an OTP to this number; only after the OTP it will show on your page.":label+" +91 "+num+" — इस नंबर पर OTP जाएगा। OTP डालने के बाद ही यह आपके पेज पर दिखेगा।")+'</p><input id="vnC" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #cfd8ea;border-radius:12px;font:inherit;font-size:18px;letter-spacing:4px;text-align:center" hidden><div id="vnE" style="color:#c5221f;font-size:13px;font-weight:700;min-height:18px;margin:8px 0 2px"></div><button type="button" id="vnG" style="width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:800;background:#1a73e8;color:#fff;cursor:pointer">'+(EN?"Send OTP":"OTP भेजें")+'</button><button type="button" id="vnX" style="width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;background:#f1f4f9;color:#123;cursor:pointer">'+(EN?"Cancel":"रद्द करें")+'</button></div>';
     document.body.appendChild(ov);
     const g=ov.querySelector("#vnG"),x=ov.querySelector("#vnX"),inp=ov.querySelector("#vnC"),er=ov.querySelector("#vnE");let sent=false;
     const done=v=>{ov.remove();res(v);};
@@ -229,11 +229,11 @@ function verifyNum(num,label){
 }
 function errText(m){
   m=String(m||"");
-  const f={"bad Hours":["खुलने और बंद होने का समय दोनों चुनें।","Choose both opening and closing time."],"bad Website":["Website का link सही लिखें (जैसे www.example.com)।","Enter a correct website link (like www.example.com)."],
+  const f={"bad Hours":["खुलने और बंद होने का समय दोनों चुनें।","Choose both opening and closing time."],"bad Website":["वेबसाइट का लिंक सही लिखें (जैसे www.example.com)।","Enter a correct website link (like www.example.com)."],
     "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
-    "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["PIN कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
+    "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["पिन कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
-    "bad Instagram":["Instagram का link या username सही लिखें (जैसे instagram.com/yourshop)।","Enter a correct Instagram link or username (like instagram.com/yourshop)."],"bad Facebook":["Facebook page का link सही लिखें (जैसे facebook.com/yourshop)।","Enter a correct Facebook page link (like facebook.com/yourshop)."],"bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
+    "bad Instagram":["Instagram का लिंक या यूज़रनेम सही लिखें (जैसे instagram.com/yourshop)।","Enter a correct Instagram link or username (like instagram.com/yourshop)."],"bad Facebook":["Facebook पेज का लिंक सही लिखें (जैसे facebook.com/yourshop)।","Enter a correct Facebook page link (like facebook.com/yourshop)."],"bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
     "gst in use":["🚫 यह GST नंबर पहले से किसी दूसरी दुकान पर इस्तेमाल हो चुका है।","🚫 This GST number is already used by another shop."],"udyam in use":["🚫 यह उद्यम (MSME) नंबर पहले से किसी दूसरी दुकान पर इस्तेमाल हो चुका है।","🚫 This Udyam (MSME) number is already used by another shop."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."],"number not verified":["यह नंबर OTP से पक्का नहीं हुआ है। फिर से सेव दबाएँ और OTP डालें।","This number is not verified by OTP. Press Save again and enter the OTP."]};
@@ -289,8 +289,8 @@ function gstLock(ds){
     inp.after(box);
     box.querySelector("button").onclick=()=>{
       if(!ok){if(!confirm(en?"Change this number? It will be checked again by PataBook.":"यह नंबर बदलें? PataBook इसे दोबारा जाँचेगा।"))return;inp.disabled=false;inp.style.opacity="";inp.focus();box.textContent=en?"⏳ Pending check after you save.":"⏳ सेव करने के बाद जाँच बाकी रहेगी।";return;}
-      if(!confirm(en?"⚠️ Changing this number will take your shop offline for now.\n\nYour number is verified. If you change it, the Verified badge will be removed, your shop will go to Pending and customers will not see it until PataBook checks and approves it again.\n\nChange anyway?":"⚠️ नंबर बदलने पर आपकी दुकान कुछ समय के लिए बंद हो जाएगी।\n\nआपका नंबर Verified है। इसे बदलने पर Verified निशान हट जाएगा, दुकान Pending में चली जाएगी और ग्राहकों को नहीं दिखेगी। PataBook की जाँच और मंज़ूरी के बाद ही दुकान फिर से Live होगी।\n\nफिर भी बदलें?"))return;
-      inp.disabled=false;inp.style.opacity="";inp.focus();box.textContent=en?"⚠️ After saving, your shop goes to Pending until re-checked.":"⚠️ सेव करने पर दुकान Pending में जाएगी, दोबारा जाँच के बाद Live होगी।";box.style.color="#b3261e";
+      if(!confirm(en?"⚠️ Changing this number will take your shop offline for now.\n\nYour number is verified. If you change it, the Verified badge will be removed, your shop will go to Pending and customers will not see it until PataBook checks and approves it again.\n\nChange anyway?":"⚠️ नंबर बदलने पर आपकी दुकान कुछ समय के लिए बंद हो जाएगी।\n\nआपका नंबर जाँचा हुआ है। इसे बदलने पर जाँचा हुआ निशान हट जाएगा, दुकान लंबित में चली जाएगी और ग्राहकों को नहीं दिखेगी। PataBook की जाँच और मंज़ूरी के बाद ही दुकान फिर से लाइव होगी।\n\nफिर भी बदलें?"))return;
+      inp.disabled=false;inp.style.opacity="";inp.focus();box.textContent=en?"⚠️ After saving, your shop goes to Pending until re-checked.":"⚠️ सेव करने पर दुकान लंबित में जाएगी, दोबारा जाँच के बाद लाइव होगी।";box.style.color="#b3261e";
     };
   });
 }
@@ -344,7 +344,7 @@ numWatch();
     var r=await PBImg.about("write",ctx(),ans);
     if(!r||!r.services||!r.services.length){say(T("AI से नहीं बन पाया। फिर कोशिश करें या ख़ुद लिखें।","AI could not write it. Try again or type it yourself."));return}
     var list=r.services.join(", ");
-    say('<div style="font-weight:700">🪄 '+T("AI ने यह लिखा — देख लें","AI wrote this — please check")+'</div>'+(r.about?'<p style="font-size:13px;color:#4b3a85;margin:6px 0">'+esc(r.about)+'</p>':"")+'<textarea id="aiOut" maxlength="500" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1.5px solid #d9cffa;border-radius:10px;font:15px system-ui">'+esc(list)+'</textarea><div style="display:flex;gap:8px;margin-top:8px"><button type="button" id="aiUse" style="flex:1;border:0;background:#1a9d4a;color:#fff;font:700 14px system-ui;border-radius:12px;padding:11px">✔ '+T("यह रखें","Use this")+'</button><button type="button" id="aiNo" style="flex:1;border:1.5px solid #cbbcf5;background:#fff;color:#5b2fc9;font:700 14px system-ui;border-radius:12px;padding:11px">'+T("रहने दें","Cancel")+'</button></div><p class="hint">'+T("‘यह रखें’ दबाने के बाद नीचे Save करना न भूलें।","After ‘Use this’, remember to press Save below.")+'</p>');
+    say('<div style="font-weight:700">🪄 '+T("AI ने यह लिखा — देख लें","AI wrote this — please check")+'</div>'+(r.about?'<p style="font-size:13px;color:#4b3a85;margin:6px 0">'+esc(r.about)+'</p>':"")+'<textarea id="aiOut" maxlength="500" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1.5px solid #d9cffa;border-radius:10px;font:15px system-ui">'+esc(list)+'</textarea><div style="display:flex;gap:8px;margin-top:8px"><button type="button" id="aiUse" style="flex:1;border:0;background:#1a9d4a;color:#fff;font:700 14px system-ui;border-radius:12px;padding:11px">✔ '+T("यह रखें","Use this")+'</button><button type="button" id="aiNo" style="flex:1;border:1.5px solid #cbbcf5;background:#fff;color:#5b2fc9;font:700 14px system-ui;border-radius:12px;padding:11px">'+T("रहने दें","Cancel")+'</button></div><p class="hint">'+T("‘यह रखें’ दबाने के बाद नीचे सेव करना न भूलें।","After ‘Use this’, remember to press Save below.")+'</p>');
     box.querySelector("#aiUse").onclick=function(){var t=document.getElementById("svc");t.value=box.querySelector("#aiOut").value.trim().slice(0,500);t.dispatchEvent(new Event("input",{bubbles:true}));box.style.display="none"};
     box.querySelector("#aiNo").onclick=function(){box.style.display="none"};
   }

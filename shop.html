@@ -481,7 +481,7 @@ const LOGO=()=>B&&PF("logo")&&IMG_RX.test(B.logo_url||"")?B.logo_url:"";
 const INI=()=>esc((String(B&&B.name||"").trim()[0]||"P").toUpperCase());
 /* plan (Silver / Gold / Platinum) में यह सुविधा ON है? — Admin → Plans */
 const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f)),TIER=()=>window.PBPlan?PBPlan.tier(slug):(PREM?"platinum":"free");
-const SECN=()=>SLAB==="product"?"Product":SLAB==="service"?"Service":L("Product और Service","Product & Service");
+const SECN=()=>SLAB==="product"?"Product":SLAB==="service"?"Service":L("उत्पाद और सेवा","Product & Service");
 const GALP=()=>PF("photos")?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
 const PRODP=()=>[];   /* Products हटा दिए (सिर्फ़ Logo, Banner, Gallery, Front photo) */
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
@@ -563,7 +563,7 @@ function render(){drawSoc();
     [L("बिज़नेस का प्रकार","Business type"),line(b,"Type")],
     [L("समय","Hours"),hoursText(b),"hours"],
     [L("कैटेगरी","Category"),[sub,b.category].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(" · ")],
-    [L("Products / सेवाएँ","Products / Services"),line(b,"Services")],
+    [L("उत्पाद / सेवाएँ","Products / Services"),line(b,"Services")],
     [L("मालिक","Owner"),line(b,"Owner")],
     ["GST",gst?line(b,"GST"):"","gst"],
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))&&/^yes$/i.test(line(b,"Udyam-Verified"))?line(b,"Udyam"):""]
@@ -581,7 +581,7 @@ function render(){drawSoc();
      '</div></div></div>'+
    '<div class="wrap">'+
      '<div class="qa">'+
-       '<a '+(ph?'class="pri c" href="tel:'+esc(ph)+'"':'class="pri c dis"')+'><span>'+PBI("call")+'</span>'+L("Call करें","Call Now")+'</a>'+
+       '<a '+(ph?'class="pri c" href="tel:'+esc(ph)+'"':'class="pri c dis"')+'><span>'+PBI("call")+'</span>'+L("कॉल करें","Call Now")+'</a>'+
        '<a '+(wa?'class="pri w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener"':'class="pri w dis"')+'><span>'+PBI("chat")+'</span>WhatsApp</a>'+
        '<a data-pbh="addr" '+(dir?'href="'+esc(dir)+'"':'class="dis"')+'><span>🧭</span>'+L("रास्ता","Directions")+'</a>'+
        (PF("card")?'<button type="button" id="shareQa" class="isCard" data-pbh="share"><span>🪪</span>'+L("डिजिटल कार्ड","Digital Card")+'</button>':'<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>')+
@@ -608,7 +608,7 @@ function render(){drawSoc();
   /* नीचे चिपका Call / WhatsApp */
   const dock=document.getElementById("dock");
   if(ph||wa){dock.hidden=false;document.getElementById("dockIn").style.gridTemplateColumns=ph&&wa?"1fr 1fr":"1fr";
-    document.getElementById("dockIn").innerHTML=(ph?'<a href="tel:'+esc(ph)+'">'+PBI("call")+L("Call करें","Call now")+'</a>':'')+(wa?'<a class="w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'WhatsApp</a>':'');}
+    document.getElementById("dockIn").innerHTML=(ph?'<a href="tel:'+esc(ph)+'">'+PBI("call")+L("कॉल करें","Call now")+'</a>':'')+(wa?'<a class="w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'WhatsApp</a>':'');}
   else dock.hidden=true;
   document.body.style.paddingBottom=dock.hidden?"16px":"";
   /* events */
@@ -647,7 +647,7 @@ function pbIntro(){try{
   const x=()=>{if(e.parentNode)e.remove();};e.onclick=x;e.addEventListener("animationend",ev=>{if(ev.target===e)x();});setTimeout(x,4500);
   document.body.appendChild(e);}catch(_){}}
 
-function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt="".replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (Map):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
+function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt="".replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (नक्शा):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function kmTxt(km){return km<1?Math.max(50,Math.round(km*1000/50)*50)+" m":(km<10?km.toFixed(1):Math.round(km))+" km";}
 const NICO=[["food|restaurant|cafe|sweet|bakery","🍽️"],["auto|car|bike|tyre|garage","🚗"],["health|doctor|hospital|medical|dental|clinic","🏥"],["school|college|tuition|coaching|education","🎓"],["salon|beauty|spa","💇"],["hotel|lodge|guest","🏨"],["electric|plumb|carpenter|painter|home|repair|cleaning","🛠️"],["mobile|electronic","📱"],["cloth|fashion","👗"],["grocery|kirana","🛒"],["manufactur|wholesale|supplier","🏭"]];
@@ -683,7 +683,7 @@ function drawVacFlag(){
   if(!VACF){el.style.display="none";return;}
   const en=PB.lang&&PB.lang()!=="hi";el.style.display="flex";
   if(window.PBHire){el.classList.add("pbh");el.innerHTML=PBHire.tile(62)+'<div class="tx"><b>'+(en?"Vacancy available":"नौकरी खाली है")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span></div>';return;}
-  el.innerHTML='<b>💼 '+(en?"Vacancy available":"नौकरी खाली है (Vacancy)")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span>';
+  el.innerHTML='<b>💼 '+(en?"Vacancy available":"नौकरी खाली है (नौकरी)")+'</b><span>'+(en?"This shop is hiring. Contact the shop for details.":"यह दुकान स्टाफ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।")+'</span>';
 }
 function openReport(){
   const en=PB.lang&&PB.lang()!=="hi",L=(h,e)=>en?e:h;
@@ -728,10 +728,10 @@ function openReport(){
 }
 /* 🧭 Directions पट्टी (Call / WhatsApp जैसी): रास्ते का link + 📋 copy + "रास्ता" बटन */
 function dirRow(b,addr,map){if(!map)return "";const en=EN(),full="https://patabook.in/"+map;
-  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (Directions)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता copy करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
+  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (रास्ता)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता कॉपी करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
 function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)return;const en=EN();
   const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
-  const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता copy हो गया")).catch(()=>{prompt(en?"Copy the address":"पता copy करें",t);});};
+  const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता कॉपी हो गया")).catch(()=>{prompt(en?"Copy the address":"पता कॉपी करें",t);});};
   c.onclick=go;const ct=c.closest(".l").querySelector(".cpt");if(ct)ct.onclick=go;}
 /* "आपकी दुकान — संभालें": सिर्फ़ login हुए मालिक को, और सिर्फ़ उसकी अपनी दुकान पर (My Shop वाली list से जाँच) */
 let OWN=false;
@@ -753,10 +753,10 @@ function prodAsk(p){const wa=waNum();
   const ph=phNum();if(ph)location.href="tel:"+ph;}
 function prodSheet(p){const d=document.createElement("div");d.className="psh";
   d.innerHTML='<div class="pin"><button type="button" class="px" aria-label="Close">✕</button><div class="pbig"><img src="'+esc(p.img)+'" alt=""></div><h3>'+esc(p.name)+'</h3>'+
-   '<div class="pmeta">'+(p.size?'<span>📦 '+esc(p.size)+'</span>':'')+'<span>'+priceMeta(p,L("कीमत पूछें","Ask price"),(a,pc)=>L("₹"+Number(a).toLocaleString("en-IN")+" की बचत","Save ₹"+Number(a).toLocaleString("en-IN")))+'</span>'+(p.stock===false?'<span style="color:#c5221f">⛔ '+L("Stock में नहीं","Out of stock")+'</span>':'')+'</div>'+
+   '<div class="pmeta">'+(p.size?'<span>📦 '+esc(p.size)+'</span>':'')+'<span>'+priceMeta(p,L("कीमत पूछें","Ask price"),(a,pc)=>L("₹"+Number(a).toLocaleString("en-IN")+" की बचत","Save ₹"+Number(a).toLocaleString("en-IN")))+'</span>'+(p.stock===false?'<span style="color:#c5221f">⛔ '+L("स्टॉक में नहीं","Out of stock")+'</span>':'')+'</div>'+
    (DSCP[p.id]?'<p class="pdesc">'+esc(DSCP[p.id])+'</p>':'')+
    (featsOf(p).length?'<div class="pft">'+featsOf(p).map(f=>'<span>✔ '+esc(f)+'</span>').join("")+'</div>':'')+
-   '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / order","Ask / order on WhatsApp")+'</button>'+
+   '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / ऑर्डर","Ask / order on WhatsApp")+'</button>'+
    '<button type="button" class="pshr big" id="pShr">📤 '+L("दोस्त को भेजें","Share with a friend")+'</button></div>';
   d.onclick=e=>{if(e.target===d||e.target.closest(".px"))d.remove();};document.body.appendChild(d);
   d.querySelector("#pAsk").onclick=()=>{d.remove();prodAsk(p);};
@@ -769,7 +769,7 @@ function lightbox(Ls,i){const d=document.createElement("div");d.className="lbx";
   const show=()=>{d.innerHTML='<img src="'+esc(Ls[i])+'" alt=""><button class="x" aria-label="Close">✕</button>'+(Ls.length>1?'<button class="pv" aria-label="Previous">‹</button><button class="nx" aria-label="Next">›</button>':'');};
   show();d.onclick=e=>{if(e.target.closest(".pv")){i=(i-1+Ls.length)%Ls.length;show();return;}if(e.target.closest(".nx")){i=(i+1)%Ls.length;show();return;}if(e.target===d||e.target.closest(".x"))d.remove();};
   document.body.appendChild(d);}
-function share(){if(!B)return;const u=shopUrl(),t=B.name+" — "+L("Products, फ़ोटो और WhatsApp","Products, photos & WhatsApp");
+function share(){if(!B)return;const u=shopUrl(),t=B.name+" — "+L("उत्पाद, फ़ोटो और WhatsApp","Products, photos & WhatsApp");
   if(navigator.share){navigator.share({title:B.name,text:t,url:u}).catch(()=>{});return;}
   window.open("https://wa.me/?text="+encodeURIComponent("🏪 "+t+"\n"+u),"_blank","noopener");}
 /* असली tab: Products / Gallery / Visit us — दबाते ही वही हिस्सा सामने (स्क्रॉल नहीं करना पड़ता) */

@@ -92,7 +92,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
     <div><label for="cfMob" id="lMob">मोबाइल नंबर *</label><input id="cfMob" inputmode="tel" maxlength="14" placeholder="98XXXXXXXX" autocomplete="tel-national"></div>
   </div>
   <div class="row2">
-    <div><label for="cfMail" id="lMail">Email (वैकल्पिक)</label><input id="cfMail" type="email" maxlength="120" autocomplete="email"></div>
+    <div><label for="cfMail" id="lMail">ईमेल (वैकल्पिक)</label><input id="cfMail" type="email" maxlength="120" autocomplete="email"></div>
     <div><label for="cfTopic" id="lTopic">विषय</label><select id="cfTopic"></select></div>
   </div>
   <label for="cfMsg" id="lMsg">आपका संदेश / शिकायत *</label>
@@ -104,7 +104,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <div class="okbox" id="cfOk" hidden></div>
 </div>
 <div class="card">
-<div data-l="hi"><h2 style="margin-top:0">शिकायत अधिकारी (Grievance Officer)</h2><p class="gnone">शिकायत ऊपर दिए <b>Complaint &amp; Support</b> बॉक्स से भेजें।</p><p class="gyes">नाम: <b data-s="grievanceName"></b><br>Email: <b data-s="grievanceEmail"></b></p><p class="upd">शिकायत की पावती 24 घंटे में और समाधान 15 दिनों में करने का प्रयास किया जाता है।</p></div>
+<div data-l="hi"><h2 style="margin-top:0">शिकायत अधिकारी (शिकायत अधिकारी)</h2><p class="gnone">शिकायत ऊपर दिए <b>Complaint &amp; Support</b> बॉक्स से भेजें।</p><p class="gyes">नाम: <b data-s="grievanceName"></b><br>Email: <b data-s="grievanceEmail"></b></p><p class="upd">शिकायत की पावती 24 घंटे में और समाधान 15 दिनों में करने का प्रयास किया जाता है।</p></div>
 <div data-l="en"><h2 style="margin-top:0">Grievance Officer</h2><p class="gnone">Please send complaints using the <b>Complaint &amp; Support</b> box above.</p><p class="gyes">Name: <b data-s="grievanceName"></b><br>Email: <b data-s="grievanceEmail"></b></p><p class="upd">We aim to acknowledge complaints within 24 hours and resolve them within 15 days.</p></div>
 </div>
 <div class="card">
@@ -119,7 +119,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <script>
 (function () {
   var S = window.PB_SITE || {};
-  function val(k) { return String(S[k] || '').trim(); }
+  function val(k) { var h = S.hi; if (h && h[k] && window.PB && PB.lang && PB.lang() === 'hi') return String(h[k]).trim(); return String(S[k] || '').trim(); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function lang() { return window.PB && PB.lang && PB.lang() === 'en' ? 'en' : 'hi'; }
   var SOON = { hi: 'जल्द जोड़ा जाएगा', en: 'Will be added soon' };
@@ -143,10 +143,10 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
   /* ---- Complaint & Support फ़ॉर्म → Supabase pb_send_message ---- */
   var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
   var FT = {
-    hi: { name: 'आपका नाम *', mob: 'मोबाइल नंबर *', mail: 'Email (वैकल्पिक)', topic: 'विषय', msg: 'आपका संदेश / शिकायत *', go: 'भेजें', sending: 'भेजा जा रहा है…',
+    hi: { name: 'आपका नाम *', mob: 'मोबाइल नंबर *', mail: 'ईमेल (वैकल्पिक)', topic: 'विषय', msg: 'आपका संदेश / शिकायत *', go: 'भेजें', sending: 'भेजा जा रहा है…',
       ph: 'अपनी बात विस्तार से लिखें — दुकान का नाम, जगह, क्या समस्या है…',
       t: { complaint: 'शिकायत', support: 'मदद / सवाल', correction: 'दुकान की जानकारी ठीक करें', removal: 'दुकान हटवाएँ', suggestion: 'सुझाव', other: 'अन्य' },
-      e_name: 'अपना नाम लिखें', e_mob: '10 अंकों का सही मोबाइल नंबर लिखें', e_mail: 'Email सही नहीं है (या खाली छोड़ दें)', e_msg: 'संदेश कम से कम 5 अक्षर का लिखें',
+      e_name: 'अपना नाम लिखें', e_mob: '10 अंकों का सही मोबाइल नंबर लिखें', e_mail: 'ईमेल सही नहीं है (या खाली छोड़ दें)', e_msg: 'संदेश कम से कम 5 अक्षर का लिखें',
       e_rate: 'बहुत सारे संदेश भेजे जा चुके हैं। थोड़ी देर बाद फिर कोशिश करें।', e_fail: 'अभी नहीं भेजा जा सका। थोड़ी देर बाद फिर कोशिश करें।',
       ok_h: 'आपका संदेश मिल गया!', ok_p: 'हम जल्द आपसे संपर्क करेंगे। अपना शिकायत नंबर संभाल कर रखें:', ok_new: 'नया संदेश लिखें' },
     en: { name: 'Your name *', mob: 'Mobile number *', mail: 'Email (optional)', topic: 'Topic', msg: 'Your message / complaint *', go: 'Send', sending: 'Sending…',

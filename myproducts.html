@@ -21,7 +21,7 @@ body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe U
 <script>
 document.getElementById("svBtn").onclick=async function(){const b=this;b.disabled=true;document.getElementById("svEr").textContent="";
   try{await prodPend.save(slug);try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){location.reload();}}
-  catch(x){document.getElementById("svEr").textContent="Save नहीं हुआ, फिर कोशिश करें।";b.disabled=false;}};
+  catch(x){document.getElementById("svEr").textContent="सेव नहीं हुआ, फिर कोशिश करें।";b.disabled=false;}};
 </script>
 <script>
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
@@ -54,11 +54,11 @@ function draw(){const b=ROWS[0];if(!b)return;$("list").innerHTML=window.prodBody
   const en=L()==="en",box=$("list");
   try{
     ME=await PBA.session();
-    if(!ME){box.innerHTML='<p class="msg">'+(en?'Please log in from <a href="mybusiness.html" target="_top">My Shop</a> first.':'पहले <a href="mybusiness.html" target="_top">मेरी दुकान</a> से login करें।')+'</p>';return;}
+    if(!ME){box.innerHTML='<p class="msg">'+(en?'Please log in from <a href="mybusiness.html" target="_top">My Shop</a> first.':'पहले <a href="mybusiness.html" target="_top">मेरी दुकान</a> से लॉगिन करें।')+'</p>';return;}
     const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
     if(!b){box.innerHTML='<p class="msg">'+(en?"This is not your shop.":"यह आपकी दुकान नहीं है।")+'</p>';return;}
     ROWS=[b];if(window.PBPlan){try{await PBPlan.load([slug]);}catch(_){}}await prodLoad(slug);draw();
-  }catch(e){box.innerHTML='<p class="msg">'+(/premium/i.test(e.message)?(en?"Products are for Premium shops.":"Products सिर्फ़ Premium दुकानों के लिए हैं।"):(en?"Could not load. Try again.":"खुल नहीं सका, फिर कोशिश करें।"))+'</p>';}
+  }catch(e){box.innerHTML='<p class="msg">'+(/premium/i.test(e.message)?(en?"Products are for Premium shops.":"उत्पाद सिर्फ़ प्रीमियम दुकानों के लिए हैं।"):(en?"Could not load. Try again.":"खुल नहीं सका, फिर कोशिश करें।"))+'</p>';}
 })();
 </script>
 </body></html>

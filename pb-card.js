@@ -154,7 +154,7 @@
       var y0 = cy + 54; if (d.owner) { ownerPill(64, y0 + 8, 23, false); y0 += 52; }
       y0 += 22; var yl = y0, dense = rows.length > 3, fs = dense ? 25 : 27, st = rows.length > 4 ? 50 : dense ? 56 : 62; rows.forEach(function (r) { var n = row(64, yl, r[0], r[1], fs, 640, r[0] === 'pin' ? 2 : 1); yl += st + (n - 1) * 33; });
       qrBox(814, 56, 330);
-      c.fillStyle = '#e8f0ff'; c.textAlign = 'center'; c.font = '700 21px ' + FONT; c.fillText(X('📱 Scan करें — दुकान', '📱 Scan to view this'), 979, 418); c.fillText(X('PataBook पर देखें', 'shop on PataBook'), 979, 446);
+      c.fillStyle = '#e8f0ff'; c.textAlign = 'center'; c.font = '700 21px ' + FONT; c.fillText(X('📱 स्कैन करें — दुकान', '📱 Scan to view this'), 979, 418); c.fillText(X('PataBook पर देखें', 'shop on PataBook'), 979, 446);
       if (d.code) { c.font = '800 22px ui-monospace,Menlo,monospace'; var cw2 = c.measureText(d.code).width + 32; c.fillStyle = 'rgba(255,255,255,.14)'; rr(c, 979 - cw2 / 2, 474, cw2, 42, 12); c.fill(); c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = 2; c.stroke(); c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.fillText(d.code, 979, 496); c.textBaseline = 'alphabetic'; }
       var lps = rows.length > 4 ? 24 : 30; linkPill(W / 2, H - 86 - lps - 8, lps);
       c.textAlign = 'left'; foot(86, 1);
@@ -165,7 +165,7 @@
       c.textAlign = 'left'; c.textBaseline = 'alphabetic'; yy0 += 80;
       var yp = yy0; rows.slice(0, 5).forEach(function (r) { var n = row(130, yp, r[0], r[1], 38, 760, r[0] === 'pin' ? 2 : 1); yp += (rows.length > 3 ? 78 : 90) + (n - 1) * 50; });
       var qy = yp + 20; qrBox(W / 2 - 220, qy, 440);
-      c.textAlign = 'center'; c.fillStyle = '#e8f0ff'; c.font = '700 32px ' + FONT; c.fillText(X('📱 Scan करें — दुकान PataBook पर देखें', '📱 Scan to view this shop on PataBook'), W / 2, qy + 500);
+      c.textAlign = 'center'; c.fillStyle = '#e8f0ff'; c.font = '700 32px ' + FONT; c.fillText(X('📱 स्कैन करें — दुकान PataBook पर देखें', '📱 Scan to view this shop on PataBook'), W / 2, qy + 500);
       if (d.code) { c.font = '800 30px ui-monospace,Menlo,monospace'; var cw3 = c.measureText(d.code).width + 40; c.fillStyle = 'rgba(255,255,255,.14)'; rr(c, W / 2 - cw3 / 2, qy + 536, cw3, 56, 14); c.fill(); c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.fillText(d.code, W / 2, qy + 565); c.textBaseline = 'alphabetic'; }
       linkPill(W / 2, H - 150 - 58, 44);
       c.textAlign = 'left'; foot(150, 1.65);
@@ -383,7 +383,7 @@
       o.r.lines.forEach(function (ln, i) { c.fillText(ln, W / 2, y + lh * (i + .5)); }); y += lh * o.r.lines.length; });
     c.restore();
     // QR (छोटा बैज) + पहचान — बीच में
-    var qsz = 150, m = qsz / (qs + 2), label = L === 'gu' ? 'Scan કરો — દુકાન PataBook પર' : L === 'en' ? 'Scan — see this shop on PataBook' : 'Scan करें — दुकान PataBook पर';
+    var qsz = 150, m = qsz / (qs + 2), label = L === 'gu' ? 'Scan કરો — દુકાન PataBook પર' : L === 'en' ? 'Scan — see this shop on PataBook' : 'स्कैन करें — दुकान PataBook पर';
     var lr = fitText(c, label, 600, 28, 20, '700', 1); c.font = '800 26px ui-monospace,Menlo,monospace'; var cwid = d.code ? c.measureText(d.code).width : 0; c.font = '700 ' + lr.s + 'px ' + FONT;
     var tw = Math.max(c.measureText(lr.lines[0]).width, cwid), gw = qsz + 24 + 36 + tw, qx = Math.round((W - gw) / 2) + 12, tx = qx + qsz + 36, qy = QY;
     c.save(); c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 18; c.fillStyle = '#fff'; rr(c, qx - 12, qy - 12, qsz + 24, qsz + 24, 18); c.fill(); c.restore();
@@ -398,7 +398,7 @@
     c.textBaseline = 'middle'; c.font = '900 50px ' + FONT; c.fillStyle = '#12141c'; c.fillText('Pata', 170, fy - 12); c.fillStyle = '#1a73e8'; c.fillText('Book', 170 + c.measureText('Pata').width, fy - 12);
     c.font = '700 20px ' + FONT; c.fillStyle = '#0b2f73'; c.fillText('B U S I N E S S   D I R E C T O R Y', 172, fy + 30);
     c.textAlign = 'right'; c.font = '800 38px ' + FONT; c.fillStyle = '#1a73e8'; c.fillText('patabook.in', W - 60, fy - 12);
-    c.font = '600 21px ' + FONT; c.fillStyle = '#667085'; c.fillText(L === 'en' ? 'Free festival poster for your shop' : L === 'gu' ? 'તમારી દુકાનનું FREE poster બનાવો' : 'अपनी दुकान का FREE poster बनाएँ', W - 60, fy + 26);
+    c.font = '600 21px ' + FONT; c.fillStyle = '#667085'; c.fillText(L === 'en' ? 'Free festival poster for your shop' : L === 'gu' ? 'તમારી દુકાનનું FREE poster બનાવો' : 'अपनी दुकान का मुफ़्त पोस्टर बनाएँ', W - 60, fy + 26);
     c.textAlign = 'left'; c.textBaseline = 'alphabetic';
     return cv;
   }
@@ -435,14 +435,14 @@
   function fname() { var ff = festOf(mode); return 'PataBook_' + String(D.name || 'card').replace(/[^\wऀ-ॿ]+/g, '_').slice(0, 40) + (mode === 'P' ? '_Status' : mode === 'L' ? '_Card' : mode === 'AI' ? '_AI_' + Date.now() % 100000 : '_' + mode + '_' + ((vi[mode] || 0) + 1)) + '.png'; }
   function shopUrl() { return D.link ? 'https://patabook.in/' + D.link : 'https://patabook.in/business.html?slug=' + encodeURIComponent(D.slug || ''); }
   function shareText() { var ff = mode === 'AI' ? aiFest() : festOf(mode);
-    if (ff) return ff.ic + ' ' + ff.t[fLang()][0] + ' — ' + D.name + '\n' + shopUrl() + '\n\n' + X('अपनी दुकान का FREE त्योहार poster बनाएँ', 'Make a FREE festival poster for your shop') + ' — patabook.in';
-    return '📇 ' + D.name + X(' — PataBook पर देखें:', ' — view on PataBook:') + '\n' + shopUrl() + '\n\n' + X('अपनी दुकान का भी FREE डिजिटल विज़िटिंग कार्ड बनाएँ', 'Get your own FREE digital visiting card') + ' — patabook.in'; }
+    if (ff) return ff.ic + ' ' + ff.t[fLang()][0] + ' — ' + D.name + '\n' + shopUrl() + '\n\n' + X('अपनी दुकान का मुफ़्त त्योहार पोस्टर बनाएँ', 'Make a FREE festival poster for your shop') + ' — patabook.in';
+    return '📇 ' + D.name + X(' — PataBook पर देखें:', ' — view on PataBook:') + '\n' + shopUrl() + '\n\n' + X('अपनी दुकान का भी मुफ़्त डिजिटल विज़िटिंग कार्ड बनाएँ', 'Get your own FREE digital visiting card') + ' — patabook.in'; }
   async function render() {
     var p = document.querySelector('.pbc-p'); if (!p) return; p.innerHTML = '<p style="padding:40px;color:#667085">' + X('कार्ड बन रहा है…', 'Making your card…') + '</p>';
     var m = mode, kk = key(), ai = m === 'AI', ff = festOf(m), note = '';
-    if (ai) p.innerHTML = '<p style="padding:40px 16px;color:#667085">✨ AI आपकी दुकान का नया poster बना रहा है…<br><small>10–20 सेकंड लग सकते हैं</small></p>';
+    if (ai) p.innerHTML = '<p style="padding:40px 16px;color:#667085">✨ AI आपकी दुकान का नया पोस्टर बना रहा है…<br><small>10–20 सेकंड लग सकते हैं</small></p>';
     if (!blobs[kk]) { var cv;
-      if (ai) { try { cv = await aiPoster(); note = aiMsg; } catch (e) { cv = await drawFest(D, aiFest(), null, 0); note = e && e.message === 'limit' ? 'आज के AI poster पूरे हो गए — कल फिर बनाएँ। अभी सादा poster दिखाया है।' : 'AI अभी व्यस्त है — सादा poster दिखाया है। थोड़ी देर बाद “दूसरा डिज़ाइन” दबाएँ।' + (e && /^ai\|/.test(e.message) ? ' (कोड: ' + e.message.slice(3) + ')' : ''); } }
+      if (ai) { try { cv = await aiPoster(); note = aiMsg; } catch (e) { cv = await drawFest(D, aiFest(), null, 0); note = e && e.message === 'limit' ? 'आज के AI पोस्टर पूरे हो गए — कल फिर बनाएँ। अभी सादा पोस्टर दिखाया है।' : 'AI अभी व्यस्त है — सादा पोस्टर दिखाया है। थोड़ी देर बाद “दूसरा डिज़ाइन” दबाएँ।' + (e && /^ai\|/.test(e.message) ? ' (कोड: ' + e.message.slice(3) + ')' : ''); } }
       else cv = ff ? await drawFest(D, ff, null, vi[m] || 0) : await draw(D, m === 'P');
       var bl = await new Promise(function (ok) { cv.toBlob(ok, 'image/png'); }); if (key() !== kk) return; blobs[kk] = bl; blobs[kk + '_n'] = note; blobs[kk + '_x'] = /पूरे/.test(note); }
     var nav = '', dots = '';
@@ -469,7 +469,7 @@
         (up.length ? '<div class="pbc-t pbc-f">' + up.map(function (f) { return '<button data-m="' + f.id + '"' + (mode === f.id ? ' class="on"' : '') + ' style="background:#fff4e0;border-color:#ffb74d">' + f.ic + ' ' + f.n[fLang()] + '</button>'; }).join('') + '</div>' : '') +
         '<div class="pbc-p"></div>' +
         '<div class="pbc-a"><button class="wa">' + X('WhatsApp पर भेजें', 'Send on WhatsApp') + '</button><button class="dl">⬇ Download</button><button class="cp">🔗 Link copy</button></div>' +
-        '<p class="pbc-n">' + (d.visitor ? X('QR scan करने पर यह दुकान PataBook पर खुलेगी, वहीं नंबर भी मिलेगा।', 'Scanning the QR opens this shop on PataBook, where the number is shown too.') : X('यह कार्ड मुफ़्त है — QR scan करने पर आपकी दुकान PataBook पर खुलेगी।', 'This card is free — scanning the QR opens your shop on PataBook.') + (d.phone ? '' : X('<br>नंबर कार्ड पर नहीं छपा है।', '<br>The number is not printed on the card.'))) + '</p></div></div>');
+        '<p class="pbc-n">' + (d.visitor ? X('QR स्कैन करने पर यह दुकान PataBook पर खुलेगी, वहीं नंबर भी मिलेगा।', 'Scanning the QR opens this shop on PataBook, where the number is shown too.') : X('यह कार्ड मुफ़्त है — QR स्कैन करने पर आपकी दुकान PataBook पर खुलेगी।', 'This card is free — scanning the QR opens your shop on PataBook.') + (d.phone ? '' : X('<br>नंबर कार्ड पर नहीं छपा है।', '<br>The number is not printed on the card.'))) + '</p></div></div>');
       document.body.appendChild(o);
       var pv = o.querySelector('.pbc-p'), sx = null; pv.addEventListener('touchstart', function (e) { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
       pv.addEventListener('touchend', function (e) { if (sx === null || !festOf(mode)) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1); }, { passive: true });

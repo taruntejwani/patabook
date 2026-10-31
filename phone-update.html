@@ -65,7 +65,7 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
  <div class="card" id="main" hidden>
   <p class="shop" id="shopName"></p>
   <p class="addr" id="shopAddr"></p>
-  <div class="banner" data-en="Complete OTP verification to update your mobile number.">अपना मोबाइल नंबर अपडेट करने के लिए OTP verification पूरा करें।</div>
+  <div class="banner" data-en="Complete OTP verification to update your mobile number.">अपना मोबाइल नंबर अपडेट करने के लिए OTP जाँच पूरा करें।</div>
 
   <form id="s1" novalidate>
    <label class="lbl" for="phone" data-en="New mobile number (the OTP will be sent to this number)">नया मोबाइल नंबर (इसी नंबर पर OTP आएगा)</label>
@@ -79,7 +79,7 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
    <p class="help" id="sentTo"></p>
    <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
    <div class="err" id="e2"></div>
-   <button class="btn" type="submit" id="verify" data-en="Verify and send request">Verify करके request भेजें</button>
+   <button class="btn" type="submit" id="verify" data-en="Verify and send request">जाँच करके अनुरोध भेजें</button>
    <div class="links"><button type="button" id="resend" data-en="Resend OTP">OTP फिर भेजें</button><button type="button" id="change" data-en="Change number">नंबर बदलें</button></div>
   </form>
 
@@ -97,9 +97,9 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
   <h2 style="margin-top:12px" data-en="Shop not linked to your email?">दुकान आपके ईमेल से नहीं जुड़ी है?</h2>
   <ol>
    <li data-en-html="Open the &lt;a href=&quot;contact.html&quot;&gt;Contact / Support&lt;/a&gt; page and choose &quot;Correct listing details&quot;."><a href="contact.html">संपर्क / मदद</a> पेज पर "दुकान की जानकारी ठीक करें" चुनें।</li>
-   <li data-en="Write the shop name, Business ID (if any), address and the email you log in with.">दुकान का नाम, Business ID (अगर है), पता और वह ईमेल लिखें जिससे आप लॉगिन करते हैं।</li>
+   <li data-en="Write the shop name, Business ID (if any), address and the email you log in with.">दुकान का नाम, बिज़नेस ID (अगर है), पता और वह ईमेल लिखें जिससे आप लॉगिन करते हैं।</li>
    <li data-en="The PataBook team will confirm ownership by visiting the shop or checking documents (shop board / bill / GST / Udyam), then link your email to the shop.">PataBook टीम दुकान पर जाकर या दस्तावेज़ (जैसे दुकान का बोर्ड/बिल/GST/Udyam) देखकर मालिकाना हक की पुष्टि करेगी, फिर आपका ईमेल दुकान से जोड़ेगी।</li>
-   <li data-en="Then come back to this page and change the number by verifying the OTP on the new number.">उसके बाद इसी पेज से नए नंबर पर OTP verify करके नंबर बदलें।</li>
+   <li data-en="Then come back to this page and change the number by verifying the OTP on the new number.">उसके बाद इसी पेज से नए नंबर पर OTP जाँच करके नंबर बदलें।</li>
   </ol>
   <p style="margin-top:8px" data-en="Until this is confirmed, nobody else can add their number to your shop.">पुष्टि होने तक कोई भी दूसरा व्यक्ति आपकी दुकान पर अपना नंबर नहीं जोड़ सकता।</p>
  </div>
@@ -128,7 +128,7 @@ function msg(e){
   if(c==="login_required")return (window.PB_EN?"Your login has expired. Please log in again.":"लॉगिन की समय-सीमा खत्म हो गई। दोबारा लॉगिन करें।");
   if(c==="not_owner")return (window.PB_EN?"This shop is not linked to your email.":"यह दुकान आपके ईमेल से नहीं जुड़ी।");
   if(c==="same_phone")return (window.PB_EN?"This is already your shop\u2019s number.":"यह तो पहले से आपकी दुकान का नंबर है।");
-  if(c==="phone_in_use")return (window.PB_EN?"This number is already on another shop. Use a different number or contact Support.":"यह नंबर पहले से किसी दूसरी दुकान पर है। कोई दूसरा नंबर डालें या Support से संपर्क करें।");
+  if(c==="phone_in_use")return (window.PB_EN?"This number is already on another shop. Use a different number or contact Support.":"यह नंबर पहले से किसी दूसरी दुकान पर है। कोई दूसरा नंबर डालें या सहायता से संपर्क करें।");
   if(c==="update_failed"||c==="shop_not_found"||c==="owner_check_failed")return (window.PB_EN?"The number could not be updated. Try again in a while.":"नंबर अपडेट नहीं हो सका। थोड़ी देर बाद कोशिश करें।");
   if(c==="otp_not_configured"||c==="server_not_configured"||c==="origin_not_allowed")return (window.PB_EN?"This feature is not enabled yet.":"यह सुविधा अभी चालू नहीं है।");
   return (window.PB_EN?"Something went wrong. Check your internet and try again.":"कुछ गड़बड़ हुई। इंटरनेट जाँचकर फिर कोशिश करें।");
@@ -163,7 +163,7 @@ $("s2").onsubmit=async e=>{
     const r=await PBA.mobile.shopVerify(slug,phone,c);
     const req=!!(r&&r.requested);
     $("doneTxt").textContent=req
-      ?(window.PB_EN?"✅ Request sent. Your new number +91 "+phone+" will start showing after PataBook Admin approves it. Until then your old number stays on your shop page.":"✅ Request भेज दी गई। PataBook Admin की मंज़ूरी के बाद आपका नया नंबर +91 "+phone+" दिखने लगेगा। तब तक दुकान के पेज पर पुराना नंबर ही रहेगा।")
+      ?(window.PB_EN?"✅ Request sent. Your new number +91 "+phone+" will start showing after PataBook Admin approves it. Until then your old number stays on your shop page.":"✅ अनुरोध भेज दी गई। PataBook एडमिन की मंज़ूरी के बाद आपका नया नंबर +91 "+phone+" दिखने लगेगा। तब तक दुकान के पेज पर पुराना नंबर ही रहेगा।")
       :(window.PB_EN?"✅ Your shop’s mobile number has been updated to +91 "+phone+".":"✅ आपकी दुकान का मोबाइल नंबर +91 "+phone+" पर अपडेट हो गया।");
     $("viewShop").href="business.html?slug="+encodeURIComponent(slug);document.querySelector(".banner").hidden=true;
     step(3);
@@ -185,7 +185,7 @@ $("s2").onsubmit=async e=>{
     $("shopName").textContent="🏪 "+(b.name||slug);$("shopAddr").textContent=b.address?"📍 "+b.address:"";
     /* 🔒 एक नंबर पर 2+ दुकानें हों तो नंबर नहीं बदलता (बाक़ी दुकानें हटाने पर खुलेगा) */
     const d10=s=>{const d=String(s||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;},same=(Array.isArray(rows)?rows:[]).filter(x=>x&&d10(x.phone)&&d10(x.phone)===d10(b.phone)).length;
-    if(same>=2){only("main");step(1);$("e1").textContent=window.PB_EN?"🔒 This number is used by "+same+" shops, so it cannot be changed now. First delete the other shops from My Shop → Settings → Account.":"🔒 इस नंबर पर "+same+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। पहले मेरी दुकान → Settings → खाता से बाक़ी दुकानें हटाएँ।";$("send").disabled=true;$("phone").disabled=true;return;}
+    if(same>=2){only("main");step(1);$("e1").textContent=window.PB_EN?"🔒 This number is used by "+same+" shops, so it cannot be changed now. First delete the other shops from My Shop → Settings → Account.":"🔒 इस नंबर पर "+same+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। पहले मेरी दुकान → सेटिंग → खाता से बाक़ी दुकानें हटाएँ।";$("send").disabled=true;$("phone").disabled=true;return;}
     only("main");step(1);
   }catch(e){only("main");$("e1").textContent=msg({});}
 })();

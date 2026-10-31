@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>दुकान की location — PataBook</title>
+<title>दुकान की लोकेशन — PataBook</title>
 <link rel="icon" href="pin.png">
 <meta name="theme-color" content="#1a73e8">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
@@ -53,7 +53,7 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
 
  <div id="main" hidden>
   <div class="card">
-   <h1 class="hd"><script>document.write(PBI("pin"))</script><span data-en="Shop location">दुकान का स्थान (location)</span></h1>
+   <h1 class="hd"><script>document.write(PBI("pin"))</script><span data-en="Shop location">दुकान का स्थान (लोकेशन)</span></h1>
    <p class="shop" id="shopName"></p><p class="addr" id="shopAddr"></p>
    <p class="hint" id="curTxt"></p>
   </div>
@@ -61,7 +61,7 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
    <button class="btn gps" type="button" id="gpsBtn"><script>document.write(PBI("pin"))</script><span data-en="I am at my shop now — use my location">मैं अभी दुकान पर हूँ — मेरा स्थान लगाएँ</span></button>
    <div class="st" id="gpsSt"></div>
    <div id="map" style="margin-top:12px"></div>
-   <div class="pinhelp"><span data-en="Zoom in, then drag the red pin (or tap the map) to put it exactly on your shop.">नक्शे को पास (zoom) करें, फिर लाल पिन को उँगली से खिसकाएँ या नक्शे पर दबाएँ — पिन ठीक दुकान पर रखें।</span></div>
+   <div class="pinhelp"><span data-en="Zoom in, then drag the red pin (or tap the map) to put it exactly on your shop.">नक्शे को पास (ज़ूम) करें, फिर लाल पिन को उँगली से खिसकाएँ या नक्शे पर दबाएँ — पिन ठीक दुकान पर रखें।</span></div>
    <label class="chk" id="chkBox"><input type="checkbox" id="chk"><span data-en="I checked: the pin is exactly on my shop.">मैंने देख लिया: पिन ठीक मेरी दुकान पर है।</span></label>
    <button class="btn" type="button" id="saveBtn" disabled data-en="Save location">स्थान सेव करें</button>
    <div class="st" id="saveSt"></div>
@@ -120,7 +120,7 @@ function loadMap(center,zoom){
   });
 }
 $("gpsBtn").onclick=()=>{
-  if(!navigator.geolocation){st("gpsSt",T("इस फ़ोन में स्थान (location) नहीं चलता।","Location is not available on this phone."),"err");return;}
+  if(!navigator.geolocation){st("gpsSt",T("इस फ़ोन में स्थान (लोकेशन) नहीं चलता।","Location is not available on this phone."),"err");return;}
   const b=$("gpsBtn");b.disabled=true;st("gpsSt",T("स्थान ढूँढ रहे हैं… (दुकान के दरवाज़े के बाहर खुली जगह में खड़े रहें, 10–20 सेकंड)","Finding your location… (stand outside the shop door in the open, 10–20 seconds)"));
   navigator.geolocation.getCurrentPosition(p=>{
     b.disabled=false;const a=Math.round(p.coords.accuracy||0);
@@ -131,7 +131,7 @@ $("gpsBtn").onclick=()=>{
       :mid?T("स्थान लगभग मिला (±"+a+" मीटर)। नीला घेरा बताता है कि असली जगह कहाँ तक हो सकती है। पिन को खिसकाकर दुकान पर रखें।","Approximate fix (±"+a+" m). The blue circle shows where the real spot may be. Drag the pin onto your shop.")
       :T("स्थान साफ़ नहीं मिला (±"+a+" मीटर)। बैटरी सेवर बंद करें, खुली जगह जाकर दोबारा दबाएँ, या पिन ख़ुद दुकान पर रखें।","Weak fix (±"+a+" m). Turn off battery saver, go to an open spot and press again, or place the pin yourself."),good?"ok":(mid?"":"err"));
   },e=>{b.disabled=false;
-    st("gpsSt",e&&e.code===1?T("स्थान की अनुमति नहीं मिली। फ़ोन की Settings → Apps → PataBook (या Chrome) → Permissions → Location → Allow करें। या नक्शे पर पिन रखें।","Location permission denied. Phone Settings → Apps → PataBook (or Chrome) → Permissions → Location → Allow. Or place the pin on the map.")
+    st("gpsSt",e&&e.code===1?T("स्थान की अनुमति नहीं मिली। फ़ोन की सेटिंग → Apps → PataBook (या Chrome) → अनुमतियाँ → लोकेशन → अनुमति दें करें। या नक्शे पर पिन रखें।","Location permission denied. Phone Settings → Apps → PataBook (or Chrome) → Permissions → Location → Allow. Or place the pin on the map.")
       :T("स्थान नहीं मिला। GPS चालू करके दोबारा दबाएँ, या नक्शे पर पिन रखें।","Could not get location. Turn on GPS and try again, or place the pin on the map."),"err");
   },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 };

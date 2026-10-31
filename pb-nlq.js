@@ -6,24 +6,24 @@
   function set(s) { var o = {}; s.split(/\s+/).forEach(function (w) { if (w) o[w] = 1; }); return o; }
   /* सवाल / इरादे वाले शब्द: मिलें तो वाक्य "सवाल" माना जाता है */
   var WHERE = set("kahan kaha kahaan kidhar kidhr kahaan कहाँ कहां कहा किधर ક્યાં ક્યા where");
-  var DO = set("batao bata btao bataiye bataiyen bataye batana dikhao dikha dikhaiye dikhana chahiye chahie chaiye chahye milega milegi milenge milta milti show find tell give बताओ बताइए बताइये बताना बता दिखाओ दिखाइए दिखाना चाहिए चाहिये मिलेगा मिलेगी मिलता बતાવો બતાવ બતાવો આપો જોઈએ મળશે મળે");
-  var BEST = set("achha acha accha achhe acche achhi acchi badhiya best top sasta सबसे अच्छा अच्छी अच्छे बढ़िया सस्ता સારું સારી સારા સસ્તું");
-  var NEAR = set("near nearby paas pass najdik nazdik nazdeek पास नज़दीक नजदीक નજીક");
-  var PHONE = set("number nmbr num नंबर नम्बर नं. નંબર");
-  var ASIDE = set("mobile phone contact call whatsapp मोबाइल फोन फ़ोन कॉल મોબાઇલ ફોન");   /* सिर्फ़ तब हटते हैं जब "number" भी लिखा हो */
-  var DIR = set("rasta raasta route direction directions navigate रास्ता रूट रस्ता રસ્તો રૂટ");
-  var ADDR = set("address pata pta पता સરનામું સરનામુ");
-  var LOC = set("location loc लोकेशन લોકેશન");
-  var OPEN = set("khula khule khuli open timing time timings band closed खुला खुली खुले बंद टाइम समय ખુલ્લું ખુલ્લી ખુલ્લા બંધ ટાઈમ");
+  var DO = set("batao bata btao bataiye bataiyen bataye batana dikhao dikha dikhaiye dikhana chahiye chahie chaiye chahye milega milegi milenge milta milti show खोजें tell give बताओ बताइए बताइये बताना बता दिखाओ दिखाइए दिखाना चाहिए चाहिये मिलेगा मिलेगी मिलता बતાવો બતાવ બતાવો આપો જોઈએ મળશે મળે");
+  var BEST = set("achha acha accha achhe acche achhi acchi badhiya सबसे अच्छा top sasta सबसे अच्छा अच्छी अच्छे बढ़िया सस्ता સારું સારી સારા સસ્તું");
+  var NEAR = set("near पास की paas pass najdik nazdik nazdeek पास नज़दीक नजदीक નજીક");
+  var PHONE = set("नंबर nmbr num नंबर नम्बर नं. નંબર");
+  var ASIDE = set("मोबाइल फ़ोन संपर्क कॉल whatsapp मोबाइल फोन फ़ोन कॉल મોબાઇલ ફોન");   /* सिर्फ़ तब हटते हैं जब "number" भी लिखा हो */
+  var DIR = set("rasta raasta route direction रास्ता navigate रास्ता रूट रस्ता રસ્તો રૂટ");
+  var ADDR = set("पता pata pta पता સરનામું સરનામુ");
+  var LOC = set("लोकेशन loc लोकेशन લોકેશન");
+  var OPEN = set("khula khule khuli खोलें timing time timings band closed खुला खुली खुले बंद टाइम समय ખુલ્લું ખુલ્લી ખુલ્લા બંધ ટાઈમ");
   /* जोड़ी वाले इरादे: दोनों शब्द साथ हों तभी मानते हैं (ताकि दुकान के नाम में आए अकेले शब्द न बिगड़ें) */
   var KITNA = set("kitna kitni kitne kitana kitani कितना कितनी कितने કેટલું કેટલી કેટલા");
   var DUR = set("dur door doori duri dooru दूर दूरी દૂર");
   var KAISE = set("kaise kese kaisey kaisay कैसे केसे કેવી કેવી?");
   var GO = set("jaye jaaye jayen jaun jau jaoon jana jaana jayein pahuche pahunche pahuch pahuchu pahunchu पहुँचे पहुंचे जाए जाएँ जाऊं जाना જવું પહોંચવું");
-  var CALLW = set("call calling dial baat phone कॉल बात फोन फ़ोन");
+  var CALLW = set("कॉल calling dial baat फ़ोन कॉल बात फोन फ़ोन");
   var CALLV = set("karo karna karni karun karu kare lagao lagana lagani lagau kijiye करो करना करनी करूं लगाओ लगाना કરવો કરવી કરવું");
   /* सिर्फ़ फ़ालतू (सवाल मिलने पर हटते हैं) */
-  var STOP = set("tak tk तक સુધી bhejo bhej bheje bhijwao dijiye dedijiye dedo dena lena dhundo dhundho khojo khoj ye yeh wo woh vo hai hain he hu hoon ho hota hoga hogi ka ki ke ko se mein me mai main ma pe par per mujhe mujhko mere meri mera humko hame ek koi kuch kya kyu aap abhi ab aaj wala wali wale vala vali vale liye lie for the a an is are of to in at on please plz pls do de dena dijiye dijie kijiye karo kare karna kar sakta sakte sakti bhi toh aur jyada " +
+  var STOP = set("tak tk तक સુધી bhejo bhej bheje bhijwao dijiye dedijiye dedo dena lena dhundo dhundho khojo khoj ye yeh wo woh vo hai hain he hu hoon ho hota hoga hogi ka ki ke ko se mein me mai मुख्य ma pe par per mujhe mujhko mere meri mera humko hame ek koi kuch kya kyu aap abhi ab aaj wala wali wale vala vali vale liye lie for the a an is are of to in at चालू please plz pls do de dena dijiye dijie kijiye karo kare karna kar sakta sakte sakti bhi toh aur jyada " +
     "है हैं हूँ होगा होगी का की के को से में मैं पे पर मुझे मेरे मेरी मेरा हमें एक कोई कुछ क्या अभी अब आज वाला वाली वाले के लिए लिये दो दे दीजिए कीजिए करो करें करना कर सकता सकते सकती भी तो और ज़्यादा " +
     "છે છે? નો ની ના નું માં મને મારી મારા એક કોઈ કંઈ શું હમણાં અત્યારે આજે નજીકમાં ને થી પર કરો કરી આપો");
   function norm(q) { return String(q || "").replace(/[?!।॥,;:()"'*]/g, " ").replace(/\s+/g, " ").trim(); }

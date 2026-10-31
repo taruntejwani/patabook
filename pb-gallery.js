@@ -43,19 +43,19 @@
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
       var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="Back">‹</button><b>' + esc(K[2]) + '</b><span>' + arr.length + '</span>' +
         (ok ? '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>' : '') + '</div>';
-      var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") + '</small></div>'
+      var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + '</small></div>'
         : arr.length ? '<div class="gg3">' + arr.map(function (x, n) {
           var on = k === "photo" ? !x.hidden : !!(act && x.url === act);
           return '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy"><span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span></button>';
         }).join("") + '</div>'
         : '<div class="gbd"><small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>' + sizeNote(k) + '</div>';
-      var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो public को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
+      var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो सार्वजनिक को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
       return bar + msg + (arr.length ? sizeNote(k) : "") + hint + body;
     }
     return msg + '<div class="gl">' + KINDS.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
       if (!can(b, K[0])) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>🔒</i></button>';
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
-    }).join("") + '</div><div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("Plans देखें", "See plans") + ' ›</button></div>' + (function () {
+    }).join("") + '</div><div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
       var parts = KINDS.map(function (K) { return esc(K[2]) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
       return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
@@ -63,9 +63,9 @@
   function sizeNote(k) {
     var t = k === "logo" ? T("चौकोर फ़ोटो (400×400)। नाम के पास दिखता है।", "Square (400×400). Shown beside your name.")
       : k === "cover" ? T("आड़ी फ़ोटो 16:9 (1200×675)। नाम के पीछे सबसे ऊपर दिखती है।", "Wide 16:9 (1200×675). Shown behind your name at the top.")
-      : k === "photo" ? T("कोई भी फ़ोटो (लंबा किनारा 1000 तक)। shop पेज पर नीचे दिखती है।", "Any photo (long side up to 1000). Shown on your shop page.")
-      : k === "front" ? T("आड़ी फ़ोटो 2:1 (1200×600)। Home पेज पर नीचे चलने वाला poster।", "Wide 2:1 (1200×600). The poster that slides on the Home page.")
-      : T("खड़ी फ़ोटो 9:16 (1080×1920)। link खुलते ही पूरी screen पर कुछ सेकंड दिखती है।", "Tall 9:16 (1080×1920). Shown full-screen for a few seconds when your link opens.");
+      : k === "photo" ? T("कोई भी फ़ोटो (लंबा किनारा 1000 तक)। दुकान पेज पर नीचे दिखती है।", "Any photo (long side up to 1000). Shown on your shop page.")
+      : k === "front" ? T("आड़ी फ़ोटो 2:1 (1200×600)। होम पेज पर नीचे चलने वाला पोस्टर।", "Wide 2:1 (1200×600). The poster that slides on the Home page.")
+      : T("खड़ी फ़ोटो 9:16 (1080×1920)। लिंक खुलते ही पूरी स्क्रीन पर कुछ सेकंड दिखती है।", "Tall 9:16 (1080×1920). Shown full-screen for a few seconds when your link opens.");
     return '<div class="szn">📐 ' + t + '</div>';
   }
 
@@ -81,7 +81,7 @@
         var hh = await dhash(file), dup = false;
         if (hh) { try { dup = await rpc("pb_img_dup", { p_slug: s, p_hash: hh }); } catch (e2) { dup = false; } }
         if (dup === true) { MSG[s] = "🚫 " + T("यह फ़ोटो किसी दूसरी दुकान की है। कृपया अपनी खुद की फ़ोटो डालें।", "This photo belongs to another shop. Please upload your own photo."); draw(); continue; }
-        MSG[s] = T("Upload हो रहा है…", "Uploading…"); draw();
+        MSG[s] = T("अपलोड हो रहा है…", "Uploading…"); draw();
         ME = await PBA.session();
         var ef = await enhance(file);
         var blob = k === "logo" ? await squareImage(ef) : k === "cover" ? await coverImage(ef) : k === "front" ? await bannerImage(ef) : k === "open" ? await packImg(ef, 1080, 1920, 150000, [1, .8, .64], 1) : await resizeImage(ef, 1000);
@@ -99,7 +99,7 @@
         MSG[s] = "";
       } catch (x) {
         var m = String(x && x.message || "");
-        MSG[s] = /too many/.test(m) ? T("फ़ोटो की सीमा पूरी हो गई (सारे फ़ोल्डर मिलाकर)।", "Photo limit reached (all folders together).") : /premium/.test(m) ? T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") : T("फ़ोटो upload नहीं हुई। दोबारा कोशिश करें।", "Could not upload. Try again.");
+        MSG[s] = /too many/.test(m) ? T("फ़ोटो की सीमा पूरी हो गई (सारे फ़ोल्डर मिलाकर)।", "Photo limit reached (all folders together).") : /premium/.test(m) ? T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") : T("फ़ोटो अपलोड नहीं हुई। दोबारा कोशिश करें।", "Could not upload. Try again.");
         break;
       }
     }
@@ -142,7 +142,7 @@
       MSG[s] = ""; await reload(b);
     } catch (er) {
       var m = String(er && er.message || "");
-      MSG[s] = /rate/.test(m) ? T("आज बहुत बार बदला। कल कोशिश करें।", "Too many changes today. Try tomorrow.") : /premium|not in plan/.test(m) ? T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") : T("नहीं हो सका। दोबारा कोशिश करें।", "Could not do it. Try again."); draw();
+      MSG[s] = /rate/.test(m) ? T("आज बहुत बार बदला। कल कोशिश करें।", "Too many changes today. Try tomorrow.") : /premium|not in plan/.test(m) ? T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") : T("नहीं हो सका। दोबारा कोशिश करें।", "Could not do it. Try again."); draw();
     }
   }
 
@@ -213,7 +213,7 @@
         close(); await reload(b);
       } catch (er) {
         a.disabled = false; var m = String(er && er.message || "");
-        em.textContent = /rate/.test(m) ? T("आज बहुत बार बदला। कल कोशिश करें।", "Too many changes today. Try tomorrow.") : /premium|not in plan/.test(m) ? T("यह सुविधा आपके plan में नहीं है।", "This is not in your plan.") : T("नहीं हो सका। दोबारा कोशिश करें।", "Could not do it. Try again.");
+        em.textContent = /rate/.test(m) ? T("आज बहुत बार बदला। कल कोशिश करें।", "Too many changes today. Try tomorrow.") : /premium|not in plan/.test(m) ? T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") : T("नहीं हो सका। दोबारा कोशिश करें।", "Could not do it. Try again.");
       }
     });
   }

@@ -145,7 +145,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
    <label class="f"><input id="q" type="search" enterkeyhint="search" data-ip="ph" placeholder="क्या ढूंढ रहे हैं?"></label>
    <label class="f loc">
     <span aria-hidden="true" style="font-size:15px">📍</span><input id="city" autocomplete="off" autocapitalize="words" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist>
-   <button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी location से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+   <button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी लोकेशन से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
    </label>
    <button class="go" type="submit" data-i="search">खोजें</button>
   </div>
@@ -246,8 +246,8 @@ const FEN=()=>PB.lang&&PB.lang()!=="hi";
 const WORKS={};
 function catName(k){const v=T("c_"+k);return v&&v!=="c_"+k?v:k;}
 function drawCat(auto){const sel=$("fCat");if(!sel)return;
-  sel.innerHTML='<option value="">'+esc(FEN()?"All categories":"सभी Category")+'</option>'+FCATS.map(k=>'<option value="'+k+'"'+(k===CATSEL?' selected':'')+'>'+esc(catName(k))+'</option>').join("");
-  sel.className=CATSEL?"on":"";$("fCL").innerHTML=(FEN()?"Category":"Category")+(auto&&CATSEL?' <span class="au">· '+(FEN()?"auto":"अपने-आप")+'</span>':'');}
+  sel.innerHTML='<option value="">'+esc(FEN()?"All categories":"सभी श्रेणी")+'</option>'+FCATS.map(k=>'<option value="'+k+'"'+(k===CATSEL?' selected':'')+'>'+esc(catName(k))+'</option>').join("");
+  sel.className=CATSEL?"on":"";$("fWL").textContent=FEN()?"Work / Service":"काम / सेवा";$("fCL").innerHTML=(FEN()?"Category":"श्रेणी")+(auto&&CATSEL?' <span class="au">· '+(FEN()?"auto":"अपने-आप")+'</span>':'');}
 function drawWork(){const sel=$("fWork");if(!sel)return;const w=WORKS[CATSEL]||[];
   sel.disabled=!CATSEL;
   sel.innerHTML='<option value="">'+esc(FEN()?"All work":"सभी काम")+'</option>'+w.map(x=>'<option value="'+esc(x[0])+'"'+(x[0]===WORKSEL?' selected':'')+'>'+esc(x[0])+' ('+x[1]+')</option>').join("");
@@ -632,7 +632,7 @@ function openSt(b){
     return null;
   }
   /* "PataBook क्या है / क्या-क्या बता सकता है" — मदद कार्ड */
-  const HELPQ=[["Gandhidham AC repair","Gandhidham में AC repair"],["Jay Shankar restaurant ka phone number","Jay Shankar restaurant का फ़ोन नंबर"],["Tejwani detergent kaha hai","Tejwani detergent कहाँ है (पता)"],["Shri Ram hardware kab tak khula hai","Shri Ram hardware कब तक खुला है"],["Shri Ram hardware ka rasta batao","Shri Ram hardware का रास्ता / दूरी"],["Bharat Nagar to Kandla","Bharat Nagar से Kandla का रास्ता"]];
+  const HELPQ=[["Gandhidham AC repair","गांधीधाम में AC मरम्मत"],["Jay Shankar restaurant ka phone number","Jay Shankar रेस्टोरेंट का फ़ोन नंबर"],["Tejwani detergent kaha hai","Tejwani detergent कहाँ है (पता)"],["Shri Ram hardware kab tak khula hai","Shri Ram हार्डवेयर कब तक खुला है"],["Shri Ram hardware ka rasta batao","Shri Ram हार्डवेयर का रास्ता / दूरी"],["Bharat Nagar to Kandla","Bharat Nagar से Kandla का रास्ता"]];
   function isHelpQ(q){
     const t=String(q||"").toLowerCase().replace(/[?!।.,]+/g," ").replace(/\s+/g," ").trim();if(!t||t.length>80)return false;
     const brand=/(patabook|pata book|पताबुक|पता बुक)/.test(t),ask=/(\bkya\b|क्या|\bkaam\b|काम|\bwork\b|\bbata|बता|\bhelp\b|मदद|madad|\buse\b|kaise|कैसे|\bwhat\b|\bhow\b|sakta|सकता|\bkare|करे|kaun|कौन|\babout\b)/.test(t);
@@ -671,9 +671,9 @@ function openSt(b){
       const note=(exact?(en?"Road distance and time (OpenStreetMap), preferring main roads.":"सड़क की दूरी और समय (OpenStreetMap), बड़ी सड़क को तरजीह।"):(en?"Approximate (straight-line estimate).":"यह अंदाज़ा है (सीधी दूरी से)।"))+(ga.vague||gb.vague?(en?" A place name is not exact, so the point may be roughly right.":" किसी जगह का नाम पक्का नहीं मिला, इसलिए बिंदु थोड़ा आगे-पीछे हो सकता है।"):"");
       const far=km>150&&(!ga.k||!gb.k);
       const lbl=(en?"Found: ":"मिला: ")+(ga.lab||A)+" → "+(gb.lab||B);
-      out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small><small>📍 "+esc(lbl)+"</small>"+(far?"<small style=\"color:#b3261e;font-weight:700\">⚠ "+esc(en?"This is far away — a place may be matched wrongly. Please write the full name, e.g. \u201cBharat Nagar Gandhidham\u201d.":"यह बहुत दूर है — कोई जगह गलत पकड़ी गई हो सकती है। पूरा नाम लिखें, जैसे \u201cBharat Nagar Gandhidham\u201d।")+"</small>":"");
+      out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small><small>📍 "+esc(lbl)+"</small>"+(far?"<small style=\"color:#b3261e;font-weight:700\">⚠ "+esc(en?"This is far away — a place may be matched wrongly. Please write the full name, e.g. \u201cBharat Nagar Gandhidham\u201d.":"यह बहुत दूर है — कोई जगह गलत पकड़ी गई हो सकती है। पूरा नाम लिखें, जैसे \u201cBharat Nagar गांधीधाम\u201d।")+"</small>":"");
       const gm="https://www.google.com/maps/dir/?api=1&origin="+ul+","+ug+"&destination="+tl+","+tg+"&travelmode=driving";
-      out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"Directions (रास्ता चलाएँ)")+'</a></div>');
+      out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"रास्ता (रास्ता चलाएँ)")+'</a></div>');
       if(line)drawMap(card,line,ul,ug,tl,tg);
     }catch(_){if(my===P2S)box.remove();}
   };
@@ -688,7 +688,7 @@ function openSt(b){
         if(!(isFinite(tl)&&isFinite(tg)&&box.dataset.lat)){
           out.textContent=en?"Finding the shop from its address…":"पते से दुकान की जगह ढूँढ रहे हैं…";
           const g=await geo(box.dataset.addr,[ul,ug]);
-          if(!g){bt.disabled=false;out.textContent=en?"Could not place this address on the map. Tap Directions.":"इस पते से नक्शे पर जगह नहीं मिली। 🧭 Directions दबाइए।";return;}
+          if(!g){bt.disabled=false;out.textContent=en?"Could not place this address on the map. Tap Directions.":"इस पते से नक्शे पर जगह नहीं मिली। 🧭 रास्ता दबाइए।";return;}
           tg=g.ll[0];tl=g.ll[1];vague=g.vague;
         }
         out.textContent=en?"Calculating the route…":"रास्ता निकाल रहे हैं…";
@@ -699,20 +699,20 @@ function openSt(b){
         }catch(_){const road=sl*1.3;km=road;dm=road/(road<15?25:40)*60;wm=road/4.5*60;}
         bt.disabled=false;
         const kmT=km<1?Math.round(km*1000)+" m":km.toFixed(1)+" km";
-        const note=(exact?(en?"Road distance and time (OpenStreetMap).":"सड़क की दूरी और समय (OpenStreetMap)।"):(en?"Approximate (straight-line estimate).":"यह अंदाज़ा है (सीधी दूरी से)।"))+(vague?(en?" The address is incomplete, so the point may be only roughly right.":" पता अधूरा है, इसलिए जगह थोड़ी आगे-पीछे हो सकती है।"):"")+" "+(en?"Tap Directions for the live route.":"पक्के रास्ते के लिए 🧭 Directions दबाइए।");
+        const note=(exact?(en?"Road distance and time (OpenStreetMap).":"सड़क की दूरी और समय (OpenStreetMap)।"):(en?"Approximate (straight-line estimate).":"यह अंदाज़ा है (सीधी दूरी से)।"))+(vague?(en?" The address is incomplete, so the point may be only roughly right.":" पता अधूरा है, इसलिए जगह थोड़ी आगे-पीछे हो सकती है।"):"")+" "+(en?"Tap Directions for the live route.":"पक्के रास्ते के लिए 🧭 रास्ता दबाइए।");
         out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small>";
         if(mapLine)drawMap(box,mapLine,ul,ug,tl,tg);
-      }catch(_){bt.disabled=false;out.textContent=en?"Could not calculate. Tap Directions.":"गिन नहीं सके। 🧭 Directions दबाइए।";}
+      }catch(_){bt.disabled=false;out.textContent=en?"Could not calculate. Tap Directions.":"गिन नहीं सके। 🧭 रास्ता दबाइए।";}
     },err=>{
       bt.disabled=false;
-      out.textContent=err&&err.code===1?(en?"Location permission was not given. Allow it in the browser, or tap Directions.":"लोकेशन की अनुमति नहीं मिली। browser में अनुमति दें, या 🧭 Directions दबाइए।"):(en?"Could not find your location. Tap Directions.":"लोकेशन नहीं मिली। 🧭 Directions दबाइए।");
+      out.textContent=err&&err.code===1?(en?"Location permission was not given. Allow it in the browser, or tap Directions.":"लोकेशन की अनुमति नहीं मिली। ब्राउज़र में अनुमति दें, या 🧭 रास्ता दबाइए।"):(en?"Could not find your location. Tap Directions.":"लोकेशन नहीं मिली। 🧭 रास्ता दबाइए।");
     },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
   });
 })();
 function bigCard(b){
   const en=FEN(),link="business.html?slug="+encodeURIComponent(b.slug||""),dir=pbDir(b),ct=cityOf(b),cg=catOf(b),it=NLI&&NLI.intent||"",os=openSt(b);
-  const hint=it==="phone"?(en?"To see the phone number, tap Contact (shown after login).":"फ़ोन नंबर देखने के लिए 📞 Contact दबाएँ (login के बाद दिखता है)।"):"";
-  const ist=(it==="open"||os)&&(it==="open")?(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'<div class="ist">'+esc(en?"Timing not listed — please call to check.":"समय दर्ज नहीं है — पक्का करने के लिए Contact करें।")+'</div>'):(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'');
+  const hint=it==="phone"?(en?"To see the phone number, tap Contact (shown after login).":"फ़ोन नंबर देखने के लिए 📞 संपर्क दबाएँ (लॉगिन के बाद दिखता है)।"):"";
+  const ist=(it==="open"||os)&&(it==="open")?(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'<div class="ist">'+esc(en?"Timing not listed — please call to check.":"समय दर्ज नहीं है — पक्का करने के लिए संपर्क करें।")+'</div>'):(os?'<div class="ist '+(os.open?'op':'cl')+'">'+(os.open?"🟢 ":"🔴 ")+esc(os.t)+'</div>':'');
   const P='<a class="call" href="'+link+'#contact">'+esc("📞 "+T("c_title"))+'</a>',D=dir?'<a href="'+esc(dir)+'">'+esc("🧭 "+T("dir"))+'</a>':'',X='<a href="'+link+'">'+esc(T("details"))+'</a>';
   const acts=it==="dir"?D+P+X:P+D+X;
   const hasLL=b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude)&&!(+b.latitude===0&&+b.longitude===0);
@@ -805,8 +805,8 @@ if(P.get("city"))$("city").value=P.get("city");
   function done(c){if(!c)return;CITYUSER=true;inp.value=c;try{localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by","me");}catch(e){}run(true);}
   function note(t){let d=document.getElementById("locMsg");if(!d){d=document.createElement("div");d.id="locMsg";d.style.cssText="position:fixed;left:12px;right:12px;top:70px;z-index:99;background:#fff4e5;color:#7a3b00;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;font-size:13.5px";document.body.appendChild(d);}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>{d.hidden=true;},7000);d.onclick=()=>{d.hidden=true;};}
   g.addEventListener("click",e=>{e.preventDefault();
-    if(!navigator.geolocation){note(en()?"Location not available":"Location नहीं मिली");return;}
-    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"Location ढूँढ रहे हैं…";g.classList.add("busy");
+    if(!navigator.geolocation){note(en()?"Location not available":"लोकेशन नहीं मिली");return;}
+    const old=inp.value,ph=inp.placeholder;inp.value="";inp.placeholder=en()?"Finding your location…":"लोकेशन ढूँढ रहे हैं…";g.classList.add("busy");
     const fail=t=>{g.classList.remove("busy");inp.value=old;inp.placeholder=ph;if(t)note(t);};
     navigator.geolocation.getCurrentPosition(p=>{
       g.classList.remove("busy");inp.placeholder=ph;
@@ -816,7 +816,7 @@ if(P.get("city"))$("city").value=P.get("city");
       fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la.toFixed(4)+"&longitude="+ln.toFixed(4)+"&localityLanguage=en")
         .then(r=>r.json()).then(d=>{const c=d.city||d.locality||"";if(c)done(c);else fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।");})
         .catch(()=>fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।"));
-    },err=>{fail(err&&err.code===1?(en()?"Location permission is blocked for this site. Allow it in browser settings.":"इस site के लिए Location की इजाज़त बंद है। Browser की settings में इजाज़त दें।"):(en()?"Could not get your location. Turn on GPS and try again.":"Location नहीं मिली। GPS चालू करके दोबारा दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+    },err=>{fail(err&&err.code===1?(en()?"Location permission is blocked for this site. Allow it in browser settings.":"इस साइट के लिए लोकेशन की इजाज़त बंद है। ब्राउज़र की सेटिंग में इजाज़त दें।"):(en()?"Could not get your location. Turn on GPS and try again.":"लोकेशन नहीं मिली। GPS चालू करके दोबारा दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
   });
 })();
 /* 🔎 search box में लिखते ही सुझाव (गलत spelling पर "क्या आपका मतलब" + दुकानों के नाम) */

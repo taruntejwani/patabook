@@ -140,6 +140,7 @@ function pbDir(b){const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.
 const SB="https://kkvbpzysktozghnxplxv.supabase.co";
 const KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 const H={apikey:KEY,Authorization:"Bearer "+KEY};
+const CITY_HI={Gandhidham:"गांधीधाम",Adipur:"आदिपुर",Anjar:"अंजार",Bhuj:"भुज",Mundra:"मुंद्रा",Mandvi:"मांडवी",Nakhatrana:"नखत्राणा",Bhachau:"भचाऊ",Rapar:"रापर",Naliya:"नलिया",Dayapar:"दयापर"};const cityLbl=c=>(PB.lang&&PB.lang()==="hi"&&CITY_HI[c])||c;
 const CITIES={Gandhidham:[23.0753,70.1337],Adipur:[23.0750,70.0830],Anjar:[23.1130,70.0270],Bhuj:[23.2420,69.6669],Mundra:[22.8390,69.7220],Mandvi:[22.8330,69.3520],Nakhatrana:[23.3000,69.2700],Bhachau:[23.2960,70.3430],Rapar:[23.5730,70.6420],Naliya:[23.2600,68.8260],Dayapar:[23.6340,68.9020]};
 
 const CATS={
@@ -219,7 +220,7 @@ function drawStatus(){
     st.innerHTML=`<span class="loc">${L.using}</span><button id="re">${L.retry}</button>`;
     document.getElementById("re").onclick=()=>{try{sessionStorage.removeItem("pb-loc");}catch(e){}locate();};
   }else{
-    st.innerHTML=`<span>${L.denied}</span><select id="cityPick">${Object.keys(CITIES).map(c=>`<option ${c===cityName?"selected":""}>${c}</option>`).join("")}</select><button id="re">${L.retry}</button>`;
+    st.innerHTML=`<span>${L.denied}</span><select id="cityPick">${Object.keys(CITIES).map(c=>`<option value="${c}" ${c===cityName?"selected":""}>${cityLbl(c)}</option>`).join("")}</select><button id="re">${L.retry}</button>`;
     document.getElementById("cityPick").onchange=e=>{cityName=e.target.value;load();};
     document.getElementById("re").onclick=()=>{try{sessionStorage.removeItem("pb-loc");}catch(e){}locate();};
   }
@@ -274,7 +275,7 @@ async function load(){
 }
 function drawStatus_sub(){
   document.getElementById("sub").innerHTML=mode==="geo"
-    ?`${L.near} · ${T("within",{r:"<b>"+radius+" km</b>"})} · ${L.nearest}`:`${L.near} · <b>${esc(cityName)}</b>`;
+    ?`${L.near} · ${T("within",{r:"<b>"+radius+" km</b>"})} · ${L.nearest}`:`${L.near} · <b>${esc(cityLbl(cityName))}</b>`;
 }
 
 /* 💎 Premium (sql-23): Premium दुकानें सबसे ऊपर — हर बार अलग क्रम (rotation), ताकि सबको बराबर मौका मिले */

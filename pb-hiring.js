@@ -70,7 +70,7 @@
       body = '<p style="font-size:15px;line-height:1.55">' + T("यह दुकान स्टाफ़ ढूँढ रही है। जानकारी के लिए दुकान से संपर्क करें।", "This shop is hiring. Contact the shop for details.") + '</p>';
     }
     var msg = encodeURIComponent(T("नमस्ते, PataBook पर देखा कि आपकी दुकान में नौकरी खाली है", "Hello, I saw on PataBook that you are hiring") + (j && j.role ? " (" + j.role + ")" : "") + T("। मुझे जानकारी चाहिए।", ". I'd like to know more."));
-    var bt = (o.call ? '<a class="c' + (o.wa ? "" : " one") + '" href="tel:' + E(o.call) + '">📞 ' + T("Call करें", "Call") + '</a>' : "") +
+    var bt = (o.call ? '<a class="c' + (o.wa ? "" : " one") + '" href="tel:' + E(o.call) + '">📞 ' + T("कॉल करें", "Call") + '</a>' : "") +
              (o.wa ? '<a class="w' + (o.call ? "" : " one") + '" href="https://wa.me/' + E(o.wa) + '?text=' + msg + '" target="_blank" rel="noopener">💬 WhatsApp</a>' : "") ||
              (o.onContact ? '<button type="button" class="c one" id="pbhCt">📞 ' + T("दुकान से संपर्क करें", "Contact the shop") + '</button>' : "");
     sc.querySelector(".pbh-sh").innerHTML = '<div class="pbh-hd">' + tile(54) + '<div><b>' + T("नौकरी खाली है", "We're hiring") + '</b><small>' + E(o.name || "") + '</small></div><button type="button" class="x" aria-label="Close">✕</button></div>' +
@@ -97,13 +97,13 @@
   async function editor(slug, rpc, done) {
     var cur = null; try { cur = await rpc("pb_my_vacancy_job", { p_slug: slug }); } catch (e) {}
     cur = cur || {};
-    var sc = sheet('<div class="pbh-hd">' + tile(48) + '<div><b>' + T("नौकरी की जानकारी", "Job details") + '</b><small>' + T("ग्राहक ऊपर HIRING निशान दबाकर यह देखेंगे · 30 दिन चालू", "Customers see this from the HIRING icon · on for 30 days") + '</small></div><button type="button" class="x" aria-label="Close">✕</button></div>' +
-      '<label class="pbh-f" for="pbhR">' + T("कौन-सा काम? *", "Which job? *") + '</label><input class="pbh-in" id="pbhR" maxlength="60" placeholder="' + T("जैसे: Delivery boy, Salesman, Packing staff", "e.g. Delivery boy, Salesman, Packing staff") + '" value="' + E(cur.role || "") + '">' +
+    var sc = sheet('<div class="pbh-hd">' + tile(48) + '<div><b>' + T("नौकरी की जानकारी", "Job details") + '</b><small>' + T("ग्राहक ऊपर नौकरी निशान दबाकर यह देखेंगे · 30 दिन चालू", "Customers see this from the HIRING icon · on for 30 days") + '</small></div><button type="button" class="x" aria-label="Close">✕</button></div>' +
+      '<label class="pbh-f" for="pbhR">' + T("कौन-सा काम? *", "Which job? *") + '</label><input class="pbh-in" id="pbhR" maxlength="60" placeholder="' + T("जैसे: डिलीवरी boy, सेल्समैन, Packing स्टाफ", "e.g. Delivery boy, Salesman, Packing staff") + '" value="' + E(cur.role || "") + '">' +
       '<div class="pbh-2"><div><label class="pbh-f" for="pbhC">' + T("कितने लोग", "How many") + '</label><input class="pbh-in" id="pbhC" inputmode="numeric" maxlength="2" placeholder="1" value="' + E(cur.count || "") + '"></div>' +
       '<div><label class="pbh-f" for="pbhS">' + T("पगार", "Salary") + '</label><input class="pbh-in" id="pbhS" maxlength="60" placeholder="₹12,000 / ' + T("महीना", "month") + '" value="' + E(cur.salary || "") + '"></div></div>' +
       '<label class="pbh-f" for="pbhTm">' + T("समय", "Timing") + '</label><input class="pbh-in" id="pbhTm" maxlength="60" placeholder="' + T("जैसे: सुबह 9 से शाम 7", "e.g. 9 AM to 7 PM") + '" value="' + E(cur.timing || "") + '">' +
-      '<label class="pbh-f" for="pbhN">' + T("कैसा व्यक्ति चाहिए", "Who are you looking for") + '</label><textarea class="pbh-in" id="pbhN" maxlength="500" placeholder="' + T("जैसे: Bike चलाना आता हो, 10वीं पास, Gandhidham के पास रहता हो", "e.g. Can ride a bike, 10th pass, lives near Gandhidham") + '">' + E(cur.need || "") + '</textarea>' +
-      '<div class="pbh-er" id="pbhE"></div><button type="button" class="pbh-sv" id="pbhSv">✔ ' + T("Save करें और चालू करें", "Save & turn on") + '</button>' +
+      '<label class="pbh-f" for="pbhN">' + T("कैसा व्यक्ति चाहिए", "Who are you looking for") + '</label><textarea class="pbh-in" id="pbhN" maxlength="500" placeholder="' + T("जैसे: बाइक चलाना आता हो, 10वीं पास, गांधीधाम के पास रहता हो", "e.g. Can ride a bike, 10th pass, lives near Gandhidham") + '">' + E(cur.need || "") + '</textarea>' +
+      '<div class="pbh-er" id="pbhE"></div><button type="button" class="pbh-sv" id="pbhSv">✔ ' + T("सेव करें और चालू करें", "Save & turn on") + '</button>' +
       (cur.open ? '<button type="button" class="pbh-off" id="pbhOff">' + T("नौकरी भर गई — बंद करें", "Job filled — turn off") + '</button>' : ""));
     var q = function (id) { return sc.querySelector("#" + id); };
     q("pbhSv").onclick = async function () {
@@ -112,7 +112,7 @@
       try { await rpc("pb_set_vacancy_job", { p_slug: slug, p: { role: role, count: q("pbhC").value, salary: q("pbhS").value, timing: q("pbhTm").value, need: q("pbhN").value } }); sc.remove(); if (done) done(true); }
       catch (x) {
         if (/could not find|PGRST202|404/i.test(x.message || "")) { try { await rpc("pb_set_vacancy", { p_slug: slug, p_on: true }); sc.remove(); if (done) done(true); return; } catch (y) {} }   /* sql-26 अभी नहीं: सिर्फ़ ON */
-        this.disabled = false; q("pbhE").textContent = T("❌ Save नहीं हुआ। फिर कोशिश करें।", "❌ Could not save. Try again."); }
+        this.disabled = false; q("pbhE").textContent = T("❌ सेव नहीं हुआ। फिर कोशिश करें।", "❌ Could not save. Try again."); }
     };
     var off = q("pbhOff"); if (off) off.onclick = async function () { off.disabled = true; try { await rpc("pb_set_vacancy", { p_slug: slug, p_on: false }); sc.remove(); if (done) done(false); } catch (x) { off.disabled = false; } };
   }

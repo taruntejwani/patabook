@@ -14,16 +14,16 @@
     weapon: ["इसमें हथियार दिख रहे हैं।", "it shows weapons."],
     drugs: ["इसमें शराब / तंबाकू / नशे का सामान दिख रहा है।", "it shows alcohol, tobacco or drugs."],
     hate: ["इसमें किसी धर्म / समुदाय के ख़िलाफ़ आपत्तिजनक सामग्री है।", "it has hateful content against a religion or community."],
-    qr: ["Payment / UPI QR code की फ़ोटो नहीं लगा सकते (धोखाधड़ी से बचाव)।", "payment / UPI QR code photos are not allowed (fraud safety)."],
-    doc: ["ID card / बैंक card / नोटों की फ़ोटो नहीं लगा सकते (आपकी सुरक्षा के लिए)।", "ID cards, bank cards or currency notes are not allowed (for your safety)."],
+    qr: ["भुगतान / UPI QR कोड की फ़ोटो नहीं लगा सकते (धोखाधड़ी से बचाव)।", "payment / UPI QR code photos are not allowed (fraud safety)."],
+    doc: ["ID कार्ड / बैंक कार्ड / नोटों की फ़ोटो नहीं लगा सकते (आपकी सुरक्षा के लिए)।", "ID cards, bank cards or currency notes are not allowed (for your safety)."],
     gamble: ["इसमें जुआ / सट्टा से जुड़ी सामग्री है।", "it shows gambling or betting."],
-    screen: ["यह mobile / computer की screenshot लग रही है।", "it looks like a phone / computer screenshot."],
-    unrelated: ["यह फ़ोटो आपके product / दुकान से जुड़ी नहीं लग रही।", "it does not look related to your product / shop."],
+    screen: ["यह मोबाइल / कंप्यूटर की स्क्रीनशॉट लग रही है।", "it looks like a phone / computer screenshot."],
+    unrelated: ["यह फ़ोटो आपके उत्पाद / दुकान से जुड़ी नहीं लग रही।", "it does not look related to your product / shop."],
     unclear: ["फ़ोटो में चीज़ साफ़ नहीं दिख रही (धुंधली / अंधेरी)। अच्छी रोशनी में साफ़ फ़ोटो लें।", "the item is not clearly visible (blurry / dark). Take a clear photo in good light."]
   };
   function msg(cat) {
     var w = WHY[cat] || WHY.nude, E = en();
-    var tail = cat === "unclear" ? "" : (E ? " Please add a clear photo of your shop or product." : " कृपया अपनी दुकान या product की साफ़ फ़ोटो लगाएँ।");
+    var tail = cat === "unclear" ? "" : (E ? " Please add a clear photo of your shop or product." : " कृपया अपनी दुकान या उत्पाद की साफ़ फ़ोटो लगाएँ।");
     return (E ? "❌ This photo cannot be added: " + w[1] : "❌ यह फ़ोटो नहीं लग सकती: " + w[0]) + tail;
   }
   async function ready() {
@@ -81,7 +81,7 @@
     try {
       var d = document.createElement("div");
       d.setAttribute("style", "position:fixed;left:8px;right:8px;bottom:12px;z-index:99999;background:#12141c;color:#fff;font:600 12.5px/1.4 system-ui,sans-serif;padding:9px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);word-break:break-word");
-      d.textContent = t + "  (सिर्फ़ admin को दिखता है)";
+      d.textContent = t + "  (सिर्फ़ एडमिन को दिखता है)";
       d.onclick = function () { d.remove(); };
       document.body.appendChild(d); setTimeout(function () { d.remove(); }, 9000);
     } catch (e) {}
@@ -89,12 +89,12 @@
   /* PBImg.check(file, {slug, kind:"product"|"logo"|"shop", name}) */
   async function check(file, info) {
     try {
-      if (!(await ready())) { dbg("⚠️ AI जांच बंद: Worker (v2+) नहीं मिला / aiUrl खाली"); return { ok: true, skipped: "off" }; }
+      if (!(await ready())) { dbg("⚠️ AI जांच बंद: कर्मचारी (v2+) नहीं मिला / aiUrl खाली"); return { ok: true, skipped: "off" }; }
       info = info || {};
       var I = await shopInfo(info.slug), ctxo = { kind: info.kind || "shop", item: String(info.name || "").slice(0, 80), shop: String(I.shop || "").slice(0, 80), cat: String(I.cat || "").slice(0, 60), sub: String(I.sub || "").slice(0, 60), svc: String(I.svc || "").slice(0, 120), unit: I.unit || "" };
       var sm = await small(file), data = sm.data;
       /* 📱 पक्की जांच (बिना AI): phone के screenshot का नाप screen जैसा लंबा-पतला होता है (जैसे 1080×2400) या नाम में Screenshot */
-      if (info.poster ? /screen ?shot|screenshot|scrnshot/i.test(String(file && file.name || "")) : isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से screenshot पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
+      if (info.poster ? /screen ?shot|screenshot|scrnshot/i.test(String(file && file.name || "")) : isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से स्क्रीनशॉट पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
       var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 15000);
       try {
         var r = await fetch(base() + "/check-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: data, ctx: ctxo }), signal: ctl.signal });
