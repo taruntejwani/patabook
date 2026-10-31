@@ -15,8 +15,15 @@
   var ADDR = set("address pata pta पता સરનામું સરનામુ");
   var LOC = set("location loc लोकेशन લોકેશન");
   var OPEN = set("khula khule khuli open timing time timings band closed खुला खुली खुले बंद टाइम समय ખુલ્લું ખુલ્લી ખુલ્લા બંધ ટાઈમ");
+  /* जोड़ी वाले इरादे: दोनों शब्द साथ हों तभी मानते हैं (ताकि दुकान के नाम में आए अकेले शब्द न बिगड़ें) */
+  var KITNA = set("kitna kitni kitne kitana kitani कितना कितनी कितने કેટલું કેટલી કેટલા");
+  var DUR = set("dur door doori duri dooru दूर दूरी દૂર");
+  var KAISE = set("kaise kese kaisey kaisay कैसे केसे કેવી કેવી?");
+  var GO = set("jaye jaaye jayen jaun jau jaoon jana jaana jayein pahuche pahunche pahuch pahuchu pahunchu पहुँचे पहुंचे जाए जाएँ जाऊं जाना જવું પહોંચવું");
+  var CALLW = set("call calling dial baat phone कॉल बात फोन फ़ोन");
+  var CALLV = set("karo karna karni karun karu kare lagao lagana lagani lagau kijiye करो करना करनी करूं लगाओ लगाना કરવો કરવી કરવું");
   /* सिर्फ़ फ़ालतू (सवाल मिलने पर हटते हैं) */
-  var STOP = set("hai hain he hu hoon ho hota hoga hogi ka ki ke ko se mein me mai main ma pe par per mujhe mujhko mere meri mera humko hame ek koi kuch kya kyu aap abhi ab aaj wala wali wale vala vali vale liye lie for the a an is are of to in at on please plz pls do de dena dijiye dijie kijiye karo kare karna kar sakta sakte sakti bhi toh aur jyada " +
+  var STOP = set("tak tk तक સુધી bhejo bhej bheje bhijwao dijiye dedijiye dedo dena lena dhundo dhundho khojo khoj ye yeh wo woh vo hai hain he hu hoon ho hota hoga hogi ka ki ke ko se mein me mai main ma pe par per mujhe mujhko mere meri mera humko hame ek koi kuch kya kyu aap abhi ab aaj wala wali wale vala vali vale liye lie for the a an is are of to in at on please plz pls do de dena dijiye dijie kijiye karo kare karna kar sakta sakte sakti bhi toh aur jyada " +
     "है हैं हूँ होगा होगी का की के को से में मैं पे पर मुझे मेरे मेरी मेरा हमें एक कोई कुछ क्या अभी अब आज वाला वाली वाले के लिए लिये दो दे दीजिए कीजिए करो करें करना कर सकता सकते सकती भी तो और ज़्यादा " +
     "છે છે? નો ની ના નું માં મને મારી મારા એક કોઈ કંઈ શું હમણાં અત્યારે આજે નજીકમાં ને થી પર કરો કરી આપો");
   function norm(q) { return String(q || "").replace(/[?!।॥,;:()"'*]/g, " ").replace(/\s+/g, " ").trim(); }
@@ -28,6 +35,10 @@
         /* एक शब्द ("kahan") अकेला हो तो भी कुछ नहीं */ if (toks.length < 2) return out; }
       var low = toks.map(function (t) { return t.toLowerCase(); });
       var trig = false, hasNum = low.some(function (t) { return PHONE[t]; });
+      var distQ = low.some(function (t) { return KITNA[t]; }) && low.some(function (t) { return DUR[t]; }),
+          howQ = low.some(function (t) { return KAISE[t]; }) && low.some(function (t) { return GO[t]; }),
+          callQ = low.some(function (t) { return CALLW[t]; }) && low.some(function (t) { return CALLV[t]; });
+      if (distQ || howQ || callQ) trig = true;
       low.forEach(function (t, i) {
         if (WHERE[t] || DO[t] || BEST[t] || NEAR[t] || PHONE[t] || DIR[t] || ADDR[t] || LOC[t] || OPEN[t]) trig = true;
         if (t === "kya" && /^(hai|he|h|hain)$/.test(low[i - 1] || "")) trig = true;
@@ -39,6 +50,9 @@
       for (var i = 0; i < toks.length; i++) {
         var t = low[i];
         if (PHONE[t]) { it("phone"); continue; }
+        if (callQ && (CALLW[t] || CALLV[t])) { it("phone"); continue; }
+        if (distQ && (KITNA[t] || DUR[t])) { it("dir"); continue; }
+        if (howQ && (KAISE[t] || GO[t])) { it("dir"); continue; }
         if (ASIDE[t] && hasNum) continue;
         if (DIR[t]) { it("dir"); continue; }
         if (OPEN[t]) { it("open"); continue; }
