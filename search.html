@@ -395,7 +395,7 @@ async function run(push){
   const ts=terms(q,!!city);
   setChip(city);
   autoCat(q);
-  if(push){const u=new URL(location.href);CATSEL?u.searchParams.set("cat",CATSEL):u.searchParams.delete("cat");WORKSEL?u.searchParams.set("work",WORKSEL):u.searchParams.delete("work");history.replaceState(null,"",u);}
+  if(push){const u=new URL(location.href);(CATSEL&&CATMAN)?u.searchParams.set("cat",CATSEL):u.searchParams.delete("cat");(WORKSEL&&CATMAN)?u.searchParams.set("work",WORKSEL):u.searchParams.delete("work");   /* सिर्फ़ खुद चुनी Category पते में; अपने-आप वाली नहीं (वरना refresh पर सख़्त फ़िल्टर बन जाती है) */history.replaceState(null,"",u);}
   if(!ts.length&&!city&&!CATSEL){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
   const n=++reqN;
   cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';
