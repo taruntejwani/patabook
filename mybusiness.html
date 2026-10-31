@@ -227,6 +227,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .stl{display:block;margin-top:12px;text-align:center;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:12px;font-size:14.5px}.stl.alt{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script>
+<style id="pbmAnim">@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}.pbmp>*:nth-child(4){animation-delay:.19s}.pbmp>*:nth-child(5){animation-delay:.24s}.pbmp>*:nth-child(6){animation-delay:.29s}.pbmp>*:nth-child(n+7){animation-delay:.33s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}</style>
 </head>
 <body>
 <div class="wrap">
@@ -1239,7 +1240,10 @@ function ownMenu(){
   const r=bar.getBoundingClientRect(),pn=document.createElement("div");
   pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
   ov.appendChild(pn);document.body.appendChild(ov);
-  const kill=()=>{if(OMOV){OMOV.remove();OMOV=null;}};
+  pn.className="pbmp";
+  const glyph=x=>{try{bar.textContent=x?"✕":"☰";if(bar.animate&&!matchMedia("(prefers-reduced-motion:reduce)").matches)bar.animate([{transform:"rotate(-90deg)",opacity:.3},{transform:"none",opacity:1}],{duration:220,easing:"ease-out"});}catch(e){}};
+  glyph(true);
+  const kill=()=>{if(OMOV){OMOV.remove();OMOV=null;glyph(false);}};
   const MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
   const locked=(kind,b)=>{try{return kind==="photo"?!PH(b,"photos"):kind==="rep"?!PH(b,"report"):false;}catch(e){return false;}};
   const main=()=>{pn.innerHTML=MAIN.map(it=>{const o=it[2]==="out";return '<a data-k="'+it[2]+'" style="'+ROW+'color:'+(o?"#c5221f":"#0b2f73")+(o?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");};

@@ -343,6 +343,7 @@ function pbOffTag(b,s){
 }
 document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(localStorage.getItem("pb-session")||"null");if(s&&s.refresh_token){var b=document.getElementById("mysBar");if(b)b.style.display="flex";if(b){pbMyShopLink(b,s);pbOffTag(b,s);}var c=document.querySelector(".join .cta");if(c)c.style.display="none";var q=document.querySelector(".join p");if(q)q.style.display="none";var j=document.querySelector(".join");if(j)j.style.display="none";var at=document.getElementById("addTop");if(at)at.style.display="none";}}catch(e){}});
 </script>
+<style id="pbmAnim">@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}.pbmp>*:nth-child(4){animation-delay:.19s}.pbmp>*:nth-child(5){animation-delay:.24s}.pbmp>*:nth-child(6){animation-delay:.29s}.pbmp>*:nth-child(n+7){animation-delay:.33s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}</style>
 </head>
 <body>
 
@@ -1096,7 +1097,9 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   function hi(){return !(window.PB&&PB.lang&&PB.lang()!=="hi");}
   function slugs(){try{var c=JSON.parse(localStorage.getItem("pb-my-shops")||"null");return Array.isArray(c)?c:[];}catch(e){return [];}}
   var ov=null;
-  function kill(){if(ov){ov.remove();ov=null;}}
+  var ic=bar.querySelector(".ic"),icOld="☰";
+  function glyph(x){try{if(!ic)return;if(x){icOld=ic.textContent||"☰";ic.textContent="✕";}else ic.textContent=icOld;if(ic.animate&&!matchMedia("(prefers-reduced-motion:reduce)").matches)ic.animate([{transform:"rotate(-90deg)",opacity:.3},{transform:"none",opacity:1}],{duration:220,easing:"ease-out"});}catch(e){}}
+  function kill(){if(ov){ov.remove();ov=null;glyph(false);}}
   /* दुकानों की असली सूची (नाम सहित): login से सीधे लाओ; न मिले तो सेव की हुई slug सूची */
   async function myShops(){
     try{var ss=window.PBA&&PBA.session?await PBA.session():null;
@@ -1114,6 +1117,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     var r=bar.getBoundingClientRect(),pn=document.createElement("div");
     pn.style.cssText="position:absolute;top:"+Math.round(r.bottom+8)+"px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
     ov.appendChild(pn);document.body.appendChild(ov);
+    pn.className="pbmp";glyph(true);
     var MAIN=[["👁️",h?"प्रोफ़ाइल Preview":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
     function href(kind,sl){return kind==="pv"?"business.html?slug="+encodeURIComponent(sl):kind==="set"?"mybusiness.html":"mybusiness.html#go="+kind+"&s="+encodeURIComponent(sl);}
     function main(){
