@@ -139,7 +139,7 @@
     }
     LAST = { c: c, en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
     function goBox(ic, e1, h1, e2, h2, on, cat) {
-      return '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="' + (on ? cat : 'plan') + '" data-tdi="' + c.i + '"><small class="td-big">' + ic + ' ' + T(e1, h1) + '</small><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : '<b style="color:#687386">🔒 ' + T("Upgrade ›", "प्लान लें ›") + '</b>') + '</em></div>';
+      return '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="' + (on || cat === 'rep' ? cat : 'plan') + '" data-tdi="' + c.i + '"><small class="td-big">' + ic + ' ' + T(e1, h1) + '</small><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : '<b style="color:#687386">🔒 ' + (cat === 'rep' ? T("See sample ›", "सैंपल देखें ›") : T("Upgrade ›", "प्लान लें ›")) + '</b>') + '</em></div>';
     }
     var goRow = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px">' + goBox("🖼️", "Gallery", "गैलरी", "Shop photos", "दुकान की फ़ोटो", !!ph.photos, "photo") + goBox("📊", "Report", "रिपोर्ट", "Views & calls", "Views और कॉल", !!ph.report, "rep") + '</div>';
     var goRow2 = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px"><a class="td-s td-click" style="display:block;color:inherit;text-decoration:none" href="business.html?slug=' + encodeURIComponent(b.slug) + '"><small class="td-big">👁️ ' + T("Preview", "प्रीव्यू") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></a>' +

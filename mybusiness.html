@@ -734,6 +734,17 @@ function reportHTML(b){
    '<button type="button" class="anex" data-aexp="'+ROWS.indexOf(b)+'">↓ Export (CSV)</button>'+
    '<div class="anpv">🔒 <b>Privacy-friendly analytics</b><p>'+(en?"Only totals are shown. No customer names or mobile numbers are stored.":"इस रिपोर्ट में केवल कुल आंकड़े दिखते हैं। ग्राहकों के नाम या मोबाइल नंबर नहीं दिखाए जाते।")+'</p></div></div>';
 }
+/* 📊 Free/बिना-रिपोर्ट प्लान: "सैंपल रिपोर्ट" — नक़ली आँकड़ों के साथ वही पन्ना, हल्का धुंधला + "Membership लें" बटन */
+function sampleReport(b,i,en){
+  const end=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),rows=[],K={view:[24,48],call:[3,9],wa:[4,12],dir:[1,6],photo:[2,8],share:[0,3]};
+  for(let k=29;k>=0;k--){const d=new Date(end);d.setDate(d.getDate()-k);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    Object.keys(K).forEach((kd,j)=>rows.push({day:ds,kind:kd,n:K[kd][0]+((k*7+j*5+k*k)%(K[kd][1]-K[kd][0]+1))}));}
+  REPORT.__demo={days:30,rows:rows};
+  const inner=reportHTML({slug:"__demo"}).replace(/<button type="button" class="anex"[\s\S]*?<\/button>/,"");
+  return '<div style="background:#fff7e6;border:1px solid #f3d99a;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.45;color:#5a4310"><b>🔒 '+(en?"Sample report":"सैंपल रिपोर्ट")+'</b><br>'+(en?"This is only an example with demo numbers, not your real data. With a Member plan you see this for your own shop.":"ये सिर्फ़ उदाहरण है (नक़ली आँकड़े), आपका असली डेटा नहीं। सदस्य प्लान लेने पर ये आपकी अपनी दुकान का दिखेगा।")+'<br><button type="button" data-tdgo="plan" data-tdi="'+i+'" style="margin-top:9px;border:0;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;border-radius:11px;padding:10px 16px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer">🔓 '+(en?"Unlock with Membership":"मेंबरशिप लेकर खोलें")+'</button></div>'+
+   '<div style="position:relative"><div aria-hidden="true" style="filter:blur(2px);opacity:.92;pointer-events:none;user-select:none;max-height:640px;overflow:hidden">'+inner+'</div>'+
+   '<div style="position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg,rgba(243,247,255,0) 0%,rgba(243,247,255,.85) 70%);display:flex;align-items:flex-end;justify-content:center;padding:0 12px 18px"><button type="button" data-tdgo="plan" data-tdi="'+i+'" style="border:0;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;border-radius:14px;padding:14px 22px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 8px 22px rgba(26,115,232,.35)">🔓 '+(en?"Unlock with Membership":"मेंबरशिप लेकर खोलें")+'</button></div></div>';
+}
 function reportCSV(i){
   const b=ROWS[i],R=REPORT[b.slug];if(!R)return;const n=Math.min(ARNG[b.slug]||7,R.days||7),M={};(R.rows||[]).forEach(x=>{(M[x.day]=M[x.day]||{})[x.kind]=x.n;});
   const end=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),rows=[["Date","Profile views","Call clicks","WhatsApp clicks","Directions","Photo clicks","Shares"]];
@@ -869,7 +880,7 @@ function catBody(k,b,i,en){
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
   if(k==="photo")return window.galleryBlock?galleryBlock(b,i):"";
   if(k==="nt")return "";
-  if(k==="rep")return PH(b,"report")?reportHTML(b):'<div class="pm"><small style="margin:0">📊 '+(en?"The report (views, Call, WhatsApp) comes with a Member plan. See “Member Plan”.":"रिपोर्ट (कितनों ने देखा, कॉल, WhatsApp) सदस्य प्लान के साथ मिलती है। “सदस्य प्लान” देखें।")+'</small></div>';
+  if(k==="rep")return PH(b,"report")?reportHTML(b):sampleReport(b,i,en);
   if(k==="plan")return premBlock(b,i)||'<p class="note">—</p>';
   return "";
 }
@@ -1292,7 +1303,7 @@ function ownMenu(){
 $("stBtn").addEventListener("click",e=>{e.preventDefault();ntOpen(false);ownMenu();});
 $("list").addEventListener("click",e=>{
   {const np=e.target.closest("[data-ntp]");if(np&&!np.disabled){NTPG+=+np.dataset.ntp;draw();window.scrollTo(0,0);return;}}
-  {const ar=e.target.closest("[data-arng]");if(ar){ARNG[ROWS[+ar.dataset.i].slug]=+ar.dataset.arng;draw();return;}
+  {const ar=e.target.closest("[data-arng]");if(ar){ARNG[(ROWS[+ar.dataset.i]||{slug:"__demo"}).slug]=+ar.dataset.arng;draw();return;}
    const ae=e.target.closest("[data-aexp]");if(ae){reportCSV(+ae.dataset.aexp);return;}
    const ap=e.target.closest(".anpt");if(ap){const t=$("antip");if(t)t.textContent=ap.dataset.t;return;}}
   {const lk=e.target.closest("[data-lk]");if(lk){e.preventDefault();e.stopPropagation();lkOpen(+lk.dataset.lk);return;}}
