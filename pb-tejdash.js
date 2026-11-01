@@ -19,7 +19,7 @@
       ".td.t-platinum{--a:#3f5075;--soft:#e8edf7;--hd:linear-gradient(120deg,#1c2539,#3f5075 55%,#4a6fa5)}" +
       ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{min-height:44px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
       ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;line-height:1;flex:none}" +
-      ".td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}" +
+      ".td-big{font-size:18px!important;font-weight:800;color:#172033!important;margin-bottom:6px}.td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}" +
       ".td-mi{display:flex;align-items:center;gap:9px;min-width:0;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:13px}.td-mi b{flex:1;min-width:0;font-weight:700}.td-mic{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}" +
       "" +
       ".td-eb{color:#2563eb;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
@@ -139,11 +139,11 @@
     }
     LAST = { en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
     function goBox(ic, e1, h1, e2, h2, on, cat) {
-      return '<div class="td-s' + (on ? ' td-click' : '') + '"' + (on ? ' role="button" tabindex="0" data-tdgo="' + cat + '" data-tdi="' + c.i + '"' : '') + '><small>' + ic + ' ' + T(e1, h1) + '</small><strong style="font-size:15px">' + T(e2, h2) + '</strong><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : T("Not in your plan", "प्लान में नहीं")) + '</em></div>';
+      return '<div class="td-s' + (on ? ' td-click' : '') + '"' + (on ? ' role="button" tabindex="0" data-tdgo="' + cat + '" data-tdi="' + c.i + '"' : '') + '><small class="td-big">' + ic + ' ' + T(e1, h1) + '</small><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : T("Not in your plan", "प्लान में नहीं")) + '</em></div>';
     }
     var goRow = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px">' + goBox("🖼️", "Gallery", "गैलरी", "Shop photos", "दुकान की फ़ोटो", !!ph.photos, "photo") + goBox("📊", "Report", "रिपोर्ट", "Views & calls", "Views और कॉल", !!ph.report, "rep") + '</div>';
-    var goRow2 = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px"><a class="td-s td-click" style="display:block;color:inherit;text-decoration:none" href="business.html?slug=' + encodeURIComponent(b.slug) + '"><small>👁️ ' + T("Preview", "प्रीव्यू") + '</small><strong style="font-size:15px">' + T("Public profile", "पब्लिक प्रोफ़ाइल") + '</strong><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></a>' +
-      '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="" data-tdi="' + c.i + '"><small>⚙️ ' + T("All settings", "सारी सेटिंग") + '</small><strong style="font-size:15px">' + T("Numbers & more", "नंबर और बहुत कुछ") + '</strong><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></div></div>';
+    var goRow2 = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px"><a class="td-s td-click" style="display:block;color:inherit;text-decoration:none" href="business.html?slug=' + encodeURIComponent(b.slug) + '"><small class="td-big">👁️ ' + T("Preview", "प्रीव्यू") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></a>' +
+      '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="" data-tdi="' + c.i + '"><small class="td-big">⚙️ ' + T("All settings", "सारी सेटिंग") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></div></div>';
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
