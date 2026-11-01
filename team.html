@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#0b2f73">
 <script src="pb-auth.js"></script>
 <script src="site-config.js"></script>
+<script src="pb-panel-lang.js"></script>
+<script src="lang/panel-team-en.js"></script>
 <style>
 :root{--b:#0b2f73;--bl:#1a73e8;--g:#1e9e57;--r:#d93025;--mu:#5f6368;--bd:#e1e6ef}
 *{box-sizing:border-box}
@@ -67,7 +69,7 @@ main{padding:14px 14px 96px}
 </style>
 </head>
 <body>
-<header><h1><span id="ttl">👥 टीम</span><small id="ttlS">PataBook · टीम वर्कस्पेस</small></h1><a href="admin.html" id="adm" hidden>Admin</a></header>
+<header><h1><span id="ttl">👥 टीम</span><small id="ttlS">PataBook · टीम वर्कस्पेस</small></h1><a href="admin.html" id="adm" hidden>एडमिन</a></header>
 <main id="m"><div class="mut">लोड हो रहा है…</div></main>
 <script>
 (function () {
@@ -75,7 +77,7 @@ main{padding:14px 14px 96px}
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {}, WORK = {}, SRC = {}, EARN = [], DED = null, EM = '', ADDOPEN = false, CITIES = null, TABPUSH = false, SKIP = 0;
-  var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ Owner कर सकता है।', 'duplicate': 'इसी नाम और नंबर की दुकान पहले से जुड़ी है।', 'limit3': 'इस नंबर पर पहले से 3 दुकानें हैं।', 'bad phone': 'मोबाइल नंबर 10 अंकों का सही होना चाहिए।', 'bad name': 'दुकान का नाम 2 से 80 अक्षर का होना चाहिए।', 'bad category': 'श्रेणी सही नहीं है।', 'rate limit': 'बहुत जल्दी-जल्दी हो रहा है, थोड़ी देर बाद कोशिश करें।', 'slug conflict': 'यह नाम पहले से है, नाम थोड़ा बदलकर देखें।' };
+  var ER = { 'already in team': 'यह ईमेल पहले से टीम में है।', 'already admin': 'यह ईमेल पहले से एडमिन है।', 'staff limit': 'एक मैनेजर के नीचे अधिकतम 20 स्टाफ हो सकते हैं।', 'bad email': 'ईमेल सही नहीं लगता।', 'manager needed': 'पहले मैनेजर चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ मालिक कर सकता है।', 'duplicate': 'इसी नाम और नंबर की दुकान पहले से जुड़ी है।', 'limit3': 'इस नंबर पर पहले से 3 दुकानें हैं।', 'bad phone': 'मोबाइल नंबर 10 अंकों का सही होना चाहिए।', 'bad name': 'दुकान का नाम 2 से 80 अक्षर का होना चाहिए।', 'bad category': 'श्रेणी सही नहीं है।', 'rate limit': 'बहुत जल्दी-जल्दी हो रहा है, थोड़ी देर बाद कोशिश करें।', 'slug conflict': 'यह नाम पहले से है, नाम थोड़ा बदलकर देखें।' };
   function eMsg(e) { var m = String(e && e.message || e); for (var k in ER) if (m.indexOf(k) >= 0) return ER[k]; return 'गलती: ' + m; }
 
   async function rpc(fn, args) {
@@ -88,8 +90,8 @@ main{padding:14px 14px 96px}
   }
   function gate(kind, extra) {
     $('m').innerHTML = kind === 'login'
-      ? '<div class="gate"><h2>🔒 लॉगिन करें</h2><p class="mut">अपने Google email या मोबाइल OTP से लॉगिन करें। यह वही email या नंबर होना चाहिए जो Admin ने टीम में जोड़ा है।</p><a href="' + PBA.loginUrl('team.html') + '">✉️ Email से लॉगिन करें</a>' + (PBA.mobile && PBA.mobile.enabled() ? '<br><a href="team-login.html" style="background:#0b2f73">📱 Mobile OTP से लॉगिन करें</a>' : '') + '</div>'
-      : '<div class="gate"><h2>⛔ अनुमति नहीं</h2><p class="mut">यह email टीम में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '। Admin से कहें कि इसे टीम में जोड़ें, या सही Google email से लॉगिन करें।</p></div>';
+      ? '<div class="gate"><h2>🔒 लॉगिन करें</h2><p class="mut">अपने Google ईमेल या मोबाइल OTP से लॉगिन करें। यह वही ईमेल या नंबर होना चाहिए जो एडमिन ने टीम में जोड़ा है।</p><a href="' + PBA.loginUrl('team.html') + '">✉️ ईमेल से लॉगिन करें</a>' + (PBA.mobile && PBA.mobile.enabled() ? '<br><a href="team-login.html" style="background:#0b2f73">📱 मोबाइल OTP से लॉगिन करें</a>' : '') + '</div>'
+      : '<div class="gate"><h2>⛔ अनुमति नहीं</h2><p class="mut">यह ईमेल टीम में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '। एडमिन से कहें कि इसे टीम में जोड़ें, या सही Google ईमेल से लॉगिन करें।</p></div>';
   }
   /* 10 अंकों का मोबाइल नंबर हो तो login वाली पहचान (m98XXXXXXXX@phone.patabook.in) बनाओ */
   function idOf(v) { var d = String(v || '').replace(/[\s\-()]/g, '').replace(/^\+/, ''); if (d.length === 12 && d.indexOf('91') === 0) d = d.slice(2); else if (d.length === 11 && d.charAt(0) === '0') d = d.slice(1); return /^[6-9]\d{9}$/.test(d) ? 'm' + d + '@phone.patabook.in' : v; }
@@ -104,14 +106,14 @@ main{padding:14px 14px 96px}
       if (ROLE !== 'owner') { var me = await rpc('pb_team_me', {}); ME = (me && me[0]) || null; }
       else $('adm').hidden = false;
     } catch (e) { if (e.message === 'login') return; return $('m').innerHTML = '<div class="gate"><p class="err">' + esc(eMsg(e)) + '</p></div>'; }
-    $('ttl').textContent = ROLE === 'owner' ? '👥 टीम (Owner)' : ROLE === 'manager' ? '👥 Manager' : '🧾 Staff';
+    $('ttl').textContent = ROLE === 'owner' ? '👥 टीम (मालिक)' : ROLE === 'manager' ? '👥 मैनेजर' : '🧾 स्टाफ';
     TAB = 'home';
     if (location.hash === '#shops') TAB = 'shops';
     draw();
   }
   function tabs() {
     var T = [['home', '🏠', 'होम']];
-    if (ROLE !== 'staff') T.push(['team', '👥', ROLE === 'owner' ? 'टीम' : 'मेरे Staff']);
+    if (ROLE !== 'staff') T.push(['team', '👥', ROLE === 'owner' ? 'टीम' : 'मेरे स्टाफ']);
     T.push(['shops', '🧾', 'दुकानें']);
     T.push(['earn', '💰', ROLE === 'staff' ? 'मेरी कमाई' : 'कमाई']);
     if (ROLE === 'owner') T.push(['ready', '📬', 'जाँच पूरी']);
@@ -125,13 +127,13 @@ main{padding:14px 14px 96px}
     W.forEach(function (x) { for (var k in o) o[k] += +x[k] || 0; });
     var who = ROLE === 'owner' ? 'पूरी टीम' : ROLE === 'manager' ? 'मेरी टीम' : 'मेरा';
     var h = '<div class="hgrid"><div class="hstat"><i>🏪</i><strong>' + o.shops_month + '</strong><span>इस महीने दुकानें (' + who + ')</span></div>' +
-      '<div class="hstat"><i>✅</i><strong>' + o.live_total + '</strong><span>कुल Live दुकानें</span></div>' +
-      '<div class="hstat"><i>💎</i><strong>' + o.sold_month + '</strong><span>इस महीने plan बिके</span></div>' +
-      '<div class="hstat"><i>📈</i><strong>' + o.sold_total + '</strong><span>कुल plan बिके</span></div></div>' +
+      '<div class="hstat"><i>✅</i><strong>' + o.live_total + '</strong><span>कुल लाइव दुकानें</span></div>' +
+      '<div class="hstat"><i>💎</i><strong>' + o.sold_month + '</strong><span>इस महीने प्लान बिके</span></div>' +
+      '<div class="hstat"><i>📈</i><strong>' + o.sold_total + '</strong><span>कुल प्लान बिके</span></div></div>' +
       '<h3 style="margin:6px 2px 10px;font-size:16px">जल्दी के काम</h3><div class="hq">' +
       '<button data-tab="shops"><b>🧾</b>दुकानें देखें</button>' +
       '<button data-tab="earn"><b>💰</b>' + (ROLE === 'staff' ? 'मेरी कमाई' : 'कमाई / काम') + '</button>' +
-      (ROLE !== 'staff' ? '<button data-tab="team"><b>👥</b>' + (ROLE === 'owner' ? 'टीम' : 'मेरे Staff') + '</button>' : (canAdd() ? '<button data-tab="shops" data-add="1"><b>＋</b>नई दुकान जोड़ें</button>' : '')) +
+      (ROLE !== 'staff' ? '<button data-tab="team"><b>👥</b>' + (ROLE === 'owner' ? 'टीम' : 'मेरे स्टाफ') + '</button>' : (canAdd() ? '<button data-tab="shops" data-add="1"><b>＋</b>नई दुकान जोड़ें</button>' : '')) +
       (ROLE === 'owner' ? '<button data-tab="ready"><b>📬</b>जाँच पूरी</button>' : ROLE === 'manager' ? '<button data-tab="log"><b>📜</b>रिकॉर्ड</button>' : '') + '</div>';
     b.innerHTML = h;
   }
@@ -163,9 +165,9 @@ main{padding:14px 14px 96px}
     try { TEAM = await rpc('pb_team_list', {}) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     var mgrs = TEAM.filter(function (t) { return t.role === 'manager'; });
     WORK = {}; try { (await rpc('pb_team_work', {}) || []).forEach(function (w) { WORK[w.member_id] = w; }); } catch (e) { WORK = {}; }
-    var h = '<div class="card"><h3>＋ ' + (ROLE === 'owner' ? 'नया Manager या Staff जोड़ें' : 'नया Staff जोड़ें') + '</h3><p class="mut">उसका <b>Google email या 10 अंकों का मोबाइल नंबर</b> डालें। वह उसी से लॉगिन करके अपना काम देखेगा।</p>' +
+    var h = '<div class="card"><h3>＋ ' + (ROLE === 'owner' ? 'नया मैनेजर या स्टाफ जोड़ें' : 'नया स्टाफ जोड़ें') + '</h3><p class="mut">उसका <b>Google ईमेल या 10 अंकों का मोबाइल नंबर</b> डालें। वह उसी से लॉगिन करके अपना काम देखेगा।</p>' +
       '<input id="aE" inputmode="email" placeholder="name@gmail.com या 98XXXXXXXX" autocomplete="off"><input id="aN" placeholder="नाम (ज़रूरी नहीं)" maxlength="60">';
-    if (ROLE === 'owner') h += '<select id="aR"><option value="manager">👔 Manager</option><option value="staff">🧑‍💼 Staff (किसी Manager के नीचे)</option></select><select id="aP" hidden>' + mgrs.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name || m.email) + '</option>'; }).join('') + '</select>';
+    if (ROLE === 'owner') h += '<select id="aR"><option value="manager">👔 मैनेजर</option><option value="staff">🧑‍💼 स्टाफ (किसी मैनेजर के नीचे)</option></select><select id="aP" hidden>' + mgrs.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name || m.email) + '</option>'; }).join('') + '</select>';
     h += '<div id="aPerm" ' + (ROLE === 'owner' ? 'hidden' : '') + '>' + permBoxes('a', { gst: true, addr: true }) + '</div><div class="row"><button class="btn" id="aGo">जोड़ें</button></div><div id="aMsg"></div></div>';
     var top = ROLE === 'owner' ? mgrs : TEAM.filter(function (t) { return t.role === 'staff'; });
     h += top.length ? top.map(function (t) { return memberCard(t, ROLE === 'owner'); }).join('') : '<p class="mut">अभी कोई नहीं जुड़ा।</p>';
@@ -177,7 +179,7 @@ main{padding:14px 14px 96px}
       btn.disabled = true; $('aMsg').innerHTML = '';
       try {
         await rpc('pb_team_add', { p_email: idOf($('aE').value), p_name: $('aN').value, p_role: role, p_parent: role === 'staff' && ROLE === 'owner' ? +$('aP').value || null : null, p_perms: perms });
-        MSG.t = 'जुड़ गया। अब वह इसी email या नंबर से लॉगिन करके team.html खोले।'; await drawTeam(); $('aMsg').innerHTML = '<p class="ok">' + MSG.t + '</p>';
+        MSG.t = 'जुड़ गया। अब वह इसी ईमेल या नंबर से लॉगिन करके team.html खोले।'; await drawTeam(); $('aMsg').innerHTML = '<p class="ok">' + MSG.t + '</p>';
       } catch (e) { btn.disabled = false; $('aMsg').innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     };
   }
@@ -185,14 +187,14 @@ main{padding:14px 14px 96px}
   function pctBlock(t) {
     var w = WORK[t.id]; if (!w) return '';
     var can = ROLE === 'owner' || (ROLE === 'manager' && t.role === 'staff');
-    var lab = t.role === 'manager' ? 'आपके मुनाफ़े में हिस्सा' : (ROLE === 'owner' ? 'Manager के हिस्से में Staff का' : 'आपके हिस्से में इसका');
-    return '<div class="ln">📊 इस महीने <b>' + (w.shops_month || 0) + '</b> दुकान जोड़ी · <b>' + (w.sold_month || 0) + '</b> plan बिके · कुल <b>' + (w.live_total || 0) + '</b> दुकान Live</div>' +
+    var lab = t.role === 'manager' ? 'आपके मुनाफ़े में हिस्सा' : (ROLE === 'owner' ? 'मैनेजर के हिस्से में स्टाफ का' : 'आपके हिस्से में इसका');
+    return '<div class="ln">📊 इस महीने <b>' + (w.shops_month || 0) + '</b> दुकान जोड़ी · <b>' + (w.sold_month || 0) + '</b> प्लान बिके · कुल <b>' + (w.live_total || 0) + '</b> दुकान लाइव</div>' +
       (can ? '<div class="ln">💰 ' + lab + ': <input type="number" min="0" max="100" step="0.5" data-pct value="' + (w.pct != null ? +w.pct : 0) + '" style="width:84px;display:inline-block;margin:0"> % <button class="btn w" data-act="pct" style="padding:7px 12px">सेव</button></div>' : '');
   }
   function memberCard(t, nest) {
     var kids = nest ? TEAM.filter(function (x) { return x.parent_id === t.id; }) : [];
-    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || show(t.email)) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(show(t.email)) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' + pctBlock(t) +
-      (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : (ROLE === 'owner' ? '<div data-perm><label class="ck"><input type="checkbox" data-p="add" ' + (t.perms && t.perms.add ? 'checked' : '') + '> ➕ दुकान जोड़ने का अधिकार</label><p class="mut">ON करने पर ही यह Manager (और उसके Staff) दुकान जोड़ सकेंगे।</p></div><div class="row"><button class="btn w" data-act="saveM">अधिकार सेव करें</button>' : '<div class="row">')) +
+    return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || show(t.email)) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'मैनेजर' : 'स्टाफ') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(show(t.email)) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' स्टाफ' : '') + '</div>' + pctBlock(t) +
+      (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : (ROLE === 'owner' ? '<div data-perm><label class="ck"><input type="checkbox" data-p="add" ' + (t.perms && t.perms.add ? 'checked' : '') + '> ➕ दुकान जोड़ने का अधिकार</label><p class="mut">चालू करने पर ही यह मैनेजर (और उसके स्टाफ) दुकान जोड़ सकेंगे।</p></div><div class="row"><button class="btn w" data-act="saveM">अधिकार सेव करें</button>' : '<div class="row">')) +
       '<button class="btn o" data-act="tog">' + (t.active ? '⏸ रोकें' : '▶ चालू करें') + '</button><button class="btn r" data-act="del">🗑 हटाएँ</button></div><div class="msg"></div>' +
       (kids.length ? '<div class="sub">' + kids.map(function (k) { return memberCard(k, false); }).join('') + '</div>' : '') + '</div>';
   }
@@ -247,15 +249,15 @@ main{padding:14px 14px 96px}
     var b = $('body'); if (!b) return;
     if (!ADDOPEN) { ADDOPEN = true; try { history.pushState({ pbAdd: 1 }, ''); } catch (e) {} }
     var cs = await loadCities();
-    b.innerHTML = '<div class="card"><h3>➕ नई दुकान जोड़ें</h3><p class="mut">दुकान आपके नाम से जुड़ेगी और हमेशा "जाँच बाकी" रहेगी। Live सिर्फ़ Owner करेगा।</p>' +
+    b.innerHTML = '<div class="card"><h3>➕ नई दुकान जोड़ें</h3><p class="mut">दुकान आपके नाम से जुड़ेगी और हमेशा "जाँच बाकी" रहेगी। लाइव सिर्फ़ मालिक करेगा।</p>' +
       '<input id="nN" placeholder="दुकान का नाम *" maxlength="80"><input id="nO" placeholder="मालिक का नाम" maxlength="60">' +
       '<select id="nG"><option value="">मुख्य श्रेणी चुनें *</option>' + GRP.map(function (g) { return '<option value="' + g[0] + '">' + g[1] + '</option>'; }).join('') + '</select>' +
       '<input id="nS" placeholder="कौन-सा काम / सेवा (जैसे: कार वॉश)" maxlength="60">' +
       '<select id="nC">' + cs.map(function (c) { return '<option value="' + c.id + '"' + (c.name === 'Gandhidham' ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select>' +
       '<input id="nA" placeholder="इलाका / मोहल्ला" maxlength="60"><input id="nD" placeholder="पूरा पता *" maxlength="200">' +
       '<input id="nP" inputmode="numeric" placeholder="दुकान का मोबाइल (10 अंक) *" maxlength="14">' +
-      '<label class="ck"><input type="checkbox" id="nR" checked> जोड़ते ही "जाँच के लिए तैयार (Ready)" भेज दें</label>' +
-      '<input id="nNote" placeholder="Owner के लिए नोट (ज़रूरी नहीं)" maxlength="200">' +
+      '<label class="ck"><input type="checkbox" id="nR" checked> जोड़ते ही "जाँच के लिए तैयार" भेज दें</label>' +
+      '<input id="nNote" placeholder="मालिक के लिए नोट (ज़रूरी नहीं)" maxlength="200">' +
       '<div class="row"><button class="btn g" id="nGo">दुकान जोड़ें</button><button class="btn o" id="nX">रद्द करें</button></div><div id="nMsg"></div></div>';
     $('nX').onclick = function () { closeAddForm(); };
     $('nGo').onclick = async function () {
@@ -292,7 +294,7 @@ main{padding:14px 14px 96px}
   async function drawShops() {
     var b = $('body');
     b.innerHTML = (canAdd() ? '<button class="btn g" id="addShopBtn" style="display:block;width:100%;margin-bottom:10px;padding:13px">➕ नई दुकान जोड़ें</button>' : '')
-      + '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
+      + '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ लंबित</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ लाइव</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="खोज" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
     var ab = $('addShopBtn'); if (ab) ab.onclick = showAddForm;
     $('sT').onclick = function (e) { var x = e.target.closest('[data-st]'); if (x) { shSt = x.dataset.st; drawShops(); } };
     var tm; $('sQ').oninput = function () { shQ = this.value; clearTimeout(tm); tm = setTimeout(loadShops, 350); };
@@ -317,28 +319,28 @@ main{padding:14px 14px 96px}
     if (!(s.name && s.address)) m.push('नाम / पता');
     if (s.has_phone === false) m.push('मोबाइल');
     if (s.latitude == null || s.longitude == null) m.push('Location');
-    if (!s.logo_url) m.push('Logo');
+    if (!s.logo_url) m.push('लोगो');
     if (!has('Hours')) m.push('समय');
     if (!has('Type')) m.push('प्रकार');
     if (!has('Services')) m.push('सेवाएँ');
     if (!(has('PIN') || has('Pincode'))) m.push('PIN');
-    if (!(has('Email') || has('Website'))) m.push('Email / वेबसाइट');
+    if (!(has('Email') || has('Website'))) m.push('ईमेल / वेबसाइट');
     if (!(has('GST') || has('Udyam'))) m.push('GST / Udyam');
     return m;
   }
   function vLine(d, k, lab) {
     var n = ln(d, k); if (!n) return '';
     var ok = /^yes/i.test(ln(d, k + '-Verified'));
-    return '<div class="ln">' + lab + ': <b>' + esc(n) + '</b> · ' + (ok ? '<span class="v">✅ Verified</span>' : '<span class="nv">⏳ जाँच बाकी</span>') + '</div>';
+    return '<div class="ln">' + lab + ': <b>' + esc(n) + '</b> · ' + (ok ? '<span class="v">✅ जाँचा हुआ</span>' : '<span class="nv">⏳ जाँच बाकी</span>') + '</div>';
   }
   function shopCard(s) {
     var d = s.description || '', g = ln(d, 'GST'), u = ln(d, 'Udyam'), gv = /^yes/i.test(ln(d, 'GST-Verified')), uv = /^yes/i.test(ln(d, 'Udyam-Verified'));
     var btn = '';
-    if (can('gst') && g) btn += '<button class="btn ' + (gv ? 'o' : 'g') + '" data-sa="gst" data-on="' + (gv ? 0 : 1) + '">' + (gv ? '↩ GST Verified हटाएँ' : '✅ GST सही है') + '</button><button class="btn w" data-sa="gsite" data-n="' + esc(g) + '">🌐 GST साइट</button>';
-    if (can('gst') && u) btn += '<button class="btn ' + (uv ? 'o' : 'g') + '" data-sa="udy" data-on="' + (uv ? 0 : 1) + '">' + (uv ? '↩ MSME Verified हटाएँ' : '✅ MSME सही है') + '</button><button class="btn w" data-sa="usite" data-n="' + esc(u) + '">🏭 MSME साइट</button>';
+    if (can('gst') && g) btn += '<button class="btn ' + (gv ? 'o' : 'g') + '" data-sa="gst" data-on="' + (gv ? 0 : 1) + '">' + (gv ? '↩ GST जाँचा हुआ हटाएँ' : '✅ GST सही है') + '</button><button class="btn w" data-sa="gsite" data-n="' + esc(g) + '">🌐 GST साइट</button>';
+    if (can('gst') && u) btn += '<button class="btn ' + (uv ? 'o' : 'g') + '" data-sa="udy" data-on="' + (uv ? 0 : 1) + '">' + (uv ? '↩ MSME जाँचा हुआ हटाएँ' : '✅ MSME सही है') + '</button><button class="btn w" data-sa="usite" data-n="' + esc(u) + '">🏭 MSME साइट</button>';
     if (can('addr')) btn += '<button class="btn w" data-sa="addr">📍 पता बदलें</button>';
-    if (!s.is_active && s.submitted_at) btn += '<button class="btn" data-sa="ready">📤 Approval के लिए भेजें</button>';
-    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">Live</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : !s.submitted_at ? '<span class="role off">अधूरी (Offline)</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' + srcLn(s.slug) +
+    if (!s.is_active && s.submitted_at) btn += '<button class="btn" data-sa="ready">📤 मंज़ूरी के लिए भेजें</button>';
+    return '<div class="card" data-slug="' + esc(s.slug) + '"><h3>' + esc(s.name) + (s.is_active ? '<span class="role">लाइव</span>' : s.ready ? '<span class="role m">आपने भेज दी</span>' : !s.submitted_at ? '<span class="role off">अधूरी (ऑफ़लाइन)</span>' : '') + '</h3><div class="mut">📍 ' + esc(s.address || '—') + '</div>' + srcLn(s.slug) +
       (function () { var m = missOf(s); return m.length ? '<div class="ln nv">⚠ अधूरा (' + m.length + '): ' + esc(m.join(' · ')) + '</div>' : '<div class="ln v">✅ प्रोफ़ाइल 100% पूरी</div>'; })() +
       vLine(d, 'GST', '🧾 GST') + vLine(d, 'Udyam', '🏭 Udyam') + (!g && !u ? '<div class="ln mut">GST / Udyam नंबर नहीं डाला</div>' : '') +
       '<div class="row">' + (s.is_active ? '<a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(s.slug) + '">👁 दुकान देखें</a>' : '') + btn + '</div><div class="ed"></div><div class="msg"></div></div>';
@@ -351,7 +353,7 @@ main{padding:14px 14px 96px}
       if (act === 'gsite' || act === 'usite') {
         try { await navigator.clipboard.writeText(a.dataset.n); } catch (x) {}
         window.open(act === 'gsite' ? 'https://services.gst.gov.in/services/searchtp' : 'https://udyamregistration.gov.in/Udyam_Verify.aspx', '_blank', 'noopener');
-        msg.innerHTML = '<p class="ok">नंबर copy हो गया — साइट पर paste करें और दुकान का नाम मिलाएँ।</p>'; return;
+        msg.innerHTML = '<p class="ok">नंबर कॉपी हो गया — साइट पर पेस्ट करें और दुकान का नाम मिलाएँ।</p>'; return;
       }
       if (act === 'gst' || act === 'udy') {
         a.disabled = true; await rpc(act === 'gst' ? 'pb_admin_gst_verify' : 'pb_admin_udyam_verify', { p_slug: slug, p_on: a.dataset.on === '1' }); return loadShops();
@@ -363,7 +365,7 @@ main{padding:14px 14px 96px}
       if (act === 'addrx') { ed.innerHTML = ''; return; }
       if (act === 'addrsave') { a.disabled = true; await rpc('pb_admin_set_address', { p_slug: slug, p_address: card.querySelector('#eA').value }); return loadShops(); }
       if (act === 'ready') {
-        ed.innerHTML = '<input id="eN" maxlength="300" placeholder="Owner के लिए छोटा नोट (ज़रूरी नहीं)"><div class="row"><button class="btn g" data-sa="readygo">भेज दें</button><button class="btn o" data-sa="addrx">रद्द</button></div>'; return;
+        ed.innerHTML = '<input id="eN" maxlength="300" placeholder="मालिक के लिए छोटा नोट (ज़रूरी नहीं)"><div class="row"><button class="btn g" data-sa="readygo">भेज दें</button><button class="btn o" data-sa="addrx">रद्द</button></div>'; return;
       }
       if (act === 'readygo') { a.disabled = true; await rpc('pb_team_ready', { p_slug: slug, p_note: card.querySelector('#eN').value || null }); return loadShops(); }
     } catch (x) { a.disabled = false; msg.innerHTML = '<p class="err">' + esc(eMsg(x)) + '</p>'; }
@@ -372,13 +374,13 @@ main{padding:14px 14px 96px}
   /* ───────── कमाई / काम ───────── */
   function rs(n) { return '₹' + Math.round(+n || 0).toLocaleString('en-IN'); }
   function mkey(d) { return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }).slice(0, 7); }
-  function mlabel(k) { return new Date(k + '-15').toLocaleDateString('hi-IN', { month: 'long', year: 'numeric' }); }
-  function dlabel(d) { return new Date(d + 'T12:00:00+05:30').toLocaleDateString('hi-IN', { day: 'numeric', month: 'long' }); }
+  function mlabel(k) { return new Date(k + '-15').toLocaleDateString((window.PBL ? PBL.loc() : 'hi-IN'), { month: 'long', year: 'numeric' }); }
+  function dlabel(d) { return new Date(d + 'T12:00:00+05:30').toLocaleDateString((window.PBL ? PBL.loc() : 'hi-IN'), { day: 'numeric', month: 'long' }); }
   function mine(r) { return ROLE === 'staff' ? (+r.staff_share || 0) : (r.mgr_share == null ? 0 : (+r.mgr_share || 0) - (+r.staff_share || 0)); }
   function dedCard() {
-    if (!DED) return '<div class="card"><h3>⚙️ कटौती के switch</h3><p class="mut">यह हिस्सा नहीं खुला — Supabase में SQL का भाग 2 चला है?</p></div>';
-    var N = { gst: '🧾 GST (रकम में शामिल)', google: '🟦 Google Play फ़ीस', razorpay: '💳 Razorpay फ़ीस' };
-    return '<div class="card"><h3>⚙️ कटौती के switch</h3><p class="mut">जो switch चालू होगा, उतना % हर बिक्री से कटेगा और बचे मुनाफ़े पर Manager / Staff का हिस्सा बनेगा। सब बंद हों तो पूरी रकम गिनी जाती है। जो हिसाब 15 तारीख़ के बाद पक्का हो चुका, वह बाद में switch बदलने से नहीं बदलता।</p>' +
+    if (!DED) return '<div class="card"><h3>⚙️ कटौती के स्विच</h3><p class="mut">यह हिस्सा नहीं खुला — Supabase में SQL का भाग 2 चला है?</p></div>';
+    var N = { gst: '🧾 GST (रकम में शामिल)', google: '🟦 Google प्ले फ़ीस', razorpay: '💳 Razorpay फ़ीस' };
+    return '<div class="card"><h3>⚙️ कटौती के स्विच</h3><p class="mut">जो स्विच चालू होगा, उतना % हर बिक्री से कटेगा और बचे मुनाफ़े पर मैनेजर / स्टाफ का हिस्सा बनेगा। सब बंद हों तो पूरी रकम गिनी जाती है। जो हिसाब 15 तारीख़ के बाद पक्का हो चुका, वह बाद में स्विच बदलने से नहीं बदलता।</p>' +
       DED.map(function (d) { return '<div class="ln" style="display:flex;align-items:center;gap:8px"><label class="ck" style="flex:1;margin:0"><input type="checkbox" data-dk="' + d.k + '" ' + (d.enabled ? 'checked' : '') + '> ' + (N[d.k] || d.k) + '</label><input type="number" min="0" max="100" step="0.1" data-dp="' + d.k + '" value="' + (+d.pct) + '" style="width:84px;margin:0"><span>%</span></div>'; }).join('') +
       '<div class="row"><button class="btn g" id="dedSave">सेव करें</button></div><div id="dedMsg"></div></div>';
   }
@@ -390,10 +392,10 @@ main{padding:14px 14px 96px}
     if (ROLE === 'staff') rows = W.map(function (x) { return tr(x.member_name, false, tot([x])); }).join('');
     else W.filter(function (x) { return x.role === 'manager'; }).forEach(function (m) {
       var kids = W.filter(function (x) { return x.parent_id === m.member_id; });
-      rows += tr(m.member_name, false, tot([m].concat(kids)), kids.length ? '(Staff समेत)' : '');
+      rows += tr(m.member_name, false, tot([m].concat(kids)), kids.length ? '(स्टाफ समेत)' : '');
       kids.forEach(function (k) { rows += tr(k.member_name, true, tot([k])); });
     });
-    return '<div class="card"><h3>' + (ROLE === 'staff' ? '📊 मेरा काम' : '📊 किसने कितना काम किया') + '</h3><div class="tw"><table><tr><th>नाम</th><th>इस महीने दुकानें</th><th>Live (कुल)</th><th>इस महीने plan</th><th>कुल plan</th></tr>' + rows + '</table></div><p class="mut">"दुकानें" = इस महीने जोड़ी गई दुकानें। "plan" = बिके हुए Premium plan (नकद + gift)।</p></div>';
+    return '<div class="card"><h3>' + (ROLE === 'staff' ? '📊 मेरा काम' : '📊 किसने कितना काम किया') + '</h3><div class="tw"><table><tr><th>नाम</th><th>इस महीने दुकानें</th><th>लाइव (कुल)</th><th>इस महीने प्लान</th><th>कुल प्लान</th></tr>' + rows + '</table></div><p class="mut">"दुकानें" = इस महीने जोड़ी गई दुकानें। "प्लान" = बिके हुए प्रीमियम प्लान (नकद + उपहार)।</p></div>';
   }
   function earnSummary(rows, W) {
     var B = {}, order = [], add = function (key, name, tag, fin, v) { if (!B[key]) { B[key] = { name: name, tag: tag, f: 0, p: 0 }; order.push(key); } B[key][fin ? 'f' : 'p'] += v; };
@@ -401,33 +403,33 @@ main{padding:14px 14px 96px}
       if (r.status === 'cancelled') return;
       var fin = r.status === 'final';
       if (ROLE === 'staff') { add('s' + r.staff_id, r.staff_name || 'मैं', '', fin, +r.staff_share || 0); return; }
-      if (r.manager_id != null && r.mgr_share != null) add('m' + r.manager_id, r.manager_name, 'Manager', fin, (+r.mgr_share || 0) - (+r.staff_share || 0));
-      if (r.staff_id != null) add('s' + r.staff_id, r.staff_name, 'Staff', fin, +r.staff_share || 0);
-      if (ROLE === 'owner') add('o', 'आप (Owner)', '', fin, (+r.profit || 0) - (+r.mgr_share || 0));
+      if (r.manager_id != null && r.mgr_share != null) add('m' + r.manager_id, r.manager_name, 'मैनेजर', fin, (+r.mgr_share || 0) - (+r.staff_share || 0));
+      if (r.staff_id != null) add('s' + r.staff_id, r.staff_name, 'स्टाफ', fin, +r.staff_share || 0);
+      if (ROLE === 'owner') add('o', 'आप (मालिक)', '', fin, (+r.profit || 0) - (+r.mgr_share || 0));
     });
     var pctLine = '';
     if (ROLE !== 'owner') {
       var me = W.filter(function (x) { return x.role === ROLE; })[0];
-      if (me) pctLine = '<p class="mut">आपका हिस्सा: <b>' + (+me.pct) + '%</b> ' + (ROLE === 'manager' ? '(मुनाफ़े का; इसमें से Staff का हिस्सा कटता है)' : '(Manager के हिस्से का)') + '</p>';
+      if (me) pctLine = '<p class="mut">आपका हिस्सा: <b>' + (+me.pct) + '%</b> ' + (ROLE === 'manager' ? '(मुनाफ़े का; इसमें से स्टाफ का हिस्सा कटता है)' : '(मैनेजर के हिस्से का)') + '</p>';
     }
     var tr = order.map(function (k) { var b = B[k]; return '<tr><td><b>' + esc(b.name || '—') + '</b>' + (b.tag ? ' <span class="mut">' + b.tag + '</span>' : '') + '</td><td class="v">' + rs(b.f) + '</td><td class="nv">' + rs(b.p) + '</td></tr>'; }).join('');
     return '<div class="card"><h3>💰 कमाई</h3>' + pctLine + (tr ? '<div class="tw"><table><tr><th>नाम</th><th>✅ पक्की</th><th>⏳ बाकी</th></tr>' + tr + '</table></div>' : '<p class="mut">इस अवधि में कोई कमाई नहीं बनी।</p>') +
-      '<p class="mut">"पक्की" = बिक्री के अगले महीने की 15 तारीख़ बीत चुकी। "बाकी" = अभी तारीख़ नहीं आई। 15 तारीख़ से पहले plan हटाया गया तो कमाई रद्द होती है।</p></div>';
+      '<p class="mut">"पक्की" = बिक्री के अगले महीने की 15 तारीख़ बीत चुकी। "बाकी" = अभी तारीख़ नहीं आई। 15 तारीख़ से पहले प्लान हटाया गया तो कमाई रद्द होती है।</p></div>';
   }
   function salesList(rows) {
     if (!rows.length) return '';
     return '<h3 style="margin:16px 2px 8px">🧾 बिक्री की सूची</h3>' + rows.map(function (r) {
-      var st = r.status === 'final' ? '<span class="v">✅ पक्की</span>' : r.status === 'cancelled' ? '<span class="cx">❌ रद्द (15 तारीख़ से पहले plan हटाया)</span>' : '<span class="nv">⏳ बाकी — ' + dlabel(r.settle_on) + ' को पक्की</span>';
+      var st = r.status === 'final' ? '<span class="v">✅ पक्की</span>' : r.status === 'cancelled' ? '<span class="cx">❌ रद्द (15 तारीख़ से पहले प्लान हटाया)</span>' : '<span class="nv">⏳ बाकी — ' + dlabel(r.settle_on) + ' को पक्की</span>';
       var d = '';
       if (r.status === 'cancelled') d = '';
       else if (ROLE === 'staff') d = '<div class="ln">आपका हिस्सा: <b>' + rs(r.staff_share) + '</b></div>';
       else {
         d = '<div class="ln">मुनाफ़ा: <b>' + rs(r.profit) + '</b>' + (+r.gst || +r.fee_google || +r.fee_razor ? ' <span class="mut">(कटौती: ' + rs((+r.gst || 0) + (+r.fee_google || 0) + (+r.fee_razor || 0)) + ')</span>' : '') + '</div>';
         d += ROLE === 'manager'
-          ? '<div class="ln">आपका: <b>' + rs(mine(r)) + '</b>' + (r.staff_id ? ' · Staff ' + esc(r.staff_name || '') + ': <b>' + rs(r.staff_share) + '</b>' : '') + '</div>'
-          : '<div class="ln">Manager ' + esc(r.manager_name || '—') + ': <b>' + rs(mine(r)) + '</b>' + (r.staff_id ? ' · Staff ' + esc(r.staff_name || '') + ': <b>' + rs(r.staff_share) + '</b>' : '') + ' · आपका: <b>' + rs((+r.profit || 0) - (+r.mgr_share || 0)) + '</b></div>';
+          ? '<div class="ln">आपका: <b>' + rs(mine(r)) + '</b>' + (r.staff_id ? ' · स्टाफ ' + esc(r.staff_name || '') + ': <b>' + rs(r.staff_share) + '</b>' : '') + '</div>'
+          : '<div class="ln">मैनेजर ' + esc(r.manager_name || '—') + ': <b>' + rs(mine(r)) + '</b>' + (r.staff_id ? ' · स्टाफ ' + esc(r.staff_name || '') + ': <b>' + rs(r.staff_share) + '</b>' : '') + ' · आपका: <b>' + rs((+r.profit || 0) - (+r.mgr_share || 0)) + '</b></div>';
       }
-      return '<div class="card' + (r.status === 'cancelled' ? ' dim' : '') + '"><h3>' + esc(r.shop || r.slug) + '</h3><div class="mut">बिक्री: ' + new Date(r.sale_at).toLocaleDateString('hi-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }) + (r.amount != null ? ' · plan ' + rs(r.amount) : '') + '</div><div class="ln">' + st + '</div>' + d + '</div>';
+      return '<div class="card' + (r.status === 'cancelled' ? ' dim' : '') + '"><h3>' + esc(r.shop || r.slug) + '</h3><div class="mut">बिक्री: ' + new Date(r.sale_at).toLocaleDateString((window.PBL ? PBL.loc() : 'hi-IN'), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }) + (r.amount != null ? ' · प्लान ' + rs(r.amount) : '') + '</div><div class="ln">' + st + '</div>' + d + '</div>';
     }).join('');
   }
   async function drawEarn() {
@@ -449,17 +451,17 @@ main{padding:14px 14px 96px}
         for (var i = 0; i < ks.length; i++) {
           await rpc('pb_deduct_set', { p_k: ks[i], p_enabled: b.querySelector('[data-dk="' + ks[i] + '"]').checked, p_pct: +b.querySelector('[data-dp="' + ks[i] + '"]').value || 0 });
         }
-        await drawEarn(); $('dedMsg').innerHTML = '<p class="ok">सेव हो गया — नीचे का हिसाब नए switch से बन गया।</p>';
+        await drawEarn(); $('dedMsg').innerHTML = '<p class="ok">सेव हो गया — नीचे का हिसाब नए स्विच से बन गया।</p>';
       } catch (e) { sv.disabled = false; $('dedMsg').innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
     };
   }
 
-  /* ───────── जाँच पूरी (Owner) ───────── */
+  /* ───────── जाँच पूरी (मालिक) ───────── */
   async function drawReady() {
     var b = $('body'), R;
     try { R = await rpc('pb_team_ready_list', {}) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
-    b.innerHTML = '<p class="mut">टीम ने इन दुकानों की जाँच पूरी कर दी है। Approve सिर्फ़ आप Admin से करेंगे।</p>' + (R.length ? R.map(function (r) {
-      return '<div class="card"><h3>' + esc(r.name) + '</h3><div class="mut">भेजने वाला: ' + esc(r.by_email) + ' · ' + new Date(r.at).toLocaleString('hi-IN') + '</div>' + (r.note ? '<div class="ln">📝 ' + esc(r.note) + '</div>' : '') + '<div class="row"><a class="btn" style="text-decoration:none" href="admin.html">✅ Admin में Approve करें</a><a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(r.slug) + '">👁 दुकान देखें</a></div></div>';
+    b.innerHTML = '<p class="mut">टीम ने इन दुकानों की जाँच पूरी कर दी है। मंज़ूर सिर्फ़ आप एडमिन से करेंगे।</p>' + (R.length ? R.map(function (r) {
+      return '<div class="card"><h3>' + esc(r.name) + '</h3><div class="mut">भेजने वाला: ' + esc(r.by_email) + ' · ' + new Date(r.at).toLocaleString((window.PBL ? PBL.loc() : 'hi-IN')) + '</div>' + (r.note ? '<div class="ln">📝 ' + esc(r.note) + '</div>' : '') + '<div class="row"><a class="btn" style="text-decoration:none" href="admin.html">✅ एडमिन में मंज़ूर करें</a><a class="btn o" style="text-decoration:none" target="_blank" rel="noopener" href="business.html?slug=' + encodeURIComponent(r.slug) + '">👁 दुकान देखें</a></div></div>';
     }).join('') : '<p class="mut">अभी कोई दुकान नहीं आई।</p>');
   }
 
@@ -467,9 +469,9 @@ main{padding:14px 14px 96px}
   async function drawLog() {
     var b = $('body'), R;
     try { R = await rpc('pb_team_log_list', { p_limit: 150 }) || []; } catch (e) { return b.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
-    var N = { gst_verify: '🧾 GST', udyam_verify: '🏭 MSME', address: '📍 पता', ready: '📤 भेजी', team_add: '➕ जोड़ा', team_set: '✏️ बदला', team_remove: '🗑 हटाया', set_pct: '💰 हिस्सा %' };
+    var N = { gst_verify: '🧾 GST', udyam_verify: '🏭 MSME', address: '📍 पता', ready: '📤 भेजी', add: '🏪 दुकान जोड़ी', team_add: '➕ जोड़ा', team_set: '✏️ बदला', team_remove: '🗑 हटाया', set_pct: '💰 हिस्सा %' };
     b.innerHTML = R.length ? '<div class="card"><table><tr><th>कब</th><th>किसने</th><th>क्या</th></tr>' + R.map(function (r) {
-      return '<tr><td>' + new Date(r.at).toLocaleString('hi-IN', { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + esc(r.by_email) + '</td><td>' + (N[r.action] || esc(r.action)) + (r.slug ? ' · ' + esc(r.slug) : '') + (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</td></tr>';
+      return '<tr><td>' + new Date(r.at).toLocaleString((window.PBL ? PBL.loc() : 'hi-IN'), { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + esc(r.by_email) + '</td><td>' + (N[r.action] || esc(r.action)) + (r.slug ? ' · ' + esc(r.slug) : '') + (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</td></tr>';
     }).join('') + '</table></div>' : '<p class="mut">अभी कोई रिकॉर्ड नहीं।</p>';
   }
 
