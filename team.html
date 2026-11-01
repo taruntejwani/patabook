@@ -294,7 +294,7 @@ main{padding:14px 14px 96px}
   async function drawShops() {
     var b = $('body');
     b.innerHTML = (canAdd() ? '<button class="btn g" id="addShopBtn" style="display:block;width:100%;margin-bottom:10px;padding:13px">➕ नई दुकान जोड़ें</button>' : '')
-      + '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ लंबित</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ लाइव</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="खोज" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
+      + '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ लंबित</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ लाइव</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
     var ab = $('addShopBtn'); if (ab) ab.onclick = showAddForm;
     $('sT').onclick = function (e) { var x = e.target.closest('[data-st]'); if (x) { shSt = x.dataset.st; drawShops(); } };
     var tm; $('sQ').oninput = function () { shQ = this.value; clearTimeout(tm); tm = setTimeout(loadShops, 350); };

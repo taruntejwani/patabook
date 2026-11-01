@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#0b2f73">
 <script src="pb-auth.js"></script>
 <script src="site-config.js"></script>
+<script src="pb-panel-lang.js"></script>
+<script src="lang/panel-admin-en.js"></script>
 <style>
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -126,114 +128,111 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 .adm-sh .go{background:#137333;color:#fff}.adm-sh .no{background:#eef1f6;color:#12141c}.adm-row{border:1px solid #e4eaf5;border-radius:12px;padding:10px;margin-top:10px}.adm-row label{display:flex;gap:8px;font-weight:700;font-size:14px}
 .adm-row small{display:block;color:#5b6475;font-size:12px;margin:4px 0}
 </style>
-<script src="i18n.js"></script>
-<script src="pb-admin-en.js"></script>
 </head>
 <body>
 <header><div class="wrap nav">
   <a class="brand" href="index.html"><img src="pin.png" alt=""><b>Pata<span>Book</span></b></a>
-  <span id="pbLang"></span>
-  <span class="tag">ADMIN</span>
+  <span class="tag">एडमिन</span>
   <span class="who" id="who"></span>
-  <button class="out" id="out" hidden>Logout</button>
+  <button class="out" id="out" hidden>लॉगआउट</button>
 </div></header>
 <main class="wrap">
   <div id="gate"></div>
   <div id="hub" hidden>
-    <div class="hh"><h2>🛠 Admin</h2><button class="backd" id="hubRf" style="margin:0">🔄</button></div>
+    <div class="hh"><h2>🛠 एडमिन</h2><button class="backd" id="hubRf" style="margin:0">🔄</button></div>
     <div class="tiles" id="hubTiles"></div>
   </div>
   <div id="home" hidden>
     <button class="backd" id="homeBack">← मुख्य</button>
-    <div class="hh"><h2>📊 Dashboard</h2><span style="display:flex;gap:8px"><button class="backd" id="hBell" style="margin:0">🔔</button><button class="backd" id="hRef" style="margin:0">🔄</button></span></div>
+    <div class="hh"><h2>📊 डैशबोर्ड</h2><span style="display:flex;gap:8px"><button class="backd" id="hBell" style="margin:0">🔔</button><button class="backd" id="hRef" style="margin:0">🔄</button></span></div>
     <p class="cnt" id="bellNote" hidden></p>
     <div class="tiles" id="tiles"></div>
     <p class="cnt" id="hNote"></p>
   </div>
   <div id="msgs" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>📩 शिकायत / संदेश</h2><button class="xl" id="mXl">⬇ Excel</button></div>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>📩 शिकायत / संदेश</h2><button class="xl" id="mXl">⬇ एक्सेल</button></div>
     <div class="mtabs" id="mTabs"><button data-m="new" class="on">🔴 नए</button><button data-m="read">👁 पढ़े</button><button data-m="done">✔ निपटे</button><button data-m="all">सभी</button></div>
     <input class="q" id="mq" type="search" placeholder="नाम, मोबाइल, शिकायत नंबर या शब्द से खोजें" style="width:100%;margin-bottom:8px">
     <div class="cnt" id="mCnt"></div>
     <div class="tbw"><table class="xt"><thead><tr><th>#</th><th>तारीख</th><th>शिकायत नं.</th><th>नाम</th><th>मोबाइल</th><th>विषय</th><th>स्थिति</th><th>संदेश</th></tr></thead><tbody id="mBody"></tbody></table></div>
   </div>
   <div id="catv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>🗂 Categories</h2></div>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>🗂 श्रेणियाँ</h2></div>
     <div class="cnt" id="cCnt"></div>
     <div id="cList"></div>
   </div>
   <div id="stats" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>📊 Traffic</h2><button class="xl" id="sXl">⬇ Excel</button></div>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>📊 ट्रैफ़िक</h2><button class="xl" id="sXl">⬇ एक्सेल</button></div>
     <div class="mtabs" id="sTabs"><button data-d="1">आज</button><button data-d="7" class="on">7 दिन</button><button data-d="30">30 दिन</button><button data-d="90">90 दिन</button><button data-d="r">🔄</button></div>
     <div id="sBody"></div>
   </div>
   <div id="cityv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
     <div class="hh"><h2>🏙 शहर / गाँव</h2></div>
-    <p class="cnt" id="ctNote">दुकानदार भारत का कोई भी शहर / गाँव लिख सकते हैं। नया नाम आते ही वह यहाँ "नया" बनकर दिखता है — 3 अक्षर का कोड डालकर Approve करें (तब वह homepage की list में आएगा और उसकी दुकानों को Business ID मिलेगी), या गलत spelling हो तो सही शहर में मिला दें।</p>
+    <p class="cnt" id="ctNote">दुकानदार भारत का कोई भी शहर / गाँव लिख सकते हैं। नया नाम आते ही वह यहाँ "नया" बनकर दिखता है — 3 अक्षर का कोड डालकर मंज़ूर करें (तब वह होमपेज की सूची में आएगा और उसकी दुकानों को बिज़नेस ID मिलेगी), या गलत वर्तनी हो तो सही शहर में मिला दें।</p>
     <div class="mtabs" id="ctTabs"><button data-c="new" class="on">🟡 नए</button><button data-c="active">✅ चालू</button><button data-c="all">सभी</button></div>
     <div id="ctList"></div>
   </div>
   <div id="jobv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>💼 Vacancy / नौकरी</h2><button class="xl" id="jPlan">➕ Plan दें</button></div>
-    <div class="mtabs" id="jTabs"><button data-j="jobs" class="on">💼 Vacancies</button><button data-j="pay">💳 Payments</button></div>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>💼 नौकरी (भर्ती)</h2><button class="xl" id="jPlan">➕ प्लान दें</button></div>
+    <div class="mtabs" id="jTabs"><button data-j="jobs" class="on">💼 नौकरियाँ</button><button data-j="pay">💳 भुगतान</button></div>
     <div id="jBody"></div>
   </div>
   <div id="repv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
     <div class="hh"><h2>🚩 दुकानों की शिकायतें</h2></div>
-    <p class="cnt">लोग दुकान के page पर "🚩 शिकायत करें" दबाकर यहाँ शिकायत भेजते हैं (Google Play का नियम)। दुकान खोलकर जाँचें — गलत हो तो दुकान को Pending करें या हटाएँ, फिर शिकायत को "✔ निपट गई" करें।</p>
+    <p class="cnt">लोग दुकान के पेज पर "🚩 शिकायत करें" दबाकर यहाँ शिकायत भेजते हैं (Google प्ले का नियम)। दुकान खोलकर जाँचें — गलत हो तो दुकान को लंबित करें या हटाएँ, फिर शिकायत को "✔ निपट गई" करें।</p>
     <div class="mtabs" id="rTabs"><button data-r="new" class="on">🆕 नई</button><button data-r="done">✔ निपट गई</button></div>
     <div id="rBody"></div>
   </div>
   <div id="phv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>📱 नंबर बदलने की requests</h2></div>
-    <p class="cnt">दुकानदार ने नया नंबर डालकर उसका OTP दे दिया है (यानी नया नंबर उसी के पास है)। जब तक आप ✅ Approve नहीं करते, website पर पुराना नंबर ही दिखता है।</p>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>📱 नंबर बदलने के अनुरोध</h2></div>
+    <p class="cnt">दुकानदार ने नया नंबर डालकर उसका OTP दे दिया है (यानी नया नंबर उसी के पास है)। जब तक आप ✅ मंज़ूर नहीं करते, वेबसाइट पर पुराना नंबर ही दिखता है।</p>
     <div class="mtabs" id="pTabs"><button data-p="pending" class="on">⏳ बाकी</button><button data-p="done">✔ हो चुकी</button></div>
     <div id="pBody"></div>
   </div>
   <div id="stov" hidden>
     <button class="backd" id="stBack">← मुख्य</button>
-    <div class="hh"><h2>💾 Storage / डेटा उपयोग</h2><button class="xl" id="stRf">🔄</button></div>
+    <div class="hh"><h2>💾 स्टोरेज / डेटा उपयोग</h2><button class="xl" id="stRf">🔄</button></div>
     <div id="stBody"></div>
   </div>
   <div id="pmv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>💎 Premium</h2></div>
-    <p class="cnt">Premium दुकानें search और category में ऊपर (बारी-बारी से), "💎 Premium" निशान, फ़ोटो gallery, 30 दिन की रिपोर्ट और Vacancy पाती हैं। बाहर सबको एक जैसा दिखता है — मुफ़्त / नकद सिर्फ यहाँ दिखता है।</p>
-    <div class="mtabs" id="pmTabs"><button data-pm="active" class="on">💎 चालू</button><button data-pm="log">📜 रिकॉर्ड / नकद</button><button data-pm="req">📨 Requests</button><button data-pm="plans">⚙️ Plans</button><button data-pm="ban">🖼️ Banners</button><button data-pm="ver">🏪 Verify</button></div>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>💎 प्रीमियम</h2></div>
+    <p class="cnt">प्रीमियम दुकानें खोज और श्रेणी में ऊपर (बारी-बारी से), "💎 प्रीमियम" निशान, फ़ोटो गैलरी, 30 दिन की रिपोर्ट और नौकरी पाती हैं। बाहर सबको एक जैसा दिखता है — मुफ़्त / नकद सिर्फ यहाँ दिखता है।</p>
+    <div class="mtabs" id="pmTabs"><button data-pm="active" class="on">💎 चालू</button><button data-pm="log">📜 रिकॉर्ड / नकद</button><button data-pm="req">📨 अनुरोध</button><button data-pm="plans">⚙️ प्लान</button><button data-pm="ban">🖼️ बैनर</button><button data-pm="ver">🏪 जाँच</button></div>
     <div id="pmBody"></div>
   </div>
   <div id="hsv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
-    <div class="hh"><h2>🏠 Home Service की requests</h2></div>
-    <p class="cnt">दुकानदार ने "मेरी दुकान" में Home Service का switch ON किया है। जाँच लें कि यह असली दुकान / फ़र्म है (पता, GST, बिज़नेस का प्रकार)। ✅ Approve करने पर दुकान Home Services पेज पर दिखेगी। दुकानदार खुद OFF करे तो तुरंत बंद हो जाती है।</p>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
+    <div class="hh"><h2>🏠 होम सर्विस के अनुरोध</h2></div>
+    <p class="cnt">दुकानदार ने "मेरी दुकान" में होम सर्विस का बदलें चालू किया है। जाँच लें कि यह असली दुकान / फ़र्म है (पता, GST, बिज़नेस का प्रकार)। ✅ मंज़ूर करने पर दुकान होम सर्विस पेज पर दिखेगी। दुकानदार खुद बंद करे तो तुरंत बंद हो जाती है।</p>
     <div class="mtabs" id="hTabs"><button data-h="pending" class="on">⏳ बाकी</button><button data-h="done">✔ हो चुकी</button></div>
     <div id="hBody"></div>
   </div>
   <div id="edv" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
     <div class="hh"><h2>✏️ दुकानदारों ने जानकारी बदली</h2></div>
-    <p class="cnt">दुकानदार "मेरी दुकान" से समय, WhatsApp, PIN, सेवाएँ जैसी जानकारी खुद बदल सकते हैं — बदलाव तुरंत दिखता है। कुछ गलत लगे तो "↩ पुराना वापस" दबाएँ।</p>
+    <p class="cnt">दुकानदार "मेरी दुकान" से समय, WhatsApp, पिन, सेवाएँ जैसी जानकारी खुद बदल सकते हैं — बदलाव तुरंत दिखता है। कुछ गलत लगे तो "↩ पुराना वापस" दबाएँ।</p>
     <div id="eBody"></div>
   </div>
   <div class="md" id="md" hidden><div class="bx" id="mdBox"></div></div>
   <div id="panel" hidden>
-    <button class="backd" data-home="1">← Dashboard</button>
+    <button class="backd" data-home="1">← डैशबोर्ड</button>
     <div class="bar">
-      <div class="tabs" id="tabs"><button data-s="pending" class="on">⏳ Pending</button><button data-s="draft">📝 अधूरी</button><button data-s="active">✅ Live</button><button data-s="all">सभी</button></div>
-      <input class="q" id="q" type="search" placeholder="नाम, पता, मोबाइल या Business ID (PB-GIM-00001)">
+      <div class="tabs" id="tabs"><button data-s="pending" class="on">⏳ लंबित</button><button data-s="draft">📝 अधूरी</button><button data-s="active">✅ लाइव</button><button data-s="all">सभी</button></div>
+      <input class="q" id="q" type="search" placeholder="नाम, पता, मोबाइल या बिज़नेस ID (PB-GIM-00001)">
     </div>
     <div class="cnt" id="cnt"></div>
-    <button type="button" id="addrAll" style="margin:0 0 10px;border:1px dashed #d9b257;background:#fffaf0;color:#7a5a14;border-radius:12px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer">✨ इस list के सभी पते AI से सुधारें</button>
+    <button type="button" id="addrAll" style="margin:0 0 10px;border:1px dashed #d9b257;background:#fffaf0;color:#7a5a14;border-radius:12px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer">✨ इस सूची के सभी पते AI से सुधारें</button>
     <div class="bulk" id="bulk" hidden>
       <label><input type="checkbox" id="selAll"> सभी चुनें</label><span class="n" id="selN"></span>
-      <button class="ok" id="bOk" disabled>✅ Approve</button><button class="hold" id="bHold" disabled>⏸ Pending</button><button class="del" id="bDel" disabled>🗑 हटाएँ</button><button class="ok" id="bPrem" disabled style="background:#3b2bb8">💎 Premium</button>
+      <button class="ok" id="bOk" disabled>✅ मंज़ूर करें</button><button class="hold" id="bHold" disabled>⏸ लंबित रखें</button><button class="del" id="bDel" disabled>🗑 हटाएँ</button><button class="ok" id="bPrem" disabled style="background:#3b2bb8">💎 प्रीमियम</button>
     </div>
     <div id="list"></div>
   </div>
@@ -257,10 +256,10 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function gate(kind, extra) {
     $('panel').hidden = true;
     var h = kind === 'login'
-      ? (function(){var en=false;try{en=localStorage.getItem('pb-lang')==='en'}catch(e){}return '<div class="msg"><h2>'+(en?'🔒 Admin login':'🔒 Admin लॉगिन')+'</h2><p>'+(en?'Log in with your admin email or admin mobile number.':'अपने admin email या admin मोबाइल नंबर से लॉगिन करें।')+'</p><a href="' + PBA.loginUrl('admin.html') + '">'+(en?'✉️ Log in with Email':'✉️ Email से लॉगिन करें')+'</a>' + (PBA.mobile && PBA.mobile.enabled() ? ' <a href="admin-login.html" style="margin-top:8px;background:#0b2f73">'+(en?'📱 Log in with Mobile OTP':'📱 Mobile OTP से लॉगिन करें')+'</a>' : '') + '</div>'})()
+      ? (function(){var en=false;try{en=localStorage.getItem('pb-lang')==='en'}catch(e){}return '<div class="msg"><h2>'+(en?'🔒 Admin login':'🔒 एडमिन लॉगिन')+'</h2><p>'+(en?'Log in with your admin email or admin mobile number.':'अपने एडमिन ईमेल या एडमिन मोबाइल नंबर से लॉगिन करें।')+'</p><a href="' + PBA.loginUrl('admin.html') + '">'+(en?'✉️ Log in with Email':'✉️ ईमेल से लॉगिन करें')+'</a>' + (PBA.mobile && PBA.mobile.enabled() ? ' <a href="admin-login.html" style="margin-top:8px;background:#0b2f73">'+(en?'📱 Log in with Mobile OTP':'📱 मोबाइल OTP से लॉगिन करें')+'</a>' : '') + '</div>'})()
       : kind === 'noadmin'
-      ? '<div class="msg"><h2>⛔ अनुमति नहीं</h2><p>यह email admin सूची में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '. Supabase में <b>pb_admins</b> में यह email जोड़ें।</p></div>'
-      : '<div class="msg"><h2>⚠️ Admin सेटअप बाकी</h2><p class="err">' + esc(extra || '') + '</p><p>Supabase में <b>sql-02-admin-and-search.sql</b> चलाएँ।</p></div>';
+      ? '<div class="msg"><h2>⛔ अनुमति नहीं</h2><p>यह ईमेल एडमिन सूची में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '. Supabase में <b>pb_admins</b> में यह ईमेल जोड़ें।</p></div>'
+      : '<div class="msg"><h2>⚠️ एडमिन सेटअप बाकी</h2><p class="err">' + esc(extra || '') + '</p><p>Supabase में <b>sql-02-admin-and-search.sql</b> चलाएँ।</p></div>';
     $('gate').innerHTML = h;
   }
   async function load() {
@@ -303,7 +302,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!OWN) return '';
     var o = ownOf(b);
     var pm = /^m([6-9]\d{9})@phone\.patabook\.in$/.exec(o.owner_email || '');
-    return '<div class="meta">👤 मालिक: ' + (pm ? '📱 मोबाइल login (' + pm[1] + ')' : o.owner_email ? esc(o.owner_email) : '<i>जुड़ा नहीं — दुकान के नंबर से मोबाइल login करते ही जुड़ जाएगी</i>') + ' · 📞 नंबर: ' + (o.show_phone === false ? '<b style="color:#667085">OFF (छिपा)</b>' : '<b style="color:#137333">ON (सबको दिखे)</b>') + '</div>';
+    return '<div class="meta">👤 मालिक: ' + (pm ? '📱 मोबाइल लॉगिन (' + pm[1] + ')' : o.owner_email ? esc(o.owner_email) : '<i>जुड़ा नहीं — दुकान के नंबर से मोबाइल लॉगिन करते ही जुड़ जाएगी</i>') + ' · 📞 नंबर: ' + (o.show_phone === false ? '<b style="color:#667085">बंद (छिपा)</b>' : '<b style="color:#137333">चालू (सबको दिखे)</b>') + '</div>';
   }
   function phBtn(b, i) {
     var on = ownOf(b).show_phone !== false;
@@ -334,7 +333,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!has('Type')) m.push('प्रकार');
     if (!has('Services')) m.push('सेवाएँ');
     if (!(has('PIN') || has('Pincode'))) m.push('PIN');
-    if (!(has('Email') || has('Website'))) m.push('Email / वेबसाइट');
+    if (!(has('Email') || has('Website'))) m.push('ईमेल / वेबसाइट');
     if (!(has('GST') || has('Udyam'))) m.push('GST / Udyam');
     return m;
   }
@@ -345,8 +344,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     $('bulk').hidden = !rows.length;
     $('selN').textContent = n ? n + ' चुनी' : 'कोई नहीं चुनी';
     $('selAll').checked = n > 0 && n === rows.length; $('selAll').indeterminate = n > 0 && n < rows.length;
-    $('bOk').disabled = $('bHold').disabled = $('bDel').disabled = !n; if ($('bPrem')) { $('bPrem').disabled = !n || !PREMA; $('bPrem').textContent = '💎 Premium' + (n ? ' (' + n + ')' : ''); }
-    $('bOk').textContent = '✅ Approve' + (n ? ' (' + n + ')' : ''); $('bHold').textContent = '⏸ Pending' + (n ? ' (' + n + ')' : ''); $('bDel').textContent = '🗑 हटाएँ' + (n ? ' (' + n + ')' : '');
+    $('bOk').disabled = $('bHold').disabled = $('bDel').disabled = !n; if ($('bPrem')) { $('bPrem').disabled = !n || !PREMA; $('bPrem').textContent = '💎 प्रीमियम' + (n ? ' (' + n + ')' : ''); }
+    $('bOk').textContent = '✅ मंज़ूर करें' + (n ? ' (' + n + ')' : ''); $('bHold').textContent = '⏸ लंबित रखें' + (n ? ' (' + n + ')' : ''); $('bDel').textContent = '🗑 हटाएँ' + (n ? ' (' + n + ')' : '');
     document.querySelectorAll('#list .card').forEach(function (c) { var cb = c.querySelector('.pick'); if (cb) c.classList.toggle('sel', cb.checked); });
   }
   var OPENS = {};
@@ -358,17 +357,17 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       var mapLink = (b.latitude != null && b.longitude != null) ? 'map.html?to=' + b.latitude + ',' + b.longitude + '&n=' + encodeURIComponent(b.name || '') : (b.address ? 'map.html?q=' + encodeURIComponent(b.address) + '&n=' + encodeURIComponent(b.name || '') : '');
       var miss = missOf(b), gOk = /^yes$/i.test(line(b.description, 'GST-Verified')), uOk = /^yes$/i.test(line(b.description, 'Udyam-Verified')), hasLoc = b.latitude != null && b.longitude != null;
       var pOn = !!(PREMA && PREMA[b.slug]), tI = pOn ? ((TIERS.filter(function (t) { return t[0] === PMTIER[b.slug]; })[0] || [0, '💎'])[1]) : '';
-      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">' + (b.submitted_at ? 'Pending' : 'अधूरी (Offline)')) + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') + srcChip(b) +
-        (PREMA ? '<button type="button" class="sw' + (pOn ? ' on' : '') + '" data-a="prem" data-i="' + i + '" role="switch" aria-checked="' + pOn + '" aria-label="Premium"><i></i>' + (pOn ? 'ON' : 'OFF') + '</button>' : '') + '<span class="ar">▼</span></div>' +
+      return '<div class="card shop' + (OPENS[b.slug] ? ' open' : '') + '"><div class="hd"><input type="checkbox" class="pick" data-slug="' + esc(b.slug) + '"' + (SEL[b.slug] ? ' checked' : '') + ' aria-label="चुनें"><span class="nm">' + esc(b.name) + '</span><span class="st ' + (live ? 'a">Live' : 'p">' + (b.submitted_at ? 'Pending' : 'अधूरी (ऑफ़लाइन)')) + '</span>' + (tI ? '<span class="tc">' + tI + '</span>' : '') + srcChip(b) +
+        (PREMA ? '<button type="button" class="sw' + (pOn ? ' on' : '') + '" data-a="prem" data-i="' + i + '" role="switch" aria-checked="' + pOn + '" aria-label="प्रीमियम"><i></i>' + (pOn ? 'ON' : 'OFF') + '</button>' : '') + '<span class="ar">▼</span></div>' +
         '<div class="bd"' + (OPENS[b.slug] ? '' : ' hidden') + '><h3 style="margin-top:10px">' + (CODES[b.slug] ? '<span class="bid">' + esc(CODES[b.slug]) + '</span>' : '') + '</h3>' +
         '<div class="meta">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '<br>👤 ' + esc(line(b.description, 'Owner') || '—') +
         (ph ? ' · 📞 <a href="tel:+91' + ph + '">' + ph + '</a> · <a href="https://wa.me/91' + ph + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
-        ' · ' + (b.latitude != null ? '📍 location है' : '⚠ location नहीं') + '</div>' +
+        ' · ' + (b.latitude != null ? '📍 लोकेशन है' : '⚠ लोकेशन नहीं') + '</div>' +
         '<div class="miss ' + (miss.length ? 'bad">⚠ अधूरा (' + miss.length + '): ' + esc(miss.join(' · ')) : 'good">✅ प्रोफ़ाइल 100% पूरी') + '</div>' +
         srcLine(b) + ownLine(b) +
         (b.description ? '<div class="desc">' + esc(b.description) + '</div>' : '') +
         '<div class="acts">' +
-        (live ? '<button class="hold" data-a="hold" data-i="' + i + '">⏸ Pending करें</button>' : '<button class="ok" data-a="ok" data-i="' + i + '">✅ Approve</button>') +
+        (live ? '<button class="hold" data-a="hold" data-i="' + i + '">⏸ लंबित करें</button>' : '<button class="ok" data-a="ok" data-i="' + i + '">✅ मंज़ूर करें</button>') +
         '<button class="del" data-a="del" data-i="' + i + '">🗑 हटाएँ</button>' +
         (OWN ? phBtn(b, i) + '<button class="lnk" data-a="own" data-i="' + i + '">👤 मालिक</button>' : '') +
         '<button class="lnk" data-a="setph" data-i="' + i + '">📱 नंबर बदलें</button>' +
@@ -377,7 +376,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (line(b.description, 'GST') ? '<button class="' + (gOk ? 'gr' : 'rd') + '" data-a="gst" data-i="' + i + '">🧾 GST ' + (/^yes$/i.test(line(b.description, 'GST-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (line(b.description, 'Udyam') ? '<button class="' + (uOk ? 'gr' : 'rd') + '" data-a="udy" data-i="' + i + '">🏭 MSME ' + (/^yes$/i.test(line(b.description, 'Udyam-Verified')) ? 'Verified ✔' : 'जाँचें') + '</button>' : '') +
         (HOME ? hsBtn(b, i) : '') +
-        (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">' + (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 Premium') + ' ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 Premium दें</button>') : '') +
+        (PREMA ? (PREMA[b.slug] ? '<button class="phon" data-a="prem" data-i="' + i + '">' + (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 प्रीमियम') + ' ' + esc(fmtShort(PREMA[b.slug].until)) + ' तक</button>' : '<button class="lnk" data-a="prem" data-i="' + i + '">💎 प्रीमियम दें</button>') : '') +
         '<button class="lnk" data-a="rate" data-i="' + i + '">⭐ Ratings</button>' +
         (b.slug ? '<a class="' + (miss.length ? 'rd' : 'gr') + '" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">' + (miss.length ? '⚠ प्रोफ़ाइल (' + miss.length + ')' : '✔ प्रोफ़ाइल') + '</a>' : '') +
         (mapLink ? '<a class="' + (hasLoc ? 'gr' : 'rd') + '" href="' + mapLink + '" target="_blank">' + (hasLoc ? '✔ मैप' : '⚠ मैप') + '</a>' : '') +
@@ -399,7 +398,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   async function bulk(kind) {
     var list = rows.filter(function (b) { return SEL[b.slug]; });
     if (!list.length) return;
-    var word = kind === 'ok' ? 'Live (Approve)' : kind === 'del' ? 'हटाना' : 'Pending';
+    var word = kind === 'ok' ? 'लाइव (मंज़ूर)' : kind === 'del' ? 'हटाना' : 'लंबित';
     if (!confirm(list.length + ' दुकानें ' + word + ' करें?' + (kind === 'del' ? '\n\nहटाई गई दुकानें वेबसाइट से चली जाएँगी।' : ''))) return;
     ['bOk', 'bHold', 'bDel', 'selAll'].forEach(function (id) { $(id).disabled = true; });
     var done = 0, fail = [];
@@ -442,16 +441,16 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         var rs = await rpc('pb_admin_ratings', { p_slug: r.slug }) || [];
         L.innerHTML = rs.length ? rs.map(function (x, k) {
           return '<div class="adm-row" style="display:flex;align-items:center;gap:10px;justify-content:space-between"><div style="min-width:0"><b style="color:#b26a00">' + '★'.repeat(x.stars) + '☆'.repeat(5 - x.stars) + '</b><div style="font-size:13px;color:#5b6475;word-break:break-all">' + esc(x.email || x.user_id) + ' · ' + esc(String(x.created_at || '').slice(0, 10)) + '</div></div><button class="del" data-k="' + k + '">🗑 हटाओ</button></div>';
-        }).join('') : '<div class="msg"><p>कोई rating नहीं</p></div>';
+        }).join('') : '<div class="msg"><p>कोई रेटिंग नहीं</p></div>';
         L.querySelectorAll('[data-k]').forEach(function (bt) {
           bt.onclick = async function () {
-            var x = rs[+bt.dataset.k]; if (!confirm('यह rating हटाएँ?')) return;
+            var x = rs[+bt.dataset.k]; if (!confirm('यह रेटिंग हटाएँ?')) return;
             bt.disabled = true;
             try { await rpc('pb_admin_delete_rating', { p_slug: r.slug, p_user: x.user_id }); ov.querySelector('#rtM').textContent = '✅ हटा दी'; paint(); load(); }
             catch (e) { bt.disabled = false; ov.querySelector('#rtM').textContent = 'हट नहीं पाई। फिर कोशिश करें।'; }
           };
         });
-      } catch (e) { L.textContent = 'Ratings नहीं खुल पाईं। (SQL चली है?)'; }
+      } catch (e) { L.textContent = 'रेटिंग नहीं खुल पाईं। (SQL चली है?)'; }
     }
     paint();
   }
@@ -478,8 +477,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     };
   }
   $('addrAll').onclick = async function () {
-    var L = rows.filter(function (r) { return r.address; }); if (!L.length) return alert('इस list में कोई पता नहीं है।');
-    if (!confirm('इस list की ' + L.length + ' दुकानों के पते AI से जांचें? (बदलने से पहले आपको दिखाया जाएगा)')) return;
+    var L = rows.filter(function (r) { return r.address; }); if (!L.length) return alert('इस सूची में कोई पता नहीं है।');
+    if (!confirm('इस सूची की ' + L.length + ' दुकानों के पते AI से जांचें? (बदलने से पहले आपको दिखाया जाएगा)')) return;
     var btn = this, items = [], t0 = btn.textContent; btn.disabled = true;
     for (var k = 0; k < L.length; k++) {
       btn.textContent = '✨ AI ' + (k + 1) + ' / ' + L.length + ' …';
@@ -517,7 +516,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (a === 'hs') {
       var h = homeOf(r), turnOn = !h.home_service, ids = null;
       if (turnOn) {
-        var names = prompt('"' + r.name + '" के लिए Home Service चालू। दुकान के शहर के अलावा और किन शहरों में सेवा देता है? (comma से लिखें, जैसे: Adipur, Anjar)\nखाली छोड़ें तो सिर्फ दुकान का शहर।', cityNames(h.city_ids));
+        var names = prompt('"' + r.name + '" के लिए होम सर्विस चालू। दुकान के शहर के अलावा और किन शहरों में सेवा देता है? (comma से लिखें, जैसे: आदिपुर, अंजार)\nखाली छोड़ें तो सिर्फ दुकान का शहर।', cityNames(h.city_ids));
         if (names === null) return;
         ids = names.split(',').map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean).map(function (n) {
           var c = (CITIES || []).filter(function (x) { return String(x.name).toLowerCase() === n; })[0]; return c ? c.id : null; }).filter(function (x) { return x != null; });
@@ -529,7 +528,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     }
     if (a === 'own') {
       var cur = ownOf(r).owner_email || '';
-      var em = prompt('"' + r.name + '" के मालिक का ईमेल लिखें (मालिक ने PataBook पर इस ईमेल से एक बार लॉगिन किया हो)।\n\nखाली छोड़कर OK दबाएँ तो दुकान किसी के नाम नहीं रहेगी — फिर दुकान के नंबर (' + (String(r.phone || '').replace(/\D/g, '').slice(-10) || '—') + ') से "मेरी दुकान" में मोबाइल OTP login करते ही दुकान उसी की हो जाएगी।', cur);
+      var em = prompt('"' + r.name + '" के मालिक का ईमेल लिखें (मालिक ने PataBook पर इस ईमेल से एक बार लॉगिन किया हो)।\n\nखाली छोड़कर ठीक है दबाएँ तो दुकान किसी के नाम नहीं रहेगी — फिर दुकान के नंबर (' + (String(r.phone || '').replace(/\D/g, '').slice(-10) || '—') + ') से "मेरी दुकान" में मोबाइल OTP लॉगिन करते ही दुकान उसी की हो जाएगी।', cur);
       if (em === null) return;
       b.disabled = true;
       try { await rpc('pb_admin_set_owner', { p_slug: r.slug, p_email: em.trim() }); load(); }
@@ -542,7 +541,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       np = np.replace(/\D/g, '').slice(-10);
       if (!/^[6-9]\d{9}$/.test(np)) { alert('10 अंकों का सही मोबाइल नंबर लिखें।'); return; }
       b.disabled = true;
-      try { await rpc('pb_admin_set_phone', { p_slug: r.slug, p_phone: np }); alert('✅ नंबर बदल गया: ' + np + '\nअब दुकानदार इसी नंबर से "मेरी दुकान" में login कर सकता है।'); load(); }
+      try { await rpc('pb_admin_set_phone', { p_slug: r.slug, p_phone: np }); alert('✅ नंबर बदल गया: ' + np + '\nअब दुकानदार इसी नंबर से "मेरी दुकान" में लॉगिन कर सकता है।'); load(); }
       catch (x) { b.disabled = false; alert(/phone in use/i.test(x.message) ? 'यह नंबर पहले से किसी दूसरी दुकान पर है।' : /function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-16 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
       return;
     }
@@ -550,11 +549,11 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       var isG = a === 'gst', key = isG ? 'GST' : 'Udyam', vk = key + '-Verified', label = isG ? 'GST' : 'MSME (Udyam)';
       var num = line(r.description, key), isV = /^yes$/i.test(line(r.description, vk));
       var site = isG ? 'https://services.gst.gov.in/services/searchtp' : 'https://udyamregistration.gov.in';
-      var how = isG ? 'वहाँ "Search by GSTIN/UIN" में यह नंबर और captcha डालें।' : 'वहाँ ☰ → Print / Verify → "Verify Udyam Registration Number" में यह नंबर और captcha डालें।';
-      if (isV) { if (!confirm('"' + label + ' Verified" का निशान हटाएँ?')) return; }
+      var how = isG ? 'वहाँ "GSTIN/UIN से खोज" में यह नंबर और कैप्चा डालें।' : 'वहाँ ☰ → Print / जाँच → "जाँच Udyam पंजीकरण नंबर" में यह नंबर और कैप्चा डालें।';
+      if (isV) { if (!confirm('"' + label + ' जाँचा हुआ" का निशान हटाएँ?')) return; }
       else {
         try { navigator.clipboard.writeText(num); } catch (x) {}
-        if (!confirm(label + ' नंबर: ' + num + '\n(कॉपी हो गया)\n\n1) OK दबाने से पहले सरकारी साइट खोलकर जाँचें: ' + site + '\n' + how + '\n2) नाम, पता और मोबाइल इस दुकान से मिलें तो OK दबाएँ → दुकान के पेज पर "✅ ' + label + ' Verified" दिखेगा।\n\nCancel = सरकारी साइट खोलें (अभी Verify न करें)।')) { try { window.open(site, '_blank'); } catch (x) {} return; }
+        if (!confirm(label + ' नंबर: ' + num + '\n(कॉपी हो गया)\n\n1) ठीक है दबाने से पहले सरकारी साइट खोलकर जाँचें: ' + site + '\n' + how + '\n2) नाम, पता और मोबाइल इस दुकान से मिलें तो ठीक है दबाएँ → दुकान के पेज पर "✅ ' + label + ' जाँचा हुआ" दिखेगा।\n\nCancel = सरकारी साइट खोलें (अभी जाँच न करें)।')) { try { window.open(site, '_blank'); } catch (x) {} return; }
       }
       b.disabled = true;
       try { await rpc(isG ? 'pb_admin_gst_verify' : 'pb_admin_udyam_verify', { p_slug: r.slug, p_on: !isV }); load(); }
@@ -564,15 +563,15 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (a === 'addr') {
       b.disabled = true; var t0 = b.textContent; b.textContent = '✨ AI…';
       var nw = await aiAddr(r); b.disabled = false; b.textContent = t0;
-      if (!nw) { alert('AI से जवाब नहीं आया। (Worker नया deploy हुआ है? थोड़ी देर बाद फिर कोशिश करें।)'); return; }
+      if (!nw) { alert('AI से जवाब नहीं आया। (कर्मचारी नया deploy हुआ है? थोड़ी देर बाद फिर कोशिश करें।)'); return; }
       addrSheet([{ r: r, nw: nw }]);
       return;
     }
     if (a === 'fix') {
-      var note = prompt('"' + r.name + '" के दुकानदार को क्या सुधारना है? (यह message उसके फ़ोन पर notification बनकर जाएगा, अगर उसने "मेरी दुकान" में सूचनाएँ चालू की हैं)\nजैसे: दुकान की सही फोटो/Logo लगाएँ, पता पूरा लिखें', '');
+      var note = prompt('"' + r.name + '" के दुकानदार को क्या सुधारना है? (यह संदेश उसके फ़ोन पर सूचना बनकर जाएगा, अगर उसने "मेरी दुकान" में सूचनाएँ चालू की हैं)\nजैसे: दुकान की सही फोटो/Logo लगाएँ, पता पूरा लिखें', '');
       if (note === null || !note.trim()) return;
       b.disabled = true;
-      try { var fx = await rpc('pb_admin_ask_fix', { p_slug: r.slug, p_note: note.trim() }); alert(fx && fx.has_owner === false ? 'Message सहेज लिया। (दुकानदार ने अभी login नहीं किया है — login करते ही "मेरी दुकान" में दिखेगा)' : '✅ दुकानदार को भेज दिया।'); b.disabled = false; }
+      try { var fx = await rpc('pb_admin_ask_fix', { p_slug: r.slug, p_note: note.trim() }); alert(fx && fx.has_owner === false ? 'संदेश सहेज लिया। (दुकानदार ने अभी लॉगिन नहीं किया है — लॉगिन करते ही "मेरी दुकान" में दिखेगा)' : '✅ दुकानदार को भेज दिया।'); b.disabled = false; }
       catch (x) { b.disabled = false; alert(/function|schema cache/i.test(x.message) ? 'पहले Supabase में sql-17 चलाएँ।' : 'नहीं हो सका: ' + x.message); }
       return;
     }
@@ -605,7 +604,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   async function bellState() {
     if (!bellOK()) return;
     try { var reg = await navigator.serviceWorker.getRegistration(); var sub = reg && await reg.pushManager.getSubscription();
-      if (sub && Notification.permission === 'granted') { $('hBell').textContent = '🔔✅'; $('hBell').title = 'Notification चालू है'; } } catch (e) {}
+      if (sub && Notification.permission === 'granted') { $('hBell').textContent = '🔔✅'; $('hBell').title = 'सूचना चालू है'; } } catch (e) {}
   }
   async function bellPost(path, body) {
     var s = await PBA.session(); if (!s) throw new Error('login');
@@ -616,12 +615,12 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   }
   $('hBell').onclick = async function () {
     var b = this;
-    if (!bellOK()) return bellNote('इस browser में notification नहीं चलता। Chrome में admin खोलें।', true);
+    if (!bellOK()) return bellNote('इस ब्राउज़र में सूचना नहीं चलता। Chrome में एडमिन खोलें।', true);
     if (!otpBase()) return bellNote('site-config.js में otpUrl नहीं है।', true);
     b.disabled = true; bellNote('…');
     try {
       var perm = await Notification.requestPermission();
-      if (perm !== 'granted') { bellNote('Notification की अनुमति नहीं मिली। Chrome में 🔒 (address bar) → Permissions → Notifications → Allow करें, फिर दोबारा 🔔 दबाएँ।', true); return; }
+      if (perm !== 'granted') { bellNote('सूचना की अनुमति नहीं मिली। Chrome में 🔒 (पता bar) → अनुमतियाँ → सूचनाएँ → अनुमति दें करें, फिर दोबारा 🔔 दबाएँ।', true); return; }
       var reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
       var kr = await fetch(otpBase() + '/push/key'); var kj = await kr.json(); if (!kj.ok) throw new Error('key');
       var sub = await reg.pushManager.getSubscription();
@@ -629,9 +628,9 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       var r = await bellPost('/push/subscribe', { sub: sub.toJSON() });
       var t = await bellPost('/push/test', {});
       b.textContent = '🔔✅';
-      bellNote('✅ Notification चालू! अभी एक test घंटी आनी चाहिए। (' + r.devices + ' फ़ोन जुड़े)' + (t.sent ? '' : ' — test नहीं पहुँचा, 1 मिनट बाद दोबारा 🔔 दबाएँ'));
+      bellNote('✅ सूचना चालू! अभी एक test घंटी आनी चाहिए। (' + r.devices + ' फ़ोन जुड़े)' + (t.sent ? '' : ' — test नहीं पहुँचा, 1 मिनट बाद दोबारा 🔔 दबाएँ'));
     } catch (e) {
-      bellNote(/not_admin|login/.test(e.message) ? 'पहले admin login करें।' : 'चालू नहीं हो पाया: ' + e.message, true);
+      bellNote(/not_admin|login/.test(e.message) ? 'पहले एडमिन लॉगिन करें।' : 'चालू नहीं हो पाया: ' + e.message, true);
     } finally { b.disabled = false; }
   };
   /* ================= Dashboard: 5 icons ================= */
@@ -668,21 +667,21 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     c = c || {};
     var n = function (v) { return v == null ? '–' : v; };
     var T = [
-      ['shops', '🏪', '#eaf2ff', 'Public (दुकानें)', n(c.shops), 'कुल दुकानें · अधूरी + Pending + Live', 0],
-      ['msgs', '📩', '#fdecec', 'शिकायत / संदेश', n(c.msg_all), (c.msg_new != null ? c.msg_new + ' नए' : 'Complaint & Support'), c.msg_new || 0],
-      ['pending', '⏳', '#fff4e5', 'Pending दुकानें', n(c.pending), 'मालिक ने भेजी — Approve करना बाकी', c.pending || 0],
-      ['draft', '📝', '#f1f3f6', 'अधूरी दुकानें', n(c.draft), 'Offline — मालिक ने अभी भेजी नहीं', 0],
-      ['live', '✅', '#e7f8ee', 'Live दुकानें', n(c.live), 'वेबसाइट पर दिख रहीं', 0],
-      ['cats', '🗂', '#f1ebfb', 'Categories', n(c.cat_main), (c.cat_all != null ? 'main · कुल ' + c.cat_all + ' काम' : 'main categories'), 0],
-      ['traffic', '📊', '#e6f6f4', 'Traffic (आज के लोग)', n(c.uv_today), (c.live_now != null ? '🟢 अभी ' + c.live_now + ' लोग साइट पर' : 'sql-11 चलाएँ'), 0],
-      ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए Approve करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0],
-      ['jobs', '💼', '#fff1e6', 'Vacancy / नौकरी', 'बंद', '₹499 plan अभी बंद है', 0],
-      ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'Report की गई दुकानें', 0],
-      ['phreq', '📱', '#e8f0fe', 'नंबर बदलने की requests', '–', 'Approve करना बाकी', 0],
+      ['shops', '🏪', '#eaf2ff', 'सार्वजनिक (दुकानें)', n(c.shops), 'कुल दुकानें · अधूरी + लंबित + लाइव', 0],
+      ['msgs', '📩', '#fdecec', 'शिकायत / संदेश', n(c.msg_all), (c.msg_new != null ? c.msg_new + ' नए' : 'शिकायत और सहायता'), c.msg_new || 0],
+      ['pending', '⏳', '#fff4e5', 'लंबित दुकानें', n(c.pending), 'मालिक ने भेजी — मंज़ूर करना बाकी', c.pending || 0],
+      ['draft', '📝', '#f1f3f6', 'अधूरी दुकानें', n(c.draft), 'ऑफ़लाइन — मालिक ने अभी भेजी नहीं', 0],
+      ['live', '✅', '#e7f8ee', 'लाइव दुकानें', n(c.live), 'वेबसाइट पर दिख रहीं', 0],
+      ['cats', '🗂', '#f1ebfb', 'श्रेणियाँ', n(c.cat_main), (c.cat_all != null ? 'मुख्य · कुल ' + c.cat_all + ' काम' : 'मुख्य श्रेणियाँ'), 0],
+      ['traffic', '📊', '#e6f6f4', 'ट्रैफ़िक (आज के लोग)', n(c.uv_today), (c.live_now != null ? '🟢 अभी ' + c.live_now + ' लोग साइट पर' : 'sql-11 चलाएँ'), 0],
+      ['cities', '🏙', '#fff8e1', 'शहर / गाँव', n(c.city_all), (c.city_new != null ? c.city_new + ' नए मंज़ूर करने बाकी' : 'sql-12 चलाएँ'), c.city_new || 0],
+      ['jobs', '💼', '#fff1e6', 'नौकरी (भर्ती)', 'बंद', '₹499 प्लान अभी बंद है', 0],
+      ['reports', '🚩', '#fdecec', 'दुकानों की शिकायतें', '–', 'रिपोर्ट की गई दुकानें', 0],
+      ['phreq', '📱', '#e8f0fe', 'नंबर बदलने के अनुरोध', '–', 'मंज़ूर करना बाकी', 0],
       ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
-      ['hsreq', '🏠', '#e6f6ed', 'Home Service requests', '–', 'Approve करना बाकी', 0],
-      ['premium', '💎', '#efeaff', 'Premium', '–', 'चालू Premium दुकानें', 0],
-      ['team', '👥', '#eef2ff', 'टीम (Manager / Staff)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0]
+      ['hsreq', '🏠', '#e6f6ed', 'होम सर्विस अनुरोध', '–', 'मंज़ूर करना बाकी', 0],
+      ['premium', '💎', '#efeaff', 'प्रीमियम', '–', 'चालू प्रीमियम दुकानें', 0],
+      ['team', '👥', '#eef2ff', 'टीम (मैनेजर / स्टाफ)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
@@ -779,19 +778,19 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       all.forEach(function (c) { if (c.parent_id == null) mains.push(c); else (kids[c.parent_id] = kids[c.parent_id] || []).push(c); });
       var cnt = function (id) { var n = 0; (kids[id] || []).forEach(function (k) { n += kids[k.id] ? kids[k.id].length : 1; }); return n; };
       mains.sort(function (a, b) { return cnt(b.id) - cnt(a.id); });
-      $('cCnt').textContent = mains.length + ' main categories · कुल ' + all.length + ' (main + group + काम)';
+      $('cCnt').textContent = mains.length + ' मुख्य श्रेणियाँ · कुल ' + all.length + ' (मुख्य + समूह + काम)';
       $('cList').innerHTML = mains.map(function (m) { var g = (kids[m.id] || []).filter(function (k) { return kids[k.id]; }).length;
         return '<div class="cl"><b>' + esc(m.name) + '</b><span>' + (g ? g + ' group · ' : '') + cnt(m.id) + ' काम</span></div>'; }).join('');
     } catch (e) { $('cCnt').innerHTML = '<span class="err">गलती: ' + esc(e.message) + '</span>'; }
   }
-  /* ================= 📊 Traffic ================= */
+  /* ================= 📊 ट्रैफ़िक ================= */
   var SD = 7, SDATA = null;
   var PG = { home: '🏠 Home', search: '🔍 खोज', business: '🏪 दुकान का पेज', map: '🗺 नक्शा', list: '📝 रजिस्ट्रेशन फ़ॉर्म', contact: '📩 Contact', category: '🗂 Category', homeservices: '🛠 घर पर सेवा', login: '🔑 Login', mybusiness: '👤 मेरी दुकान', privacy: 'Privacy', terms: 'Terms', plan: 'Plan' };
-  var SRC = { whatsapp: '💬 WhatsApp', google: '🔎 Google', direct: '🔗 सीधे link / टाइप करके', facebook: '📘 Facebook', instagram: '📸 Instagram', youtube: '▶ YouTube', site: '↪ साइट के अंदर से', 'other search': '🔎 दूसरे search' };
+  var SRC = { whatsapp: '💬 WhatsApp', google: '🔎 Google', direct: '🔗 सीधे लिंक / टाइप करके', facebook: '📘 Facebook', instagram: '📸 Instagram', youtube: '▶ YouTube', site: '↪ साइट के अंदर से', 'other search': '🔎 दूसरे खोज' };
   var DEV = { mobile: '📱 Mobile', computer: '💻 Computer', tablet: '📟 Tablet' };
-  var REG = { shop: 'दुकान का नाम', owner: 'मालिक का नाम', addr: 'शहर और पता', svc: 'काम / category', phone: 'मोबाइल नंबर', done: '✅ रजिस्ट्रेशन पूरा' };
+  var REG = { shop: 'दुकान का नाम', owner: 'मालिक का नाम', addr: 'शहर और पता', svc: 'काम / श्रेणी', phone: 'मोबाइल नंबर', done: '✅ रजिस्ट्रेशन पूरा' };
   var fmt = function (v) { return Number(v || 0).toLocaleString('en-IN'); };
-  var dd = function (d) { var x = new Date(d + 'T00:00:00'); return x.getDate() + ' ' + ['जन', 'फ़र', 'मार्च', 'अप्रै', 'मई', 'जून', 'जुला', 'अग', 'सितं', 'अक्टू', 'नवं', 'दिसं'][x.getMonth()]; };
+  var dd = function (d) { var x = new Date(d + 'T00:00:00'); return x.getDate() + ' ' + (PBL.lang()==='en'?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:['जन','फ़र','मार्च','अप्रै','मई','जून','जुला','अग','सितं','अक्टू','नवं','दिसं'])[x.getMonth()]; };
   $('sTabs').onclick = function (e) {
     var b = e.target.closest('button'); if (!b) return;
     if (b.dataset.d !== 'r') { SD = +b.dataset.d; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); }
@@ -803,7 +802,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try { SDATA = await rpc('pb_admin_stats', { p_days: SD }); }
     catch (e) {
       if (e.message === 'login') return;
-      $('sBody').innerHTML = '<div class="msg"><b>Traffic की गिनती अभी चालू नहीं है</b><p>Supabase में sql-11-traffic.sql चलाएँ। उसके बाद जो लोग साइट पर आएँगे, वे यहाँ दिखेंगे।</p><p class="err">' + esc(e.message) + '</p></div>';
+      $('sBody').innerHTML = '<div class="msg"><b>ट्रैफ़िक की गिनती अभी चालू नहीं है</b><p>Supabase में sql-11-traffic.sql चलाएँ। उसके बाद जो लोग साइट पर आएँगे, वे यहाँ दिखेंगे।</p><p class="err">' + esc(e.message) + '</p></div>';
       return;
     }
     drawStats(SDATA);
@@ -856,24 +855,24 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div><b>' + fmt(d.uv_30) + '</b><span>30 दिन में लोग</span></div>' +
       '<div><b>' + fmt(SD === 1 ? d.pv_today : d.pv_period) + '</b><span>' + per + ' पेज खुले</span></div>' +
       '<div><b>' + fmt(d.card_period) + '</b><span>📇 ' + per + ' कार्ड शेयर</span></div></div>';
-    if (SD > 1) html += gc('📈 रोज़ कितने लोग आए', per + ' · कुल ' + fmt(d.uv_period) + ' अलग-अलग लोग · bar पर उँगली रखें तो गिनती दिखेगी', bars(daily, 'uv'));
+    if (SD > 1) html += gc('📈 रोज़ कितने लोग आए', per + ' · कुल ' + fmt(d.uv_period) + ' अलग-अलग लोग · पट्टी पर उँगली रखें तो गिनती दिखेगी', bars(daily, 'uv'));
     html += gc('⏰ किस समय लोग आते हैं', per + (hr && hr.pv ? ' · सबसे ज़्यादा भीड़ ' + hr.lab : '') + ' (पेज खुलने के हिसाब से)', bars(hrs, 'pv', 140));
     html += '<div class="g2">' +
       gc('🆕 नए या दोबारा आए', per, stack([['पहली बार आए', sum('new'), '#1a73e8'], ['दोबारा आए', sum('ret'), '#f9ab00']])) +
       gc('📱 किस पर साइट खोली', per, stack(get('dev').map(function (r, i) { return [DEV[r.k] || r.k, r.n, ['#1a73e8', '#f9ab00', '#12a150'][i] || '#98a2b3']; }))) +
       '</div><div style="height:12px"></div><div class="g2">' +
       gc('🔗 लोग कहाँ से आए', per, hbars(get('src'), function (k) { return SRC[k] || k; })) +
-      gc('🏙 किस शहर से', per + ' (homepage पर चुना हुआ शहर)', hbars(get('city'))) +
+      gc('🏙 किस शहर से', per + ' (होमपेज पर चुना हुआ शहर)', hbars(get('city'))) +
       gc('📄 कौन-सा पेज कितना खुला', per, hbars(get('pv'), function (k) { return PG[k] || k; })) +
       gc('📝 रजिस्ट्रेशन कहाँ तक पहुँचा', per + (r1 ? ' · ' + r1 + ' ने फ़ॉर्म खोला' : ''), hbars(reg.map(function (r) { var p = r.k.split('-'); return { k: (p[1] === 'done' ? '' : p[0] + '. ') + (REG[p[1]] || p[1]) + (r1 ? ' · ' + Math.round(100 * r.n / r1) + '%' : ''), n: r.n }; }), null, 'grn')) +
       gc('🔍 सबसे ज़्यादा क्या खोजा', per + ' · जिनकी दुकानें मिलीं', hbars(get('search'))) +
       gc('❌ खोजा, पर दुकान नहीं मिली', per + ' · ये दुकानें PataBook पर जोड़ने लायक हैं', hbars(get('search0'), null, 'red', 'बहुत बढ़िया — हर खोज का नतीजा मिला')) +
       '</div><div style="height:12px"></div>';
-    html += gc('🏪 दुकानों का हिसाब', per + ' · कितनों ने दुकान देखी, Call / WhatsApp / रास्ता दबाया, कार्ड शेयर किया',
+    html += gc('🏪 दुकानों का हिसाब', per + ' · कितनों ने दुकान देखी, कॉल / WhatsApp / रास्ता दबाया, कार्ड शेयर किया',
       shops.length ? '<div class="tbw"><table class="xt" style="min-width:600px"><thead><tr><th>दुकान</th><th>👁 देखी</th><th>📞 Call</th><th>💬 WhatsApp</th><th>🧭 रास्ता</th><th>📇 कार्ड</th></tr></thead><tbody>' +
         shops.map(function (s) { return '<tr data-slug="' + esc(s.slug) + '"><td><b>' + esc(s.name) + '</b>' + (s.code ? ' <span class="bid">' + esc(s.code) + '</span>' : '') + '</td><td>' + fmt(s.view) + '</td><td>' + fmt(s.call) + '</td><td>' + fmt(s.wa) + '</td><td>' + fmt(s.dir) + '</td><td>' + fmt(s.card) + '</td></tr>'; }).join('') +
         '</tbody></table></div>' : '<p class="emp">अभी किसी दुकान का पेज नहीं खुला</p>');
-    html += '<p class="cnt">गिनती में किसी का नाम, नंबर या IP नहीं रखा जाता। आपका यह फ़ोन (admin) गिनती में नहीं जुड़ता। "लोग" = अलग-अलग फ़ोन/कंप्यूटर।</p>';
+    html += '<p class="cnt">गिनती में किसी का नाम, नंबर या IP नहीं रखा जाता। आपका यह फ़ोन (एडमिन) गिनती में नहीं जुड़ता। "लोग" = अलग-अलग फ़ोन/कंप्यूटर।</p>';
     $('sBody').innerHTML = html;
   }
   $('sBody').onclick = function (e) { var r = e.target.closest('tr[data-slug]'); if (r) window.open('business.html?slug=' + encodeURIComponent(r.dataset.slug), '_blank'); };
@@ -892,9 +891,9 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ================= 🏙 शहर / गाँव ================= */
   var CT = [], CTF = 'new';
   $('ctTabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; CTF = b.dataset.c; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawCities(); };
-  /* ---- 💾 Storage / डेटा उपयोग (सिर्फ़ कुल आँकड़े; किसने क्या डाला — नहीं) ---- */
+  /* ---- 💾 स्टोरेज / डेटा उपयोग (सिर्फ़ कुल आँकड़े; किसने क्या डाला — नहीं) ---- */
   var ST_CAP = 1024 * 1048576;   /* Supabase Free = 1 GB */
-  var ST_NAME = { logo: 'Logo', photo: 'Gallery फ़ोटो', banner: 'Banner / Home Ad', cover: 'Cover', open: 'Opening Photo', prod: 'Products', other: 'अन्य' };
+  var ST_NAME = { logo: 'Logo', photo: 'गैलरी फ़ोटो', banner: 'Banner / Home Ad', cover: 'Cover', open: 'Opening Photo', prod: 'Products', other: 'अन्य' };
   function fmtB(b) { b = +b || 0; return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB'; }
   document.addEventListener('click', function (e) {
     var h = e.target.closest('[data-h]'); if (h) { if (h.dataset.h === 'storage') showStorage(); else showHome(); return; }
@@ -903,8 +902,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function showHub() {
     view('hub');
     $('hubTiles').innerHTML =
-      '<button class="tile" data-h="storage"><i class="ic" style="background:#e8f4fd">💾</i><b id="hubSt">–</b><span>Data / Storage</span><small id="hubStN">फ़ोटो में कितना डेटा लगा · कितना बाकी</small></button>' +
-      '<button class="tile" data-h="dash"><i class="ic" style="background:#eaf2ff">📊</i><b>Dashboard</b><span>दुकानें · संदेश · Traffic · Team</span><small>पहले वाला पूरा Admin</small></button>';
+      '<button class="tile" data-h="storage"><i class="ic" style="background:#e8f4fd">💾</i><b id="hubSt">–</b><span>डेटा / स्टोरेज</span><small id="hubStN">फ़ोटो में कितना डेटा लगा · कितना बाकी</small></button>' +
+      '<button class="tile" data-h="dash"><i class="ic" style="background:#eaf2ff">📊</i><b>डैशबोर्ड</b><span>दुकानें · संदेश · ट्रैफ़िक · टीम</span><small>पहले वाला पूरा एडमिन</small></button>';
     $('hubRf').onclick = showHub; stBadge();
   }
   async function stBadge() {
@@ -929,18 +928,18 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#1a73e8;margin-right:7px"></span>इस्तेमाल: <b>' + fmtB(j.total_bytes) + '</b> (' + (j.total_files || 0) + ' फ़ाइलें)</div>' +
       '<div><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#2e9e4f;margin-right:7px"></span>बाकी: <b>' + fmtB(Math.max(0, ST_CAP - (+j.total_bytes || 0))) + '</b></div></div></div>' +
       '<div style="height:12px;background:#e3f1e3;border-radius:8px;overflow:hidden;margin-top:14px"><div style="height:100%;width:' + pct + '%;background:#1a73e8"></div></div>' +
-      '<div style="color:#5b6475;font-size:12.5px;margin-top:6px">1 GB = Supabase Free plan की सीमा</div></div>' +
+      '<div style="color:#5b6475;font-size:12.5px;margin-top:6px">1 GB = Supabase मुफ़्त प्लान की सीमा</div></div>' +
       '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px;margin-bottom:12px"><b>📂 प्रकार के हिसाब से (फ़ोटो)</b><table style="width:100%;margin-top:8px;border-collapse:collapse"><tbody>' + (rows || '<tr><td>कुछ नहीं</td></tr>') + '</tbody></table></div>' +
-      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px;margin-bottom:12px"><b>🗄 Storage bucket</b><table style="width:100%;margin-top:8px;border-collapse:collapse"><tbody>' + brow + '</tbody></table></div>' +
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px;margin-bottom:12px"><b>🗄 स्टोरेज बकेट</b><table style="width:100%;margin-top:8px;border-collapse:collapse"><tbody>' + brow + '</tbody></table></div>' +
       '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:12px 14px">' +
       (orph ? '<b>🧹 बेकार फ़ाइलें</b><div style="margin-top:6px;font-size:15px">' + orph.orphan_files + ' फ़ाइलें · <b>' + fmtB(orph.orphan_bytes) + '</b> (किसी दुकान से जुड़ी नहीं)</div>'
             : '<b>🧹 बेकार फ़ाइलें</b><div style="color:#5b6475;font-size:14px;margin:6px 0 10px">जो फ़ाइलें किसी दुकान से जुड़ी नहीं हैं, उन्हें गिनें (थोड़ा समय लगता है)।</div><button class="xl" id="stOrph" style="margin:0">🔍 बेकार फ़ाइलें गिनो</button>') + '</div>';
     $('stBody').insertAdjacentHTML('beforeend',
-      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:14px;margin-top:12px"><b>🧮 Calculator (अंदाज़ा)</b>' +
-      '<div style="color:#5b6475;font-size:13px;margin:4px 0 10px">Traffic आपकी साइट के असली आँकड़ों से; बाकी दो बातें बदल सकते हैं।</div>' +
-      '<div id="cfPv" style="font-size:14px;margin-bottom:8px">Traffic लोड हो रहा है…</div>' +
+      '<div style="background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:14px;margin-top:12px"><b>🧮 कैलकुलेटर (अंदाज़ा)</b>' +
+      '<div style="color:#5b6475;font-size:13px;margin:4px 0 10px">ट्रैफ़िक आपकी साइट के असली आँकड़ों से; बाकी दो बातें बदल सकते हैं।</div>' +
+      '<div id="cfPv" style="font-size:14px;margin-bottom:8px">ट्रैफ़िक लोड हो रहा है…</div>' +
       '<label style="display:block;font-size:14px;margin:6px 0">एक पन्ने पर औसत फ़ोटो <input id="cfPh" type="number" min="1" value="6" style="width:70px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
-      '<label style="display:block;font-size:14px;margin:6px 0">एक फ़ोटो औसत कितने KB की <input id="cfKb" type="number" min="1" value="' + avgKb + '" style="width:80px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
+      '<label style="display:block;font-size:14px;margin:6px 0">एक फ़ोटो औसत कितने केबी की <input id="cfKb" type="number" min="1" value="' + avgKb + '" style="width:80px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
       '<label style="display:block;font-size:14px;margin:6px 0">रोज़ कितनी नई फ़ोटो जुड़ती हैं <input id="cfNew" type="number" min="0" value="10" style="width:70px;padding:6px;border:1px solid #c9d3e4;border-radius:8px"></label>' +
       '<div id="cfOut" style="margin-top:10px;font-size:14.5px;line-height:1.7"></div></div>');
     var PV30 = null;
@@ -950,7 +949,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       if (PV30 != null) {
         var gb = PV30 * ph * kb / 1048576, pc = gb / capGB * 100, perPage = ph * kb / 1048576, maxPages = perPage ? capGB / perPage : 0, maxDay = maxPages / 30;
         var col = pc < 50 ? '#1a8a3c' : pc < 80 ? '#c98a00' : '#d92d20', tag = pc < 50 ? '🟢 सुरक्षित' : pc < 80 ? '🟡 ध्यान दें' : '🔴 खतरा';
-        out += '<div>📡 महीने का Bandwidth: <b style="color:' + col + '">' + gb.toFixed(2) + ' GB</b> / 5 GB (' + pc.toFixed(1) + '%) ' + tag + '</div>' +
+        out += '<div>📡 महीने का बैंडविड्थ: <b style="color:' + col + '">' + gb.toFixed(2) + ' GB</b> / 5 GB (' + pc.toFixed(1) + '%) ' + tag + '</div>' +
                '<div>👥 रोज़ लगभग <b>' + fmt(Math.round(maxDay / 1)) + '</b> पन्ने खुलें तब 5 GB भरेगा</div>';
       }
       var perDay = nw * kb * 1024;
@@ -959,7 +958,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     }
     ['cfPh', 'cfKb', 'cfNew'].forEach(function (id) { $(id).oninput = cf; }); cf();
     rpc('pb_admin_stats', { p_days: 30 }).then(function (d) { PV30 = +(d && (d.pv_period != null ? d.pv_period : d.pv_30)) || 0; $('cfPv').innerHTML = '📈 पिछले 30 दिन: <b>' + fmt(d.uv_30) + '</b> लोग · <b>' + fmt(PV30) + '</b> पेज खुले'; cf(); })
-      .catch(function () { $('cfPv').textContent = 'Traffic का आँकड़ा नहीं मिला (sql-11 चलाएँ)।'; });
+      .catch(function () { $('cfPv').textContent = 'ट्रैफ़िक का आँकड़ा नहीं मिला (sql-11 चलाएँ)।'; });
     var ob = $('stOrph'); if (ob) ob.onclick = async function () {
       ob.disabled = true; ob.textContent = 'गिन रहे हैं…';
       try { var j2 = await rpc('pb_admin_storage_stats', { p_orphans: true }); stDraw(j2, j2); }
@@ -994,7 +993,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function drawReports() {
     var L = RDATA.filter(function (r) { return r.status === RTAB; });
     $('rBody').innerHTML = '<p class="cnt">' + L.length + ' शिकायतें</p>' + (L.length ? L.map(function (r) {
-      return '<div class="cty"><h3>' + esc(RREASON[r.reason] || r.reason) + ' <span class="bid">' + (r.live ? '✅ Live दुकान' : '⏸ Live नहीं') + '</span></h3>' +
+      return '<div class="cty"><h3>' + esc(RREASON[r.reason] || r.reason) + ' <span class="bid">' + (r.live ? '✅ लाइव दुकान' : '⏸ लाइव नहीं') + '</span></h3>' +
         '<p class="meta">🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> · ' + fmtD(r.created_at) + '</p>' +
         (r.note ? '<p class="meta">💬 ' + esc(r.note) + '</p>' : '') +
         '<div class="acts">' + (r.status === 'new' ? '<button data-ra="done" data-id="' + r.id + '">✔ निपट गई</button>' : '<button data-ra="new" data-id="' + r.id + '">↩ फिर से नई</button>') +
@@ -1009,14 +1008,14 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try { await rpc('pb_admin_report_set', { p_id: +b.dataset.id, p_action: b.dataset.ra }); } catch (x) { alert('गलती: ' + x.message); }
     loadReports();
   };
-  /* ---- 📱 नंबर बदलने की requests (sql-15) ---- */
+  /* ---- 📱 नंबर बदलने के अनुरोध (sql-15) ---- */
   var PTAB = 'pending', PDATA = [];
   async function phBadge() {
     var b = document.querySelector('#tiles [data-t="phreq"]'); if (!b) return;
     try {
       var R = await rpc('pb_admin_phone_requests', {}) || [], n = R.filter(function (r) { return r.status === 'pending'; }).length;
       b.querySelector('b').textContent = n;
-      b.querySelector('small').textContent = n ? n + ' Approve करनी बाकी' : 'कोई बाकी नहीं';
+      b.querySelector('small').textContent = n ? n + ' मंज़ूर करनी बाकी' : 'कोई बाकी नहीं';
       if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
     } catch (e) { b.querySelector('small').textContent = 'sql-15 चलाएँ'; }
   }
@@ -1028,38 +1027,38 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   }
   function drawPhReq() {
     var L = PDATA.filter(function (r) { return PTAB === 'pending' ? r.status === 'pending' : r.status !== 'pending'; });
-    $('pBody').innerHTML = '<p class="cnt">' + L.length + ' requests</p>' + (L.length ? L.map(function (r) {
-      return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ Pending दुकान') + '</span></h3>' +
+    $('pBody').innerHTML = '<p class="cnt">' + L.length + ' अनुरोध</p>' + (L.length ? L.map(function (r) {
+      return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ लंबित दुकान') + '</span></h3>' +
         (r.address ? '<p class="meta">📍 ' + esc(r.address) + '</p>' : '') +
         '<p class="meta" style="font-size:15px;margin-top:6px">पुराना: <b><a href="tel:' + esc(r.old_phone || '') + '">' + esc(r.old_phone || '—') + '</a></b> → नया: <b><a href="tel:' + esc(r.new_phone) + '">' + esc(r.new_phone) + '</a></b></p>' +
-        '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + (r.status === 'approved' ? '✅ Approve किया' : '❌ Reject किया') + (r.decided_at ? ' ' + fmtD(r.decided_at) : '') : '') + '</p>' +
-        (r.status === 'pending' ? '<div class="acts"><button data-pa="1" data-id="' + r.id + '" style="background:#137333;color:#fff">✅ Approve — नया नंबर चालू करें</button><button class="del" data-pa="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
-    }).join('') : '<p class="cnt">' + (PTAB === 'pending' ? 'कोई request बाकी नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
+        '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + (r.status === 'approved' ? '✅ मंज़ूर किया' : '❌ अस्वीकार किया') + (r.decided_at ? ' ' + fmtD(r.decided_at) : '') : '') + '</p>' +
+        (r.status === 'pending' ? '<div class="acts"><button data-pa="1" data-id="' + r.id + '" style="background:#137333;color:#fff">✅ मंज़ूर — नया नंबर चालू करें</button><button class="del" data-pa="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
+    }).join('') : '<p class="cnt">' + (PTAB === 'pending' ? 'कोई अनुरोध बाकी नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
   }
   $('pTabs').onclick = function (e) { var b = e.target.closest('[data-p]'); if (!b) return; PTAB = b.dataset.p; $('pTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawPhReq(); };
   $('pBody').onclick = async function (e) {
     var b = e.target.closest('[data-pa]'); if (!b) return;
     var ok = b.dataset.pa === '1';
-    if (!confirm(ok ? 'नया नंबर website पर चालू कर दें?' : 'यह request Reject करें? (पुराना नंबर ही रहेगा)')) return;
+    if (!confirm(ok ? 'नया नंबर वेबसाइट पर चालू कर दें?' : 'यह अनुरोध अस्वीकार करें? (पुराना नंबर ही रहेगा)')) return;
     b.disabled = true;
     try { await rpc('pb_admin_phone_decide', { p_id: +b.dataset.id, p_approve: ok }); }
-    catch (x) { alert(/phone in use/i.test(x.message) ? 'यह नया नंबर अब किसी दूसरी दुकान पर है — Approve नहीं हो सकता।' : 'गलती: ' + x.message); }
+    catch (x) { alert(/phone in use/i.test(x.message) ? 'यह नया नंबर अब किसी दूसरी दुकान पर है — मंज़ूर नहीं हो सकता।' : 'गलती: ' + x.message); }
     loadPhReq();
   };
-  /* ---- 💎 Premium (sql-23): Admin से देना, list, रिकॉर्ड, requests ---- */
-  function fmtShort(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  /* ---- 💎 प्रीमियम (sql-23): Admin से देना, list, रिकॉर्ड, requests ---- */
+  function fmtShort(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleDateString(PBL.loc(), { day: 'numeric', month: 'short', year: 'numeric' }); }
   function methodName(m) { return m === 'cash' ? '💵 नकद' : m === 'gift' ? '🎁 मुफ़्त' : m === 'play' ? '📱 Google Play' : m === 'revoke' ? '⛔ बंद किया' : '—'; }
-  /* 💎 चालू Premium: दिन बढ़ाएँ या Premium बंद करें (दुकान Free हो जाए; logo / products / फ़ोटो मिटते नहीं) */
+  /* 💎 चालू प्रीमियम: दिन बढ़ाएँ या प्रीमियम बंद करें (दुकान Free हो जाए; logo / products / फ़ोटो मिटते नहीं) */
   function premManage(r, pa) {
     var old = $('premMg'); if (old) old.remove();
     var w = document.createElement('div'); w.id = 'premMg';
     w.setAttribute('style', 'position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center');
     var B = 'display:block;width:100%;border-radius:12px;padding:13px;font:inherit;font-weight:800;font-size:15px;margin-top:10px;cursor:pointer;';
     w.innerHTML = '<div style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px 20px">' +
-      '<h2 style="margin:0 0 4px;font-size:18px;color:#3b2bb8">💎 ' + esc(r.name) + '</h2><p style="margin:0 0 6px;font-size:14px;color:#5b6475">Premium ' + esc(fmtShort(pa.until)) + ' तक चालू · ' + esc(methodName(pa.method)) + '</p>' +
+      '<h2 style="margin:0 0 4px;font-size:18px;color:#3b2bb8">💎 ' + esc(r.name) + '</h2><p style="margin:0 0 6px;font-size:14px;color:#5b6475">प्रीमियम ' + esc(fmtShort(pa.until)) + ' तक चालू · ' + esc(methodName(pa.method)) + '</p>' +
       '<div style="display:flex;gap:6px;margin-top:6px">' + TIERS.slice(1).map(function (t) { return '<button type="button" data-mt="' + t[0] + '" style="flex:1;border:1px solid #cfc5f5;border-radius:12px;padding:11px 4px;font:inherit;font-weight:800;cursor:pointer;' + (PMTIER[r.slug] === t[0] ? 'background:#3b2bb8;color:#fff' : 'background:#f5f2ff;color:#3b2bb8') + '">' + t[1] + ' ' + t[2] + '</button>'; }).join('') + '</div>' +
       '<button type="button" id="pmgExt" style="' + B + 'border:0;background:#3b2bb8;color:#fff">➕ दिन बढ़ाएँ</button>' +
-      '<button type="button" id="pmgOff" style="' + B + 'border:1px solid #f3b8b3;background:#fdecea;color:#b42318">⛔ Premium बंद करें (दुकान Free हो जाए)</button>' +
+      '<button type="button" id="pmgOff" style="' + B + 'border:1px solid #f3b8b3;background:#fdecea;color:#b42318">⛔ प्रीमियम बंद करें (दुकान मुफ़्त हो जाए)</button>' +
       '<button type="button" id="pmgX" style="' + B + 'border:1px solid #d0d7e2;background:#fff;color:#12141c">रहने दें</button>' +
       '<p id="pmgE" style="min-height:18px;margin:8px 0 0;font-size:13.5px;color:#b42318"></p></div>';
     document.body.appendChild(w);
@@ -1071,10 +1070,10 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       bt.disabled = true; try { await rpc('pb_admin_plan_set_tier', { p_slugs: [r.slug], p_tier: bt.dataset.mt }); PMTIER[r.slug] = bt.dataset.mt; close(); alert('✅ "' + r.name + '" अब ' + tierName(bt.dataset.mt) + ' है।'); load(); }
       catch (x) { w.querySelector('#pmgE').textContent = 'नहीं हो सका (30_plans_banners.sql चली है?): ' + x.message; bt.disabled = false; } }; });
     w.querySelector('#pmgOff').onclick = async function () {
-      var why = prompt('"' + r.name + '" का Premium अभी बंद करें?\nदुकान Free हो जाएगी (logo, products, फ़ोटो मिटेंगे नहीं — फिर Premium देने पर वापस आएँगे)।\n\nकारण (सिर्फ आपके रिकॉर्ड के लिए):', '');
+      var why = prompt('"' + r.name + '" का प्रीमियम अभी बंद करें?\nदुकान मुफ़्त हो जाएगी (लोगो, उत्पाद, फ़ोटो मिटेंगे नहीं — फिर प्रीमियम देने पर वापस आएँगे)।\n\nकारण (सिर्फ आपके रिकॉर्ड के लिए):', '');
       if (why === null) return;
       this.disabled = true;
-      try { await rpc('pb_admin_premium_revoke', { p_slug: r.slug, p_note: why || null }); close(); alert('✅ "' + r.name + '" अब Free है।'); load(); }
+      try { await rpc('pb_admin_premium_revoke', { p_slug: r.slug, p_note: why || null }); close(); alert('✅ "' + r.name + '" अब मुफ़्त है।'); load(); }
       catch (x) { w.querySelector('#pmgE').textContent = 'नहीं हो सका: ' + x.message; this.disabled = false; }
     };
   }
@@ -1083,8 +1082,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var w = document.createElement('div'); w.id = 'premSheet';
     w.setAttribute('style', 'position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center');
     w.innerHTML = '<form style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px 20px;max-height:92vh;overflow:auto">' +
-      '<h2 style="margin:0 0 4px;font-size:18px;color:#3b2bb8">💎 Premium दें</h2><p style="margin:0 0 12px;font-size:13px;color:#5b6475">' + esc(label) + '</p>' +
-      '<label style="display:block;font-weight:700;font-size:14px;margin-top:6px">कौन-सा plan</label><select id="psT" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit"><option value="silver">🥈 Silver</option><option value="gold" selected>👑 Gold</option><option value="platinum">💎 Platinum</option></select>' +
+      '<h2 style="margin:0 0 4px;font-size:18px;color:#3b2bb8">💎 प्रीमियम दें</h2><p style="margin:0 0 12px;font-size:13px;color:#5b6475">' + esc(label) + '</p>' +
+      '<label style="display:block;font-weight:700;font-size:14px;margin-top:6px">कौन-सा प्लान</label><select id="psT" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit"><option value="silver">🥈 सिल्वर</option><option value="gold" selected>👑 गोल्ड</option><option value="platinum">💎 प्लैटिनम</option></select>' +
       '<label style="display:block;font-weight:700;font-size:14px;margin-top:12px">कितने दिन</label><select id="psD" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit"><option value="365" selected>1 साल (365 दिन)</option><option value="180">6 महीने</option><option value="90">3 महीने</option><option value="30">1 महीना</option><option value="730">2 साल</option></select>' +
       '<label style="display:block;font-weight:700;font-size:14px;margin-top:12px">कैसे</label><div style="display:flex;gap:8px;margin-top:4px"><label style="flex:1;border:1px solid #d0d7e2;border-radius:10px;padding:10px"><input type="radio" name="psM" value="gift" checked> 🎁 मुफ़्त</label><label style="flex:1;border:1px solid #d0d7e2;border-radius:10px;padding:10px"><input type="radio" name="psM" value="cash"> 💵 नकद</label></div>' +
       '<div id="psCash" hidden><label style="display:block;font-weight:700;font-size:14px;margin-top:12px">रकम (₹, हर दुकान)</label><input id="psA" type="number" min="0" max="1000000" inputmode="numeric" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit">' +
@@ -1092,7 +1091,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<label style="display:block;font-weight:700;font-size:14px;margin-top:12px">नोट (सिर्फ आपके लिए)</label><input id="psN" maxlength="300" placeholder="जैसे: चाचा जी की दुकानें" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7e2;font:inherit">' +
       '<p id="psV" hidden style="margin:10px 0 0;padding:10px 12px;border-radius:10px;background:#fff4e5;color:#7a3b00;font-size:13.5px;font-weight:700"></p>' +
       '<p id="psE" style="min-height:18px;margin:8px 0;font-size:13.5px;color:#b42318"></p>' +
-      '<div style="display:flex;gap:10px"><button type="button" id="psX" style="flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700">रहने दें</button><button type="submit" id="psGo" style="flex:1;border:0;background:#3b2bb8;color:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:800">💎 Premium चालू करें</button></div></form>';
+      '<div style="display:flex;gap:10px"><button type="button" id="psX" style="flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:700">रहने दें</button><button type="submit" id="psGo" style="flex:1;border:0;background:#3b2bb8;color:#fff;border-radius:12px;padding:12px;font:inherit;font-weight:800">💎 प्रीमियम चालू करें</button></div></form>';
     document.body.appendChild(w);
     var close = function () { w.remove(); };
     w.addEventListener('click', function (e) { if (e.target === w) close(); });
@@ -1100,7 +1099,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     /* ⚠️ verify नहीं हुई दुकान (sql-32) — चेतावनी, रोक नहीं */
     (async function () { try { var st = await rpc('pb_admin_verify_state', { p_slugs: slugs }) || {}, bad = slugs.filter(function (s2) { return st[s2] !== 'approved'; });
       if (!bad.length || !document.body.contains(w)) return; var pv = w.querySelector('#psV');
-      pv.textContent = '⚠️ ' + (slugs.length === 1 ? 'यह दुकान' : bad.length + ' दुकान(ें)') + ' अभी verify नहीं हुई' + (slugs.length === 1 && st[slugs[0]] === 'pending' ? ' (फ़ोटो जाँच के लिए आई हुई हैं — 💎 Premium → 🏪 Verify)' : slugs.length === 1 && st[slugs[0]] === 'rejected' ? ' (पिछली बार मना हुई थी)' : ' (दुकानदार ने अभी फ़ोटो नहीं भेजीं)') + '। पहले verify करना बेहतर है — फिर भी plan देना हो तो नीचे बटन दबाएँ।';
+      pv.textContent = '⚠️ ' + (slugs.length === 1 ? 'यह दुकान' : bad.length + ' दुकान(ें)') + ' अभी जाँच नहीं हुई' + (slugs.length === 1 && st[slugs[0]] === 'pending' ? ' (फ़ोटो जाँच के लिए आई हुई हैं — 💎 प्रीमियम → 🏪 जाँच)' : slugs.length === 1 && st[slugs[0]] === 'rejected' ? ' (पिछली बार मना हुई थी)' : ' (दुकानदार ने अभी फ़ोटो नहीं भेजीं)') + '। पहले जाँच करना बेहतर है — फिर भी प्लान देना हो तो नीचे बटन दबाएँ।';
       pv.hidden = false; } catch (e) {} })();
     w.querySelectorAll('input[name="psM"]').forEach(function (x) { x.onchange = function () { w.querySelector('#psCash').hidden = w.querySelector('input[name="psM"]:checked').value !== 'cash'; }; });
     w.querySelector('form').onsubmit = async function (e) {
@@ -1111,22 +1110,22 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       try {
         var res = await rpc('pb_admin_premium_grant', { p_slugs: slugs, p_days: +w.querySelector('#psD').value, p_method: m, p_amount: m === 'cash' ? +amt : null, p_receipt: w.querySelector('#psR').value || null, p_note: w.querySelector('#psN').value || null });
         var tsel = w.querySelector('#psT').value;
-        try { await rpc('pb_admin_plan_set_tier', { p_slugs: slugs, p_tier: tsel }); } catch (x3) { /* sql-30 अभी नहीं चली: पुराना Premium (सब सुविधाएँ) */ }
+        try { await rpc('pb_admin_plan_set_tier', { p_slugs: slugs, p_tier: tsel }); } catch (x3) { /* sql-30 अभी नहीं चली: पुराना प्रीमियम (सब सुविधाएँ) */ }
         close(); alert('✅ ' + (res && res.shops || 0) + ' दुकान(ों) का ' + tierName(tsel) + ' चालू।'); SEL = {}; load();
       } catch (x) { er.textContent = 'नहीं हो सका: ' + x.message; w.querySelector('#psGo').disabled = false; }
     };
   }
   var PMTAB = 'active', PMDATA = null, PMREQ = [], PLANCFG = null, PMTIER = {}, BANS = null, VERS = null, VSIGN = {};
   /* 🥈 Silver · 👑 Gold · 💎 Platinum (sql-30) */
-  var TIERS = [['free', '🆓', 'Free'], ['silver', '🥈', 'Silver'], ['gold', '👑', 'Gold'], ['platinum', '💎', 'Platinum']];
-  var FEATS = [['logo', '🖼️ Logo'], ['photos', '📷 फ़ोटो gallery'], ['hiring', '💼 नौकरी (Hiring)'], ['card', '🪪 विज़िटिंग कार्ड'], ['report', '📊 रिपोर्ट'], ['top', '⭐ Search / category में ऊपर'], ['strip', '🏠 Home पट्टी में बड़ा card'], ['banner', '📢 Banner (विज्ञापन)'], ['social', '📸 Instagram / Facebook']];
-  function tierName(t) { var x = TIERS.filter(function (y) { return y[0] === t; })[0]; return x ? x[1] + ' ' + x[2] : '💎 Premium'; }
+  var TIERS = [['free', '🆓', 'फ्री'], ['silver', '🥈', 'सिल्वर'], ['gold', '👑', 'गोल्ड'], ['platinum', '💎', 'प्लैटिनम']];
+  var FEATS = [['logo', '🖼️ Logo'], ['photos', '📷 फ़ोटो गैलरी'], ['hiring', '💼 नौकरी (भर्ती)'], ['card', '🪪 विज़िटिंग कार्ड'], ['report', '📊 रिपोर्ट'], ['top', '⭐ खोज / श्रेणी में ऊपर'], ['strip', '🏠 होम पट्टी में बड़ा कार्ड'], ['banner', '📢 बैनर (विज्ञापन)'], ['social', '📸 Instagram / Facebook']];
+  function tierName(t) { var x = TIERS.filter(function (y) { return y[0] === t; })[0]; return x ? x[1] + ' ' + x[2] : '💎 प्रीमियम'; }
   async function pmBadge() {
     var b = document.querySelector('#tiles [data-t="premium"]'); if (!b) return;
     try {
       var d = await rpc('pb_admin_premium_list', {}) || {}, R = await rpc('pb_admin_premium_requests', {}) || [], n = R.filter(function (r) { return r.status === 'pending'; }).length;
       b.querySelector('b').textContent = (d.active || []).length;
-      b.querySelector('small').textContent = n ? n + ' request बाकी' : 'चालू Premium दुकानें';
+      b.querySelector('small').textContent = n ? n + ' अनुरोध बाकी' : 'चालू प्रीमियम दुकानें';
       if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
     } catch (e) { b.querySelector('small').textContent = 'sql-23 चलाएँ'; }
   }
@@ -1142,12 +1141,12 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function drawPrem() {
     var A = PMDATA.active || [], G = PMDATA.log || [], h = '';
     if (PMTAB === 'active') {
-      h = '<p class="cnt">' + A.length + ' दुकानें Premium · नई दुकान को Premium देने के लिए "दुकानें" list में उस दुकान पर "💎 Premium दें" दबाएँ (या कई चुनकर ऊपर "💎 Premium")</p>' + A.map(function (p) {
+      h = '<p class="cnt">' + A.length + ' दुकानें प्रीमियम · नई दुकान को प्रीमियम देने के लिए "दुकानें" सूची में उस दुकान पर "💎 प्रीमियम दें" दबाएँ (या कई चुनकर ऊपर "💎 प्रीमियम")</p>' + A.map(function (p) {
         var tr = PMTIER[p.slug] || '';
         return '<div class="cty"><h3>' + (tr ? tierName(tr).split(' ')[0] : '💎') + ' <a href="business.html?slug=' + encodeURIComponent(p.slug) + '" target="_blank">' + esc(p.shop) + '</a> <span class="bid">' + (tr ? tierName(tr).split(' ')[1] + ' · ' : '') + methodName(p.method) + '</span></h3>' +
           (PLANCFG ? '<div class="acts" style="margin-top:6px">' + TIERS.slice(1).map(function (t) { return '<button data-ptier="' + t[0] + '" data-slug="' + esc(p.slug) + '" style="' + (tr === t[0] ? 'background:#3b2bb8;color:#fff' : '') + '">' + t[1] + ' ' + t[2] + '</button>'; }).join('') + '</div>' : '') +
-          (p.address ? '<p class="meta">📍 ' + esc(p.address) + '</p>' : '') + '<p class="meta">' + fmtShort(p.until) + ' तक' + (p.live ? '' : ' · ⏸ दुकान अभी Pending है (Premium नहीं दिखेगा)') + '</p>' +
-          '<div class="acts"><button data-pmx="ext" data-slug="' + esc(p.slug) + '" data-n="' + esc(p.shop) + '" style="background:#3b2bb8;color:#fff">➕ दिन बढ़ाएँ</button><button class="del" data-pmx="off" data-slug="' + esc(p.slug) + '" data-n="' + esc(p.shop) + '">⛔ Premium बंद करें</button></div></div>';
+          (p.address ? '<p class="meta">📍 ' + esc(p.address) + '</p>' : '') + '<p class="meta">' + fmtShort(p.until) + ' तक' + (p.live ? '' : ' · ⏸ दुकान अभी लंबित है (प्रीमियम नहीं दिखेगा)') + '</p>' +
+          '<div class="acts"><button data-pmx="ext" data-slug="' + esc(p.slug) + '" data-n="' + esc(p.shop) + '" style="background:#3b2bb8;color:#fff">➕ दिन बढ़ाएँ</button><button class="del" data-pmx="off" data-slug="' + esc(p.slug) + '" data-n="' + esc(p.shop) + '">⛔ प्रीमियम बंद करें</button></div></div>';
       }).join('');
     } else if (PMTAB === 'log') {
       h = '<p class="cnt">नकद कुल: ₹' + (PMDATA.cash_total || 0) + ' · पिछले ' + G.length + ' बदलाव</p>' + G.map(function (g) {
@@ -1155,16 +1154,16 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       }).join('');
     } else {
       var L = PMREQ;
-      h = '<p class="cnt">दुकानदार की Premium requests (दुकानदारों को यह विकल्प अभी website पर बंद है — site-config.js में premiumReq)</p>' + (L.length ? L.map(function (r) {
+      h = '<p class="cnt">दुकानदार की प्रीमियम अनुरोध (दुकानदारों को यह विकल्प अभी वेबसाइट पर बंद है — site-config.js में premiumReq)</p>' + (L.length ? L.map(function (r) {
         var chk = function (ok, t) { return (ok ? '✅ ' : '⚠️ ') + t; };
         return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ Pending') + '</span></h3>' +
           (r.address ? '<p class="meta">📍 ' + esc(r.address) + '</p>' : '') +
           '<p class="meta">' + esc([r.category, r.type].filter(Boolean).join(' · ')) + ' · PataBook पर ' + fmtShort(r.since) + ' से</p>' +
           '<p class="meta">' + [chk(r.gst, 'GST'), chk(r.udyam, 'उद्यम'), chk(r.location, 'location'), chk(r.logo, 'logo')].join(' · ') + ' · 👀 30 दिन: ' + (r.views30 || 0) + (r.reports ? ' · 🚩 ' + r.reports + ' शिकायत' : '') + '</p>' +
           (r.note ? '<p class="meta">💬 ' + esc(r.note) + '</p>' : '') +
-          '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + ({ approved: '✅ मंज़ूर', rejected: '❌ मना', used: '💎 Premium दिया', expired: '⌛ समय निकल गया' }[r.status] || r.status) + (r.reason ? ' — ' + esc(r.reason) : '') : '') + '</p>' +
-          (r.status === 'pending' ? '<div class="acts"><button data-pmr="1" data-id="' + r.id + '" style="background:#137333;color:#fff">✅ Approve</button><button class="del" data-pmr="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
-      }).join('') : '<p class="cnt">अभी कोई request नहीं</p>');
+          '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + ({ approved: '✅ मंज़ूर', rejected: '❌ मना', used: '💎 प्रीमियम दिया', expired: '⌛ समय निकल गया' }[r.status] || r.status) + (r.reason ? ' — ' + esc(r.reason) : '') : '') + '</p>' +
+          (r.status === 'pending' ? '<div class="acts"><button data-pmr="1" data-id="' + r.id + '" style="background:#137333;color:#fff">✅ मंज़ूर करें</button><button class="del" data-pmr="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
+      }).join('') : '<p class="cnt">अभी कोई अनुरोध नहीं</p>');
     }
     if (PMTAB === 'plans') h = plansHTML();
     if (PMTAB === 'ban') h = bansHTML();
@@ -1174,17 +1173,17 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* ⚙️ हर plan की settings: सुविधाएँ ON/OFF, फ़ोटो / products की limit, banner कितने दिन */
   function plansHTML() {
     if (!PLANCFG) return '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 30_plans_banners.sql चलाएँ।</p></div>';
-    return '<p class="cnt">हर plan में क्या मिले — बदलकर "Save" दबाएँ। तुरंत सब दुकानों पर लागू।</p>' + TIERS.map(function (t) {
+    return '<p class="cnt">हर प्लान में क्या मिले — बदलकर "सेव" दबाएँ। तुरंत सब दुकानों पर लागू।</p>' + TIERS.map(function (t) {
       var c = PLANCFG[t[0]] || { feats: {} }, f = c.feats || {}, fr = t[0] === 'free';
       return '<div class="cty" data-plan="' + t[0] + '"><h3>' + t[1] + ' ' + t[2] + '</h3>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:8px 0">' + FEATS.map(function (x) {
           return '<label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" data-f="' + x[0] + '"' + (f[x[0]] ? ' checked' : '') + ' style="width:20px;height:20px">' + x[1] + '</label>'; }).join('') + '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:14px">' +
           '<label>📷 फ़ोटो <input type="number" min="0" max="100" data-n="photos" value="' + (c.photos || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"></label>' +
-          (fr ? '' : ('poster_days' in c ? '<label>📢 Poster: साल में <input type="number" min="0" max="366" data-n="poster_days" value="' + (c.poster_days || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन <small style="color:#5b6475">(365 = रोज़; दुकानदार My Shop से तारीख़ें चुनता है)</small></label>'
+          (fr ? '' : ('poster_days' in c ? '<label>📢 Poster: साल में <input type="number" min="0" max="366" data-n="poster_days" value="' + (c.poster_days || 0) + '" style="width:64px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन <small style="color:#5b6475">(365 = रोज़; दुकानदार मेरी दुकान से तारीख़ें चुनता है)</small></label>'
             : '<label>📢 Banner: <input type="number" min="1" max="30" data-n="banner_on" value="' + (c.banner_on || 1) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन चले, फिर <input type="number" min="0" max="60" data-n="banner_off" value="' + (c.banner_off || 0) + '" style="width:54px;padding:6px;border:1px solid #d0d7e2;border-radius:8px"> दिन बंद <small style="color:#5b6475">(0 = हर दिन)</small></label>')) +
         '</div><div class="acts"><button data-psave="' + t[0] + '" style="background:#137333;color:#fff">💾 Save</button></div></div>';
-    }).join('') + '<p class="cnt">Poster: Silver / Gold दुकानदार अपने दिन खुद चुनते हैं (किसी भी 12 महीने में इतने दिन तक); 365 = हर दिन।</p>';
+    }).join('') + '<p class="cnt">Poster: सिल्वर / गोल्ड दुकानदार अपने दिन खुद चुनते हैं (किसी भी 12 महीने में इतने दिन तक); 365 = हर दिन।</p>';
   }
   /* 🏪 दुकान Verification (sql-32): दुकानदार की 2 फ़ोटो (private) + AI ने बोर्ड पर क्या पढ़ा → Approve / Reject */
   async function loadVers() {
@@ -1199,29 +1198,29 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   }
   function versHTML() {
     if (!VERS) return '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 32_shop_verify.sql चलाएँ।</p></div>';
-    if (!VERS.length) return '<p class="cnt">अभी कोई दुकान verification के लिए नहीं आई</p>';
+    if (!VERS.length) return '<p class="cnt">अभी कोई दुकान जाँच के लिए नहीं आई</p>';
     var np = VERS.filter(function (v) { return v.status === 'pending'; }).length;
     var img = function (p, t) { var u = VSIGN[p]; return '<figure style="margin:0;flex:1;min-width:0"><figcaption style="font-size:12.5px;font-weight:700;color:#5b6475;margin-bottom:4px">' + t + '</figcaption>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + t + '" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:#eef2f7"></a>' : '<div style="aspect-ratio:4/3;border-radius:10px;background:#eef2f7;display:grid;place-items:center;font-size:12px;color:#5b6475">फ़ोटो नहीं खुली</div>') + '</figure>'; };
-    return '<p class="cnt">' + (np ? np + ' दुकान(ें) जाँच के लिए बाकी · ' : '') + 'फ़ोटो सिर्फ़ आपको दिखती हैं (private) — दबाकर बड़ा देखें</p>' + VERS.map(function (v) {
+    return '<p class="cnt">' + (np ? np + ' दुकान(ें) जाँच के लिए बाकी · ' : '') + 'फ़ोटो सिर्फ़ आपको दिखती हैं (निजी) — दबाकर बड़ा देखें</p>' + VERS.map(function (v) {
       var ai = v.ai_status === 'error' ? '<p class="meta" style="color:#b54708;font-weight:700">⚠️ AI जाँच नहीं हो पाई — बोर्ड का नाम खुद मिलाएँ</p>'
         : '<p class="meta">🤖 बोर्ड पर पढ़ा: <b>' + esc(v.sign_text || '—') + '</b> ' + (v.ai_match ? '✅ नाम मिला' : '❌ नाम नहीं मिला') + (v.ai_note ? '<br>' + esc(v.ai_note) : '') + '</p>';
       return '<div class="cty' + (v.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(v.slug) + '" target="_blank">' + esc(v.shop) + '</a> <span class="bid">' + ({ pending: '⏳ जाँच बाकी', approved: '✅ Verified', rejected: '❌ मना' }[v.status] || v.status) + '</span></h3>' +
         (v.address ? '<p class="meta">📍 ' + esc(v.address) + '</p>' : '') +
-        '<p class="meta">Profile में नाम: <b>' + esc(v.shop) + '</b> · ' + (v.paid ? tierName(v.tier) : '🆓 Free') + ' · ' + fmtD(v.created_at) + '</p>' + ai +
+        '<p class="meta">प्रोफ़ाइल में नाम: <b>' + esc(v.shop) + '</b> · ' + (v.paid ? tierName(v.tier) : '🆓 Free') + ' · ' + fmtD(v.created_at) + '</p>' + ai +
         '<div style="display:flex;gap:8px;margin:8px 0">' + img(v.outside_path, 'बाहर (बोर्ड)') + img(v.inside_path, 'अंदर') + '</div>' +
         (v.reason ? '<p class="meta">कारण: ' + esc(v.reason) + '</p>' : '') +
-        (v.status === 'pending' ? '<div class="acts"><button data-ver="1" data-id="' + v.id + '" data-n="' + esc(v.shop) + '" style="background:#137333;color:#fff">✅ Approve — दुकान verified</button><button class="del" data-ver="0" data-id="' + v.id + '" data-n="' + esc(v.shop) + '">❌ Reject</button></div>' : '') + '</div>';
+        (v.status === 'pending' ? '<div class="acts"><button data-ver="1" data-id="' + v.id + '" data-n="' + esc(v.shop) + '" style="background:#137333;color:#fff">✅ मंज़ूर — दुकान जाँचा हुआ</button><button class="del" data-ver="0" data-id="' + v.id + '" data-n="' + esc(v.shop) + '">❌ Reject</button></div>' : '') + '</div>';
     }).join('');
   }
   /* 🖼️ दुकानदारों के banner: मंज़ूर / मना */
   function bansHTML() {
     if (!BANS) return '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 30_plans_banners.sql चलाएँ।</p></div>';
-    if (!BANS.length) return '<p class="cnt">अभी कोई banner नहीं</p>';
+    if (!BANS.length) return '<p class="cnt">अभी कोई बैनर नहीं</p>';
     var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
     return BANS.map(function (b) {
       return '<div class="cty' + (b.status === 'pending' ? ' nw' : '') + '"><h3>' + tierName(b.tier).split(' ')[0] + ' <a href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">' + esc(b.shop) + '</a> <span class="bid">' + ({ pending: '⏳ मंज़ूरी बाकी', approved: '✅ चल रहा', rejected: '❌ मना' }[b.status] || '') + '</span></h3>' +
         (RX.test(b.url || '') ? '<img src="' + esc(b.url) + '" alt="" style="width:100%;max-width:520px;aspect-ratio:2/1;object-fit:cover;border-radius:12px;display:block;margin:6px 0">' : '') +
-        (b.reason ? '<p class="meta">कारण: ' + esc(b.reason) + '</p>' : '') + '<p class="meta">' + fmtD(b.at) + (b.tier === 'free' ? ' · ⚠️ दुकान अभी Free है — banner नहीं चलेगा' : '') + '</p>' +
+        (b.reason ? '<p class="meta">कारण: ' + esc(b.reason) + '</p>' : '') + '<p class="meta">' + fmtD(b.at) + (b.tier === 'free' ? ' · ⚠️ दुकान अभी मुफ़्त है — बैनर नहीं चलेगा' : '') + '</p>' +
         '<div class="acts">' + (b.status !== 'approved' ? '<button data-ban="1" data-slug="' + esc(b.slug) + '" style="background:#137333;color:#fff">✅ मंज़ूर</button>' : '') + (b.status !== 'rejected' ? '<button class="del" data-ban="0" data-slug="' + esc(b.slug) + '">❌ मना करें</button>' : '') + '</div></div>';
     }).join('');
   }
@@ -1231,8 +1230,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var vr = e.target.closest('[data-ver]');
     if (vr) {
       var okv = vr.dataset.ver === '1', whyv = null;
-      if (okv) { if (!confirm('"' + vr.dataset.n + '" को verified करें? दुकानदार को 🔔 संदेश जाएगा और वह plan ले सकेगा।')) return; }
-      else { whyv = prompt('Reject का कारण (दुकानदार को 🔔 में दिखेगा), जैसे: बोर्ड का नाम साफ़ नहीं, दुकान बंद दिख रही', ''); if (whyv === null) return; if (!whyv.trim()) { alert('कारण लिखें।'); return; } }
+      if (okv) { if (!confirm('"' + vr.dataset.n + '" को जाँचा हुआ करें? दुकानदार को 🔔 संदेश जाएगा और वह प्लान ले सकेगा।')) return; }
+      else { whyv = prompt('अस्वीकार का कारण (दुकानदार को 🔔 में दिखेगा), जैसे: बोर्ड का नाम साफ़ नहीं, दुकान बंद दिख रही', ''); if (whyv === null) return; if (!whyv.trim()) { alert('कारण लिखें।'); return; } }
       vr.disabled = true; try { await rpc('pb_admin_verify_decide', { p_id: +vr.dataset.id, p_ok: okv, p_reason: whyv }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
     }
     if (ps) {
@@ -1240,28 +1239,28 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       box.querySelectorAll('[data-f]').forEach(function (c) { feats[c.dataset.f] = c.checked; });
       box.querySelectorAll('[data-n]').forEach(function (c) { body[c.dataset.n] = +c.value; });
       body.feats = feats; ps.disabled = true;
-      try { await rpc('pb_admin_plan_config_set', { p_tier: ps.dataset.psave, p: body }); ps.textContent = '✅ Save हो गया'; PLANCFG = await rpc('pb_admin_plan_config', {}); setTimeout(drawPrem, 900); } catch (er) { alert('गलती: ' + er.message); ps.disabled = false; }
+      try { await rpc('pb_admin_plan_config_set', { p_tier: ps.dataset.psave, p: body }); ps.textContent = '✅ सेव हो गया'; PLANCFG = await rpc('pb_admin_plan_config', {}); setTimeout(drawPrem, 900); } catch (er) { alert('गलती: ' + er.message); ps.disabled = false; }
       return;
     }
     if (pt) {
-      if (!confirm('इस दुकान का plan "' + tierName(pt.dataset.ptier) + '" करें?')) return;
+      if (!confirm('इस दुकान का प्लान "' + tierName(pt.dataset.ptier) + '" करें?')) return;
       pt.disabled = true; try { await rpc('pb_admin_plan_set_tier', { p_slugs: [pt.dataset.slug], p_tier: pt.dataset.ptier }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
     }
     if (bn) {
       var okb = bn.dataset.ban === '1', why2 = null;
-      if (!okb) { why2 = prompt('मना करने का कारण (दुकानदार को दिखेगा), जैसे: photo साफ़ नहीं है', ''); if (why2 === null) return; }
+      if (!okb) { why2 = prompt('मना करने का कारण (दुकानदार को दिखेगा), जैसे: फ़ोटो साफ़ नहीं है', ''); if (why2 === null) return; }
       bn.disabled = true; try { await rpc('pb_admin_banner_decide', { p_slug: bn.dataset.slug, p_ok: okb, p_reason: why2 }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
     }
     var x = e.target.closest('[data-pmx]'), q = e.target.closest('[data-pmr]');
     if (x) {
       if (x.dataset.pmx === 'ext') { premSheet([x.dataset.slug], x.dataset.n); return; }
-      var why = prompt('"' + x.dataset.n + '" का Premium अभी बंद करें? कारण (सिर्फ आपके रिकॉर्ड के लिए):', ''); if (why === null) return;
+      var why = prompt('"' + x.dataset.n + '" का प्रीमियम अभी बंद करें? कारण (सिर्फ आपके रिकॉर्ड के लिए):', ''); if (why === null) return;
       x.disabled = true; try { await rpc('pb_admin_premium_revoke', { p_slug: x.dataset.slug, p_note: why || null }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
     }
     if (q) {
       var ok = q.dataset.pmr === '1', reason = null;
-      if (ok) { if (!confirm('यह Premium request मंज़ूर करें?')) return; }
-      else { reason = prompt('Reject का कारण (दुकानदार को दिखेगा), जैसे: पहले logo और location लगाएँ', ''); if (reason === null) return; }
+      if (ok) { if (!confirm('यह प्रीमियम अनुरोध मंज़ूर करें?')) return; }
+      else { reason = prompt('अस्वीकार का कारण (दुकानदार को दिखेगा), जैसे: पहले लोगो और लोकेशन लगाएँ', ''); if (reason === null) return; }
       q.disabled = true; try { await rpc('pb_admin_premium_decide', { p_id: +q.dataset.id, p_approve: ok, p_reason: reason }); } catch (er) { alert('गलती: ' + er.message); } loadPrem();
     }
   };
@@ -1272,7 +1271,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     try {
       var R = await rpc('pb_admin_home_requests', {}) || [], n = R.filter(function (r) { return r.status === 'pending'; }).length;
       b.querySelector('b').textContent = n;
-      b.querySelector('small').textContent = n ? n + ' Approve करनी बाकी' : 'कोई बाकी नहीं';
+      b.querySelector('small').textContent = n ? n + ' मंज़ूर करनी बाकी' : 'कोई बाकी नहीं';
       if (n) b.insertAdjacentHTML('afterbegin', '<i class="badge">' + n + '</i>');
     } catch (e) { b.querySelector('small').textContent = 'sql-22 चलाएँ'; }
   }
@@ -1284,19 +1283,19 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   }
   function drawHsReq() {
     var L = HDATA.filter(function (r) { return HTAB === 'pending' ? r.status === 'pending' : r.status !== 'pending'; });
-    $('hBody').innerHTML = '<p class="cnt">' + L.length + ' requests</p>' + (L.length ? L.map(function (r) {
-      return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ Pending दुकान') + '</span></h3>' +
+    $('hBody').innerHTML = '<p class="cnt">' + L.length + ' अनुरोध</p>' + (L.length ? L.map(function (r) {
+      return '<div class="cty' + (r.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(r.slug) + '" target="_blank">' + esc(r.shop) + '</a> <span class="bid">' + (r.live ? '✅ Live' : '⏸ लंबित दुकान') + '</span></h3>' +
         (r.address ? '<p class="meta">📍 ' + esc(r.address) + '</p>' : '') +
         '<p class="meta">' + esc(r.category || '') + (r.type ? ' · ' + esc(r.type) : ' · प्रकार नहीं भरा') + (r.gst ? ' · 🧾 GST है' : '') + '</p>' +
-        '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + (r.status === 'approved' ? '✅ Approve किया' : '❌ Reject किया') + (r.decided_at ? ' ' + fmtD(r.decided_at) : '') : '') + '</p>' +
-        (r.status === 'pending' ? '<div class="acts"><button data-ha="1" data-id="' + r.id + '" data-slug="' + esc(r.slug) + '" style="background:#137333;color:#fff">✅ Approve — Home Service चालू</button><button class="del" data-ha="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
-    }).join('') : '<p class="cnt">' + (HTAB === 'pending' ? 'कोई request बाकी नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
+        '<p class="meta">' + fmtD(r.created_at) + (r.status !== 'pending' ? ' · ' + (r.status === 'approved' ? '✅ मंज़ूर किया' : '❌ अस्वीकार किया') + (r.decided_at ? ' ' + fmtD(r.decided_at) : '') : '') + '</p>' +
+        (r.status === 'pending' ? '<div class="acts"><button data-ha="1" data-id="' + r.id + '" data-slug="' + esc(r.slug) + '" style="background:#137333;color:#fff">✅ मंज़ूर — होम सर्विस चालू</button><button class="del" data-ha="0" data-id="' + r.id + '">❌ Reject</button></div>' : '') + '</div>';
+    }).join('') : '<p class="cnt">' + (HTAB === 'pending' ? 'कोई अनुरोध बाकी नहीं 🎉' : 'अभी कुछ नहीं') + '</p>');
   }
   $('hTabs').onclick = function (e) { var b = e.target.closest('[data-h]'); if (!b) return; HTAB = b.dataset.h; $('hTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawHsReq(); };
   $('hBody').onclick = async function (e) {
     var b = e.target.closest('[data-ha]'); if (!b) return;
     var ok = b.dataset.ha === '1';
-    if (!confirm(ok ? 'इस दुकान की Home Service चालू करें? (दुकान Home Services पेज पर दिखेगी)' : 'यह request Reject करें?')) return;
+    if (!confirm(ok ? 'इस दुकान की होम सर्विस चालू करें? (दुकान होम सर्विस पेज पर दिखेगी)' : 'यह अनुरोध अस्वीकार करें?')) return;
     b.disabled = true;
     try {
       if (ok) { try { await rpc('pb_admin_set_home_service', { p_slug: b.dataset.slug, p_on: true, p_city_ids: [] }); } catch (x) {} }   /* पुराना admin switch भी (और शहर बाद में दुकानों की list से) */
@@ -1352,7 +1351,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   async function loadJobs() {
     $('jBody').innerHTML = '<p class="cnt">लोड हो रहा है…</p>';
     try { JDATA = await rpc('pb_admin_jobs', {}); drawJobs(); }
-    catch (e) { $('jBody').innerHTML = '<div class="msg"><b>Vacancy वाला हिस्सा अभी चालू नहीं है</b><p>Supabase में sql-09-jobs-vacancy.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
+    catch (e) { $('jBody').innerHTML = '<div class="msg"><b>नौकरी वाला हिस्सा अभी चालू नहीं है</b><p>Supabase में sql-09-jobs-vacancy.sql चलाएँ।</p><p class="err">' + esc(e.message) + '</p></div>'; }
   }
   function drawJobs() {
     var d = JDATA || {}, now = new Date();
@@ -1360,7 +1359,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       var P = d.payments || [], tot = P.filter(function (p) { return p.status === 'paid'; }).reduce(function (a, p) { return a + p.amount; }, 0);
       $('jBody').innerHTML = '<p class="cnt">कुल मिले: ₹' + (tot / 100).toLocaleString('en-IN') + ' · ' + P.length + ' payments</p>' + (P.length ? P.map(function (p) {
         return '<div class="cty"><h3>' + esc(p.shop) + ' <span class="bid">' + (p.status === 'paid' ? '✅ Paid' : '⏳ अधूरा') + '</span></h3><p class="meta">₹' + (p.amount / 100) + ' · ' + fmtD(p.paid_at || p.created_at) + (p.payment_id ? ' · ' + esc(p.payment_id) : '') + '</p></div>';
-      }).join('') : '<p class="cnt">अभी कोई payment नहीं</p>');
+      }).join('') : '<p class="cnt">अभी कोई भुगतान नहीं</p>');
       return;
     }
     var J = d.jobs || [];
@@ -1371,20 +1370,20 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (j.details ? '<p class="meta">' + esc(j.details) + '</p>' : '') +
         '<div class="acts">' + (j.status === 'hidden' ? '<button data-ja="show" data-id="' + j.id + '">👁 दिखाएँ</button>' : '<button data-ja="hide" data-id="' + j.id + '">🙈 छिपाएँ</button>') +
         '<button class="del" data-ja="delete" data-id="' + j.id + '">🗑 हटाएँ</button></div></div>';
-    }).join('') : '<p class="cnt">अभी कोई vacancy नहीं</p>';
+    }).join('') : '<p class="cnt">अभी कोई नौकरी नहीं</p>';
   }
   $('jTabs').onclick = function (e) { var b = e.target.closest('[data-j]'); if (!b) return; JTAB = b.dataset.j; $('jTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawJobs(); };
   $('jBody').onclick = async function (e) {
     var b = e.target.closest('[data-ja]'); if (!b) return;
-    if (b.dataset.ja === 'delete' && !confirm('यह vacancy हमेशा के लिए हटाएँ?')) return;
+    if (b.dataset.ja === 'delete' && !confirm('यह नौकरी हमेशा के लिए हटाएँ?')) return;
     b.disabled = true;
     try { await rpc('pb_admin_job_set', { p_id: +b.dataset.id, p_action: b.dataset.ja }); } catch (x) { alert('गलती: ' + x.message); }
     loadJobs();
   };
   $('jPlan').onclick = async function () {
-    var sl = prompt('दुकान का slug (दुकान के link में ?slug= के बाद वाला हिस्सा):'); if (!sl) return;
-    var dd = prompt('कितने दिन का plan दें? (जैसे 30; हटाने के लिए -30)', '30'); if (!dd) return;
-    try { var u = await rpc('pb_admin_plan_add', { p_slug: sl.trim().toLowerCase(), p_days: parseInt(dd, 10) }); alert('✅ Plan अब ' + fmtD(u) + ' तक'); loadJobs(); }
+    var sl = prompt('दुकान का slug (दुकान के लिंक में ?slug= के बाद वाला हिस्सा):'); if (!sl) return;
+    var dd = prompt('कितने दिन का प्लान दें? (जैसे 30; हटाने के लिए -30)', '30'); if (!dd) return;
+    try { var u = await rpc('pb_admin_plan_add', { p_slug: sl.trim().toLowerCase(), p_days: parseInt(dd, 10) }); alert('✅ प्लान अब ' + fmtD(u) + ' तक'); loadJobs(); }
     catch (x) { alert('गलती: ' + x.message); }
   };
   async function loadCities() {
@@ -1398,15 +1397,15 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function drawCities() {
     var L = CT.filter(function (c) { return CTF === 'all' || (CTF === 'new' ? c.is_new : c.active); });
     var act = CT.filter(function (c) { return c.active; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
-    if (!L.length) { $('ctList').innerHTML = '<p class="msg">' + (CTF === 'new' ? '🎉 कोई नया शहर Approve करने के लिए बाकी नहीं है।' : 'कोई शहर नहीं') + '</p>'; return; }
+    if (!L.length) { $('ctList').innerHTML = '<p class="msg">' + (CTF === 'new' ? '🎉 कोई नया शहर मंज़ूर करने के लिए बाकी नहीं है।' : 'कोई शहर नहीं') + '</p>'; return; }
     $('ctList').innerHTML = L.map(function (c) {
       var where = [c.district, c.state].filter(Boolean).join(', ');
       var head = '<h3>' + esc(c.name) + (c.code ? ' <span class="bid">' + esc(c.code) + '</span>' : '') + (c.is_new ? ' <span class="st p">🟡 नया</span>' : c.active ? ' <span class="st a">✅ चालू</span>' : ' <span class="st">छिपा</span>') + '</h3>' +
         '<div class="meta">' + (where ? '📍 ' + esc(where) + ' · ' : '') + '🏪 ' + c.shops + ' दुकानें</div>';
       var acts = '';
-      if (!c.active) acts += '<input class="cd" maxlength="3" placeholder="ABC" value="' + esc(c.code || sugCode(c.name)) + '" aria-label="3 अक्षर का कोड"><button class="ok" data-ca="approve" data-id="' + c.id + '">✅ Approve</button>';
+      if (!c.active) acts += '<input class="cd" maxlength="3" placeholder="ABC" value="' + esc(c.code || sugCode(c.name)) + '" aria-label="3 अक्षर का कोड"><button class="ok" data-ca="approve" data-id="' + c.id + '">✅ मंज़ूर करें</button>';
       if (c.is_new || !c.active) acts += '<select aria-label="किस शहर में मिलाएँ"><option value="">🔀 सही शहर में मिलाएँ…</option>' + act.filter(function (a) { return a.id !== c.id; }).map(function (a) { return '<option value="' + a.id + '">' + esc(a.name) + (a.state && a.state !== 'Gujarat' ? ' (' + esc(a.state) + ')' : '') + '</option>'; }).join('') + '</select><button class="hold" data-ca="merge" data-id="' + c.id + '">मिलाएँ</button>';
-      if (c.active) acts += '<button class="lnk" data-ca="hide" data-id="' + c.id + '">🙈 list से छिपाएँ</button>';
+      if (c.active) acts += '<button class="lnk" data-ca="hide" data-id="' + c.id + '">🙈 सूची से छिपाएँ</button>';
       if (!c.shops) acts += '<button class="del" data-ca="delete" data-id="' + c.id + '">🗑 हटाएँ</button>';
       return '<div class="cty' + (c.is_new ? ' nw' : '') + '">' + head + '<div class="acts">' + acts + '</div></div>';
     }).join('');
@@ -1415,18 +1414,17 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var b = e.target.closest('[data-ca]'); if (!b) return;
     var box = b.closest('.cty'), id = +b.dataset.id, a = b.dataset.ca, c = CT.filter(function (x) { return x.id === id; })[0] || {}, args = { p_id: id, p_action: a };
     if (a === 'approve') { var cd = (box.querySelector('input.cd').value || '').trim().toUpperCase(); if (!/^[A-Z]{3}$/.test(cd)) { alert('3 अंग्रेज़ी अक्षर का कोड डालें, जैसे RJT'); return; } args.p_code = cd;
-      if (!confirm(c.name + ' को कोड ' + cd + ' के साथ Approve करें? इसकी ' + c.shops + ' दुकानों को PB-' + cd + '-00001… ID मिलेगी (बाद में बदल नहीं सकती).')) return; }
+      if (!confirm(c.name + ' को कोड ' + cd + ' के साथ मंज़ूर करें? इसकी ' + c.shops + ' दुकानों को PB-' + cd + '-00001… ID मिलेगी (बाद में बदल नहीं सकती).')) return; }
     if (a === 'merge') { var t = box.querySelector('select').value; if (!t) { alert('पहले सही शहर चुनें'); return; } args.p_target = +t;
       var tn = (CT.filter(function (x) { return x.id === +t; })[0] || {}).name; if (!confirm('"' + c.name + '" की ' + c.shops + ' दुकानें "' + tn + '" में चली जाएँगी और "' + c.name + '" हट जाएगा। ठीक?')) return; }
-    if (a === 'hide' && !confirm(c.name + ' को homepage की list से छिपाएँ? (दुकानें नहीं हटेंगी)')) return;
+    if (a === 'hide' && !confirm(c.name + ' को होमपेज की सूची से छिपाएँ? (दुकानें नहीं हटेंगी)')) return;
     if (a === 'delete' && !confirm(c.name + ' हटाएँ?')) return;
     b.disabled = true;
-    try { var r = await rpc('pb_admin_city_set', args); if (r && r.codes) alert('✅ हो गया — ' + r.codes + ' दुकानों को Business ID मिली'); }
+    try { var r = await rpc('pb_admin_city_set', args); if (r && r.codes) alert('✅ हो गया — ' + r.codes + ' दुकानों को बिज़नेस ID मिली'); }
     catch (x) { alert(/code already used/.test(x.message) ? 'यह कोड किसी दूसरे शहर का है — दूसरा कोड डालें' : /has shops/.test(x.message) ? 'इस शहर में दुकानें हैं — पहले "मिलाएँ" से दूसरे शहर में भेजें' : 'गलती: ' + x.message); }
     loadCities();
   };
 })();
 </script>
-<script>try{PB.mount(document.getElementById("pbLang"));PB.onChange(function(){location.reload();});}catch(e){}</script>
 </body>
 </html>
