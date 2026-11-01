@@ -137,7 +137,7 @@
       if (has(t, "banner")) li.push(en ? "Banner" : "बैनर");
       return '<div class="td-p' + (cur ? ' cur' : '') + '">' + (cur ? '<span class="td-cl">' + T("Your plan", "आपका प्लान") + '</span>' : '') + '<h4>' + esc(PBPlan.name(t, en).toUpperCase()) + '</h4><ul>' + li.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + '</ul></div>';
     }
-    LAST = { en: en, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
+    LAST = { en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
@@ -147,8 +147,8 @@
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct != null ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' : '') + '</div></div>' +
       '<div class="td-st">' +
-      '<div class="td-s td-click" role="button" tabindex="0" data-tdopen="1"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
-      '<div class="td-s"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + '</em></div>' +
+      '<div class="td-s"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + '</em></div>' +
+      '<div class="td-s td-click" role="button" tabindex="0" data-tdopen="1"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
@@ -166,7 +166,7 @@
     if (!LAST || document.getElementById("tdOv")) return;
     var ov = document.createElement("div"); ov.className = "tdov"; ov.id = "tdOv";
     var en = LAST.en;
-    ov.innerHTML = '<div class="tdsh t-' + LAST.tier + '"><div class="td t-' + LAST.tier + '"><div class="td-hd"><h3>' + esc(en ? "Profile & features" : "प्रोफ़ाइल और सुविधाएँ") + ' · ' + (LAST.pct == null ? "—" : LAST.pct + "%") + '</h3><button type="button" class="td-x" data-tdx="1" aria-label="' + esc(en ? "Close" : "बंद करें") + '">✕</button></div>' + LAST.html + '</div></div>';
+    ov.innerHTML = '<div class="tdsh t-' + LAST.tier + '"><div class="td t-' + LAST.tier + '"><div class="td-hd"><h3>' + esc(LAST.tn + (en ? " plan features" : " प्लान की सुविधाएँ")) + '</h3><button type="button" class="td-x" data-tdx="1" aria-label="' + esc(en ? "Close" : "बंद करें") + '">✕</button></div>' + LAST.html + '</div></div>';
     function gone() { if (ov.isConnected) ov.remove(); document.body.style.overflow = ""; }
     ov._close = function () { if (window.PBBack) PBBack.close(); else gone(); };
     document.body.appendChild(ov); document.body.style.overflow = "hidden";
