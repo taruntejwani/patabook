@@ -19,7 +19,7 @@
       ".td.t-platinum{--a:#3f5075;--soft:#e8edf7;--hd:linear-gradient(120deg,#1c2539,#3f5075 55%,#4a6fa5)}" +
       ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{min-height:44px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
       ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;line-height:1;flex:none}" +
-      ".td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}" +
+      ".td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}" +
       ".td-mi{display:flex;align-items:center;gap:9px;min-width:0;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:13px}.td-mi b{flex:1;min-width:0;font-weight:700}.td-mic{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}" +
       "" +
       ".td-eb{color:#2563eb;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
@@ -151,7 +151,7 @@
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct != null ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' : '') + '</div></div>' +
       '<div class="td-st">' +
-      '<div class="td-s"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + '</em></div>' +
+      '<div class="td-s' + (c.profOpen ? ' td-open' : '') + '"><div class="td-click" role="button" tabindex="0" data-tdprof="1"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + ' · <b style="color:var(--a)">' + (c.profOpen ? T("Close ˄", "बंद करें ˄") : T("View ›", "देखें ›")) + '</b></em></div>' + (c.profOpen ? '<div class="td-pbody">' + (c.profHtml || "") + '</div>' : '') + '</div>' +
       '<div class="td-s td-click" role="button" tabindex="0" data-tdopen="1"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +

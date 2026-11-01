@@ -895,7 +895,7 @@ function settingsView(en){
     return '<div class="tp tp-'+tierOf(b)+'"><div class="setbar"><button type="button" data-setback="close">‹ '+(en?"My shops":"मेरी दुकानें")+'</button></div>'+
       '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
       '<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"Preview profile":"प्रोफ़ाइल प्रीव्यू")+'</a>'+
-      '<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+'</div>'+
+      ((window.PBTejDash&&b.slug===PBTejDash.SLUG)?'':'<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+'</div>')+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
       '<div class="cats">'+C.filter(c=>!/^(photo|rep|nt)$/.test(c[0])).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div></div>';
   }
@@ -935,7 +935,7 @@ function lkOpen(i){
     catch(x){const m=x.message||"";er.style.color="#c5221f";er.textContent=/link_taken/.test(m)?T("यह नाम अभी किसी और ने ले लिया।","Someone just took this name."):/link_locked/.test(m)?T("लिंक बदलने की सीमा पूरी हो चुकी है।","Change limit reached."):/link_reserved/.test(m)?T("यह नाम नहीं मिल सकता।","This name is not allowed."):T("सेव नहीं हुआ, फिर कोशिश करें।","Could not save. Try again.");go.disabled=false;}};
 }
 /* 🏪 My Shop मुख्य पन्ना: दो-दो चौकोर डिब्बे; हर डिब्बे पर Online/Offline स्विच */
-let HIDE_SLUG="";
+let HIDE_SLUG="",TDPROF=false;
 function shopTiles(en){
   return '<div class="shg">'+ROWS.map((b,i)=>{
     if(HIDE_SLUG&&b.slug===HIDE_SLUG)return "";
@@ -1008,7 +1008,7 @@ function draw(){
   if(inSet&&ROWS[SET.shop]){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
   let _td="";
   try{if(window.PBTejDash){const ti=ROWS.findIndex(r=>r.slug===PBTejDash.SLUG);if(ti>=0){const tb=ROWS[ti];if(!PBTejDash.ready())PBTejDash.load(tb.slug,draw);
-    _td=PBTejDash.html({en,b:tb,i:ti,tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
+    _td=PBTejDash.html({en,b:tb,i:ti,profOpen:TDPROF,profHtml:TDPROF?offBlock(tb,ti,en)+profBlock(tb,ti)+verifyBlock(tb,ti):"",tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
   {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=!!_td;if(_s)_s.hidden=!!_td;}
   HIDE_SLUG=_td?PBTejDash.SLUG:"";
   if(window.PBTejDash)PBTejDash.act=(k,i,btn)=>{if(k==="submit")submitApproval(i,btn);else openShop(i,"");};
@@ -1287,6 +1287,7 @@ $("list").addEventListener("click",e=>{
    const ap=e.target.closest(".anpt");if(ap){const t=$("antip");if(t)t.textContent=ap.dataset.t;return;}}
   {const lk=e.target.closest("[data-lk]");if(lk){e.preventDefault();e.stopPropagation();lkOpen(+lk.dataset.lk);return;}}
   {const tw=e.target.closest("[data-tsw]");if(tw){e.preventDefault();e.stopPropagation();tileSwitch(+tw.dataset.tsw,tw);return;}}
+  {const tp=e.target.closest("[data-tdprof]");if(tp){TDPROF=!TDPROF;draw();return;}}
   {const tg=e.target.closest("[data-tdgo]");if(tg){openShop(+tg.dataset.tdi,tg.dataset.tdgo);return;}}
   {const ot=e.target.closest("[data-openshop]");if(ot){ntOpen(false);openShop(+ot.dataset.openshop,"");return;}}
   {const pp=e.target.closest("[data-pop]");if(pp){e.preventDefault();popEdit(pp.dataset.popshop,pp.dataset.pop);return;}}
