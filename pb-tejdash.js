@@ -17,6 +17,8 @@
       ".td.t-silver{--a:#6b7788;--soft:#f1f3f6;--hd:linear-gradient(120deg,#4c5664,#7d8898 60%,#b4bdc9)}" +
       ".td.t-gold{--a:#B58A2A;--soft:#fdf5df;--hd:linear-gradient(120deg,#6b4e12,#B58A2A 60%,#d9b257)}" +
       ".td.t-platinum{--a:#3f5075;--soft:#e8edf7;--hd:linear-gradient(120deg,#1c2539,#3f5075 55%,#4a6fa5)}" +
+      ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
+      ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:none;border:0;padding:0 2px;font-size:15px;line-height:1}" +
       ".td-eb{color:#2563eb;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
       ".td-h{font-size:22px;font-weight:800;margin:2px 0 4px}.td-sub{color:#687386;font-size:13px;margin-bottom:14px}" +
       ".td-shop{background:var(--hd);color:#fff;border-radius:20px;padding:20px;margin-bottom:14px}" +
@@ -84,6 +86,10 @@
         : '<p>' + T("Your shop is not live yet.", "आपकी दुकान अभी लाइव नहीं है।") + '</p><span class="td-tag off">🔴 Offline</span>');
     var lkBox = box("🔗", T("Your shop link", "आपकी दुकान का लिंक"),
       '<p>' + (c.link ? '<b>patabook.in/' + esc(c.link) + '</b>' : T("No custom link yet.", "अभी अपना लिंक नहीं बना।")) + '</p><button type="button" class="td-b lt" data-lk="' + c.i + '">✏️ ' + T(c.link ? "Change link" : "Create link", c.link ? "लिंक बदलें" : "लिंक बनाएँ") + '</button>');
+    var swPill = '<div class="td-pill2">' + (canSw ? '<button type="button" class="tsw" role="switch" aria-checked="' + (st === "live") + '" aria-label="Online / Offline" data-tsw="' + c.i + '"></button><b>' + T(st === "live" ? "Online" : "Offline", st === "live" ? "ऑनलाइन" : "ऑफ़लाइन") + '</b>'
+      : st === "pend" ? '<span>⏳</span><b>' + T("Waiting for approval", "मंज़ूरी का इंतज़ार") + '</b>' : '<span>🔴</span><b>Offline</b>') + '</div>';
+    var lkPill = '<div class="td-pill2" style="flex:1;min-width:0;gap:6px;padding:6px 10px;font-size:12.5px"><b class="td-lk">' + (c.link ? 'patabook.in/' + esc(c.link) : T("No link yet", "अभी लिंक नहीं")) + '</b><button type="button" class="td-ed" data-lk="' + c.i + '" aria-label="' + T(c.link ? "Change link" : "Create link", c.link ? "लिंक बदलें" : "लिंक बनाएँ") + '">✏️</button></div>';
+    var topRow = '<div class="td-row">' + swPill + lkPill + '</div><div class="err" id="sub' + c.i + '" style="font-size:11.5px"></div>';
     var lgBox = box("🖼️", T("Shop logo", "दुकान का लोगो"),
       ph.logo ? '<p>' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;vertical-align:middle;margin-inline-end:8px">' : '') + T(c.logo ? "Your logo is set." : "No logo added yet.", c.logo ? "आपका लोगो लगा है।" : "अभी लोगो नहीं लगाया।") + '</p><a class="td-b lt" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change logo ›" : "Add logo ›", c.logo ? "लोगो बदलें ›" : "लोगो जोड़ें ›") + '</a>'
         : '<p>' + T("Logo is not in your plan.", "लोगो आपके प्लान में नहीं है।") + '</p><span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>');
@@ -121,7 +127,7 @@
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
-      '<div class="td-g" style="margin-bottom:14px">' + swBox + lkBox + '</div>' +
+      topRow + '<div style="height:12px"></div>' +
       '<div class="td-shop"><div class="td-sh"><div><h2>' + esc(b.name) + '</h2><p>' + esc([x.category || b.category, city].filter(Boolean).join(" · ")) + '</p></div>' +
       '<div class="td-pill">' + (c.tier === "platinum" ? "💎 " : c.tier === "gold" ? "👑 " : "") + esc(TN) + (paid ? " " + T("MEMBER", "सदस्य") : "") + '</div></div>' +
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
