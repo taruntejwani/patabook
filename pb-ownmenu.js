@@ -12,7 +12,16 @@
   }
   function en() { try { return (localStorage.getItem("pb-lang") || "en") !== "hi"; } catch (e) { return true; } }
   var ov = null, btn = null;
-  function glyph(open) { if (btn) btn.textContent = open ? "✕" : "☰"; }
+  function css() {   /* "मेरी दुकान" वाला ही इफ़ेक्ट: बटन घूमकर ☰ ↔ ✕, मेन्यू ऊपर से खुलता है, आइटम एक-एक करके आते हैं */
+    if (document.getElementById("pbmAnim")) return;
+    var st = document.createElement("style"); st.id = "pbmAnim";
+    st.textContent = "@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}";
+    document.head.appendChild(st);
+  }
+  function glyph(open) {
+    if (!btn) return; btn.textContent = open ? "✕" : "☰";
+    try { if (btn.animate && !matchMedia("(prefers-reduced-motion:reduce)").matches) btn.animate([{ transform: "rotate(-90deg)", opacity: .3 }, { transform: "none", opacity: 1 }], { duration: 220, easing: "ease-out" }); } catch (e) {}
+  }
   function kill() { if (ov) { ov.remove(); ov = null; glyph(false); } }
   function close() { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else kill(); }
   function open() {
@@ -22,7 +31,7 @@
     var r = btn.getBoundingClientRect(), pn = document.createElement("div");
     pn.style.cssText = "position:absolute;top:" + Math.round(r.bottom + 8) + "px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
     pn.innerHTML = '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>';
-    ov.appendChild(pn); document.body.appendChild(ov); glyph(true);
+    css(); pn.className = "pbmp"; ov.appendChild(pn); document.body.appendChild(ov); glyph(true);
     ov.addEventListener("click", function (e) {
       var a = e.target.closest("[data-k]");
       if (!a) { close(); return; }
