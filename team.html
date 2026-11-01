@@ -74,7 +74,7 @@ main{padding:14px 14px 96px}
   var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {}, WORK = {}, SRC = {}, EARN = [], DED = null, EM = '', ADDOPEN = false, CITIES = null;
+  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {}, WORK = {}, SRC = {}, EARN = [], DED = null, EM = '', ADDOPEN = false, CITIES = null, TABPUSH = false, SKIP = 0;
   var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ Owner कर सकता है।', 'duplicate': 'इसी नाम और नंबर की दुकान पहले से जुड़ी है।', 'limit3': 'इस नंबर पर पहले से 3 दुकानें हैं।', 'bad phone': 'मोबाइल नंबर 10 अंकों का सही होना चाहिए।', 'bad name': 'दुकान का नाम 2 से 80 अक्षर का होना चाहिए।', 'bad category': 'श्रेणी सही नहीं है।', 'rate limit': 'बहुत जल्दी-जल्दी हो रहा है, थोड़ी देर बाद कोशिश करें।', 'slug conflict': 'यह नाम पहले से है, नाम थोड़ा बदलकर देखें।' };
   function eMsg(e) { var m = String(e && e.message || e); for (var k in ER) if (m.indexOf(k) >= 0) return ER[k]; return 'गलती: ' + m; }
 
@@ -145,7 +145,11 @@ main{padding:14px 14px 96px}
     if (TAB === 'log') return drawLog();
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tab]'); if (t) { ADDOPEN = false; TAB = t.dataset.tab; draw(); window.scrollTo(0, 0); if (t.dataset.add === '1') showAddForm(); }
+    var t = e.target.closest('[data-tab]'); if (!t) return;
+    var nt = t.dataset.tab; ADDOPEN = false;
+    if (nt === 'home' && TABPUSH) { TABPUSH = false; SKIP = 0; try { history.back(); return; } catch (x) {} }
+    if (nt !== 'home' && TAB === 'home' && !TABPUSH) { TABPUSH = true; try { history.pushState({ pbTab: 1 }, ''); } catch (x) {} }
+    TAB = nt; draw(); window.scrollTo(0, 0); if (t.dataset.add === '1') showAddForm();
   });
 
   /* ───────── टीम ───────── */
@@ -270,7 +274,7 @@ main{padding:14px 14px 96px}
         var res = await rpc('pb_team_add_shop', { p: row });
         var slug = (res && res.slug) || row.slug;
         if ($('nR').checked && slug) { try { await rpc('pb_team_ready', { p_slug: slug, p_note: $('nNote').value.trim() || null }); } catch (e2) {} }
-        ADDOPEN = false; try { history.back(); } catch (e3) {}
+        ADDOPEN = false; SKIP = 1; try { history.back(); } catch (e3) { SKIP = 0; }
         shSt = 'all'; shQ = name; MSG.ok = '✅ "' + name + '" जुड़ गई — आपके नाम से, जाँच के लिए।';
         TAB = 'shops'; draw();
         setTimeout(function () { var ho = $('body'); if (ho) ho.insertAdjacentHTML('afterbegin', '<p class="ok">' + esc(MSG.ok) + '</p>'); }, 50);
@@ -278,7 +282,11 @@ main{padding:14px 14px 96px}
     };
   }
   function closeAddForm() { if (ADDOPEN) { try { history.back(); return; } catch (e) {} } ADDOPEN = false; drawShops(); }
-  window.addEventListener('popstate', function () { if (ADDOPEN) { ADDOPEN = false; if (TAB === 'shops') drawShops(); } });
+  window.addEventListener('popstate', function () {
+    if (SKIP) { SKIP = 0; return; }
+    if (ADDOPEN) { ADDOPEN = false; if (TAB === 'shops') drawShops(); return; }
+    if (TAB !== 'home') { TABPUSH = false; TAB = 'home'; draw(); window.scrollTo(0, 0); }
+  });
 
   /* ───────── दुकानें ───────── */
   async function drawShops() {
