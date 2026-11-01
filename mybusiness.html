@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#1a73e8">
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
+<script src="pb-tejdash.js"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -938,7 +939,7 @@ function lkOpen(i){
     catch(x){const m=x.message||"";er.style.color="#c5221f";er.textContent=/link_taken/.test(m)?T("यह नाम अभी किसी और ने ले लिया।","Someone just took this name."):/link_locked/.test(m)?T("लिंक बदलने की सीमा पूरी हो चुकी है।","Change limit reached."):/link_reserved/.test(m)?T("यह नाम नहीं मिल सकता।","This name is not allowed."):T("सेव नहीं हुआ, फिर कोशिश करें।","Could not save. Try again.");go.disabled=false;}};
 }
 /* 🏪 My Shop मुख्य पन्ना: दो-दो चौकोर डिब्बे; हर डिब्बे पर Online/Offline स्विच */
-let HIDE_SLUG="",TDPROF=false;
+let HIDE_SLUG="",TDPROF=false,BOOT=true;
 function shopTiles(en){
   return '<div class="shg">'+ROWS.map((b,i)=>{
     if(HIDE_SLUG&&b.slug===HIDE_SLUG)return "";
@@ -1009,6 +1010,7 @@ function draw(){
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");
   if(inSet&&ROWS[SET.shop]){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
+  if(BOOT&&ROWS.some(r=>r&&r.slug==="tejwani-detergent-and-chemical-gandhidham-31oyn")){list.innerHTML='<p class="note">…</p>';return;}   /* पूरा डेटा आने तक: पुराना card / FREE फ़्लैश नहीं */
   let _td="";
   try{if(window.PBTejDash){const ti=ROWS.findIndex(r=>r.slug===PBTejDash.SLUG);if(ti>=0){const tb=ROWS[ti];if(!PBTejDash.ready())PBTejDash.load(tb.slug,draw);
     _td=PBTejDash.html({en,b:tb,i:ti,extra:(vacBlock(tb,ti)||"")+(homeBlock(tb,ti)||""),profOpen:TDPROF,profHtml:TDPROF?offBlock(tb,ti,en)+profBlock(tb,ti)+verifyBlock(tb,ti):"",tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
@@ -1225,7 +1227,7 @@ async function start(){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else ERR=(e.status===404||/function|schema cache/i.test(e.message))?"e_setup":"e_net";
   }
-  draw();
+  BOOT=false;draw();
   /* होम पेज की "Offline: प्रोफ़ाइल पूरी करो" पट्टी से सीधे Settings → प्रोफ़ाइल */
   /* होम के ☰ मेन्यू से सीधे Gallery / Report: #go=photo | #go=rep (एक दुकान हो तो वही खुलती है, ज़्यादा हों तो दुकान चुनने पर) */
   runDeep();
@@ -1310,7 +1312,7 @@ start();
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-watermark.js"></script>
-<script src="pb-back.js"></script><script src="pb-gallery.js"></script><script src="pb-tejdash.js"></script>
+<script src="pb-back.js"></script><script src="pb-gallery.js"></script>
 
 </body>
 </html>
