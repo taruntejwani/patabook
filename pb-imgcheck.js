@@ -94,7 +94,7 @@
       var I = await shopInfo(info.slug), ctxo = { kind: info.kind || "shop", item: String(info.name || "").slice(0, 80), shop: String(I.shop || "").slice(0, 80), cat: String(I.cat || "").slice(0, 60), sub: String(I.sub || "").slice(0, 60), svc: String(I.svc || "").slice(0, 120), unit: I.unit || "" };
       var sm = await small(file), data = sm.data;
       /* 📱 पक्की जांच (बिना AI): phone के screenshot का नाप screen जैसा लंबा-पतला होता है (जैसे 1080×2400) या नाम में Screenshot */
-      if (info.poster ? /screen ?shot|screenshot|scrnshot/i.test(String(file && file.name || "")) : isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से स्क्रीनशॉट पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
+      if (info.kind === "logo") { /* लोगो screenshot से भी बन सकता है — नाप / नाम की screenshot-जाँच नहीं */ } else if (info.poster ? /screen ?shot|screenshot|scrnshot/i.test(String(file && file.name || "")) : isScreen(file, sm.w, sm.h)) { dbg("🤖 नाप से स्क्रीनशॉट पकड़ा (" + sm.w + "×" + sm.h + ")"); return { ok: false, cat: "screen", msg: msg("screen"), local: true }; }
       var ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 15000);
       try {
         var r = await fetch(base() + "/check-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ img: data, ctx: ctxo }), signal: ctl.signal });
@@ -102,7 +102,7 @@
         if (window.console) console.log("PataBook AI photo check:", j);
         dbg((j.skipped ? "⚠️ AI जांच नहीं हुई (" + j.skipped + ")" : "🤖 AI [" + (j.src || "?") + "]: " + (j.ok === false ? "❌ रोका – " + j.cat : "✅ ठीक")) +
           (j.what ? " · \"" + j.what + "\"" : j.r ? " · " + String(j.r).slice(0, 120) : "") + " · " + sm.w + "×" + sm.h + (j.ge ? " · Gemini error: " + j.ge : ""));
-        if (j && j.ok === false) return { ok: false, cat: j.cat, msg: msg(j.cat) };
+        if (j && j.ok === false && !(info.kind === "logo" && j.cat === "screen")) return { ok: false, cat: j.cat, msg: msg(j.cat) };
         return { ok: true };
       } finally { clearTimeout(tm); }
     } catch (e) { dbg("⚠️ AI जांच नहीं हुई: " + (e && e.name === "AbortError" ? "15 सेकंड में जवाब नहीं आया" : String(e && e.message || e))); return { ok: true, skipped: "err" }; }
