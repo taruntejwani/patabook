@@ -158,6 +158,7 @@
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
       goRow + goRow2 +
+      (c.extra ? '<div style="margin-top:14px">' + c.extra + '</div>' : '') +
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
         '<div class="td-m"><div class="td-mt"><div><h3>' + T("Your ", "आपका ") + esc(TN) + T(" plan", " प्लान") + '</h3><p>' + (until ? T("Valid till ", "समाप्ति: ") + esc(until) : T("No expiry", "कोई समाप्ति नहीं")) + '</p></div>' +
         (paid ? '<span class="td-pill" style="background:#e3f7ea;color:#13845b;border-color:#bfe8cf">' + T("ACTIVE", "चालू") + '</span>' : '') + '</div><div class="td-pl">' + plans + '</div></div>' : '') +
