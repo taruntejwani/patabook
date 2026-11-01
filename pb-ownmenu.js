@@ -21,17 +21,12 @@
     ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
     var r = btn.getBoundingClientRect(), pn = document.createElement("div");
     pn.style.cssText = "position:absolute;top:" + Math.round(r.bottom + 8) + "px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
-    pn.innerHTML = '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>' +
-      '<a data-k="out" style="' + ROW + 'color:#c5221f;border-top:1px solid #eef1f7;margin-top:4px"><span style="font-size:20px;width:24px;text-align:center">🚪</span>' + (h ? "लॉग आउट" : "Log out") + '</a>';
+    pn.innerHTML = '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>';
     ov.appendChild(pn); document.body.appendChild(ov); glyph(true);
     ov.addEventListener("click", function (e) {
       var a = e.target.closest("[data-k]");
       if (!a) { close(); return; }
       if (a.dataset.k === "set") { location.href = "mybusiness.html"; return; }
-      if (!confirm(h ? "लॉग आउट करें?" : "Log out?")) return;
-      try { localStorage.removeItem("pb-my-shops"); localStorage.removeItem("pb-my-shop-st"); } catch (x) {}
-      var go = function () { kill(); location.href = "index.html"; };
-      try { (window.PBA && PBA.logout ? PBA.logout() : Promise.resolve()).catch(function () {}).then(go); } catch (x) { go(); }
     });
     if (window.PBBack) PBBack.open(kill);
   }
