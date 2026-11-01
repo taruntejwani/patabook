@@ -1249,7 +1249,7 @@ function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROW
 /* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
 let PENDCAT="";function openShop(i,cat){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
 function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
-window.addEventListener("popstate",e=>{const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));SET.shop=SD===0?null:(st.shop==null?null:st.shop);ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
+window.addEventListener("popstate",e=>{DEEP=0;const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));SET.shop=SD===0?null:(st.shop==null?null:st.shop);ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
 /* ☰ मेन्यू: Home जैसा — Preview, Gallery, Report, Notifications, Settings, Log out (एक से ज़्यादा दुकान हो तो दुकान चुनो; plan में न हो तो 🔒) */
 let OMOV=null;
 function ownMenu(){
@@ -1299,7 +1299,7 @@ $("list").addEventListener("click",e=>{
   {const tw=e.target.closest("[data-tsw]");if(tw){e.preventDefault();e.stopPropagation();tileSwitch(+tw.dataset.tsw,tw);return;}}
   {const sl=e.target.closest("[data-tdsel]");if(sl){TDSEL=+sl.dataset.tdsel;draw();return;}}
   {const tp=e.target.closest("[data-tdprof]");if(tp){TDPROF=!TDPROF;draw();return;}}
-  {const tg=e.target.closest("[data-tdgo]");if(tg){openShop(+tg.dataset.tdi,tg.dataset.tdgo);return;}}
+  {const tg=e.target.closest("[data-tdgo]");if(tg){DEEP=0;openShop(+tg.dataset.tdi,tg.dataset.tdgo);return;}}
   {const ot=e.target.closest("[data-openshop]");if(ot){ntOpen(false);openShop(+ot.dataset.openshop,"");return;}}
   {const pp=e.target.closest("[data-pop]");if(pp){e.preventDefault();popEdit(pp.dataset.popshop,pp.dataset.pop);return;}}
   {const ps=e.target.closest("[data-profshop]");if(ps){openShop(+ps.dataset.profshop,"");return;}}
