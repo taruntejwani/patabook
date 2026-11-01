@@ -2,7 +2,7 @@
    अगर भाषा English चुनी है तो admin panel के हिंदी शब्द/वाक्य अपने-आप English में दिखते हैं
    (पेज के text, placeholder, title और alert/confirm/prompt संदेश). Hindi चुनने पर कुछ नहीं बदलता. */
 (function () {
-  var en = false; try { en = localStorage.getItem('pb-lang') === 'en'; } catch (e) {}
+  var en = false; try { en = localStorage.getItem('pb-lang') !== 'hi'; } catch (e) {}
   if (!en) return;
   document.documentElement.lang = 'en';
   var D = {

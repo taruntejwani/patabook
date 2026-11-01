@@ -39,7 +39,7 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
 </head>
 <body>
 <div class="wrap">
- <div class="top"><a class="back" href="team.html">← टीम</a><div class="brand">PataBook</div></div>
+ <div class="top"><a class="back" href="team.html" data-en="← Team">← टीम</a><div class="brand">PataBook</div></div>
  <div class="card">
 
   <form id="s1" autocomplete="on" novalidate>
@@ -123,7 +123,7 @@ if(!PBA.mobile||!PBA.mobile.enabled()){$("e1").textContent=msg({code:"otp_not_co
 </script>
 <script>
 /* English चुनी हो तो data-en वाले हिस्से English में */
-(function(){var en=false;try{en=/^(?!hi$)./.test(localStorage.getItem("pb-lang")||"");}catch(e){}window.PB_EN=en;if(!en)return;
+(function(){var en=false;try{en=(localStorage.getItem("pb-lang")||"en")!=="hi";}catch(e){}window.PB_EN=en;if(!en)return;
 document.documentElement.lang="en";document.querySelectorAll("[data-en]").forEach(function(el){el.textContent=el.getAttribute("data-en");});})();
 </script>
 <script src="pb-panel-lang.js"></script>

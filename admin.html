@@ -256,7 +256,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function gate(kind, extra) {
     $('panel').hidden = true;
     var h = kind === 'login'
-      ? (function(){var en=false;try{en=localStorage.getItem('pb-lang')==='en'}catch(e){}return '<div class="msg"><h2>'+(en?'🔒 Admin login':'🔒 एडमिन लॉगिन')+'</h2><p>'+(en?'Log in with your admin email or admin mobile number.':'अपने एडमिन ईमेल या एडमिन मोबाइल नंबर से लॉगिन करें।')+'</p><a href="' + PBA.loginUrl('admin.html') + '">'+(en?'✉️ Log in with Email':'✉️ ईमेल से लॉगिन करें')+'</a>' + (PBA.mobile && PBA.mobile.enabled() ? ' <a href="admin-login.html" style="margin-top:8px;background:#0b2f73">'+(en?'📱 Log in with Mobile OTP':'📱 मोबाइल OTP से लॉगिन करें')+'</a>' : '') + '</div>'})()
+      ? (function(){var en=false;try{en=localStorage.getItem('pb-lang')!=='hi'}catch(e){}return '<div class="msg"><h2>'+(en?'🔒 Admin login':'🔒 एडमिन लॉगिन')+'</h2><p>'+(en?'Log in with your admin email or admin mobile number.':'अपने एडमिन ईमेल या एडमिन मोबाइल नंबर से लॉगिन करें।')+'</p><a href="' + PBA.loginUrl('admin.html') + '">'+(en?'✉️ Log in with Email':'✉️ ईमेल से लॉगिन करें')+'</a>' + (PBA.mobile && PBA.mobile.enabled() ? ' <a href="admin-login.html" style="margin-top:8px;background:#0b2f73">'+(en?'📱 Log in with Mobile OTP':'📱 मोबाइल OTP से लॉगिन करें')+'</a>' : '') + '</div>'})()
       : kind === 'noadmin'
       ? '<div class="msg"><h2>⛔ अनुमति नहीं</h2><p>यह ईमेल एडमिन सूची में नहीं है' + (extra ? ' (' + esc(extra) + ')' : '') + '. Supabase में <b>pb_admins</b> में यह ईमेल जोड़ें।</p></div>'
       : '<div class="msg"><h2>⚠️ एडमिन सेटअप बाकी</h2><p class="err">' + esc(extra || '') + '</p><p>Supabase में <b>sql-02-admin-and-search.sql</b> चलाएँ।</p></div>';

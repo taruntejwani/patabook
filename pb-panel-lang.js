@@ -2,7 +2,7 @@
    कोड में लिखे हिन्दी वाक्यों को English मोड में पन्ने पर बदल देता है; डेटा और सर्वर को नहीं छूता।
    भाषा वही 'pb-lang' key में रहती है जो पूरी साइट इस्तेमाल करती है। */
 (function () {
-  var L = 'hi'; try { L = localStorage.getItem('pb-lang') === 'en' ? 'en' : 'hi'; } catch (e) {}
+  var L = 'en'; try { L = localStorage.getItem('pb-lang') === 'hi' ? 'hi' : 'en'; } catch (e) {}
   var pairs = [], sorted = null, DEV = /[ऀ-ॿ]/;
   var PBL = window.PBL = {
     lang: function () { return L; },
