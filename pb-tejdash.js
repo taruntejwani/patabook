@@ -6,7 +6,7 @@
 (function () {
   var SB = "https://kkvbpzysktozghnxplxv.supabase.co", KEY = "sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
   var SLUG = "tejwani-detergent-and-chemical-gandhidham-31oyn";
-  var X = null, ASKED = false;
+  var X = null, ASKED = false, LAST = null;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function css() {
     if (document.getElementById("tdCss")) return;
@@ -19,9 +19,9 @@
       ".td.t-platinum{--a:#3f5075;--soft:#e8edf7;--hd:linear-gradient(120deg,#1c2539,#3f5075 55%,#4a6fa5)}" +
       ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{min-height:44px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
       ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;line-height:1;flex:none}" +
-      ".td-wide{grid-column:1/-1}.td-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px;margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}" +
+      ".td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}" +
       ".td-mi{display:flex;align-items:center;gap:9px;min-width:0;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:13px}.td-mi b{flex:1;min-width:0;font-weight:700}.td-mic{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}" +
-      "@media(max-width:700px){.td-mini{grid-template-columns:1fr}}" +
+      "" +
       ".td-eb{color:#2563eb;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
       ".td-h{font-size:22px;font-weight:800;margin:2px 0 4px}.td-sub{color:#687386;font-size:13px;margin-bottom:14px}" +
       ".td-shop{background:var(--hd);color:#fff;border-radius:20px;padding:20px;margin-bottom:14px}" +
@@ -51,6 +51,7 @@
       ".td-b.lt{background:var(--soft);color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}" +
       ".td-ft{padding:11px 16px;color:#687386;font-size:11.5px;border-top:1px solid #e7ebf2}" +
       "@media(max-width:700px){.td-st{grid-template-columns:repeat(2,1fr)}.td-g{grid-template-columns:1fr}.td-pl{grid-template-columns:1fr}.td-p{border-inline-end:0;border-bottom:1px solid #e7ebf2}.td-p:last-child{border-bottom:0}.td-h{font-size:19px}}";
+    s.textContent += ".tdov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center}.tdsh{background:#fff;width:100%;max-width:520px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.tdov{align-items:center}.tdsh{border-radius:20px}}.tdsh .td{--a:#2563eb;--soft:#f3f7ff}.tdsh .td-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.tdsh .td-hd h3{margin:0;font-size:17px}.tdsh .td-x{font-size:20px;padding:4px 10px;border-radius:10px;background:#f1f3f7}";
     document.head.appendChild(s);
   }
   function load(slug, cb) {
@@ -101,16 +102,16 @@
         : '<p>' + T("Logo is not in your plan.", "लोगो आपके प्लान में नहीं है।") + '</p><span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>');
     var apBox = box("📋", T("Profile & approval", "प्रोफ़ाइल और मंज़ूरी"),
       '<p>' + T("Profile ", "प्रोफ़ाइल ") + (pct == null ? "—" : pct + "%") + T(" complete", " पूरी") + '</p>' +
-      (!done ? '<button type="button" class="td-b" data-setprof="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
+      (!done ? '<button type="button" class="td-b" data-tdact="prof" data-tdi="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
         : st === "live" ? '<span class="td-tag">✓ ' + T("Approved & live", "मंज़ूर और लाइव") + '</span>'
         : st === "pend" ? '<span class="td-tag off">⏳ ' + T("Sent for approval", "मंज़ूरी के लिए भेजी") + '</span>'
-        : st === "draft" ? '<button type="button" class="td-b" data-submit="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
+        : st === "draft" ? '<button type="button" class="td-b" data-tdact="submit" data-tdi="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
         : '<span class="td-tag off">' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</span>'));
     var apRow = '<div class="td-mi"><span class="td-mic">📋</span><b>' + T("Approval", "मंज़ूरी") + '</b>' +
-      (!done ? '<button type="button" class="td-b" data-setprof="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
+      (!done ? '<button type="button" class="td-b" data-tdact="prof" data-tdi="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
         : st === "live" ? '<span class="td-tag">✓ ' + T("Approved & live", "मंज़ूर और लाइव") + '</span>'
         : st === "pend" ? '<span class="td-tag off">⏳ ' + T("Sent for approval", "मंज़ूरी के लिए भेजी") + '</span>'
-        : st === "draft" ? '<button type="button" class="td-b" data-submit="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
+        : st === "draft" ? '<button type="button" class="td-b" data-tdact="submit" data-tdi="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
         : '<span class="td-tag off">' + T("Offline", "ऑफ़लाइन") + '</span>') + '</div>';
     var lgRow = '<div class="td-mi"><span class="td-mic">' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:30px;height:30px;border-radius:8px;object-fit:cover">' : '🏷️') + '</span><b>' + T("Logo", "लोगो") + '</b>' +
       (ph.logo ? '<a class="td-b lt" style="padding:5px 12px;font-size:12.5px" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change ›" : "Add ›", c.logo ? "बदलें ›" : "जोड़ें ›") + '</a>' : '<span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>') + '</div>';
@@ -136,6 +137,7 @@
       if (has(t, "banner")) li.push(en ? "Banner" : "बैनर");
       return '<div class="td-p' + (cur ? ' cur' : '') + '">' + (cur ? '<span class="td-cl">' + T("Your plan", "आपका प्लान") + '</span>' : '') + '<h4>' + esc(PBPlan.name(t, en).toUpperCase()) + '</h4><ul>' + li.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + '</ul></div>';
     }
+    LAST = { en: en, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
@@ -145,7 +147,7 @@
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct != null ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' : '') + '</div></div>' +
       '<div class="td-st">' +
-      '<div class="td-s td-wide"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + '</em><div class="td-mini">' + apRow + lgRow + feats + '</div></div>' +
+      '<div class="td-s td-click" role="button" tabindex="0" data-tdopen="1"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
       '<div class="td-s"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + '</em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
@@ -160,5 +162,25 @@
       '<article class="td-t"><div class="td-i">⚙️</div><div><h4>' + T("All settings", "सारी सेटिंग") + '</h4><p>' + T("Photos, numbers, notifications and more.", "फ़ोटो, नंबर, नोटिफ़िकेशन और बहुत कुछ।") + '</p><button type="button" class="td-b lt" data-tdgo="" data-tdi="' + c.i + '">' + T("Open ›", "खोलें ›") + '</button></div></article>' +
       '</div></section>';
   }
+  function openDetails() {
+    if (!LAST || document.getElementById("tdOv")) return;
+    var ov = document.createElement("div"); ov.className = "tdov"; ov.id = "tdOv";
+    var en = LAST.en;
+    ov.innerHTML = '<div class="tdsh t-' + LAST.tier + '"><div class="td t-' + LAST.tier + '"><div class="td-hd"><h3>' + esc(en ? "Profile & features" : "प्रोफ़ाइल और सुविधाएँ") + ' · ' + (LAST.pct == null ? "—" : LAST.pct + "%") + '</h3><button type="button" class="td-x" data-tdx="1" aria-label="' + esc(en ? "Close" : "बंद करें") + '">✕</button></div>' + LAST.html + '</div></div>';
+    function gone() { if (ov.isConnected) ov.remove(); document.body.style.overflow = ""; }
+    ov._close = function () { if (window.PBBack) PBBack.close(); else gone(); };
+    document.body.appendChild(ov); document.body.style.overflow = "hidden";
+    if (window.PBBack) PBBack.open(gone, ov);
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-tdopen]"); if (t) { openDetails(); return; }
+    var ov = document.getElementById("tdOv"); if (!ov) return;
+    if (e.target === ov || e.target.closest("[data-tdx]")) { ov._close(); return; }
+    var a = e.target.closest("[data-tdact]");
+    if (a) { var k = a.dataset.tdact, i = +a.dataset.tdi; ov._close(); setTimeout(function () { if (window.PBTejDash.act) PBTejDash.act(k, i, a); }, 60); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("[data-tdopen]")) { e.preventDefault(); openDetails(); }
+  });
   window.PBTejDash = { SLUG: SLUG, html: html, load: load, ready: function () { return !!X; } };
 })();

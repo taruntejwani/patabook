@@ -1011,6 +1011,7 @@ function draw(){
     _td=PBTejDash.html({en,b:tb,i:ti,tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
   {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=!!_td;if(_s)_s.hidden=!!_td;}
   HIDE_SLUG=_td?PBTejDash.SLUG:"";
+  if(window.PBTejDash)PBTejDash.act=(k,i,btn)=>{if(k==="submit")submitApproval(i,btn);else openShop(i,"");};
   list.innerHTML=_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
