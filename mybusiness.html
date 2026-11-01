@@ -1003,7 +1003,10 @@ function draw(){
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");
   if(inSet&&ROWS[SET.shop]){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
-  list.innerHTML=shopTiles(en);
+  let _td="";
+  try{if(window.PBTejDash){const ti=ROWS.findIndex(r=>r.slug===PBTejDash.SLUG);if(ti>=0){const tb=ROWS[ti];if(!PBTejDash.ready())PBTejDash.load(tb.slug,draw);
+    _td=PBTejDash.html({en,b:tb,i:ti,tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
+  list.innerHTML=_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
   const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
@@ -1278,6 +1281,7 @@ $("list").addEventListener("click",e=>{
    const ap=e.target.closest(".anpt");if(ap){const t=$("antip");if(t)t.textContent=ap.dataset.t;return;}}
   {const lk=e.target.closest("[data-lk]");if(lk){e.preventDefault();e.stopPropagation();lkOpen(+lk.dataset.lk);return;}}
   {const tw=e.target.closest("[data-tsw]");if(tw){e.preventDefault();e.stopPropagation();tileSwitch(+tw.dataset.tsw,tw);return;}}
+  {const tg=e.target.closest("[data-tdgo]");if(tg){openShop(+tg.dataset.tdi,tg.dataset.tdgo);return;}}
   {const ot=e.target.closest("[data-openshop]");if(ot){ntOpen(false);openShop(+ot.dataset.openshop,"");return;}}
   {const pp=e.target.closest("[data-pop]");if(pp){e.preventDefault();popEdit(pp.dataset.popshop,pp.dataset.pop);return;}}
   {const ps=e.target.closest("[data-profshop]");if(ps){openShop(+ps.dataset.profshop,"");return;}}
@@ -1296,7 +1300,7 @@ start();
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-watermark.js"></script>
-<script src="pb-back.js"></script><script src="pb-gallery.js"></script>
+<script src="pb-back.js"></script><script src="pb-gallery.js"></script><script src="pb-tejdash.js"></script>
 
 </body>
 </html>
