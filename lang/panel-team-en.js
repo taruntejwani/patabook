@@ -28,7 +28,7 @@ PBL.add([
 ["यह ईमेल टीम में नहीं है","This email is not in the team"],
 ["। एडमिन से कहें कि इसे टीम में जोड़ें, या सही Google ईमेल से लॉगिन करें।",". Ask the admin to add it to the team, or log in with the correct Google email."],
 ["👥 टीम (मालिक)","👥 Team (Owner)"],["👥 मैनेजर","👥 Manager"],["🧾 स्टाफ","🧾 Staff"],
-["होम","Home"],["मेरे स्टाफ","My staff"],["मेरी कमाई","My earnings"],["जाँच पूरी","Checked"],["रिकॉर्ड","Records"],
+["← होम","← Home"],["होम","Home"],["मेरे स्टाफ","My staff"],["मेरी कमाई","My earnings"],["जाँच पूरी","Checked"],["रिकॉर्ड","Records"],
 ["पूरी टीम","whole team"],["मेरी टीम","my team"],["मेरा","mine"],
 ["इस महीने दुकानें (","Shops this month ("],
 ["कुल लाइव दुकानें","Total live shops"],["इस महीने प्लान बिके","Plans sold this month"],["कुल प्लान बिके","Total plans sold"],
