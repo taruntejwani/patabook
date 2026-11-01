@@ -6,7 +6,7 @@
 (function () {
   var SB = "https://kkvbpzysktozghnxplxv.supabase.co", KEY = "sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
   var SLUG = "tejwani-detergent-and-chemical-gandhidham-31oyn";
-  var X = null, ASKED = false, LAST = null;
+  var XS = {}, AS = {}, LAST = null;
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function css() {
     if (document.getElementById("tdCss")) return;
@@ -55,22 +55,22 @@
     document.head.appendChild(s);
   }
   function load(slug, cb) {
-    if (ASKED) return; ASKED = true;
-    function ok(j) { X = j || {}; try { cb && cb(); } catch (e) {} }
+    if (AS[slug]) return; AS[slug] = 1;
+    function ok(j) { XS[slug] = j || {}; try { cb && cb(); } catch (e) {} }
     fetch(SB + "/rest/v1/businesses?select=rating,review_count,is_verified,home_service,business_code,category,address&slug=eq." + encodeURIComponent(slug), { headers: { apikey: KEY, Authorization: "Bearer " + KEY } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (a) {
         if (a && a[0]) return ok(a[0]);
         return fetch(SB + "/rest/v1/businesses?select=business_code,category&slug=eq." + encodeURIComponent(slug), { headers: { apikey: KEY, Authorization: "Bearer " + KEY } })
           .then(function (r) { return r.ok ? r.json() : null; }).then(function (a2) { ok(a2 && a2[0]); });
-      }).catch(function () { X = {}; });
+      }).catch(function () { XS[slug] = {}; });
   }
   function fmtDate(u, en) {
     try { var d = new Date(u); if (isNaN(d)) return ""; return d.toLocaleDateString(en ? "en-IN" : "hi-IN", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; }
   }
   function html(c) {
     css();
-    var en = c.en, b = c.b, T = function (e, h) { return esc(en ? e : h); }, x = X || {};
+    var en = c.en, b = c.b, T = function (e, h) { return esc(en ? e : h); }, x = XS[c.b.slug] || {};
     var tn = (window.PBPlan ? PBPlan.name(c.tier, en) : c.tier), TN = String(tn).toUpperCase();
     var paid = c.tier !== "free";
     var stTxt = c.status === "live" ? (en ? "Live" : "लाइव") : c.status === "pend" ? (en ? "Pending" : "मंज़ूरी बाकी") : (en ? "Offline" : "ऑफ़लाइन");
@@ -99,7 +99,7 @@
     var topRow = '<div class="td-row">' + swPill + lkPill + '</div><div class="err" id="sub' + c.i + '" style="font-size:11.5px"></div>';
     var lgBox = box("🖼️", T("Shop logo", "दुकान का लोगो"),
       ph.logo ? '<p>' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;vertical-align:middle;margin-inline-end:8px">' : '') + T(c.logo ? "Your logo is set." : "No logo added yet.", c.logo ? "आपका लोगो लगा है।" : "अभी लोगो नहीं लगाया।") + '</p><a class="td-b lt" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change logo ›" : "Add logo ›", c.logo ? "लोगो बदलें ›" : "लोगो जोड़ें ›") + '</a>'
-        : '<p>' + T("Logo is not in your plan.", "लोगो आपके प्लान में नहीं है।") + '</p><span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>');
+        : '<p>' + T("Logo is not in your plan.", "लोगो आपके प्लान में नहीं है।") + '</p><span class="td-tag off">' + T("🔒 Not in your plan", "🔒 प्लान में नहीं") + '</span>');
     var apBox = box("📋", T("Profile & approval", "प्रोफ़ाइल और मंज़ूरी"),
       '<p>' + T("Profile ", "प्रोफ़ाइल ") + (pct == null ? "—" : pct + "%") + T(" complete", " पूरी") + '</p>' +
       (!done ? '<button type="button" class="td-b" data-tdact="prof" data-tdi="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
@@ -114,15 +114,15 @@
         : st === "draft" ? '<button type="button" class="td-b" data-tdact="submit" data-tdi="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
         : '<span class="td-tag off">' + T("Offline", "ऑफ़लाइन") + '</span>') + '</div>';
     var lgRow = '<div class="td-mi"><span class="td-mic">' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:30px;height:30px;border-radius:8px;object-fit:cover">' : '🏷️') + '</span><b>' + T("Logo", "लोगो") + '</b>' +
-      (ph.logo ? '<a class="td-b lt" style="padding:5px 12px;font-size:12.5px" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change ›" : "Add ›", c.logo ? "बदलें ›" : "जोड़ें ›") + '</a>' : '<span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>') + '</div>';
+      (ph.logo ? '<a class="td-b lt" style="padding:5px 12px;font-size:12.5px" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change ›" : "Add ›", c.logo ? "बदलें ›" : "जोड़ें ›") + '</a>' : '<span class="td-tag off">' + T("🔒 Not in your plan", "🔒 प्लान में नहीं") + '</span>') + '</div>';
     var feats = [
       miniX("📞", "Call & WhatsApp", "कॉल और WhatsApp", "Customers can call or message you directly.", "ग्राहक सीधे फ़ोन या WhatsApp कर सकते हैं।", !!b.phone, "Active", "चालू है", "Add a number", "नंबर जोड़ें"),
-      miniX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      miniX("📦", "Products", "प्रोडक्ट्स", "List what you sell.", "जो बेचते हैं उसकी सूची।", !!ph.products, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      miniX("🌐", "Website & Social Links", "वेबसाइट और सोशल लिंक", "Add your website and Instagram.", "वेबसाइट और Instagram जोड़ें।", !!ph.social, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
+      miniX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "🔒 Not in your plan", "🔒 प्लान में नहीं"),
+      miniX("📦", "Products", "प्रोडक्ट्स", "List what you sell.", "जो बेचते हैं उसकी सूची।", !!ph.products, "Active", "चालू है", "🔒 Not in your plan", "🔒 प्लान में नहीं"),
+      miniX("🌐", "Website & Social Links", "वेबसाइट और सोशल लिंक", "Add your website and Instagram.", "वेबसाइट और Instagram जोड़ें।", !!ph.social, "Active", "चालू है", "🔒 Not in your plan", "🔒 प्लान में नहीं"),
       miniX("🛡️", "Verified", "वेरिफ़ाइड", "A trust badge on your profile.", "प्रोफ़ाइल पर भरोसे का निशान।", !!x.is_verified, "Verified", "वेरिफ़ाइड", "Not verified yet", "अभी वेरिफ़ाइड नहीं"),
-      miniX("👥", "Hiring", "भर्ती", "Post job openings.", "नौकरी की जगहें डालें।", !!ph.hiring, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      miniX("📊", "Reports", "रिपोर्ट", "Views, calls and enquiries.", "Views, कॉल और enquiries देखें।", !!ph.report, "Active", "चालू है", "Not in your plan", "प्लान में नहीं")
+      miniX("👥", "Hiring", "भर्ती", "Post job openings.", "नौकरी की जगहें डालें।", !!ph.hiring, "Active", "चालू है", "🔒 Not in your plan", "🔒 प्लान में नहीं"),
+      miniX("📊", "Reports", "रिपोर्ट", "Views, calls and enquiries.", "Views, कॉल और enquiries देखें।", !!ph.report, "Active", "चालू है", "🔒 Not in your plan", "🔒 प्लान में नहीं")
     ].join("");
     function lim(t, k) { return window.PBPlan ? PBPlan.limT(t, k) : 0; }
     function has(t, f) { return window.PBPlan ? PBPlan.hasT(t, f) : false; }
@@ -139,7 +139,7 @@
     }
     LAST = { c: c, en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
     function goBox(ic, e1, h1, e2, h2, on, cat) {
-      return '<div class="td-s' + (on ? ' td-click' : '') + '"' + (on ? ' role="button" tabindex="0" data-tdgo="' + cat + '" data-tdi="' + c.i + '"' : '') + '><small class="td-big">' + ic + ' ' + T(e1, h1) + '</small><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : T("Not in your plan", "प्लान में नहीं")) + '</em></div>';
+      return '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="' + (on ? cat : 'plan') + '" data-tdi="' + c.i + '"><small class="td-big">' + ic + ' ' + T(e1, h1) + '</small><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : '<b style="color:#687386">🔒 ' + T("Upgrade ›", "प्लान लें ›") + '</b>') + '</em></div>';
     }
     var goRow = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px">' + goBox("🖼️", "Gallery", "गैलरी", "Shop photos", "दुकान की फ़ोटो", !!ph.photos, "photo") + goBox("📊", "Report", "रिपोर्ट", "Views & calls", "Views और कॉल", !!ph.report, "rep") + '</div>';
     var goRow2 = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px"><a class="td-s td-click" style="display:block;color:inherit;text-decoration:none" href="business.html?slug=' + encodeURIComponent(b.slug) + '"><small class="td-big">👁️ ' + T("Preview", "प्रीव्यू") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></a>' +
@@ -190,5 +190,5 @@
     var m = d.querySelector(".td-m");
     return '<div class="td t-' + esc(LAST.c.tier) + '">' + LAST.html + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
   }
-  window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function () { return !!X; } };
+  window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function (slug) { return !!XS[slug]; } };
 })();
