@@ -19,6 +19,9 @@
       ".td.t-platinum{--a:#3f5075;--soft:#e8edf7;--hd:linear-gradient(120deg,#1c2539,#3f5075 55%,#4a6fa5)}" +
       ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{min-height:44px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
       ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;line-height:1;flex:none}" +
+      ".td-wide{grid-column:1/-1}.td-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px;margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}" +
+      ".td-mi{display:flex;align-items:center;gap:9px;min-width:0;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:13px}.td-mi b{flex:1;min-width:0;font-weight:700}.td-mic{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}" +
+      "@media(max-width:700px){.td-mini{grid-template-columns:1fr}}" +
       ".td-eb{color:#2563eb;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
       ".td-h{font-size:22px;font-weight:800;margin:2px 0 4px}.td-sub{color:#687386;font-size:13px;margin-bottom:14px}" +
       ".td-shop{background:var(--hd);color:#fff;border-radius:20px;padding:20px;margin-bottom:14px}" +
@@ -75,6 +78,9 @@
     var rat = x.rating ? "★ " + esc(x.rating) : (en ? "—" : "—");
     var ratSub = x.rating ? (x.review_count ? esc(x.review_count) + (en ? " reviews" : " समीक्षाएँ") : "") : (en ? "No rating yet" : "अभी कोई रेटिंग नहीं");
     var ph = c.ph || {};
+    function miniX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
+      return '<div class="td-mi"><span class="td-mic">' + ic + '</span><b>' + T(e1, h1) + '</b><span class="td-tag' + (on ? '' : ' off') + '">' + T(on ? onE : offE, on ? onH : offH) + '</span></div>';
+    }
     function tileX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
       return '<article class="td-t"><div class="td-i">' + ic + '</div><div><h4>' + T(e1, h1) + '</h4><p>' + T(e2, h2) + '</p><span class="td-tag' + (on ? '' : ' off') + '">' + T(on ? onE : offE, on ? onH : offH) + '</span></div></article>';
     }
@@ -100,16 +106,22 @@
         : st === "pend" ? '<span class="td-tag off">⏳ ' + T("Sent for approval", "मंज़ूरी के लिए भेजी") + '</span>'
         : st === "draft" ? '<button type="button" class="td-b" data-submit="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
         : '<span class="td-tag off">' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</span>'));
-    var ctl = '<div class="td-sec"><h3>' + T("Shop controls", "दुकान कंट्रोल") + '</h3><p>' + T("Your logo and approval.", "आपका लोगो और मंज़ूरी।") + '</p></div><div class="td-g">' + lgBox + apBox + '</div>';
+    var apRow = '<div class="td-mi"><span class="td-mic">📋</span><b>' + T("Approval", "मंज़ूरी") + '</b>' +
+      (!done ? '<button type="button" class="td-b" data-setprof="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
+        : st === "live" ? '<span class="td-tag">✓ ' + T("Approved & live", "मंज़ूर और लाइव") + '</span>'
+        : st === "pend" ? '<span class="td-tag off">⏳ ' + T("Sent for approval", "मंज़ूरी के लिए भेजी") + '</span>'
+        : st === "draft" ? '<button type="button" class="td-b" data-submit="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
+        : '<span class="td-tag off">' + T("Offline", "ऑफ़लाइन") + '</span>') + '</div>';
+    var lgRow = '<div class="td-mi"><span class="td-mic">' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:30px;height:30px;border-radius:8px;object-fit:cover">' : '🏷️') + '</span><b>' + T("Logo", "लोगो") + '</b>' +
+      (ph.logo ? '<a class="td-b lt" style="padding:5px 12px;font-size:12.5px" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change ›" : "Add ›", c.logo ? "बदलें ›" : "जोड़ें ›") + '</a>' : '<span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>') + '</div>';
     var feats = [
-      tileX("📞", "Call & WhatsApp", "कॉल और WhatsApp", "Customers can call or message you directly.", "ग्राहक सीधे फ़ोन या WhatsApp कर सकते हैं।", !!b.phone, "Active", "चालू है", "Add a number", "नंबर जोड़ें"),
-      tileX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      tileX("🏷️", "Logo", "लोगो", "Your logo on your public profile.", "आपके प्रोफ़ाइल पर आपका लोगो।", !!ph.logo, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      tileX("📦", "Products", "प्रोडक्ट्स", "List what you sell.", "जो बेचते हैं उसकी सूची।", !!ph.products, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      tileX("🌐", "Website & Social Links", "वेबसाइट और सोशल लिंक", "Add your website and Instagram.", "वेबसाइट और Instagram जोड़ें।", !!ph.social, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      tileX("🛡️", "Verified", "वेरिफ़ाइड", "A trust badge on your profile.", "प्रोफ़ाइल पर भरोसे का निशान।", !!x.is_verified, "Verified", "वेरिफ़ाइड", "Not verified yet", "अभी वेरिफ़ाइड नहीं"),
-      tileX("👥", "Hiring", "भर्ती", "Post job openings.", "नौकरी की जगहें डालें।", !!ph.hiring, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
-      tileX("📊", "Reports", "रिपोर्ट", "Views, calls and enquiries.", "Views, कॉल और enquiries देखें।", !!ph.report, "Active", "चालू है", "Not in your plan", "प्लान में नहीं")
+      miniX("📞", "Call & WhatsApp", "कॉल और WhatsApp", "Customers can call or message you directly.", "ग्राहक सीधे फ़ोन या WhatsApp कर सकते हैं।", !!b.phone, "Active", "चालू है", "Add a number", "नंबर जोड़ें"),
+      miniX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
+      miniX("📦", "Products", "प्रोडक्ट्स", "List what you sell.", "जो बेचते हैं उसकी सूची।", !!ph.products, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
+      miniX("🌐", "Website & Social Links", "वेबसाइट और सोशल लिंक", "Add your website and Instagram.", "वेबसाइट और Instagram जोड़ें।", !!ph.social, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
+      miniX("🛡️", "Verified", "वेरिफ़ाइड", "A trust badge on your profile.", "प्रोफ़ाइल पर भरोसे का निशान।", !!x.is_verified, "Verified", "वेरिफ़ाइड", "Not verified yet", "अभी वेरिफ़ाइड नहीं"),
+      miniX("👥", "Hiring", "भर्ती", "Post job openings.", "नौकरी की जगहें डालें।", !!ph.hiring, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
+      miniX("📊", "Reports", "रिपोर्ट", "Views, calls and enquiries.", "Views, कॉल और enquiries देखें।", !!ph.report, "Active", "चालू है", "Not in your plan", "प्लान में नहीं")
     ].join("");
     function lim(t, k) { return window.PBPlan ? PBPlan.limT(t, k) : 0; }
     function has(t, f) { return window.PBPlan ? PBPlan.hasT(t, f) : false; }
@@ -133,12 +145,10 @@
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct != null ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' : '') + '</div></div>' +
       '<div class="td-st">' +
-      '<div class="td-s"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + '</em></div>' +
+      '<div class="td-s td-wide"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + '</em><div class="td-mini">' + apRow + lgRow + feats + '</div></div>' +
       '<div class="td-s"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + '</em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
-      ctl + '<div class="td-sec"><h3>' + T("Your shop features", "आपकी दुकान की सुविधाएँ") + '</h3><p>' + T("Features included in your plan.", "आपके प्लान में मिलने वाली सुविधाएँ।") + '</p></div>' +
-      '<div class="td-g">' + feats + '</div>' +
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
         '<div class="td-m"><div class="td-mt"><div><h3>' + T("Your ", "आपका ") + esc(TN) + T(" plan", " प्लान") + '</h3><p>' + (until ? T("Valid till ", "समाप्ति: ") + esc(until) : T("No expiry", "कोई समाप्ति नहीं")) + '</p></div>' +
         (paid ? '<span class="td-pill" style="background:#e3f7ea;color:#13845b;border-color:#bfe8cf">' + T("ACTIVE", "चालू") + '</span>' : '') + '</div><div class="td-pl">' + plans + '</div></div>' : '') +
