@@ -138,6 +138,10 @@
       return '<div class="td-p' + (cur ? ' cur' : '') + '">' + (cur ? '<span class="td-cl">' + T("Your plan", "आपका प्लान") + '</span>' : '') + '<h4>' + esc(PBPlan.name(t, en).toUpperCase()) + '</h4><ul>' + li.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + '</ul></div>';
     }
     LAST = { en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
+    function goBox(ic, e1, h1, e2, h2, on, cat) {
+      return '<div class="td-s' + (on ? ' td-click' : '') + '"' + (on ? ' role="button" tabindex="0" data-tdgo="' + cat + '" data-tdi="' + c.i + '"' : '') + '><small>' + ic + ' ' + T(e1, h1) + '</small><strong style="font-size:15px">' + T(e2, h2) + '</strong><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : T("Not in your plan", "प्लान में नहीं")) + '</em></div>';
+    }
+    var goRow = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px">' + goBox("🖼️", "Gallery", "गैलरी", "Shop photos", "दुकान की फ़ोटो", !!ph.photos, "photo") + goBox("📊", "Report", "रिपोर्ट", "Views & calls", "Views और कॉल", !!ph.report, "rep") + '</div>';
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
@@ -151,6 +155,7 @@
       '<div class="td-s td-click" role="button" tabindex="0" data-tdopen="1"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
+      goRow +
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
         '<div class="td-m"><div class="td-mt"><div><h3>' + T("Your ", "आपका ") + esc(TN) + T(" plan", " प्लान") + '</h3><p>' + (until ? T("Valid till ", "समाप्ति: ") + esc(until) : T("No expiry", "कोई समाप्ति नहीं")) + '</p></div>' +
         (paid ? '<span class="td-pill" style="background:#e3f7ea;color:#13845b;border-color:#bfe8cf">' + T("ACTIVE", "चालू") + '</span>' : '') + '</div><div class="td-pl">' + plans + '</div></div>' : '') +
@@ -158,7 +163,6 @@
       '<div class="td-g">' +
       '<article class="td-t"><div class="td-i">✏️</div><div><h4>' + T("Edit profile", "प्रोफ़ाइल बदलें") + '</h4><p>' + T("Change address, timings, services and photos.", "पता, समय, सेवाएँ और फ़ोटो बदलें।") + '</p><a class="td-b" href="edit.html?slug=' + encodeURIComponent(b.slug) + '">' + T("Edit ›", "बदलें ›") + '</a></div></article>' +
       '<article class="td-t"><div class="td-i">👁️</div><div><h4>' + T("Preview public profile", "पब्लिक प्रोफ़ाइल देखें") + '</h4><p>' + T("See what customers see.", "ग्राहकों को जो दिखता है वह देखें।") + '</p><a class="td-b lt" href="business.html?slug=' + encodeURIComponent(b.slug) + '">' + T("Preview ›", "देखें ›") + '</a></div></article>' +
-      (ph.report ? '<article class="td-t"><div class="td-i">📊</div><div><h4>' + T("Shop performance", "दुकान की Performance") + '</h4><p>' + T("Views, calls and WhatsApp enquiries.", "Views, कॉल और WhatsApp enquiries।") + '</p><button type="button" class="td-b lt" data-tdgo="rep" data-tdi="' + c.i + '">' + T("Open report ›", "रिपोर्ट खोलें ›") + '</button></div></article>' : '') +
       '<article class="td-t"><div class="td-i">⚙️</div><div><h4>' + T("All settings", "सारी सेटिंग") + '</h4><p>' + T("Photos, numbers, notifications and more.", "फ़ोटो, नंबर, नोटिफ़िकेशन और बहुत कुछ।") + '</p><button type="button" class="td-b lt" data-tdgo="" data-tdi="' + c.i + '">' + T("Open ›", "खोलें ›") + '</button></div></article>' +
       '</div></section>';
   }
