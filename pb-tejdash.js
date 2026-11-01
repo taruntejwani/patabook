@@ -162,10 +162,7 @@
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
         '<div class="td-m"><div class="td-mt"><div><h3>' + T("Your ", "आपका ") + esc(TN) + T(" plan", " प्लान") + '</h3><p>' + (until ? T("Valid till ", "समाप्ति: ") + esc(until) : T("No expiry", "कोई समाप्ति नहीं")) + '</p></div>' +
         (paid ? '<span class="td-pill" style="background:#e3f7ea;color:#13845b;border-color:#bfe8cf">' + T("ACTIVE", "चालू") + '</span>' : '') + '</div><div class="td-pl">' + plans + '</div></div>' : '') +
-      '<div class="td-sec"><h3>' + T("Manage your shop", "दुकान मैनेज करें") + '</h3><p>' + T("Keep your shop details up to date.", "अपनी दुकान की जानकारी अपडेट रखें।") + '</p></div>' +
-      '<div class="td-g">' +
-      '<article class="td-t"><div class="td-i">✏️</div><div><h4>' + T("Edit profile", "प्रोफ़ाइल बदलें") + '</h4><p>' + T("Change address, timings, services and photos.", "पता, समय, सेवाएँ और फ़ोटो बदलें।") + '</p><a class="td-b" href="edit.html?slug=' + encodeURIComponent(b.slug) + '">' + T("Edit ›", "बदलें ›") + '</a></div></article>' +
-      '</div></section>';
+      '</section>';
   }
   function openDetails() {
     if (!LAST || document.getElementById("tdOv")) return;
