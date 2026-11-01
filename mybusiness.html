@@ -935,8 +935,10 @@ function lkOpen(i){
     catch(x){const m=x.message||"";er.style.color="#c5221f";er.textContent=/link_taken/.test(m)?T("यह नाम अभी किसी और ने ले लिया।","Someone just took this name."):/link_locked/.test(m)?T("लिंक बदलने की सीमा पूरी हो चुकी है।","Change limit reached."):/link_reserved/.test(m)?T("यह नाम नहीं मिल सकता।","This name is not allowed."):T("सेव नहीं हुआ, फिर कोशिश करें।","Could not save. Try again.");go.disabled=false;}};
 }
 /* 🏪 My Shop मुख्य पन्ना: दो-दो चौकोर डिब्बे; हर डिब्बे पर Online/Offline स्विच */
+let HIDE_SLUG="";
 function shopTiles(en){
   return '<div class="shg">'+ROWS.map((b,i)=>{
+    if(HIDE_SLUG&&b.slug===HIDE_SLUG)return "";
     const s=shopSt(b),lg=LOGOS[b.slug],pc=profPct(b),has=!!(SST&&SST[b.slug]&&("owner_off" in SST[b.slug]));
     const col=pc==null||pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
     const chip=s==="live"?'<span class="st live">✅ Online</span>':s==="pend"?'<span class="st pend">⏳ '+(en?"Waiting":"मंज़ूरी का इंतज़ार")+'</span>':'<span class="st draft">🔴 Offline</span>';
@@ -1008,6 +1010,7 @@ function draw(){
   try{if(window.PBTejDash){const ti=ROWS.findIndex(r=>r.slug===PBTejDash.SLUG);if(ti>=0){const tb=ROWS[ti];if(!PBTejDash.ready())PBTejDash.load(tb.slug,draw);
     _td=PBTejDash.html({en,b:tb,i:ti,tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
   {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=!!_td;if(_s)_s.hidden=!!_td;}
+  HIDE_SLUG=_td?PBTejDash.SLUG:"";
   list.innerHTML=_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
