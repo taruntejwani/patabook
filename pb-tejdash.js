@@ -143,7 +143,7 @@
     }
     var goRow = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px">' + goBox("🖼️", "Gallery", "गैलरी", "Shop photos", "दुकान की फ़ोटो", !!ph.photos, "photo") + goBox("📊", "Report", "रिपोर्ट", "Views & calls", "Views और कॉल", !!ph.report, "rep") + '</div>';
     var goRow2 = '<div class="td-st" style="grid-template-columns:repeat(2,1fr);margin-top:-6px"><a class="td-s td-click" style="display:block;color:inherit;text-decoration:none" href="business.html?slug=' + encodeURIComponent(b.slug) + '"><small class="td-big">👁️ ' + T("Preview", "प्रीव्यू") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></a>' +
-      '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="" data-tdi="' + c.i + '"><small class="td-big">⚙️ ' + T("All settings", "सारी सेटिंग") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></div></div>';
+      '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="acct" data-tdi="' + c.i + '"><small class="td-big">⚙️ ' + T("Settings & security", "सेटिंग और सुरक्षा") + '</small><em><b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b></em></div></div>';
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
