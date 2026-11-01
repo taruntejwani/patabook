@@ -44,10 +44,30 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
 .card.dim{opacity:.6}
 .tw{overflow-x:auto}.tw td:not(:first-child),.tw th:not(:first-child){text-align:right;white-space:nowrap}
 .big{font-size:20px;font-weight:900}
+
+/* ── नया मोबाइल-फ़र्स्ट रूप (सिर्फ़ डिज़ाइन) ── */
+body{background:#f4f7fb}
+header{background:linear-gradient(135deg,#0b2f73,#1769aa);padding:14px 16px 16px;border-radius:0 0 22px 22px;box-shadow:0 6px 18px rgba(11,47,115,.18)}
+header h1{font-size:19px;line-height:1.25}header h1 small{display:block;font-size:11px;font-weight:600;opacity:.8;margin-top:2px;letter-spacing:.3px}
+header a{background:#ffffff22;border:1px solid #ffffff55;border-radius:11px;padding:7px 11px;text-decoration:none}
+main{padding:14px 14px 96px}
+.card{border-radius:18px;box-shadow:0 3px 12px rgba(16,42,67,.05)}
+.btn{border-radius:13px;padding:12px 15px}
+#m>.tabs{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,760px);margin:0;gap:0;flex-wrap:nowrap;background:#fff;border-top:1px solid var(--bd);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:20;box-shadow:0 -4px 16px rgba(16,42,67,.06)}
+#m>.tabs button{flex:1;min-width:0;border:0;border-radius:12px;background:none;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#7a8794}
+#m>.tabs button b{font-size:20px;font-weight:400;line-height:1}
+#m>.tabs button.on{background:#eaf2ff;color:var(--bl)}
+#m>.tabs button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.hstat{background:#fff;border:1px solid var(--bd);border-radius:18px;padding:14px;box-shadow:0 3px 12px rgba(16,42,67,.05)}
+.hstat i{font-style:normal;font-size:20px}.hstat strong{display:block;font-size:26px;margin:6px 0 2px;color:#0b2f73}.hstat span{font-size:12px;color:var(--mu)}
+.hq{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hq button{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:14px;text-align:left;font:inherit;font-weight:800;font-size:14px;color:#202124;cursor:pointer}
+.hq button b{display:block;font-size:22px;margin-bottom:6px;font-weight:400}
 </style>
 </head>
 <body>
-<header><h1 id="ttl">👥 टीम</h1><a href="admin.html" id="adm" hidden>Admin</a></header>
+<header><h1><span id="ttl">👥 टीम</span><small id="ttlS">PataBook · टीम वर्कस्पेस</small></h1><a href="admin.html" id="adm" hidden>Admin</a></header>
 <main id="m"><div class="mut">लोड हो रहा है…</div></main>
 <script>
 (function () {
@@ -85,21 +105,39 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
       else $('adm').hidden = false;
     } catch (e) { if (e.message === 'login') return; return $('m').innerHTML = '<div class="gate"><p class="err">' + esc(eMsg(e)) + '</p></div>'; }
     $('ttl').textContent = ROLE === 'owner' ? '👥 टीम (Owner)' : ROLE === 'manager' ? '👥 Manager' : '🧾 Staff';
-    TAB = ROLE === 'staff' ? 'shops' : 'team';
+    TAB = 'home';
     if (location.hash === '#shops') TAB = 'shops';
     draw();
   }
   function tabs() {
-    var T = [];
-    if (ROLE !== 'staff') T.push(['team', ROLE === 'owner' ? '👥 टीम' : '👥 मेरे Staff']);
-    T.push(['shops', '🧾 दुकानें']);
-    T.push(['earn', ROLE === 'staff' ? '💰 मेरी कमाई' : '💰 कमाई / काम']);
-    if (ROLE === 'owner') T.push(['ready', '📬 जाँच पूरी']);
-    if (ROLE !== 'staff') T.push(['log', '📜 रिकॉर्ड']);
-    return '<div class="tabs">' + T.map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    var T = [['home', '🏠', 'होम']];
+    if (ROLE !== 'staff') T.push(['team', '👥', ROLE === 'owner' ? 'टीम' : 'मेरे Staff']);
+    T.push(['shops', '🧾', 'दुकानें']);
+    T.push(['earn', '💰', ROLE === 'staff' ? 'मेरी कमाई' : 'कमाई']);
+    if (ROLE === 'owner') T.push(['ready', '📬', 'जाँच पूरी']);
+    if (ROLE !== 'staff') T.push(['log', '📜', 'रिकॉर्ड']);
+    return '<div class="tabs">' + T.map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'on' : '') + '"><b>' + t[1] + '</b><span>' + t[2] + '</span></button>'; }).join('') + '</div>';
+  }
+  async function drawHome() {
+    var b = $('body'), W = [];
+    try { W = await rpc('pb_team_work', {}) || []; } catch (e) { W = []; }
+    var o = { shops_month: 0, live_total: 0, sold_month: 0, sold_total: 0 };
+    W.forEach(function (x) { for (var k in o) o[k] += +x[k] || 0; });
+    var who = ROLE === 'owner' ? 'पूरी टीम' : ROLE === 'manager' ? 'मेरी टीम' : 'मेरा';
+    var h = '<div class="hgrid"><div class="hstat"><i>🏪</i><strong>' + o.shops_month + '</strong><span>इस महीने दुकानें (' + who + ')</span></div>' +
+      '<div class="hstat"><i>✅</i><strong>' + o.live_total + '</strong><span>कुल Live दुकानें</span></div>' +
+      '<div class="hstat"><i>💎</i><strong>' + o.sold_month + '</strong><span>इस महीने plan बिके</span></div>' +
+      '<div class="hstat"><i>📈</i><strong>' + o.sold_total + '</strong><span>कुल plan बिके</span></div></div>' +
+      '<h3 style="margin:6px 2px 10px;font-size:16px">जल्दी के काम</h3><div class="hq">' +
+      '<button data-tab="shops"><b>🧾</b>दुकानें देखें</button>' +
+      '<button data-tab="earn"><b>💰</b>' + (ROLE === 'staff' ? 'मेरी कमाई' : 'कमाई / काम') + '</button>' +
+      (ROLE !== 'staff' ? '<button data-tab="team"><b>👥</b>' + (ROLE === 'owner' ? 'टीम' : 'मेरे Staff') + '</button>' : '<button onclick="location.href=\'list.html\'"><b>＋</b>नई दुकान जोड़ें</button>') +
+      (ROLE === 'owner' ? '<button data-tab="ready"><b>📬</b>जाँच पूरी</button>' : ROLE === 'manager' ? '<button data-tab="log"><b>📜</b>रिकॉर्ड</button>' : '') + '</div>';
+    b.innerHTML = h;
   }
   function draw() {
     $('m').innerHTML = tabs() + '<div id="body"><div class="mut">लोड हो रहा है…</div></div>';
+    if (TAB === 'home') return drawHome();
     if (TAB === 'team') return drawTeam();
     if (TAB === 'shops') return drawShops();
     if (TAB === 'earn') return drawEarn();
@@ -107,7 +145,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
     if (TAB === 'log') return drawLog();
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tab]'); if (t) { TAB = t.dataset.tab; draw(); }
+    var t = e.target.closest('[data-tab]'); if (t) { TAB = t.dataset.tab; draw(); window.scrollTo(0, 0); }
   });
 
   /* ───────── टीम ───────── */
