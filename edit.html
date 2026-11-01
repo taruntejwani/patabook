@@ -180,7 +180,7 @@ const $=id=>document.getElementById(id),EN=!!window.PB_EN;
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
 /* बिज़नेस के प्रकार — "दुकान जोड़ें" form (list.html) वाली ही list */
 const BTYPES=[
- ["🏪 बिज़नेस का प्रकार","🏪 Business type",[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी (थोक विक्रेता)"],["Manufacturer","निर्माता (निर्माता)"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा (सेवा)"],["Repair & Service Centre","मरम्मत और सेवा Centre"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]]]
+ ["🏪 बिज़नेस का प्रकार","🏪 Business type",[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी"],["Manufacturer","निर्माता"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा प्रदाता"],["Repair & Service Centre","मरम्मत और सेवा केंद्र"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]]]
 ];
 const DAYS=[["","कोई छुट्टी नहीं (सातों दिन खुला)","No weekly off (open all 7 days)"],["Sunday","रविवार","Sunday"],["Monday","सोमवार","Monday"],["Tuesday","मंगलवार","Tuesday"],["Wednesday","बुधवार","Wednesday"],["Thursday","गुरुवार","Thursday"],["Friday","शुक्रवार","Friday"],["Saturday","शनिवार","Saturday"]];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

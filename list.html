@@ -678,11 +678,7 @@ const OTP_URL=String((window.PB_SITE&&PB_SITE.otpUrl)||"").replace(/\/$/,"");
 const EN=()=>!!(window.PB&&PB.lang&&PB.lang()!=="hi");
 /* बिज़नेस का प्रकार (Manufacturer / Wholesaler / Retailer …) — description में "Type:" line बनकर जाता है */
 const BTYPES=[
- ["🏭 बनाने वाले","🏭 Makers",[["Manufacturer","निर्माता (निर्माता)"],["Processor / Packer","प्रोसेसर / पैकर"],["Job Worker","जॉब वर्कर (नौकरी काम)"],["Assembler","असेंबलर"]]],
- ["🚚 थोक / बीच के व्यापारी","🚚 Trade (bulk)",[["Importer","इम्पोर्टर"],["Exporter","एक्सपोर्टर"],["C&F / Super Stockist","C&F / सुपर स्टॉकिस्ट"],["Distributor","डिस्ट्रीब्यूटर"],["Wholesaler","होलसेलर (थोक)"],["Stockist","स्टॉकिस्ट"],["Authorised Dealer","अधिकृत डीलर"],["Trader / Commission Agent","ट्रेडर / दलाल"]]],
- ["🏪 ग्राहक तक","🏪 To customers",[["Retailer","रिटेलर (दुकान)"],["Showroom","शोरूम"],["Franchise","फ्रैंचाइज़ी"],["Online Seller","ऑनलाइन विक्रेता"],["Hawker / Street Vendor","फेरीवाला / ठेला"]]],
- ["🛠️ सेवा","🛠️ Services",[["Service Provider","सेवा (सेवा)"],["Contractor","कॉन्ट्रैक्टर / ठेकेदार"],["Consultant / Professional","कंसल्टेंट / प्रोफेशनल"],["Rental / Hire","किराये पर (Rental)"],["Repair & Service Centre","रिपेयर / सर्विस सेंटर"]]],
- ["👷 नौकरी / काम","👷 Job / Work",[["Employee (Job)","नौकरी करता हूँ (Employee)"],["Freelancer / Self-employed","फ्रीलांसर / खुद का काम"],["Skilled Worker","कारीगर (Skilled कर्मचारी)"]]]
+ ["🏪 बिज़नेस का प्रकार","🏪 Business type",[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी"],["Manufacturer","निर्माता"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा प्रदाता"],["Repair & Service Centre","मरम्मत और सेवा केंद्र"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]]]
 ];
 function webNorm(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);if(!/\.[a-z]{2,}$/i.test(u.hostname))return null;return u.href.slice(0,200);}catch(e){return null;}}
 function n10(v){const d=String(v||"").replace(/\D/g,"");return d.length>10?d.slice(-10):d;}
