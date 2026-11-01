@@ -72,6 +72,25 @@
     function tileX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
       return '<article class="td-t"><div class="td-i">' + ic + '</div><div><h4>' + T(e1, h1) + '</h4><p>' + T(e2, h2) + '</p><span class="td-tag' + (on ? '' : ' off') + '">' + T(on ? onE : offE, on ? onH : offH) + '</span></div></article>';
     }
+    var st = c.status, canSw = st === "live" || st === "off", pct = c.pct, done = pct == null || pct >= 100;
+    var box = function (ic, h, body) { return '<article class="td-t"><div class="td-i">' + ic + '</div><div style="min-width:0;flex:1"><h4>' + h + '</h4>' + body + '</div></article>'; };
+    var swBox = box("🟢", T("Online / Offline", "ऑनलाइन / ऑफ़लाइन"),
+      canSw ? '<p>' + T(st === "live" ? "Customers can see your shop." : "Hidden from customers.", st === "live" ? "ग्राहकों को आपकी दुकान दिख रही है।" : "ग्राहकों से छिपी है।") + '</p><div style="display:flex;align-items:center;gap:10px"><button type="button" class="tsw" role="switch" aria-checked="' + (st === "live") + '" aria-label="Online / Offline" data-tsw="' + c.i + '"></button><b style="font-size:13px">' + T(st === "live" ? "Online" : "Offline", st === "live" ? "ऑनलाइन" : "ऑफ़लाइन") + '</b></div><div class="err" id="sub' + c.i + '" style="font-size:11.5px"></div>'
+        : st === "pend" ? '<p>' + T("PataBook is checking your shop.", "PataBook आपकी दुकान जाँच रहा है।") + '</p><span class="td-tag off">⏳ ' + T("Waiting for approval", "मंज़ूरी का इंतज़ार") + '</span>'
+        : '<p>' + T("Your shop is not live yet.", "आपकी दुकान अभी लाइव नहीं है।") + '</p><span class="td-tag off">🔴 Offline</span>');
+    var lkBox = box("🔗", T("Your shop link", "आपकी दुकान का लिंक"),
+      '<p>' + (c.link ? '<b>patabook.in/' + esc(c.link) + '</b>' : T("No custom link yet.", "अभी अपना लिंक नहीं बना।")) + '</p><button type="button" class="td-b lt" data-lk="' + c.i + '">✏️ ' + T(c.link ? "Change link" : "Create link", c.link ? "लिंक बदलें" : "लिंक बनाएँ") + '</button>');
+    var lgBox = box("🖼️", T("Shop logo", "दुकान का लोगो"),
+      ph.logo ? '<p>' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;vertical-align:middle;margin-inline-end:8px">' : '') + T(c.logo ? "Your logo is set." : "No logo added yet.", c.logo ? "आपका लोगो लगा है।" : "अभी लोगो नहीं लगाया।") + '</p><a class="td-b lt" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change logo ›" : "Add logo ›", c.logo ? "लोगो बदलें ›" : "लोगो जोड़ें ›") + '</a>'
+        : '<p>' + T("Logo is not in your plan.", "लोगो आपके प्लान में नहीं है।") + '</p><span class="td-tag off">' + T("Not in your plan", "प्लान में नहीं") + '</span>');
+    var apBox = box("📋", T("Profile & approval", "प्रोफ़ाइल और मंज़ूरी"),
+      '<p>' + T("Profile ", "प्रोफ़ाइल ") + (pct == null ? "—" : pct + "%") + T(" complete", " पूरी") + '</p>' +
+      (!done ? '<button type="button" class="td-b" data-setprof="' + c.i + '">' + T("Complete profile ›", "प्रोफ़ाइल पूरी करें ›") + '</button>'
+        : st === "live" ? '<span class="td-tag">✓ ' + T("Approved & live", "मंज़ूर और लाइव") + '</span>'
+        : st === "pend" ? '<span class="td-tag off">⏳ ' + T("Sent for approval", "मंज़ूरी के लिए भेजी") + '</span>'
+        : st === "draft" ? '<button type="button" class="td-b" data-submit="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
+        : '<span class="td-tag off">' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</span>'));
+    var ctl = '<div class="td-sec"><h3>' + T("Shop controls", "दुकान कंट्रोल") + '</h3><p>' + T("Go online or offline, your link, logo and approval.", "ऑनलाइन/ऑफ़लाइन, लिंक, लोगो और मंज़ूरी।") + '</p></div><div class="td-g">' + swBox + lkBox + lgBox + apBox + '</div>';
     var feats = [
       tileX("📞", "Call & WhatsApp", "कॉल और WhatsApp", "Customers can call or message you directly.", "ग्राहक सीधे फ़ोन या WhatsApp कर सकते हैं।", !!b.phone, "Active", "चालू है", "Add a number", "नंबर जोड़ें"),
       tileX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
@@ -110,7 +129,7 @@
       '<div class="td-s"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + '</em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
-      '<div class="td-sec"><h3>' + T("Your shop features", "आपकी दुकान की सुविधाएँ") + '</h3><p>' + T("Features included in your plan.", "आपके प्लान में मिलने वाली सुविधाएँ।") + '</p></div>' +
+      ctl + '<div class="td-sec"><h3>' + T("Your shop features", "आपकी दुकान की सुविधाएँ") + '</h3><p>' + T("Features included in your plan.", "आपके प्लान में मिलने वाली सुविधाएँ।") + '</p></div>' +
       '<div class="td-g">' + feats + '</div>' +
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
         '<div class="td-m"><div class="td-mt"><div><h3>' + T("Your ", "आपका ") + esc(TN) + T(" plan", " प्लान") + '</h3><p>' + (until ? T("Valid till ", "समाप्ति: ") + esc(until) : T("No expiry", "कोई समाप्ति नहीं")) + '</p></div>' +

@@ -1005,7 +1005,7 @@ function draw(){
   if(inSet&&ROWS[SET.shop]){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
   let _td="";
   try{if(window.PBTejDash){const ti=ROWS.findIndex(r=>r.slug===PBTejDash.SLUG);if(ti>=0){const tb=ROWS[ti];if(!PBTejDash.ready())PBTejDash.load(tb.slug,draw);
-    _td=PBTejDash.html({en,b:tb,i:ti,tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
+    _td=PBTejDash.html({en,b:tb,i:ti,tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});}}}catch(x){_td="";}
   list.innerHTML=_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
