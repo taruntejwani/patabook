@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <body>
 
 <div class="top">
-  <label class="locchip" title="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="मेरी लोकेशन से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="मेरी लोकेशन से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></label>
+  <label class="locchip" title="Choose city" data-hi="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="City from my location" data-hi="मेरी लोकेशन से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="search" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="City from my location" data-hi="मेरी लोकेशन से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></label>
   <div class="tr"><a class="addtop" id="addTop" href="list.html">＋ <span data-i="addtop">दुकान जोड़ें</span></a><a class="mapbtn" href="map.html" aria-label="PataBook Map"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1a73e8" d="M9 3 3 5.4v15.4l6-2.4 6 3 6-2.4V3.6L15 6zm0 2.3 6 3v12.4l-6-3z"/><path fill="#34a853" d="M3 5.4 9 3v12.4l-6 2.4z"/><path fill="#fbbc04" d="M15 8.3 21 6v12.4L15 20.7z"/></svg><span>Map</span></a>
   <span id="pbLang"></span></div>
 </div>
@@ -1206,5 +1206,6 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
   });
 })();
 </script>
+<script src="pb-hititle.js"></script>
 </body>
 </html>
