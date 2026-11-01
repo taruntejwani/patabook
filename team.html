@@ -428,6 +428,53 @@ main{padding:14px 14px 96px}
       return '<div class="card' + (r.status === 'cancelled' ? ' dim' : '') + '"><h3>' + esc(r.shop || r.slug) + '</h3><div class="mut">बिक्री: ' + new Date(r.sale_at).toLocaleDateString((window.PBL ? PBL.loc() : 'hi-IN'), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }) + (r.amount != null ? ' · प्लान ' + rs(r.amount) : '') + '</div><div class="ln">' + st + '</div>' + d + '</div>';
     }).join('');
   }
+  /* ───────── 📊 मुनाफ़ा रिपोर्ट: आज / हफ़्ता / महीना / साल / तारीख़ से तारीख़ (मौजूदा EARN डेटा से, DB में बदलाव नहीं) ───────── */
+  var RP = { mode: 'month', from: '', to: '' };
+  function istDay(d) { return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }); }
+  function addDays(ds, n) { var d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function rpRange() {
+    var t = istDay(new Date()), m = RP.mode;
+    if (m === 'today') return [t, t];
+    if (m === 'week') { var wd = new Date(t + 'T00:00:00Z').getUTCDay(); return [addDays(t, -((wd + 6) % 7)), t]; }
+    if (m === 'month') return [t.slice(0, 8) + '01', t];
+    if (m === 'year') return [t.slice(0, 5) + '01-01', t];
+    var f = RP.from || '0000-01-01', e = RP.to || '9999-12-31'; return f <= e ? [f, e] : [e, f];
+  }
+  function myShare(r) {
+    if (ROLE === 'staff') return +r.staff_share || 0;
+    if (ROLE === 'manager') return r.mgr_share != null ? (+r.mgr_share || 0) - (+r.staff_share || 0) : 0;
+    return (+r.profit || 0) - (+r.mgr_share || 0);
+  }
+  function rpHtml() {
+    var rg = rpRange(), T = { n: 0, amt: 0, pr: 0, f: 0, p: 0 }, D = {}, ks = [];
+    EARN.forEach(function (r) {
+      if (r.status === 'cancelled') return;
+      var d = istDay(r.sale_at); if (d < rg[0] || d > rg[1]) return;
+      var sh = myShare(r), fin = r.status === 'final';
+      T.n++; T.amt += +r.amount || 0; T.pr += +r.profit || 0; T[fin ? 'f' : 'p'] += sh;
+      if (!D[d]) { D[d] = { n: 0, pr: 0, sh: 0 }; ks.push(d); }
+      D[d].n++; D[d].pr += +r.profit || 0; D[d].sh += sh;
+    });
+    ks.sort().reverse();
+    var L = (window.PBL ? PBL.loc() : 'hi-IN'), fd = function (d) { return new Date(d + 'T00:00:00').toLocaleDateString(L, { day: 'numeric', month: 'short', year: 'numeric' }); };
+    var M = [['today', 'आज का दिन'], ['week', 'इस हफ़्ते'], ['month', 'इस महीने'], ['year', 'इस साल'], ['range', 'तारीख़ से तारीख़']];
+    var h = '<div class="tabs" id="rpT">' + M.map(function (x) { return '<button data-rp="' + x[0] + '" class="' + (RP.mode === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>';
+    if (RP.mode === 'range') h += '<div class="row" style="gap:8px;align-items:center;margin:0 0 10px"><span class="mut">शुरुआत</span><input type="date" id="rpF" value="' + RP.from + '" style="margin:0;flex:1"><span class="mut">अंत</span><input type="date" id="rpE" value="' + RP.to + '" style="margin:0;flex:1"></div>';
+    h += '<p class="mut" style="margin:0 0 8px">' + fd(rg[0] > '0001' ? rg[0] : istDay(new Date())) + (rg[0] === rg[1] ? '' : ' → ' + (rg[1] > '9000' ? fd(istDay(new Date())) : fd(rg[1]))) + '</p>';
+    h += '<div class="hgrid"><div class="hstat"><i>🧾</i><strong>' + T.n + '</strong><span>प्लान बिके</span></div>' +
+      '<div class="hstat"><i>💵</i><strong>' + rs(T.amt) + '</strong><span>कुल बिक्री (प्लान)</span></div>' +
+      (ROLE !== 'staff' ? '<div class="hstat"><i>📈</i><strong>' + rs(T.pr) + '</strong><span>कुल मुनाफ़ा</span></div>' : '') +
+      '<div class="hstat"><i>💰</i><strong>' + rs(T.f + T.p) + '</strong><span>मेरा हिस्सा</span></div></div>' +
+      '<p class="mut" style="margin:6px 2px">✅ पक्की: <b>' + rs(T.f) + '</b> · ⏳ बाकी: <b>' + rs(T.p) + '</b></p>';
+    h += ks.length ? '<div class="tw"><table><tr><th>दिन की तारीख़</th><th>कितने प्लान</th>' + (ROLE !== 'staff' ? '<th>मुनाफ़ा (₹)</th>' : '') + '<th>मेरा हिस्सा (₹)</th></tr>' + ks.map(function (d) { var x = D[d]; return '<tr><td>' + fd(d) + '</td><td>' + x.n + '</td>' + (ROLE !== 'staff' ? '<td>' + rs(x.pr) + '</td>' : '') + '<td class="v">' + rs(x.sh) + '</td></tr>'; }).join('') + '</table></div>' : '<p class="mut">इस अवधि में कोई बिक्री नहीं।</p>';
+    return h + '<p class="mut" style="font-size:12px">यह रिपोर्ट पिछले 6 महीने तक की बिक्री से बनती है।</p>';
+  }
+  function rpDraw() {
+    var box = $('rpBox'); if (!box) return;
+    box.innerHTML = '<h3>📊 मुनाफ़ा रिपोर्ट</h3>' + rpHtml();
+    box.querySelectorAll('[data-rp]').forEach(function (bt) { bt.onclick = function () { RP.mode = bt.dataset.rp; if (RP.mode === 'range' && !RP.from) { RP.to = istDay(new Date()); RP.from = addDays(RP.to, -29); } rpDraw(); }; });
+    var f = $('rpF'), e = $('rpE'); if (f) f.onchange = function () { RP.from = this.value; rpDraw(); }; if (e) e.onchange = function () { RP.to = this.value; rpDraw(); };
+  }
   async function drawEarn() {
     var b = $('body'), W;
     try { EARN = await rpc('pb_earn_rows', { p_months: 6 }) || []; W = await rpc('pb_team_work', {}) || []; }
@@ -437,7 +484,7 @@ main{padding:14px 14px 96px}
     keys.sort().reverse(); if (EM && keys.indexOf(EM) < 0) EM = '';
     var rows = EM ? EARN.filter(function (r) { return mkey(r.sale_at) === EM; }) : EARN;
     var sel = '<div class="card"><select id="eM" style="margin:0"><option value="">सभी (पिछले 6 महीने)</option>' + keys.map(function (k) { return '<option value="' + k + '"' + (k === EM ? ' selected' : '') + '>' + mlabel(k) + ' की बिक्री</option>'; }).join('') + '</select></div>';
-    b.innerHTML = (ROLE === 'owner' ? dedCard() : '') + workCard(W) + sel + earnSummary(rows, W) + salesList(rows);
+    b.innerHTML = (ROLE === 'owner' ? dedCard() : '') + workCard(W) + '<div class="card" id="rpBox"></div>' + sel + earnSummary(rows, W) + salesList(rows); rpDraw();
     $('eM').onchange = function () { EM = this.value; drawEarn(); };
     var sv = $('dedSave');
     if (sv) sv.onclick = async function () {
