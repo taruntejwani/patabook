@@ -558,3 +558,4 @@ PBL.add([["🔒 एडमिन लॉगिन","🔒 Admin login"],
 ["अनुरोध","requests"],
 ["पट्टी पर","bar"],
 ["होमपेज","homepage"]]);
+PBL.add([["टीम का नज़ारा","Team view"],["मैनेजर / स्टाफ का पैनल देखें (सिर्फ़ देखना)","See the manager / staff panel (view only)"]]);

@@ -66,6 +66,11 @@ main{padding:14px 14px 96px}
 .hq{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hq button{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:14px;text-align:left;font:inherit;font-weight:800;font-size:14px;color:#202124;cursor:pointer}
 .hq button b{display:block;font-size:22px;margin-bottom:6px;font-weight:400}
+
+.pvbar{position:sticky;top:0;z-index:40;background:#fff3cd;color:#664d03;border-bottom:1px solid #ffe69c;padding:8px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pvbar a{margin-left:auto;color:#0b2f73;font-weight:800;text-decoration:none;border:1.5px solid #0b2f73;border-radius:999px;padding:4px 11px;background:#fff}.pvbar a+a{margin-left:0}
+.pvbar.flash{background:#ffd8a8}
+body.pvw #m button:not([data-tab]):not([data-st]):not([data-rp]):not(.pvok),body.pvw #m input:not(#rpF):not(#rpE):not(#sQ),body.pvw #m select:not(#eM),body.pvw #m textarea{pointer-events:none;opacity:.55}
 </style>
 </head>
 <body>
@@ -80,7 +85,54 @@ main{padding:14px 14px 96px}
   var ER = { 'already in team': 'यह ईमेल पहले से टीम में है।', 'already admin': 'यह ईमेल पहले से एडमिन है।', 'staff limit': 'एक मैनेजर के नीचे अधिकतम 20 स्टाफ हो सकते हैं।', 'bad email': 'ईमेल सही नहीं लगता।', 'manager needed': 'पहले मैनेजर चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ मालिक कर सकता है।', 'duplicate': 'इसी नाम और नंबर की दुकान पहले से जुड़ी है।', 'limit3': 'इस नंबर पर पहले से 3 दुकानें हैं।', 'bad phone': 'मोबाइल नंबर 10 अंकों का सही होना चाहिए।', 'bad name': 'दुकान का नाम 2 से 80 अक्षर का होना चाहिए।', 'bad category': 'श्रेणी सही नहीं है।', 'rate limit': 'बहुत जल्दी-जल्दी हो रहा है, थोड़ी देर बाद कोशिश करें।', 'slug conflict': 'यह नाम पहले से है, नाम थोड़ा बदलकर देखें।' };
   function eMsg(e) { var m = String(e && e.message || e); for (var k in ER) if (m.indexOf(k) >= 0) return ER[k]; return 'गलती: ' + m; }
 
+  /* ───────── 👁 टीम का नज़ारा (सिर्फ़ मालिक, सिर्फ़ देखने के लिए): ?as=<id> या ?as=pick ───────── */
+  var VIEW = null;
+  var VW_WRITE = ['pb_team_add', 'pb_team_add_shop', 'pb_team_ready', 'pb_team_remove', 'pb_team_set', 'pb_team_set_pct', 'pb_admin_set_address', 'pb_deduct_set'];
   async function rpc(fn, args) {
+    if (!VIEW) return rpc0(fn, args);
+    args = args || {};
+    if (VW_WRITE.indexOf(fn) >= 0) throw new Error('यह सिर्फ़ देखने के लिए है — बदलाव नहीं हो सकता');
+    var m = VIEW.m, me = m.id, isM = m.role === 'manager';
+    if (fn === 'pb_team_role') return m.role;
+    if (fn === 'pb_team_me') {
+      var pr = m.perms || {}, pm = null;
+      if (m.role === 'staff') { pm = VIEW.team.filter(function (x) { return x.id === m.parent_id; })[0]; if (!pm || !pm.perms || pm.perms.add !== true) pr = Object.assign({}, pr, { add: false }); }
+      return [{ id: m.id, email: m.email, role: m.role, parent_id: m.parent_id, perms: pr }];
+    }
+    if (fn === 'pb_deduct_list' || fn === 'pb_team_ready_list') return [];
+    var R = await rpc0(fn, args) || [];
+    if (fn === 'pb_team_list') return isM ? R.filter(function (x) { return x.parent_id === me; }) : [];
+    if (fn === 'pb_team_work') return R.filter(function (x) { return x.member_id === me || (isM && x.parent_id === me); });
+    if (fn === 'pb_shop_source') return R.filter(function (x) { return isM ? (x.by_id === me || x.mgr_id === me) : x.by_id === me; });
+    if (fn === 'pb_earn_rows') {
+      R = R.filter(function (x) { return isM ? x.manager_id === me : x.staff_id === me; });
+      if (!isM) R = R.map(function (x) { return Object.assign({}, x, { amount: null, gst: null, fee_google: null, fee_razor: null, profit: null, mgr_pct: null, mgr_share: null }); });
+      return R;
+    }
+    if (fn === 'pb_team_log_list') { var em = {}; em[m.email] = 1; VIEW.team.forEach(function (x) { if (isM ? x.parent_id === me : false) em[x.email] = 1; }); return R.filter(function (x) { return em[x.by_email]; }); }
+    return R;
+  }
+  function vwRoleLabel(r) { return r === 'manager' ? 'मैनेजर' : 'स्टाफ'; }
+  function vwPicker(team) {
+    var mg = team.filter(function (t) { return t.role === 'manager'; });
+    var card = function (t, sub) { return '<a class="btn pvok" style="display:block;text-decoration:none;margin:6px 0;text-align:left;background:' + (sub ? '#fff;color:#0b2f73;border:1.5px solid #d8e1ee' : '#0b2f73;color:#fff') + '" href="team.html?as=' + t.id + '">' + (sub ? '↳ 🧑‍💼 ' : '👔 ') + esc(t.name || show(t.email)) + ' <small>(' + vwRoleLabel(t.role) + (t.active ? '' : ' · रुका हुआ') + ')</small></a>'; };
+    $('ttl').textContent = '👁 टीम का नज़ारा'; $('ttlS').textContent = 'सिर्फ़ देखने के लिए';
+    $('m').innerHTML = '<a class="btn pvok" href="admin.html" style="display:inline-block;text-decoration:none;margin:0 0 12px;background:#fff;color:#0b2f73;border:1.5px solid #d8e1ee;padding:9px 14px;font-size:14px">← एडमिन</a>' +
+      '<div class="card"><h3>👁 किसका पैनल देखना है?</h3><p class="mut">नाम दबाइए — उस व्यक्ति को जो दिखता है, वही आपको दिखेगा। आप कुछ बदल नहीं पाएँगे।</p></div>' +
+      (mg.length ? mg.map(function (m) { return card(m, false) + team.filter(function (x) { return x.parent_id === m.id; }).map(function (x) { return card(x, true); }).join(''); }).join('') : '<p class="mut">अभी कोई मैनेजर या स्टाफ नहीं जुड़ा।</p>');
+  }
+  function vwBar() {
+    var d = document.createElement('div'); d.id = 'pvbar'; d.className = 'pvbar';
+    d.innerHTML = '👁 <b>सिर्फ़ देखने के लिए</b> — ' + esc(VIEW.m.name || show(VIEW.m.email)) + ' (' + vwRoleLabel(VIEW.m.role) + ') <a class="pvok" href="team.html?as=pick">दूसरा चुनें</a> <a class="pvok" href="admin.html">नज़ारा बंद करें</a>';
+    var m = $('m'); m.parentNode.insertBefore(d, m);
+    document.body.classList.add('pvw');
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest('button,input,select,textarea,label'); if (!t || t.closest('#pvbar')) return;
+      if (t.matches('[data-tab],[data-st],[data-rp],#rpF,#rpE,#eM,#sQ,.pvok,#pbLangBtn')) return;
+      e.preventDefault(); e.stopPropagation(); d.classList.add('flash'); setTimeout(function () { d.classList.remove('flash'); }, 700);
+    }, true);
+  }
+  async function rpc0(fn, args) {
     var s = await PBA.session();
     if (!s) { gate('login'); throw new Error('login'); }
     var r = await fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) });
@@ -101,6 +153,16 @@ main{padding:14px 14px 96px}
 
   async function boot() {
     try {
+      var asP = new URLSearchParams(location.search).get('as');
+      if (asP) {
+        var real = await rpc0('pb_team_role', {});
+        if (real === 'owner') {
+          var tl = await rpc0('pb_team_list', {}) || [];
+          var mem = asP === 'pick' ? null : tl.filter(function (x) { return String(x.id) === asP; })[0];
+          if (!mem) { $('adm').hidden = true; return vwPicker(tl); }
+          VIEW = { m: mem, team: tl };
+        }
+      }
       ROLE = await rpc('pb_team_role', {});
       if (!ROLE) { var s = await PBA.session(); return gate('noteam', s && s.email); }
       if (ROLE !== 'owner') { var me = await rpc('pb_team_me', {}); ME = (me && me[0]) || null; }
@@ -109,6 +171,7 @@ main{padding:14px 14px 96px}
     $('ttl').textContent = ROLE === 'owner' ? '👥 टीम (मालिक)' : ROLE === 'manager' ? '👥 मैनेजर' : '🧾 स्टाफ';
     TAB = 'home';
     if (location.hash === '#shops') TAB = 'shops';
+    if (VIEW) vwBar();
     draw();
   }
   function tabs() {

@@ -681,7 +681,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       ['edits', '✏️', '#f3f0ff', 'जानकारी में बदलाव', '–', 'दुकानदारों ने खुद बदली', 0],
       ['hsreq', '🏠', '#e6f6ed', 'होम सर्विस अनुरोध', '–', 'मंज़ूर करना बाकी', 0],
       ['premium', '💎', '#efeaff', 'प्रीमियम', '–', 'चालू प्रीमियम दुकानें', 0],
-      ['team', '👥', '#eef2ff', 'टीम (मैनेजर / स्टाफ)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0]
+      ['team', '👥', '#eef2ff', 'टीम (मैनेजर / स्टाफ)', '–', 'जोड़ें · अधिकार दें · रिकॉर्ड', 0],
+      ['pview', '👁', '#fff7e0', 'टीम का नज़ारा', '–', 'मैनेजर / स्टाफ का पैनल देखें (सिर्फ़ देखना)', 0]
     ];
     $('tiles').innerHTML = T.map(function (t) {
       return '<button class="tile" data-t="' + t[0] + '">' + (t[6] ? '<i class="badge">' + t[6] + '</i>' : '') + '<i class="ic" style="background:' + t[2] + '">' + t[1] + '</i><b>' + t[4] + '</b><span>' + t[3] + '</span><small>' + esc(String(t[5])) + '</small></button>';
@@ -704,6 +705,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (t === 'hsreq') return showHsReq();
     if (t === 'premium') return showPrem();
     if (t === 'team') { location.href = 'team.html'; return; }
+    if (t === 'pview') { location.href = 'team.html?as=pick'; return; }
     status = t === 'live' ? 'active' : t === 'pending' ? 'pending' : t === 'draft' ? 'draft' : 'all';
     $('tabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.s === status); });
     view('panel'); load();
