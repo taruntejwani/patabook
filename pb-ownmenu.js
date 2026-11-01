@@ -31,6 +31,14 @@
     if (window.PBBack) PBBack.open(kill);
   }
   function init() {
+    var g = document.getElementById("gearTop");   /* shop.html: ⚙️ की जगह वही ☰ मेन्यू (दिखना/छुपना पन्ने का अपना OWN तय करता है) */
+    if (g && !document.getElementById("pbOwnMenu")) {
+      btn = g; g.id = "gearTop"; g.removeAttribute("href"); g.setAttribute("role", "button"); g.setAttribute("aria-haspopup", "true");
+      g.setAttribute("aria-label", en() ? "Menu" : "मेन्यू"); g.removeAttribute("title");
+      g.innerHTML = "☰"; g.style.color = "#fff"; g.style.fontSize = "18px"; g.style.cursor = "pointer"; g.dataset.own = "1";
+      g.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); if (ov) close(); else open(); });
+      return;
+    }
     if (!mine()) return;
     var nav = document.querySelector("header .nav"); if (!nav || document.getElementById("pbOwnMenu")) return;
     btn = document.createElement("button"); btn.type = "button"; btn.id = "pbOwnMenu";
