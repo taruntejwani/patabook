@@ -90,7 +90,7 @@
         : st === "pend" ? '<span class="td-tag off">⏳ ' + T("Sent for approval", "मंज़ूरी के लिए भेजी") + '</span>'
         : st === "draft" ? '<button type="button" class="td-b" data-submit="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
         : '<span class="td-tag off">' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</span>'));
-    var ctl = '<div class="td-sec"><h3>' + T("Shop controls", "दुकान कंट्रोल") + '</h3><p>' + T("Go online or offline, your link, logo and approval.", "ऑनलाइन/ऑफ़लाइन, लिंक, लोगो और मंज़ूरी।") + '</p></div><div class="td-g">' + swBox + lkBox + lgBox + apBox + '</div>';
+    var ctl = '<div class="td-sec"><h3>' + T("Shop controls", "दुकान कंट्रोल") + '</h3><p>' + T("Your logo and approval.", "आपका लोगो और मंज़ूरी।") + '</p></div><div class="td-g">' + lgBox + apBox + '</div>';
     var feats = [
       tileX("📞", "Call & WhatsApp", "कॉल और WhatsApp", "Customers can call or message you directly.", "ग्राहक सीधे फ़ोन या WhatsApp कर सकते हैं।", !!b.phone, "Active", "चालू है", "Add a number", "नंबर जोड़ें"),
       tileX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "Not in your plan", "प्लान में नहीं"),
@@ -117,9 +117,7 @@
     var plans = window.PBPlan ? ["free", "gold", "platinum"].map(plan).join("") : "";
     var city = ""; try { city = (x.address || b.address || "").split(",").slice(-1)[0].trim(); } catch (e) {}
     return '<section class="td" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
-      '<div class="td-eb">' + T("Shopkeeper dashboard", "दुकानदार डैशबोर्ड") + '</div>' +
-      '<div class="td-h">' + T("Your shop at a glance", "आपकी दुकान एक नज़र में") + ' 👋</div>' +
-      '<div class="td-sub">' + T("This is how your profile looks to you.", "आपकी प्रोफ़ाइल आपको ऐसी दिखती है।") + '</div>' +
+      '<div class="td-g" style="margin-bottom:14px">' + swBox + lkBox + '</div>' +
       '<div class="td-shop"><div class="td-sh"><div><h2>' + esc(b.name) + '</h2><p>' + esc([x.category || b.category, city].filter(Boolean).join(" · ")) + '</p></div>' +
       '<div class="td-pill">' + (c.tier === "platinum" ? "💎 " : c.tier === "gold" ? "👑 " : "") + esc(TN) + (paid ? " " + T("MEMBER", "सदस्य") : "") + '</div></div>' +
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
