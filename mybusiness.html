@@ -888,7 +888,8 @@ function profOverview(en){
 function settingsView(en){
   const b=ROWS[SET.shop],i=SET.shop;
   if(!b){SET.cat=null;SET.shop=null;return "";}
-  const C=setCats(en).filter(c=>c[0]!=="prof"&&c[0]!=="num"),cur=C.find(c=>c[0]===SET.cat);
+  const TJ0=!!(window.PBTejDash&&b.slug===PBTejDash.SLUG);
+  const C=setCats(en).filter(c=>(c[0]!=="prof"||TJ0)&&c[0]!=="num"),cur=C.find(c=>c[0]===SET.cat);
   const nm=esc(b.name);
   if(!cur){
     /* दुकान का घर: ऊपर 9 कदम (हर कदम पर Edit), नीचे बाक़ी सेटिंग — कोई चीज़ दो बार नहीं */
@@ -898,11 +899,12 @@ function settingsView(en){
       (TJ?'':'<a class="stl alt" href="business.html?slug='+encodeURIComponent(b.slug)+'" style="margin:0 0 10px">👁️ '+(en?"Preview profile":"प्रोफ़ाइल प्रीव्यू")+'</a>')+
       ((window.PBTejDash&&b.slug===PBTejDash.SLUG)?'':'<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+'</div>')+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
-      '<div class="cats">'+C.filter(c=>!/^(photo|rep|nt)$/.test(c[0])&&!(/^(feat|plan)$/.test(c[0])&&window.PBTejDash&&b.slug===PBTejDash.SLUG)).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div></div>';
+      '<div class="cats">'+C.filter(c=>!/^(prof|photo|rep|nt)$/.test(c[0])&&!(/^(feat|plan)$/.test(c[0])&&window.PBTejDash&&b.slug===PBTejDash.SLUG)).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div></div>';
   }
   let h='<div class="setbar"><button type="button" data-setback="list">‹ '+nm+'</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
   if(cur[0]==="acct")return h+delShopBtns(en,i)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
   if(cur[0]==="nt")return h+'<div class="card">'+notifPage()+'</div>';
+  if(cur[0]==="plan"&&TJ0&&PBTejDash.planPage)return h+'<div class="card">'+PBTejDash.planPage()+catBody("plan",b,i,en)+'</div>';
   return h+'<div class="card">'+catBody(cur[0],b,i,en)+'</div>';
 }
 const LINKS={};

@@ -137,7 +137,7 @@
       if (has(t, "banner")) li.push(en ? "Banner" : "बैनर");
       return '<div class="td-p' + (cur ? ' cur' : '') + '">' + (cur ? '<span class="td-cl">' + T("Your plan", "आपका प्लान") + '</span>' : '') + '<h4>' + esc(PBPlan.name(t, en).toUpperCase()) + '</h4><ul>' + li.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + '</ul></div>';
     }
-    LAST = { en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
+    LAST = { c: c, en: en, tn: TN, html: '<div class="td-mini">' + apRow + lgRow + feats + '</div>', tier: c.tier, pct: pct };
     function goBox(ic, e1, h1, e2, h2, on, cat) {
       return '<div class="td-s' + (on ? ' td-click' : '') + '"' + (on ? ' role="button" tabindex="0" data-tdgo="' + cat + '" data-tdi="' + c.i + '"' : '') + '><small class="td-big">' + ic + ' ' + T(e1, h1) + '</small><em>' + (on ? '<b style="color:var(--a)">' + T("Open ›", "खोलें ›") + '</b>' : T("Not in your plan", "प्लान में नहीं")) + '</em></div>';
     }
@@ -153,8 +153,8 @@
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct != null ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' : '') + '</div></div>' +
       '<div class="td-st">' +
-      '<div class="td-s' + (c.profOpen ? ' td-open' : '') + '"><div class="td-click" role="button" tabindex="0" data-tdprof="1"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + ' · <b style="color:var(--a)">' + (c.profOpen ? T("Close ˄", "बंद करें ˄") : T("View ›", "देखें ›")) + '</b></em></div>' + (c.profOpen ? '<div class="td-pbody">' + (c.profHtml || "") + '</div>' : '') + '</div>' +
-      '<div class="td-s td-click" role="button" tabindex="0" data-tdopen="1"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
+      '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="prof" data-tdi="' + c.i + '"><small>' + T("Profile complete", "प्रोफ़ाइल पूरी") + '</small><strong>' + (c.pct != null ? c.pct + '%' : '—') + '</strong><em>' + T(c.pct >= 100 ? "✓ All details filled" : "Add the missing details", c.pct >= 100 ? "✓ सारी जानकारी भरी है" : "बाकी जानकारी भरें") + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
+      '<div class="td-s td-click" role="button" tabindex="0" data-tdgo="plan" data-tdi="' + c.i + '"><small>' + T("Membership", "सदस्यता") + '</small><strong>' + esc(TN) + '</strong><em>' + (until ? T("Till ", "") + esc(until) + T("", " तक") : T("Free forever", "हमेशा मुफ़्त")) + ' · <b style="color:var(--a)">' + T("View ›", "देखें ›") + '</b></em></div>' +
       '<div class="td-s"><small>' + T("Shop status", "दुकान की स्थिति") + '</small><strong>' + esc(stTxt) + '</strong><em>' + esc(stSub) + '</em></div>' +
       '<div class="td-s"><small>' + T("Customer rating", "ग्राहक रेटिंग") + '</small><strong>' + rat + '</strong><em>' + ratSub + '</em></div></div>' +
       goRow + goRow2 +
@@ -184,5 +184,11 @@
   document.addEventListener("keydown", function (e) {
     if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("[data-tdopen]")) { e.preventDefault(); openDetails(); }
   });
-  window.PBTejDash = { SLUG: SLUG, html: html, load: load, ready: function () { return !!X; } };
+  function planPage() {
+    if (!LAST) return "";
+    var d = document.createElement("div"); d.innerHTML = html(LAST.c);
+    var m = d.querySelector(".td-m");
+    return '<div class="td t-' + esc(LAST.c.tier) + '">' + LAST.html + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
+  }
+  window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function () { return !!X; } };
 })();
