@@ -74,8 +74,8 @@ main{padding:14px 14px 96px}
   var SB = 'https://kkvbpzysktozghnxplxv.supabase.co', KEY = 'sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8';
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {}, WORK = {}, SRC = {}, EARN = [], DED = null, EM = '';
-  var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ Owner कर सकता है।' };
+  var ROLE = null, ME = null, TAB = '', TEAM = [], SH = [], shSt = 'pending', shQ = '', MSG = {}, WORK = {}, SRC = {}, EARN = [], DED = null, EM = '', ADDOPEN = false, CITIES = null;
+  var ER = { 'already in team': 'यह email पहले से टीम में है।', 'already admin': 'यह email पहले से Admin है।', 'staff limit': 'एक Manager के नीचे अधिकतम 20 Staff हो सकते हैं।', 'bad email': 'Email सही नहीं लगता।', 'manager needed': 'पहले Manager चुनें।', 'not allowed': 'आपको यह करने की अनुमति नहीं है।', 'not found': 'नहीं मिला।', 'no GST': 'इस दुकान में GST नंबर नहीं है।', 'no Udyam': 'इस दुकान में Udyam नंबर नहीं है।', 'bad address': 'पता 5 से 300 अक्षर का होना चाहिए।', 'bad pct': 'हिस्सा 0 से 100 के बीच होना चाहिए।', 'not admin': 'यह सिर्फ़ Owner कर सकता है।', 'duplicate': 'इसी नाम और नंबर की दुकान पहले से जुड़ी है।', 'limit3': 'इस नंबर पर पहले से 3 दुकानें हैं।', 'bad phone': 'मोबाइल नंबर 10 अंकों का सही होना चाहिए।', 'bad name': 'दुकान का नाम 2 से 80 अक्षर का होना चाहिए।', 'bad category': 'श्रेणी सही नहीं है।', 'rate limit': 'बहुत जल्दी-जल्दी हो रहा है, थोड़ी देर बाद कोशिश करें।', 'slug conflict': 'यह नाम पहले से है, नाम थोड़ा बदलकर देखें।' };
   function eMsg(e) { var m = String(e && e.message || e); for (var k in ER) if (m.indexOf(k) >= 0) return ER[k]; return 'गलती: ' + m; }
 
   async function rpc(fn, args) {
@@ -131,7 +131,7 @@ main{padding:14px 14px 96px}
       '<h3 style="margin:6px 2px 10px;font-size:16px">जल्दी के काम</h3><div class="hq">' +
       '<button data-tab="shops"><b>🧾</b>दुकानें देखें</button>' +
       '<button data-tab="earn"><b>💰</b>' + (ROLE === 'staff' ? 'मेरी कमाई' : 'कमाई / काम') + '</button>' +
-      (ROLE !== 'staff' ? '<button data-tab="team"><b>👥</b>' + (ROLE === 'owner' ? 'टीम' : 'मेरे Staff') + '</button>' : '<button onclick="location.href=\'list.html\'"><b>＋</b>नई दुकान जोड़ें</button>') +
+      (ROLE !== 'staff' ? '<button data-tab="team"><b>👥</b>' + (ROLE === 'owner' ? 'टीम' : 'मेरे Staff') + '</button>' : (canAdd() ? '<button data-tab="shops" data-add="1"><b>＋</b>नई दुकान जोड़ें</button>' : '')) +
       (ROLE === 'owner' ? '<button data-tab="ready"><b>📬</b>जाँच पूरी</button>' : ROLE === 'manager' ? '<button data-tab="log"><b>📜</b>रिकॉर्ड</button>' : '') + '</div>';
     b.innerHTML = h;
   }
@@ -145,12 +145,14 @@ main{padding:14px 14px 96px}
     if (TAB === 'log') return drawLog();
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tab]'); if (t) { TAB = t.dataset.tab; draw(); window.scrollTo(0, 0); }
+    var t = e.target.closest('[data-tab]'); if (t) { ADDOPEN = false; TAB = t.dataset.tab; draw(); window.scrollTo(0, 0); if (t.dataset.add === '1') showAddForm(); }
   });
 
   /* ───────── टीम ───────── */
+  function canAdd() { return ROLE === 'owner' || !!(ME && ME.perms && ME.perms.add === true); }
+  function canGiveAdd() { return ROLE === 'owner' || (ROLE === 'manager' && !!(ME && ME.perms && ME.perms.add === true)); }
   function permBoxes(id, perms) {
-    return '<label class="ck"><input type="checkbox" data-p="gst" ' + (perms && perms.gst ? 'checked' : '') + '> 🧾 GST / MSME जाँच</label><label class="ck"><input type="checkbox" data-p="addr" ' + (perms && perms.addr ? 'checked' : '') + '> 📍 पता सुधार</label>';
+    return (canGiveAdd() ? '<label class="ck"><input type="checkbox" data-p="add" ' + (perms && perms.add ? 'checked' : '') + '> ➕ दुकान जोड़ना</label>' : '') + '<label class="ck"><input type="checkbox" data-p="gst" ' + (perms && perms.gst ? 'checked' : '') + '> 🧾 GST / MSME जाँच</label><label class="ck"><input type="checkbox" data-p="addr" ' + (perms && perms.addr ? 'checked' : '') + '> 📍 पता सुधार</label>';
   }
   async function drawTeam() {
     var b = $('body');
@@ -186,7 +188,7 @@ main{padding:14px 14px 96px}
   function memberCard(t, nest) {
     var kids = nest ? TEAM.filter(function (x) { return x.parent_id === t.id; }) : [];
     return '<div class="card" data-id="' + t.id + '"><h3>' + esc(t.name || show(t.email)) + '<span class="role ' + (t.role === 'manager' ? 'm' : '') + '">' + (t.role === 'manager' ? 'Manager' : 'Staff') + '</span>' + (t.active ? '' : '<span class="role off">रुका हुआ</span>') + '</h3><div class="mut">' + esc(show(t.email)) + (t.role === 'manager' && nest ? ' · ' + kids.length + ' Staff' : '') + '</div>' + pctBlock(t) +
-      (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : '<div class="row">') +
+      (t.role === 'staff' ? '<div data-perm>' + permBoxes('p', t.perms) + '</div><div class="row"><button class="btn w" data-act="save">अधिकार सेव करें</button>' : (ROLE === 'owner' ? '<div data-perm><label class="ck"><input type="checkbox" data-p="add" ' + (t.perms && t.perms.add ? 'checked' : '') + '> ➕ दुकान जोड़ने का अधिकार</label><p class="mut">ON करने पर ही यह Manager (और उसके Staff) दुकान जोड़ सकेंगे।</p></div><div class="row"><button class="btn w" data-act="saveM">अधिकार सेव करें</button>' : '<div class="row">')) +
       '<button class="btn o" data-act="tog">' + (t.active ? '⏸ रोकें' : '▶ चालू करें') + '</button><button class="btn r" data-act="del">🗑 हटाएँ</button></div><div class="msg"></div>' +
       (kids.length ? '<div class="sub">' + kids.map(function (k) { return memberCard(k, false); }).join('') + '</div>' : '') + '</div>';
   }
@@ -205,6 +207,11 @@ main{padding:14px 14px 96px}
         await rpc('pb_team_set_pct', { p_id: id, p_pct: pv });
         if (WORK[id]) WORK[id].pct = pv; msg.innerHTML = '<p class="ok">हिस्सा ' + pv + '% सेव हो गया।</p>'; return;
       }
+      if (act === 'saveM') {
+        var pm = {}; for (var kk in (t.perms || {})) if (t.perms[kk] === true) pm[kk] = true;
+        if (card.querySelector('[data-p="add"]').checked) pm.add = true; else delete pm.add;
+        await rpc('pb_team_set', { p_id: id, p_perms: pm }); t.perms = pm; msg.innerHTML = '<p class="ok">सेव हो गया।</p>'; return;
+      }
       if (act === 'save') {
         var perms = {}; card.querySelector('[data-perm]').querySelectorAll('[data-p]').forEach(function (c) { if (c.checked) perms[c.dataset.p] = true; });
         await rpc('pb_team_set', { p_id: id, p_perms: perms }); msg.innerHTML = '<p class="ok">सेव हो गया।</p>';
@@ -212,11 +219,73 @@ main{padding:14px 14px 96px}
     } catch (x) { msg.innerHTML = '<p class="err">' + esc(eMsg(x)) + '</p>'; }
   });
 
+
+  /* ───────── टीम की तरफ़ से दुकान जोड़ना ───────── */
+  var GRP = [[1, 'स्वास्थ्य और चिकित्सा', 'Health'], [2, 'शिक्षा', 'Education'], [3, 'मनोरंजन और कार्यक्रम', 'Professional'], [4, 'शॉपिंग', 'Shopping'], [5, 'निर्माण (मैन्युफैक्चरिंग)', 'Professional'], [6, 'खाना और रेस्टोरेंट', 'Food'], [7, 'थोक और सप्लायर', 'Professional'], [8, 'वित्त और बीमा', 'Professional'], [9, 'ऑटोमोबाइल', 'Automobile'], [10, 'होटल और ठहराव', 'Hotel'], [11, 'यात्रा और ट्रांसपोर्ट', 'Professional'], [12, 'होम सर्विस', 'Home'], [13, 'प्रोफेशनल सेवाएँ', 'Professional'], [14, 'ब्यूटी और पर्सनल केयर', 'Other'], [15, 'रियल एस्टेट', 'Professional']];
+  var CITY_FALLBACK = { Anjar: 6, Bhachau: 8, Bhuj: 4, Dayapar: 9, Gandhidham: 3, Mandvi: 5, Mundra: 2, Nakhatrana: 1, Naliya: 7, Rapar: 10 };
+  async function loadCities() {
+    if (CITIES) return CITIES;
+    try {
+      var r = await fetch(SB + '/rest/v1/rpc/pb_public_cities', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: '{}' });
+      var l = await r.json();
+      CITIES = (Array.isArray(l) ? l : []).filter(function (c) { return c && c.name && c.id != null; });
+    } catch (e) { CITIES = []; }
+    if (!CITIES.length) CITIES = Object.keys(CITY_FALLBACK).map(function (n) { return { name: n, id: CITY_FALLBACK[n], district: 'Kutch', state: 'Gujarat' }; });
+    CITIES.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    return CITIES;
+  }
+  function slugOf(name, city) {
+    var t = (String(name) + '-' + String(city)).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return t.length >= 3 ? t.slice(0, 60) : '';
+  }
+  async function showAddForm() {
+    if (!canAdd()) return;
+    var b = $('body'); if (!b) return;
+    if (!ADDOPEN) { ADDOPEN = true; try { history.pushState({ pbAdd: 1 }, ''); } catch (e) {} }
+    var cs = await loadCities();
+    b.innerHTML = '<div class="card"><h3>➕ नई दुकान जोड़ें</h3><p class="mut">दुकान आपके नाम से जुड़ेगी और हमेशा "जाँच बाकी" रहेगी। Live सिर्फ़ Owner करेगा।</p>' +
+      '<input id="nN" placeholder="दुकान का नाम *" maxlength="80"><input id="nO" placeholder="मालिक का नाम" maxlength="60">' +
+      '<select id="nG"><option value="">मुख्य श्रेणी चुनें *</option>' + GRP.map(function (g) { return '<option value="' + g[0] + '">' + g[1] + '</option>'; }).join('') + '</select>' +
+      '<input id="nS" placeholder="कौन-सा काम / सेवा (जैसे: कार वॉश)" maxlength="60">' +
+      '<select id="nC">' + cs.map(function (c) { return '<option value="' + c.id + '"' + (c.name === 'Gandhidham' ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select>' +
+      '<input id="nA" placeholder="इलाका / मोहल्ला" maxlength="60"><input id="nD" placeholder="पूरा पता *" maxlength="200">' +
+      '<input id="nP" inputmode="numeric" placeholder="दुकान का मोबाइल (10 अंक) *" maxlength="14">' +
+      '<label class="ck"><input type="checkbox" id="nR" checked> जोड़ते ही "जाँच के लिए तैयार (Ready)" भेज दें</label>' +
+      '<input id="nNote" placeholder="Owner के लिए नोट (ज़रूरी नहीं)" maxlength="200">' +
+      '<div class="row"><button class="btn g" id="nGo">दुकान जोड़ें</button><button class="btn o" id="nX">रद्द करें</button></div><div id="nMsg"></div></div>';
+    $('nX').onclick = function () { closeAddForm(); };
+    $('nGo').onclick = async function () {
+      var btn = this, name = $('nN').value.trim(), gid = +$('nG').value, grp = GRP.filter(function (g) { return g[0] === gid; })[0], cid = +$('nC').value;
+      var city = cs.filter(function (c) { return c.id === cid; })[0], ph = $('nP').value.replace(/\D/g, '').slice(-10), addr = $('nD').value.trim(), area = $('nA').value.trim();
+      var m = $('nMsg'); m.innerHTML = '';
+      if (name.length < 2) { m.innerHTML = '<p class="err">दुकान का नाम लिखें।</p>'; return; }
+      if (!grp) { m.innerHTML = '<p class="err">मुख्य श्रेणी चुनें।</p>'; return; }
+      if (!city) { m.innerHTML = '<p class="err">शहर चुनें।</p>'; return; }
+      if (addr.length < 5) { m.innerHTML = '<p class="err">पूरा पता लिखें (कम से कम 5 अक्षर)।</p>'; return; }
+      if (!/^[6-9]\d{9}$/.test(ph)) { m.innerHTML = '<p class="err">मोबाइल 10 अंकों का सही नंबर हो।</p>'; return; }
+      var desc = ['Owner: ' + $('nO').value.trim(), $('nS').value.trim() ? 'Subcategory: ' + $('nS').value.trim() : '', $('nS').value.trim() ? 'Services: ' + $('nS').value.trim() : '', 'City: ' + city.name, area ? 'Area: ' + area : ''].filter(function (x) { return x && x !== 'Owner: '; }).join('\n');
+      var row = { name: name, slug: slugOf(name, city.name), phone: ph, category: grp[2], category_id: grp[0], city_id: city.id, city_name: city.name, district: city.district || 'Kutch', state: city.state || 'Gujarat', address: [area, addr, city.name].filter(Boolean).join(', '), description: desc, show_phone: true };
+      btn.disabled = true; m.innerHTML = '<p class="mut">जोड़ रहे हैं…</p>';
+      try {
+        var res = await rpc('pb_team_add_shop', { p: row });
+        var slug = (res && res.slug) || row.slug;
+        if ($('nR').checked && slug) { try { await rpc('pb_team_ready', { p_slug: slug, p_note: $('nNote').value.trim() || null }); } catch (e2) {} }
+        ADDOPEN = false; try { history.back(); } catch (e3) {}
+        shSt = 'all'; shQ = name; MSG.ok = '✅ "' + name + '" जुड़ गई — आपके नाम से, जाँच के लिए।';
+        TAB = 'shops'; draw();
+        setTimeout(function () { var ho = $('body'); if (ho) ho.insertAdjacentHTML('afterbegin', '<p class="ok">' + esc(MSG.ok) + '</p>'); }, 50);
+      } catch (e) { btn.disabled = false; m.innerHTML = '<p class="err">' + esc(eMsg(e)) + '</p>'; }
+    };
+  }
+  function closeAddForm() { if (ADDOPEN) { try { history.back(); return; } catch (e) {} } ADDOPEN = false; drawShops(); }
+  window.addEventListener('popstate', function () { if (ADDOPEN) { ADDOPEN = false; if (TAB === 'shops') drawShops(); } });
+
   /* ───────── दुकानें ───────── */
   async function drawShops() {
     var b = $('body');
-    b.innerHTML = '<a href="list.html" style="display:block;text-align:center;background:#1a73e8;color:#fff;font-weight:800;text-decoration:none;border-radius:12px;padding:13px;margin-bottom:10px">➕ नई दुकान जोड़ें</a>'
+    b.innerHTML = (canAdd() ? '<button class="btn g" id="addShopBtn" style="display:block;width:100%;margin-bottom:10px;padding:13px">➕ नई दुकान जोड़ें</button>' : '')
       + '<div class="card"><div class="tabs" id="sT"><button data-st="pending" class="' + (shSt === 'pending' ? 'on' : '') + '">⏳ Pending</button><button data-st="draft" class="' + (shSt === 'draft' ? 'on' : '') + '">📝 अधूरी</button><button data-st="active" class="' + (shSt === 'active' ? 'on' : '') + '">✅ Live</button><button data-st="all" class="' + (shSt === 'all' ? 'on' : '') + '">सभी</button></div><input id="sQ" type="search" placeholder="दुकान का नाम या पता" value="' + esc(shQ) + '"></div><div id="sL"><div class="mut">लोड हो रहा है…</div></div>';
+    var ab = $('addShopBtn'); if (ab) ab.onclick = showAddForm;
     $('sT').onclick = function (e) { var x = e.target.closest('[data-st]'); if (x) { shSt = x.dataset.st; drawShops(); } };
     var tm; $('sQ').oninput = function () { shQ = this.value; clearTimeout(tm); tm = setTimeout(loadShops, 350); };
     loadShops();
