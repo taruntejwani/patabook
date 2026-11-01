@@ -973,7 +973,8 @@ function draw(){
   ["h1","sub","gH","gB","pbT","pbS"].forEach(k=>{const e=$(k);if(e)e.textContent=tx(k);});
   const mOn=!!(PBA.mobile&&PBA.mobile.enabled&&PBA.mobile.enabled());
   $("mF").hidden=!mOn;$("gP").textContent=tx(mOn?"gP":"gPe");$("gB").className=mOn?"lnk":"btn";
-  {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=false;if(_s)_s.hidden=false;}
+  const TJC=(()=>{try{const a=JSON.parse(localStorage.getItem("pb-my-shops")||"[]");return Array.isArray(a)&&a.includes("tejwani-detergent-and-chemical-gandhidham-31oyn");}catch(e){return false;}})();   /* पहले से पता है: Tejwani का dashboard आएगा → "My Shop" शीर्षक/लॉगिन पट्टी की झलक नहीं */
+  {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=TJC;if(_s)_s.hidden=TJC;}
   const en0=L()==="en";mVis();
   $("mGo").textContent=M.mode==="pin"?(en0?"Log in →":"लॉगिन करें →"):tx(M.sent?"m_go":"m_send");$("mBack").textContent=tx("m_back");
   $("mMode").textContent=M.mode==="pin"?(en0?"No password yet / forgot it? Log in with OTP →":"पासवर्ड नहीं बनाया / भूल गए? OTP से लॉगिन करें →"):(en0?"🔐 Log in with mobile number + password →":"🔐 मोबाइल नंबर + पासवर्ड से लॉगिन करें →");
@@ -981,7 +982,7 @@ function draw(){
   $("mPin").placeholder=en0?"Password":"पासवर्ड";
   if(M.sent)$("mHint").textContent=tx("m_hint","+91 "+M.phone);
   document.title=tx("h1")+" — PataBook";
-  $("gate").hidden=!!ME;$("who").hidden=!ME;
+  $("gate").hidden=!!ME;$("who").hidden=!ME||TJC;
   if(!ME){SET.cat=null;$("list").innerHTML="";return;}
   /* मोबाइल login: नंबर Approve होकर बदल गया हो तो दुकान का अभी वाला नंबर दिखाओ */
   const ph=phoneOf(ME)?((ROWS&&ROWS.length===1&&String(ROWS[0].phone||"").replace(/\D/g,"").slice(-10))||phoneOf(ME)):"";
@@ -1009,7 +1010,7 @@ function draw(){
   const inSet=SET.cat!==null&&!!ROWS[SET.shop];
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"Settings");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");
-  if(inSet&&ROWS[SET.shop]){$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
+  if(inSet&&ROWS[SET.shop]){$("h1").hidden=false;$("sub").hidden=false;$("h1").textContent="⚙️ Settings";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
   if(BOOT&&ROWS.some(r=>r&&r.slug==="tejwani-detergent-and-chemical-gandhidham-31oyn")){list.innerHTML='<p class="note">…</p>';return;}   /* पूरा डेटा आने तक: पुराना card / FREE फ़्लैश नहीं */
   let _td="";
   try{if(window.PBTejDash){const ti=ROWS.findIndex(r=>r.slug===PBTejDash.SLUG);if(ti>=0){const tb=ROWS[ti];if(!PBTejDash.ready())PBTejDash.load(tb.slug,draw);
