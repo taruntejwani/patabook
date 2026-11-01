@@ -1223,7 +1223,9 @@ async function start(){
   draw();
   if(!ME)return;
   try{ROWS=await rpc("pb_my_businesses")||[];ERR="";loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
-    await Promise.all([loadLogos(),loadCovers(),loadVac(),loadPrem()]);runDeep();await _rest;await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
+    const _TJ="tejwani-detergent-and-chemical-gandhidham-31oyn",_tx=(window.PBTejDash&&ROWS.some(r=>r&&r.slug===_TJ))?new Promise(r=>{PBTejDash.load(_TJ,r);setTimeout(r,1500);}):null;
+    await Promise.all([loadLogos(),loadCovers(),loadVac(),loadPrem(),_tx]);runDeep();BOOT=false;draw();   /* ज़रूरी डेटा आते ही पन्ना दिखाओ; बाक़ी बाद में अपने-आप जुड़ेगा */
+    await _rest;await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
     try{PINST=(PBA.mobile&&PBA.mobile.enabled()&&PBA.mobile.pinStatus)?await PBA.mobile.pinStatus():null;}catch(e){PINST=null;}}   /* admin / पुराना Worker → PIN box नहीं */
   catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
