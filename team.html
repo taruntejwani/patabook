@@ -100,6 +100,13 @@ body.pvw #m button:not([data-tab]):not([data-st]):not([data-rp]):not(.pvok),body
       return [{ id: m.id, email: m.email, role: m.role, parent_id: m.parent_id, perms: pr }];
     }
     if (fn === 'pb_deduct_list' || fn === 'pb_team_ready_list') return [];
+    /* 👁 नज़ारे में भी दुकानों की सूची वही दिखे जो असली Manager / Staff को दिखेगी: Manager = अपनी + अपने Staff की जोड़ी हुई, Staff = सिर्फ़ अपनी */
+    if (fn === 'pb_team_shops') {
+      var SR = await rpc0(fn, Object.assign({}, args, { p_limit: 300 })) || [];
+      var SS = SR.length ? (await rpc0('pb_shop_source', { p_slugs: SR.map(function (x) { return x.slug; }) }) || []) : [], OKS = {};
+      SS.forEach(function (x) { if (isM ? (x.by_id === me || x.mgr_id === me) : x.by_id === me) OKS[x.slug] = 1; });
+      return SR.filter(function (x) { return OKS[x.slug]; }).slice(0, +args.p_limit || 100);
+    }
     var R = await rpc0(fn, args) || [];
     if (fn === 'pb_team_list') return isM ? R.filter(function (x) { return x.parent_id === me; }) : [];
     if (fn === 'pb_team_work') return R.filter(function (x) { return x.member_id === me || (isM && x.parent_id === me); });
