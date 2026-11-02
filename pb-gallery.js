@@ -43,6 +43,7 @@
     if (!LOAD[s]) { LOAD[s] = 1; load(s); }
     var msg = MSG[s] ? '<div class="err" style="margin:6px 2px">' + esc(MSG[s]) + '</div>' : '';
     var open = GO[s];
+    if (open === "staff" && !b.h) return staffPage(b, i);
     if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
       var bar = '<div class="gph">' + (b.h ? '' : '<button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button>') + '<b>' + esc(nm(K)) + '</b><span>' + arr.length + '</span>' +
@@ -61,7 +62,7 @@
     return msg + '<div class="gl">' + KINDS.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
       if (!can(b, K[0])) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>🔒</i></button>';
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
-    }).join("") + '</div>' + (b.h ? '' : '<button type="button" class="ghl" data-hlp="' + i + '"><span>👥</span><b>' + T("फ़ोटो सहायक", "Photo helper") + '</b><em>' + T("स्टाफ़ से फ़ोटो डलवाएँ", "Let staff add photos") + ' ›</em></button>') + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
+    }).join("") + '</div>' + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
       var parts = KINDS.map(function (K) { return esc(nm(K)) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
       return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
@@ -356,46 +357,49 @@
       : /not allowed|login/.test(m) ? T("यह सिर्फ़ दुकान का मालिक कर सकता है।", "Only the shop owner can do this.")
       : T("नहीं हो पाया। दोबारा कोशिश करें।", "Could not do it. Try again.");
   }
-  async function helpers(i) {
-    var b = ROWS[i], s = b.slug, D = null, A = [], err = "", busy = false;
-    function paint() {
-      var lim = D ? +D.lim || 0 : 0, items = D && D.items ? D.items : [];
-      var h = '<h3>👥 ' + T("फ़ोटो सहायक", "Photo helper") + '</h3>' +
-        '<p class="hn">' + T("सहायक सिर्फ़ \"प्रोडक्ट और सर्विस\" की फ़ोटो जोड़, बदल, छिपा या हटा सकता है। लोगो, बैनर, प्लान और सेटिंग सिर्फ़ आपके पास रहती हैं।", "A helper can only add, edit, hide or remove photos in \"Products & Services\". Logo, banner, plan and settings stay with you only.") + '</p>';
-      if (!D) h += '<p class="hn">' + (err ? esc(err) : '…') + '</p>';
-      else if (!lim) h += '<div class="pbger" style="display:block">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + '</div>';
-      else {
-        h += '<div class="szn">' + T("जुड़े सहायक", "Helpers added") + ': <b>' + items.length + ' / ' + lim + '</b></div>' +
-          items.map(function (x) { return '<div class="hrow"><b>' + esc(x.email || x.phone) + '</b><button type="button" data-hrm="' + x.id + '" aria-label="' + esc(T("हटाएँ", "Remove")) + '">' + T("हटाएँ", "Remove") + '</button></div>'; }).join("");
-        if (items.length < lim) h += '<input class="pbgin" id="pbghc" maxlength="80" placeholder="' + esc(T("सहायक का Google ईमेल या 10 अंकों का मोबाइल", "Helper's Google email or 10-digit mobile")) + '" aria-label="' + esc(T("सहायक का ईमेल या मोबाइल", "Helper's email or mobile")) + '"><button type="button" class="pbgsv" data-hadd="1">' + T("सहायक जोड़ें", "Add helper") + '</button>';
-        h += '<p class="hn" style="margin-top:8px">' + T("सहायक को इसी ईमेल या नंबर से PataBook में लॉगिन करके patabook.in/helper.html खोलना है।", "The helper must log in to PataBook with this email or number and open patabook.in/helper.html.") + '</p>';
-      }
-      if (err && D) h += '<div class="pbger" style="display:block">' + esc(err) + '</div>';
-      h += '<h3 style="margin-top:16px">' + T("हाल की गतिविधि", "Recent activity") + '</h3>';
-      h += A.length ? A.slice(0, 30).map(function (x) {
-        var dt = new Date(x.at), when = isNaN(dt) ? "" : dt.toLocaleString(en() ? "en-IN" : "hi-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
-        return '<div class="hrow">' + (x.url ? '<img src="' + esc(x.url) + '" alt="">' : '') + '<b>' + esc(whoTxt(x)) + ' · ' + esc(actTxt(x.action)) + '<small>' + esc(when) + '</small></b></div>';
-      }).join("") : '<p class="hn">' + T("अभी कोई गतिविधि नहीं।", "No activity yet.") + '</p>';
-      sh.sh.innerHTML = h;
-    }
-    async function refresh() {
-      try { D = await rpc("pb_helper_list", { p_slug: s }); if (!D) D = { lim: 0, items: [] }; } catch (e) { D = null; err = T("लोड नहीं हुआ।", "Could not load."); }
-      try { A = (await rpc("pb_photo_activity", { p_slug: s })) || []; } catch (e) { A = []; }
-      paint();
-    }
-    var sh = mkSheet('<p class="hn">…</p>', async function (e) {
-      var ad = e.target.closest("[data-hadd]"), rm = e.target.closest("[data-hrm]");
-      if (busy || (!ad && !rm)) return;
-      busy = true; err = "";
-      try {
-        if (ad) { var v = (document.getElementById("pbghc") || {}).value || ""; await rpc("pb_helper_add", { p_slug: s, p_contact: v }); }
-        else { if (!confirm(T("इस सहायक को हटाएँ? उसकी पहुँच तुरंत बंद हो जाएगी।", "Remove this helper? Their access will stop right away."))) { busy = false; return; } await rpc("pb_helper_remove", { p_slug: s, p_id: +rm.dataset.hrm }); }
-        await refresh();
-      } catch (x) { err = helperErr(x && x.message); paint(); }
-      busy = false;
-    });
-    refresh();
+  var HST = {};
+  function staffOpen(i) {
+    var s = ROWS[i].slug; GO[s] = "staff"; HST[s] = HST[s] || {};
+    try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {}
+    draw(); window.scrollTo(0, 0); staffLoad(s);
   }
+  async function staffLoad(s) {
+    var S = HST[s] = HST[s] || {};
+    try { S.D = (await rpc("pb_helper_list", { p_slug: s })) || { lim: 0, items: [] }; S.err = ""; } catch (e) { S.D = null; S.err = T("लोड नहीं हुआ।", "Could not load."); }
+    try { S.A = (await rpc("pb_photo_activity", { p_slug: s })) || []; } catch (e) { S.A = []; }
+    draw();
+  }
+  async function staffAct(i, add, id) {
+    var s = ROWS[i].slug, S = HST[s] = HST[s] || {};
+    if (S.busy) return; S.busy = 1; S.msg = "";
+    try {
+      if (add) { await rpc("pb_helper_add", { p_slug: s, p_contact: (document.getElementById("pbghc") || {}).value || "" }); }
+      else { if (!confirm(T("इस स्टाफ़ को हटाएँ? उसकी पहुँच तुरंत बंद हो जाएगी।", "Remove this staff member? Their access will stop right away."))) { S.busy = 0; return; } await rpc("pb_helper_remove", { p_slug: s, p_id: id }); }
+      await staffLoad(s);
+    } catch (x) { S.msg = helperErr(x && x.message); draw(); }
+    S.busy = 0;
+  }
+  function staffPage(b, i) {
+    var S = HST[b.slug] || {}, D = S.D, A = S.A || [], lim = D ? +D.lim || 0 : 0, items = D && D.items ? D.items : [];
+    var h = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button><b>👥 ' + T("स्टाफ़ एक्सेस", "Staff access") + '</b></div>' +
+      '<p class="hn" style="margin:6px 2px">' + T("स्टाफ़ सिर्फ़ \"प्रोडक्ट और सर्विस\" की फ़ोटो जोड़, बदल, छिपा या हटा सकता है। लोगो, बैनर, प्लान और सेटिंग सिर्फ़ आपके पास रहती हैं।", "Staff can only add, edit, hide or remove photos in \"Products & Services\". Logo, banner, plan and settings stay with you only.") + '</p>';
+    if (!D) h += '<p class="hn">' + (S.err ? esc(S.err) : '…') + '</p>';
+    else if (!lim) h += '<div class="pbger" style="display:block">' + T("यह सुविधा आपके प्लान में नहीं है। Silver में 1, Gold में 2, Platinum में 5 स्टाफ़।", "This is not in your plan. Silver 1, Gold 2, Platinum 5 staff.") + '</div>';
+    else {
+      h += '<div class="szn" style="margin:6px 2px">' + T("जुड़े स्टाफ़", "Staff added") + ': <b>' + items.length + ' / ' + lim + '</b></div>' +
+        items.map(function (x) { return '<div class="hrow"><b>' + esc(x.email || x.phone) + '</b><button type="button" data-hrm="' + x.id + '" data-i="' + i + '">' + T("हटाएँ", "Remove") + '</button></div>'; }).join("");
+      if (items.length < lim) h += '<div style="margin-top:10px"><input class="pbgin" id="pbghc" maxlength="80" placeholder="' + esc(T("स्टाफ़ का Google ईमेल या 10 अंकों का मोबाइल", "Staff's Google email or 10-digit mobile")) + '" aria-label="' + esc(T("स्टाफ़ का ईमेल या मोबाइल", "Staff's email or mobile")) + '"><button type="button" class="pbgsv" data-hadd="1" data-i="' + i + '">' + T("स्टाफ़ जोड़ें", "Add staff") + '</button></div>';
+      h += '<p class="hn" style="margin:8px 2px">' + T("स्टाफ़ को इसी ईमेल या नंबर से PataBook में लॉगिन करके patabook.in/helper.html खोलना है।", "Staff must log in to PataBook with this email or number and open patabook.in/helper.html.") + '</p>';
+    }
+    if (S.msg) h += '<div class="pbger" style="display:block">' + esc(S.msg) + '</div>';
+    h += '<div class="gsh" style="margin-top:14px"><b>' + T("हाल की गतिविधि", "Recent activity") + '</b></div>';
+    h += A.length ? A.slice(0, 30).map(function (x) {
+      var dt = new Date(x.at), when = isNaN(dt) ? "" : dt.toLocaleString(en() ? "en-IN" : "hi-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+      return '<div class="hrow">' + (x.url ? '<img src="' + esc(x.url) + '" alt="">' : '') + '<b>' + esc(whoTxt(x)) + ' · ' + esc(actTxt(x.action)) + '<small>' + esc(when) + '</small></b></div>';
+    }).join("") : '<p class="hn" style="margin:6px 2px">' + T("अभी कोई गतिविधि नहीं।", "No activity yet.") + '</p>';
+    return h;
+  }
+  window.pbgOpen = function (slug) { return GO[slug] || ""; };
   function fileInput() {
     if (GF) return GF;
     GF = document.createElement("input"); GF.type = "file"; GF.accept = "image/*"; GF.multiple = true; GF.hidden = true; document.body.appendChild(GF);
@@ -493,7 +497,9 @@
     if (e.target.closest("[data-glk]")) { var m = document.getElementById("glkm"); if (m) m.style.display = "block"; return; }
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
     var gk = e.target.closest("[data-gk]"); if (gk) { e.stopPropagation(); tick(+gk.dataset.i, gk.dataset.gk, +gk.dataset.n); return; }
-    var hl = e.target.closest("[data-hlp]"); if (hl) { helpers(+hl.dataset.hlp); return; }
+    var hl = e.target.closest("[data-hlp]"); if (hl) { staffOpen(+hl.dataset.hlp); return; }
+    var ha = e.target.closest("[data-hadd]"); if (ha) { staffAct(+ha.dataset.i, 1); return; }
+    var hr = e.target.closest("[data-hrm]"); if (hr) { staffAct(+hr.dataset.i, 0, +hr.dataset.hrm); return; }
     var gs = e.target.closest("[data-gsec]"); if (gs) { chooseSec(+gs.dataset.gsec); return; }
     var gd = e.target.closest("[data-gd]"); if (gd) { e.stopPropagation(); details(+gd.dataset.i, +gd.dataset.gd); return; }
     var gv = e.target.closest("[data-gv]"); if (gv) { light(+gv.dataset.i, gv.dataset.gv, +gv.dataset.n); return; }

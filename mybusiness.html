@@ -913,7 +913,7 @@ function settingsView(en){
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
       '<div class="cats">'+C.filter(c=>!/^(prof|photo|rep|nt)$/.test(c[0])&&!(/^(feat|plan)$/.test(c[0])&&window.PBTejDash)).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div></div>';
   }
-  let h='<div class="setbar"><button type="button" data-setback="list">‹ '+nm+'</button><b>'+cur[1]+' '+esc(cur[2])+'</b></div>';
+  let h='<div class="setbar"><button type="button" data-setback="list">‹ '+nm+'</button><b>'+cur[1]+' '+esc(cur[2])+'</b>'+(cur[0]==="photo"&&!(window.pbgOpen&&pbgOpen(b.slug)==="staff")?'<button type="button" data-hlp="'+i+'" style="margin-left:auto">👥 '+(en?"Staff access":"स्टाफ़ एक्सेस")+'</button>':'')+'</div>';
   if(cur[0]==="acct")return h+delShopBtns(en,i)+((PINST)?'<button type="button" class="delacc" id="delAcc">🗑️ '+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ")+'</button>':'');
   if(cur[0]==="nt")return h+'<div class="card">'+notifPage()+'</div>';
   if(cur[0]==="plan"&&TJ0&&PBTejDash.planPage)return h+'<div class="card">'+PBTejDash.planPage()+catBody("plan",b,i,en)+'</div>';
