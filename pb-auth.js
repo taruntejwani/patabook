@@ -124,23 +124,40 @@ function tsScript(){
     document.head.appendChild(sc);});
   return tsLoad;
 }
+var tsMode=null;
+function tsLang(){var lg="en";try{if(localStorage.getItem("pb-lang")==="hi")lg="hi";}catch(e){}return lg;}
+function tsHint(box,on){
+  var h=document.getElementById("pbCapHint");
+  if(!on){if(h&&h.parentNode)h.parentNode.removeChild(h);return;}
+  if(!h){h=document.createElement("div");h.id="pbCapHint";h.style.cssText="text-align:center;font-size:13px;font-weight:700;color:#b45309;margin:8px 0 2px";box.parentNode.insertBefore(h,box);}
+  h.textContent=tsLang()==="hi"?"नीचे \u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी होने दें — OTP अपने-आप चला जाएगा।":"Let the \u201cI am not a robot\u201d check below finish — your OTP will be sent automatically.";
+}
+/* पहले चुपचाप जाँच; फेल हो तो साफ़ दिखने वाला box अपने-आप आता है और पास होते ही OTP चल पड़ता है (दोबारा tap नहीं) */
+function tsRender(box,mode){
+  if(tsWid!==null){try{window.turnstile.remove(tsWid);}catch(e){}tsWid=null;}
+  box.innerHTML="";tsMode=mode;
+  var vis=mode==="vis";
+  tsWid=window.turnstile.render(box,{sitekey:tsKey(),execution:vis?"render":"execute",appearance:vis?"always":"interaction-only",language:tsLang(),
+    callback:function(t){tsHint(box,false);var p=tsWait;tsWait=null;if(p)p.res(t);},
+    "error-callback":function(){tsFail(box);},"timeout-callback":function(){tsFail(box);}});
+}
+function tsFail(box){
+  if(!tsWait)return;
+  if(tsMode!=="vis"){setTimeout(function(){if(!tsWait)return;tsHint(box,true);try{tsRender(box,"vis");}catch(e){tsReject();}},0);return;}
+  tsReject();
+}
+function tsReject(){var p=tsWait;tsWait=null;var b=document.getElementById("pbCaptcha");tsHint(b,false);if(p){var e2=new Error("captcha_failed");e2.code="captcha_failed";p.rej(e2);}}
 async function captchaToken(anchor){
   if(!tsKey())return "";
   try{await tsScript();}catch(e){var e1=new Error("captcha_failed");e1.code="captcha_failed";throw e1;}
   return new Promise(function(res,rej){
-    var fail=function(){var p=tsWait;tsWait=null;if(p){var e2=new Error("captcha_failed");e2.code="captcha_failed";p.rej(e2);}};
-    if(tsWid===null){
-      var box=document.getElementById("pbCaptcha");
-      if(!box){box=document.createElement("div");box.id="pbCaptcha";box.style.cssText="display:flex;justify-content:center;margin:10px 0";
-        if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else document.body.appendChild(box);}
-      var lg="en";try{if(localStorage.getItem("pb-lang")==="hi")lg="hi";}catch(e){}
-      tsWid=window.turnstile.render(box,{sitekey:tsKey(),execution:"execute",appearance:"interaction-only",language:lg,
-        callback:function(t){var p=tsWait;tsWait=null;if(p)p.res(t);},"error-callback":fail,"timeout-callback":fail});
-    }
+    var box=document.getElementById("pbCaptcha");
+    if(!box){box=document.createElement("div");box.id="pbCaptcha";box.style.cssText="display:flex;justify-content:center;margin:10px 0";
+      if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else document.body.appendChild(box);}
     tsWait={res:res,rej:rej};
-    try{window.turnstile.reset(tsWid);}catch(e){}
-    window.turnstile.execute(tsWid);
-    setTimeout(function(){if(tsWait&&tsWait.res===res)fail();},90000);
+    if(tsWid===null||tsMode===null){tsRender(box,"auto");window.turnstile.execute(tsWid);}
+    else{try{window.turnstile.reset(tsWid);}catch(e){}if(tsMode!=="vis")window.turnstile.execute(tsWid);}
+    setTimeout(function(){if(tsWait&&tsWait.res===res)tsReject();},90000);
   });
 }
 async function otpCall(path,body,withSession){
