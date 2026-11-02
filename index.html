@@ -574,6 +574,7 @@ function applyLang(){
   try{const sv=JSON.parse(localStorage.getItem("pb-nb")||"null");if(sv&&[2,5,10,20].indexOf(sv.r)>=0)NB.r=sv.r;}catch(e){}
   const NBT={chip_near:["📍 Near me","📍 मेरे पास"],chip_all:["🏙️ City","🏙️ शहर"],near_t:["Shops near you · within {r} km","आपके पास की दुकानें · {r} km के अंदर"],city_t:["Shops in {c}","{c} की दुकानें"],
     none_near:["No shops within {r} km. Try a bigger distance.","{r} km के अंदर कोई दुकान नहीं मिली। दूरी बढ़ाकर देखें।"],deny:["Allow location to see shops near you.","पास की दुकानें देखने के लिए लोकेशन की इजाज़त दें।"],
+    none_any:["No shops found for this city yet.","इस शहर में अभी कोई दुकान नहीं मिली।"],none_city:["No shops in {c} yet.","{c} में अभी कोई दुकान नहीं है।"],add_shop:["🏪 Add your shop","🏪 अपनी दुकान जोड़ें"],
     wait:["Finding your location…","आपकी लोकेशन ढूँढ रहे हैं…"],nopos:["Location not available on this device.","इस फ़ोन पर लोकेशन उपलब्ध नहीं है।"]};
   const nbt=(k,o)=>{let x=NBT[k][(PB.lang&&PB.lang()==="hi")?1:0];for(const q in (o||{}))x=x.replace("{"+q+"}",o[q]);return x;};
   function nbChips(){
@@ -627,7 +628,7 @@ function applyLang(){
   }
   let ALL_ROWS=[];
   /* शहर -> जिला (pb_public_cities से), ताकि पट्टी में सिर्फ़ उसी जिले की दुकानें आएँ */
-  let DMAP=null,LASTD=null;
+  let DMAP=null,LASTD=null,STRICT=false,XROWS={};   /* STRICT: शहर चुना पर उसका जिला पता नहीं → सिर्फ़ उसी शहर की दुकानें, दूसरे जिले की कभी नहीं */
   async function cityDistrict(city){
     if(!city)return "Kutch";   /* शहर नहीं चुना: पहले की तरह कच्छ */
     if(!DMAP){DMAP={};
@@ -646,6 +647,7 @@ function applyLang(){
   }
   async function load(){
     const d=await cityDistrict(currentCity());
+    STRICT=!!currentCity()&&!d;
     ALL_ROWS=await fetchRows(d);LASTD=d;window.__pbDist=d;
     refreshCityShops();
   }
@@ -662,13 +664,25 @@ function applyLang(){
       return (await b.json()||[]).filter(x=>x&&x.name&&st[x.slug]).map(x=>Object.assign({},x,{_off:st[x.slug]}));
     }catch(e){return [];}
   }
+  /* जिला पता न हो तो उसी शहर के नाम वाली लाइव दुकानें सीधे ढूँढो (पते में शहर का नाम) */
+  async function cityOnly(city){
+    try{const q=String(city).replace(/[^A-Za-z0-9\u0900-\u097f ]+/g," ").trim();if(!q)return [];
+      const r=await fetch(SBU+"/rest/v1/businesses?select=slug,name,address,category&is_active=eq.true&deleted_at=is.null&address=ilike."+encodeURIComponent("*"+q+"*")+"&order=created_at.desc&limit=60",{headers:H});
+      const d=r.ok?await r.json():[];return (Array.isArray(d)?d:[]).filter(b=>b&&b.name&&inCity(b,city));
+    }catch(e){return [];}
+  }
   let RUN=0;
   async function refreshCityShops(){
     const run=++RUN,city=currentCity();
-    if(LASTD!==null){const d=await cityDistrict(city);if(run!==RUN)return;if(d!==LASTD){const nr=await fetchRows(d);if(run!==RUN)return;ALL_ROWS=nr;LASTD=d;window.__pbDist=d;}}
+    if(LASTD!==null){const d=await cityDistrict(city);if(run!==RUN)return;STRICT=!!city&&!d;if(d!==LASTD){const nr=await fetchRows(d);if(run!==RUN)return;ALL_ROWS=nr;LASTD=d;window.__pbDist=d;}}
     setCityTitle(city);
     let rows;
     if(NB.mode==="near"&&Array.isArray(NB.rows)){rows=NB.rows.slice(0,60);NB.cityOn=false;}
+    else if(STRICT){
+      let cr=ALL_ROWS.filter(b=>inCity(b,city));
+      if(!cr.length){const k=normCity(city);if(XROWS[k]===undefined){XROWS[k]=await cityOnly(city);if(run!==RUN)return;}cr=XROWS[k];}
+      NB.cityOn=true;rows=cr.slice(0,60);
+    }
     else{const cr=city?ALL_ROWS.filter(b=>inCity(b,city)):[];NB.cityOn=cr.length>0;rows=(cr.length?cr:ALL_ROWS).slice(0,60);}   /* शहर की दुकानें; शहर में कोई न हो तो पूरे जिले की */
     nbChips();setCityTitle(city);
     if(rows.length&&window.PB_SITE&&PB_SITE.premium&&window.PBPlan){
@@ -681,7 +695,7 @@ function applyLang(){
     if(mine.length&&NB.mode!=="near"){const have={};rows.forEach(b=>{have[b.slug]=1;});rows=mine.filter(b=>!have[b.slug]).concat(rows);}
     L=rows.slice(0,60);
     const section=document.getElementById("ns");if(!section)return;section.hidden=false;
-    if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">'+(NB.mode==="near"?nbt("none_near",{r:NB.r}):"No shops found for this city yet.")+'</div>';return;}   /* शहर नहीं चुना: ऊपर की लाइन ही काफ़ी */
+    if(!L.length){document.getElementById("nst").innerHTML='<div class="nsc-empty">'+(NB.mode==="near"?nbt("none_near",{r:NB.r}):(STRICT&&city?nbt("none_city",{c:city})+' <a href="list.html" style="color:#1a73e8;font-weight:800;margin-left:6px;white-space:nowrap">'+nbt("add_shop")+' ›</a>':nbt("none_any")))+'</div>';return;}   /* शहर नहीं चुना: ऊपर की लाइन ही काफ़ी */
     draw();if(!window.__pbStripOn){window.__pbStripOn=1;wire();start();}loadLogos();loadPrem();
   }
   document.getElementById("city")?.addEventListener("change",refreshCityShops);
