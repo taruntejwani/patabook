@@ -273,11 +273,86 @@
     ov.addEventListener("click", function (e) { if (e.target === ov) { close(); return; } if (onclick) onclick(e, close); });
     return { ov: ov, sh: ov.firstChild, close: close };
   }
+  /* फ़ोटो चुनने के बाद: दुकानदार खुद ज़ूम/खिसकाकर चौकोर फ्रेम में सेट करे। Done = फ्रेम वाला हिस्सा; Skip = जैसी है वैसी; रद्द/Back = null */
+  function cropEdit(file, n, tot) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file), im = new Image(), done = false;
+      im.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      im.onload = function () {
+        var ov = document.createElement("div"); ov.className = "pbgov";
+        var F = Math.min(340, Math.floor(Math.min(window.innerWidth, 420) * .86));
+        ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>' + T("फ़ोटो सेट करें", "Set your photo") + (tot > 1 ? ' (' + n + '/' + tot + ')' : '') + '</h3>' +
+          '<p class="hn">' + T("दो उँगली से ज़ूम करें और खिसकाकर सही जगह लगाएँ। जो फ्रेम में दिखेगा वही ग्राहक को दिखेगा।", "Pinch to zoom and drag to place it. What you see in the frame is what customers will see.") + '</p>' +
+          '<div id="pbgcf" style="width:' + F + 'px;height:' + F + 'px;margin:6px auto;position:relative;overflow:hidden;background:#fff;border:2px solid #0060f0;border-radius:14px;touch-action:none"></div>' +
+          '<input type="range" id="pbgcz" min="0" max="100" value="0" style="width:' + F + 'px;display:block;margin:10px auto" aria-label="' + esc(T("ज़ूम", "Zoom")) + '">' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="pbgsv" id="pbgdn" style="flex:2">' + T("हो गया", "Done") + '</button>' +
+          '<button type="button" class="pbgop" id="pbgrs" style="flex:1;margin:0;justify-content:center">' + T("रीसेट", "Reset") + '</button>' +
+          '<button type="button" class="pbgop" id="pbgsk" style="flex:1;margin:0;justify-content:center">' + T("ऐसे ही रखें", "Keep as is") + '</button></div>' +
+          '<button type="button" class="pbgop" id="pbgcx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
+        document.body.appendChild(ov);
+        var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
+        var box = ov.querySelector("#pbgcf"), z = ov.querySelector("#pbgcz");
+        var iw = im.naturalWidth, ih = im.naturalHeight, fit = Math.min(F / iw, F / ih), cover = Math.max(F / iw, F / ih), mx = cover * 4;
+        var sc = cover, tx = 0, ty = 0;
+        im.style.cssText = "position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none";
+        box.appendChild(im);
+        function clamp() {
+          var w = iw * sc, h = ih * sc;
+          tx = w >= F ? Math.min(0, Math.max(F - w, tx)) : Math.min(F - w, Math.max(0, tx));
+          ty = h >= F ? Math.min(0, Math.max(F - h, ty)) : Math.min(F - h, Math.max(0, ty));
+        }
+        function paint() { clamp(); im.style.width = iw * sc + "px"; im.style.height = ih * sc + "px"; im.style.transform = "translate(" + tx + "px," + ty + "px)"; z.value = Math.round((sc - fit) / (mx - fit) * 100); }
+        function zoomAt(ns, cx, cy) { ns = Math.max(fit, Math.min(mx, ns)); tx = cx - (cx - tx) * ns / sc; ty = cy - (cy - ty) * ns / sc; sc = ns; paint(); }
+        function reset() { sc = cover; tx = (F - iw * sc) / 2; ty = (F - ih * sc) / 2; paint(); }
+        reset();
+        var pts = {}, last = 0;
+        box.addEventListener("pointerdown", function (e) { box.setPointerCapture(e.pointerId); pts[e.pointerId] = { x: e.clientX, y: e.clientY }; last = 0; });
+        box.addEventListener("pointermove", function (e) {
+          var p = pts[e.pointerId]; if (!p) return;
+          var ids = Object.keys(pts);
+          if (ids.length === 1) { tx += e.clientX - p.x; ty += e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; paint(); }
+          else { p.x = e.clientX; p.y = e.clientY; var a = pts[ids[0]], b2 = pts[ids[1]], d = Math.hypot(a.x - b2.x, a.y - b2.y), r = box.getBoundingClientRect();
+            if (last) zoomAt(sc * d / last, (a.x + b2.x) / 2 - r.left, (a.y + b2.y) / 2 - r.top); last = d; }
+        });
+        function up2(e) { delete pts[e.pointerId]; last = 0; }
+        box.addEventListener("pointerup", up2); box.addEventListener("pointercancel", up2);
+        box.addEventListener("wheel", function (e) { e.preventDefault(); var r = box.getBoundingClientRect(); zoomAt(sc * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+        z.addEventListener("input", function () { zoomAt(fit + (mx - fit) * z.value / 100, F / 2, F / 2); });
+        function fin(v) {
+          if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; URL.revokeObjectURL(url); resolve(v);
+        }
+        var closeTop = function (v) { pending = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); }, pending = null;
+        if (window.PBBack) PBBack.open(function () { fin(pending); });
+        ov.querySelector("#pbgdn").onclick = function () {
+          var out = Math.max(300, Math.min(1000, Math.round(F / sc))), c = document.createElement("canvas"); c.width = c.height = out;
+          var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, out, out); var k = out / F;
+          g.drawImage(im, tx * k, ty * k, iw * sc * k, ih * sc * k);
+          c.toBlob(function (bl) { closeTop(bl ? new File([bl], "set.webp", { type: bl.type }) : file); }, "image/webp", .92);
+        };
+        ov.querySelector("#pbgrs").onclick = reset;
+        ov.querySelector("#pbgsk").onclick = function () { closeTop(file); };
+        ov.querySelector("#pbgcx").onclick = function () { closeTop(null); };
+      };
+      im.src = url;
+    });
+  }
   function fileInput() {
     if (GF) return GF;
     GF = document.createElement("input"); GF.type = "file"; GF.accept = "image/*"; GF.multiple = true; GF.hidden = true; document.body.appendChild(GF);
     GF.addEventListener("change", function () {
-      if (GF.files && GF.files.length && PEND) { var fs = Array.prototype.slice.call(GF.files), p = PEND; PEND = null; GO[ROWS[p.i].slug] = "photo"; up(p.i, "photo", fs, { sec: p.sec, name: p.name }); }
+      if (GF.files && GF.files.length && PEND) {
+        var fs = Array.prototype.slice.call(GF.files), p = PEND; PEND = null;
+        (async function () {
+          var out = [];
+          for (var q = 0; q < fs.length; q++) {
+            if (!/^image\//.test(fs[q].type)) { out.push(fs[q]); continue; }
+            var r = await cropEdit(fs[q], q + 1, fs.length);
+            if (r === null) return;   /* रद्द / Back */
+            out.push(r);
+          }
+          GO[ROWS[p.i].slug] = "photo"; up(p.i, "photo", out, { sec: p.sec, name: p.name });
+        })();
+      }
       GF.value = "";
     });
     return GF;
