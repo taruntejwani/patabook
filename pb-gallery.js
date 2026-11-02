@@ -284,17 +284,20 @@
     return { ov: ov, sh: ov.firstChild, close: close };
   }
   /* फ़ोटो चुनने के बाद: दुकानदार खुद ज़ूम/खिसकाकर चौकोर फ्रेम में सेट करे। Done = फ्रेम वाला हिस्सा; Skip = जैसी है वैसी; रद्द/Back = null */
-  function cropEdit(file, n, tot) {
+  var RATIO = { logo: 1, front: 2, cover: 16 / 9, open: 9 / 16 };   /* कौन-सी फ़ोटो किस नाप के फ्रेम में सेट होगी */
+  window.pbCrop = function (f, r) { return cropEdit(f, 1, 1, r); };
+  function cropEdit(file, n, tot, ratio) {
     return new Promise(function (resolve) {
       var url = URL.createObjectURL(file), im = new Image(), done = false;
       im.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
       im.onload = function () {
         var ov = document.createElement("div"); ov.className = "pbgov";
-        var F = Math.min(340, Math.floor(Math.min(window.innerWidth, 420) * .86));
+        var F = Math.min(340, Math.floor(Math.min(window.innerWidth, 420) * .86)), R = ratio > 0 ? ratio : 1, FW, FH;
+        if (R >= 1) { FW = F; FH = Math.round(F / R); } else { FH = Math.round(F * 1.15); FW = Math.round(FH * R); }
         ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>' + T("फ़ोटो सेट करें", "Set your photo") + (tot > 1 ? ' (' + n + '/' + tot + ')' : '') + '</h3>' +
           '<p class="hn">' + T("दो उँगली से ज़ूम करें और खिसकाकर सही जगह लगाएँ। जो फ्रेम में दिखेगा वही ग्राहक को दिखेगा।", "Pinch to zoom and drag to place it. What you see in the frame is what customers will see.") + '</p>' +
-          '<div id="pbgcf" style="width:' + F + 'px;height:' + F + 'px;margin:6px auto;position:relative;overflow:hidden;background:#fff;border:2px solid #0060f0;border-radius:14px;touch-action:none"></div>' +
-          '<input type="range" id="pbgcz" min="0" max="100" value="0" style="width:' + F + 'px;display:block;margin:10px auto" aria-label="' + esc(T("ज़ूम", "Zoom")) + '">' +
+          '<div id="pbgcf" style="width:' + FW + 'px;height:' + FH + 'px;margin:6px auto;position:relative;overflow:hidden;background:#fff;border:2px solid #0060f0;border-radius:14px;touch-action:none"></div>' +
+          '<input type="range" id="pbgcz" min="0" max="100" value="0" style="width:' + Math.max(FW, 200) + 'px;display:block;margin:10px auto" aria-label="' + esc(T("ज़ूम", "Zoom")) + '">' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="pbgsv" id="pbgdn" style="flex:2">' + T("हो गया", "Done") + '</button>' +
           '<button type="button" class="pbgop" id="pbgrs" style="flex:1;margin:0;justify-content:center">' + T("रीसेट", "Reset") + '</button>' +
           '<button type="button" class="pbgop" id="pbgsk" style="flex:1;margin:0;justify-content:center">' + T("ऐसे ही रखें", "Keep as is") + '</button></div>' +
@@ -302,18 +305,18 @@
         document.body.appendChild(ov);
         var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
         var box = ov.querySelector("#pbgcf"), z = ov.querySelector("#pbgcz");
-        var iw = im.naturalWidth, ih = im.naturalHeight, fit = Math.min(F / iw, F / ih), cover = Math.max(F / iw, F / ih), mx = cover * 4;
+        var iw = im.naturalWidth, ih = im.naturalHeight, fit = Math.min(FW / iw, FH / ih), cover = Math.max(FW / iw, FH / ih), mx = cover * 4;
         var sc = cover, tx = 0, ty = 0;
         im.style.cssText = "position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none";
         box.appendChild(im);
         function clamp() {
           var w = iw * sc, h = ih * sc;
-          tx = w >= F ? Math.min(0, Math.max(F - w, tx)) : Math.min(F - w, Math.max(0, tx));
-          ty = h >= F ? Math.min(0, Math.max(F - h, ty)) : Math.min(F - h, Math.max(0, ty));
+          tx = w >= FW ? Math.min(0, Math.max(FW - w, tx)) : Math.min(FW - w, Math.max(0, tx));
+          ty = h >= FH ? Math.min(0, Math.max(FH - h, ty)) : Math.min(FH - h, Math.max(0, ty));
         }
         function paint() { clamp(); im.style.width = iw * sc + "px"; im.style.height = ih * sc + "px"; im.style.transform = "translate(" + tx + "px," + ty + "px)"; z.value = Math.round((sc - fit) / (mx - fit) * 100); }
         function zoomAt(ns, cx, cy) { ns = Math.max(fit, Math.min(mx, ns)); tx = cx - (cx - tx) * ns / sc; ty = cy - (cy - ty) * ns / sc; sc = ns; paint(); }
-        function reset() { sc = cover; tx = (F - iw * sc) / 2; ty = (F - ih * sc) / 2; paint(); }
+        function reset() { sc = cover; tx = (FW - iw * sc) / 2; ty = (FH - ih * sc) / 2; paint(); }
         reset();
         var pts = {}, last = 0;
         box.addEventListener("pointerdown", function (e) { box.setPointerCapture(e.pointerId); pts[e.pointerId] = { x: e.clientX, y: e.clientY }; last = 0; });
@@ -327,15 +330,15 @@
         function up2(e) { delete pts[e.pointerId]; last = 0; }
         box.addEventListener("pointerup", up2); box.addEventListener("pointercancel", up2);
         box.addEventListener("wheel", function (e) { e.preventDefault(); var r = box.getBoundingClientRect(); zoomAt(sc * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
-        z.addEventListener("input", function () { zoomAt(fit + (mx - fit) * z.value / 100, F / 2, F / 2); });
+        z.addEventListener("input", function () { zoomAt(fit + (mx - fit) * z.value / 100, FW / 2, FH / 2); });
         function fin(v) {
           if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; URL.revokeObjectURL(url); resolve(v);
         }
         var closeTop = function (v) { pending = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); }, pending = null;
         if (window.PBBack) PBBack.open(function () { fin(pending); });
         ov.querySelector("#pbgdn").onclick = function () {
-          var out = Math.max(300, Math.min(1000, Math.round(F / sc))), c = document.createElement("canvas"); c.width = c.height = out;
-          var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, out, out); var k = out / F;
+          var ow = Math.round(FW / sc), oh = Math.round(FH / sc), mm = Math.min(1, 1600 / Math.max(ow, oh)), cw = Math.max(200, Math.round(ow * mm)), c = document.createElement("canvas"); c.width = cw; c.height = Math.round(cw * FH / FW);
+          var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); var k = cw / FW;
           g.drawImage(im, tx * k, ty * k, iw * sc * k, ih * sc * k);
           c.toBlob(function (bl) { closeTop(bl ? new File([bl], "set.webp", { type: bl.type }) : file); }, "image/webp", .92);
         };
@@ -541,6 +544,11 @@
   document.getElementById("list").addEventListener("change", function (e) {
     var pr = e.target.closest("[data-hpr]"); if (pr) { staffPerm(+pr.dataset.i, +pr.dataset.hpr); return; }
     var nw = e.target.closest("[data-hnw]"); if (nw) { var sl = ROWS[(document.querySelector("[data-hadd]") || {}).dataset ? +document.querySelector("[data-hadd]").dataset.i : 0].slug, S = HST[sl] = HST[sl] || {}, a = []; document.querySelectorAll("[data-hnw]").forEach(function (c) { if (c.checked) a.push(c.dataset.hp2); }); S.np = a; return; }
-    var g = e.target.closest("[data-gup]"); if (g && g.files && g.files.length) { var fs = Array.prototype.slice.call(g.files); GO[ROWS[+g.dataset.i].slug] = g.dataset.gup; up(+g.dataset.i, g.dataset.gup, fs); g.value = ""; }
+    var g = e.target.closest("[data-gup]"); if (g && g.files && g.files.length) { var fs = Array.prototype.slice.call(g.files), gi = +g.dataset.i, gk = g.dataset.gup; g.value = "";
+      (async function () {
+        var rt = RATIO[gk] || 1, out = [];
+        for (var q = 0; q < fs.length; q++) { if (!/^image\//.test(fs[q].type)) { out.push(fs[q]); continue; } var r = await cropEdit(fs[q], q + 1, fs.length, rt); if (r === null) return; out.push(r); }
+        GO[ROWS[gi].slug] = gk; up(gi, gk, out);
+      })(); }
   });
 })();

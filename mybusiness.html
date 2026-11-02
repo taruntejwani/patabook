@@ -652,7 +652,7 @@ function packImg(file,W,H,limit,steps,fit){return new Promise((res,rej)=>{const 
 const bannerImage=f=>packImg(f,1200,600,110000,[1,.8,.64],1);
 const coverImage=f=>packImg(f,1200,675,85000,[1,.8,.6],1);
 const extOf=bl=>bl.type==="image/webp"?"webp":"jpg";
-async function addBanner(i,file){const b=ROWS[i],en=L()==="en",er=$("be"+i);
+async function addBanner(i,file){const b=ROWS[i],en=L()==="en",er=$("be"+i);if(window.pbCrop){const f2=await pbCrop(file,2);if(f2===null)return;file=f2;}
   try{if(!/^image\//.test(file.type))throw new Error("type");
     if(er){er.style.color="#5b6475";er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";}
     const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop",poster:true}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
@@ -807,7 +807,7 @@ function coverBlock(b,i){const en=L()==="en",u=COVER[b.slug]||"";
   return '<div class="ban cv"><div class="bh">🌄 '+(en?"Profile Banner":"Profile Banner")+'</div>'+
     (COVER_RX.test(u)?'<img src="'+esc(u)+'" alt="" loading="lazy" style="aspect-ratio:16/9">':'<small>'+(en?"The photo at the very top of your page — your name and logo come below it. Best 16:9 (1200×675). It is resized and made small automatically.":"आपके पेज के सबसे ऊपर की फ़ोटो — नाम और लोगो इसके नीचे आते हैं। सबसे अच्छी 16:9 (1200×675)। अपने-आप छोटी (कम KB) हो जाएगी।")+'</small>')+
     '<div class="bb"><label>'+(u?(en?"🔄 Change":"🔄 बदलें"):(en?"➕ Add banner":"➕ बैनर लगाएँ"))+'<input type="file" accept="image/*" hidden data-cup="'+i+'"></label>'+(u?'<button type="button" data-crm="'+i+'">🗑️ '+(en?"Delete":"हटाएँ")+'</button>':'')+'</div><div class="err" id="ce'+i+'"></div></div>';}
-async function addCover(i,file){const b=ROWS[i],en=L()==="en",er=$("ce"+i);
+async function addCover(i,file){const b=ROWS[i],en=L()==="en",er=$("ce"+i);if(window.pbCrop){const f2=await pbCrop(file,16/9);if(f2===null)return;file=f2;}
   try{if(!/^image\//.test(file.type))throw new Error("type");
     if(er){er.style.color="#5b6475";er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";}
     const ck=window.PBImg?await PBImg.check(file,{slug:b.slug,kind:"shop",poster:true}):{ok:true};if(!ck.ok){if(er){er.style.color="";er.textContent=ck.msg;}return;}
@@ -845,6 +845,7 @@ const squareImage=f=>packImg(f,400,400,30000,[1,.8,.6]);
 async function uploadLogo(i,file){
   const b=ROWS[i],en=L()==="en",er=$("le"+i);er.textContent="";
   if(!/^image\//.test(file.type)){er.textContent=en?"Please choose a photo.":"कृपया फोटो चुनें।";return;}
+  if(window.pbCrop){const f2=await pbCrop(file,1);if(f2===null)return;file=f2;}
   er.style.color="var(--muted)";er.textContent=en?"Uploading…":"अपलोड हो रहा है…";
   try{
     er.textContent=en?"🔍 AI is checking the photo…":"🔍 AI फ़ोटो जांच रहा है…";
