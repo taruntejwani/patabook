@@ -27,6 +27,7 @@
   }
   window.pbPurge = purge;
   function active(b, k) { return k === "logo" ? (LOGOS[b.slug] || "") : k === "cover" ? (COVER[b.slug] || "") : k === "front" ? ((BAN[b.slug] && BAN[b.slug].url) || "") : k === "open" ? (OPEN[b.slug] || "") : ""; }
+  function hp(b, p) { return !b.h || (b.perms || []).indexOf(p) >= 0; }   /* सहायक को यह इजाज़त है? (मालिक: हाँ) */
   function isH(s) { return !!((ROWS || []).filter(function (r) { return r && r.slug === s; })[0] || {}).h; }
   async function load(s) {
     if (isH(s)) { LIB[s] = []; try { PHOTOS[s] = (await rpc("pb_my_photos", { p_slug: s })) || []; } catch (e) {} draw(); return; }   /* सहायक: सिर्फ़ फ़ोटो */
@@ -47,13 +48,13 @@
     if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
       var bar = '<div class="gph">' + (b.h ? '' : '<button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button>') + '<b>' + esc(nm(K)) + '</b><span>' + arr.length + '</span>' +
-        (ok ? (k === "photo" ? '<button type="button" class="gplus2" data-gsec="' + i + '" style="border:0" title="' + T("फ़ोटो जोड़ें", "Add photos") + '" aria-label="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋</button>' : '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>') : '') + '</div>';
+        (ok && hp(b, "add") ? (k === "photo" ? '<button type="button" class="gplus2" data-gsec="' + i + '" style="border:0" title="' + T("फ़ोटो जोड़ें", "Add photos") + '" aria-label="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋</button>' : '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>') : '') + '</div>';
       var ovl = {}, vi = 0, LM = lim(b);   /* प्लान की सीमा के बाहर वाली फ़ोटो: मालिक को दिखती है, ग्राहक को नहीं */
       if (k === "photo") arr.forEach(function (x) { if (!x.hidden) { if (LM && vi >= LM) ovl[x.id] = 1; vi++; } });
       var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + '</small></div>'
         : arr.length ? gridOf(k, arr, arr.map(function (x, n) {
           var on = k === "photo" ? !x.hidden : !!(act && x.url === act);
-          return (k === "photo" ? '<div class="gw">' : '') + '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (k === "photo" ? '<span class="gsb" title="' + esc(secLabel(x)) + '">' + secOf(x)[1] + '</span>' : '') + (k === "photo" && !b.h && x.by_role === "helper" ? '<span class="gby" title="' + esc(x.by_who || "") + '">👤 ' + T("सहायक", "Helper") + '</span>' : '') + '<span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span>' + (k === "photo" && on && ovl[x.id] ? '<span class="gtm" style="background:rgba(180,35,24,.94)">⛔ ' + T("सीमा पार · छिपी", "Over limit · hidden") + '</span>' : '') + (k === "photo" && !on && x.off_since ? '<span class="gtm">⏳ ' + hrsLeft(x) + T(" घं बचे", "h left") + '</span>' : '') + '</button>' + (k === "photo" ? '<button type="button" class="gdt' + (sumTxt(x) ? ' has' : '') + '" data-gd="' + n + '" data-i="' + i + '" aria-label="' + esc(T("विवरण जोड़ें", "Add details")) + '">' + (sumTxt(x) ? esc(sumTxt(x)) : '＋') + '</button></div>' : '');
+          return (k === "photo" ? '<div class="gw">' : '') + '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (k === "photo" ? '<span class="gsb" title="' + esc(secLabel(x)) + '">' + secOf(x)[1] + '</span>' : '') + (k === "photo" && !b.h && x.by_role === "helper" ? '<span class="gby" title="' + esc(x.by_who || "") + '">👤 ' + T("सहायक", "Helper") + '</span>' : '') + '<span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span>' + (k === "photo" && on && ovl[x.id] ? '<span class="gtm" style="background:rgba(180,35,24,.94)">⛔ ' + T("सीमा पार · छिपी", "Over limit · hidden") + '</span>' : '') + (k === "photo" && !on && x.off_since ? '<span class="gtm">⏳ ' + hrsLeft(x) + T(" घं बचे", "h left") + '</span>' : '') + '</button>' + (k === "photo" && hp(b, "edit") ? '<button type="button" class="gdt' + (sumTxt(x) ? ' has' : '') + '" data-gd="' + n + '" data-i="' + i + '" aria-label="' + esc(T("विवरण जोड़ें", "Add details")) + '">' + (sumTxt(x) ? esc(sumTxt(x)) : '＋') + '</button></div>' : '');
         }))
         : '<div class="gbd"><small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>' + sizeNote(k) + '</div>';
       var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो सार्वजनिक को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' + (arr.some(function (x) { return "off_since" in x; }) ? '<br><span style="color:#b45309">' + T("बिना ✔ की (छिपी) फ़ोटो 72 घंटे बाद अपने-आप हमेशा के लिए हट जाती है। ✔ लगाते ही वह बच जाती है।", "Photos without ✔ (hidden) are deleted permanently after 72 hours. Tick ✔ to keep one.") + '</span>' : '') : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
@@ -154,6 +155,7 @@
 
   async function tick(i, k, n) {
     var b = ROWS[i], s = b.slug, x = listOf(b, k)[n]; if (!x) return;
+    if (k === "photo" && !hp(b, "hide")) { MSG[s] = T("आपको फ़ोटो दिखाने/छिपाने की इजाज़त नहीं है।", "You are not allowed to show or hide photos."); draw(); return; }
     try {
       ME = await PBA.session();
       if (k === "photo") await rpc("pb_photo_hide", { p_slug: s, p_id: x.id, p_hidden: !x.hidden });
@@ -210,9 +212,9 @@
       '<img src="' + esc(x.url) + '" alt="" style="width:100%;flex:1 1 auto;min-height:0;max-height:calc(100dvh - 170px);border-radius:10px;object-fit:contain;background:#000">' +
       (act ? '<div style="color:#8ef0b0;font-weight:800">✔ ' + T("अभी यही चालू है", "This one is in use") + '</div>' : "") + (x.hidden ? '<div style="color:#ffd28a;font-weight:800">' + T("यह फ़ोटो छिपी है", "This photo is hidden") + '</div>' : "") +
       '<div id="gbr" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' +
-      (k === "photo" ? '<button type="button" data-a="hide" style="' + btn + 'background:' + (x.hidden ? '#1e9e57' : '#fff') + ';color:' + (x.hidden ? '#fff' : '#0b2f73') + '">' + (x.hidden ? "👁️ " + T("दिखाओ", "Show") : "🙈 " + T("छिपाओ", "Hide")) + '</button>'
+      (k === "photo" ? (hp(b, "hide") ? '<button type="button" data-a="hide" style="' + btn + 'background:' + (x.hidden ? '#1e9e57' : '#fff') + ';color:' + (x.hidden ? '#fff' : '#0b2f73') + '">' + (x.hidden ? "👁️ " + T("दिखाओ", "Show") : "🙈 " + T("छिपाओ", "Hide")) + '</button>' : '')
         : (act ? '<button type="button" data-a="unset" style="' + btn + 'background:#fff;color:#0b2f73">✖ ' + T("चालू नहीं रखना", "Stop using") + '</button>' : '<button type="button" data-a="set" style="' + btn + 'background:#1e9e57;color:#fff">✔ ' + T("Set (चालू करें)", "Set (use this)") + '</button>')) +
-      '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("Delete", "Delete") + '</button></div><div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px"></div>';
+      (hp(b, "remove") ? '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("हटाएँ", "Delete") + '</button>' : '') + '</div><div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px"></div>';
     document.body.appendChild(ov);
     var prev = document.body.style.overflow; document.body.style.overflow = "hidden";
     var gone = false;
@@ -263,6 +265,7 @@
       ".pbgsv{width:100%;border:0;border-radius:13px;padding:13px;background:linear-gradient(135deg,#0030c0,#0070f0);color:#fff;font:inherit;font-weight:800;font-size:16px;cursor:pointer;margin-top:6px}.pbgsv:disabled{opacity:.6}" +
       ".pbgtg{display:flex;align-items:center;gap:9px;margin:6px 0;font-size:14px;font-weight:700;color:#33395a}.pbgtg input{width:19px;height:19px}.pbger{color:#b42318;font-size:13px;min-height:16px;margin:4px 0}" +
       ".gsh{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 6px;font-size:14.5px;color:#0b2f73}.gsh:first-child{margin-top:4px}.gsh span{background:#eef3fc;color:#1a4fb4;border-radius:999px;padding:1px 9px;font-size:12.5px;font-weight:800}.gw{min-width:0}.gdt{display:block;width:100%;margin-top:3px;border:1px solid #cfdcf5;background:#f4f8ff;color:#1a4fb4;border-radius:8px;padding:5px 3px;font:inherit;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gdt.has{background:#e9f9ef;border-color:#bfe6cc;color:#14703d}" +
+      ".hcard{border:1px solid #e1e8f5;border-radius:14px;padding:10px 12px;margin:8px 0;background:#fff}.hpl{font-size:12.5px;color:#5b6475;margin:6px 0 2px}.hpm{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:5px 0}.hpm input{width:18px;height:18px}.pbok{color:#1e7a46;font-weight:700;font-size:13.5px;margin:8px 2px}" +
       ".gby{position:absolute;left:5px;bottom:5px;background:rgba(255,255,255,.94);border-radius:8px;padding:1px 6px;font-size:11px;font-weight:700;color:#0b2f73;box-shadow:0 1px 3px rgba(0,0,0,.25)}" +
       ".ghl{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:12px 14px;border:1px solid #d8e1ee;border-radius:14px;background:#fff;text-align:left}.ghl span{font-size:22px}.ghl b{font-size:14px;color:#0b2f73}.ghl em{margin-left:auto;font-style:normal;font-size:12px;color:#5b6475}" +
       ".hrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #eef2f8;font-size:13.5px}.hrow b{flex:1;min-width:0;word-break:break-all}.hrow img{width:36px;height:36px;object-fit:cover;border-radius:8px;flex:none}.hrow small{display:block;color:#5b6475;font-size:12px}.hrow button{border:1px solid #f0c9c4;color:#b42318;background:#fff;border-radius:999px;padding:4px 10px;font-size:12px}" +
@@ -369,28 +372,59 @@
     try { S.A = (await rpc("pb_photo_activity", { p_slug: s })) || []; } catch (e) { S.A = []; }
     draw();
   }
-  async function staffAct(i, add, id) {
+  var PERMS = [["add", "➕", "फ़ोटो जोड़ना", "Add photos"], ["edit", "✏️", "कीमत / कैप्शन बदलना", "Edit price & details"], ["hide", "👁️", "फ़ोटो दिखाना / छिपाना", "Show / hide photos"], ["remove", "🗑️", "फ़ोटो हटाना", "Remove photos"]];
+  function permBoxes(sel, attr) {
+    return PERMS.map(function (q) { return '<label class="hpm"><input type="checkbox" ' + attr + '="' + q[0] + '"' + (sel.indexOf(q[0]) >= 0 ? " checked" : "") + '> ' + q[1] + ' ' + esc(T(q[2], q[3])) + '</label>'; }).join("");
+  }
+  async function rpcFb(fn, args, fb) {   /* नया SQL न चला हो तो पुराने तरीके से */
+    try { return await rpc(fn, args); } catch (e) { if (fb && (e.status === 404 || /function|schema cache/i.test(e.message || ""))) return rpc(fb[0], fb[1]); throw e; }
+  }
+  async function staffAct(i, mode, id) {
     var s = ROWS[i].slug, S = HST[s] = HST[s] || {};
-    if (S.busy) return; S.busy = 1; S.msg = "";
+    if (S.busy) return; S.busy = 1; S.msg = ""; S.ok = "";
     try {
-      if (add) { await rpc("pb_helper_add", { p_slug: s, p_contact: (document.getElementById("pbghc") || {}).value || "" }); }
-      else { if (!confirm(T("इस स्टाफ़ को हटाएँ? उसकी पहुँच तुरंत बंद हो जाएगी।", "Remove this staff member? Their access will stop right away."))) { S.busy = 0; return; } await rpc("pb_helper_remove", { p_slug: s, p_id: id }); }
+      if (mode === "add") {
+        var v = ((document.getElementById("pbghc") || {}).value || "").trim(), np = S.np || ["add", "edit"];
+        if (!v) { S.msg = T("पहले स्टाफ़ का ईमेल या मोबाइल नंबर लिखें।", "First type the staff's email or mobile number."); S.busy = 0; draw(); return; }
+        if (!np.length) { S.msg = T("कम से कम एक इजाज़त चुनें।", "Choose at least one permission."); S.busy = 0; draw(); return; }
+        S.msg = "⏳ " + T("जोड़ा जा रहा है…", "Adding…"); draw();
+        await rpcFb("pb_helper_add", { p_slug: s, p_contact: v, p_perms: np }, ["pb_helper_add", { p_slug: s, p_contact: v }]);
+        S.msg = ""; S.ok = "✅ " + T("स्टाफ़ जुड़ गया।", "Staff added."); S.np = null;
+      } else {
+        if (!confirm(T("इस स्टाफ़ को हटाएँ? उसकी पहुँच तुरंत बंद हो जाएगी।", "Remove this staff member? Their access will stop right away."))) { S.busy = 0; return; }
+        await rpc("pb_helper_remove", { p_slug: s, p_id: id }); S.ok = "✅ " + T("स्टाफ़ हट गया।", "Staff removed.");
+      }
       await staffLoad(s);
-    } catch (x) { S.msg = helperErr(x && x.message); draw(); }
+    } catch (x) { S.msg = helperErr(x && x.message); S.ok = ""; draw(); }
     S.busy = 0;
   }
+  async function staffPerm(i, id) {   /* एक स्टाफ़ की इजाज़तें बदलीं → तुरंत सेव */
+    var s = ROWS[i].slug, S = HST[s] = HST[s] || {}, boxes = document.querySelectorAll('[data-hpr="' + id + '"]'), ps = [];
+    boxes.forEach(function (c) { if (c.checked) ps.push(c.dataset.hp2); });
+    if (!ps.length) { S.msg = T("कम से कम एक इजाज़त रखें। या स्टाफ़ को हटाएँ।", "Keep at least one permission, or remove the staff."); S.ok = ""; await staffLoad(s); return; }
+    try { await rpc("pb_helper_set", { p_slug: s, p_id: id, p_perms: ps }); S.msg = ""; S.ok = "✅ " + T("इजाज़तें सेव हो गईं।", "Permissions saved."); }
+    catch (x) { S.msg = helperErr(x && x.message); S.ok = ""; }
+    await staffLoad(s);
+  }
   function staffPage(b, i) {
-    var S = HST[b.slug] || {}, D = S.D, A = S.A || [], lim = D ? +D.lim || 0 : 0, items = D && D.items ? D.items : [];
+    var S = HST[b.slug] || {}, D = S.D, A = S.A || [], lim = D ? +D.lim || 0 : 0, items = D && D.items ? D.items : [], np = S.np || ["add", "edit"];
     var h = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button><b>👥 ' + T("स्टाफ़ एक्सेस", "Staff access") + '</b></div>' +
-      '<p class="hn" style="margin:6px 2px">' + T("स्टाफ़ सिर्फ़ \"प्रोडक्ट और सर्विस\" की फ़ोटो जोड़, बदल, छिपा या हटा सकता है। लोगो, बैनर, प्लान और सेटिंग सिर्फ़ आपके पास रहती हैं।", "Staff can only add, edit, hide or remove photos in \"Products & Services\". Logo, banner, plan and settings stay with you only.") + '</p>';
+      '<p class="hn" style="margin:6px 2px">' + T("स्टाफ़ सिर्फ़ \"प्रोडक्ट और सर्विस\" की फ़ोटो पर, आपकी चुनी इजाज़तों के हिसाब से काम कर सकता है। लोगो, बैनर, प्लान और सेटिंग सिर्फ़ आपके पास रहती हैं। हर स्टाफ़ की इजाज़त अलग रख सकते हैं।", "Staff can work only on \"Products & Services\" photos, as per the permissions you choose. Logo, banner, plan and settings stay with you only. You can set different permissions for each staff.") + '</p>';
     if (!D) h += '<p class="hn">' + (S.err ? esc(S.err) : '…') + '</p>';
     else if (!lim) h += '<div class="pbger" style="display:block">' + T("यह सुविधा आपके प्लान में नहीं है। Silver में 1, Gold में 2, Platinum में 5 स्टाफ़।", "This is not in your plan. Silver 1, Gold 2, Platinum 5 staff.") + '</div>';
     else {
       h += '<div class="szn" style="margin:6px 2px">' + T("जुड़े स्टाफ़", "Staff added") + ': <b>' + items.length + ' / ' + lim + '</b></div>' +
-        items.map(function (x) { return '<div class="hrow"><b>' + esc(x.email || x.phone) + '</b><button type="button" data-hrm="' + x.id + '" data-i="' + i + '">' + T("हटाएँ", "Remove") + '</button></div>'; }).join("");
-      if (items.length < lim) h += '<div style="margin-top:10px"><input class="pbgin" id="pbghc" maxlength="80" placeholder="' + esc(T("स्टाफ़ का Google ईमेल या 10 अंकों का मोबाइल", "Staff's Google email or 10-digit mobile")) + '" aria-label="' + esc(T("स्टाफ़ का ईमेल या मोबाइल", "Staff's email or mobile")) + '"><button type="button" class="pbgsv" data-hadd="1" data-i="' + i + '">' + T("स्टाफ़ जोड़ें", "Add staff") + '</button></div>';
+        items.map(function (x) {
+          var ps = x.perms || ["add", "edit"];
+          return '<div class="hcard"><div class="hrow" style="border:0;padding:0 0 4px"><b>' + esc(x.email || x.phone) + '</b><button type="button" data-hrm="' + x.id + '" data-i="' + i + '">' + T("हटाएँ", "Remove") + '</button></div>' +
+            '<div class="hpl">' + T("इजाज़तें", "Permissions") + ':</div>' + permBoxes(ps, 'data-hpr="' + x.id + '" data-i="' + i + '" data-hp2') + '</div>';
+        }).join("");
+      if (items.length < lim) h += '<div class="hcard"><div class="hpl" style="margin-top:0"><b>' + T("नया स्टाफ़ जोड़ें", "Add new staff") + '</b></div><input class="pbgin" id="pbghc" maxlength="80" inputmode="email" placeholder="' + esc(T("स्टाफ़ का Google ईमेल या 10 अंकों का मोबाइल", "Staff's Google email or 10-digit mobile")) + '" aria-label="' + esc(T("स्टाफ़ का ईमेल या मोबाइल", "Staff's email or mobile")) + '">' +
+        '<div class="hpl">' + T("इस स्टाफ़ को क्या करने दें:", "What can this staff do:") + '</div>' + permBoxes(np, 'data-hnw="1" data-hp2') +
+        '<button type="button" class="pbgsv" data-hadd="1" data-i="' + i + '" style="margin-top:8px">' + T("स्टाफ़ जोड़ें", "Add staff") + '</button></div>';
       h += '<p class="hn" style="margin:8px 2px">' + T("स्टाफ़ को इसी ईमेल या नंबर से PataBook में लॉगिन करके patabook.in/helper.html खोलना है।", "Staff must log in to PataBook with this email or number and open patabook.in/helper.html.") + '</p>';
     }
+    if (S.ok) h += '<div class="pbok">' + esc(S.ok) + '</div>';
     if (S.msg) h += '<div class="pbger" style="display:block">' + esc(S.msg) + '</div>';
     h += '<div class="gsh" style="margin-top:14px"><b>' + T("हाल की गतिविधि", "Recent activity") + '</b></div>';
     h += A.length ? A.slice(0, 30).map(function (x) {
@@ -498,13 +532,15 @@
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
     var gk = e.target.closest("[data-gk]"); if (gk) { e.stopPropagation(); tick(+gk.dataset.i, gk.dataset.gk, +gk.dataset.n); return; }
     var hl = e.target.closest("[data-hlp]"); if (hl) { staffOpen(+hl.dataset.hlp); return; }
-    var ha = e.target.closest("[data-hadd]"); if (ha) { staffAct(+ha.dataset.i, 1); return; }
-    var hr = e.target.closest("[data-hrm]"); if (hr) { staffAct(+hr.dataset.i, 0, +hr.dataset.hrm); return; }
+    var ha = e.target.closest("[data-hadd]"); if (ha) { staffAct(+ha.dataset.i, "add"); return; }
+    var hr = e.target.closest("[data-hrm]"); if (hr) { staffAct(+hr.dataset.i, "rm", +hr.dataset.hrm); return; }
     var gs = e.target.closest("[data-gsec]"); if (gs) { chooseSec(+gs.dataset.gsec); return; }
     var gd = e.target.closest("[data-gd]"); if (gd) { e.stopPropagation(); details(+gd.dataset.i, +gd.dataset.gd); return; }
     var gv = e.target.closest("[data-gv]"); if (gv) { light(+gv.dataset.i, gv.dataset.gv, +gv.dataset.n); return; }
   });
   document.getElementById("list").addEventListener("change", function (e) {
+    var pr = e.target.closest("[data-hpr]"); if (pr) { staffPerm(+pr.dataset.i, +pr.dataset.hpr); return; }
+    var nw = e.target.closest("[data-hnw]"); if (nw) { var sl = ROWS[(document.querySelector("[data-hadd]") || {}).dataset ? +document.querySelector("[data-hadd]").dataset.i : 0].slug, S = HST[sl] = HST[sl] || {}, a = []; document.querySelectorAll("[data-hnw]").forEach(function (c) { if (c.checked) a.push(c.dataset.hp2); }); S.np = a; return; }
     var g = e.target.closest("[data-gup]"); if (g && g.files && g.files.length) { var fs = Array.prototype.slice.call(g.files); GO[ROWS[+g.dataset.i].slug] = g.dataset.gup; up(+g.dataset.i, g.dataset.gup, fs); g.value = ""; }
   });
 })();

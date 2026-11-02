@@ -102,7 +102,7 @@ async function start(){
   ME=await PBA.session();draw();if(!ME)return;
   try{
     const r=await rpc("pb_my_helper_shops")||[];
-    ROWS=r.map(x=>({slug:x.slug,name:x.name,h:true,is_active:true}));
+    ROWS=r.map(x=>({slug:x.slug,name:x.name,h:true,is_active:true,perms:Array.isArray(x.perms)?x.perms:["add","edit"]}));
     if(window.PBPlan)await PBPlan.load(ROWS.map(x=>x.slug));
   }catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
