@@ -191,10 +191,7 @@ form.short .fo{display:none}
         <h1 data-i="phone_h">आपका मोबाइल नंबर क्या है?</h1>
         <p class="hint" data-i="phone_hint">ग्राहक इसी नंबर पर कॉल / WhatsApp करेंगे।</p>
         <input id="phone" type="tel" inputmode="numeric" maxlength="13" autocomplete="tel-national" placeholder="98XXXXXXXX">
-        <div class="otpb" id="otpBox">
-          <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
-          <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर जाँच करें।</p>
-        </div>
+        <p class="hint" id="phOtpNote" style="margin:8px 0 0;font-size:12.5px">आख़िरी स्टेप पर इस नंबर की OTP से जाँच होगी।</p>
         <p class="lbl" id="pubNote" style="margin:16px 0 0">📞 क्या आपका नंबर ग्राहकों को दिखे?</p>
         <label class="hsv" for="spY"><input type="radio" name="showPh" id="spY" value="1" checked> <span id="spYt">✅ हाँ, सबको दिखे (ग्राहक कॉल / WhatsApp कर सकें)</span></label>
         <label class="hsv" for="spN" style="margin-top:8px"><input type="radio" name="showPh" id="spN" value="0"> <span id="spNt">🔒 नहीं, नंबर छिपा रहे</span></label>
@@ -280,6 +277,18 @@ form.short .fo{display:none}
       </div>
       </div>
 
+      <!-- 5: OTP (आख़िर में — फ़ॉर्म भरने के बाद) -->
+      <div class="step" data-s="otp">
+        <div class="emoji">🔐</div>
+        <h1 id="otH">मोबाइल नंबर की जाँच</h1>
+        <p class="hint" id="otHint">इस नंबर पर SMS से OTP आएगा। OTP डालते ही दुकान जमा हो सकेगी।</p>
+        <div class="otpb" id="otpBox">
+          <div class="otpr"><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><button type="button" id="otpSend" class="otpbtn">OTP भेजें</button></div>
+          <p class="hint" id="otpMsg" style="margin:8px 0 0;font-size:13px">इस नंबर पर SMS से आया OTP डालकर नंबर जाँच करें।</p>
+        </div>
+        <div class="err"></div>
+      </div>
+
       <!-- 6: मोबाइल + submit -->
       <div class="btns" id="btns">
         <button type="button" class="btn sec" id="prev" data-i="prev">← पीछे</button>
@@ -321,7 +330,7 @@ const GROUP={biz:["shop","owner"],work:["svc","addr"]};
 function langChosen(){try{return localStorage.getItem("pb-lang-chosen")==="1";}catch(_){return true;}}   /* storage बंद हो तो भाषा वाली स्क्रीन छोड़ दो */
 function langFirst(){try{return sessionStorage.getItem("pb-lang-first")==="1";}catch(_){return false;}}  /* अभी-अभी भाषा चुनी (page reload के बाद भी 4 स्क्रीन दिखें) */
 const WITH_LANG=!langChosen()||langFirst();
-const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(["phone","biz","work"]),FULL_KEYS=SHORT_KEYS;
+const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(["phone","biz","work","otp"]),FULL_KEYS=SHORT_KEYS;   /* OTP अब आख़िर में: पहले नंबर, फिर फ़ॉर्म, फिर OTP */
 let FULLF=false,steps=SHORT_KEYS.map(stepBy);
 let i=(WITH_LANG&&langChosen())?1:0,coords=null,sending=false;
 
@@ -591,12 +600,13 @@ function render(){
   steps.forEach((s,k)=>s.classList.toggle("on",k===i));
   $("bar").style.width=((i+1)/steps.length*100)+"%";
   /* ऊपर की पट्टी: सारे steps नाम के साथ (हो चुके = हरा ✓, अभी वाला = नीला, आगे वाले = धुँधले) */
-  {const NM={lang:["भाषा","Language"],phone:["मोबाइल","Mobile"],biz:["दुकान और मालिक","Business"],work:["काम और पता","Work & Address"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
+  {const NM={lang:["भाषा","Language"],phone:["मोबाइल","Mobile"],biz:["दुकान और मालिक","Business"],work:["काम और पता","Work & Address"],otp:["OTP","OTP"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
    $("cnt").innerHTML='<div class="stp" role="list">'+steps.map((x,k)=>{const k2=x.dataset.s,st=k<i?"done":k===i?"on":"todo";
      return '<button type="button" class="'+st+'" role="listitem" data-stp="'+k2+'"'+(k<i?'':' tabindex="-1"')+(k===i?' aria-current="step"':'')+'><i>'+(k<i?"✓":(k+1))+'</i><span>'+(NM[k2]?NM[k2][EN()?1:0]:k2)+'</span></button>';}).join("")+'</div>';
    const cur=$("cnt").querySelector(".on");if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:"center",block:"nearest"});}catch(_){}}
   $("prev").style.visibility=i===0?"hidden":"visible";
   const key=steps[i].dataset.s;
+  if(key==="otp"&&OTP_URL&&!OWNP[ph10()]&&!regToken&&AUTOOTP!==ph10()&&/^[6-9]\d{9}$/.test(ph10())){AUTOOTP=ph10();setTimeout(()=>{const b=$("otpSend");if(b&&!b.disabled)b.click();},250);}   /* OTP वाले स्टेप पर पहुँचते ही OTP अपने-आप चला जाए */
   if(window.PBT)PBT.once("reg",(i+1)+"-"+key);   /* traffic: रजिस्ट्रेशन कहाँ तक पहुँचा */
   $("skip").style.display=key==="loc"?"block":"none";   /* category zaroori: svc step skip nahi */
   /* WhatsApp / समय / ईमेल वाले खाने ज़रूरी नहीं: सीधे आखिरी (काम/category) वाले सवाल पर जा सकते हैं */
@@ -638,7 +648,7 @@ function checkKey(key){
   }
   if(key==="phone"&&!validPhone(phoneClean())){E(T("e_phone"));return false;}
   if(key==="phone"&&OWNP[ph10()]>=3){E(LX("limit2"));return false;}
-  if(key==="phone"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){E(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से जाँच करें।");return false;}
+  if(key==="otp"&&OTP_URL&&!OWNP[ph10()]&&(!regToken||regPhone!==ph10())){E(EN()?"Please verify your mobile number with OTP first.":"पहले मोबाइल नंबर OTP से जाँच करें।");return false;}
   return true;
 }
 function check(){
@@ -656,7 +666,7 @@ function summary(){
 }
 
 /* ---------- दुकान जोड़ने से पहले मोबाइल OTP ---------- */
-let regToken="",regPhone="",otpTimer=null,loginTicket="";
+let regToken="",regPhone="",otpTimer=null,loginTicket="",AUTOOTP="";   /* AUTOOTP: जिस नंबर पर OTP अपने-आप भेज चुके */
 /* 🔑 पहले से login मालिक: इसी नंबर पर दूसरी / तीसरी दुकान बिना OTP (pb_register_open खुद जाँचता है कि दुकान इसी खाते की है) */
 let OWNP={},OWNMODE=false;   /* OWNP = {नंबर: इस खाते की उस नंबर वाली दुकानों की गिनती} */
 function ownSync(){
@@ -687,6 +697,9 @@ function hm(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").m
 function extrasFill(){
   const en=EN(),set=(id,h,e)=>{const x=$(id);if(x)x.textContent=en?e:h;},ph=(id,h,e)=>{const x=$(id);if(x)x.placeholder=en?e:h;};
   set("lgH","भाषा चुनें","Choose your language");set("lgHint","इस फ़ॉर्म की भाषा चुनें","Select the language of this form");
+  set("otH","मोबाइल नंबर की जाँच","Verify your mobile number");
+  set("otHint","इस नंबर पर SMS से OTP आएगा। OTP डालते ही दुकान जमा हो सकेगी।","An OTP will be sent by SMS to this number. Enter it to submit your shop.");
+  set("phOtpNote","आख़िरी स्टेप पर इस नंबर की OTP से जाँच होगी।","This number will be verified with an OTP on the last step.");
   set("hrH","दुकान कब खुलती है?","When is your shop open?");
   set("hrHint","ग्राहक बिना फ़ोन किए जान लेंगे कि दुकान अभी खुली है या नहीं। ज़रूरी नहीं।","Customers can see if you are open without calling. Optional.");
   set("opL","खुलने का समय","Opens at");set("clL","बंद होने का समय","Closes at");set("offL","🗓️ हफ़्ते में छुट्टी","🗓️ Weekly off");
@@ -774,8 +787,16 @@ $("otpCode").addEventListener("input",async()=>{
     if(e.code==="admin_owned"||e.code==="owner_missing"){otpMsg(EN()?"A shop is already added with this number. Please contact PataBook to manage it.":"इस नंबर से दुकान पहले से जुड़ी है। उसे संभालने के लिए PataBook से संपर्क करें।",true);$("otpCode").value="";return;}
     otpMsg(otpErr(e),true);$("otpCode").disabled=false;$("otpCode").value="";$("otpCode").focus();}
 });
-$("next").onclick=()=>{
+$("next").onclick=async()=>{
   if(!check())return;
+  /* इस नंबर से दुकान पहले से जुड़ी हो तो पूरा फ़ॉर्म भरवाए बिना सीधे OTP पर भेजो (OTP सही होते ही "मेरी दुकान" खुलती है) */
+  if(steps[i].dataset.s==="phone"&&OTP_URL&&!OWNP[ph10()]){
+    const nb=$("next");nb.disabled=true;let has=false;
+    try{const st=await regStatus(ph10());has=!!(st&&(st.status==="live"||st.status==="pending"));}catch(_){}
+    nb.disabled=false;
+    const t=steps.findIndex(x=>x.dataset.s==="otp");
+    if(has&&t>0){i=t;history.pushState({pbst:i,pbk:"otp"},"",location.pathname+location.search);render();return;}
+  }
   if(i<steps.length-1){i++;history.pushState({pbst:i,pbk:steps[i].dataset.s},"",location.pathname+location.search);render();}else submit();
 };
 
