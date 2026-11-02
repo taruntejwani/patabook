@@ -27,6 +27,7 @@
     ".pgv .cp{position:absolute;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));text-align:center;color:#fff;font:700 14px/1.4 system-ui,sans-serif;padding:0 70px;text-shadow:0 1px 6px #000;z-index:2;pointer-events:none}";
   document.head.appendChild(css);
 
+  function hiL() { return !!(window.PB && PB.lang && PB.lang() === "hi"); }
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* जाली का HTML: urls = फ़ोटो की list, caps = {url: नाम} */
@@ -35,7 +36,7 @@
     caps = caps || {}; cur = { urls: urls, caps: caps };
     var h = '<div class="pgal">' + urls.slice(0, LIM).map(function (u, i) {
       var c = caps[u] ? String(caps[u]) : "";
-      return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || "Photo " + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
+      return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
         (c ? '<figcaption>' + esc(c) + '</figcaption>' : '') + '</figure>';
     }).join("") + '</div>';
     if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="1">More (' + (urls.length - LIM) + ') ›</button>';
@@ -46,7 +47,7 @@
     caps = caps || {};
     var d = document.createElement("div"); d.className = "pgp";
     d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="Back">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + ' (' + urls.length + ')</span></div><div class="gr">' +
-      urls.map(function (u, i) { return '<button type="button" data-pg="' + i + '" aria-label="Photo ' + (i + 1) + '"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></button>'; }).join("") + '</div>';
+      urls.map(function (u, i) { return '<button type="button" data-pg="' + i + '" aria-label="' + (hiL() ? "फ़ोटो " : "Photo ") + (i + 1) + '"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></button>'; }).join("") + '</div>';
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; }
     d.addEventListener("click", function (e) {
       if (e.target.closest(".bk")) { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); return; }

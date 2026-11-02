@@ -10,7 +10,7 @@
   var OPEN = {};
   function en() { return L() === "en"; }
   function T(h, e) { return en() ? e : h; }
-  function nm(K) { return K[0] === "photo" ? T("प्रोडक्ट और सर्विस", "Products & Services") : K[2]; }   /* "Gallery" फ़ोल्डर = प्रोडक्ट और सर्विस की फ़ोटो */
+  function nm(K) { var H = { photo: "प्रोडक्ट और सर्विस", logo: "लोगो", cover: "प्रोफ़ाइल बैनर", front: "होम विज्ञापन", open: "शुरुआती फ़ोटो" }; return K[0] === "photo" ? T(H.photo, "Products & Services") : T(H[K[0]] || K[2], K[2]); }   /* "Gallery" फ़ोल्डर = प्रोडक्ट और सर्विस की फ़ोटो */
   function paid(b) { return !!(PREM && PREM[b.slug] && PREM[b.slug].until); }
   function can(b, k) { return k === "logo" ? true : k === "photo" ? PH(b, "photos") : k === "front" || k === "open" ? PH(b, "banner") : paid(b); }
   function lim(b) { return (window.PBPlan && PBPlan.lim(b.slug, "photos")) || 0; }

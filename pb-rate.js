@@ -13,7 +13,7 @@
   function css(){if(CSS)return;CSS=true;var st=document.createElement("style");st.textContent=".pbrate{margin:14px 0;padding:12px 14px;border:1px solid #e3e6f0;border-radius:14px;background:#fff}.pbrate b{display:block;font-size:14px;margin-bottom:6px}.pbrate .st{display:flex;gap:6px}.pbrate .st button{font-size:30px;line-height:1;background:none;border:0;padding:2px;cursor:pointer;color:#cfd3e0}.pbrate .st button.on{color:#f5b301}.pbrate small{display:block;margin-top:6px;color:#5b6475;font-size:13px}";document.head.appendChild(st);}
   function paint(){var el=document.getElementById("pbRate");if(!el)return;css();
     var h='<b>⭐ '+(MINE?T("आपकी रेटिंग","Your rating"):T("इस दुकान को रेटिंग दें","Rate this shop"))+'</b><div class="st">';
-    for(var i=1;i<=5;i++)h+='<button type="button" data-s="'+i+'" class="'+(MINE&&i<=MINE?"on":"")+'" aria-label="'+i+' star">★</button>';
+    for(var i=1;i<=5;i++)h+='<button type="button" data-s="'+i+'" class="'+(MINE&&i<=MINE?"on":"")+'" aria-label="'+i+T(' स्टार',' star')+'">★</button>';
     h+='</div>'+(MSG?'<small>'+MSG+'</small>':'<small>'+T("रेटिंग के लिए लॉगिन ज़रूरी है।","Login is needed to rate.")+'</small>');
     el.className="pbrate";el.innerHTML=h;}
   async function rate(n){if(BUSY)return;var s=await sess();if(!s){location.href=PBA.loginUrl();return;}

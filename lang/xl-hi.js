@@ -1,6 +1,9 @@
 /* PataBook — English text on Hindi pages -> Hindi (generated; edit the map below) */
 PB_XL("hi",{
 "m": {
+"Categories": "श्रेणियाँ",
+"Member posters": "सदस्य पोस्टर",
+"Online / Offline": "ऑनलाइन / ऑफ़लाइन",
 "Language": "भाषा",
 "Home": "होम",
 "Back": "वापस",

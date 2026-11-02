@@ -179,8 +179,8 @@ form.short .fo{display:none}
       <!-- 1: भाषा (सिर्फ़ पहली बार) -->
       <div class="step" data-s="lang">
         <div class="emoji">🌐</div>
-        <h1>भाषा चुनें · Choose your language</h1>
-        <p class="hint">इस फ़ॉर्म की भाषा चुनें · Select the language of this form</p>
+        <h1 id="lgH">Choose your language</h1>
+        <p class="hint" id="lgHint">Select the language of this form</p>
         <div class="lgrid" id="lgrid"></div>
         <div class="err"></div>
       </div>
@@ -686,6 +686,7 @@ const DAYS=[["","कोई छुट्टी नहीं (सातों द�
 function hm(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
 function extrasFill(){
   const en=EN(),set=(id,h,e)=>{const x=$(id);if(x)x.textContent=en?e:h;},ph=(id,h,e)=>{const x=$(id);if(x)x.placeholder=en?e:h;};
+  set("lgH","भाषा चुनें","Choose your language");set("lgHint","इस फ़ॉर्म की भाषा चुनें","Select the language of this form");
   set("hrH","दुकान कब खुलती है?","When is your shop open?");
   set("hrHint","ग्राहक बिना फ़ोन किए जान लेंगे कि दुकान अभी खुली है या नहीं। ज़रूरी नहीं।","Customers can see if you are open without calling. Optional.");
   set("opL","खुलने का समय","Opens at");set("clL","बंद होने का समय","Closes at");set("offL","🗓️ हफ़्ते में छुट्टी","🗓️ Weekly off");
