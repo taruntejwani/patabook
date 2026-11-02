@@ -1228,7 +1228,12 @@ const bellH=async e=>{
 };
 $("ntPanel").addEventListener("click",bellH);$("list").addEventListener("click",bellH);
 $("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
-function helpBar(en){return HELP&&HELP.length?'<a href="helper.html" class="card" style="display:flex;align-items:center;gap:10px;border-color:#cfe0ff"><span style="font-size:22px">👥</span><b style="flex:1;color:var(--navy);font-size:14px">'+(en?"You are a photo helper for ":"आप इनके फ़ोटो सहायक हैं: ")+esc(HELP.map(h=>h.name).join(", "))+'</b><span style="color:var(--blue);font-weight:700">'+(en?"Open ›":"खोलें ›")+'</span></a>':"";}
+function helpBar(en){
+  if(!HELP||!HELP.length)return "";
+  const PL={add:["➕",en?"Add photos":"फ़ोटो जोड़ना"],edit:["✏️",en?"Edit price & details":"कीमत / कैप्शन बदलना"],hide:["👁️",en?"Show / hide":"दिखाना / छिपाना"],remove:["🗑️",en?"Remove":"हटाना"]};
+  return HELP.map(h=>{const ps=(Array.isArray(h.perms)&&h.perms.length?h.perms:["add","edit"]).filter(k=>PL[k]);
+    return '<a href="helper.html" class="card" style="display:block;border-color:#cfe0ff;background:#f4f8ff"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">👥</span><b style="flex:1;color:var(--navy);font-size:14.5px">'+esc(h.name)+'<small style="display:block;font-weight:600;color:var(--muted);font-size:12px">'+(en?"You have staff access here":"यहाँ आपको स्टाफ़ एक्सेस मिला है")+'</small></b><span style="color:var(--blue);font-weight:800">'+(en?"Open ›":"खोलें ›")+'</span></div>'+
+      '<div style="margin-top:8px;font-size:12.5px;color:#34415a">'+(en?"You can: ":"आप कर सकते हैं: ")+ps.map(k=>PL[k][0]+" "+PL[k][1]).join(" · ")+'</div></a>';}).join("");}
 async function start(){
   ME=await PBA.session();
   if(ME&&PBA.deviceCheck){DEV=await PBA.deviceCheck().catch(()=>null);if(DEV&&DEV.ok===false){ME=null;DEV=null;}}

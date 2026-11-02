@@ -56,7 +56,7 @@ const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const L=()=>(window.PB&&PB.lang&&PB.lang()!=="hi")?"en":"hi";
-let ME=null,ROWS=null,SEL=0,ERR="";
+let ME=null,ROWS=null,SEL=0,ERR="",OWN=0;
 /* pb-gallery.js को चाहिए वाली चीज़ें (सहायक के पास सिर्फ़ फ़ोटो का काम है) */
 let PREM={},PHOTOS={},LOGOS={},COVER={},BAN={},PDAYS=0,PDOPEN=0;
 const PH=(b,f)=>window.PBPlan?PBPlan.has(b.slug,f):true;
@@ -91,9 +91,11 @@ function draw(){
   if(!ROWS.length){list.innerHTML='<div class="card gate"><div class="big">👥</div><p class="note">'+tx("none")+'</p><a class="lnk" href="mybusiness.html">'+tx("my")+'</a></div>';return;}
   if(SEL>=ROWS.length)SEL=0;
   const b=ROWS[SEL];
-  let h="";
+  let h=OWN?'<a class="lnk" href="mybusiness.html" style="margin:0 0 10px">‹ '+(L()==="en"?"My own shop":"मेरी अपनी दुकान")+'</a>':"";
   if(ROWS.length>1)h+='<div class="pick">'+ROWS.map((r,k)=>'<button type="button" data-sel="'+k+'" class="'+(k===SEL?"on":"")+'">'+esc(r.name)+'</button>').join("")+'</div>';
   else h+='<p class="sub" style="margin-top:-4px"><b>'+esc(b.name)+'</b></p>';
+  {const en=L()==="en",PL={add:en?"➕ Add photos":"➕ फ़ोटो जोड़ना",edit:en?"✏️ Edit price & details":"✏️ कीमत / कैप्शन बदलना",hide:en?"👁️ Show / hide":"👁️ दिखाना / छिपाना",remove:en?"🗑️ Remove":"🗑️ हटाना"};
+   h+='<p class="note" style="margin:-6px 0 10px">'+(en?"You can: ":"आप कर सकते हैं: ")+(b.perms||[]).filter(k=>PL[k]).map(k=>PL[k]).join(" · ")+'</p>';}
   h+='<div class="card">'+(PH(b,"photos")?(window.galleryBlock?galleryBlock(b,SEL):""):'<p class="note">'+tx("noplan")+'</p>')+'</div>';
   list.innerHTML=h;
 }
@@ -104,6 +106,7 @@ async function start(){
     const r=await rpc("pb_my_helper_shops")||[];
     ROWS=r.map(x=>({slug:x.slug,name:x.name,h:true,is_active:true,perms:Array.isArray(x.perms)?x.perms:["add","edit"]}));
     if(window.PBPlan)await PBPlan.load(ROWS.map(x=>x.slug));
+    try{const o=await rpc("pb_my_businesses")||[];OWN=o.length;}catch(e){OWN=0;}
   }catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){await PBA.logout();ME=null;}
     else{ERR="e_net";ROWS=null;}
