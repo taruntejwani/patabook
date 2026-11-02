@@ -43,11 +43,11 @@
     if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
       var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="Back">‹</button><b>' + esc(nm(K)) + '</b><span>' + arr.length + '</span>' +
-        (ok ? '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>' : '') + '</div>';
+        (ok ? (k === "photo" ? '<button type="button" class="gplus2" data-gsec="' + i + '" style="border:0" title="' + T("फ़ोटो जोड़ें", "Add photos") + '" aria-label="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋</button>' : '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>') : '') + '</div>';
       var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + '</small></div>'
         : arr.length ? '<div class="gg3">' + arr.map(function (x, n) {
           var on = k === "photo" ? !x.hidden : !!(act && x.url === act);
-          return '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy"><span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span>' + (k === "photo" && !on && x.off_since ? '<span class="gtm">⏳ ' + hrsLeft(x) + T(" घं बचे", "h left") + '</span>' : '') + '</button>';
+          return (k === "photo" ? '<div class="gw">' : '') + '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (k === "photo" ? '<span class="gsb" title="' + esc(secLabel(x)) + '">' + secOf(x)[1] + '</span>' : '') + '<span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span>' + (k === "photo" && !on && x.off_since ? '<span class="gtm">⏳ ' + hrsLeft(x) + T(" घं बचे", "h left") + '</span>' : '') + '</button>' + (k === "photo" ? '<button type="button" class="gdt' + (sumTxt(x) ? ' has' : '') + '" data-gd="' + n + '" data-i="' + i + '" aria-label="' + esc(T("विवरण जोड़ें", "Add details")) + '">' + (sumTxt(x) ? esc(sumTxt(x)) : '＋') + '</button></div>' : '');
         }).join("") + '</div>'
         : '<div class="gbd"><small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>' + sizeNote(k) + '</div>';
       var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो सार्वजनिक को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' + (arr.some(function (x) { return "off_since" in x; }) ? '<br><span style="color:#b45309">' + T("बिना ✔ की (छिपी) फ़ोटो 72 घंटे बाद अपने-आप हमेशा के लिए हट जाती है। ✔ लगाते ही वह बच जाती है।", "Photos without ✔ (hidden) are deleted permanently after 72 hours. Tick ✔ to keep one.") + '</span>' : '') : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
@@ -71,7 +71,7 @@
     return '<div class="szn">📐 ' + t + '</div>';
   }
 
-  async function up(i, k, files) {
+  async function up(i, k, files, meta) {
     var b = ROWS[i], s = b.slug, name = nm(KINDS.filter(function (x) { return x[0] === k; })[0]);
     for (var f = 0; f < files.length; f++) {
       var file = files[f];
@@ -92,7 +92,7 @@
         var r = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
         if (!r.ok) throw new Error("upload");
         var pub = SB + "/storage/v1/object/public/shop-logos/" + path;
-        if (k === "photo") await rpc("pb_photo_add", { p_slug: s, p_url: pub });
+        if (k === "photo") { var nid = await rpc("pb_photo_add", { p_slug: s, p_url: pub }); if (meta && nid) { try { await rpc("pb_photo_set", { p_slug: s, p_id: nid, p_sec: meta.sec, p_sec_name: meta.name || null, p_title: null, p_price: null, p_disc: null, p_caption: null, p_descr: null, p_extra: null, p_price_from: false, p_sold: false }); } catch (e4) {} } }
         else {
           await rpc("pb_lib_add", { p_slug: s, p_kind: k, p_url: pub });
           if (!active(b, k)) { try { await setActive(b, k, pub); } catch (e) {} }   /* पहली फ़ोटो अपने-आप चालू */
@@ -220,12 +220,133 @@
     });
   }
 
+
+  /* ============ 🛍️ Products & Services: हर फ़ोटो का अपना section + विवरण ============ */
+  var SECS = [["products", "🛍️", "Products", "प्रोडक्ट"], ["services", "🛠️", "Services", "सर्विस"], ["properties", "🏠", "Properties", "प्रॉपर्टी"], ["menu", "🍽️", "Menu", "मेन्यू"], ["gallery", "🖼️", "Gallery", "गैलरी"], ["custom", "✏️", "Own name", "अपना नाम"]];
+  var XTRA = { products: ["Size / Pack", "साइज़ / पैक"], services: ["Time taken", "समय"], properties: ["Area (sq ft)", "एरिया (sq ft)"], menu: ["Half / Full", "हाफ़ / फुल"] };
+  var GF = null, PEND = null;
+  function secOf(x) { var k = (x && x.sec) || "products"; return SECS.filter(function (z) { return z[0] === k; })[0] || SECS[0]; }
+  function secLabel(x) { var z = secOf(x); return z[0] === "custom" ? (x.sec_name || T("अपना नाम", "Own name")) : T(z[3], z[2]); }
+  function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
+  function netPrice(x) { return x.price != null && x.disc ? Math.round(x.price * (100 - x.disc) / 100) : x.price; }
+  function sumTxt(x) {   /* फ़ोटो के नीचे बटन पर छोटा सार */
+    if (x.title) return x.title;
+    if (x.price != null) return inr(netPrice(x)) + (x.disc ? " · -" + x.disc + "%" : "");
+    return x.caption || x.descr || "";
+  }
+  (function () {
+    if (document.getElementById("pbgCss")) return;
+    var st = document.createElement("style"); st.id = "pbgCss";
+    st.textContent = ".pbgov{position:fixed;inset:0;z-index:320;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center}.pbgsh{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.pbgov{align-items:center}.pbgsh{border-radius:20px}}" +
+      ".pbgsh h3{margin:0 0 4px;font-size:17px;color:#0b2f73}.pbgsh .hn{font-size:12.5px;color:#5b6475;margin:0 0 12px;line-height:1.4}" +
+      ".pbgop{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid #e1e8f5;background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:8px;font:inherit;font-weight:800;font-size:15px;color:#0b2f73;cursor:pointer;text-align:left}.pbgop span{font-size:22px}" +
+      ".pbgin{width:100%;padding:11px 12px;border:1.5px solid #dbe5f7;border-radius:11px;font:inherit;font-size:15px;margin:2px 0 8px;background:#fff}textarea.pbgin{min-height:78px;resize:vertical}" +
+      ".pbgf label{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:800;color:#33395a}.pbgf label button{border:0;background:none;color:#b42318;font:inherit;font-weight:800;cursor:pointer;padding:2px 6px}" +
+      ".pbgch{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.pbgch button{border:1.5px dashed #9fb6e6;background:#f4f8ff;color:#1a4fb4;border-radius:999px;padding:8px 13px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}" +
+      ".pbgsv{width:100%;border:0;border-radius:13px;padding:13px;background:linear-gradient(135deg,#0030c0,#0070f0);color:#fff;font:inherit;font-weight:800;font-size:16px;cursor:pointer;margin-top:6px}.pbgsv:disabled{opacity:.6}" +
+      ".pbgtg{display:flex;align-items:center;gap:9px;margin:6px 0;font-size:14px;font-weight:700;color:#33395a}.pbgtg input{width:19px;height:19px}.pbger{color:#b42318;font-size:13px;min-height:16px;margin:4px 0}" +
+      ".gw{min-width:0}.gdt{display:block;width:100%;margin-top:3px;border:1px solid #cfdcf5;background:#f4f8ff;color:#1a4fb4;border-radius:8px;padding:5px 3px;font:inherit;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gdt.has{background:#e9f9ef;border-color:#bfe6cc;color:#14703d}" +
+      ".gsb{position:absolute;left:5px;top:5px;background:rgba(255,255,255,.92);border-radius:8px;padding:1px 5px;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.25)}";
+    document.head.appendChild(st);
+  })();
+  function mkSheet(inner, onclick) {   /* नीचे से खुलने वाली शीट; फ़ोन का Back उसे पहले बंद करता है */
+    var ov = document.createElement("div"), gone = false;
+    ov.className = "pbgov"; ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true">' + inner + '</div>';
+    document.body.appendChild(ov);
+    var prev = document.body.style.overflow; document.body.style.overflow = "hidden";
+    function gc() { if (gone) return; gone = true; ov.remove(); document.body.style.overflow = prev; }
+    function close() { if (window.PBBack) PBBack.close(); else gc(); }
+    if (window.PBBack) PBBack.open(gc);
+    ov.addEventListener("click", function (e) { if (e.target === ov) { close(); return; } if (onclick) onclick(e, close); });
+    return { ov: ov, sh: ov.firstChild, close: close };
+  }
+  function fileInput() {
+    if (GF) return GF;
+    GF = document.createElement("input"); GF.type = "file"; GF.accept = "image/*"; GF.multiple = true; GF.hidden = true; document.body.appendChild(GF);
+    GF.addEventListener("change", function () {
+      if (GF.files && GF.files.length && PEND) { var fs = Array.prototype.slice.call(GF.files), p = PEND; PEND = null; GO[ROWS[p.i].slug] = "photo"; up(p.i, "photo", fs, { sec: p.sec, name: p.name }); }
+      GF.value = "";
+    });
+    return GF;
+  }
+  /* ＋ दबाया: पहले चुनें कि यह फ़ोटो किस section की है, फिर फ़ोटो चुनने की खिड़की */
+  function chooseSec(i) {
+    var inp = fileInput(), custom = false;
+    var inner = '<h3>' + T("यह फ़ोटो किसकी है?", "What is this photo for?") + '</h3><p class="hn">' + T("अपना काम चुनें — उसी नाम के हिस्से में ग्राहक को दिखेगी।", "Pick your work — it will show under that heading to customers.") + '</p>' +
+      SECS.map(function (z) { return '<button type="button" class="pbgop" data-sec="' + z[0] + '"><span>' + z[1] + '</span>' + esc(T(z[3], z[2])) + '</button>'; }).join("") +
+      '<div id="pbgcu" style="display:none"><input class="pbgin" id="pbgcn" maxlength="24" placeholder="' + esc(T("अपने हिस्से का नाम (जैसे: हमारा काम)", "Name of your section (e.g. Our Work)")) + '" aria-label="' + esc(T("हिस्से का नाम", "Section name")) + '"><div class="pbger" id="pbgce"></div><button type="button" class="pbgsv" data-go="1">' + T("आगे — फ़ोटो चुनें", "Next — choose photos") + '</button></div>';
+    mkSheet(inner, function (e, close) {
+      var o = e.target.closest("[data-sec]"), go = e.target.closest("[data-go]");
+      if (o) {
+        if (o.dataset.sec === "custom") { document.getElementById("pbgcu").style.display = "block"; custom = true; var c = document.getElementById("pbgcn"); if (c) c.focus(); return; }
+        PEND = { i: i, sec: o.dataset.sec, name: "" }; inp.click(); close(); return;
+      }
+      if (go && custom) {
+        var nmv = (document.getElementById("pbgcn").value || "").trim();
+        if (!nmv) { document.getElementById("pbgce").textContent = T("नाम लिखें।", "Please type a name."); return; }
+        PEND = { i: i, sec: "custom", name: nmv }; inp.click(); close();
+      }
+    });
+  }
+  /* फ़ोटो के नीचे ＋: कीमत / डिस्काउंट / Caption / Description जो चाहें वही जोड़ें */
+  function details(i, n) {
+    var b = ROWS[i], s = b.slug, x = listOf(b, "photo")[n]; if (!x) return;
+    var S = { sec: x.sec || "products", name: x.sec_name || "", title: x.title || "", price: x.price == null ? "" : String(x.price), disc: x.disc ? String(x.disc) : "", cap: x.caption || "", desc: x.descr || "", extra: x.extra || "", from: !!x.price_from, sold: !!x.sold };
+    var O = { price: S.price !== "", disc: !!S.disc, cap: !!S.cap, desc: !!S.desc, extra: !!S.extra }, err = "", h;
+    function field(f, lab, inner) { return '<div class="pbgf"><label>' + lab + '<button type="button" data-rm="' + f + '" aria-label="' + esc(T("हटाएँ", "Remove")) + '">✕</button></label>' + inner + '</div>'; }
+    function html() {
+      var xl = XTRA[S.sec], chips = [];
+      var out = '<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><img src="' + esc(x.url) + '" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:12px"><div style="flex:1"><h3>' + T("फ़ोटो का विवरण", "Photo details") + '</h3><div class="hn" style="margin:0">' + T("जो चाहें वही जोड़ें — बाकी ग्राहक को नहीं दिखेगा।", "Add only what you need — the rest stays hidden.") + '</div></div></div>' +
+        '<div class="pbgf"><label>' + T("किस हिस्से में", "Section") + '</label><select class="pbgin" data-f="sec">' + SECS.map(function (z) { return '<option value="' + z[0] + '"' + (z[0] === S.sec ? " selected" : "") + '>' + esc(T(z[3], z[2])) + '</option>'; }).join("") + '</select>' +
+        (S.sec === "custom" ? '<input class="pbgin" data-f="name" maxlength="24" value="' + esc(S.name) + '" placeholder="' + esc(T("अपने हिस्से का नाम", "Your section name")) + '" aria-label="' + esc(T("हिस्से का नाम", "Section name")) + '">' : '') + '</div>' +
+        '<div class="pbgf"><label>' + T("नाम", "Name") + '</label><input class="pbgin" data-f="title" maxlength="80" value="' + esc(S.title) + '" placeholder="' + esc(T("प्रोडक्ट / सर्विस का नाम", "Product / service name")) + '"></div>';
+      if (O.price) out += field("price", "💰 " + T("कीमत (₹)", "Price (₹)"), '<input class="pbgin" data-f="price" inputmode="decimal" value="' + esc(S.price) + '" placeholder="499">');
+      if (O.disc) { var pv = Number(S.price), dv = Number(S.disc); out += field("disc", "🏷️ " + T("डिस्काउंट (%)", "Discount (%)"), '<input class="pbgin" data-f="disc" inputmode="numeric" maxlength="2" value="' + esc(S.disc) + '" placeholder="10">' + (pv > 0 && dv > 0 && dv < 96 ? '<div class="hn" style="margin-top:-4px">' + T("ग्राहक को दिखेगा: ", "Customers see: ") + '<b>' + inr(Math.round(pv * (100 - dv) / 100)) + '</b> <s>' + inr(pv) + '</s></div>' : '')); }
+      if (O.cap) out += field("cap", "📝 " + T("कैप्शन", "Caption"), '<input class="pbgin" data-f="cap" maxlength="120" value="' + esc(S.cap) + '" placeholder="' + esc(T("एक छोटी लाइन", "One short line")) + '">');
+      if (O.desc) out += field("desc", "📄 " + T("विवरण", "Description"), '<textarea class="pbgin" data-f="desc" maxlength="600" placeholder="' + esc(T("पूरी जानकारी लिखें", "Write the full details")) + '">' + esc(S.desc) + '</textarea>');
+      if (O.extra && xl) out += field("extra", "ℹ️ " + T(xl[1], xl[0]), '<input class="pbgin" data-f="extra" maxlength="60" value="' + esc(S.extra) + '">');
+      if (!O.price) chips.push(["price", "💰 " + T("कीमत", "Price")]);
+      if (!O.disc) chips.push(["disc", "🏷️ " + T("डिस्काउंट", "Discount")]);
+      if (!O.cap) chips.push(["cap", "📝 " + T("कैप्शन", "Caption")]);
+      if (!O.desc) chips.push(["desc", "📄 " + T("विवरण", "Description")]);
+      if (!O.extra && xl) chips.push(["extra", "ℹ️ " + T(xl[1], xl[0])]);
+      if (chips.length) out += '<div class="pbgch">' + chips.map(function (c) { return '<button type="button" data-add="' + c[0] + '">＋ ' + c[1] + '</button>'; }).join("") + '</div>';
+      if (O.price) out += '<label class="pbgtg"><input type="checkbox" data-f="from"' + (S.from ? " checked" : "") + '>' + T("“से शुरू” कीमत", "“Starting from” price") + '</label>';
+      out += '<label class="pbgtg"><input type="checkbox" data-f="sold"' + (S.sold ? " checked" : "") + '>' + T("अभी उपलब्ध नहीं (बिक चुका)", "Not available now (Sold out)") + '</label>' +
+        '<div class="pbger">' + esc(err) + '</div><button type="button" class="pbgsv" data-save="1">' + T("सेव करें", "Save") + '</button>';
+      return out;
+    }
+    function read() { h.sh.querySelectorAll("[data-f]").forEach(function (el) { var f = el.dataset.f; S[f] = el.type === "checkbox" ? el.checked : el.value; }); }
+    function draw2() { h.sh.innerHTML = html(); }
+    h = mkSheet(html(), async function (e, close) {
+      var a = e.target.closest("[data-add]"), r = e.target.closest("[data-rm]"), sv = e.target.closest("[data-save]");
+      if (a) { read(); O[a.dataset.add] = true; if (a.dataset.add === "disc") O.price = true; err = ""; draw2(); return; }
+      if (r) { read(); var f = r.dataset.rm; O[f] = false; if (f === "price") { S.price = ""; O.disc = false; S.disc = ""; S.from = false; } if (f === "disc") S.disc = ""; if (f === "cap") S.cap = ""; if (f === "desc") S.desc = ""; if (f === "extra") S.extra = ""; draw2(); return; }
+      if (e.target.matches && e.target.matches("select[data-f='sec']")) return;
+      if (!sv) return;
+      read();
+      if (S.sec === "custom" && !String(S.name).trim()) { err = T("हिस्से का नाम लिखें।", "Please type the section name."); draw2(); return; }
+      var pr = O.price && S.price !== "" ? Number(String(S.price).replace(/,/g, "")) : null, dc = O.disc && pr != null && S.disc !== "" ? Math.round(Number(S.disc)) : null;
+      if (pr != null && !(pr >= 0)) { err = T("कीमत सही लिखें।", "Enter a valid price."); draw2(); return; }
+      if (dc != null && !(dc >= 1 && dc <= 95)) { err = T("डिस्काउंट 1 से 95 के बीच हो।", "Discount must be between 1 and 95."); draw2(); return; }
+      sv.disabled = true;
+      try {
+        ME = await PBA.session();
+        await rpc("pb_photo_set", { p_slug: s, p_id: x.id, p_sec: S.sec, p_sec_name: S.sec === "custom" ? String(S.name).trim() : null, p_title: S.title || null, p_price: pr, p_disc: dc, p_caption: O.cap ? S.cap || null : null, p_descr: O.desc ? S.desc || null : null, p_extra: O.extra ? S.extra || null : null, p_price_from: !!(O.price && S.from), p_sold: !!S.sold });
+        close(); await reload(b);
+      } catch (er) { sv.disabled = false; err = T("सेव नहीं हो सका। दोबारा कोशिश करें।", "Could not save. Try again."); draw2(); }
+    });
+    h.sh.addEventListener("change", function (e) { if (e.target.matches("select[data-f='sec']")) { read(); err = ""; draw2(); } });
+  }
+
   window.addEventListener("popstate", function (ev) { if (ev.state && ev.state.pbgal) return; var any = false; for (var k in GO) if (GO[k]) { any = true; GO[k] = ""; } if (any) draw(); });
   document.getElementById("list").addEventListener("click", function (e) {
     var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-glk]")) { var m = document.getElementById("glkm"); if (m) m.style.display = "block"; return; }
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
     var gk = e.target.closest("[data-gk]"); if (gk) { e.stopPropagation(); tick(+gk.dataset.i, gk.dataset.gk, +gk.dataset.n); return; }
+    var gs = e.target.closest("[data-gsec]"); if (gs) { chooseSec(+gs.dataset.gsec); return; }
+    var gd = e.target.closest("[data-gd]"); if (gd) { e.stopPropagation(); details(+gd.dataset.i, +gd.dataset.gd); return; }
     var gv = e.target.closest("[data-gv]"); if (gv) { light(+gv.dataset.i, gv.dataset.gv, +gv.dataset.n); return; }
   });
   document.getElementById("list").addEventListener("change", function (e) {

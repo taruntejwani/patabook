@@ -324,11 +324,34 @@ async function loadPrem(){
   if(window.PBPlan){try{await PBPlan.load([B.slug]);if(PBPlan.tier(B.slug)!=="free")document.documentElement.classList.remove("pbfree");}catch(e){}}
   if(!PF("photos")){render();return;}
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GAL=r.ok?(await r.json()||[]):[];}catch(e){GAL=[];}
+  try{const ri=await fetch(SB+"/rest/v1/rpc/pb_shop_items_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});ITEMS=ri.ok?await ri.json():null;if(!Array.isArray(ITEMS))ITEMS=null;}catch(e){ITEMS=null;}
   try{const rc=await fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GCAP={};if(rc.ok)(await rc.json()||[]).forEach(c=>{if(c&&c.url&&c.caption)GCAP[c.url]=c.caption;});}catch(e){GCAP={};}
   render();bizDist();
 }
 const GAL_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
 let GCAP={};
+let ITEMS=null,SGR=[];
+/* 🛍️ Products & Services: हर फ़ोटो अपने section में (Products, Services, Properties, Menu, Gallery, फिर दुकान के अपने नाम वाले) */
+const SEC_ORDER=["products","services","properties","menu","gallery"],SEC_NAME={products:["Products","प्रोडक्ट"],services:["Services","सर्विस"],properties:["Properties","प्रॉपर्टी"],menu:["Menu","मेन्यू"],gallery:["Gallery","गैलरी"]},SEC_ICON={products:"🛍️",services:"🛠️",properties:"🏠",menu:"🍽️",gallery:"🖼️",custom:"✏️"};
+function secGroups(){const L=(ITEMS||[]).filter(x=>x&&GAL_RX.test(x.url||"")),g=[];
+  SEC_ORDER.forEach(k=>{const a=L.filter(x=>(x.sec||"products")===k);if(a.length)g.push({k,name:"",a});});
+  const cn={};L.filter(x=>x.sec==="custom").forEach(x=>{const n=String(x.sec_name||"").trim();if(n)(cn[n]=cn[n]||[]).push(x);});
+  Object.keys(cn).forEach(n=>g.push({k:"custom",name:n,a:cn[n]}));return g;}
+function galTabLabel(en){const g=secGroups();if(!g.length)return en?"Gallery":"गैलरी";
+  const ks=g.map(x=>x.k);if(g.length===1)return g[0].k==="custom"?g[0].name:SEC_NAME[g[0].k][en?0:1];
+  if(g.length===2&&ks[0]==="products"&&ks[1]==="services")return en?"Products & Services":"प्रोडक्ट और सर्विस";
+  return en?"Gallery":"गैलरी";}
+function itemCard(x,gi,ii,en){
+  const inr=n=>"₹"+Number(n).toLocaleString("en-IN"),cap=x.title||x.caption||"",net=x.price!=null&&x.disc?Math.round(x.price*(100-x.disc)/100):x.price;
+  let pr="";if(x.price!=null){const v=inr(net);pr='<div class="itp"><b>'+(x.price_from?(en?"From "+v:v+" से शुरू"):v)+'</b>'+(x.disc?' <s>'+inr(x.price)+'</s> <em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':'')+'</div>';}
+  return '<div class="itc'+(x.sold?' sold':'')+'"><button type="button" class="itm" data-ig="'+gi+'.'+ii+'" aria-label="'+esc(cap||(en?"Photo":"फ़ोटो"))+'"><img src="'+esc(x.url)+'" alt="'+esc(String(cap).slice(0,80))+'" loading="lazy" decoding="async">'+(x.sold?'<span class="its">'+(en?"Sold out":"उपलब्ध नहीं")+'</span>':'')+'</button><div class="iti">'+
+    (x.title?'<b class="ith">'+esc(x.title)+'</b>':'')+pr+(x.extra?'<span class="itx">'+esc(x.extra)+'</span>':'')+(x.caption&&x.title?'<div class="itcp">'+esc(x.caption)+'</div>':'')+(x.descr?'<div class="itd" data-itx="1">'+esc(x.descr)+'</div>':'')+'</div></div>';}
+function itemsHTML(en){
+  if(!document.getElementById("itCss")){const st=document.createElement("style");st.id="itCss";
+    st.textContent=".itsec+.itsec{margin-top:20px}.itsec h2{margin-bottom:10px}.itg{display:grid;grid-template-columns:1fr 1fr;gap:12px}.itc{background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(20,40,90,.07);min-width:0}.itm{display:block;position:relative;width:100%;aspect-ratio:1;border:0;padding:0;background:#fff;cursor:zoom-in}.itm img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}.itc.sold .itm img{opacity:.5}.its{position:absolute;left:8px;top:8px;background:#b42318;color:#fff;font:800 11.5px system-ui,sans-serif;border-radius:8px;padding:3px 8px}.iti{padding:9px 11px 12px;border-top:1px solid #eef2f9}.ith{display:block;font-size:14px;line-height:1.3;color:#12141c;word-break:break-word}.itp{margin-top:3px;font-size:14px;color:#188038}.itp b{font-weight:800}.itp s{color:#8a93a6;font-size:12.5px}.itp em{font-style:normal;background:#e8f7ee;color:#188038;border-radius:6px;padding:1px 6px;font-size:11.5px;font-weight:800}.itx{display:inline-block;margin-top:5px;background:#eef3fc;color:#1a4fb4;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700}.itcp{margin-top:5px;font-size:12.5px;color:#5b6475;line-height:1.35}.itd{margin-top:5px;font-size:12.5px;color:#33395a;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}.itd.on{display:block}";
+    document.head.appendChild(st);}
+  SGR=secGroups();
+  return SGR.map((g,gi)=>'<div class="itsec"><h2>'+SEC_ICON[g.k]+' '+esc(g.k==="custom"?g.name:SEC_NAME[g.k][en?0:1])+' <small style="font-weight:600;color:#5b6475">('+g.a.length+')</small></h2><div class="itg">'+g.a.map((x,ii)=>itemCard(x,gi,ii,en)).join("")+'</div></div>').join("");}
 function GALP(){return PF("photos")?(GAL||[]).filter(u=>GAL_RX.test(u)):[];}
 /* Free दुकान + फ़ोटो: Premium पेज जैसे दो टैब (Gallery | Visit us) */
 let BTAB="g";
@@ -339,7 +362,7 @@ function drawTabs(){
   if(!document.getElementById("btabCss")){const st=document.createElement("style");st.id="btabCss";
     st.textContent="#btabs{display:flex;gap:8px;margin:2px 0 12px}#btabs button{border:1.5px solid #cfd8ea;background:#fff;color:#0b2f73;font:700 14.5px system-ui,sans-serif;padding:9px 18px;border-radius:999px;cursor:pointer}#btabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}#app.tabG>*:not(.card:first-child):not(#gal):not(#btabs):not(#contact){display:none!important}#app.tabV>#gal{display:none!important}";document.head.appendChild(st);}
   const en=PB.lang&&PB.lang()!=="hi",d=document.createElement("div");d.id="btabs";
-  d.innerHTML='<button type="button" data-t="g">'+(en?"Gallery":"गैलरी")+'</button><button type="button" data-t="v">'+(en?"Visit us":"हमसे मिलें")+'</button>';
+  d.innerHTML='<button type="button" data-t="g">'+esc(ITEMS&&ITEMS.length?galTabLabel(en):(en?"Gallery":"गैलरी"))+'</button><button type="button" data-t="v">'+(en?"Visit us":"हमसे मिलें")+'</button>';
   g.insertAdjacentElement("beforebegin",d);
   const set=t=>{BTAB=t;app.classList.toggle("tabG",t==="g");app.classList.toggle("tabV",t==="v");d.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.t===t));};
   d.addEventListener("click",e=>{const b=e.target.closest("button[data-t]");if(b)set(b.dataset.t);});
@@ -348,6 +371,9 @@ function drawTabs(){
 function drawGal(){const sec=document.getElementById("gal"),L=GALP();if(!sec)return;
   if(!L.length){sec.hidden=true;return;}
   const en=PB.lang&&PB.lang()!=="hi";
+  if(ITEMS&&PF("photos")&&secGroups().length){sec.hidden=false;sec.innerHTML=itemsHTML(en);
+    if(!sec.__it){sec.__it=1;sec.addEventListener("click",e=>{const d=e.target.closest("[data-itx]");if(d){d.classList.toggle("on");return;}const m=e.target.closest("[data-ig]");if(!m)return;const [gi,ii]=m.dataset.ig.split(".").map(Number),g=SGR[gi];if(!g)return;const caps={};g.a.forEach(x=>{const c=x.title||x.caption;if(c)caps[x.url]=c;});PBPGal.view(g.a.map(x=>x.url),ii,caps);});}
+    return;}
   sec.hidden=false;sec.innerHTML='<h2>🖼️ '+esc(PBPGal.title(L,GCAP,!en))+' <small style="font-weight:600;color:#5b6475">('+L.length+')</small></h2>'+PBPGal.grid(L,GCAP);
   if(!sec.__pg){sec.__pg=1;sec.addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b)PBPGal.view(GALP(),+b.dataset.g,GCAP);});}}
 /* 🛍️ Products (sql-24, सिर्फ़ Premium) — पूछने के लिए वही संपर्क नियम: नंबर दिखता हो तो WhatsApp, नहीं तो संपर्क वाला हिस्सा */
