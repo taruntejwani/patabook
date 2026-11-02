@@ -215,6 +215,7 @@ async function load(){
     if(!r.ok){u.searchParams.set("select",COLS);r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});}   /* sql-05 से पहले */
     let rows=await r.json(),ownSt="";
     if(!r.ok||!Array.isArray(rows)||!rows.length){const ow=await ownerRow();if(ow){rows=[ow];ownSt=ow._st;}}
+    window.OWNOFF=ownSt?1:0;
     if(ownSt){try{var _n=document.createElement("meta");_n.name="robots";_n.content="noindex";document.head.appendChild(_n);}catch(_){}
       const en0=PB.lang&&PB.lang()!=="hi",bn=document.createElement("div");bn.style.cssText="background:#fff4e5;color:#7a3b00;font-weight:700;font-size:14px;line-height:1.45;padding:10px 16px;text-align:center;border-bottom:1px solid #f3dc9a";
       bn.textContent=ownSt==="pend"?(en0?"⏳ Waiting for approval — only you can see this shop right now.":"⏳ मंज़ूरी का इंतज़ार — यह दुकान अभी सिर्फ़ आपको दिखती है।"):(en0?"🔴 Offline — only you can see this shop right now.":"🔴 ऑफ़लाइन — यह दुकान अभी सिर्फ़ आपको दिखती है।");
@@ -325,6 +326,10 @@ async function loadPrem(){
   if(!PF("photos")){render();return;}
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GAL=r.ok?(await r.json()||[]):[];}catch(e){GAL=[];}
   try{const ri=await fetch(SB+"/rest/v1/rpc/pb_shop_items_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});ITEMS=ri.ok?await ri.json():null;if(!Array.isArray(ITEMS))ITEMS=null;}catch(e){ITEMS=null;}
+  if(window.OWNOFF&&(!ITEMS||!ITEMS.length)){   /* मालिक अपनी Offline/Pending दुकान पर अपनी फ़ोटो देख सके (जनता को नहीं दिखती) */
+    try{const ss=await PBA.session();if(ss){const rr=await fetch(SB+"/rest/v1/rpc/pb_my_photos",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ss.access_token,"Content-Type":"application/json"},body:JSON.stringify({p_slug:B.slug})});
+      const v=(rr.ok?await rr.json():[]||[]).filter(x=>x&&x.url&&!x.hidden);
+      if(v.length){ITEMS=v.map(x=>({url:x.url,sec:x.sec,sec_name:x.sec_name,title:x.title,price:x.price,disc:x.disc,caption:x.caption,descr:x.descr,extra:x.extra,price_from:x.price_from,sold:x.sold}));GAL=v.map(x=>x.url);}}}catch(e){}}
   try{const rc=await fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GCAP={};if(rc.ok)(await rc.json()||[]).forEach(c=>{if(c&&c.url&&c.caption)GCAP[c.url]=c.caption;});}catch(e){GCAP={};}
   render();bizDist();
 }
