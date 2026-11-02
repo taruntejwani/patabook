@@ -17,6 +17,7 @@
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
 <style>
+html.pbfree{--blue:#0060f0}html.pbfree .qa3 a.qc,html.pbfree #pbDock a.qc{background:linear-gradient(135deg,#0070f0,#0030c0)}
 :root{--blue:#1a73e8;--navy:#0b2f73;--yellow:#ffd21f;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--green:#188038}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#f5f8fe;-webkit-font-smoothing:antialiased}
@@ -312,6 +313,7 @@ const NICO=[["food|restaurant|cafe|sweet|bakery","🍽️"],["auto|car|bike|tyre
 function nico(c){c=String(c||"").toLowerCase();for(const x of NICO)if(new RegExp(x[0]).test(c))return x[1];return "🏪";}
 /* 💎 Premium (sql-23): निशान + फ़ोटो gallery */
 let PREM=false,GAL=[],PRODS=[];
+document.documentElement.classList.add("pbfree");   /* Free दुकान = PataBook logo वाला नीला; paid plan मिलने पर हट जाता है */
 let DSCP={};
 /* plan (Free / Silver / Gold / Platinum) में यह सुविधा ON है? — Admin → Plans */
 function PF(f){return !!(window.PBPlan&&B&&PBPlan.has(B.slug,f));}
@@ -319,7 +321,7 @@ async function loadPrem(){
   if(!(window.PB_SITE&&PB_SITE.premium)||!B)return;
   const H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_premium_status",{method:"POST",headers:H,body:JSON.stringify({p_slugs:[B.slug]})});if(!r.ok)return;const j=await r.json();PREM=!!(j&&j[B.slug]);}catch(e){return;}
-  if(window.PBPlan){try{await PBPlan.load([B.slug]);}catch(e){}}
+  if(window.PBPlan){try{await PBPlan.load([B.slug]);if(PBPlan.tier(B.slug)!=="free")document.documentElement.classList.remove("pbfree");}catch(e){}}
   if(!PF("photos")){render();return;}
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GAL=r.ok?(await r.json()||[]):[];}catch(e){GAL=[];}
   try{const rc=await fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GCAP={};if(rc.ok)(await rc.json()||[]).forEach(c=>{if(c&&c.url&&c.caption)GCAP[c.url]=c.caption;});}catch(e){GCAP={};}
@@ -335,7 +337,7 @@ function drawTabs(){
   if(!app)return;app.classList.remove("tabG","tabV");
   if(PREM||!g||g.hidden||!GALP().length)return;
   if(!document.getElementById("btabCss")){const st=document.createElement("style");st.id="btabCss";
-    st.textContent="#btabs{display:flex;gap:8px;margin:2px 0 12px}#btabs button{border:1.5px solid #cfd8ea;background:#fff;color:#0b2f73;font:700 14.5px system-ui,sans-serif;padding:9px 18px;border-radius:999px;cursor:pointer}#btabs button.on{background:#1a73e8;border-color:#1a73e8;color:#fff}#app.tabG>*:not(.card:first-child):not(#gal):not(#btabs):not(#contact){display:none!important}#app.tabV>#gal{display:none!important}";document.head.appendChild(st);}
+    st.textContent="#btabs{display:flex;gap:8px;margin:2px 0 12px}#btabs button{border:1.5px solid #cfd8ea;background:#fff;color:#0b2f73;font:700 14.5px system-ui,sans-serif;padding:9px 18px;border-radius:999px;cursor:pointer}#btabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}#app.tabG>*:not(.card:first-child):not(#gal):not(#btabs):not(#contact){display:none!important}#app.tabV>#gal{display:none!important}";document.head.appendChild(st);}
   const en=PB.lang&&PB.lang()!=="hi",d=document.createElement("div");d.id="btabs";
   d.innerHTML='<button type="button" data-t="g">'+(en?"Gallery":"गैलरी")+'</button><button type="button" data-t="v">'+(en?"Visit us":"हमसे मिलें")+'</button>';
   g.insertAdjacentElement("beforebegin",d);
@@ -452,9 +454,9 @@ function render(){
    '<a class="shr" data-pbh="share" id="waShare" href="'+esc(waLink(b,window.PBHide&&PBHide.has('addr')?'':addr))+'" target="_blank" rel="noopener"><span class="ic">📍</span><span><b>'+esc(en?"Send address & directions to a friend":"दोस्त को पता और रास्ता भेजें")+'</b><small>'+esc(en?"Address + map route link on WhatsApp":"पता और नक्शा पर रास्ते का लिंक, WhatsApp पर")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></a>'+
    (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+esc(en?"Send visiting card to a friend":"विज़िटिंग कार्ड दोस्त को भेजें")+'</b><small>'+esc(en?"Shop card with QR, as a photo":"दुकान का कार्ड QR के साथ, फ़ोटो में")+'</small></span><span class="go">'+esc(en?"Send":"भेजें")+'</span></button>':'')+
    '<section class="card" data-pbh="near" id="near" hidden><h2>📍 '+esc(en?"Other shops nearby":"पास की दूसरी दुकानें")+'</h2><div class="near" id="nearBox"></div></section>'+
-   '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()!=="hi")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:#1a73e8">'+((PB.lang&&PB.lang()!=="hi")?"Terms":"नियम")+'</a></p>'+
+   '<p style="text-align:center;margin:-2px 8px 10px;font-size:12px;line-height:1.5;color:#667085">ℹ '+((PB.lang&&PB.lang()!=="hi")?"This information was provided by the shop owner; PataBook has not verified it. ":"यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ")+'<a href="terms.html" style="color:var(--blue)">'+((PB.lang&&PB.lang()!=="hi")?"Terms":"नियम")+'</a></p>'+
    (window.PB_SITE&&PB_SITE.jobs?'<a href="vacancy.html?slug='+encodeURIComponent(b.slug)+'" style="display:block;text-align:center;margin:0 0 10px;padding:12px;border-radius:14px;background:#fff7e6;border:1px solid #ffd591;color:#874d00;font-weight:800;text-decoration:none">💼 '+((PB.lang&&PB.lang()!=="hi")?"Vacancy — post a job (shop owner)":"नौकरी — नौकरी डालें (दुकानदार के लिए)")+'</a>':'')+
-   '<p id="ownBox" hidden style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:#1a73e8;font-weight:700">✏️ '+((PB.lang&&PB.lang()!=="hi")?"Your shop — manage it here ›":"आपकी दुकान — यहां से संभालें ›")+'</a>'+(PF("report")?' &nbsp;·&nbsp; <button type="button" onclick="window.PBEdit&&PBEdit.act(\'report\')" style="border:0;background:none;padding:0;font:inherit;color:#1a73e8;font-weight:700;cursor:pointer">📊 '+((PB.lang&&PB.lang()!=="hi")?"Report":"रिपोर्ट")+'</button>':'')+'</p>'+
+   '<p id="ownBox" hidden style="text-align:center;margin:4px 0 18px;font-size:13.5px"><a href="mybusiness.html" style="color:var(--blue);font-weight:700">✏️ '+((PB.lang&&PB.lang()!=="hi")?"Your shop — manage it here ›":"आपकी दुकान — यहां से संभालें ›")+'</a>'+(PF("report")?' &nbsp;·&nbsp; <button type="button" onclick="window.PBEdit&&PBEdit.act(\'report\')" style="border:0;background:none;padding:0;font:inherit;color:var(--blue);font-weight:700;cursor:pointer">📊 '+((PB.lang&&PB.lang()!=="hi")?"Report":"रिपोर्ट")+'</button>':'')+'</p>'+
    '<p style="text-align:center;margin:-8px 0 18px"><button type="button" id="repBtn" style="border:0;background:none;padding:6px 10px;font:inherit;font-size:13px;color:#b42318;cursor:pointer">🚩 '+((PB.lang&&PB.lang()!=="hi")?"Report this listing":"इस दुकान की शिकायत करें")+'</button></p>'+'<div id="whoBot" style="text-align:center;margin:0 0 14px"></div>';
   drawContact();drawVac();drawVacFlag();drawNear();placeMap();drawGal();drawTabs();drawProds();
   wireDir(b,addr,map);
@@ -538,7 +540,7 @@ function drawVac(){
   if(!PF("hiring")||!VAC||!VAC.length){sec.hidden=true;return;}   /* नौकरी सिर्फ़ Premium */
   const en=PB.lang&&PB.lang()!=="hi";sec.hidden=false;
   box.innerHTML=VAC.map(j=>'<div style="border:1px solid #e4eaf5;border-radius:12px;padding:10px 12px;margin-top:8px"><b style="color:#0b2f73">'+esc(j.title)+'</b><div style="font-size:13px;color:#5b6475;margin-top:3px;line-height:1.5">'+[j.salary&&("💰 "+esc(j.salary)),j.timing&&("🕘 "+esc(j.timing)),"👥 "+(j.openings||1)].filter(Boolean).join(" · ")+'</div></div>').join("")+
-    (window.PB_SITE&&PB_SITE.jobs?'<a href="jobs.html?city=&q='+encodeURIComponent(B.name||"")+'#job-'+VAC[0].id+'" style="display:block;text-align:center;margin-top:10px;font-weight:700;color:#1a73e8;text-decoration:none">'+(en?"Apply / contact on the Jobs page ›":"नौकरी पेज पर देखें / संपर्क करें ›")+'</a>':'');
+    (window.PB_SITE&&PB_SITE.jobs?'<a href="jobs.html?city=&q='+encodeURIComponent(B.name||"")+'#job-'+VAC[0].id+'" style="display:block;text-align:center;margin-top:10px;font-weight:700;color:var(--blue);text-decoration:none">'+(en?"Apply / contact on the Jobs page ›":"नौकरी पेज पर देखें / संपर्क करें ›")+'</a>':'');
 }
 function lockHTML(){
   const go=esc(PBA.loginUrl("business.html?slug="+encodeURIComponent(slug)));
