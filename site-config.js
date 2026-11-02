@@ -24,7 +24,7 @@ window.PB_SITE = {
   otpUrl: 'https://patabook-admin-otp-staging.tejwani512.workers.dev',
 
   /* "मैं रोबोट नहीं हूँ" जाँच (Cloudflare Turnstile) की Site Key — यह public होती है। Secret Key सिर्फ Worker में। */
-  turnstileKey: '0x4AAAAAAFh2ET1CgatdIOGP',
+  turnstileKey: '',   /* robot check बंद (Nov 2026): Worker से TURNSTILE_SECRET हटाया गया। फिर चालू करना हो तो key यहाँ वापस डालें + Worker में secret */
 
   /* 💼 ₹499 Vacancy plan: अभी बंद (24 Oct 2026 — Play Store billing नियम की वजह से)। false रहने तक vacancy.html / jobs.html नहीं खुलते।
      मुफ़्त "Vacancy available" स्विच (मेरी दुकान) इससे अलग है और चालू रहता है। */
