@@ -10,6 +10,7 @@
   var OPEN = {};
   function en() { return L() === "en"; }
   function T(h, e) { return en() ? e : h; }
+  function nm(K) { return K[0] === "photo" ? T("प्रोडक्ट और सर्विस", "Products & Services") : K[2]; }   /* "Gallery" फ़ोल्डर = प्रोडक्ट और सर्विस की फ़ोटो */
   function paid(b) { return !!(PREM && PREM[b.slug] && PREM[b.slug].until); }
   function can(b, k) { return k === "logo" ? true : k === "photo" ? PH(b, "photos") : k === "front" || k === "open" ? PH(b, "banner") : paid(b); }
   function lim(b) { return (window.PBPlan && PBPlan.lim(b.slug, "photos")) || 0; }
@@ -41,7 +42,7 @@
     var open = GO[s];
     if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
-      var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="Back">‹</button><b>' + esc(K[2]) + '</b><span>' + arr.length + '</span>' +
+      var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="Back">‹</button><b>' + esc(nm(K)) + '</b><span>' + arr.length + '</span>' +
         (ok ? '<label class="gplus2" title="' + T("फ़ोटो जोड़ें", "Add photos") + '">＋<input type="file" accept="image/*" multiple hidden data-gup="' + k + '" data-i="' + i + '"></label>' : '') + '</div>';
       var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + '</small></div>'
         : arr.length ? '<div class="gg3">' + arr.map(function (x, n) {
@@ -53,10 +54,10 @@
       return bar + msg + (arr.length ? sizeNote(k) : "") + hint + body;
     }
     return msg + '<div class="gl">' + KINDS.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
-      if (!can(b, K[0])) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>🔒</i></button>';
-      return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(K[2]) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
+      if (!can(b, K[0])) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>🔒</i></button>';
+      return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
     }).join("") + '</div><div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
-      var parts = KINDS.map(function (K) { return esc(K[2]) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
+      var parts = KINDS.map(function (K) { return esc(nm(K)) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
       return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
   };
@@ -71,7 +72,7 @@
   }
 
   async function up(i, k, files) {
-    var b = ROWS[i], s = b.slug, name = KINDS.filter(function (x) { return x[0] === k; })[0][2];
+    var b = ROWS[i], s = b.slug, name = nm(KINDS.filter(function (x) { return x[0] === k; })[0]);
     for (var f = 0; f < files.length; f++) {
       var file = files[f];
       try {
