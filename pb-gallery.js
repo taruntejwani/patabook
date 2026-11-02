@@ -422,7 +422,7 @@
       if (items.length < lim) h += '<div class="hcard"><div class="hpl" style="margin-top:0"><b>' + T("नया स्टाफ़ जोड़ें", "Add new staff") + '</b></div><input class="pbgin" id="pbghc" maxlength="80" inputmode="email" placeholder="' + esc(T("स्टाफ़ का Google ईमेल या 10 अंकों का मोबाइल", "Staff's Google email or 10-digit mobile")) + '" aria-label="' + esc(T("स्टाफ़ का ईमेल या मोबाइल", "Staff's email or mobile")) + '">' +
         '<div class="hpl">' + T("इस स्टाफ़ को क्या करने दें:", "What can this staff do:") + '</div>' + permBoxes(np, 'data-hnw="1" data-hp2') +
         '<button type="button" class="pbgsv" data-hadd="1" data-i="' + i + '" style="margin-top:8px">' + T("स्टाफ़ जोड़ें", "Add staff") + '</button></div>';
-      h += '<p class="hn" style="margin:8px 2px">' + T("स्टाफ़ को इसी ईमेल या नंबर से PataBook में लॉगिन करके patabook.in/helper.html खोलना है।", "Staff must log in to PataBook with this email or number and open patabook.in/helper.html.") + '</p>';
+      h += '<p class="hn" style="margin:8px 2px">' + T("स्टाफ़ को बस patabook.in पर इसी ईमेल या नंबर से लॉगिन करना है — उसका काम अपने-आप खुल जाएगा, फ़ोटो एक लाइन में 3।", "Staff just log in at patabook.in with this email or number — their work opens automatically, 3 photos per line.") + '</p>';
     }
     if (S.ok) h += '<div class="pbok">' + esc(S.ok) + '</div>';
     if (S.msg) h += '<div class="pbger" style="display:block">' + esc(S.msg) + '</div>';
