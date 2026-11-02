@@ -300,7 +300,7 @@ const TX={
 };
 const L=()=>(window.PB&&PB.lang&&PB.lang()!=="hi")?"en":"hi";
 const tx=(k,v)=>String(TX[L()][k]).replace("{e}",v||"");
-let ME=null,ROWS=null,ERR="";
+let ME=null,ROWS=null,ERR="",HELP=[];
 
 let DEEPDONE=0;
 function runDeep(){
@@ -1030,7 +1030,7 @@ function draw(){
   {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=!!_td;if(_s)_s.hidden=!!_td;}
   HIDE_SLUG=_td?"1":"";
   if(window.PBTejDash)PBTejDash.act=(k,i,btn)=>{if(k==="submit")submitApproval(i,btn);else openShop(i,"");};
-  list.innerHTML=_td+shopTiles(en);
+  list.innerHTML=helpBar(en)+_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
   const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
@@ -1228,13 +1228,14 @@ const bellH=async e=>{
 };
 $("ntPanel").addEventListener("click",bellH);$("list").addEventListener("click",bellH);
 $("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
+function helpBar(en){return HELP&&HELP.length?'<a href="helper.html" class="card" style="display:flex;align-items:center;gap:10px;border-color:#cfe0ff"><span style="font-size:22px">👥</span><b style="flex:1;color:var(--navy);font-size:14px">'+(en?"You are a photo helper for ":"आप इनके फ़ोटो सहायक हैं: ")+esc(HELP.map(h=>h.name).join(", "))+'</b><span style="color:var(--blue);font-weight:700">'+(en?"Open ›":"खोलें ›")+'</span></a>':"";}
 async function start(){
   ME=await PBA.session();
   if(ME&&PBA.deviceCheck){DEV=await PBA.deviceCheck().catch(()=>null);if(DEV&&DEV.ok===false){ME=null;DEV=null;}}
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{HELP=await rpc("pb_my_helper_shops")||[];}catch(e){HELP=[];}if(!ROWS.length&&HELP.length){location.replace("helper.html");return;}loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
     const _tx=(window.PBTejDash&&ROWS.length)?Promise.all(ROWS.map(b=>new Promise(r=>{PBTejDash.load(b.slug,r);setTimeout(r,1500);}))):null;
     await Promise.all([loadLogos(),loadCovers(),loadVac(),loadPrem(),_tx]);runDeep();BOOT=false;draw();   /* ज़रूरी डेटा आते ही पन्ना दिखाओ; बाक़ी बाद में अपने-आप जुड़ेगा */
     await _rest;await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
