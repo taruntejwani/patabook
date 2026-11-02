@@ -105,6 +105,7 @@ async function start(){
   try{
     const r=await rpc("pb_my_helper_shops")||[];
     ROWS=r.map(x=>({slug:x.slug,name:x.name,h:true,is_active:true,perms:Array.isArray(x.perms)?x.perms:["add","edit"]}));
+    try{const q=new URLSearchParams(location.search).get("s");const k=ROWS.findIndex(x=>x.slug===q);if(k>=0)SEL=k;}catch(e){}
     if(window.PBPlan)await PBPlan.load(ROWS.map(x=>x.slug));
     try{const o=await rpc("pb_my_businesses")||[];OWN=o.length;}catch(e){OWN=0;}
   }catch(e){

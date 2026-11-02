@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#1a73e8">
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
+<script src="pb-helpmenu.js"></script>
 <script src="pb-tejdash.js"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
@@ -1030,7 +1031,7 @@ function draw(){
   {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=!!_td;if(_s)_s.hidden=!!_td;}
   HIDE_SLUG=_td?"1":"";
   if(window.PBTejDash)PBTejDash.act=(k,i,btn)=>{if(k==="submit")submitApproval(i,btn);else openShop(i,"");};
-  list.innerHTML=helpBar(en)+_td+shopTiles(en);
+  list.innerHTML=_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
   const f=e.target.closest("[data-pup]");if(f&&f.files&&f.files[0])addPhoto(+f.dataset.pup,f.files[0]);
@@ -1185,7 +1186,7 @@ $("list").addEventListener("click",async e=>{
     const j=await r.json().catch(()=>null);
     if(!r.ok||!j||!j.ok)throw new Error((j&&j.error)||"HTTP "+r.status);
     try{localStorage.removeItem("pb-has-pin");localStorage.removeItem("pb-own-bell");localStorage.removeItem("pb-reg");}catch(x){}
-    try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();
+    try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();
     $("kick").textContent=en?"✅ Your shop and account have been deleted. Thank you for using PataBook.":"✅ आपकी दुकान और खाता हटा दिए गए। PataBook इस्तेमाल करने के लिए धन्यवाद।";
     $("kick").style.background="#e6f4ea";$("kick").style.color="#137333";$("kick").style.borderColor="#b7e1c1";$("kick").hidden=false;window.scrollTo(0,0);
   }catch(x){b.disabled=false;b.textContent="🗑️ "+(en?"Delete my shop and account":"मेरी दुकान और खाता हटाएँ");
@@ -1227,7 +1228,7 @@ const bellH=async e=>{
   }catch(x){b.disabled=false;note(en?"Could not turn on. Try again in a while.":"चालू नहीं हो पाया। थोड़ी देर बाद दोबारा कोशिश करें।");}
 };
 $("ntPanel").addEventListener("click",bellH);$("list").addEventListener("click",bellH);
-$("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
+$("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
 function helpBar(en){
   if(!HELP||!HELP.length)return "";
   const PL={add:["➕",en?"Add photos":"फ़ोटो जोड़ना"],edit:["✏️",en?"Edit price & details":"कीमत / कैप्शन बदलना"],hide:["👁️",en?"Show / hide":"दिखाना / छिपाना"],remove:["🗑️",en?"Remove":"हटाना"]};
@@ -1240,7 +1241,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{HELP=await rpc("pb_my_helper_shops")||[];}catch(e){HELP=[];}if(!ROWS.length&&HELP.length){location.replace("helper.html");return;}loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{HELP=await rpc("pb_my_helper_shops")||[];if(window.PBHelp)PBHelp.save(HELP.map(h=>({slug:h.slug,name:h.name,perms:h.perms||null})));}catch(e){HELP=[];}if(!ROWS.length&&HELP.length){location.replace("helper.html");return;}loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
     const _tx=(window.PBTejDash&&ROWS.length)?Promise.all(ROWS.map(b=>new Promise(r=>{PBTejDash.load(b.slug,r);setTimeout(r,1500);}))):null;
     await Promise.all([loadLogos(),loadCovers(),loadVac(),loadPrem(),_tx]);runDeep();BOOT=false;draw();   /* ज़रूरी डेटा आते ही पन्ना दिखाओ; बाक़ी बाद में अपने-आप जुड़ेगा */
     await _rest;await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
@@ -1280,7 +1281,7 @@ function ownMenu(){
   const glyph=x=>{try{bar.textContent=x?"✕":"☰";if(bar.animate&&!matchMedia("(prefers-reduced-motion:reduce)").matches)bar.animate([{transform:"rotate(-90deg)",opacity:.3},{transform:"none",opacity:1}],{duration:220,easing:"ease-out"});}catch(e){}};
   glyph(true);
   const kill=()=>{if(OMOV){OMOV.remove();OMOV=null;glyph(false);}};
-  const MAIN=[["👁️",h?"प्रोफ़ाइल प्रीव्यू":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"],["🚪",h?"लॉग आउट":"Log out","out"]];
+  const MAIN=[["👁️",h?"प्रोफ़ाइल प्रीव्यू":"Preview profile","pv"],["🖼️",h?"गैलरी":"Gallery","photo"],["📊",h?"रिपोर्ट":"Report","rep"],["🔔",h?"सूचनाएँ":"Notifications","nt"],["⚙️",h?"सेटिंग":"Settings","set"]].concat((HELP||[]).map(s=>["👥",s.name+(h?" · स्टाफ़ का काम":" · Staff work"),"hs:"+s.slug]),[["🚪",h?"लॉग आउट":"Log out","out"]]);
   const locked=(kind,b)=>{try{return kind==="photo"?!PH(b,"photos"):kind==="rep"?!PH(b,"report"):false;}catch(e){return false;}};
   const main=()=>{pn.innerHTML=MAIN.filter(it=>it[2]!=="out"&&!(HIDE_SLUG&&ROWS.length===1&&/^(photo|rep|nt|set)$/.test(it[2]))).map(it=>{const o=it[2]==="out";return '<a data-k="'+it[2]+'" style="'+ROW+'color:'+(o?"#c5221f":"#0b2f73")+(o?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");};
   const pick=(k,label)=>{pn.innerHTML='<div style="padding:8px 14px 6px;font-size:12.5px;color:#5b6475;font-weight:700">'+esc(label)+' — '+(h?"दुकान चुनें":"choose shop")+'</div>'+
@@ -1299,7 +1300,8 @@ function ownMenu(){
     if(!a){if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
     const k=a.dataset.k;
     if(k==="back"){main();return;}
-    if(k==="out"){if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(x){}
+    if(k.indexOf("hs:")===0){location.href="helper.html?s="+encodeURIComponent(k.slice(3));return;}
+    if(k==="out"){if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(x){}
       (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(()=>{}).then(()=>{kill();location.href="index.html";});return;}
     if(ROWS.length===1){go(k,0);return;}
     pick(k,a.innerText.trim());

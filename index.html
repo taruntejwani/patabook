@@ -308,6 +308,7 @@ window.PATABOOK_SUPABASE={
 };
 </script>
 <script src="pb-plan.js"></script>
+<script src="pb-helpmenu.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-slide.js"></script><script src="pb-auth.js"></script><script src="pb-track.js"></script><script src="pb-protect.js"></script>
 <script src="pb-addbtn.js" defer></script>
@@ -1163,9 +1164,10 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     ov.appendChild(pn);document.body.appendChild(ov);
     pn.className="pbmp";glyph(true);
     var MAIN=[["👁️",h?"प्रोफ़ाइल प्रीव्यू":"Preview profile","pv"],["⚙️",h?"सेटिंग":"Settings","set"]];
+    var HS=(window.PBHelp?PBHelp.list():[]);
     function href(kind,sl){return kind==="pv"?"business.html?slug="+encodeURIComponent(sl):kind==="set"?"mybusiness.html":"mybusiness.html#go="+kind+"&s="+encodeURIComponent(sl);}
     function main(){
-      pn.innerHTML=MAIN.map(function(it,i){var out=it[2]==="out";return '<a data-k="'+it[2]+'" href="#" style="'+ROW+'color:'+(out?"#c5221f":"#0b2f73")+(out?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("");
+      pn.innerHTML=MAIN.filter(function(it){return !(HS.length&&!slugs().length&&/^(pv|set)$/.test(it[2]));}).map(function(it,i){var out=it[2]==="out";return '<a data-k="'+it[2]+'" href="#" style="'+ROW+'color:'+(out?"#c5221f":"#0b2f73")+(out?";border-top:1px solid #eef1f7;margin-top:4px":"")+'"><span style="font-size:20px;width:24px;text-align:center">'+it[0]+'</span>'+it[1]+'</a>';}).join("")+(window.PBHelp?PBHelp.rows(ROW):"");
     }
     function locked(kind,sl){try{if(!window.PBPlan)return false;return kind==="photo"?!PBPlan.has(sl,"photos"):kind==="rep"?!PBPlan.has(sl,"report"):false;}catch(e){return false;}}
     function pick(kind,label){   /* एक से ज़्यादा दुकान: पहले दुकान चुनो */
@@ -1181,9 +1183,10 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
       if(!a){if(e.target.closest("a[href]"))return;if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();return;}
       e.preventDefault();var k=a.dataset.k;
       if(k==="back"){main();return;}
+      if(k==="hs"){location.href=PBHelp.url(a.dataset.s);return;}
       if(k==="out"){
         if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;
-        try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");}catch(x){}
+        try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(x){}
         (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(function(){}).then(function(){kill();bar.style.display="none";location.reload();});return;}
       if(k==="set"){location.href="mybusiness.html";return;}
       a.style.opacity=".6";if(!shops)shops=await myShops();

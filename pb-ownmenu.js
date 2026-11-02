@@ -10,6 +10,8 @@
       var a = JSON.parse(localStorage.getItem("pb-my-shops") || "[]"); return Array.isArray(a) && a.indexOf(slug) >= 0;
     } catch (e) { return false; }
   }
+  function hl() { return window.PBHelp ? PBHelp.list() : []; }
+  function isOwn() { return mine() || (typeof OWN !== "undefined" && OWN === true); }
   function en() { try { return (localStorage.getItem("pb-lang") || "en") !== "hi"; } catch (e) { return true; } }
   var ov = null, btn = null;
   function css() {   /* "मेरी दुकान" वाला ही इफ़ेक्ट: बटन घूमकर ☰ ↔ ✕, मेन्यू ऊपर से खुलता है, आइटम एक-एक करके आते हैं */
@@ -30,12 +32,13 @@
     ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
     var r = btn.getBoundingClientRect(), pn = document.createElement("div");
     pn.style.cssText = "position:absolute;top:" + Math.round(r.bottom + 8) + "px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
-    pn.innerHTML = '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>';
+    pn.innerHTML = (isOwn() ? '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>' : "") + (window.PBHelp ? PBHelp.rows(ROW) : "");
     css(); pn.className = "pbmp"; ov.appendChild(pn); document.body.appendChild(ov); glyph(true);
     ov.addEventListener("click", function (e) {
       var a = e.target.closest("[data-k]");
       if (!a) { close(); return; }
       if (a.dataset.k === "set") { location.href = "mybusiness.html"; return; }
+      if (a.dataset.k === "hs") { location.href = PBHelp.url(a.dataset.s); return; }
     });
     if (window.PBBack) PBBack.open(kill);
   }
@@ -49,7 +52,7 @@
       g.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); if (ov) close(); else open(); });
       return;
     }
-    if (!mine()) return;
+    if (!mine() && !hl().length) return;
     var nav = document.querySelector("header .nav"); if (!nav || document.getElementById("pbOwnMenu")) return;
     btn = document.createElement("button"); btn.type = "button"; btn.id = "pbOwnMenu";
     btn.setAttribute("aria-label", en() ? "Menu" : "मेन्यू"); btn.setAttribute("aria-haspopup", "true");

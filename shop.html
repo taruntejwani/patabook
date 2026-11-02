@@ -734,13 +734,13 @@ function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)retu
   const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता कॉपी हो गया")).catch(()=>{prompt(en?"Copy the address":"पता कॉपी करें",t);});};
   c.onclick=go;const ct=c.closest(".l").querySelector(".cpt");if(ct)ct.onclick=go;}
 /* "आपकी दुकान — संभालें": सिर्फ़ login हुए मालिक को, और सिर्फ़ उसकी अपनी दुकान पर (My Shop वाली list से जाँच) */
-let OWN=false;
+let OWN=false;window.addEventListener("pbhelp",function(){try{drawOwn();}catch(e){}});
 async function loadOwner(){
   try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
     if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
-function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const gz=document.getElementById("gearTop");if(gz)gz.hidden=!OWN;const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
+function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const gz=document.getElementById("gearTop");if(gz)gz.hidden=!(OWN||(window.PBHelp&&PBHelp.list().length>0));const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
 function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const N=CT.k==="ok"?((CT.nums&&CT.nums.length)?CT.nums:[String(CT.phone||"").replace(/\D/g,"").slice(-10)].filter(x=>/^\d{10}$/.test(x))):[];
@@ -794,5 +794,5 @@ function spy(){if(IO)IO.disconnect();if(!("IntersectionObserver" in window))retu
 if(window.PB){try{PB.apply&&PB.apply();PB.mount&&PB.mount(document.getElementById("pbLang"));PB.onChange&&PB.onChange(()=>render());}catch(e){}}
 load();
 </script><script>document.addEventListener("DOMContentLoaded",function(){var t=document.getElementById("tb");if(t)t.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});});</script>
-<script src="pb-back.js"></script><script src="pb-ownmenu.js"></script>
+<script src="pb-back.js"></script><script src="pb-helpmenu.js"></script><script src="pb-ownmenu.js"></script>
 </body></html>
