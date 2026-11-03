@@ -19,7 +19,7 @@
       ".td.t-platinum{--a:#6D28D9;--soft:#f2ecff;--hd:radial-gradient(circle at 88% 0%,rgba(255,255,255,.30),transparent 46%),linear-gradient(135deg,#6D28D9,#2E0757)}" +
       ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{min-height:44px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
       ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;line-height:1;flex:none}" +
-      ".td-big{font-size:18px!important;font-weight:800;color:#172033!important;margin-bottom:6px}.td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}" +
+      ".td-big{font-size:18px!important;font-weight:800;color:#172033!important;margin-bottom:6px}.td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}.td-fx{border:1px solid #dfe5f0;border-radius:16px;background:#fff;margin-bottom:6px;overflow:hidden}.td-fx>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;font-weight:800;font-size:16px;color:#172033}.td-fx>summary::-webkit-details-marker{display:none}.td-fx>summary small{margin-inline-start:auto;font-weight:700;font-size:12.5px;color:#13845b;background:#e3f7ea;border-radius:999px;padding:3px 10px}.td-fx>summary:after{content:'▾';color:#687386;font-size:15px}.td-fx[open]>summary:after{content:'▴'}.td-fx>.td-mini{padding:0 12px 12px}" +
       ".td-mi{display:flex;align-items:center;gap:9px;min-width:0;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:13px}.td-mi b{flex:1;min-width:0;font-weight:700}.td-mic{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}" +
       "" +
       ".td-eb{color:var(--a);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
@@ -188,7 +188,9 @@
     if (!LAST) return "";
     var d = document.createElement("div"); d.innerHTML = html(LAST.c);
     var m = d.querySelector(".td-m"); if (m) { var pp = m.querySelector(".td-pl2"); if (pp) pp.remove(); }
-    return '<div class="td t-' + esc(LAST.c.tier) + '">' + LAST.html + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
+    var en = LAST.en, n = (LAST.html.match(/class="td-tag\"/g) || []).length;
+    var fx = '<details class="td-fx"><summary><span aria-hidden="true">📋</span>' + (en ? "Plan features" : "प्लान की सुविधाएँ") + '<small>' + n + (en ? " active" : " चालू") + '</small></summary>' + LAST.html + '</details>';
+    return '<div class="td t-' + esc(LAST.c.tier) + '">' + fx + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
   }
   window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function (slug) { return !!XS[slug]; } };
 })();
