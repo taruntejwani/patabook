@@ -567,14 +567,14 @@ function profItems(b,i){
 let TAB={};
 function tilesBlock(b,i){
   const it=profItems(b,i),en=L()==="en",t=TAB[b.slug];
-  let pc=100;if(it&&it.length)pc=Math.round(it.filter(x=>x[0]).length/it.length*100);
+  let pc=100;if(it&&it.length)pc=profPct(b);
   const col=pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
   return '<div class="tiles"><button type="button" class="tile'+(t==="p"?" on":"")+'" data-tab="p" data-i="'+i+'"><span class="tr" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></span><b>'+(en?"Profile":"प्रोफ़ाइल")+'</b><small>'+(en?"Profile & Verify":"प्रोफ़ाइल और जाँच")+'</small></button>'+
     '<button type="button" class="tile'+(t==="f"?" on":"")+'" data-tab="f" data-i="'+i+'"><span class="ti">⚙️</span><b>'+(en?"Advance Features":"Advance Features")+'</b><small>'+(en?"Number, Hiring, Home Service":"नंबर, नौकरी, होम सर्विस")+'</small></button></div>';
 }
 function profBlock(b,i){
   const it=profItems(b,i);if(!it)return "";
-  const n=it.filter(x=>x[0]).length,pc=Math.round(n/it.length*100),en=L()==="en",miss=it.filter(x=>!x[0]);
+  const pc=profPct(b),en=L()==="en",miss=it.filter(x=>!x[0]);
   const col=pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
   return '<div class="pf"><div class="ring" style="background:conic-gradient('+col+' '+(pc*3.6)+'deg,#e8edf5 0)"><span>'+pc+'%</span></div>'+
     '<div class="pt"><b>'+(pc>=100?(en?"🎉 Profile 100% complete!":"🎉 प्रोफ़ाइल 100% पूरी!"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</b>'+
