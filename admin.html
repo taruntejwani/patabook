@@ -143,6 +143,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 .tg small{display:block;font-size:10.5px;font-weight:700;color:#667085;margin-top:1px}
 .tg.ac{justify-content:flex-start}.tg.ac.bad{border-color:#f1a7a0;background:#fef3f2;color:#b42318}
 .tg:disabled{opacity:.55}
+.tg .cp{display:inline-block;margin-left:4px;font-size:10px;font-weight:800;color:#1a73e8;background:#eaf2ff;border-radius:6px;padding:1px 6px;cursor:pointer}
 .card.shop .hd{cursor:pointer}
 </style>
 </head>
@@ -601,6 +602,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   /* 🏪 दुकान का पूरा पेज: नाम दबाते ही खुले; हर चालू/बंद काम एक छोटा switch-डिब्बा */
   var SPG = null;
   function tgl(on, a, i, label, sub) { return '<button type="button" class="tg' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" data-a="' + a + '" data-i="' + i + '"><span>' + label + (sub ? '<small>' + sub + '</small>' : '') + '</span><i></i></button>'; }
+  function cpy(v) { return ' <span class="cp" role="button" tabindex="0" data-cp="' + esc(v) + '">📋 कॉपी</span>'; }
   function act1(a, i, label, bad) { return '<button type="button" class="tg ac' + (bad ? ' bad' : '') + '" data-a="' + a + '" data-i="' + i + '">' + label + '</button>'; }
   function shopPgHTML(b, i) {
     var live = !!b.is_active, ph = String(b.phone || '').replace(/\D/g, '').slice(-10), miss = missOf(b), hasLoc = b.latitude != null && b.longitude != null;
@@ -611,8 +613,8 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (OWN) t += tgl(ownOf(b).show_phone !== false, 'ph', i, '📞 नंबर दिखे', 'ग्राहकों को मोबाइल नंबर');
     if (HOME) t += tgl(hOn, 'hs', i, '🏠 Home Service', hOn && h.city_ids && h.city_ids.length ? esc(cityNames(h.city_ids)) : 'घर पर सेवा');
     if (PREMA) t += tgl(pOn, 'prem', i, pOn ? (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 प्रीमियम') : '💎 प्रीमियम', pOn ? esc(fmtShort(PREMA[b.slug].until)) + ' तक' : 'plan दें');
-    if (gst) t += tgl(/^yes$/i.test(line(b.description, 'GST-Verified')), 'gst', i, '🧾 GST Verified', esc(gst));
-    if (udy) t += tgl(/^yes$/i.test(line(b.description, 'Udyam-Verified')), 'udy', i, '🏭 MSME Verified', esc(udy));
+    if (gst) t += tgl(/^yes$/i.test(line(b.description, 'GST-Verified')), 'gst', i, '🧾 GST Verified', esc(gst) + cpy(gst));
+    if (udy) t += tgl(/^yes$/i.test(line(b.description, 'Udyam-Verified')), 'udy', i, '🏭 MSME Verified', esc(udy) + cpy(udy));
     var w = '';
     if (b.slug) w += '<a class="tg ac" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">👁 दुकान का पेज</a>';
     if (mapLink) w += '<a class="tg ac' + (hasLoc ? '' : ' bad') + '" href="' + mapLink + '" target="_blank">' + (hasLoc ? '🗺 मैप' : '⚠ मैप') + '</a>';
@@ -637,9 +639,15 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   function openShopPg(slug) {
     SPG = slug; var el = $('spg');
     if (!el) { el = document.createElement('div'); el.id = 'spg'; el.className = 'spg'; document.body.appendChild(el);
-      el.onclick = function (e) { if (e.target.closest('[data-x]')) { closeShopPg(); return; } shopAct(e); }; }
+      el.onclick = function (e) { if (e.target.closest('[data-x]')) { closeShopPg(); return; }
+        var cp = e.target.closest('[data-cp]'); if (cp) { e.preventDefault(); e.stopPropagation(); doCopy(cp); return; } shopAct(e); }; }
     el.hidden = false; el.scrollTop = 0; paintShopPg(); document.body.style.overflow = 'hidden';
     if (!(history.state && history.state.pbs)) history.pushState({ pbs: 1, pbv: (history.state && history.state.pbv) || 'home' }, '', location.pathname + '#shop');
+  }
+  function doCopy(el) {
+    var v = el.dataset.cp, done = function () { el.textContent = '✔ कॉपी हो गया'; setTimeout(function () { el.textContent = '📋 कॉपी'; }, 1800); };
+    try { navigator.clipboard.writeText(v).then(done, function () { fb(); }); } catch (x) { fb(); }
+    function fb() { var t = document.createElement('textarea'); t.value = v; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (x) {} t.remove(); done(); }
   }
   function hideShopPg() { SPG = null; var el = $('spg'); if (el) el.hidden = true; document.body.style.overflow = ''; }
   function closeShopPg() { hideShopPg(); if (history.state && history.state.pbs) history.back(); }
