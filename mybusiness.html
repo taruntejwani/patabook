@@ -477,9 +477,10 @@ function popEdit(slug,card){
   ov.addEventListener("click",e=>{if(e.target===ov)close();});
   document.body.appendChild(ov);document.body.style.overflow="hidden";if(window.PBBack)PBBack.open(byBack);
 }
-/* % : रजिस्टर में भरी 3 चीज़ें (नाम-पता, मोबाइल, लोकेशन) = 50%, बाकी चीज़ें मिलकर 50% */
-function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const core=it.slice(0,3),rest=it.slice(3);
-  const f=a=>a.length?a.filter(x=>x[0]).length/a.length:0;return Math.round(f(core)*50+f(rest)*50);}
+/* % (कुल 100): रजिस्टर की 3 चीज़ें 50 + समय/प्रकार/सेवाएँ/PIN(+लोगो) 33 + दुकान की बाहर-अंदर की फ़ोटो भेजी हुई 12 + Email/वेबसाइट और GST/Udyam 5 */
+function photoDone(b){return verOn()&&(verSt(b)==="pending"||verSt(b)==="approved");}
+function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const n=it.length,core=it.slice(0,3),tail=it.slice(n-2),mid=it.slice(3,n-2);
+  const f=a=>a.length?a.filter(x=>x[0]).length/a.length:0;return Math.round(f(core)*50+f(mid)*33+f(tail)*5+(photoDone(b)?12:0));}
 /* मंज़ूरी के लिए भेजने की शर्त: प्रोफ़ाइल 80%+ और दुकान की बाहर/अंदर की फ़ोटो जाँच के लिए भेजी हुई */
 const APPR_MIN=80;
 function photosOk(b){return !verOn()||verSt(b)==="pending"||verSt(b)==="approved";}
