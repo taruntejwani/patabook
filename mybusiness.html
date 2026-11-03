@@ -1476,7 +1476,7 @@ async function start(){
   if(ME&&ROWS&&ROWS.length&&/^#(num|prof(=|$))/.test(location.hash)){
     const h=location.hash,sg=/^#prof=/.test(h)?decodeURIComponent(h.slice(6)||""):"";try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}
     let ix=sg?ROWS.findIndex(r=>r&&r.slug===sg):-1;if(ix<0){ix=ROWS.findIndex(r=>shopSt(r)!=="live");if(ix<0)ix=0;}
-    DEEP=1;openShop(ix,h==="#num"?"num":"");}
+    DEEP=1;openShop(ix,h==="#num"?"num":(window.PBTejDash?"prof":""));}
 }
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;
