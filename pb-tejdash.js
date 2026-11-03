@@ -161,7 +161,7 @@
       (c.extra ? '<div style="margin-top:14px">' + c.extra + '</div>' : '') +
       (plans ? '<div class="td-sec"><h3>' + T("Membership & premium features", "सदस्यता और प्रीमियम सुविधाएँ") + '</h3><p>' + T("See what each plan includes.", "देखें हर प्लान में क्या मिलता है।") + '</p></div>' +
         '<div class="td-m"><div class="td-mt"><div><h3>' + T("Your ", "आपका ") + esc(TN) + T(" plan", " प्लान") + '</h3><p>' + (until ? T("Valid till ", "समाप्ति: ") + esc(until) : T("No expiry", "कोई समाप्ति नहीं")) + '</p></div>' +
-        (paid ? '<span class="td-pill" style="background:#e3f7ea;color:#13845b;border-color:#bfe8cf">' + T("ACTIVE", "चालू") + '</span>' : '') + '</div><div class="td-pl">' + plans + '</div></div>' : '') +
+        (paid ? '<span class="td-pill" style="background:#e3f7ea;color:#13845b;border-color:#bfe8cf">' + T("ACTIVE", "चालू") + '</span>' : '') + '</div><div class="td-pl2" style="padding:6px 12px 10px">' + (window.PBPlanPosters ? PBPlanPosters(c.tier, en) : '<div class="td-pl">' + plans + '</div>') + '</div></div>' : '') +
       '</section>';
   }
   function openDetails() {
@@ -187,7 +187,7 @@
   function planPage() {
     if (!LAST) return "";
     var d = document.createElement("div"); d.innerHTML = html(LAST.c);
-    var m = d.querySelector(".td-m");
+    var m = d.querySelector(".td-m"); if (m) { var pp = m.querySelector(".td-pl2"); if (pp) pp.remove(); }
     return '<div class="td t-' + esc(LAST.c.tier) + '">' + LAST.html + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
   }
   window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function (slug) { return !!XS[slug]; } };
