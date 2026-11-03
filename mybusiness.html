@@ -747,7 +747,7 @@ function plansCompare(b,i,en){
     ["Logo",t=>H(t,"logo")?yes:no,t=>H(t,"logo")],
     [en?"Hiring posts":"नौकरी पोस्ट",t=>H(t,"hiring")?yes:no,t=>H(t,"hiring")],
     [en?"Visiting card":"विज़िटिंग कार्ड",t=>H(t,"card")?yes:no,t=>H(t,"card")],
-    [en?"Report (views, calls)":"रिपोर्ट (views, कॉल)",t=>H(t,"report")?yes:no,t=>H(t,"report")],
+    [en?"Reports":"रिपोर्ट",t=>H(t,"report")?yes:no,t=>H(t,"report")],
     [en?"On top in search":"खोज में ऊपर",t=>H(t,"top")?yes:no,t=>H(t,"top")],
     [en?"Home poster":"होम पोस्टर",t=>H(t,"banner")?pd(t):no,t=>H(t,"banner")]
   ].map(x=>[x[0],x[1],T.find(t=>x[2](t))||"platinum"]);
@@ -756,8 +756,8 @@ function plansCompare(b,i,en){
   const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
   const body=T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td colspan="5">'+GT[g]+'</td></tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("")+'<tr class="prow"><td>'+(en?"Price (1 year)":"क़ीमत (1 साल)")+'</td>'+T.map(t=>'<td class="pp pp-'+t+'">₹'+PLAN_PRICE[t].toLocaleString("en-IN")+'</td>').join("")+'</tr>';
   return ''+
-    '<div class="offer"><div class="oh">🎁 '+(en?"Offer: Silver plan FREE for 1 year":"ऑफ़र: Silver प्लान 1 साल मुफ़्त")+'</div>'+
-    '<p>'+(en?"Bring 5 shopkeepers to PataBook. When their shops are complete, verified and Active, you get the Silver plan free for 1 year.":"5 दुकानदारों को PataBook पर लाएँ। उनकी दुकानें पूरी, जाँची हुई और Active होने पर आपको Silver प्लान 1 साल मुफ़्त मिलेगा।")+'</p>'+
+    '<div class="offer"><div class="oh">🎁 '+(en?"Silver Plan FREE for 1 Year":"Silver प्लान 1 साल मुफ़्त")+'</div>'+
+    '<p>'+(en?"<strong>Share PataBook with 5 shopkeepers.</strong> When all 5 shops are complete, verified and Active, your Silver Plan reward will be unlocked and shown automatically on your mobile.":"<strong>5 दुकानदारों को PataBook शेयर करें।</strong> जब पाँचों दुकानें पूरी, जाँची हुई और Active हो जाएँगी, तब आपका Silver प्लान इनाम अपने-आप खुल जाएगा और आपके मोबाइल पर दिखेगा।")+'</p>'+
     '<div class="lights">'+[1,2,3,4,5].map(n=>'<span>'+n+'</span>').join("")+'</div>'+
     '<button type="button" class="shb" data-psh="1">📤 '+(en?"Share PataBook with shopkeepers":"दुकानदारों को PataBook भेजें")+'</button><small>'+(en?"Offer valid till 31 January 2027 · Free plan continues as it is · Referral tracking starts soon.":"ऑफ़र 31 जनवरी 2027 तक · Free प्लान वैसे ही चलता रहेगा · रेफ़रल गिनती जल्द शुरू होगी।")+'</small></div>'+
     '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'">'+head+body+'</table></div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
