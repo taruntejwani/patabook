@@ -928,7 +928,7 @@ function settingsView(en){
   const b=ROWS[SET.shop],i=SET.shop;
   if(!b){SET.cat=null;SET.shop=null;return "";}
   const TJ0=!!window.PBTejDash;
-  const C=setCats(en).filter(c=>(c[0]!=="prof"||TJ0)&&c[0]!=="num"),cur=C.find(c=>c[0]===SET.cat);
+  const C=setCats(en).filter(c=>(c[0]!=="prof"||TJ0)&&c[0]!=="num"&&(c[0]!=="plan"||shopSt(b)==="live")),cur=C.find(c=>c[0]===SET.cat);
   const nm=esc(b.name);
   if(!cur){
     /* दुकान का घर: ऊपर 9 कदम (हर कदम पर Edit), नीचे बाक़ी सेटिंग — कोई चीज़ दो बार नहीं */
