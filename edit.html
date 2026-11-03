@@ -41,6 +41,9 @@ h2{font-size:15.5px;color:#0b2f73;margin:0 0 10px}
 input,select,textarea{width:100%;border:2px solid #dfe1e5;border-radius:12px;padding:12px;font-size:16px;outline:0;font-family:inherit;background:#fff;color:#12141c}
 textarea{min-height:90px;resize:vertical}
 input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
+.tq{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}.tq button,.td button{border:2px solid #dfe1e5;background:#fff;color:#12141c;border-radius:999px;font:600 14px inherit;font-family:inherit;padding:9px 14px;cursor:pointer}
+.tq button.on,.td button.on{background:#1a73e8;border-color:#1a73e8;color:#fff}.td{display:flex;gap:5px;margin:4px 0}.td button{flex:1;min-width:0;padding:10px 0;text-align:center;font-size:13.5px}.td button.on{background:#d93025;border-color:#d93025}
+.tpv{margin-top:12px;background:#f1f6ff;border:1px solid #cfe0ff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700;color:#0b3a8f}.tpv:empty{display:none}
 .two{display:flex;gap:10px}.two>div{flex:1;min-width:0}
 .chk{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;margin-top:4px;cursor:pointer}
 .chk input{width:22px;height:22px;flex:none}
@@ -89,12 +92,16 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
 
   <div class="card" id="cTime" data-sec="about">
    <h2 data-en="🕘 Timings">🕘 दुकान का समय</h2>
+   <div id="tq" class="tq"></div>
    <div class="two">
-    <div><label class="lbl" for="openT" data-en="Opens at">खुलने का समय</label><input id="openT" type="time"></div>
-    <div><label class="lbl" for="closeT" data-en="Closes at">बंद होने का समय</label><input id="closeT" type="time"></div>
+    <div><label class="lbl" for="openS" data-en="Opens at">खुलने का समय</label><select id="openS"></select></div>
+    <div><label class="lbl" for="closeS" data-en="Closes at">बंद होने का समय</label><select id="closeS"></select></div>
    </div>
-   <label class="lbl" for="offDay" data-en="Weekly off">हफ़्ते की छुट्टी</label>
-   <select id="offDay"></select>
+   <input id="openT" type="time" hidden><input id="closeT" type="time" hidden>
+   <label class="lbl" data-en="Weekly off — tap the day your shop is closed">हफ़्ते की छुट्टी — जिस दिन दुकान बंद रहती है उसे दबाएँ</label>
+   <div id="td" class="td"></div>
+   <select id="offDay" hidden></select>
+   <div id="tp" class="tpv"></div>
   </div>
 
   <div class="card" data-sec="numbers">
@@ -187,6 +194,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 function fill(){
   $("btype").innerHTML='<option value="">'+(EN?"— Choose —":"— चुनें —")+'</option>'+BTYPES.map(g=>'<optgroup label="'+esc(EN?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+esc(o[0])+'">'+esc(EN?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
   $("offDay").innerHTML=DAYS.map(d=>'<option value="'+d[0]+'">'+esc(EN?d[2]:d[1])+'</option>').join("");
+  tSync();
 }
 function only(id){["loading","needLogin","notOwner","setup","main","done"].forEach(x=>$(x).hidden=x!==id);}
 const line=(d,k)=>{const m=String(d||"").match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
@@ -242,6 +250,27 @@ function errText(m){
 }
 $("main").addEventListener("input",()=>{if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"dirty"},location.origin);}catch(_){}},{once:true});
 $("pin").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,6);});
+
+/* ⏰ दुकान का समय: जल्दी वाले बटन + 30-मिनट की list + हफ़्ते की छुट्टी के दिन वाले बटन (भीतर वही openT / closeT / offDay चलते हैं) */
+const T_Q=[["09:00","21:00","9 AM – 9 PM","सुबह 9 – रात 9"],["10:00","20:00","10 AM – 8 PM","सुबह 10 – रात 8"],["00:00","23:59","Open 24 hours","24 घंटे खुला"]];
+const T_D=[["Sunday","Sun","रवि"],["Monday","Mon","सोम"],["Tuesday","Tue","मंगल"],["Wednesday","Wed","बुध"],["Thursday","Thu","गुरु"],["Friday","Fri","शुक्र"],["Saturday","Sat","शनि"]];
+function tLab(v){if(!v)return"";const h=+v.slice(0,2),m=v.slice(3,5),ap=h>=12?"PM":"AM",h12=h%12||12;return h12+":"+m+" "+(EN?ap:(h<12?"AM":"PM"));}
+function tOpts(sel,cur){let o='<option value="">'+(EN?"— Choose —":"— चुनें —")+'</option>',seen=!cur;
+  for(let i=0;i<48;i++){const v=String(Math.floor(i/2)).padStart(2,"0")+":"+(i%2?"30":"00");if(v===cur)seen=true;o+='<option value="'+v+'"'+(v===cur?" selected":"")+'>'+tLab(v)+'</option>';}
+  if(!seen)o+='<option value="'+cur+'" selected>'+tLab(cur)+'</option>';sel.innerHTML=o;}
+function tSync(){
+  const o=$("openT").value,c=$("closeT").value,d=$("offDay").value;
+  $("tq").innerHTML=T_Q.map((q,i)=>'<button type="button" data-q="'+i+'" class="'+(o===q[0]&&c===q[1]?"on":"")+'">'+(EN?q[2]:q[3])+'</button>').join("");
+  tOpts($("openS"),o);tOpts($("closeS"),c);
+  $("td").innerHTML=T_D.map(x=>'<button type="button" data-d="'+x[0]+'" class="'+(d===x[0]?"on":"")+'">'+(EN?x[1]:x[2])+'</button>').join("");
+  const dn=T_D.find(x=>x[0]===d);
+  $("tp").textContent=(o&&c?"🕘 "+tLab(o)+" – "+tLab(c):"")+(o&&c?" · ":"")+(d?(EN?"🗓️ Closed on "+dn[1]:"🗓️ "+dn[2]+" को बंद"):(EN?"🗓️ Open all 7 days":"🗓️ सातों दिन खुला"));
+  if(!o&&!c&&!d)$("tp").textContent="";
+}
+$("tq").addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(!b)return;const q=T_Q[+b.dataset.q];$("openT").value=q[0];$("closeT").value=q[1];tSync();});
+$("td").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(!b)return;$("offDay").value=$("offDay").value===b.dataset.d?"":b.dataset.d;tSync();});
+$("openS").addEventListener("change",()=>{$("openT").value=$("openS").value;tSync();});
+$("closeS").addEventListener("change",()=>{$("closeT").value=$("closeS").value;tSync();});
 $("main").addEventListener("submit",async e=>{
   e.preventDefault();$("err").textContent="";
   const o=$("openT").value,c=$("closeT").value;
@@ -308,7 +337,7 @@ numWatch();
     const t=line(ds,"Type");if(t&&![...$("btype").options].some(x=>x.value===t))$("btype").insertAdjacentHTML("beforeend",'<option value="'+esc(t)+'">'+esc(t)+'</option>');
     $("btype").value=t;
     const h=line(ds,"Hours").match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);if(h){$("openT").value=h[1];$("closeT").value=h[2];}
-    $("offDay").value=line(ds,"Closed");
+    $("offDay").value=line(ds,"Closed");tSync();
     MAIN=n10(String(b.phone||""));$("pin").value=line(ds,"PIN")||line(ds,"Pincode");
     $("homeDel").checked=/^yes$/i.test(line(ds,"Delivery"));$("email").value=line(ds,"Email");$("web").value=line(ds,"Website");$("svc").value=line(ds,"Services");$("lmk").value=line(ds,"Landmark");
     $("igIn").value=line(ds,"Instagram");$("fbIn").value=line(ds,"Facebook");ORIGSOC={ig:$("igIn").value,fb:$("fbIn").value};$("gst").value=line(ds,"GST");$("udyam").value=line(ds,"Udyam");gstLock(ds);$("locLink").href="location.html?slug="+encodeURIComponent(slug);
