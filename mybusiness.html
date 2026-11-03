@@ -126,10 +126,10 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pc .pcp{text-align:center;font-weight:800;font-size:26px;padding:10px 6px 0;min-height:36px}.pc .pcp small{font-size:11px;color:#5b6475;font-weight:600}
 .pc ul{list-style:none;margin:8px 0 6px;padding:0 14px}.pc li{font-size:15px;padding:5px 0 5px 22px;position:relative}.pc li:before{content:"✓";position:absolute;left:0;color:#1e9e57;font-weight:800}
 .offer{margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff7e0,#eefaf1);border:1px solid #f1d98a}.offer .oh{font-weight:800;color:#7a4b00;font-size:15.5px}.offer p{margin:6px 0;font-size:13.5px}.offer small{color:#5b6475;font-size:12px}.offer .lights{display:flex;gap:8px;margin:8px 0}.offer .lights span{width:30px;height:30px;border-radius:50%;background:#dbe8fb;color:#1a4fa0;display:grid;place-items:center;font-weight:800;font-size:13px}
-.cmpw{overflow-x:auto;margin-top:12px}.cmp{width:100%;border-collapse:collapse;font-size:12.5px;text-align:center;min-width:330px;font-size:14px}.cmp th,.cmp td{border-bottom:1px solid #e4eaf5;padding:8px 4px}.cmp td:first-child{text-align:left;font-weight:700;padding-left:8px}
+.cmpw{overflow-x:auto;margin-top:12px;-webkit-overflow-scrolling:touch}.cmp{width:100%;border-collapse:collapse;text-align:center;min-width:560px;font-size:16px}.cmp th,.cmp td{border-bottom:1px solid #e4eaf5;padding:12px 8px}.cmp th{font-size:15px}.cmp td:first-child{min-width:150px}.cmp td:first-child{text-align:left;font-weight:700;padding-left:8px}
 .cmp .cmh{background:#0b2f73;color:#fff;text-align:left;padding-left:10px;border-radius:12px 0 0 0}.cmp th{color:#fff;font-size:12.5px}.cmp th em{display:inline-block;font-style:normal;background:#fff;color:#2E0757;border-radius:999px;padding:1px 7px;font-size:10px;margin-top:2px}
 .cmp .th-free{background:#1a73e8}.cmp .th-silver{background:#8e98a9}.cmp .th-gold{background:#d9a21b}.cmp .th-platinum{background:linear-gradient(135deg,#6D28D9,#2E0757)}
-.cmp .td-free{background:#eef4ff}.cmp .td-silver{background:#f3f5f8}.cmp .td-gold{background:#fff8e3}.cmp .td-platinum{background:#f2ecff}.cmp .y{color:#1e9e57;font-weight:800;font-size:15px}.cmp .n{color:#9aa0a6}
+.cmp .td-free{background:#eef4ff}.cmp .td-silver{background:#f3f5f8}.cmp .td-gold{background:#fff8e3}.cmp .td-platinum{background:#f2ecff}.cmp .y{color:#1e9e57;font-weight:800;font-size:20px}.cmp .n{color:#9aa0a6}
 .buy{margin-top:12px;border:1px solid #d7e3f7;background:#fff;border-radius:14px;padding:12px}.buy .bh2{font-weight:800;color:#0b2f73}.buy>small{display:block;color:#5b6475;font-size:12.5px}
 .bp{border:1.5px solid #e4eaf5;border-radius:14px;padding:11px;margin-top:10px}.bp .bt{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.bp .bt b{font-size:15.5px}.bp .bt span{font-weight:900;font-size:17px;color:#0b2f73}.bp .bt span small{font-size:11px;font-weight:700;color:#5b6475}
 .bp .bf{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.bp .bf i{font-style:normal;font-size:12px;background:#f4f7fc;border-radius:999px;padding:2px 8px}
@@ -706,7 +706,6 @@ function planCards(cur,en){
     '<div class="pch"><span class="pci">'+ic[t]+'</span><b>'+nm(t)+'</b></div>'+
     '<div class="pcp">'+price(t)+'</div><ul>'+bul(t).map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>').join("")+'</div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
-window.PBPlanPosters=(cur,en)=>planCards(cur,en);
 /* 📊 प्लान कार्ड + Silver ऑफ़र + तुलना तालिका (Free / Silver / Gold / Platinum) — सिर्फ़ दिखाने के लिए, आँकड़े PBPlan से */
 function plansCompare(b,i,en){
   if(!window.PBPlan)return "";
@@ -721,7 +720,6 @@ function plansCompare(b,i,en){
     H(t,"logo")?"Logo":"",H(t,"hiring")?(en?"Hiring posts":"नौकरी पोस्ट"):"",H(t,"report")?(en?"Reports":"रिपोर्ट"):"",
     H(t,"banner")?(en?"Home poster":"होम पोस्टर"):"",H(t,"top")?(en?"On top in search":"खोज में ऊपर"):""
   ].filter(Boolean);
-  const cards=planCards(cur,en);
   const R=[
     [en?"Photos":"फ़ोटो",t=>Lm(t,"photos")||no],
     [en?"Products":"Products",t=>Lm(t,"products")||no],
@@ -735,12 +733,12 @@ function plansCompare(b,i,en){
   ];
   const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
   const body=R.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join("");
-  return cards+
+  return ''+
     '<div class="offer"><div class="oh">🎁 '+(en?"Offer: Silver plan FREE for 1 year":"ऑफ़र: Silver प्लान 1 साल मुफ़्त")+'</div>'+
     '<p>'+(en?"Bring 5 shopkeepers to PataBook. When their shops are complete, verified and Active, you get the Silver plan free for 1 year.":"5 दुकानदारों को PataBook पर लाएँ। उनकी दुकानें पूरी, जाँची हुई और Active होने पर आपको Silver प्लान 1 साल मुफ़्त मिलेगा।")+'</p>'+
     '<div class="lights">'+[1,2,3,4,5].map(n=>'<span>'+n+'</span>').join("")+'</div>'+
     '<small>'+(en?"Offer valid till 31 January 2027 · Free plan continues as it is · Referral tracking starts soon.":"ऑफ़र 31 जनवरी 2027 तक · Free प्लान वैसे ही चलता रहेगा · रेफ़रल गिनती जल्द शुरू होगी।")+'</small></div>'+
-    '<div class="cmpw"><table class="cmp">'+head+body+'</table></div>';
+    '<div class="cmpw"><table class="cmp">'+head+body+'</table></div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
 function premBlock(b,i){
   if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
