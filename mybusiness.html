@@ -561,7 +561,7 @@ function profItems(b,i){
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ","pop:cSvc"],
     [has("PIN")||has("Pincode"),"📮",en?"PIN code":"पिन कोड","pop:cPin"],
     [has("Email")||has("Website"),"🌐",en?"Email or website":"ईमेल या वेबसाइट","pop:cOnline"],
-    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number":"GST या उद्यम (MSME) नंबर","pop:gstCard",
+    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number — optional":"GST या उद्यम (MSME) नंबर — वैकल्पिक","pop:gstCard",
       (has("GST")||has("Udyam"))?((!has("GST")||/^GST-Verified:\s*yes/mi.test(d))&&(!has("Udyam")||/^Udyam-Verified:\s*yes/mi.test(d))?"ok":"pend"):""]
   ];
 }
@@ -686,7 +686,10 @@ async function sendVerify(i,btn){
     say(en?"🔍 AI is reading your shop board…":"🔍 AI आपकी दुकान का बोर्ड पढ़ रहा है…");
     const r=await fetch(verUrl()+"/verify-shop",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+ME.access_token},body:JSON.stringify({slug:b.slug,out:po,in:pi})});
     const j=await r.json().catch(()=>({}));
-    if(j&&j.ok){VER[b.slug]={status:j.already?"approved":"pending"};VMSG[b.slug]=en?"✅ Sent! You will get a message in 🔔 after the check.":"✅ भेज दिया! जाँच के बाद 🔔 घंटी में संदेश आएगा।";delete VPH[b.slug];draw();return;}
+    if(j&&j.ok){VER[b.slug]={status:j.already?"approved":"pending"};VMSG[b.slug]=en?"✅ Sent! You will get a message in 🔔 after the check.":"✅ भेज दिया! जाँच के बाद 🔔 घंटी में संदेश आएगा।";delete VPH[b.slug];draw();
+      /* आख़िरी कदम पूरा: OTP वाली window सीधे सामने खोलो (guest दुकान, प्रोफ़ाइल तैयार) */
+      if(IS_GUEST()&&shopSt(b)==="draft"&&canSend(b))setTimeout(()=>gOtp(i),600);
+      return;}
     const read=j&&j.read?(en?" AI read: \""+j.read+"\".":" AI ने पढ़ा: \""+j.read+"\"।"):"";
     let t;
     if(j&&j.error==="ai"&&j.why==="name"){t=(en?"❌ The name on your board is not clear or does not match your shop name (\""+b.name+"\").":"❌ बोर्ड पर नाम साफ़ नहीं दिखा या आपकी दुकान के नाम (\""+b.name+"\") से नहीं मिला।")+read+(en?" Stand in front, keep the full board clearly in the photo in good light, and take it again.":" सामने खड़े होकर, अच्छी रोशनी में पूरा बोर्ड साफ़ दिखे — ऐसी फ़ोटो फिर से लें।");P.out=null;}
