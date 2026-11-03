@@ -15,6 +15,22 @@ var st=document.createElement("style");st.textContent='.card:not(#'+m[1]+'),a.ca
 window.__pbCard=m[1];
 function tell(){try{parent.postMessage({pbEdit:"h",h:Math.ceil(document.documentElement.scrollHeight)},location.origin);}catch(_){}}
 addEventListener("load",function(){tell();setTimeout(tell,400);setTimeout(tell,1200);});if(window.ResizeObserver)new ResizeObserver(tell).observe(document.documentElement);})();</script>
+<script>/* ✏️ "Edit profile" (पूरा पेज, card=all): हर डिब्बा बंद — नाम दबाओ तो वही खुले (एक बार में एक) */
+(function(){if(!/[?&]embed=1\b/.test(location.search)||!/[?&]card=all\b/.test(location.search))return;
+document.documentElement.classList.add("acc");
+var st=document.createElement("style");st.textContent='.acc .card[data-sec]:not(a):not(.open)>*:not(h2){display:none!important}'+
+'.acc .card[data-sec]:not(a)>h2{cursor:pointer;margin:0;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none}'+
+'.acc .card[data-sec]:not(a)>h2:after{content:"";flex:none;width:9px;height:9px;border-right:2.5px solid #1a73e8;border-bottom:2.5px solid #1a73e8;transform:rotate(45deg);margin:-4px 4px 0;transition:transform .2s}'+
+'.acc .card[data-sec].open>h2{margin-bottom:12px}.acc .card[data-sec].open>h2:after{transform:rotate(-135deg);margin-top:4px}'+
+'.acc .card[data-sec]:not(a){padding-top:16px;padding-bottom:16px}';
+document.head.appendChild(st);
+function cardOf(el){return el&&el.closest?el.closest(".card[data-sec]"):null;}
+function open(c,only){if(!c||c.tagName==="A")return;if(only)document.querySelectorAll(".acc .card[data-sec].open").forEach(function(x){if(x!==c)x.classList.remove("open");});c.classList.add("open");}
+document.addEventListener("click",function(e){var h=e.target.closest&&e.target.closest(".card[data-sec]>h2");if(!h)return;var c=h.parentNode;
+  if(c.classList.contains("open"))c.classList.remove("open");else{open(c,true);setTimeout(function(){try{c.scrollIntoView({block:"start",behavior:"smooth"});}catch(_){}},30);}});
+/* गलती वाला खाना बंद डिब्बे में हो तो पहले वह डिब्बा खोलो */
+var F=HTMLElement.prototype.focus;HTMLElement.prototype.focus=function(){var c=cardOf(this);if(c&&!c.classList.contains("open"))open(c,true);return F.apply(this,arguments);};
+})();</script>
 <script>/* ✏️ किसी हिस्से की पेंसिल से खुला (?sec=about / visit): सिर्फ़ वही चीज़ें दिखें जो उस हिस्से में दिखती हैं */
 (function(){var m=location.search.match(/[?&]sec=(about|visit|numbers)\b/);if(!m)return;var k=m[1];
 var sh={about:["about","numbers"],visit:["visit"],numbers:["numbers"]}[k];
