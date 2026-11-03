@@ -18,6 +18,16 @@ async function call(path,body,token){
   if(!r.ok){var err=new Error((j&&(j.msg||j.error_description||j.message||j.error))||("HTTP "+r.status));err.status=r.status;err.code=j&&(j.error_code||j.code);throw err;}
   return j;
 }
+/* Guest login (Supabase Anonymous sign-in): register ke time OTP ke bina draft dukaan ke liye. OTP baad me — profile poori hone par */
+async function guest(){
+  var d=await call("signup",{data:{}});
+  var s=fromToken(d);if(!s)throw new Error("guest login failed");
+  save(s);return s;
+}
+function isGuest(s){
+  s=s||read();if(!s||!s.access_token)return false;
+  try{var p=JSON.parse(atob(s.access_token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));return p.is_anonymous===true;}catch(e){return false;}
+}
 /* email par OTP (code / link) bhejo */
 async function sendOtp(email,next){
   var back=location.origin+location.pathname.replace(/[^\/]*$/,"")+"login.html"+(next?"?next="+encodeURIComponent(next):"");
@@ -200,5 +210,5 @@ var mobile={
   staffVerify:function(slug,phone,code){return otpCall("/verify",{purpose:"staff_phone",slug:slug,phone:phone,code:code},true);}
 
 };
-window.PBA={identities:identities,linkGoogle:linkGoogle,google:google,googleNext:googleNext,otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
+window.PBA={guest:guest,isGuest:isGuest,identities:identities,linkGoogle:linkGoogle,google:google,googleNext:googleNext,otp:function(path,body){return otpCall(path,body,false);},captchaToken:captchaToken,sendOtp:sendOtp,verifyOtp:verifyOtp,fromUrl:fromUrl,session:session,logout:logout,contact:contact,loginUrl:loginUrl,current:read,mobile:mobile,deviceCheck:deviceCheck,deviceKick:deviceKick};
 })();

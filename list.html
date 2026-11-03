@@ -330,7 +330,9 @@ const GROUP={biz:["shop","owner"],work:["svc","addr"]};
 function langChosen(){try{return localStorage.getItem("pb-lang-chosen")==="1";}catch(_){return true;}}   /* storage बंद हो तो भाषा वाली स्क्रीन छोड़ दो */
 function langFirst(){try{return sessionStorage.getItem("pb-lang-first")==="1";}catch(_){return false;}}  /* अभी-अभी भाषा चुनी (page reload के बाद भी 4 स्क्रीन दिखें) */
 const WITH_LANG=!langChosen()||langFirst();
-const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(["phone","biz","work","otp"]),FULL_KEYS=SHORT_KEYS;   /* OTP अब आख़िर में: पहले नंबर, फिर फ़ॉर्म, फिर OTP */
+/* 🧪 GUESTREG: OTP बिल्कुल आख़िर में (प्रोफ़ाइल पूरी होने के बाद, "मेरी दुकान" में)। अभी सिर्फ़ ?guest=1 से टेस्ट के लिए चालू; पक्का होने पर डिफ़ॉल्ट */
+const GUESTREG=(()=>{try{if(/[?&]guest=1(&|$)/.test(location.search))localStorage.setItem("pb-guestreg","1");if(/[?&]guest=0(&|$)/.test(location.search))localStorage.removeItem("pb-guestreg");return localStorage.getItem("pb-guestreg")==="1";}catch(_){return false;}})();
+const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(GUESTREG?["phone","biz","work"]:["phone","biz","work","otp"]),FULL_KEYS=SHORT_KEYS;   /* OTP अब आख़िर में: पहले नंबर, फिर फ़ॉर्म, फिर OTP */
 let FULLF=false,steps=SHORT_KEYS.map(stepBy);
 let i=(WITH_LANG&&langChosen())?1:0,coords=null,sending=false;
 
@@ -794,6 +796,7 @@ $("next").onclick=async()=>{
     const nb=$("next");nb.disabled=true;let has=false;
     try{const st=await regStatus(ph10());has=!!(st&&(st.status==="live"||st.status==="pending"));}catch(_){}
     nb.disabled=false;
+    if(has&&GUESTREG&&!steps.includes(stepBy("otp")))steps.push(stepBy("otp"));   /* नंबर पर दुकान पहले से है → login के लिए OTP वाला कदम जोड़ो */
     const t=steps.findIndex(x=>x.dataset.s==="otp");
     if(has&&t>0){i=t;history.pushState({pbst:i,pbk:"otp"},"",location.pathname+location.search);render();return;}
   }
@@ -871,7 +874,7 @@ $("city").addEventListener("change",()=>{const k=knownCity($("city").value);if(!
 async function submit(){
   if(sending)return;
   if($("hp").value){$("f").style.display="none";$("pw").style.display="none";$("done").style.display="block";$("doneTxt").textContent=T("thanks");return;}
-  const ses=await PBA.session().catch(()=>null);   /* लॉगिन ज़रूरी नहीं; हो तो दुकान उसके नाम भी जुड़ जाती है */
+  let ses=await PBA.session().catch(()=>null);   /* लॉगिन ज़रूरी नहीं; हो तो दुकान उसके नाम भी जुड़ जाती है */
   sending=true;const btn=$("next");btn.disabled=true;btn.textContent=T("sending");setErr("");
   const S=sel,d=S?[S.db_key,S.typ]:["Other",""],city=$("city").value.trim(),phone=phoneClean(),m=mapUrl();
   let name=$("shop").value.trim(),area=$("area").value.trim(),addr=$("address").value.trim(),svc=$("services").value.trim();
@@ -906,13 +909,22 @@ async function submit(){
   if(regToken)row.otp_token=regToken;   /* OTP से verify हुआ नंबर (database इसे जाँचता है) */   /* दुकानदार की पसंद: नंबर दिखे या छिपे */
   const fail=e=>{setErr(e);btn.disabled=false;btn.textContent=T("submit");sending=false;};
   try{
+    if(GUESTREG&&!ses&&!regToken){   /* बिना OTP: guest login बनाकर draft दुकान */
+      try{ses=await PBA.guest();}catch(_){return fail(EN()?"Could not start. Please try again in a minute.":"शुरू नहीं हो पाया। एक मिनट बाद फिर कोशिश करें।");}
+    }
     /* नया तरीका: pb_register_open — बिना लॉगिन / बिना OTP; दुकान हमेशा Pending; एक मोबाइल = एक दुकान */
     const hdr={apikey:KEY,Authorization:"Bearer "+(ses?ses.access_token:KEY),"Content-Type":"application/json"};
     let rr=await fetch(SB+"/rest/v1/rpc/pb_register_open",{method:"POST",headers:hdr,body:JSON.stringify({p:row})});
     if(rr.status===404&&ses)rr=await fetch(SB+"/rest/v1/rpc/pb_submit_business",{method:"POST",headers:hdr,body:JSON.stringify({p:row})});   /* SQL अभी न चला हो */
     let j=null;try{j=await rr.json();}catch(_){}
+    if(rr.ok&&GUESTREG&&ses&&PBA.isGuest&&PBA.isGuest(ses)){   /* guest: प्रोफ़ाइल पूरी करने "मेरी दुकान" में भेजो — OTP आख़िर में वहीं */
+      saveReg({phone:phone10(phone),slug:(j&&j.slug)||row.slug,name:name,created:Date.now(),skew:0});
+      if(window.PBT)PBT.once("reg",(steps.length+1)+"-done");
+      location.href="mybusiness.html?new=1";return;}
     if(rr.ok){done(name,S,d,{phone:phone,slug:(j&&j.slug)||row.slug,created_at:j&&j.created_at,now:j&&j.now});return;}
     const rt=(j&&(j.message||j.msg))||"";
+    if(/gst required/i.test(rt))return fail(EN()?"A second shop can be added only after your first shop's GST is verified.":"दूसरी दुकान तभी जुड़ सकती है जब आपकी पहली दुकान का GST जाँच हो जाए।");
+    if(/number in use/i.test(rt))return fail(EN()?"A shop already exists with this mobile number. Please open My Shop and log in with the OTP.":"इस मोबाइल नंबर से दुकान पहले से जुड़ी है। \"मेरी दुकान\" खोलकर OTP से लॉगिन करें।");
     if(/limit1|limit2|limit3|duplicate|already/i.test(rt))return fail(LX("limit2"));
     if(/too many|rate/i.test(rt))return fail(LX("rate"));
     if(/bad address/i.test(rt))return fail(T("e_addr"));

@@ -156,6 +156,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .offer .frs{flex-wrap:wrap;row-gap:10px}.offer .frs span{flex:0 0 calc(20% - 7px)}.offer .fcnt{font-weight:800;color:#0b3a8f;font-size:13px;margin-top:6px}@keyframes pgpo{40%{transform:scale(1.15) rotate(-4deg)}100%{transform:scale(1)}}
 .pgift .pgk{position:absolute;left:50%;top:-40px;transform:translateX(-50%);font-size:15px;font-weight:800;letter-spacing:.08em;color:#3a2a00;padding:7px 16px;border-radius:999px;white-space:nowrap;background:linear-gradient(135deg,#fdeeb0,#e0a91c 55%,#f8dc86);box-shadow:0 3px 8px rgba(160,110,0,.4)}.pgift.open .pgk{display:none}
 .pgp{position:fixed;pointer-events:none;z-index:2100;animation:pgpa 1.4s ease-out forwards}@keyframes pgpa{to{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
+.gotp{position:relative;width:100%;max-width:360px;background:#fff;border-radius:22px;padding:24px 20px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}.gotp .x{position:absolute;right:12px;top:10px;width:30px;height:30px;border-radius:50%;border:1px solid #cfd8ea;background:#fff;font-size:18px;color:#34415a}.gotp .gk{font-size:34px}.gotp h3{margin:6px 0;color:#0b2f73;font-size:19px}.gotp p{margin:6px 0 12px;color:#34415a;font-size:14px}.gotp input{width:100%;text-align:center;letter-spacing:.35em;font-size:22px;font-weight:800;padding:12px;border:2px solid #cfd8ea;border-radius:14px}.gotp .gm{min-height:20px;margin-top:8px;font-size:13px;color:#5b6475}.gotp .gm.e{color:#d93025}.gotp .gr{margin-top:8px;border:0;background:transparent;color:#1a73e8;font-weight:700;font-size:14px}.gotp .gr:disabled{color:#9aa0a6}
 .pgo{position:fixed;inset:0;background:rgba(6,10,30,.7);display:flex;align-items:center;justify-content:center;z-index:2000;padding:16px}
 .pgf2{max-width:380px;width:100%;padding:2.5px;border-radius:26px;background:linear-gradient(135deg,#fbe9a0,#c8921a 30%,#fff1b8 50%,#b27a0e 75%,#f6d977);animation:pgup .45s cubic-bezier(.2,.9,.3,1.1)}@keyframes pgup{from{transform:translateY(50px) scale(.92);opacity:0}}
 .pgbx{border-radius:24px;padding:24px 20px 20px;text-align:center;position:relative;color:#fff;background:radial-gradient(circle at 50% -10%,#3a3f9e 0,transparent 60%),linear-gradient(170deg,#141c52,#0a0f33 70%)}
@@ -482,7 +483,45 @@ function offBlock(b,i,en){
   if(s==="pend")return '<div class="offb pnd"><b>⏳ '+(en?"Sent for approval":"मंज़ूरी के लिए भेज दी")+'</b><small>'+(en?"PataBook will check your shop. Until then it is visible only to you.":"PataBook आपकी दुकान जाँचेगा। तब तक यह सिर्फ़ आपको दिखती है।")+'</small></div>';
   const pc=profPct(b),ok=pc===null||pc>=100;
   return '<div class="offb"><b>🔴 Offline — '+(en?"only you can see this shop":"यह दुकान अभी सिर्फ़ आपको दिखती है")+'</b><small>'+(ok?(en?"Your profile is complete. Send it to PataBook to go Online for everyone.":"प्रोफ़ाइल पूरी है। सबको दिखाने (ऑनलाइन) के लिए PataBook को भेजें।"):(en?"Complete your profile to 100% (now "+pc+"%), then send it for approval.":"पहले प्रोफ़ाइल 100% पूरी करें (अभी "+pc+"%), फिर मंज़ूरी के लिए भेजें।"))+'</small>'+
-    (ok?'<button type="button" class="go" data-submit="'+i+'">📤 '+(en?"Send for approval":"मंज़ूरी के लिए भेजें")+'</button>':'<button type="button" class="go alt" data-setprof="'+i+'">'+(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›")+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
+    (ok?''+subBtn(i,en)+'':'<button type="button" class="go alt" data-setprof="'+i+'">'+(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›")+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
+}
+/* 🔐 OTP बिल्कुल आख़िर में: guest (बिना OTP वाली) दुकान की प्रोफ़ाइल पूरी होने के बाद नंबर OTP से जाँचो; फिर मंज़ूरी के लिए भेजो */
+const IS_GUEST=()=>!!(window.PBA&&PBA.isGuest&&PBA.isGuest());
+function subBtn(i,en){
+  return IS_GUEST()?'<button type="button" class="go" data-gotp="'+i+'">📲 '+(en?"Verify mobile & send for approval":"मोबाइल जाँचकर मंज़ूरी के लिए भेजें")+'</button>'
+    :'<button type="button" class="go" data-submit="'+i+'">📤 '+(en?"Send for approval":"मंज़ूरी के लिए भेजें")+'</button>';}
+function gOtpErr(e,en){const c=e&&e.code;
+  if(c==="invalid_otp")return (en?"Wrong OTP.":"OTP गलत है।")+(e.attempts_left?(en?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");
+  if(c==="otp_expired"||c==="otp_expired_or_missing")return en?"The OTP has expired. Request a new OTP.":"OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।";
+  if(c==="resend_too_soon")return en?"Request again after "+(e.retry_after||60)+" seconds.":(e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।";
+  if(c==="rate_limited_mobile")return en?"Today's OTP limit for this number is used up. Try tomorrow.":"इस नंबर पर आज के OTP पूरे हो गए। कल फिर कोशिश करें।";
+  if(c==="rate_limited_ip")return en?"Too many attempts. Try again in about an hour.":"बहुत ज़्यादा कोशिशें हुईं। लगभग एक घंटे बाद कोशिश करें।";
+  if(c==="sms_failed")return en?"The SMS could not be sent. Try again in a while.":"SMS नहीं भेजा जा सका। थोड़ी देर बाद कोशिश करें।";
+  if(c==="admin_owned"||c==="owner_missing")return en?"A shop is already added with this number. Please contact PataBook.":"इस नंबर से दुकान पहले से जुड़ी है। PataBook से संपर्क करें।";
+  return en?"Something went wrong. Try again.":"कुछ गड़बड़ हुई। दोबारा कोशिश करें।";}
+function gOtp(i){
+  const b=ROWS&&ROWS[i];if(!b||document.querySelector(".gotp-o")||!window.PBA||!PBA.mobile)return;
+  const en=L()==="en",ph=String(b.phone||"").replace(/\D/g,"").slice(-10),slug=b.slug;
+  const ov=document.createElement("div");ov.className="pgo gotp-o";
+  ov.innerHTML='<div class="gotp" role="dialog" aria-modal="true"><button type="button" class="x" data-x aria-label="'+(en?"Close":"बंद करें")+'">×</button><div class="gk">📲</div><h3>'+(en?"Verify your mobile number":"मोबाइल नंबर जाँचें")+'</h3><p>+91 '+ph+'</p><input id="gotpC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="OTP ••••••" disabled><div class="gm" id="gotpM"></div><button type="button" class="gr" id="gotpR" disabled>'+(en?"Send OTP":"OTP भेजें")+'</button></div>';
+  document.body.appendChild(ov);
+  const M=(t,er)=>{const m=$("gotpM");if(m){m.textContent=t;m.className="gm"+(er?" e":"");}};
+  let tm=null,dead=false;
+  const kill=()=>{dead=true;clearInterval(tm);if(ov.isConnected)ov.remove();};
+  if(window.PBBack)PBBack.open(kill,ov);
+  const close=()=>{if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();};
+  const cool=sec=>{let left=sec||60;const r=$("gotpR");if(!r)return;r.disabled=true;clearInterval(tm);const tick=()=>{if(dead||!r.isConnected){clearInterval(tm);return;}r.textContent=left>0?(en?"Resend in "+left+"s":left+" सेकंड बाद दोबारा भेजें"):(en?"Resend OTP":"OTP दोबारा भेजें");if(left<=0){r.disabled=false;clearInterval(tm);}left--;};tick();tm=setInterval(tick,1000);};
+  const send=async()=>{const c=$("gotpC");if(c)c.disabled=true;M(en?"Sending OTP…":"OTP भेज रहे हैं…");
+    try{const j=await PBA.mobile.ownerSend(ph);if(dead)return;if(c){c.disabled=false;c.value="";c.focus();}M(en?"OTP sent. Enter it above.":"OTP भेजा गया है। ऊपर डालें।");cool(j&&j.resend_after);}
+    catch(e){if(dead)return;M(gOtpErr(e,en),true);if(c)c.disabled=true;cool(e&&e.retry_after);const r=$("gotpR");if(r&&e&&e.code!=="resend_too_soon")r.disabled=false;}};
+  ov.addEventListener("click",e=>{if(e.target===ov||e.target.closest("[data-x]")){close();return;}if(e.target.closest("#gotpR"))send();});
+  ov.addEventListener("input",async e=>{if(e.target.id!=="gotpC")return;const c=e.target;c.value=c.value.replace(/\D/g,"");if(c.value.length!==6)return;
+    c.disabled=true;M(en?"Checking…":"जाँच हो रही है…");
+    try{await PBA.mobile.ownerVerify(ph,c.value);if(dead)return;M(en?"✅ Number verified":"✅ नंबर जाँच हो गया");
+      await new Promise(z=>setTimeout(z,500));close();
+      await start();const k=(ROWS||[]).findIndex(r=>r.slug===slug);if(k>=0)submitApproval(k,{disabled:false});}
+    catch(x){if(dead)return;c.disabled=false;c.value="";c.focus();M(gOtpErr(x,en),true);}});
+  send();
 }
 async function submitApproval(i,btn){
   const b=ROWS[i],en=L()==="en",er=$("sub"+i);if(!b)return;btn.disabled=true;if(er)er.textContent="…";
@@ -1059,7 +1098,7 @@ function profOverview(en){
     const col=pc==null?"#9aa0a6":pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
     const chip=s==="live"?'<span class="st live">✅ '+(en?"Online":"Online")+'</span>':s==="pend"?'<span class="st pend">⏳ '+(en?"Waiting for approval":"मंज़ूरी का इंतज़ार")+'</span>':'<span class="st draft">🔴 Offline</span>';
     const full=pc===100,act=full
-      ?(s==="draft"?'<button type="button" class="go" data-submit="'+i+'">📤 '+(en?"Send for approval":"मंज़ूरी के लिए भेजें")+'</button><div class="err" id="sub'+i+'"></div>':'')
+      ?(s==="draft"?''+subBtn(i,en)+'<div class="err" id="sub'+i+'"></div>':'')
       :'<button type="button" class="go alt" data-profshop="'+i+'">'+(en?"Complete it ›":"पूरा करें ›")+'</button>';
     return '<div class="card ov"><div class="ovr"><div class="ring" style="background:conic-gradient('+col+' '+((pc||0)*3.6)+'deg,#e8edf5 0)"><span>'+(pc==null?"–":pc+"%")+'</span></div>'+
       '<div class="ovt"><b>'+esc(b.name)+'</b>'+chip+'<small>'+(pc==null?"":full?(en?"Profile 100% complete ✅":"प्रोफ़ाइल 100% पूरी ✅"):(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी"))+'</small></div></div>'+act+'</div>';
@@ -1493,6 +1532,7 @@ $("list").addEventListener("click",e=>{
   const nsv=e.target.closest("[data-nsave]");if(nsv){const ni=+nsv.dataset.ni,sl=+nsv.dataset.nsave,v=($("nin"+ni+"_"+sl).value||"").replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,""),x=(NUMS[ROWS[ni].slug]||{})[sl];numSet(ni,sl,v,x?x.show:false,nsv);return;}
   const nrm=e.target.closest("[data-nrm]");if(nrm){const ni=+nrm.dataset.ni;if(confirm(L()==="en"?"Remove this number?":"यह नंबर हटाएँ?"))numSet(ni,+nrm.dataset.nrm,"",false,nrm);return;}
   const dsb=e.target.closest("[data-delshop]");if(dsb){delShop(+dsb.dataset.delshop,dsb);return;}
+  const gtp=e.target.closest("[data-gotp]");if(gtp){gOtp(+gtp.dataset.gotp);return;}
   const sbt=e.target.closest("[data-submit]");if(sbt){submitApproval(+sbt.dataset.submit,sbt);return;}
   const c=e.target.closest("[data-setcat]");if(c){e.preventDefault();setGo(c.dataset.setcat);return;}
   if(e.target.closest("[data-setback]"))setBack();
