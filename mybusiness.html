@@ -119,8 +119,17 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pm{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .pm a{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;border-bottom:1px solid var(--line);background:#fff}.pm a:last-child{border-bottom:0}
 .pm a span:nth-child(2){flex:1;min-width:0}.pm a i{font-style:normal;color:var(--blue);font-weight:800;font-size:13px}
-.offer{margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff7e0,#eefaf1);border:1px solid #f1d98a}.offer .oh{font-weight:800;color:#7a4b00;font-size:15.5px}.offer p{margin:6px 0;font-size:13.5px}.offer small{color:#5b6475;font-size:12px}.offer .lights{display:flex;gap:8px;margin:8px 0}.offer .lights span{width:30px;height:30px;border-radius:50%;background:#e4e7ec;color:#7b8494;display:grid;place-items:center;font-weight:800;font-size:13px}
-.cmph{margin:14px 0 6px;font-weight:800;color:#0b2f73}.cmpw{overflow-x:auto}.cmp{width:100%;border-collapse:collapse;font-size:12.5px;text-align:center}.cmp th,.cmp td{border-bottom:1px solid #e4eaf5;padding:7px 4px}.cmp td:first-child{text-align:left;font-weight:700}.cmp th small{color:#1a73e8;font-weight:700}.cmp .cur{background:#eef4ff}.cmp .y{color:#1e9e57;font-weight:800}.cmp .n{color:#9aa0a6}
+.pcards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}@media(min-width:640px){.pcards{grid-template-columns:repeat(4,1fr)}}
+.pc{position:relative;border-radius:16px;border:1.5px solid #e4eaf5;background:#fff;overflow:hidden;padding-bottom:10px}.pc.me{box-shadow:0 0 0 2px #f0b429}.pc .yp{position:absolute;top:6px;right:6px;background:#f0b429;color:#4a3300;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;z-index:1}
+.pc .pch{padding:12px 8px 10px;text-align:center;color:#fff}.pc .pch b{display:block;font-size:17px}.pc .pci{font-size:26px;display:block}
+.pc-free .pch{background:linear-gradient(#1a73e8,#0b57c4)}.pc-silver .pch{background:linear-gradient(#aeb7c6,#7c8798)}.pc-gold .pch{background:linear-gradient(#f3c23c,#c98a05)}.pc-platinum .pch{background:linear-gradient(#7b3fe4,#4a1fa8)}
+.pc .pcp{text-align:center;font-weight:800;font-size:20px;padding:8px 6px 0;min-height:30px}.pc .pcp small{font-size:11px;color:#5b6475;font-weight:600}
+.pc ul{list-style:none;margin:6px 0 0;padding:0 10px}.pc li{font-size:12.5px;padding:3px 0 3px 18px;position:relative}.pc li:before{content:"✓";position:absolute;left:0;color:#1e9e57;font-weight:800}
+.offer{margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff7e0,#eefaf1);border:1px solid #f1d98a}.offer .oh{font-weight:800;color:#7a4b00;font-size:15.5px}.offer p{margin:6px 0;font-size:13.5px}.offer small{color:#5b6475;font-size:12px}.offer .lights{display:flex;gap:8px;margin:8px 0}.offer .lights span{width:30px;height:30px;border-radius:50%;background:#dbe8fb;color:#1a4fa0;display:grid;place-items:center;font-weight:800;font-size:13px}
+.cmpw{overflow-x:auto;margin-top:12px}.cmp{width:100%;border-collapse:collapse;font-size:12.5px;text-align:center;min-width:330px}.cmp th,.cmp td{border-bottom:1px solid #e4eaf5;padding:8px 4px}.cmp td:first-child{text-align:left;font-weight:700;padding-left:8px}
+.cmp .cmh{background:#0b2f73;color:#fff;text-align:left;padding-left:10px;border-radius:12px 0 0 0}.cmp th{color:#fff;font-size:12.5px}.cmp th em{display:inline-block;font-style:normal;background:#fff;color:#4a1fa8;border-radius:999px;padding:1px 7px;font-size:10px;margin-top:2px}
+.cmp .th-free{background:#1a73e8}.cmp .th-silver{background:#8e98a9}.cmp .th-gold{background:#d9a21b}.cmp .th-platinum{background:#5b2bbf}
+.cmp .td-free{background:#eef4ff}.cmp .td-silver{background:#f3f5f8}.cmp .td-gold{background:#fff8e3}.cmp .td-platinum{background:#f2ecff}.cmp .y{color:#1e9e57;font-weight:800;font-size:15px}.cmp .n{color:#9aa0a6}
 .buy{margin-top:12px;border:1px solid #d7e3f7;background:#fff;border-radius:14px;padding:12px}.buy .bh2{font-weight:800;color:#0b2f73}.buy>small{display:block;color:#5b6475;font-size:12.5px}
 .bp{border:1.5px solid #e4eaf5;border-radius:14px;padding:11px;margin-top:10px}.bp .bt{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.bp .bt b{font-size:15.5px}.bp .bt span{font-weight:900;font-size:17px;color:#0b2f73}.bp .bt span small{font-size:11px;font-weight:700;color:#5b6475}
 .bp .bf{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.bp .bf i{font-style:normal;font-size:12px;background:#f4f7fc;border-radius:999px;padding:2px 8px}
@@ -681,28 +690,42 @@ function buyBlock(b,i,paid){
         (verLocked(b)?'<div class="lock">🔒 '+(en?"Verify your shop first (above)":"पहले दुकान जाँच करवाएँ (ऊपर)")+'</div>':inApp?'<button type="button" data-buy="'+i+'" data-p="'+esc(p.product)+'">'+(en?"Buy with Google Play":"Google प्ले से खरीदें")+'</button>':'<a href="'+store+'" target="_blank" rel="noopener">'+(en?"Buy in the PataBook app ›":"PataBook ऐप में खरीदें ›")+'</a>')+'</div>';}).join("")+
     '<small style="margin-top:8px">'+(en?"By buying you accept the ":"खरीदकर आप ")+'<a href="terms.html">'+(en?"Terms":"नियम")+'</a> · <a href="refund.html">'+(en?"Refund Policy":"पैसे वापसी नीति")+'</a>'+(en?".":" मानते हैं।")+'</small><div class="err" id="bye'+i+'"></div></div>';
 }
-/* 📊 प्लान तुलना (Free / Silver / Gold / Platinum) + Silver ऑफ़र कार्ड — सिर्फ़ दिखाने के लिए, आँकड़े PBPlan से */
+/* 📊 प्लान कार्ड + Silver ऑफ़र + तुलना तालिका (Free / Silver / Gold / Platinum) — सिर्फ़ दिखाने के लिए, आँकड़े PBPlan से */
 function plansCompare(b,i,en){
   if(!window.PBPlan)return "";
-  const T=["free","silver","gold","platinum"],ic={free:"🆓",silver:"🥈",gold:"👑",platinum:"💎"},cur=tierOf(b);
-  const yes='<span class="y">✓</span>',no='<span class="n">–</span>';
+  const T=["free","silver","gold","platinum"],ic={free:"🏪",silver:"🥈",gold:"👑",platinum:"💎"},cur=tierOf(b);
+  const yes='<span class="y">✓</span>',no='<span class="n">–</span>',H=(t,k)=>PBPlan.hasT(t,k),Lm=(t,k)=>PBPlan.limT(t,k);
+  const nm=t=>esc(PBPlan.name(t,en)),pd=t=>{const d=Lm(t,"poster_days");return d>=365?(en?"Daily":"रोज़"):d?d+(en?" days":" दिन"):yes;};
+  const price=t=>{if(t==="free")return "₹0";const p=(window.PLAYP||[]).find(x=>x.tier===t);if(!p)return "";const v=p.playPrice&&p.playPrice.value?Number(p.playPrice.value):Number(p.price||0);return v?"₹"+v.toLocaleString("en-IN")+"<small>/"+(en?"year":"साल")+"</small>":"";};
+  const bul=t=>[
+    en?"Business listing":"बिज़नेस लिस्टिंग",
+    Lm(t,"photos")?(en?"Up to "+Lm(t,"photos")+" photos":Lm(t,"photos")+" फ़ोटो तक"):"",
+    Lm(t,"products")?(en?"Up to "+Lm(t,"products")+" products":Lm(t,"products")+" products तक"):"",
+    H(t,"logo")?"Logo":"",H(t,"hiring")?(en?"Hiring posts":"नौकरी पोस्ट"):"",H(t,"report")?(en?"Reports":"रिपोर्ट"):"",
+    H(t,"banner")?(en?"Home poster":"होम पोस्टर"):"",H(t,"top")?(en?"On top in search":"खोज में ऊपर"):""
+  ].filter(Boolean);
+  const cards='<div class="pcards">'+T.map(t=>'<div class="pc pc-'+t+(t===cur?" me":"")+'">'+(t===cur?'<span class="yp">'+(en?"Your Plan":"आपका प्लान")+'</span>':'')+
+    '<div class="pch"><span class="pci">'+ic[t]+'</span><b>'+nm(t)+'</b></div>'+
+    '<div class="pcp">'+price(t)+'</div><ul>'+bul(t).map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>').join("")+'</div>';
   const R=[
-    [en?"Photos":"फ़ोटो",t=>PBPlan.limT(t,"photos")||no],
-    [en?"Helpers (staff)":"सहायक (स्टाफ़)",t=>PBPlan.limT(t,"helpers")||no],
-    ["Logo",t=>PBPlan.hasT(t,"logo")?yes:no],
-    [en?"Hiring":"नौकरी (नौकरी)",t=>PBPlan.hasT(t,"hiring")?yes:no],
-    [en?"Visiting card":"विज़िटिंग कार्ड",t=>PBPlan.hasT(t,"card")?yes:no],
-    [en?"Report":"रिपोर्ट",t=>PBPlan.hasT(t,"report")?yes:no],
-    [en?"On top in search":"खोज में ऊपर",t=>PBPlan.hasT(t,"top")?yes:no],
-    [en?"Home poster":"होम पोस्टर",t=>{if(!PBPlan.hasT(t,"banner"))return no;const d=PBPlan.limT(t,"poster_days");return d>=365?(en?"Daily":"रोज़"):d?d+(en?" days":" दिन"):yes;}]
+    [en?"Photos":"फ़ोटो",t=>Lm(t,"photos")||no],
+    [en?"Products":"Products",t=>Lm(t,"products")||no],
+    [en?"Helpers (staff)":"सहायक (स्टाफ़)",t=>Lm(t,"helpers")||no],
+    ["Logo",t=>H(t,"logo")?yes:no],
+    [en?"Hiring posts":"नौकरी पोस्ट",t=>H(t,"hiring")?yes:no],
+    [en?"Visiting card":"विज़िटिंग कार्ड",t=>H(t,"card")?yes:no],
+    [en?"Report":"रिपोर्ट",t=>H(t,"report")?yes:no],
+    [en?"On top in search":"खोज में ऊपर",t=>H(t,"top")?yes:no],
+    [en?"Home poster":"होम पोस्टर",t=>H(t,"banner")?pd(t):no]
   ];
-  const head='<tr><th></th>'+T.map(t=>'<th class="'+(t===cur?"cur":"")+'">'+ic[t]+'<br>'+esc(PBPlan.name(t,en))+(t===cur?'<br><small>'+(en?"Your plan":"आपका प्लान")+'</small>':'')+'</th>').join("")+'</tr>';
-  const body=R.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="'+(t===cur?"cur":"")+'">'+r[1](t)+'</td>').join("")+'</tr>').join("");
-  return '<div class="offer"><div class="oh">🎁 '+(en?"Offer: Silver plan FREE for 1 year":"ऑफ़र: Silver प्लान 1 साल मुफ़्त")+'</div>'+
+  const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
+  const body=R.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join("");
+  return cards+
+    '<div class="offer"><div class="oh">🎁 '+(en?"Offer: Silver plan FREE for 1 year":"ऑफ़र: Silver प्लान 1 साल मुफ़्त")+'</div>'+
     '<p>'+(en?"Bring 5 shopkeepers to PataBook. When their shops are complete, verified and Active, you get the Silver plan free for 1 year.":"5 दुकानदारों को PataBook पर लाएँ। उनकी दुकानें पूरी, जाँची हुई और Active होने पर आपको Silver प्लान 1 साल मुफ़्त मिलेगा।")+'</p>'+
     '<div class="lights">'+[1,2,3,4,5].map(n=>'<span>'+n+'</span>').join("")+'</div>'+
     '<small>'+(en?"Offer valid till 31 January 2027 · Free plan continues as it is · Referral tracking starts soon.":"ऑफ़र 31 जनवरी 2027 तक · Free प्लान वैसे ही चलता रहेगा · रेफ़रल गिनती जल्द शुरू होगी।")+'</small></div>'+
-    '<div class="cmph">'+(en?"Compare plans":"प्लान की तुलना")+'</div><div class="cmpw"><table class="cmp">'+head+body+'</table></div>';
+    '<div class="cmpw"><table class="cmp">'+head+body+'</table></div>';
 }
 function premBlock(b,i){
   if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
