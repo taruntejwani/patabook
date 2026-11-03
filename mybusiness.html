@@ -731,7 +731,6 @@ function plansCompare(b,i,en){
   ].map(x=>[x[0],ALLT,"free"]);
   const FE=[
     [en?"Photos":"फ़ोटो",t=>Lm(t,"photos")||no,t=>Lm(t,"photos")>0],
-    [en?"Products":"Products",t=>Lm(t,"products")||no,t=>Lm(t,"products")>0],
     [en?"Helpers (staff)":"सहायक (स्टाफ़)",t=>Lm(t,"helpers")||no,t=>Lm(t,"helpers")>0],
     ["Logo",t=>H(t,"logo")?yes:no,t=>H(t,"logo")],
     [en?"Hiring posts":"नौकरी पोस्ट",t=>H(t,"hiring")?yes:no,t=>H(t,"hiring")],
@@ -743,7 +742,7 @@ function plansCompare(b,i,en){
   const GT={free:en?"✅ Free plan includes (in every plan)":"✅ Free प्लान में मिलता है (हर प्लान में)",silver:en?"🥈 Added in Silver":"🥈 Silver में जुड़ता है",gold:en?"👑 Added in Gold":"👑 Gold में जुड़ता है",platinum:en?"💎 Added in Platinum":"💎 Platinum में जुड़ता है"};
   const ALLR=ALLP.concat(FE);
   const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
-  const body=T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?'<tr class="grp grp-'+g+'"><td colspan="5">'+GT[g]+'</td></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("");
+  const body=T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td colspan="5">'+GT[g]+'</td></tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("");
   return ''+
     '<div class="offer"><div class="oh">🎁 '+(en?"Offer: Silver plan FREE for 1 year":"ऑफ़र: Silver प्लान 1 साल मुफ़्त")+'</div>'+
     '<p>'+(en?"Bring 5 shopkeepers to PataBook. When their shops are complete, verified and Active, you get the Silver plan free for 1 year.":"5 दुकानदारों को PataBook पर लाएँ। उनकी दुकानें पूरी, जाँची हुई और Active होने पर आपको Silver प्लान 1 साल मुफ़्त मिलेगा।")+'</p>'+
