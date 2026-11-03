@@ -489,9 +489,15 @@ function offBlock(b,i,en){
   const s=shopSt(b);if(s==="live"||s==="off"||!SST)return "";
   if(s==="pend")return '<div class="offb pnd"><b>⏳ '+(en?"Sent for approval":"मंज़ूरी के लिए भेज दी")+'</b><small>'+(en?"PataBook will check your shop. Until then it is visible only to you.":"PataBook आपकी दुकान जाँचेगा। तब तक यह सिर्फ़ आपको दिखती है।")+'</small></div>';
   const pc=profPct(b),ok=canSend(b),needPh=pc!==null&&pc>=APPR_MIN&&!photosOk(b);
-  return '<div class="offb"><b>🔴 Offline — '+(en?"only you can see this shop":"यह दुकान अभी सिर्फ़ आपको दिखती है")+'</b><small>'+(ok?(en?"Your profile is complete. Send it to PataBook to go Online for everyone.":"प्रोफ़ाइल पूरी है। सबको दिखाने (ऑनलाइन) के लिए PataBook को भेजें।"):(needPh?(en?"One step left: send the outside and inside photos of your shop for verification, then send it for approval.":"एक कदम बाकी: दुकान की बाहर और अंदर की फ़ोटो जाँच के लिए भेजें, फिर मंज़ूरी के लिए भेजें।"):(en?"Complete your profile to "+APPR_MIN+"% (now "+pc+"%), then send it for approval.":"पहले प्रोफ़ाइल "+APPR_MIN+"% पूरी करें (अभी "+pc+"%), फिर मंज़ूरी के लिए भेजें।")))+'</small>'+
-    (ok?''+subBtn(i,en)+'':'<button type="button" class="go alt" data-setprof="'+i+'">'+(needPh?(en?"Send shop photos ›":"दुकान की फ़ोटो भेजें ›"):(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›"))+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
+  if(!ok)return '<div class="offb"><b>🔴 '+(en?"Offline":"ऑफ़लाइन")+'</b>'+
+    '<button type="button" class="go alt" data-setprof="'+i+'">'+(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›")+'</button><div class="err" id="sub'+i+'"></div></div>';
+  return '<div class="offb"><b>🔴 Offline — '+(en?"only you can see this shop":"यह दुकान अभी सिर्फ़ आपको दिखती है")+'</b><small>'+(en?"Your profile is complete. Send it to PataBook to go Online for everyone.":"प्रोफ़ाइल पूरी है। सबको दिखाने (ऑनलाइन) के लिए PataBook को भेजें।")+'</small>'+
+    subBtn(i,en)+'<div class="err" id="sub'+i+'"></div></div>';
 }
+/* जैसे ही प्रोफ़ाइल पूरी हो (80%+ और दुकान की फ़ोटो भेजी हुई): OTP वाली window अपने-आप खोलो — सिर्फ़ "अधूरी → पूरी" होने पर, एक बार */
+const CANP={};
+function autoOtp(){try{if(!ROWS||!SST||!IS_GUEST())return;ROWS.forEach((b,i)=>{if(shopSt(b)!=="draft"){CANP[b.slug]=null;return;}
+  const ok=canSend(b),prev=CANP[b.slug];CANP[b.slug]=ok;if(prev===false&&ok)setTimeout(()=>{if(shopSt(ROWS[i]||{})==="draft"&&canSend(ROWS[i]))gOtp(i);},500);});}catch(e){}}
 /* 🔐 OTP बिल्कुल आख़िर में: guest (बिना OTP वाली) दुकान की प्रोफ़ाइल पूरी होने के बाद नंबर OTP से जाँचो; फिर मंज़ूरी के लिए भेजो */
 const IS_GUEST=()=>!!(window.PBA&&PBA.isGuest&&PBA.isGuest());
 function subBtn(i,en){
@@ -686,8 +692,6 @@ async function sendVerify(i,btn){
     const r=await fetch(verUrl()+"/verify-shop",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+ME.access_token},body:JSON.stringify({slug:b.slug,out:po,in:pi})});
     const j=await r.json().catch(()=>({}));
     if(j&&j.ok){VER[b.slug]={status:j.already?"approved":"pending"};VMSG[b.slug]=en?"✅ Sent! You will get a message in 🔔 after the check.":"✅ भेज दिया! जाँच के बाद 🔔 घंटी में संदेश आएगा।";delete VPH[b.slug];draw();
-      /* आख़िरी कदम पूरा: OTP वाली window सीधे सामने खोलो (guest दुकान, प्रोफ़ाइल तैयार) */
-      if(IS_GUEST()&&shopSt(b)==="draft"&&canSend(b))setTimeout(()=>gOtp(i),600);
       return;}
     const read=j&&j.read?(en?" AI read: \""+j.read+"\".":" AI ने पढ़ा: \""+j.read+"\"।"):"";
     let t;
@@ -1194,6 +1198,7 @@ async function tileSwitch(i,btn){
   catch(e){btn.disabled=false;if(er)er.textContent=en?"Could not change. Try again.":"बदल नहीं पाए। दोबारा कोशिश करें।";}
 }
 function draw(){
+  setTimeout(autoOtp,0);
   PB.apply();
   {const _sb=$("stBtn");if(_sb)_sb.hidden=true;}
   ["h1","sub","gH","gB","pbT","pbS"].forEach(k=>{const e=$(k);if(e)e.textContent=tx(k);});
