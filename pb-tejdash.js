@@ -87,7 +87,7 @@
     function tileX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
       return '<article class="td-t"><div class="td-i">' + ic + '</div><div><h4>' + T(e1, h1) + '</h4><p>' + T(e2, h2) + '</p><span class="td-tag' + (on ? '' : ' off') + '">' + T(on ? onE : offE, on ? onH : offH) + '</span></div></article>';
     }
-    var st = c.status, canSw = st === "live" || st === "off", pct = c.pct, done = pct == null || pct >= 100;
+    var st = c.status, canSw = st === "live" || st === "off", pct = c.pct, done = c.can != null ? !!c.can : (pct == null || pct >= 100);
     var box = function (ic, h, body) { return '<article class="td-t"><div class="td-i">' + ic + '</div><div style="min-width:0;flex:1"><h4>' + h + '</h4>' + body + '</div></article>'; };
     var swBox = box("🟢", T("Online / Offline", "ऑनलाइन / ऑफ़लाइन"),
       canSw ? '<p>' + T(st === "live" ? "Customers can see your shop." : "Hidden from customers.", st === "live" ? "ग्राहकों को आपकी दुकान दिख रही है।" : "ग्राहकों से छिपी है।") + '</p><div style="display:flex;align-items:center;gap:10px"><button type="button" class="tsw" role="switch" aria-checked="' + (st === "live") + '" aria-label="' + T("Online / Offline", "ऑनलाइन / ऑफ़लाइन") + '" data-tsw="' + c.i + '"></button><b style="font-size:13px">' + T(st === "live" ? "Online" : "Offline", st === "live" ? "ऑनलाइन" : "ऑफ़लाइन") + '</b></div><div class="err" id="sub' + c.i + '" style="font-size:11.5px"></div>'

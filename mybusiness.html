@@ -1098,8 +1098,8 @@ function catBody(k,b,i,en){
   if(k==="photo")return window.galleryBlock?galleryBlock(b,i):"";
   if(k==="nt")return "";
   if(k==="rep")return PH(b,"report")?reportHTML(b):sampleReport(b,i,en);
-  if(k==="plan"){const pc=profPct(b);
-    if(pc!==null&&pc<100)return '<div class="offer" style="background:#f4f8ff;border-color:#cfe0ff"><div class="oh" style="color:#0b3a8f">🆓 '+(en?"PataBook is a Free plan":"PataBook एक Free प्लान है")+'</div><p>'+(en?"Your shop is free on PataBook. Complete your profile to see the Member plans and the Silver offer here.":"PataBook पर आपकी दुकान मुफ़्त है। प्रोफ़ाइल पूरी करने पर Member प्लान और Silver ऑफ़र यहाँ दिखेंगे।")+'</p><small>'+(en?"Profile "+pc+"% complete":"प्रोफ़ाइल "+pc+"% पूरी")+'</small><button type="button" class="go" style="margin-top:10px;width:100%;border:0;border-radius:12px;padding:11px;font:inherit;font-weight:800;background:#1a73e8;color:#fff" data-profshop="'+i+'">'+(en?"Complete it ›":"पूरा करें ›")+'</button></div>';
+  if(k==="plan"){
+    if(!b.is_active)return '<div class="offer" style="background:#f4f8ff;border-color:#cfe0ff"><div class="oh" style="color:#0b3a8f">🆓 '+(en?"Your shop is free on PataBook":"PataBook पर आपकी दुकान मुफ़्त है")+'</div><p>'+(en?"Plans will appear here after PataBook approves your shop.":"PataBook से मंज़ूरी मिलने के बाद यहाँ प्लान दिखेंगे।")+'</p></div>';
     return (premBlock(b,i)||'')+plansCompare(b,i,en);}
   return "";
 }
@@ -1245,11 +1245,11 @@ function draw(){
   if(BOOT&&window.PBTejDash&&ROWS.length){list.innerHTML='<p class="note">…</p>';return;}   /* पूरा डेटा आने तक: पुराना card / FREE फ़्लैश नहीं */
   let _td="";
   try{if(window.PBTejDash){if(TDSEL>=ROWS.length)TDSEL=0;const ti=TDSEL;if(ROWS[ti]){const tb=ROWS[ti];if(!PBTejDash.ready(tb.slug))PBTejDash.load(tb.slug,draw);
-    _td=PBTejDash.html({en,b:tb,i:ti,extra:(vacBlock(tb,ti)||"")+(homeBlock(tb,ti)||""),profOpen:TDPROF,profHtml:TDPROF?offBlock(tb,ti,en)+profBlock(tb,ti)+verifyBlock(tb,ti):"",tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),status:shopSt(tb),multi:ROWS.length>1,link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});
+    _td=PBTejDash.html({en,b:tb,i:ti,extra:(vacBlock(tb,ti)||"")+(homeBlock(tb,ti)||""),profOpen:TDPROF,profHtml:TDPROF?offBlock(tb,ti,en)+profBlock(tb,ti)+verifyBlock(tb,ti):"",tier:tierOf(tb),until:(PREM&&PREM[tb.slug]&&PREM[tb.slug].until)||"",pct:profPct(tb),can:canSend(tb),status:shopSt(tb),multi:ROWS.length>1,link:(LINKS[tb.slug]&&LINKS[tb.slug].link)||"",logo:LOGOS[tb.slug]||"",ph:{photos:PH(tb,"photos"),logo:PH(tb,"logo"),products:PH(tb,"products"),social:PH(tb,"social"),hiring:PH(tb,"hiring"),report:PH(tb,"report")}});
     if(ROWS.length>1)_td='<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">'+ROWS.map((r,k)=>'<button type="button" data-tdsel="'+k+'" style="padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid #cfd8ea;background:'+(k===ti?"#0b2f73":"#fff")+';color:'+(k===ti?"#fff":"#0b2f73")+'">'+esc(r.name)+'</button>').join("")+'</div>'+_td;}}}catch(x){_td="";}
   {const _h=$("h1"),_s=$("sub");if(_h)_h.hidden=!!_td;if(_s)_s.hidden=!!_td;}
   HIDE_SLUG=_td?"1":"";
-  if(window.PBTejDash)PBTejDash.act=(k,i,btn)=>{if(k==="submit")submitApproval(i,btn);else openShop(i,"");};
+  if(window.PBTejDash)PBTejDash.act=(k,i,btn)=>{if(k==="submit"){if(IS_GUEST())gOtp(i);else submitApproval(i,btn);}else openShop(i,"prof");};
   list.innerHTML=_td+shopTiles(en);
 }
 $("list").addEventListener("change",e=>{const v=e.target.closest("[data-vph]");if(v&&v.files&&v.files[0]){const b=ROWS[+v.dataset.i],f0=v.files[0];if(!/^image\//.test(f0.type))return;const P=VPH[b.slug]=VPH[b.slug]||{};if(P[v.dataset.vph])URL.revokeObjectURL(P[v.dataset.vph].url);P[v.dataset.vph]={file:f0,url:URL.createObjectURL(f0)};delete VMSG[b.slug];draw();return;}
