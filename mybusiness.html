@@ -539,14 +539,7 @@ function gOtp(i){
 async function submitApproval(i,btn){
   const b=ROWS[i],en=L()==="en",er=$("sub"+i);if(!b)return;btn.disabled=true;if(er)er.textContent="…";
   try{
-    /* मंज़ूरी के लिए भेजने से पहले: मोबाइल और Google दोनों verified होने चाहिए */
-    const id=await PBA.identities();
-    /* मोबाइल नंबर दुकान जोड़ते समय ही OTP से verify हो चुका है; यहाँ सिर्फ़ Google जुड़ा होना चाहिए */
-    if(id&&!id.google){
-      btn.disabled=false;
-      if(er){er.innerHTML='<div style="margin:8px 0">'+(en?"One step left: add your Google account (needed for approval).":"एक कदम बाकी: अपना Google खाता जोड़ें (मंज़ूरी के लिए ज़रूरी)।")+'</div><button type="button" class="go" id="lkG'+i+'">'+(en?"Add Google":"Google जोड़ें")+'</button>';
-        const k=$("lkG"+i);if(k)k.onclick=async()=>{k.disabled=true;try{await PBA.linkGoogle("mybusiness.html");}catch(x){k.disabled=false;er.textContent=en?"Could not add Google. Try again later.":"Google जोड़ नहीं पाए। थोड़ी देर बाद फिर कोशिश करें।";}};}
-      return;}
+    /* मोबाइल OTP से verify हो चुका है; Google अब मंज़ूरी के लिए ज़रूरी नहीं (बाद में जोड़ सकते हैं) */
     const j=await rpc("pb_submit_for_approval",{p_slug:b.slug}),live=!!(j&&j.status==="live");
     SST=SST||{};SST[b.slug]={slug:b.slug,is_active:live,submitted_at:new Date().toISOString()};
     try{const m=JSON.parse(localStorage.getItem("pb-my-shop-st")||"{}");m[b.slug]=live?"live":"pend";localStorage.setItem("pb-my-shop-st",JSON.stringify(m));}catch(x){}
