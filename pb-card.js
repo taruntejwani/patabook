@@ -102,7 +102,7 @@
     wa: function (c, x, y, s) { c.fillStyle = '#25d366'; c.beginPath(); c.arc(x, y, s * .34, 0, 7); c.fill(); c.beginPath(); c.moveTo(x - s * .26, y + s * .22); c.lineTo(x - s * .34, y + s * .38); c.lineTo(x - s * .12, y + s * .3); c.fill();
       c.fillStyle = '#fff'; c.font = '700 ' + (s * .34) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('✆', x, y + 1); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
   };
-  var TIER = { platinum: { c: ['#566178', '#1d2536', '#070b16'], a: ['#f4f8ff', '#9db4d6'], n: 'PLATINUM' }, gold: { c: ['#6b4f12', '#33260a', '#120d02'], a: ['#fff1bf', '#d9b257'], n: 'GOLD' }, silver: { c: ['#8794a6', '#4f5b6b', '#1f2733'], a: ['#ffffff', '#cdd5df'], n: 'SILVER' } };
+  var TIER = { platinum: { c: ['#6D28D9', '#4A1798', '#2E0757'], a: ['#f5f0ff', '#C4B5FD'], n: 'PLATINUM' }, gold: { c: ['#6b4f12', '#33260a', '#120d02'], a: ['#fff1bf', '#d9b257'], n: 'GOLD' }, silver: { c: ['#8794a6', '#4f5b6b', '#1f2733'], a: ['#ffffff', '#cdd5df'], n: 'SILVER' } };
   async function draw(d, portrait) {
     var W = portrait ? 1080 : 1200, H = portrait ? 1920 : 690, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var c = cv.getContext('2d'), th = theme((d.sub || '') + ' ' + (d.category || '')), tr = TIER[d.tier], col = tr ? tr.c : th[2];
