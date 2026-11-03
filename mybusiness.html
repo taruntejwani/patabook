@@ -790,7 +790,7 @@ document.addEventListener("click",e=>{const z=e.target.closest("[data-pz]");if(!
   document.querySelectorAll(".cmp").forEach(t=>t.style.zoom=PZ);document.querySelectorAll(".pzv").forEach(v=>v.textContent=Math.round(PZ*100)+"%");});
 const FRP=[];   /* दोस्तों की प्रोफ़ाइल % — सर्वर रेफ़रल सिस्टम बनने पर यहाँ भरेगा; अभी खाली = 0% */
 function offerCard(en,cur){
-  if(cur!=="free")return "";   /* Silver/Gold/Platinum वालों को ऑफ़र नहीं दिखता */
+  if(cur!=="free"||!gOp())return "";   /* गिफ़्ट खुलने के बाद ही ऑफ़र कार्ड दिखता है */   /* Silver/Gold/Platinum वालों को ऑफ़र नहीं दिखता */
   const SH=gSh(),n=SH*5,pcs=[...Array(n)].map((_,k)=>Math.max(0,Math.min(100,+FRP[k]||0))),dn=pcs.filter(x=>x>=100).length;
   if(dn>=5)return "";   /* 5 दोस्त पूरे → विंडो हट जाती है */
   const hd='<div class="oh">🎁 '+(en?"Silver Plan FREE for 1 Year":"Silver प्लान 1 साल मुफ़्त")+'</div>',
