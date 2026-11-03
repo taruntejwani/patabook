@@ -125,8 +125,8 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pc-free .pch{background:linear-gradient(#1a73e8,#0b57c4)}.pc-silver .pch{background:linear-gradient(#aeb7c6,#7c8798)}.pc-gold .pch{background:linear-gradient(#f3c23c,#c98a05)}.pc-platinum .pch{background:linear-gradient(135deg,#6D28D9,#2E0757)}
 .pc .pcp{text-align:center;font-weight:800;font-size:26px;padding:10px 6px 0;min-height:36px}.pc .pcp small{font-size:11px;color:#5b6475;font-weight:600}
 .pc ul{list-style:none;margin:8px 0 6px;padding:0 14px}.pc li{font-size:15px;padding:5px 0 5px 22px;position:relative}.pc li:before{content:"✓";position:absolute;left:0;color:#1e9e57;font-weight:800}
-.hang{position:relative;margin-top:10px;padding-top:12px}.hang:before{content:"";position:absolute;top:0;left:4%;right:4%;height:5px;border-radius:5px;background:linear-gradient(90deg,#b8c4da,#8795aa,#b8c4da)}
-.hg{display:flex;justify-content:center;gap:8px}.hg figure{margin:0;flex:0 1 31%;max-width:150px;position:relative;padding-top:22px;transform-origin:50% 0;animation:pbSwing 4.2s ease-in-out infinite}
+.hang{position:relative;margin-top:14px;padding-top:12px;margin-bottom:10px}.hang:before{content:"";position:absolute;top:0;left:4%;right:4%;height:5px;border-radius:5px;background:linear-gradient(90deg,#b8c4da,#8795aa,#b8c4da)}
+.hg{display:flex;justify-content:center;gap:8px}.hg figure{margin:0;flex:0 1 26%;max-width:112px;position:relative;padding-top:22px;transform-origin:50% 0;animation:pbSwing 4.2s ease-in-out infinite}
 .hg figure:before{content:"";position:absolute;top:0;left:50%;width:2px;height:22px;background:#8795aa;transform:translateX(-50%)}
 .hg img{width:100%;display:block;border-radius:14px;box-shadow:0 6px 14px rgba(16,44,80,.25)}.hg figure.me img{outline:3px solid #f0b429;outline-offset:2px}
 @keyframes pbSwing{0%,100%{transform:rotate(2.2deg)}50%{transform:rotate(-2.2deg)}}@media(prefers-reduced-motion:reduce){.hg figure{animation:none}}
@@ -761,12 +761,12 @@ function plansCompare(b,i,en){
   const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
   const body=T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td colspan="5">'+GT[g]+'</td></tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("")+'<tr class="prow"><td>'+(en?"Price (1 year)":"क़ीमत (1 साल)")+'</td>'+T.map(t=>'<td class="pp pp-'+t+'">₹'+PLAN_PRICE[t].toLocaleString("en-IN")+'</td>').join("")+'</tr>';
   const hang='<div class="hang"><div class="hg">'+["silver","gold","platinum"].map((t,k)=>'<figure class="'+(t===cur?"me":"")+'" style="animation-delay:'+(k*0.6)+'s"><img src="pb-member-'+t+'.webp" alt="'+esc(PBPlan.name(t,en))+' Member" loading="lazy"></figure>').join("")+'</div></div>';
-  return hang+
+  return ''+
     '<div class="offer"><div class="oh">🎁 '+(en?"Silver Plan FREE for 1 Year":"Silver प्लान 1 साल मुफ़्त")+'</div>'+
     '<p>'+(en?"<strong>Share PataBook with 5 shopkeepers.</strong> When all 5 shops are complete, verified and Active, your Silver Plan reward will be unlocked and shown automatically on your mobile.":"<strong>5 दुकानदारों को PataBook शेयर करें।</strong> जब पाँचों दुकानें पूरी, जाँची हुई और Active हो जाएँगी, तब आपका Silver प्लान इनाम अपने-आप खुल जाएगा और आपके मोबाइल पर दिखेगा।")+'</p>'+
     '<div class="lights">'+[1,2,3,4,5].map(n=>'<span>'+n+'</span>').join("")+'</div>'+
     '<button type="button" class="shb" data-psh="1">📤 '+(en?"Share PataBook with shopkeepers":"दुकानदारों को PataBook भेजें")+'</button><small>'+(en?"Offer valid till 31 January 2027 · Free plan continues as it is · Referral tracking starts soon.":"ऑफ़र 31 जनवरी 2027 तक · Free प्लान वैसे ही चलता रहेगा · रेफ़रल गिनती जल्द शुरू होगी।")+'</small></div>'+
-    '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'">'+head+body+'</table></div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
+    hang+'<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'">'+head+body+'</table></div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
 function premBlock(b,i){
   if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
