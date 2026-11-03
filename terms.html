@@ -72,7 +72,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 
 <h2>3. दुकान जोड़ना</h2>
 <ul>
-<li>दुकानदार अपने मोबाइल नंबर (OTP से पुष्टि) के साथ फ़ॉर्म भरकर दुकान जोड़ सकता है।</li>
+<li>दुकानदार फ़ॉर्म भरकर दुकान जोड़ सकता है। दुकान पहले <b>Offline</b> बनती है (सिर्फ़ मालिक को दिखती है); प्रोफ़ाइल पूरी करके मंज़ूरी के लिए भेजते समय मोबाइल नंबर OTP से पक्का किया जाता है।</li>
 <li><b>फ़ोटो सहायक (स्टाफ़):</b> जिन प्लान में यह सुविधा है, उनमें दुकानदार अपने स्टाफ़ को फ़ोटो पर काम करने की चुनी हुई अनुमतियाँ दे सकता है। स्टाफ़ जो भी फ़ोटो या जानकारी डालता है, उसकी ज़िम्मेदारी दुकानदार की है, और वह हिस्सा 4 के नियमों के अंदर होनी चाहिए। स्टाफ़ का नंबर / ईमेल उसकी सहमति से ही जोड़ें। स्टाफ़ की गतिविधि का रिकॉर्ड रखा जाता है और मालिक को दिखता है।</li>
 <li>हर नई सूची पहले <b>लंबित (जाँच में)</b> रहती है और जाँच के बाद ही दिखती है।</li>
 <li>एक मोबाइल नंबर से सिर्फ <b>1 दुकान</b> जोड़ी जा सकती है।</li>
@@ -94,24 +94,37 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <li><b>कीमत (1 साल के लिए):</b> 🥈 Silver Member — ₹3,000 · 👑 Gold Member — ₹9,000 · 💎 Platinum Member — ₹15,000.</li>
 <li><b>GST:</b> अभी PataBook GST में पंजीकृत नहीं है, इसलिए इन कीमतों पर अभी कोई GST नहीं लगता। GST पंजीकरण होने के बाद कीमत पर लागू GST (जैसे 18%) अलग से जुड़ेगा — यह बदलाव पहले से बताया जाएगा और जो प्लान पहले से चल रहा है, उस पर असर नहीं होगा।</li>
 <li><b>प्लान में क्या मिलता है:</b> हर प्लान की सुविधाएँ (जैसे लोगो, उत्पाद और फ़ोटो की संख्या, नौकरी / नौकरी, विज़िटिंग कार्ड, रिपोर्ट, खोज में ऊपर दिखना, होम की पट्टी में कार्ड, बैनर विज्ञापन और वह कितने दिन चले) PataBook तय करता है और प्लान लेते समय बताता है। PataBook सुविधाएँ बदल सकता है; बदलाव पहले से बताया जाएगा।</li>
-<li><b>भुगतान पहले:</b> प्लान भुगतान मिलने के बाद चालू होता है और चालू होने की तारीख़ से 1 साल (या जितने दिन का लिया हो) चलता है। भुगतान UPI / बैंक transfer / नकद से, या बाद में ऐप / वेबसाइट के भुगतान तरीके से लिया जा सकता है; हर भुगतान की रसीद दी जाती है।</li>
+<li><b>भुगतान पहले:</b> प्लान भुगतान मिलने के बाद चालू होता है और चालू होने की तारीख़ से 1 साल (या जितने दिन का लिया हो) चलता है। ऐप में plan का भुगतान Google Play से होता है; हर भुगतान की रसीद मिलती है।</li>
 <li><b>अपने-आप नवीनीकरण नहीं:</b> प्लान ख़त्म होने पर अपने-आप पैसा नहीं कटता। दुकानदार चाहे तो फिर से प्लान ले सकता है।</li>
 <li><b>प्लान ख़त्म / छोटा होने पर:</b> दुकान मुफ़्त सूची बन जाती है (या छोटे प्लान की सुविधाएँ मिलती हैं)। ज़्यादा वाली फ़ोटो, उत्पाद और बैनर मिटते नहीं, सिर्फ़ छिप जाते हैं; प्लान फिर लेने पर वापस दिखते हैं।</li>
 <li><b>कोई गारंटी नहीं:</b> प्लान लेने से ज़्यादा कॉल, ग्राहक या बिक्री की कोई गारंटी नहीं है। "ऊपर दिखना" का मतलब है कि एक ही प्लान की दुकानें बारी-बारी से ऊपर आती हैं — कोई तय जगह या नंबर नहीं।</li>
-<li><b>प्रचार साफ़ दिखाया जाता है:</b> पैसे वाली दुकानों पर "सिल्वर / गोल्ड / प्लैटिनम सदस्य" और "Featured", और बैनर पर "Ad / विज्ञापन" लिखा रहता है, ताकि ग्राहक जानें कि यह प्रचार है।</li>
+<li><b>प्रचार साफ़ दिखाया जाता है:</b> पैसे वाली दुकानों पर "सिल्वर / गोल्ड / प्लैटिनम सदस्य" और "Featured", और होम के poster पर प्लान का नाम (जैसे "GOLD" / "PLATINUM") लिखा रहता है, ताकि ग्राहक जानें कि यह प्रचार है।</li>
 <li><b>रिफंड:</b> <a href="refund.html">पैसे वापसी और रद्द करने की नीति</a> के अनुसार।</li>
 </ul>
 
 <h2>5A. बैनर (विज्ञापन)</h2>
 <ul>
 <li>जिन प्लान में बैनर है, उनमें दुकानदार अपनी दुकान / ऑफ़र की फ़ोटो लगा सकता है। फ़ोटो पहले अपने-आप (AI से) जाँची जाती है; नियम तोड़ने वाली फ़ोटो PataBook बाद में भी हटा सकता है।</li>
-<li>बैनर किन दिनों दिखेगा (जैसे रोज़, या कुछ दिन छोड़कर) यह प्लान के हिसाब से PataBook तय करता है; हर दिन या हर समय दिखने की गारंटी नहीं है। बैनर दुकान वाले शहर के लोगों को होम की पट्टी में दिखता है।</li>
+<li>हर प्लान में साल भर में poster कितने दिन चलेगा, यह प्लान में लिखा होता है (Platinum में रोज़)। दिन दुकानदार "मेरी दुकान" से ख़ुद चुनता है। Poster दुकान वाले शहर के लोगों को होम पेज पर दिखता है; एक समय में कई poster बारी-बारी से दिखते हैं, हर समय सबसे ऊपर दिखने की गारंटी नहीं है।</li>
 <li>बैनर की फ़ोटो, उसके लिखे ऑफ़र, कीमत और दावे सच्चे होने चाहिए; उसकी ज़िम्मेदारी दुकानदार की है। हिस्सा 4 वाली सामग्री बैनर में भी मना है।</li>
 <li>PataBook किसी भी बैनर को बिना कारण बताए मना कर सकता है या हटा सकता है।</li>
 </ul>
 
 <h2>5B. रेटिंग</h2>
 <ul><li>दुकान को रेटिंग देने के लिए लॉगिन ज़रूरी है; एक खाते से एक दुकान को एक रेटिंग गिनी जाती है। दुकानदार अपनी ही दुकान को रेटिंग नहीं दे सकता।</li><li>रेटिंग सच्चे अनुभव के आधार पर ही दें। पैसे या तोहफ़े के बदले, या अपने जानने वालों से नकली रेटिंग दिलवाना मना है; ऐसी रेटिंग हटाई जा सकती है।</li><li>रेटिंग लोगों की निजी राय है, PataBook की सिफ़ारिश या गारंटी नहीं।</li></ul>
+<h2>5C. दुकान की जाँच (Verification)</h2>
+<ul>
+<li>Silver / Gold / Platinum प्लान लेने से पहले दुकानदार को दुकान की 2 फ़ोटो भेजनी होती हैं — बाहर (नाम के बोर्ड के साथ) और अंदर। AI बोर्ड का नाम प्रोफ़ाइल के नाम से मिलाता है और फिर PataBook (Admin) मंज़ूरी देता है। जाँच पूरी होने तक प्लान नहीं ख़रीदा जा सकता।</li>
+</ul>
+
+<h2>5D. "दोस्तों को भेजें — Silver 1 साल मुफ़्त" offer</h2>
+<ul>
+<li>यह offer सिर्फ़ मुफ़्त (Free) दुकानों के लिए है और <b>31 दिसंबर 2026</b> तक खुले link ही गिने जाते हैं।</li>
+<li>दोस्त ने link खोला = 10%, दोस्त ने उसी फ़ोन से दुकान जोड़ी = 30%, प्रोफ़ाइल भरने के साथ % बढ़ता है, और <b>प्रोफ़ाइल पूरी + PataBook की मंज़ूरी</b> पर 100%। एक फ़ोन एक बार ही गिना जाता है; अपनी ही दुकान या उसी मोबाइल नंबर की दुकान गिनती में नहीं आती।</li>
+<li>5 दोस्त 100% होने पर Silver प्लान 1 साल के लिए अपने-आप चालू होता है — हर दुकान को सिर्फ़ एक बार। यह offer पैसे में नहीं बदला जा सकता।</li>
+<li>नकली दुकानें बनाकर या किसी और तरह धोखे से गिनती बढ़ाने पर offer रद्द किया जा सकता है और ऐसी दुकानें हटाई जा सकती हैं। PataBook यह offer पहले बताकर बदल या बंद कर सकता है।</li>
+</ul>
+
 <h2>6. नौकरी / नौकरी</h2>
 <p>जिन प्लान में "नौकरी (नौकरी)" सुविधा है, उनमें दुकानदार नौकरी की जानकारी (काम, कितने लोग, पगार, समय, कैसा व्यक्ति चाहिए) डाल सकता है; यह 30 दिन बाद अपने-आप बंद हो जाती है। जानकारी की ज़िम्मेदारी दुकानदार की है। <b>नौकरी के बदले उम्मीदवार से पैसे माँगना या झूठी नौकरी दिखाना मना है</b> — ऐसी दुकान हटाई जा सकती है। PataBook नौकरी की गारंटी नहीं देता और दुकानदार व उम्मीदवार के बीच के समझौते के लिए ज़िम्मेदार नहीं है।</p>
 
@@ -151,7 +164,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 
 <h2>3. Adding a business</h2>
 <ul>
-<li>Shop owners can add a shop by filling the form with their mobile number (verified by OTP).</li>
+<li>Shop owners can add a shop by filling the form. The shop is first created <b>Offline</b> (visible only to the owner); the mobile number is confirmed by OTP when the completed profile is sent for approval.</li>
 <li>Every new listing stays <b>Pending</b> and appears only after review.</li>
 <li><b>Photo helper (staff):</b> in plans that include it, an owner can give staff chosen permissions to work on photos. The owner is responsible for every photo or detail a staff member adds, and it must follow the rules in section 4. Add a staff member's number / email only with their consent. A record of staff activity is kept and shown to the owner.</li>
 <li>Only <b>1 shop</b> can be added per mobile number.</li>
@@ -173,24 +186,37 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <li><b>Price (per 1 year):</b> 🥈 Silver Member — ₹3,000 · 👑 Gold Member — ₹9,000 · 💎 Platinum Member — ₹15,000.</li>
 <li><b>GST:</b> PataBook is currently not registered under GST, so no GST is charged on these prices now. After GST registration, applicable GST (e.g. 18%) will be added on top — this will be announced in advance and will not affect plans already running.</li>
 <li><b>What a plan includes:</b> each plan's features (such as logo, number of products and photos, Hiring, visiting card, report, higher placement in search, card on the home strip, banner ads and how many days they run) are set by PataBook and shown when you buy. PataBook may change features with advance notice.</li>
-<li><b>Payment first:</b> a plan starts after payment is received and runs for 1 year (or the number of days bought) from the start date. Payment may be taken by UPI / bank transfer / cash, or later through an app / website payment method; a receipt is given for every payment.</li>
+<li><b>Payment first:</b> a plan starts after payment is received and runs for 1 year (or the number of days bought) from the start date. Plans bought in the app are paid through Google Play; a receipt is given for every payment.</li>
 <li><b>No auto-renewal:</b> no money is charged automatically when a plan ends. The owner may buy a plan again.</li>
 <li><b>When a plan ends or is downgraded:</b> the shop becomes a free listing (or gets the smaller plan's features). Extra photos, products and banners are not deleted, only hidden; they show again if a plan is bought again.</li>
 <li><b>No guarantee:</b> a plan does not guarantee more calls, customers or sales. "Shown on top" means shops of the same plan take turns at the top — no fixed position or rank.</li>
-<li><b>Promotion is clearly labelled:</b> paid shops show "Silver / Gold / Platinum Member" and "Featured", and banners show "Ad", so customers know it is promotion.</li>
+<li><b>Promotion is clearly labelled:</b> paid shops show "Silver / Gold / Platinum Member" and "Featured", and home-page posters show the plan name (such as "GOLD" / "PLATINUM"), so customers know it is promotion.</li>
 <li><b>Refunds:</b> as per the <a href="refund.html">Refund &amp; Cancellation Policy</a>.</li>
 </ul>
 
 <h2>5A. Banners (ads)</h2>
 <ul>
 <li>In plans that include banners, the owner can upload a photo of the shop / offer. Photos are first checked automatically (by AI); PataBook can remove any photo that breaks the rules, even later.</li>
-<li>On which days a banner shows (daily, or every few days) is set by PataBook per plan; showing every day or all the time is not guaranteed. Banners show on the home strip to people in the shop's city.</li>
+<li>How many days a year a poster runs is shown in each plan (daily in Platinum). The owner picks the days in "My Shop". Posters show on the home page to people in the shop's city; several posters take turns, so showing on top all the time is not guaranteed.</li>
 <li>The banner photo, offers, prices and claims must be true; the owner is responsible for them. Content not allowed under section 4 is also not allowed in banners.</li>
 <li>PataBook may refuse or remove any banner without giving a reason.</li>
 </ul>
 
 <h2>5B. Ratings</h2>
 <ul><li>Login is required to rate a shop; one account counts once per shop. A shop owner cannot rate their own shop.</li><li>Rate only on genuine experience. Rating in exchange for money or gifts, or getting friends to post fake ratings, is not allowed and such ratings may be removed.</li><li>A rating is a person's own opinion, not a recommendation or guarantee by PataBook.</li></ul>
+<h2>5C. Shop verification</h2>
+<ul>
+<li>Before buying a Silver / Gold / Platinum plan, the owner sends 2 photos of the shop — outside (with the name board) and inside. AI matches the board name with the profile name and then PataBook (Admin) approves. A plan cannot be bought until verification is done.</li>
+</ul>
+
+<h2>5D. "Share with friends — Silver free for 1 year" offer</h2>
+<ul>
+<li>The offer is only for Free shops, and only links opened up to <b>31 December 2026</b> are counted.</li>
+<li>Friend opened the link = 10%, friend added a shop from the same phone = 30%, the % grows as the profile is filled, and <b>complete profile + PataBook approval</b> = 100%. Each phone is counted once; your own shop or a shop with the same mobile number is not counted.</li>
+<li>When 5 friends reach 100%, the Silver plan starts automatically for 1 year — only once per shop. The offer cannot be exchanged for money.</li>
+<li>The offer may be cancelled, and such shops removed, if the count is raised with fake shops or any other trick. PataBook may change or end the offer with advance notice.</li>
+</ul>
+
 <h2>6. Vacancies / jobs</h2>
 <p>In plans that include "Hiring", owners can post job details (role, how many, salary, timing, who they need); it turns off by itself after 30 days. Owners are responsible for the details. <b>Asking candidates for money or showing false vacancies is not allowed</b> — such shops may be removed. PataBook does not guarantee jobs and is not a party to any agreement between owners and candidates.</p>
 
