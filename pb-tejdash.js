@@ -189,7 +189,8 @@
     var d = document.createElement("div"); d.innerHTML = html(LAST.c);
     var m = d.querySelector(".td-m"); if (m) { var pp = m.querySelector(".td-pl2"); if (pp) pp.remove(); }
     var en = LAST.en, n = (LAST.html.match(/class="td-tag\"/g) || []).length;
-    var fx = '<details class="td-fx"><summary><span aria-hidden="true">📋</span>' + (en ? "Plan features" : "प्लान की सुविधाएँ") + '<small>' + n + (en ? " active" : " चालू") + '</small></summary>' + LAST.html + '</details>';
+    var fo = ""; try { fo = localStorage.getItem("pb-planfx") === "1" ? " open" : ""; } catch (e) {}
+    var fx = '<details class="td-fx"' + fo + ' ontoggle="try{localStorage.setItem(\'pb-planfx\',this.open?\'1\':\'0\')}catch(e){}"><summary><span aria-hidden="true">📋</span>' + (en ? "Plan features" : "प्लान की सुविधाएँ") + '<small>' + n + (en ? " active" : " चालू") + '</small></summary>' + LAST.html + '</details>';
     return '<div class="td t-' + esc(LAST.c.tier) + '">' + fx + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
   }
   window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function (slug) { return !!XS[slug]; } };
