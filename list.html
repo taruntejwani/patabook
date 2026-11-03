@@ -331,7 +331,7 @@ function langChosen(){try{return localStorage.getItem("pb-lang-chosen")==="1";}c
 function langFirst(){try{return sessionStorage.getItem("pb-lang-first")==="1";}catch(_){return false;}}  /* अभी-अभी भाषा चुनी (page reload के बाद भी 4 स्क्रीन दिखें) */
 const WITH_LANG=!langChosen()||langFirst();
 /* 🧪 GUESTREG: OTP बिल्कुल आख़िर में (प्रोफ़ाइल पूरी होने के बाद, "मेरी दुकान" में)। अभी सिर्फ़ ?guest=1 से टेस्ट के लिए चालू; पक्का होने पर डिफ़ॉल्ट */
-const GUESTREG=(()=>{try{if(/[?&]guest=1(&|$)/.test(location.search))localStorage.setItem("pb-guestreg","1");if(/[?&]guest=0(&|$)/.test(location.search))localStorage.removeItem("pb-guestreg");return localStorage.getItem("pb-guestreg")==="1";}catch(_){return false;}})();
+const GUESTREG=(()=>{try{if(/[?&]guest=1(?!\d)/.test(location.search))localStorage.setItem("pb-guestreg","1");if(/[?&]guest=0(?!\d)/.test(location.search))localStorage.removeItem("pb-guestreg");return localStorage.getItem("pb-guestreg")==="1";}catch(_){return false;}})();
 const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(GUESTREG?["phone","biz","work"]:["phone","biz","work","otp"]),FULL_KEYS=SHORT_KEYS;   /* OTP अब आख़िर में: पहले नंबर, फिर फ़ॉर्म, फिर OTP */
 let FULLF=false,steps=SHORT_KEYS.map(stepBy);
 let i=(WITH_LANG&&langChosen())?1:0,coords=null,sending=false;
