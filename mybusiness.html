@@ -477,9 +477,9 @@ function popEdit(slug,card){
   ov.addEventListener("click",e=>{if(e.target===ov)close();});
   document.body.appendChild(ov);document.body.style.overflow="hidden";if(window.PBBack)PBBack.open(byBack);
 }
-/* % (कुल 100): रजिस्टर की 3 चीज़ें 50 + समय/प्रकार/सेवाएँ/PIN(+लोगो) 33 + दुकान की बाहर-अंदर की फ़ोटो भेजी हुई 12 + Email/वेबसाइट और GST/Udyam 5 */
+/* % (कुल 100): रजिस्टर की 2 चीज़ें (नाम-पता, लोकेशन) 50 + समय/प्रकार/सेवाएँ/PIN(+लोगो) 33 + दुकान की बाहर-अंदर की फ़ोटो भेजी हुई 12 + Email/वेबसाइट और GST/Udyam 5 */
 function photoDone(b){return verOn()&&(verSt(b)==="pending"||verSt(b)==="approved");}
-function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const n=it.length,core=it.slice(0,3),tail=it.slice(n-2),mid=it.slice(3,n-2);
+function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const n=it.length,core=it.slice(0,2),tail=it.slice(n-2),mid=it.slice(2,n-2);
   const f=a=>a.length?a.filter(x=>x[0]).length/a.length:0;return Math.round(f(core)*50+f(mid)*33+f(tail)*5+(photoDone(b)?12:0));}
 /* मंज़ूरी के लिए भेजने की शर्त: प्रोफ़ाइल 80%+ और दुकान की बाहर/अंदर की फ़ोटो जाँच के लिए भेजी हुई */
 const APPR_MIN=80;
@@ -553,7 +553,6 @@ function profItems(b,i){
   const d=p.d||"",has=k=>new RegExp("^"+k+":\\s*\\S","mi").test(d),en=L()==="en",E="edit.html?slug="+encodeURIComponent(b.slug);
   return [
     [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता","pop:cAddr"],
-    [!!b.phone,"📱",en?"Mobile number verified":"मोबाइल नंबर जाँचा हुआ","cat:num"],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर लोकेशन","location.html?slug="+encodeURIComponent(b.slug)],
     ...(PH(b,"logo")?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"लोगो / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय","pop:cTime"],
@@ -1104,7 +1103,7 @@ function catBody(k,b,i,en){
 /* कई दुकानें हों: हर दुकान का एक डिब्बा — नाम, स्थिति, कितने % पूरी; "पूरा करें" दबाने पर उसी दुकान के कदम */
 function profOverview(en){
   return '<div class="ovh">'+(en?"Your shops — profile status":"आपकी दुकानें — प्रोफ़ाइल कितनी पूरी")+'</div>'+ROWS.map((b,i)=>{
-    const it=profItems(b,i),pc=it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null,s=shopSt(b);
+    const it=profItems(b,i),pc=it&&it.length?profPct(b):null,s=shopSt(b);
     const col=pc==null?"#9aa0a6":pc>=100?"#1e9e57":pc>=70?"#1a73e8":pc>=40?"#f29900":"#d93025";
     const chip=s==="live"?'<span class="st live">✅ '+(en?"Online":"Online")+'</span>':s==="pend"?'<span class="st pend">⏳ '+(en?"Waiting for approval":"मंज़ूरी का इंतज़ार")+'</span>':'<span class="st draft">🔴 Offline</span>';
     const full=pc===100,act=full
