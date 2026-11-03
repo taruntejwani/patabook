@@ -73,6 +73,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .nt .bn{font-size:13px;margin-top:8px;line-height:1.45}.nt .bn:empty{display:none}
 .ev{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ev h3{font-size:14px;color:var(--navy);margin-bottom:6px}
 .ev .e{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.ev .e:last-child{border-bottom:0}.ev .e b{display:block;font-size:14px}.ev .e small{color:var(--muted);font-size:12px}
+.popov.full{background:#fff;align-items:stretch}.popov.full .popsh{max-width:none;width:100%;height:100%;max-height:none;border-radius:0!important;display:flex;flex-direction:column}.popov.full .popfr{flex:1;height:auto!important;min-height:0}
 .popov{position:fixed;inset:0;z-index:100000;background:#0008;display:flex;align-items:flex-end;justify-content:center}
 .popsh{width:100%;max-width:520px;max-height:86vh;background:#fff;border-radius:20px 20px 0 0;overflow:hidden;display:flex;flex-direction:column}
 @media(min-width:600px){.popov{align-items:center}.popsh{border-radius:20px}}
@@ -459,8 +460,8 @@ function delShopBtns(en,only){
 }
 /* छोटी window: किसी कदम पर दबाने पर सिर्फ़ वही एक चीज़ (जैसे सिर्फ़ GST) भरने के लिए खुले */
 function popEdit(slug,card){
-  const en=L()==="en",ov=document.createElement("div");ov.className="popov";
-  ov.innerHTML='<div class="popsh"><div class="pophd"><b>'+(en?"Edit":"भरें / बदलें")+'</b><button type="button" aria-label="Close">✕</button></div><iframe class="popfr" title="edit" style="height:340px"></iframe></div>';
+  const en=L()==="en",ov=document.createElement("div"),FULL=card==="all";ov.className="popov"+(FULL?" full":"");   /* "Edit profile" = पूरा पेज; बाकी छोटे काम नीचे से खुलने वाली window */
+  ov.innerHTML='<div class="popsh"><div class="pophd"><b>'+(FULL?(en?"← Edit profile":"← प्रोफ़ाइल बदलें"):(en?"Edit":"भरें / बदलें"))+'</b><button type="button" aria-label="'+(en?"Close":"बंद करें")+'">✕</button></div><iframe class="popfr" title="edit" style="height:340px"></iframe></div>';
   const fr=ov.querySelector("iframe"),sh=ov.querySelector(".popsh");let dirty=false;
   fr.src="edit.html?slug="+encodeURIComponent(slug)+"&embed=1&card="+encodeURIComponent(card);
   let dead=false;function gone(){if(dead)return;dead=true;window.removeEventListener("message",onMsg);ov.remove();document.body.style.overflow="";}
@@ -470,10 +471,10 @@ function popEdit(slug,card){
     if(e.origin!==location.origin||!e.data||e.source!==fr.contentWindow)return;
     if(e.data.pbEdit==="saved"){dirty=false;if(window.PBBack&&!dead)PBBack.close();else gone();try{ME=await PBA.session();await loadProf();draw();}catch(x){location.reload();}}
     else if(e.data.pbEdit==="dirty")dirty=true;
-    else if(e.data.pbEdit==="h"){fr.style.height=Math.min(Math.max(+e.data.h||0,200),Math.round(innerHeight*0.82)-48)+"px";}
+    else if(e.data.pbEdit==="h"&&!FULL){fr.style.height=Math.min(Math.max(+e.data.h||0,200),Math.round(innerHeight*0.82)-48)+"px";}
   }
   window.addEventListener("message",onMsg);
-  ov.querySelector(".pophd button").onclick=()=>close();
+  ov.querySelector(".pophd button").onclick=()=>close();if(FULL){fr.style.height="";ov.querySelector(".pophd b").style.cursor="pointer";ov.querySelector(".pophd b").onclick=()=>close();}
   ov.addEventListener("click",e=>{if(e.target===ov)close();});
   document.body.appendChild(ov);document.body.style.overflow="hidden";if(window.PBBack)PBBack.open(byBack);
 }
