@@ -35,6 +35,16 @@
     lim: function (s, k) { var c = cfgOf(tier(s)); return +c[k] || 0; },
     limT: function (t, k) { var c = cfgOf(t || "free"); return +c[k] || 0; },
     name: function (t, en) { var n = NAME[t] || NAME.free; return en ? n[0] : n[1]; },
-    set: function (s, t) { if (s) { SH[s] = t || "free"; ASKED[s] = 1; } }
+    set: function (s, t) { if (s) { SH[s] = t || "free"; ASKED[s] = 1; } },
+    /* दुकान का सही पता: paid (जिसका plan पता है) → सीधे shop.html; बाकी business.html */
+    url: function (s) { return (SH[s] && SH[s] !== "free" ? "shop.html" : "business.html") + "?slug=" + encodeURIComponent(s || ""); }
   };
+  /* किसी भी "business.html?slug=…" link पर दबाने से ठीक पहले: दुकान paid है (पहले से पता) → link सीधे shop.html का कर दो।
+     ऐसे business.html खुलकर फिर shop.html पर जाने का दोहरा load नहीं होता। */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null; if (!a) return;
+    var h = a.getAttribute("href") || "", m = /^(?:\/|\.\/)?business\.html\?([^#]*)(#.*)?$/.exec(h); if (!m) return;
+    var q = new URLSearchParams(m[1]), s = q.get("slug"); if (!s || q.get("listing")) return;
+    if (SH[s] && SH[s] !== "free") a.setAttribute("href", "shop.html?slug=" + encodeURIComponent(s) + (m[2] || ""));
+  }, true);
 })();

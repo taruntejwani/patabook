@@ -38,7 +38,10 @@ h.textContent='This page could not be found';p.textContent='The link may be old 
   var t=setTimeout(back,4000);
   fetch("https://kkvbpzysktozghnxplxv.supabase.co/rest/v1/rpc/pb_link_resolve",{method:"POST",headers:{apikey:"sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8","Content-Type":"application/json"},body:JSON.stringify({p_link:n})})
    .then(function(r){return r.ok?r.json():null;}).then(function(slug){
-     if(typeof slug==="string"&&slug){clearTimeout(t);location.replace("/business.html?slug="+encodeURIComponent(slug)+location.hash);}else{back();}
+     if(typeof slug==="string"&&slug){clearTimeout(t);var K="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8",go=function(p){location.replace((p?"/shop.html":"/business.html")+"?slug="+encodeURIComponent(slug)+location.hash);};
+       /* paid दुकान: सीधे shop.html (बीच में business.html नहीं) */
+       fetch("https://kkvbpzysktozghnxplxv.supabase.co/rest/v1/rpc/pb_premium_status",{method:"POST",headers:{apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:[slug]})})
+        .then(function(r){return r.ok?r.json():null;}).then(function(j){go(!!(j&&j[slug]));}).catch(function(){go(false);});}else{back();}
    }).catch(back);
 })();
 </script>
