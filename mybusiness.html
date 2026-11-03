@@ -126,6 +126,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pc .pcp{text-align:center;font-weight:800;font-size:26px;padding:10px 6px 0;min-height:36px}.pc .pcp small{font-size:11px;color:#5b6475;font-weight:600}
 .pc ul{list-style:none;margin:8px 0 6px;padding:0 14px}.pc li{font-size:15px;padding:5px 0 5px 22px;position:relative}.pc li:before{content:"✓";position:absolute;left:0;color:#1e9e57;font-weight:800}
 .offer{margin-top:12px;border-radius:14px;padding:12px 14px;background:linear-gradient(135deg,#fff7e0,#eefaf1);border:1px solid #f1d98a}.offer .oh{font-weight:800;color:#7a4b00;font-size:15.5px}.offer p{margin:6px 0;font-size:13.5px}.offer small{color:#5b6475;font-size:12px}.offer .lights{display:flex;gap:8px;margin:8px 0}.offer .lights span{width:30px;height:30px;border-radius:50%;background:#dbe8fb;color:#1a4fa0;display:grid;place-items:center;font-weight:800;font-size:13px}
+.cmp .thp{display:block;font-size:14px;font-weight:700;opacity:.95;margin-top:2px}.offer .shb{display:block;width:100%;margin:6px 0 8px;padding:12px;border:0;border-radius:12px;background:#1e9e57;color:#fff;font-size:16px;font-weight:800}
 .pz{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:12px}.pz button{width:40px;height:40px;border-radius:50%;border:1.5px solid #c9d6ee;background:#fff;color:#0b2f73;font-size:22px;font-weight:800;line-height:1}.pz span{min-width:48px;text-align:center;font-weight:800;color:#0b2f73}
 .cmpw{overflow-x:auto;margin-top:12px;-webkit-overflow-scrolling:touch}.cmp{width:100%;border-collapse:collapse;text-align:center;min-width:760px;font-size:18px;table-layout:fixed}.cmp th:first-child{width:250px}.cmp th,.cmp td{border-bottom:1px solid #e4eaf5;padding:12px 8px}.cmp th{font-size:17px}.cmp td:first-child{text-align:left;font-weight:700;padding-left:8px}
 .cmp .cmh{background:#0b2f73;color:#fff;text-align:left;padding-left:10px;border-radius:12px 0 0 0}.cmp th{color:#fff;font-size:12.5px}.cmp th em{display:inline-block;font-style:normal;background:#fff;color:#2E0757;border-radius:999px;padding:1px 8px;font-size:12px;margin-top:2px}
@@ -709,6 +710,13 @@ function planCards(cur,en){
     '<div class="pcp">'+price(t)+'</div><ul>'+bul(t).map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>').join("")+'</div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
 /* 📊 प्लान कार्ड + Silver ऑफ़र + तुलना तालिका (Free / Silver / Gold / Platinum) — सिर्फ़ दिखाने के लिए, आँकड़े PBPlan से */
+/* प्लान की क़ीमतें (GST सहित) — बदलनी हों तो सिर्फ़ यहाँ */
+const PLAN_PRICE={free:0,silver:3000,gold:9000,platinum:15000};
+const PB_SHARE_URL="https://patabook.in";
+function pbShareText(en){return en?"List your shop on PataBook for free. Customers find you in search and call or WhatsApp you directly. Add your shop and get more customers: ":"अपनी दुकान PataBook पर मुफ़्त जोड़ें। ग्राहक खोज में आपको ढूँढकर सीधे कॉल या WhatsApp करेंगे। अपनी दुकान जोड़ें और ज़्यादा ग्राहक पाएँ: ";}
+document.addEventListener("click",async e=>{if(!e.target.closest("[data-psh]"))return;const en=L()==="en",tx=pbShareText(en);
+  try{if(navigator.share){await navigator.share({title:"PataBook",text:tx,url:PB_SHARE_URL});return;}}catch(x){if(x&&x.name==="AbortError")return;}
+  window.open("https://wa.me/?text="+encodeURIComponent(tx+PB_SHARE_URL),"_blank","noopener");});
 let PZ=1;try{const z=parseFloat(localStorage.getItem("pb-planzoom"));if(z>=0.5&&z<=2)PZ=z;}catch(e){}
 document.addEventListener("click",e=>{const z=e.target.closest("[data-pz]");if(!z)return;const d=z.dataset.pz;PZ=d==="r"?1:Math.min(2,Math.max(0.5,Math.round((PZ+(d==="+"?0.1:-0.1))*10)/10));try{localStorage.setItem("pb-planzoom",PZ);}catch(x){}
   document.querySelectorAll(".cmp").forEach(t=>t.style.zoom=PZ);document.querySelectorAll(".pzv").forEach(v=>v.textContent=Math.round(PZ*100)+"%");});
@@ -745,13 +753,13 @@ function plansCompare(b,i,en){
   ].map(x=>[x[0],x[1],T.find(t=>x[2](t))||"platinum"]);
   const GT={free:en?"✅ Free plan includes (in every plan)":"✅ Free प्लान में मिलता है (हर प्लान में)",silver:en?"🥈 Added in Silver":"🥈 Silver में जुड़ता है",gold:en?"👑 Added in Gold":"👑 Gold में जुड़ता है",platinum:en?"💎 Added in Platinum":"💎 Platinum में जुड़ता है"};
   const ALLR=ALLP.concat(FE);
-  const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
+  const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'">'+ic[t]+'<br>'+nm(t)+'<br><span class="thp">₹'+PLAN_PRICE[t].toLocaleString("en-IN")+(t==="free"?"":(en?" / year":" / साल"))+'</span>'+(t===cur?'<br><em>'+(en?"Your Plan":"आपका प्लान")+'</em>':'')+'</th>').join("")+'</tr>';
   const body=T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td colspan="5">'+GT[g]+'</td></tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("");
   return ''+
     '<div class="offer"><div class="oh">🎁 '+(en?"Offer: Silver plan FREE for 1 year":"ऑफ़र: Silver प्लान 1 साल मुफ़्त")+'</div>'+
     '<p>'+(en?"Bring 5 shopkeepers to PataBook. When their shops are complete, verified and Active, you get the Silver plan free for 1 year.":"5 दुकानदारों को PataBook पर लाएँ। उनकी दुकानें पूरी, जाँची हुई और Active होने पर आपको Silver प्लान 1 साल मुफ़्त मिलेगा।")+'</p>'+
     '<div class="lights">'+[1,2,3,4,5].map(n=>'<span>'+n+'</span>').join("")+'</div>'+
-    '<small>'+(en?"Offer valid till 31 January 2027 · Free plan continues as it is · Referral tracking starts soon.":"ऑफ़र 31 जनवरी 2027 तक · Free प्लान वैसे ही चलता रहेगा · रेफ़रल गिनती जल्द शुरू होगी।")+'</small></div>'+
+    '<button type="button" class="shb" data-psh="1">📤 '+(en?"Share PataBook with shopkeepers":"दुकानदारों को PataBook भेजें")+'</button><small>'+(en?"Offer valid till 31 January 2027 · Free plan continues as it is · Referral tracking starts soon.":"ऑफ़र 31 जनवरी 2027 तक · Free प्लान वैसे ही चलता रहेगा · रेफ़रल गिनती जल्द शुरू होगी।")+'</small></div>'+
     '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'">'+head+body+'</table></div><div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
 function premBlock(b,i){
