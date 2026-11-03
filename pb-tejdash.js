@@ -27,6 +27,7 @@
       ".td-shop{background:var(--hd);color:#fff;border-radius:20px;padding:20px;margin-bottom:14px}" +
       ".td-sh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}" +
       ".td-shop h2{margin:0;font-size:19px}.td-shop p{margin:4px 0 0;font-size:13px;opacity:.85}" +
+      ".td-pc{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.td-ep{background:#fff;color:#172033;border:0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit}" +
       ".td-pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;white-space:nowrap}" +
       ".td-meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font-size:12.5px;opacity:.92}" +
       ".td-st{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}" +
@@ -150,7 +151,8 @@
     return '<section class="td t-' + esc(c.tier) + '" aria-label="' + T("Shop dashboard", "दुकान डैशबोर्ड") + '">' +
       topRow + '<div style="height:12px"></div>' +
       '<div class="td-shop"><div class="td-sh"><div><h2>' + esc(b.name) + '</h2><p>' + esc([x.category || b.category, city].filter(Boolean).join(" · ")) + '</p></div>' +
-      '<div class="td-pill">' + (c.tier === "platinum" ? "💎 " : c.tier === "gold" ? "👑 " : "") + esc(TN) + (paid ? " " + T("MEMBER", "सदस्य") : "") + '</div></div>' +
+      '<div class="td-pc"><div class="td-pill">' + (c.tier === "platinum" ? "💎 " : c.tier === "gold" ? "👑 " : "") + esc(TN) + (paid ? " " + T("MEMBER", "सदस्य") : "") + '</div>' +
+      '<button type="button" class="td-ep" data-pop="all" data-popshop="' + esc(b.slug) + '">✏️ ' + T("Edit profile", "प्रोफ़ाइल बदलें") + '</button></div></div>' +
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct == null ? '' : c.pct >= 100 ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' :
         '<span class="td-sig td-click" role="button" tabindex="0" data-tdgo="prof" data-tdi="' + c.i + '" style="--sg:' + (c.pct < 40 ? '#d93025' : c.pct < 70 ? '#f29900' : '#1a73e8') + '"><i></i>' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + ' · <b>' + T("Complete it ›", "पूरी करें ›") + '</b></span>') + '</div></div>' +
