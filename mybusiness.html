@@ -15,7 +15,7 @@
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
-<script src="site-config.js"></script>
+<script src="site-config.js"></script><script src="pb-ref.js"></script>
 <style>
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--green:#1e9e57}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -811,7 +811,7 @@ function planCards(cur,en){
 const PLAN_PRICE={free:0,silver:3000,gold:9000,platinum:15000};
 const PB_SHARE_URL="https://patabook.in";
 /* दोस्तों को भेजा जाने वाला संदेश (लिंक संदेश के अंदर ही है) */
-function pbShareText(en){return "🏪 PATABOOK.IN\n✨ हर दुकान की अपनी डिजिटल पहचान!\n\n━━━━━━━━━━━━━━━━━━\n\n📋 PataBook के Business Benefits\n\n✅ Online Business Listing\n🏪 दुकान की डिजिटल पहचान\n📍 दुकान की Location\n📞 Direct Call सुविधा\n💬 WhatsApp Contact\n🛍️ Products Showcase\n🛠️ Services Showcase\n📸 Photos एवं Gallery\n⭐ Customer Reviews\n🗺️ Nearby Shops Search\n🎯 Offers एवं Promotions\n🏠 Home Services\n👥 नए ग्राहकों तक पहुँच\n\n━━━━━━━━━━━━━━━━━━\n\n🆓 अपनी दुकान को PataBook पर बिल्कुल फ्री में लिस्ट करें!\n\n📲 आज ही अपना बिजनेस Register करें!\n\n🌐 https://patabook.in\n\nअपने दोस्तों और दूसरे व्यापारियों के साथ भी Share करें। 🤝\n\n✨ PataBook – आपका बिजनेस, आपकी पहचान!\n\n━━━━━━━━━━━━━━━━━━";}
+function pbShareText(en){const _rs=(ROWS&&ROWS[TDSEL]&&ROWS[TDSEL].slug)||(ROWS&&ROWS[0]&&ROWS[0].slug)||"";return "🏪 PATABOOK.IN\n✨ हर दुकान की अपनी डिजिटल पहचान!\n\n━━━━━━━━━━━━━━━━━━\n\n📋 PataBook के Business Benefits\n\n✅ Online Business Listing\n🏪 दुकान की डिजिटल पहचान\n📍 दुकान की Location\n📞 Direct Call सुविधा\n💬 WhatsApp Contact\n🛍️ Products Showcase\n🛠️ Services Showcase\n📸 Photos एवं Gallery\n⭐ Customer Reviews\n🗺️ Nearby Shops Search\n🎯 Offers एवं Promotions\n🏠 Home Services\n👥 नए ग्राहकों तक पहुँच\n\n━━━━━━━━━━━━━━━━━━\n\n🆓 अपनी दुकान को PataBook पर बिल्कुल फ्री में लिस्ट करें!\n\n📲 आज ही अपना बिजनेस Register करें!\n\n🌐 https://patabook.in/"+(_rs?"?ref="+encodeURIComponent(_rs):"")+"\n\nअपने दोस्तों और दूसरे व्यापारियों के साथ भी Share करें। 🤝\n\n✨ PataBook – आपका बिजनेस, आपकी पहचान!\n\n━━━━━━━━━━━━━━━━━━";}
 function gGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function gSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 const gOp=()=>gGet("pb-gopen")==="1",gSh=()=>Math.min(5,Math.max(0,parseInt(gGet("pb-gshare"),10)||0));
@@ -841,10 +841,21 @@ document.addEventListener("click",async e=>{if(!e.target.closest("[data-psh]"))r
 let PZ=1;try{const z=parseFloat(localStorage.getItem("pb-planzoom"));if(z>=0.5&&z<=2)PZ=z;}catch(e){}
 document.addEventListener("click",e=>{const z=e.target.closest("[data-pz]");if(!z)return;const d=z.dataset.pz;PZ=d==="r"?1:Math.min(2,Math.max(0.5,Math.round((PZ+(d==="+"?0.1:-0.1))*10)/10));try{localStorage.setItem("pb-planzoom",PZ);}catch(x){}
   document.querySelectorAll(".cmp").forEach(t=>t.style.zoom=PZ);document.querySelectorAll(".pzv").forEach(v=>v.textContent=Math.round(PZ*100)+"%");});
+let REFD={};   /* sql-34: { slug: {friends:[%], done, granted} } — दोस्तों का असली % सर्वर से */
+async function loadRef(){
+  if(!ROWS||!ROWS.length)return;
+  /* यह फ़ोन किसी दोस्त के link से आया था → मेरी नई दुकान उस दोस्त की गिनती में जोड़ो */
+  try{const rf=window.PBRef&&PBRef.ref();if(rf&&!ROWS.some(b=>b.slug===rf)){let any=false;
+    for(const b of ROWS){try{const x=await rpc("pb_ref_claim",{p_slug:b.slug,p_ref:rf,p_device:PBRef.dev()});if(x&&x.ok)any=true;}catch(e){}}
+    if(any)try{localStorage.removeItem("pb-ref");}catch(e){}}}catch(e){}
+  let got=false;const R={};
+  await Promise.all(ROWS.map(async b=>{try{const x=await rpc("pb_ref_my",{p_slug:b.slug});if(x){R[b.slug]=x;if(x.granted&&x.until&&!(PREM&&PREM[b.slug]&&PREM[b.slug].until))got=true;}}catch(e){}}));
+  REFD=R;if(got){try{await loadPrem();}catch(e){}}
+}
 const FRP=[];   /* दोस्तों की प्रोफ़ाइल % — सर्वर रेफ़रल सिस्टम बनने पर यहाँ भरेगा; अभी खाली = 0% */
-function offerCard(en,cur){
+function offerCard(en,cur,b){
   if(cur!=="free"||!gOp())return "";   /* गिफ़्ट खुलने के बाद ही ऑफ़र कार्ड दिखता है */   /* Silver/Gold/Platinum वालों को ऑफ़र नहीं दिखता */
-  const SH=gSh(),n=SH*5,pcs=[...Array(n)].map((_,k)=>Math.max(0,Math.min(100,+FRP[k]||0))),dn=pcs.filter(x=>x>=100).length;
+  const D=(b&&REFD[b.slug])||null,FR=(D&&Array.isArray(D.friends))?D.friends:FRP,SH=Math.max(gSh(),FR.length?1:0),n=Math.max(SH*5,Math.ceil(FR.length/5)*5),pcs=[...Array(n)].map((_,k)=>Math.max(0,Math.min(100,+FR[k]||0))),dn=pcs.filter(x=>x>=100).length;
   if(dn>=5)return "";   /* 5 दोस्त पूरे → विंडो हट जाती है */
   const hd='<div class="oh">🎁 '+(en?"Silver Plan FREE for 1 Year":"Silver प्लान 1 साल मुफ़्त")+'</div>',
     vd=(en?"Offer valid till 31 December 2026":"ऑफ़र 31 दिसंबर 2026 तक");
@@ -892,7 +903,7 @@ function plansCompare(b,i,en){
   const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'"><span class="sr">'+nm(t)+'</span>'+''+'</th>').join("")+'</tr>';
   const body='<tr class="vrow"><td>'+(en?"Validity":"वैधता")+'</td>'+T.map(t=>'<td class="td-'+t+'"><b>'+(t==="free"?(en?"Lifetime":"आजीवन"):(en?"1 Year":"1 साल"))+'</b></td>').join("")+'</tr>'+T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td></td>'+T.map(t=>'<td>'+(t===cur?(en?"Active Plan":"एक्टिव प्लान"):'')+'</td>').join("")+'</tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("")+'<tr class="prow"><td>'+(en?"Price":"क़ीमत")+'</td>'+T.map(t=>'<td class="pp pp-'+t+'">'+(GOP&&t==="silver"?'<s>₹'+PLAN_PRICE[t].toLocaleString("en-IN")+'</s><span class="fre">'+(en?"FREE":"मुफ़्त")+'</span>':'₹'+PLAN_PRICE[t].toLocaleString("en-IN"))+'</td>').join("")+'</tr>';
   return ''+
-    offerCard(en,cur)+
+    offerCard(en,cur,b)+
     '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'"><colgroup><col style="width:250px"><col><col><col><col></colgroup>'+mrow+head+body+'</table></div>'+(GOP?gStrip(en):'')+'<div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
 function premBlock(b,i){
@@ -1460,7 +1471,7 @@ async function start(){
   if(!ME)kickMsg();else $("kick").hidden=true;
   draw();
   if(!ME)return;
-  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{HELP=await rpc("pb_my_helper_shops")||[];if(window.PBHelp)PBHelp.save(HELP.map(h=>({slug:h.slug,name:h.name,perms:h.perms||null})));}catch(e){HELP=[];}if(!ROWS.length&&HELP.length){location.replace("helper.html");return;}loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
+  try{ROWS=await rpc("pb_my_businesses")||[];ERR="";try{HELP=await rpc("pb_my_helper_shops")||[];if(window.PBHelp)PBHelp.save(HELP.map(h=>({slug:h.slug,name:h.name,perms:h.perms||null})));}catch(e){HELP=[];}if(!ROWS.length&&HELP.length){location.replace("helper.html");return;}loadLinks();try{localStorage.setItem("pb-my-shops",JSON.stringify(ROWS.map(r=>r&&r.slug).filter(Boolean)));}catch(e){}const _rest=Promise.all([loadVer(),loadHome(),loadPreq(),loadRef()]);   /* सब एक साथ (पहले एक-एक करके → 1-2 सेकंड की देरी) */
     const _tx=(window.PBTejDash&&ROWS.length)?Promise.all(ROWS.map(b=>new Promise(r=>{PBTejDash.load(b.slug,r);setTimeout(r,1500);}))):null;
     await Promise.all([loadLogos(),loadCovers(),loadVac(),loadPrem(),_tx]);runDeep();BOOT=false;draw();   /* ज़रूरी डेटा आते ही पन्ना दिखाओ; बाक़ी बाद में अपने-आप जुड़ेगा */
     await _rest;await loadEvents();await loadProf();await loadStates();await loadNums();await bellState();
