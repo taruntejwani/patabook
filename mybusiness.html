@@ -129,10 +129,10 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .cmp .mb{display:block;width:100%;max-width:150px;margin:0 auto 4px;border-radius:12px}.cmp .prow td{border-top:2px solid #e4eaf5;padding:16px 6px;background:#fff}.cmp .prow td:first-child{font-weight:800}.cmp .pp{font-size:24px;font-weight:900}.cmp .pp-free{color:#1a73e8}.cmp .pp-silver{color:#6b7788}.cmp .pp-gold{color:#B58A2A}.cmp .pp-platinum{color:#6D28D9}.cmp .thp{display:block;font-size:14px;font-weight:700;opacity:.95;margin-top:2px}.offer .shb{display:block;width:100%;margin:6px 0 8px;padding:12px;border:0;border-radius:12px;background:#1e9e57;color:#fff;font-size:16px;font-weight:800}
 .pz{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:12px}.pz button{width:40px;height:40px;border-radius:50%;border:1.5px solid #c9d6ee;background:#fff;color:#0b2f73;font-size:22px;font-weight:800;line-height:1}.pz span{min-width:48px;text-align:center;font-weight:800;color:#0b2f73}
 .cmpw{overflow-x:auto;margin-top:12px;-webkit-overflow-scrolling:touch}.cmp{width:100%;border-collapse:collapse;text-align:center;min-width:760px;font-size:18px;table-layout:fixed}.cmp th:first-child{width:250px}.cmp th,.cmp td{border-bottom:1px solid #e4eaf5;padding:12px 8px}.cmp th{font-size:17px}.cmp td:first-child{text-align:left;font-weight:700;padding-left:8px}
-.cmp .cmh{background:#0b2f73;color:#fff;text-align:left;padding-left:10px;border-radius:12px 0 0 0}.cmp th{color:#fff;font-size:12.5px}.cmp th em{display:inline-block;font-style:normal;background:#fff;color:#2E0757;border-radius:999px;padding:1px 8px;font-size:12px;margin-top:2px}
-.cmp .th-free{background:#1a73e8}.cmp .th-silver{background:#8e98a9}.cmp .th-gold{background:#d9a21b}.cmp .th-platinum{background:linear-gradient(135deg,#6D28D9,#2E0757)}
-.cmp .grp td{text-align:left;font-weight:800;font-size:17px;padding:10px 10px;color:#fff}.cmp .grp-free td{background:#1a73e8}.cmp .grp-silver td{background:#7c8798}.cmp .grp-gold td{background:#c98a05}.cmp .grp-platinum td{background:linear-gradient(135deg,#6D28D9,#2E0757)}
-.cmp .td-free{background:#eef4ff}.cmp .td-silver{background:#f3f5f8}.cmp .td-gold{background:#fff8e3}.cmp .td-platinum{background:#f2ecff}.cmp .y{color:#1e9e57;font-weight:800;font-size:24px}.cmp .n{color:#9aa0a6}
+.cmp .cmh{background:#0b367f;color:#fff;text-align:left;padding-left:10px;border-radius:12px 0 0 0}.cmp th{color:#fff;font-size:12.5px}.cmp th em{display:inline-block;font-style:normal;background:#fff;color:#2E0757;border-radius:999px;padding:1px 8px;font-size:12px;margin-top:2px}
+.cmp .th-free{background:#0875ed}.cmp .th-silver{background:#8795aa}.cmp .th-gold{background:#c58a08}.cmp .th-platinum{background:linear-gradient(135deg,#6D28D9,#2E0757)}
+.cmp .grp td{text-align:left;font-weight:800;font-size:17px;padding:10px 10px;color:#fff}.cmp .grp-free td{background:#0875ed}.cmp .grp-silver td{background:#7c8798}.cmp .grp-gold td{background:#c98a05}.cmp .grp-platinum td{background:linear-gradient(135deg,#6D28D9,#2E0757)}
+.cmp .td-free{background:#f0f7ff}.cmp .td-silver{background:#f4f6f9}.cmp .td-gold{background:#fff9e9}.cmp .td-platinum{background:#f7f0ff}.cmp .y{color:#16a05a;font-weight:800;font-size:24px}.cmp .n{color:#9aa3b2}
 .buy{margin-top:12px;border:1px solid #d7e3f7;background:#fff;border-radius:14px;padding:12px}.buy .bh2{font-weight:800;color:#0b2f73}.buy>small{display:block;color:#5b6475;font-size:12.5px}
 .bp{border:1.5px solid #e4eaf5;border-radius:14px;padding:11px;margin-top:10px}.bp .bt{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.bp .bt b{font-size:15.5px}.bp .bt span{font-weight:900;font-size:17px;color:#0b2f73}.bp .bt span small{font-size:11px;font-weight:700;color:#5b6475}
 .bp .bf{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.bp .bf i{font-style:normal;font-size:12px;background:#f4f7fc;border-radius:999px;padding:2px 8px}
@@ -695,7 +695,7 @@ function buyBlock(b,i,paid){
 }
 function planCards(cur,en){
   if(!window.PBPlan)return "";
-  const T=["free","silver","gold","platinum"],ic={free:"🏪",silver:"🥈",gold:"👑",platinum:"💎"};
+  const T=["free","silver","gold","platinum"],ic={free:"🔵",silver:"🥈",gold:"👑",platinum:"💎"};
   const yes="",H=(t,k)=>PBPlan.hasT(t,k),Lm=(t,k)=>PBPlan.limT(t,k),nm=t=>esc(PBPlan.name(t,en));
   const price=t=>{if(t==="free")return "₹0";const p=(window.PLAYP||[]).find(x=>x.tier===t);if(!p)return "";const v=p.playPrice&&p.playPrice.value?Number(p.playPrice.value):Number(p.price||0);return v?"₹"+v.toLocaleString("en-IN")+"<small>/"+(en?"year":"साल")+"</small>":"";};
   const bul=t=>[
@@ -722,7 +722,7 @@ document.addEventListener("click",e=>{const z=e.target.closest("[data-pz]");if(!
   document.querySelectorAll(".cmp").forEach(t=>t.style.zoom=PZ);document.querySelectorAll(".pzv").forEach(v=>v.textContent=Math.round(PZ*100)+"%");});
 function plansCompare(b,i,en){
   if(!window.PBPlan)return "";
-  const T=["free","silver","gold","platinum"],ic={free:"🏪",silver:"🥈",gold:"👑",platinum:"💎"},cur=tierOf(b);
+  const T=["free","silver","gold","platinum"],ic={free:"🔵",silver:"🥈",gold:"👑",platinum:"💎"},cur=tierOf(b);
   const yes='<span class="y">✓</span>',no='<span class="n">–</span>',H=(t,k)=>PBPlan.hasT(t,k),Lm=(t,k)=>PBPlan.limT(t,k);
   const nm=t=>esc(PBPlan.name(t,en)),pd=t=>{const d=Lm(t,"poster_days");return d>=365?(en?"Daily":"रोज़"):d?d+(en?" days":" दिन"):yes;};
   const price=t=>{if(t==="free")return "₹0";const p=(window.PLAYP||[]).find(x=>x.tier===t);if(!p)return "";const v=p.playPrice&&p.playPrice.value?Number(p.playPrice.value):Number(p.price||0);return v?"₹"+v.toLocaleString("en-IN")+"<small>/"+(en?"year":"साल")+"</small>":"";};
