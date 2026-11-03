@@ -559,3 +559,9 @@ PBL.add([["🔒 एडमिन लॉगिन","🔒 Admin login"],
 ["पट्टी पर","bar"],
 ["होमपेज","homepage"]]);
 PBL.add([["टीम का नज़ारा","Team view"],["मैनेजर / स्टाफ का पैनल देखें (सिर्फ़ देखना)","See the manager / staff panel (view only)"]]);
+
+PBL.add([["दुकान सबको दिखती है","Shop is visible to everyone"],["मंज़ूर करने के लिए दबाएँ","Tap to approve"],["📝 अधूरी","📝 Incomplete"],
+["📞 नंबर दिखे","📞 Show number"],["ग्राहकों को मोबाइल नंबर","Mobile number to customers"],["घर पर सेवा","Service at home"],
+["plan दें","Give plan"],["👁 दुकान का पेज","👁 Shop page"],["🗺 मैप","🗺 Map"],["⚠ मैप","⚠ Map"],["📱 नंबर बदलें","📱 Change number"],
+["✍️ सुधार माँगें","✍️ Ask to fix"],["✨ पता सुधारें","✨ Fix address"],["🗑 हटाएँ","🗑 Remove"],["← वापस","← Back"],["⚠ अधूरा (","⚠ Incomplete ("],["👤 मालिक","👤 Owner"],
+["चालू / बंद","On / Off"],["और काम","More actions"],["जानकारी","Details"],["📍 लोकेशन है","📍 Has location"],["⚠ लोकेशन नहीं","⚠ No location"],[" तक"," till"]]);

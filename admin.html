@@ -127,6 +127,23 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
 .adm-sh .bt{display:flex;gap:8px;margin-top:12px}.adm-sh .bt button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer}
 .adm-sh .go{background:#137333;color:#fff}.adm-sh .no{background:#eef1f6;color:#12141c}.adm-row{border:1px solid #e4eaf5;border-radius:12px;padding:10px;margin-top:10px}.adm-row label{display:flex;gap:8px;font-weight:700;font-size:14px}
 .adm-row small{display:block;color:#5b6475;font-size:12px;margin:4px 0}
+/* 🏪 एक दुकान का पूरा पेज (Admin) — सब चालू/बंद छोटे डिब्बों में */
+.spg{position:fixed;inset:0;z-index:9000;background:#f4f7fc;overflow:auto;-webkit-overflow-scrolling:touch}
+.spg .in{max-width:760px;margin:0 auto;padding:0 14px 40px}
+.spg .top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;background:#fff;border-bottom:1px solid var(--line);padding:10px 14px;margin:0 -14px 12px}
+.spg .top button{flex:none;border:0;background:#eef2f8;color:#0b2f73;border-radius:10px;padding:8px 12px;font:inherit;font-weight:800;cursor:pointer}
+.spg .top b{flex:1;min-width:0;font-size:17px;color:#0b2f73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spg .box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:12px}
+.spg h4{margin:0 0 8px;font-size:13px;color:#5b6475;letter-spacing:.2px}
+.tgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.5px solid #e4e7ec;background:#fff;border-radius:12px;padding:9px 10px;font:inherit;font-size:13px;font-weight:800;color:#344054;cursor:pointer;text-align:start;text-decoration:none;min-height:46px;box-sizing:border-box}
+.tg i{flex:none;width:34px;height:20px;border-radius:99px;background:#d0d5dd;position:relative;transition:background .2s}
+.tg i:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:left .2s}
+.tg.on{border-color:#7fd3a3;background:#f2fbf5;color:#137a3f}.tg.on i{background:#16a34a}.tg.on i:after{left:17px}
+.tg small{display:block;font-size:10.5px;font-weight:700;color:#667085;margin-top:1px}
+.tg.ac{justify-content:flex-start}.tg.ac.bad{border-color:#f1a7a0;background:#fef3f2;color:#b42318}
+.tg:disabled{opacity:.55}
+.card.shop .hd{cursor:pointer}
 </style>
 </head>
 <body>
@@ -382,7 +399,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
         (mapLink ? '<a class="' + (hasLoc ? 'gr' : 'rd') + '" href="' + mapLink + '" target="_blank">' + (hasLoc ? '✔ मैप' : '⚠ मैप') + '</a>' : '') +
         '</div></div></div>';
     }).join('') || '<div class="msg"><p>कोई दुकान नहीं</p></div>';
-    paintBulk();
+    paintBulk(); paintShopPg();
   }
   $('list').addEventListener('change', function (e) {
     var c = e.target.closest('.pick'); if (!c) return;
@@ -489,12 +506,10 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!items.length) return alert('सब पते पहले से ठीक हैं, या AI से जवाब नहीं आया।');
     addrSheet(items);
   };
-  $('list').onclick = async function (e) {
+  var shopAct = async function (e) {
     var hd = e.target.closest('.hd');
-    if (hd && !e.target.closest('input,button,a')) {
-      var cd = hd.parentNode, sl = cd.querySelector('.pick').dataset.slug, was = cd.classList.contains('open');
-      document.querySelectorAll('#list .card.open').forEach(function (x) { x.classList.remove('open'); x.querySelector('.bd').hidden = true; });
-      OPENS = {}; if (!was) { cd.classList.add('open'); cd.querySelector('.bd').hidden = false; OPENS[sl] = 1; }
+    if (hd && !e.target.closest('input,button,a') && hd.closest('#list')) {
+      openShopPg(hd.parentNode.querySelector('.pick').dataset.slug);
       return;
     }
     var b = e.target.closest('[data-a]'); if (!b) return;
@@ -582,6 +597,52 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       load();
     } catch (x) { b.disabled = false; alert('नहीं हो सका: ' + x.message); }
   };
+  $('list').onclick = shopAct;
+  /* 🏪 दुकान का पूरा पेज: नाम दबाते ही खुले; हर चालू/बंद काम एक छोटा switch-डिब्बा */
+  var SPG = null;
+  function tgl(on, a, i, label, sub) { return '<button type="button" class="tg' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" data-a="' + a + '" data-i="' + i + '"><span>' + label + (sub ? '<small>' + sub + '</small>' : '') + '</span><i></i></button>'; }
+  function act1(a, i, label, bad) { return '<button type="button" class="tg ac' + (bad ? ' bad' : '') + '" data-a="' + a + '" data-i="' + i + '">' + label + '</button>'; }
+  function shopPgHTML(b, i) {
+    var live = !!b.is_active, ph = String(b.phone || '').replace(/\D/g, '').slice(-10), miss = missOf(b), hasLoc = b.latitude != null && b.longitude != null;
+    var pOn = !!(PREMA && PREMA[b.slug]), h = homeOf(b), hOn = !!h.home_service, gst = line(b.description, 'GST'), udy = line(b.description, 'Udyam');
+    var mapLink = hasLoc ? 'map.html?to=' + b.latitude + ',' + b.longitude + '&n=' + encodeURIComponent(b.name || '') : (b.address ? 'map.html?q=' + encodeURIComponent(b.address) + '&n=' + encodeURIComponent(b.name || '') : '');
+    var t = '';
+    t += tgl(live, live ? 'hold' : 'ok', i, live ? '✅ Live' : (b.submitted_at ? '⏳ Pending' : '📝 अधूरी'), live ? 'दुकान सबको दिखती है' : 'मंज़ूर करने के लिए दबाएँ');
+    if (OWN) t += tgl(ownOf(b).show_phone !== false, 'ph', i, '📞 नंबर दिखे', 'ग्राहकों को मोबाइल नंबर');
+    if (HOME) t += tgl(hOn, 'hs', i, '🏠 Home Service', hOn && h.city_ids && h.city_ids.length ? esc(cityNames(h.city_ids)) : 'घर पर सेवा');
+    if (PREMA) t += tgl(pOn, 'prem', i, pOn ? (PMTIER[b.slug] ? tierName(PMTIER[b.slug]) : '💎 प्रीमियम') : '💎 प्रीमियम', pOn ? esc(fmtShort(PREMA[b.slug].until)) + ' तक' : 'plan दें');
+    if (gst) t += tgl(/^yes$/i.test(line(b.description, 'GST-Verified')), 'gst', i, '🧾 GST Verified', esc(gst));
+    if (udy) t += tgl(/^yes$/i.test(line(b.description, 'Udyam-Verified')), 'udy', i, '🏭 MSME Verified', esc(udy));
+    var w = '';
+    if (b.slug) w += '<a class="tg ac" href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">👁 दुकान का पेज</a>';
+    if (mapLink) w += '<a class="tg ac' + (hasLoc ? '' : ' bad') + '" href="' + mapLink + '" target="_blank">' + (hasLoc ? '🗺 मैप' : '⚠ मैप') + '</a>';
+    if (ph) w += '<a class="tg ac" href="tel:+91' + ph + '">📞 Call</a><a class="tg ac" href="https://wa.me/91' + ph + '" target="_blank" rel="noopener">💬 WhatsApp</a>';
+    if (OWN) w += act1('own', i, '👤 मालिक');
+    w += act1('setph', i, '📱 नंबर बदलें') + act1('fix', i, '✍️ सुधार माँगें');
+    if (b.address) w += act1('addr', i, '✨ पता सुधारें');
+    w += act1('rate', i, '⭐ Ratings') + act1('del', i, '🗑 हटाएँ', 1);
+    return '<div class="in"><div class="top"><button type="button" data-x="1">← वापस</button><b>' + esc(b.name) + '</b>' + (CODES[b.slug] ? '<span class="bid">' + esc(CODES[b.slug]) + '</span>' : '') + '</div>' +
+      '<div class="box"><div class="meta" style="margin:0">' + esc([b.category, b.address].filter(Boolean).join(' · ')) + '<br>👤 ' + esc(line(b.description, 'Owner') || '—') + (ph ? ' · 📞 ' + ph : '') + ' · ' + (hasLoc ? '📍 लोकेशन है' : '⚠ लोकेशन नहीं') + '</div>' +
+      '<div class="miss ' + (miss.length ? 'bad">⚠ अधूरा (' + miss.length + '): ' + esc(miss.join(' · ')) : 'good">✅ प्रोफ़ाइल 100% पूरी') + '</div>' + srcLine(b) + ownLine(b) + '</div>' +
+      '<div class="box"><h4>चालू / बंद</h4><div class="tgs">' + t + '</div></div>' +
+      '<div class="box"><h4>और काम</h4><div class="tgs">' + w + '</div></div>' +
+      (b.description ? '<div class="box"><h4>जानकारी</h4><div class="desc" style="margin:0">' + esc(b.description) + '</div></div>' : '') + '</div>';
+  }
+  function paintShopPg() {
+    if (!SPG) return; var el = $('spg'); if (!el) return;
+    var i = -1; rows.forEach(function (b, k) { if (b.slug === SPG) i = k; });
+    if (i < 0) { closeShopPg(); return; }
+    var y = el.scrollTop; el.innerHTML = shopPgHTML(rows[i], i); el.scrollTop = y;
+  }
+  function openShopPg(slug) {
+    SPG = slug; var el = $('spg');
+    if (!el) { el = document.createElement('div'); el.id = 'spg'; el.className = 'spg'; document.body.appendChild(el);
+      el.onclick = function (e) { if (e.target.closest('[data-x]')) { closeShopPg(); return; } shopAct(e); }; }
+    el.hidden = false; el.scrollTop = 0; paintShopPg(); document.body.style.overflow = 'hidden';
+    if (!(history.state && history.state.pbs)) history.pushState({ pbs: 1, pbv: (history.state && history.state.pbv) || 'home' }, '', location.pathname + '#shop');
+  }
+  function hideShopPg() { SPG = null; var el = $('spg'); if (el) el.hidden = true; document.body.style.overflow = ''; }
+  function closeShopPg() { hideShopPg(); if (history.state && history.state.pbs) history.back(); }
   $('tabs').onclick = function (e) {
     var b = e.target.closest('[data-s]'); if (!b) return;
     status = b.dataset.s; this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); load();
@@ -651,6 +712,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   if (location.hash) history.replaceState(null, '', location.pathname);
   window.addEventListener('popstate', function (e) {
     var st = e.state || {};
+    if (SPG) { hideShopPg(); if (st.pbs) return; return; }
     if (!$('md').hidden) { $('md').hidden = true; if (st.pbm) return; }
     if (st.pbm) return;
     NAV = true; try { if (st.pbv === 'home') showHome(); else if (st.pbv === 'stov') showStorage(); else if (st.pbv) view(st.pbv); else showHub(); } finally { NAV = false; }
