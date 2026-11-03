@@ -38,6 +38,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .gt .gok{position:absolute;top:5px;left:5px;background:#1e9e57;color:#fff;border-radius:999px;padding:1px 7px;font-size:13px;font-weight:800}.gt .ghd{position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,.65);color:#fff;border-radius:8px;padding:1px 7px;font-size:11.5px}
 h1{font-size:21px;color:var(--navy);margin:6px 0 4px}.sub{color:var(--muted);font-size:14px;margin-bottom:12px}
 .pick{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.pick button{padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid #cfd8ea;background:#fff;color:var(--navy)}.pick button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.hacc{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 0}.hacc button{flex:1;min-width:140px;padding:12px 14px;border-radius:14px;font-weight:800;font-size:14px;border:1px solid #cfd8ea;background:#fff;color:var(--navy)}.hacc button.dng{border-color:#f1b9b3;color:#b42318;background:#fff7f6}.hacc button:disabled{opacity:.6}.hmsg{font-size:13px;margin:8px 2px;color:#b42318}
+.hov{position:fixed;inset:0;background:rgba(10,20,40,.5);z-index:60;display:grid;place-items:center;padding:20px}.hbx{background:#fff;border-radius:18px;padding:20px;max-width:360px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25)}.hbx h3{font-size:17px;color:var(--navy);margin-bottom:8px}.hbx p{font-size:14px;color:var(--muted);line-height:1.5}.hbx .r{display:flex;gap:10px;margin-top:16px}.hbx .r button{flex:1;padding:11px;border-radius:12px;font-weight:800;font-size:14px;border:1px solid #cfd8ea;background:#fff;color:var(--navy)}.hbx .r button.dng{background:#d93025;border-color:#d93025;color:#fff}
 .note{color:var(--muted);font-size:14px;padding:8px 2px}.lnk{display:inline-block;margin-top:10px;font-weight:700;color:var(--blue)}
 </style>
 </head>
@@ -77,18 +79,18 @@ const squareImage=resizeImage,coverImage=resizeImage,bannerImage=resizeImage;
 const TX={en:{h1:"Photo Helper",sub:"Add and manage photos for the shop that added you as a helper.",
   gH:"Please log in first",gP:"Log in with the same email or mobile number the shop owner added as helper.",gB:"Log in",
   none:"No shop has added you as a helper yet. Ask the shop owner to add your email or mobile number.",my:"Open my own shops ›",
-  e_net:"Could not load. Check your internet and open again.",noplan:"Photos are not in this shop's plan."},
+  e_net:"Could not load. Check your internet and open again.",noplan:"Photos are not in this shop's plan.",lo:"Log out",lv:"Leave this shop",lvT:"Leave this shop?",lvP:"You will no longer be a helper for {n}. The shop and its photos stay as they are. The owner can add you again.",lvY:"Yes, leave",no:"Cancel",lvE:"Could not leave. Try again.",lvOk:"You left the shop."},
  hi:{h1:"फ़ोटो सहायक",sub:"जिस दुकान ने आपको सहायक बनाया है, उसकी फ़ोटो यहाँ जोड़ें और संभालें।",
   gH:"पहले लॉगिन करें",gP:"उसी ईमेल या मोबाइल नंबर से लॉगिन करें जो दुकान के मालिक ने सहायक के रूप में जोड़ा है।",gB:"लॉगिन करें",
   none:"अभी किसी दुकान ने आपको सहायक नहीं बनाया। दुकान के मालिक से कहें कि वे आपका ईमेल या मोबाइल नंबर जोड़ें।",my:"मेरी अपनी दुकानें खोलें ›",
-  e_net:"लोड नहीं हुआ। इंटरनेट देखकर दोबारा खोलें।",noplan:"इस दुकान के प्लान में फ़ोटो की सुविधा नहीं है।"}};
+  e_net:"लोड नहीं हुआ। इंटरनेट देखकर दोबारा खोलें।",noplan:"इस दुकान के प्लान में फ़ोटो की सुविधा नहीं है।",lo:"लॉग आउट",lv:"इस दुकान से हट जाएँ",lvT:"इस दुकान से हट जाएँ?",lvP:"आप {n} के सहायक नहीं रहेंगे। दुकान और उसकी फ़ोटो जैसी हैं वैसी ही रहेंगी। मालिक आपको दोबारा जोड़ सकते हैं।",lvY:"हाँ, हट जाएँ",no:"रद्द करें",lvE:"हट नहीं पाए। दोबारा कोशिश करें।",lvOk:"आप दुकान से हट गए।"}};
 const tx=k=>TX[L()][k];
 function draw(){
   $("h1").textContent=tx("h1");$("sub").textContent=tx("sub");document.documentElement.lang=L();document.title=tx("h1")+" — PataBook";
   const list=$("list");
   if(!ME){list.innerHTML='<div class="card gate"><div class="big">🔒</div><h2>'+tx("gH")+'</h2><p class="note">'+tx("gP")+'</p><a class="lnk" href="'+esc(PBA.loginUrl("helper.html"))+'">'+tx("gB")+' ›</a></div>';return;}
   if(ROWS===null){list.innerHTML=ERR?'<p class="note">'+tx(ERR)+'</p>':'<p class="note">…</p>';return;}
-  if(!ROWS.length){list.innerHTML='<div class="card gate"><div class="big">👥</div><p class="note">'+tx("none")+'</p><a class="lnk" href="mybusiness.html">'+tx("my")+'</a></div>';return;}
+  if(!ROWS.length){list.innerHTML=(LVM?'<p class="note" style="color:#1e9e57;font-weight:700">'+esc(LVM)+'</p>':'')+'<div class="card gate"><div class="big">👥</div><p class="note">'+tx("none")+'</p><a class="lnk" href="mybusiness.html">'+tx("my")+'</a></div><div class="hacc"><button type="button" data-lo>🚪 '+tx("lo")+'</button></div>';return;}
   if(SEL>=ROWS.length)SEL=0;
   const b=ROWS[SEL];
   let h=OWN?'<a class="lnk" href="mybusiness.html" style="margin:0 0 10px">‹ '+(L()==="en"?"My own shop":"मेरी अपनी दुकान")+'</a>':"";
@@ -97,9 +99,31 @@ function draw(){
   {const en=L()==="en",PL={add:en?"➕ Add photos":"➕ फ़ोटो जोड़ना",edit:en?"✏️ Edit price & details":"✏️ कीमत / कैप्शन बदलना",hide:en?"👁️ Show / hide":"👁️ दिखाना / छिपाना",remove:en?"🗑️ Remove":"🗑️ हटाना"};
    h+='<p class="note" style="margin:-6px 0 10px">'+(en?"You can: ":"आप कर सकते हैं: ")+(b.perms||[]).filter(k=>PL[k]).map(k=>PL[k]).join(" · ")+'</p>';}
   h+='<div class="card">'+(PH(b,"photos")?(window.galleryBlock?galleryBlock(b,SEL):""):'<p class="note">'+tx("noplan")+'</p>')+'</div>';
+  h+='<div class="hacc"><button type="button" data-lo>🚪 '+tx("lo")+'</button><button type="button" class="dng" data-lv>🚶 '+tx("lv")+'</button></div><div class="hmsg" id="hm"></div>';
   list.innerHTML=h;
 }
-$("list").addEventListener("click",e=>{const s=e.target.closest("[data-sel]");if(s){SEL=+s.dataset.sel;draw();}});
+let LVM="";
+async function doLogout(){try{await PBA.logout();}catch(e){}ME=null;ROWS=null;OWN=0;LVM="";draw();}
+function askLeave(){
+  const b=ROWS&&ROWS[SEL];if(!b||document.querySelector(".hov"))return;
+  const ov=document.createElement("div");ov.className="hov";
+  ov.innerHTML='<div class="hbx" role="dialog" aria-modal="true"><h3>'+esc(tx("lvT"))+'</h3><p>'+esc(tx("lvP").replace("{n}",b.name))+'</p><div class="r"><button type="button" data-no>'+esc(tx("no"))+'</button><button type="button" class="dng" data-yes>'+esc(tx("lvY"))+'</button></div></div>';
+  document.body.appendChild(ov);
+  const kill=()=>{if(ov.isConnected)ov.remove();};
+  if(window.PBBack)PBBack.open(kill,ov);
+  const close=()=>{if(window.PBBack&&PBBack.isOpen())PBBack.close();else kill();};
+  ov.addEventListener("click",async e=>{
+    if(e.target===ov||e.target.closest("[data-no]")){close();return;}
+    const y=e.target.closest("[data-yes]");if(!y)return;
+    y.disabled=true;
+    try{await rpc("pb_helper_leave",{p_slug:b.slug});
+      ROWS=ROWS.filter(r=>r.slug!==b.slug);SEL=0;LVM=tx("lvOk");close();draw();}
+    catch(x){y.disabled=false;close();const m=$("hm");if(m)m.textContent=tx("lvE");}
+  });
+}
+$("list").addEventListener("click",e=>{const s=e.target.closest("[data-sel]");if(s){SEL=+s.dataset.sel;draw();return;}
+  if(e.target.closest("[data-lo]")){doLogout();return;}
+  if(e.target.closest("[data-lv]"))askLeave();});
 async function start(){
   ME=await PBA.session();draw();if(!ME)return;
   try{
