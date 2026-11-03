@@ -126,7 +126,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .pc .pcp{text-align:center;font-weight:800;font-size:26px;padding:10px 6px 0;min-height:36px}.pc .pcp small{font-size:11px;color:#5b6475;font-weight:600}
 .pc ul{list-style:none;margin:8px 0 6px;padding:0 14px}.pc li{font-size:15px;padding:5px 0 5px 22px;position:relative}.pc li:before{content:"✓";position:absolute;left:0;color:#1e9e57;font-weight:800}
 .cmp .mrow td{background:transparent!important;border:0;padding:245px 0 6px;position:relative;vertical-align:top}.cmp .mrow td:before{content:"";position:absolute;top:231px;left:0;right:0;height:5px;background:linear-gradient(90deg,#b8c4da,#8795aa,#b8c4da)}
-.cmp .mrow figure{margin:0 auto;width:fit-content;position:relative;z-index:3;padding-top:44px;margin-bottom:-85px;transform-origin:50% 0;animation:pbSwing 4.2s ease-in-out infinite}
+.cmp .mrow.ng td{padding-top:62px}.cmp .mrow.ng td:before{top:48px}.cmp .mrow figure{margin:0 auto;width:fit-content;position:relative;z-index:3;padding-top:44px;margin-bottom:-85px;transform-origin:50% 0;animation:pbSwing 4.2s ease-in-out infinite}
 .cmp .mrow figure:before{content:"";position:absolute;top:0;left:50%;width:2px;height:44px;background:#8795aa;transform:translateX(-50%)}
 .cmp .mrow td:nth-child(4) img{height:90px}.cmp .mrow td:nth-child(5) img{height:90px}.cmp .mrow img{height:92px;width:auto;display:block;filter:drop-shadow(0 5px 6px rgba(16,44,80,.28))}.cmp .mrow figure.me img{filter:drop-shadow(0 0 5px #f0b429) drop-shadow(0 0 2px #f0b429)}
 .cmp .mrow figure.fp{width:fit-content;max-width:none;display:block;margin:0 auto;padding-top:46px;margin-bottom:-85px;transform-origin:50% 0}.cmp .mrow figure.fp:before{height:46px}.cmp .mrow .fpb{display:inline-block;border:3px dashed #0875ed;border-radius:18px;padding:9px 10px;white-space:normal;text-align:center}
@@ -789,7 +789,8 @@ let PZ=1;try{const z=parseFloat(localStorage.getItem("pb-planzoom"));if(z>=0.5&&
 document.addEventListener("click",e=>{const z=e.target.closest("[data-pz]");if(!z)return;const d=z.dataset.pz;PZ=d==="r"?1:Math.min(2,Math.max(0.5,Math.round((PZ+(d==="+"?0.1:-0.1))*10)/10));try{localStorage.setItem("pb-planzoom",PZ);}catch(x){}
   document.querySelectorAll(".cmp").forEach(t=>t.style.zoom=PZ);document.querySelectorAll(".pzv").forEach(v=>v.textContent=Math.round(PZ*100)+"%");});
 const FRP=[];   /* दोस्तों की प्रोफ़ाइल % — सर्वर रेफ़रल सिस्टम बनने पर यहाँ भरेगा; अभी खाली = 0% */
-function offerCard(en){
+function offerCard(en,cur){
+  if(cur!=="free")return "";   /* Silver/Gold/Platinum वालों को ऑफ़र नहीं दिखता */
   const SH=gSh(),n=SH*5,pcs=[...Array(n)].map((_,k)=>Math.max(0,Math.min(100,+FRP[k]||0))),dn=pcs.filter(x=>x>=100).length;
   if(dn>=5)return "";   /* 5 दोस्त पूरे → विंडो हट जाती है */
   const hd='<div class="oh">🎁 '+(en?"Silver Plan FREE for 1 Year":"Silver प्लान 1 साल मुफ़्त")+'</div>',
@@ -833,12 +834,12 @@ function plansCompare(b,i,en){
   ].map(x=>[x[0],x[1],T.find(t=>x[2](t))||"platinum"]);
   const GT={free:en?"✅ Free plan includes (in every plan)":"✅ Free प्लान में मिलता है (हर प्लान में)",silver:en?"🥈 Added in Silver":"🥈 Silver में जुड़ता है",gold:en?"👑 Added in Gold":"👑 Gold में जुड़ता है",platinum:en?"💎 Added in Platinum":"💎 Platinum में जुड़ता है"};
   const ALLR=ALLP.concat(FE);
-  const GOP=gOp(),GIFT=Date.now()>=new Date("2027-01-01T00:00:00+05:30").getTime()?'':'<div class="pgift'+(GOP?' opened':'')+'" role="button" tabindex="0" data-gift="1" aria-label="'+(en?"Claim your Diwali & New Year gift":"दीवाली और नए साल का गिफ्ट पाएँ")+'">'+giftInner(en,GOP)+'</div>';
-  const mrow='<tr class="mrow"><td></td><td><figure class="fp'+(cur==="free"?" me":"")+'"><span class="fpb"><b>'+(en?"Free Plan":"फ्री प्लान")+'</b></span></figure></td>'+["silver","gold","platinum"].map((t,k)=>'<td>'+(t==="silver"?GIFT:"")+'<figure class="'+(t===cur?"me":"")+'" style="animation-delay:'+(k*0.6)+'s"><img src="pb-member-'+t+'.webp" alt="'+esc(PBPlan.name(t,en))+' Member" loading="lazy"></figure></td>').join("")+'</tr>';
+  const GOP=cur==="free"&&gOp(),GIFT=(cur!=="free"||Date.now()>=new Date("2027-01-01T00:00:00+05:30").getTime())?'':'<div class="pgift'+(GOP?' opened':'')+'" role="button" tabindex="0" data-gift="1" aria-label="'+(en?"Claim your Diwali & New Year gift":"दीवाली और नए साल का गिफ्ट पाएँ")+'">'+giftInner(en,GOP)+'</div>';
+  const mrow='<tr class="mrow'+(GIFT?'':' ng')+'"><td></td><td><figure class="fp'+(cur==="free"?" me":"")+'"><span class="fpb"><b>'+(en?"Free Plan":"फ्री प्लान")+'</b></span></figure></td>'+["silver","gold","platinum"].map((t,k)=>'<td>'+(t==="silver"?GIFT:"")+'<figure class="'+(t===cur?"me":"")+'" style="animation-delay:'+(k*0.6)+'s"><img src="pb-member-'+t+'.webp" alt="'+esc(PBPlan.name(t,en))+' Member" loading="lazy"></figure></td>').join("")+'</tr>';
   const head='<tr><th class="cmh">'+(en?"Compare Plans":"प्लान तुलना")+'</th>'+T.map(t=>'<th class="th-'+t+'"><span class="sr">'+nm(t)+'</span>'+''+'</th>').join("")+'</tr>';
   const body='<tr class="vrow"><td>'+(en?"Validity":"वैधता")+'</td>'+T.map(t=>'<td class="td-'+t+'"><b>'+(t==="free"?(en?"Lifetime":"आजीवन"):(en?"1 Year":"1 साल"))+'</b></td>').join("")+'</tr>'+T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td></td>'+T.map(t=>'<td>'+(t===cur?(en?"Active Plan":"एक्टिव प्लान"):'')+'</td>').join("")+'</tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("")+'<tr class="prow"><td>'+(en?"Price":"क़ीमत")+'</td>'+T.map(t=>'<td class="pp pp-'+t+'">'+(GOP&&t==="silver"?'<s>₹'+PLAN_PRICE[t].toLocaleString("en-IN")+'</s><span class="fre">'+(en?"FREE":"मुफ़्त")+'</span>':'₹'+PLAN_PRICE[t].toLocaleString("en-IN"))+'</td>').join("")+'</tr>';
   return ''+
-    offerCard(en)+
+    offerCard(en,cur)+
     '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'"><colgroup><col style="width:250px"><col><col><col><col></colgroup>'+mrow+head+body+'</table></div>'+(GOP?gStrip(en):'')+'<div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
 }
 function premBlock(b,i){
