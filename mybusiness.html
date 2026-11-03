@@ -477,13 +477,19 @@ function popEdit(slug,card){
   ov.addEventListener("click",e=>{if(e.target===ov)close();});
   document.body.appendChild(ov);document.body.style.overflow="hidden";if(window.PBBack)PBBack.open(byBack);
 }
-function profPct(b){const it=profItems(b,0);return it&&it.length?Math.round(it.filter(x=>x[0]).length/it.length*100):null;}
+/* % : रजिस्टर में भरी 3 चीज़ें (नाम-पता, मोबाइल, लोकेशन) = 50%, बाकी चीज़ें मिलकर 50% */
+function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const core=it.slice(0,3),rest=it.slice(3);
+  const f=a=>a.length?a.filter(x=>x[0]).length/a.length:0;return Math.round(f(core)*50+f(rest)*50);}
+/* मंज़ूरी के लिए भेजने की शर्त: प्रोफ़ाइल 80%+ और दुकान की बाहर/अंदर की फ़ोटो जाँच के लिए भेजी हुई */
+const APPR_MIN=80;
+function photosOk(b){return !verOn()||verSt(b)==="pending"||verSt(b)==="approved";}
+function canSend(b){const pc=profPct(b);return pc===null||(pc>=APPR_MIN&&photosOk(b));}
 function offBlock(b,i,en){
   const s=shopSt(b);if(s==="live"||s==="off"||!SST)return "";
   if(s==="pend")return '<div class="offb pnd"><b>⏳ '+(en?"Sent for approval":"मंज़ूरी के लिए भेज दी")+'</b><small>'+(en?"PataBook will check your shop. Until then it is visible only to you.":"PataBook आपकी दुकान जाँचेगा। तब तक यह सिर्फ़ आपको दिखती है।")+'</small></div>';
-  const pc=profPct(b),ok=pc===null||pc>=100;
-  return '<div class="offb"><b>🔴 Offline — '+(en?"only you can see this shop":"यह दुकान अभी सिर्फ़ आपको दिखती है")+'</b><small>'+(ok?(en?"Your profile is complete. Send it to PataBook to go Online for everyone.":"प्रोफ़ाइल पूरी है। सबको दिखाने (ऑनलाइन) के लिए PataBook को भेजें।"):(en?"Complete your profile to 100% (now "+pc+"%), then send it for approval.":"पहले प्रोफ़ाइल 100% पूरी करें (अभी "+pc+"%), फिर मंज़ूरी के लिए भेजें।"))+'</small>'+
-    (ok?''+subBtn(i,en)+'':'<button type="button" class="go alt" data-setprof="'+i+'">'+(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›")+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
+  const pc=profPct(b),ok=canSend(b),needPh=pc!==null&&pc>=APPR_MIN&&!photosOk(b);
+  return '<div class="offb"><b>🔴 Offline — '+(en?"only you can see this shop":"यह दुकान अभी सिर्फ़ आपको दिखती है")+'</b><small>'+(ok?(en?"Your profile is complete. Send it to PataBook to go Online for everyone.":"प्रोफ़ाइल पूरी है। सबको दिखाने (ऑनलाइन) के लिए PataBook को भेजें।"):(needPh?(en?"One step left: send the outside and inside photos of your shop for verification, then send it for approval.":"एक कदम बाकी: दुकान की बाहर और अंदर की फ़ोटो जाँच के लिए भेजें, फिर मंज़ूरी के लिए भेजें।"):(en?"Complete your profile to "+APPR_MIN+"% (now "+pc+"%), then send it for approval.":"पहले प्रोफ़ाइल "+APPR_MIN+"% पूरी करें (अभी "+pc+"%), फिर मंज़ूरी के लिए भेजें।")))+'</small>'+
+    (ok?''+subBtn(i,en)+'':'<button type="button" class="go alt" data-setprof="'+i+'">'+(needPh?(en?"Send shop photos ›":"दुकान की फ़ोटो भेजें ›"):(en?"Complete profile ›":"प्रोफ़ाइल पूरी करें ›"))+'</button>')+'<div class="err" id="sub'+i+'"></div></div>';
 }
 /* 🔐 OTP बिल्कुल आख़िर में: guest (बिना OTP वाली) दुकान की प्रोफ़ाइल पूरी होने के बाद नंबर OTP से जाँचो; फिर मंज़ूरी के लिए भेजो */
 const IS_GUEST=()=>!!(window.PBA&&PBA.isGuest&&PBA.isGuest());
@@ -654,7 +660,7 @@ function verifyBlock(b,i){
   if(st==="approved")return '<div class="vf ok"><div class="vh">✅ '+(en?"Your shop is verified by PataBook":"आपकी दुकान PataBook से जाँचा हुआ है")+'</div></div>';
   if(st==="pending")return '<div class="vf pd" id="vfx'+i+'"><div class="vh">⏳ '+(en?"Shop verification: being checked":"दुकान Verification: जाँच चल रही है")+'</div><small>'+(en?"PataBook will check your photos soon. You will get a message in 🔔 at the top. After that you can take a plan.":"PataBook जल्द ही आपकी फ़ोटो देखेगा। ऊपर 🔔 घंटी में संदेश आएगा। उसके बाद आप प्लान ले सकते हैं।")+'</small>'+(m?'<div class="vm" style="color:#137333">'+esc(m)+'</div>':'')+'</div>';
   const P=VPH[b.slug]||{},slot=(k,ic,t,s2)=>'<label class="vs'+(P[k]?' has':'')+'">'+(P[k]?'<img src="'+P[k].url+'" alt="">':'')+'<i>'+(P[k]?'✅':ic)+'</i><span class="t">'+t+'</span><small>'+(P[k]?(en?"Tap to retake":"दोबारा लेने के लिए दबाएँ"):s2)+'</small><input type="file" accept="image/*" capture="environment" hidden data-vph="'+k+'" data-i="'+i+'"></label>';
-  return '<div class="vf" id="vfx'+i+'"><div class="vh">📸 '+(en?"Verify your shop":"दुकान जाँच करवाएँ")+'</div><small>'+(en?"Needed before taking a Silver / Gold / Platinum plan. Take 2 photos with your camera — only PataBook sees them.":"सिल्वर / गोल्ड / प्लैटिनम प्लान लेने से पहले ज़रूरी। कैमरे से 2 फ़ोटो लें — ये सिर्फ़ PataBook देखता है, ग्राहक नहीं।")+'</small>'+
+  return '<div class="vf" id="vfx'+i+'"><div class="vh">📸 '+(en?"Verify your shop":"दुकान जाँच करवाएँ")+'</div><small>'+(en?"Needed to send your shop for approval and before taking a Silver / Gold / Platinum plan. Take 2 photos with your camera — only PataBook sees them.":"मंज़ूरी के लिए भेजने और सिल्वर / गोल्ड / प्लैटिनम प्लान लेने से पहले ज़रूरी। कैमरे से 2 फ़ोटो लें — ये सिर्फ़ PataBook देखता है, ग्राहक नहीं।")+'</small>'+
     (st==="rejected"&&V.reason?'<div class="vm" style="color:#b42318">❌ '+(en?"Last time not verified: ":"पिछली बार जाँच नहीं हुई: ")+esc(V.reason)+'</div>':'')+
     '<div class="vg">'+slot("out","🏪",en?"Outside":"बाहर से",en?"Name board must be clear":"बोर्ड पर नाम साफ़ दिखे")+slot("in","🛒",en?"Inside":"अंदर से",en?"Counter / goods":"काउंटर / सामान")+'</div>'+
     '<button type="button" class="go" data-vsend="'+i+'"'+(P.out&&P.in?'':' disabled')+'>'+(en?"Send for verification":"जाँच के लिए भेजें")+'</button>'+
@@ -1175,7 +1181,7 @@ function shopTiles(en){
 /* स्विच: Live → Offline (तुरंत); Offline (पहले Live थी) → Online (तुरंत); कभी पास नहीं हुई दुकान → मंज़ूरी के लिए भेजो */
 async function tileSwitch(i,btn){
   const b=ROWS[i],en=L()==="en",s=shopSt(b);if(!b)return;
-  if(s==="draft"){const pc=profPct(b);if(pc!==null&&pc<100){openShop(i,"");return;}submitApproval(i,btn);return;}
+  if(s==="draft"){if(!canSend(b)){openShop(i,"");return;}submitApproval(i,btn);return;}
   const on=s==="off";
   if(!on&&!confirm(en?'Take "'+b.name+'" Offline? Customers will not see it until you turn it Online again.':'"'+b.name+'" ऑफ़लाइन करें? दोबारा ऑनलाइन करने तक ग्राहकों को नहीं दिखेगी।'))return;
   btn.disabled=true;const er=$("sub"+i);if(er)er.textContent="";
