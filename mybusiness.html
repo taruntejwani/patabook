@@ -156,7 +156,7 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .offer .frs{flex-wrap:wrap;row-gap:10px}.offer .frs span{flex:0 0 calc(20% - 7px)}.offer .fcnt{font-weight:800;color:#0b3a8f;font-size:13px;margin-top:6px}@keyframes pgpo{40%{transform:scale(1.15) rotate(-4deg)}100%{transform:scale(1)}}
 .pgift .pgk{position:absolute;left:50%;top:-40px;transform:translateX(-50%);font-size:15px;font-weight:800;letter-spacing:.08em;color:#3a2a00;padding:7px 16px;border-radius:999px;white-space:nowrap;background:linear-gradient(135deg,#fdeeb0,#e0a91c 55%,#f8dc86);box-shadow:0 3px 8px rgba(160,110,0,.4)}.pgift.open .pgk{display:none}
 .pgp{position:fixed;pointer-events:none;z-index:2100;animation:pgpa 1.4s ease-out forwards}@keyframes pgpa{to{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
-.gotp{position:relative;width:100%;max-width:360px;background:#fff;border-radius:22px;padding:24px 20px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}.gotp .x{position:absolute;right:12px;top:10px;width:30px;height:30px;border-radius:50%;border:1px solid #cfd8ea;background:#fff;font-size:18px;color:#34415a}.gotp .gk{font-size:34px}.gotp h3{margin:6px 0;color:#0b2f73;font-size:19px}.gotp p{margin:6px 0 12px;color:#34415a;font-size:14px}.gotp input{width:100%;text-align:center;letter-spacing:.35em;font-size:22px;font-weight:800;padding:12px;border:2px solid #cfd8ea;border-radius:14px}.gotp .gm{min-height:20px;margin-top:8px;font-size:13px;color:#5b6475}.gotp .gm.e{color:#d93025}.gotp .gr{margin-top:8px;border:0;background:transparent;color:#1a73e8;font-weight:700;font-size:14px}.gotp .gr:disabled{color:#9aa0a6}
+.gotp{position:relative;width:100%;max-width:360px;background:#fff;border-radius:22px;padding:24px 20px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}.gotp .x{position:absolute;right:12px;top:10px;width:30px;height:30px;border-radius:50%;border:1px solid #cfd8ea;background:#fff;font-size:18px;color:#34415a}.gotp .gk{font-size:34px}.gotp h3{margin:6px 0;color:#0b2f73;font-size:19px}.gotp p{margin:6px 0 12px;color:#34415a;font-size:14px}.gotp input{width:100%;text-align:center;letter-spacing:.35em;font-size:22px;font-weight:800;padding:12px;border:2px solid #cfd8ea;border-radius:14px}.gotp .gm{white-space:pre-line;min-height:20px;margin-top:8px;font-size:13px;color:#5b6475}.gotp .gm.e{color:#d93025}.gotp .gr{margin-top:8px;border:0;background:transparent;color:#1a73e8;font-weight:700;font-size:14px}.gotp .gr:disabled{color:#9aa0a6}
 .pgo{position:fixed;inset:0;background:rgba(6,10,30,.7);display:flex;align-items:center;justify-content:center;z-index:2000;padding:16px}
 .pgf2{max-width:380px;width:100%;padding:2.5px;border-radius:26px;background:linear-gradient(135deg,#fbe9a0,#c8921a 30%,#fff1b8 50%,#b27a0e 75%,#f6d977);animation:pgup .45s cubic-bezier(.2,.9,.3,1.1)}@keyframes pgup{from{transform:translateY(50px) scale(.92);opacity:0}}
 .pgbx{border-radius:24px;padding:24px 20px 20px;text-align:center;position:relative;color:#fff;background:radial-gradient(circle at 50% -10%,#3a3f9e 0,transparent 60%),linear-gradient(170deg,#141c52,#0a0f33 70%)}
@@ -529,11 +529,11 @@ function gOtp(i){
     catch(e){if(dead)return;M(gOtpErr(e,en),true);if(c)c.disabled=true;cool(e&&e.retry_after);const r=$("gotpR");if(r&&e&&e.code!=="resend_too_soon")r.disabled=false;}};
   ov.addEventListener("click",e=>{if(e.target===ov||e.target.closest("[data-x]")){close();return;}if(e.target.closest("#gotpR"))send();});
   ov.addEventListener("input",async e=>{if(e.target.id!=="gotpC")return;const c=e.target;c.value=c.value.replace(/\D/g,"");if(c.value.length!==6)return;
-    c.disabled=true;M(en?"Checking…":"जाँच हो रही है…");
-    try{await PBA.mobile.ownerVerify(ph,c.value);if(dead)return;M(en?"✅ Number verified":"✅ नंबर जाँच हो गया");
-      await new Promise(z=>setTimeout(z,500));close();
-      await start();const k=(ROWS||[]).findIndex(r=>r.slug===slug);if(k>=0)submitApproval(k,{disabled:false});}
-    catch(x){if(dead)return;c.disabled=false;c.value="";c.focus();M(gOtpErr(x,en),true);}});
+    c.disabled=true;let base=en?"Checking…":"जाँच हो रही है…";const stopT=tmr(en,x=>M(base+"\n"+x),10);
+    try{await PBA.mobile.ownerVerify(ph,c.value);base=en?"✅ Number verified. Sending for approval…":"✅ नंबर जाँच हो गया। मंज़ूरी के लिए भेज रहे हैं…";M(base);
+      await start();const k=(ROWS||[]).findIndex(r=>r.slug===slug);if(k>=0)await submitApproval(k,{disabled:false});
+      stopT();if(!dead)close();}
+    catch(x){stopT();if(dead)return;c.disabled=false;c.value="";c.focus();M(gOtpErr(x,en),true);}});
   send();
 }
 async function submitApproval(i,btn){
@@ -670,10 +670,15 @@ function verJpeg(file){return new Promise((res,rej)=>{const img=new Image(),url=
     const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
     const tryQ=q=>c.toBlob(bl=>{if(bl&&bl.size<450000)return res(bl);if(q>0.45)return tryQ(Math.round((q-0.1)*100)/100);bl&&bl.size<1900000?res(bl):rej(new Error("img"));},"image/jpeg",q);tryQ(0.82);};
   img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("img"));};img.src=url;});}
+/* ⏳ उल्टी गिनती: user को दिखे कि थोड़ा समय लगेगा */
+function tmr(en,set,secs){let left=secs||15;const f=()=>set(left>0?(en?"⏳ About "+left+(left===1?" second":" seconds")+" left… please wait":"⏳ लगभग "+left+" सेकंड बाकी… कृपया रुकें"):(en?"⏳ Almost done… it needs a little more time":"⏳ बस हो ही गया… थोड़ा और समय लग रहा है"));f();const t=setInterval(()=>{left--;f();},1000);return()=>clearInterval(t);}
 async function sendVerify(i,btn){
   const b=ROWS[i],en=L()==="en",P=VPH[b.slug]||{},er=$("vme"+i);if(!P.out||!P.in)return;
-  const say=(t,c)=>{if(er){er.style.color=c||"#5b6475";er.textContent=t;}};
+  let cur="",tl="",col="";
+  const paint=()=>{if(er){er.style.color=col||"#5b6475";er.style.whiteSpace="pre-line";er.textContent=cur+(tl?"\n"+tl:"");}};
+  const say=(t,c)=>{cur=t;col=c||"";paint();};
   btn.disabled=true;delete VMSG[b.slug];
+  const stopT=tmr(en,x=>{tl=x;paint();},15);
   try{
     say(en?"Preparing photos…":"फ़ोटो तैयार हो रही हैं…");
     const [o,n]=await Promise.all([verJpeg(P.out.file),verJpeg(P.in.file)]);
@@ -696,6 +701,7 @@ async function sendVerify(i,btn){
     else t=(en?"Could not send. Try again. ":"भेजा नहीं जा सका। दोबारा कोशिश करें। ")+(j&&j.error?"("+String(j.error).slice(0,40)+")":"");
     VMSG[b.slug]=t;draw();
   }catch(x){VMSG[b.slug]=en?"Could not send. Check internet and try again.":"भेजा नहीं जा सका। इंटरनेट देखकर दोबारा कोशिश करें।";draw();}
+  finally{stopT();}
 }
 /* plan: free / silver / gold / platinum — और उसमें कौन-सी सुविधा ON है (Admin → Plans) */
 function tierOf(b){const P=PREM&&PREM[b.slug];return P&&P.until?(P.tier&&P.tier!=="free"?P.tier:"platinum"):"free";}
