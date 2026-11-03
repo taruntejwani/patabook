@@ -330,8 +330,8 @@ const GROUP={biz:["shop","owner"],work:["svc","addr"]};
 function langChosen(){try{return localStorage.getItem("pb-lang-chosen")==="1";}catch(_){return true;}}   /* storage बंद हो तो भाषा वाली स्क्रीन छोड़ दो */
 function langFirst(){try{return sessionStorage.getItem("pb-lang-first")==="1";}catch(_){return false;}}  /* अभी-अभी भाषा चुनी (page reload के बाद भी 4 स्क्रीन दिखें) */
 const WITH_LANG=!langChosen()||langFirst();
-/* 🧪 GUESTREG: OTP बिल्कुल आख़िर में (प्रोफ़ाइल पूरी होने के बाद, "मेरी दुकान" में)। अभी सिर्फ़ ?guest=1 से टेस्ट के लिए चालू; पक्का होने पर डिफ़ॉल्ट */
-const GUESTREG=(()=>{try{if(/[?&]guest=1(?!\d)/.test(location.search))localStorage.setItem("pb-guestreg","1");if(/[?&]guest=0(?!\d)/.test(location.search))localStorage.removeItem("pb-guestreg");return localStorage.getItem("pb-guestreg")==="1";}catch(_){return false;}})();
+/* GUESTREG: OTP बिल्कुल आख़िर में (प्रोफ़ाइल पूरी होने के बाद, "मेरी दुकान" में)। अब डिफ़ॉल्ट चालू; ?guest=0 से पुराना तरीका (रजिस्टर के समय OTP) */
+const GUESTREG=(()=>{try{if(/[?&]guest=0(?!\d)/.test(location.search))localStorage.setItem("pb-guestreg","0");if(/[?&]guest=1(?!\d)/.test(location.search))localStorage.removeItem("pb-guestreg");return localStorage.getItem("pb-guestreg")!=="0";}catch(_){return true;}})();
 const SHORT_KEYS=(WITH_LANG?["lang"]:[]).concat(GUESTREG?["phone","biz","work"]:["phone","biz","work","otp"]),FULL_KEYS=SHORT_KEYS;   /* OTP अब आख़िर में: पहले नंबर, फिर फ़ॉर्म, फिर OTP */
 let FULLF=false,steps=SHORT_KEYS.map(stepBy);
 let i=(WITH_LANG&&langChosen())?1:0,coords=null,sending=false;
@@ -701,7 +701,7 @@ function extrasFill(){
   set("lgH","भाषा चुनें","Choose your language");set("lgHint","इस फ़ॉर्म की भाषा चुनें","Select the language of this form");
   set("otH","मोबाइल नंबर की जाँच","Verify your mobile number");
   set("otHint","इस नंबर पर SMS से OTP आएगा। OTP डालते ही दुकान जमा हो सकेगी।","An OTP will be sent by SMS to this number. Enter it to submit your shop.");
-  set("phOtpNote","आख़िरी स्टेप पर इस नंबर की OTP से जाँच होगी।","This number will be verified with an OTP on the last step.");
+  set("phOtpNote",GUESTREG?"दुकान की प्रोफ़ाइल पूरी होने के बाद, आख़िर में इस नंबर की OTP से जाँच होगी।":"आख़िरी स्टेप पर इस नंबर की OTP से जाँच होगी।",GUESTREG?"After you complete your shop profile, this number is verified with an OTP at the very end.":"This number will be verified with an OTP on the last step.");
   set("hrH","दुकान कब खुलती है?","When is your shop open?");
   set("hrHint","ग्राहक बिना फ़ोन किए जान लेंगे कि दुकान अभी खुली है या नहीं। ज़रूरी नहीं।","Customers can see if you are open without calling. Optional.");
   set("opL","खुलने का समय","Opens at");set("clL","बंद होने का समय","Closes at");set("offL","🗓️ हफ़्ते में छुट्टी","🗓️ Weekly off");
@@ -908,9 +908,11 @@ async function submit(){
   row.show_phone=!($("spN")&&$("spN").checked);
   if(regToken)row.otp_token=regToken;   /* OTP से verify हुआ नंबर (database इसे जाँचता है) */   /* दुकानदार की पसंद: नंबर दिखे या छिपे */
   const fail=e=>{setErr(e);btn.disabled=false;btn.textContent=T("submit");sending=false;};
+  /* सुरक्षा: guest तरीका न चले (SQL / Supabase सेटिंग बाकी) तो पुराना OTP वाला कदम खोल दो — दुकानदार अटकता नहीं */
+  const toOtp=()=>{if(!steps.includes(stepBy("otp")))steps.push(stepBy("otp"));i=steps.length-1;history.pushState({pbst:i,pbk:"otp"},"",location.pathname+location.search);btn.disabled=false;sending=false;render();};
   try{
     if(GUESTREG&&!ses&&!regToken){   /* बिना OTP: guest login बनाकर draft दुकान */
-      try{ses=await PBA.guest();}catch(_){return fail(EN()?"Could not start. Please try again in a minute.":"शुरू नहीं हो पाया। एक मिनट बाद फिर कोशिश करें।");}
+      try{ses=await PBA.guest();}catch(_){return toOtp();}
     }
     /* नया तरीका: pb_register_open — बिना लॉगिन / बिना OTP; दुकान हमेशा Pending; एक मोबाइल = एक दुकान */
     const hdr={apikey:KEY,Authorization:"Bearer "+(ses?ses.access_token:KEY),"Content-Type":"application/json"};
@@ -928,6 +930,7 @@ async function submit(){
     if(/limit1|limit2|limit3|duplicate|already/i.test(rt))return fail(LX("limit2"));
     if(/too many|rate/i.test(rt))return fail(LX("rate"));
     if(/bad address/i.test(rt))return fail(T("e_addr"));
+    if(/otp required/i.test(rt)&&GUESTREG&&!regToken&&ses&&PBA.isGuest&&PBA.isGuest(ses)){try{await PBA.logout();}catch(_){}return toOtp();}   /* database में guest वाला SQL अभी नहीं चला */
     if(/otp required/i.test(rt)){otpReset();return fail(EN()?"Your OTP verification expired. Please verify the mobile number again.":"OTP जाँच की समय-सीमा खत्म हो गई। मोबाइल नंबर फिर से जाँच करें।");}
     if(/bad phone/i.test(rt))return fail(T("e_phone"));
     if(/bad city|bad state|bad district/i.test(rt))return fail(LX("e_city2"));
