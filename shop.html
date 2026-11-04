@@ -14,8 +14,7 @@
   setTimeout(function(){h.classList.remove("pbcv");},7000);}catch(e){}})();</script>
 <style>html.pbcv body::before{content:"";position:fixed;inset:0;z-index:9999;background:radial-gradient(110% 80% at 50% 45%,#4c1d95,#14052c 75%)}
 html.pbcv[data-cv=gold] body::before{background:radial-gradient(110% 80% at 50% 45%,#5a3d07,#120b01 75%)}
-html.pbcv body::after{content:"";position:fixed;left:50%;top:50%;width:46px;height:56px;margin:-28px 0 0 -23px;z-index:9999;background:url(pin.png) center/contain no-repeat;animation:pbcvHop 1s ease-in-out infinite;opacity:.9}
-@keyframes pbcvHop{50%{transform:translateY(-14px)}}</style>
+</style>
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="PataBook">
 <meta name="theme-color" content="#fbf6ea">
@@ -318,7 +317,7 @@ html body .hero.hascv{min-height:0!important}.hero.hascv::after{display:none!imp
 .hlogo img,.hlogo .ini{box-shadow:0 0 0 2px #fff!important}.hlogo.gold img,.hlogo.gold .ini{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold1)!important}
 /* 💳 Business Card intro */
 .bc{position:fixed;inset:0;z-index:10000;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;
- --c1:#4c1d95;--c2:#14052c;--ink:#1b1033;--acc:#7c3aed;--gold:#e9c46a;--cf1:#ffffff;--cf2:#efe7ff;animation:bcIn .3s ease both;transition:opacity .6s ease}
+ --c1:#4c1d95;--c2:#14052c;--ink:#1b1033;--acc:#7c3aed;--gold:#e9c46a;--cf1:#ffffff;--cf2:#efe7ff;transition:opacity .6s ease}
 .bc-gold{--c1:#5a3d07;--c2:#120b01;--ink:#2b1d02;--acc:#b8860b;--gold:#f3c64b;--cf1:#fffdf6;--cf2:#f6e7bd}
 .bc .bg{position:absolute;inset:0;background:radial-gradient(110% 80% at 50% 45%,var(--c1),var(--c2) 75%)}
 .bc .bg:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 46%,rgba(255,255,255,.16),transparent 45%)}
@@ -349,7 +348,7 @@ html body .hero.hascv{min-height:0!important}.hero.hascv::after{display:none!imp
 @keyframes bcShine{from{left:-60%}to{left:130%}}
 /* 👑 Royal Entry */
 .rx{position:fixed;inset:0;z-index:10000;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;
- --c1:#4c1d95;--c2:#16052f;--ink:#f5f0ff;--acc:#c4b5fd;--gold:#e9c46a;background:radial-gradient(120% 85% at 50% 38%,var(--c1) 0%,var(--c2) 72%);animation:rxIn .35s ease both;transition:opacity .5s ease,backdrop-filter .5s}
+ --c1:#4c1d95;--c2:#16052f;--ink:#f5f0ff;--acc:#c4b5fd;--gold:#e9c46a;background:radial-gradient(120% 85% at 50% 38%,var(--c1) 0%,var(--c2) 72%);transition:opacity .5s ease,backdrop-filter .5s}
 .rx-gold{--c1:#5a3d07;--c2:#120b01;--ink:#fff6dc;--acc:#f3d27a;--gold:#f3c64b}
 .rx.out{opacity:0;pointer-events:none}
 .rx.fly .st>*:not(.lo),.rx.fly .tg,.rx.fly .rays,.rx.fly .glow{opacity:0!important;transition:opacity .35s ease}
@@ -705,7 +704,7 @@ function render(){drawSoc();
   placeMap();tabsApply();pbIntro();
 }
 /* ✨ intro: Gold/Platinum, दुकान हर बार खुलने पर (Back पर नहीं), टैप से बंद, motion कम हो तो नहीं */
-function cvOff(){setTimeout(()=>document.documentElement.classList.remove("pbcv"),60);}
+function cvOff(){setTimeout(()=>document.documentElement.classList.remove("pbcv"),400);}
 function pbIntro(){let wait=false;try{
   if(window.__pbIntro||!B)return;
   if(!window.__premDone){wait=true;return;}   /* plan अभी पता नहीं (पहला render): परदा रहने दो, दूसरे render पर फ़ैसला */
