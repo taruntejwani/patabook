@@ -628,7 +628,7 @@ function render(){drawSoc();
   drawVacFlag();drawNear();
   placeMap();tabsApply();pbIntro();
 }
-/* ✨ intro: Gold/Platinum, दिन में एक बार (उसी फ़ोन पर, उसी दुकान का), टैप से बंद, motion कम हो तो नहीं */
+/* ✨ intro: Gold/Platinum, दुकान हर बार खुलने पर (Back पर नहीं), टैप से बंद, motion कम हो तो नहीं */
 function pbIntro(){try{
   if(window.__pbIntro||!B)return;const t=TIER();if(t!=="gold"&&t!=="platinum")return;
   if(document.body.classList.contains("pbe-on"))return;
@@ -645,8 +645,8 @@ function pbIntro(){try{
     im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2000);
     e.onclick=x;document.body.appendChild(e);return;}
   if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  const k="pbi_"+slug,d=new Date().toISOString().slice(0,10);let seen="";try{seen=localStorage.getItem(k)||"";}catch(_){}
-  if(seen===d)return;try{localStorage.setItem(k,d);}catch(_){}
+  /* हर बार दुकान खुलने पर (link / होम से / refresh) — सिर्फ़ फ़ोन का Back दबाकर लौटने पर नहीं */
+  try{const nv=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nv&&nv.type==="back_forward")return;}catch(_){}
   window.__pbIntro=1;const e=document.createElement("div");e.className="pbx "+t;e.id="pbIntro";
   e.innerHTML="<i></i><b>"+esc(B.name)+"</b>"+(B.category?"<em>"+esc(B.category)+"</em>":"")+"<i></i><small>"+t.toUpperCase()+" BUSINESS CARD</small>";
   const x=()=>{if(e.parentNode)e.remove();};e.onclick=x;e.addEventListener("animationend",ev=>{if(ev.target===e)x();});setTimeout(x,4500);
