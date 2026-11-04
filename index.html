@@ -19,7 +19,12 @@
 <meta name="twitter:image" content="https://patabook.in/icon-512.png">
 <script>try{sessionStorage.removeItem("pb-from-search")}catch(e){}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://patabook.in/#org","name":"PataBook","url":"https://patabook.in/","logo":"https://patabook.in/icon-512.png","email":"patabook.in@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Gandhidham","addressRegion":"Gujarat","postalCode":"370201","addressCountry":"IN"}},{"@type":"WebSite","@id":"https://patabook.in/#site","url":"https://patabook.in/","name":"PataBook","inLanguage":["hi","en"],"publisher":{"@id":"https://patabook.in/#org"},"potentialAction":{"@type":"SearchAction","target":"https://patabook.in/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
 <link rel="icon" href="pin.png">
-<script>/* 🎬 Loader: 24 घंटे में एक बार (पहली बार आए या एक दिन बाद लौटे) */(function(){try{var k="pb-ldr",t=+localStorage.getItem(k)||0;if(Date.now()-t<864e5)return;localStorage.setItem(k,String(Date.now()));document.documentElement.classList.add("pbl");}catch(e){}})();</script>
+<script>/* 🎬 Loader: सिर्फ़ होम पेज पर — website में आते ही (बाहर से / सीधा link / app खोला) या होम पर refresh करने पर।
+   website के अंदर के किसी पेज से होम पर लौटने या Back दबाने पर नहीं। */(function(){try{
+  var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0],ty=n?n.type:(performance.navigation&&performance.navigation.type===1?"reload":"navigate");
+  var inside=false;try{inside=!!document.referrer&&new URL(document.referrer).origin===location.origin;}catch(e){}
+  if(ty==="reload"||(ty==="navigate"&&!inside))document.documentElement.classList.add("pbl");
+}catch(e){}})();</script>
 <style>
 #pbL{display:none}
 html.pbl #pbL{display:flex;position:fixed;inset:0;z-index:2147483000;background:#fff;align-items:center;justify-content:center;overflow:hidden;transition:opacity .45s ease}
