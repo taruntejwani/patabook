@@ -177,9 +177,10 @@ body.pvw #m button:not([data-tab]):not([data-st]):not([data-rp]):not(.pvok),body
     } catch (e) { if (e.message === 'login') return; return $('m').innerHTML = '<div class="gate"><p class="err">' + esc(eMsg(e)) + '</p></div>'; }
     $('ttl').textContent = ROLE === 'owner' ? '👥 टीम (मालिक)' : ROLE === 'manager' ? '👥 मैनेजर' : '🧾 स्टाफ';
     TAB = 'home';
-    if (location.hash === '#shops') TAB = 'shops';
+    if (location.hash === '#shops' || location.hash === '#add') TAB = 'shops';
     if (VIEW) vwBar();
     draw();
+    if (location.hash === '#add' && canAdd()) { try { history.replaceState(null, '', location.pathname + location.search + '#shops'); } catch (e) {} showAddForm(); }   /* Admin के "➕ नई दुकान जोड़ें" से सीधे फ़ॉर्म */
   }
   function tabs() {
     /* नीचे की पट्टी हटा दी — सारे रास्ते होम के कार्डों से; अंदर के पन्नों पर ऊपर "← होम" */

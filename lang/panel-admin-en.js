@@ -565,3 +565,5 @@ PBL.add([["दुकान सबको दिखती है","Shop is visible
 ["plan दें","Give plan"],["👁 दुकान का पेज","👁 Shop page"],["🗺 मैप","🗺 Map"],["⚠ मैप","⚠ Map"],["📱 नंबर बदलें","📱 Change number"],
 ["✍️ सुधार माँगें","✍️ Ask to fix"],["✨ पता सुधारें","✨ Fix address"],["🗑 हटाएँ","🗑 Remove"],["← वापस","← Back"],["✔ कॉपी हो गया","✔ Copied"],["📋 कॉपी","📋 Copy"],["⚠ अधूरा (","⚠ Incomplete ("],["👤 मालिक","👤 Owner"],
 ["चालू / बंद","On / Off"],["और काम","More actions"],["जानकारी","Details"],["📍 लोकेशन है","📍 Has location"],["⚠ लोकेशन नहीं","⚠ No location"],[" तक"," till"]]);
+
+PBL.add([["➕ नई दुकान जोड़ें (दुकानदार की तरफ़ से)","➕ Add a new shop (for the shopkeeper)"]]);
