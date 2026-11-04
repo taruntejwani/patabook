@@ -19,6 +19,30 @@
 <meta name="twitter:image" content="https://patabook.in/icon-512.png">
 <script>try{sessionStorage.removeItem("pb-from-search")}catch(e){}</script><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://patabook.in/#org","name":"PataBook","url":"https://patabook.in/","logo":"https://patabook.in/icon-512.png","email":"patabook.in@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Gandhidham","addressRegion":"Gujarat","postalCode":"370201","addressCountry":"IN"}},{"@type":"WebSite","@id":"https://patabook.in/#site","url":"https://patabook.in/","name":"PataBook","inLanguage":["hi","en"],"publisher":{"@id":"https://patabook.in/#org"},"potentialAction":{"@type":"SearchAction","target":"https://patabook.in/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}]}</script>
 <link rel="icon" href="pin.png">
+<script>/* 🎬 Loader: 24 घंटे में एक बार (पहली बार आए या एक दिन बाद लौटे) */(function(){try{var k="pb-ldr",t=+localStorage.getItem(k)||0;if(Date.now()-t<864e5)return;localStorage.setItem(k,String(Date.now()));document.documentElement.classList.add("pbl");}catch(e){}})();</script>
+<style>
+#pbL{display:none}
+html.pbl #pbL{display:flex;position:fixed;inset:0;z-index:2147483000;background:#fff;align-items:center;justify-content:center;overflow:hidden;transition:opacity .45s ease}
+html.pbl body{overflow:hidden}
+#pbL.out{opacity:0}
+#pbL .row{display:flex;align-items:center;justify-content:center}
+#pbL .lm{position:relative;width:clamp(120px,34vw,190px);aspect-ratio:830/640;flex:none}
+#pbL .lm .mp{position:absolute;left:0;top:39.8%;width:100%;height:auto;opacity:0;animation:pblFade .8s ease forwards}
+#pbL .lm .pn{position:absolute;left:40.8%;top:31.6%;width:22%;height:auto;transform-origin:50% 100%;opacity:0;animation:pblDrop 1s cubic-bezier(.3,.6,.4,1) .75s forwards}
+#pbL .lm .sh{position:absolute;left:43%;top:58%;width:17%;height:5%;border-radius:50%;background:rgba(0,0,0,.18);transform:scale(0);animation:pblSh 1s ease .75s forwards}
+#pbL .lw{width:0;overflow:hidden;flex:none;animation:pblW .7s cubic-bezier(.3,.7,.3,1) 2s forwards}
+#pbL .lw .in{position:relative;width:clamp(170px,48vw,280px);padding-left:12px;opacity:0;transform:translateX(40px);animation:pblIn .7s cubic-bezier(.3,.7,.3,1) 2.05s forwards;overflow:hidden}
+#pbL .lw img{display:block;width:100%;height:auto}
+#pbL .lw small{display:block;margin-top:5px;font:800 clamp(7px,2vw,10px)/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.28em;color:#0b2f73;white-space:nowrap}
+#pbL .lw .in:after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.85),transparent);transform:skewX(-18deg);animation:pblShine .9s ease 2.75s forwards}
+@keyframes pblFade{to{opacity:1}}
+@keyframes pblDrop{0%{opacity:1;transform:translateY(-70vh)}55%{transform:translateY(0) scaleY(.86)}68%{transform:translateY(-22%)}80%{transform:translateY(0) scaleY(.93)}90%{transform:translateY(-7%)}100%{opacity:1;transform:translateY(0)}}
+@keyframes pblSh{55%{transform:scale(1)}68%{transform:scale(.7)}80%{transform:scale(1)}100%{transform:scale(1)}}
+@keyframes pblW{to{width:clamp(182px,51vw,292px)}}
+@keyframes pblIn{to{opacity:1;transform:none}}
+@keyframes pblShine{to{left:130%}}
+@media (prefers-reduced-motion:reduce){#pbL *{animation-duration:.01s!important;animation-delay:0s!important}}
+</style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#1a73e8">
@@ -372,6 +396,11 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <style id="pbmAnim">@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}.pbmp>*:nth-child(4){animation-delay:.19s}.pbmp>*:nth-child(5){animation-delay:.24s}.pbmp>*:nth-child(6){animation-delay:.29s}.pbmp>*:nth-child(n+7){animation-delay:.33s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}</style>
 </head>
 <body>
+<div id="pbL" aria-hidden="true"><div class="row"><div class="lm"><img class="mp" src="map.png" alt=""><i class="sh"></i><img class="pn" src="pin.png" alt=""></div><div class="lw"><div class="in"><img src="wordmark.png" alt=""><small>LOCAL BUSINESS DIRECTORY</small></div></div></div></div>
+<script>(function(){if(!document.documentElement.classList.contains("pbl"))return;var L=document.getElementById("pbL"),done=false;
+  function end(){if(done)return;done=true;L.classList.add("out");setTimeout(function(){document.documentElement.classList.remove("pbl");L.remove();},460);}
+  setTimeout(end,3500);L.addEventListener("click",end);   /* दबाने पर तुरंत हट जाए */
+})();</script>
 
 <div class="top">
   <label class="locchip" title="Choose city" data-hi="शहर चुनें"><span id="locBtn" role="button" tabindex="0" aria-label="Use my location" title="City from my location" data-hi="मेरी लोकेशन से शहर" style="cursor:pointer">📍</span><input id="city" form="sf" list="cityDL" autocomplete="off" enterkeyhint="done" data-ip="s_all" placeholder="सभी जगह" aria-label="City"><datalist id="cityDL"><option value="Gandhidham"></option><option value="Adipur"></option><option value="Anjar"></option><option value="Bhuj"></option><option value="Mundra"></option><option value="Mandvi"></option><option value="Nakhatrana"></option><option value="Bhachau"></option><option value="Rapar"></option><option value="Naliya"></option><option value="Dayapar"></option></datalist><button type="button" class="gpsb" id="gpsBtn" aria-label="Use my location" title="City from my location" data-hi="मेरी लोकेशन से शहर"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></label>
