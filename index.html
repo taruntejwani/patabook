@@ -315,8 +315,12 @@ footer{padding:14px 16px 18px;text-align:center;color:var(--muted);font-size:12p
   .searchbox{max-width:900px}
   .qcat{max-width:1100px;flex-wrap:wrap;justify-content:center;overflow:visible;gap:14px}
   .qcat a{width:88px;font-size:13px}.qcat a i{width:66px;height:66px;font-size:32px}
-  .posters{max-width:1000px;margin-left:auto;margin-right:auto}.hsbtn,#jobsBtn{max-width:1100px;margin-left:auto;margin-right:auto}
-  .pv{aspect-ratio:2.4/1}
+  .posters{max-width:none}
+  .posters.dsk .pv{aspect-ratio:auto;height:calc(var(--pw,400px) / 2 + 16px);padding-top:8px;background:none;box-shadow:none;border-radius:0;overflow:hidden}
+  .posters.dsk .ptk{gap:18px;transition:transform .55s cubic-bezier(.3,.75,.3,1)}.posters.dsk .ptk.nd{transition:none}
+  .posters.dsk .ps{flex:0 0 var(--pw,400px);height:calc(var(--pw,400px) / 2);border-radius:18px;background:#eef3fb;box-shadow:0 6px 18px rgba(26,115,232,.12);transform:scale(.86);opacity:.55;transition:transform .55s ease,opacity .55s ease}
+  .posters.dsk .ps.on{transform:none;opacity:1;box-shadow:0 12px 30px rgba(26,115,232,.25)}
+  .posters:not(.dsk) .pv{max-width:528px;margin:0 auto}.hsbtn,#jobsBtn{max-width:1100px;margin-left:auto;margin-right:auto}
   .gpw .nsc.pm{min-height:260px}
   .hsbtn{padding:16px 20px}.hsbtn b{font-size:18px}.hsbtn small{font-size:14px}
 }
@@ -734,7 +738,19 @@ function applyLang(){
   function slide(b){const t=b.tier==="platinum"||b.tier==="silver"?b.tier:"gold";
     return '<a class="ps" style="--pi:url(\''+esc(b.url)+'\')" href="shop.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 Digital Platinum Card",gold:"👑 Digital Gold Card",silver:"🥈 Digital Silver Card"}[t])+'</span></a>';}
   function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का पोस्टर यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"गोल्ड और प्लैटिनम सदस्य अपना पोस्टर यहाँ पूरे साइज़ में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
-  function go(n,anim){const t=tk();if(!t)return;i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
+  /* 💻 कंप्यूटर: poster पुराने (मोबाइल) size के ही, पर एक साथ 3 दिखें — बीच वाला बड़ा, दोनों तरफ़ वाले थोड़े छोटे; हर बार अगला poster बीच में आकर रुकता है */
+  const DSK=matchMedia("(min-width:900px)");let J=0,DX=0,FX=0;
+  const dsk=()=>DSK.matches&&P.length>1;
+  function dpos(anim){const t=tk(),v=document.getElementById("pv");if(!t||!v)return;const s0=t.children[0];if(!s0)return;
+    const gap=18,cx=v.clientWidth/2,pw=Math.floor(Math.min(528,(cx-gap)/1.43-6));   /* तीनों पूरे दिखें: बीच वाला पूरा, किनारे वाले .86 */
+    document.getElementById("posters").style.setProperty("--pw",pw+"px");const w=pw;
+    t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(cx-(J*(w+gap)+w/2)+DX)+"px)";
+    [...t.children].forEach((c,k)=>c.classList.toggle("on",k===J));
+    const n=P.length;document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===((J%n)+n)%n));}
+  function dfix(){const n=P.length;if(J>=2*n||J<n){J=((J%n)+n)%n+n;dpos(false);}}   /* बीच वाली copy पर चुपचाप लौटो — घूमता रहे, ख़त्म न हो */
+  function go(n,anim){const t=tk();if(!t)return;
+    if(dsk()){const c=P.length;J=anim===false?(((n%c)+c)%c)+c:J+(n-i);i=((n%c)+c)%c;dpos(anim);clearTimeout(FX);FX=setTimeout(dfix,480);return;}
+    i=P.length?((n%P.length)+P.length)%P.length:0;t.classList.toggle("nd",anim===false);t.style.transform="translateX("+(-i*100)+"%)";
     document.querySelectorAll("#pdots i").forEach((d,k)=>d.classList.toggle("on",k===i));}
   function auto(){clearInterval(timer);if(P.length>1&&!matchMedia("(prefers-reduced-motion: reduce)").matches)timer=setInterval(()=>go(i+1),4500);}
   /* Gold / Platinum दुकान जिसका आज poster नहीं: ऊपर वाली पट्टी जैसा चलता card (नीचे) */
@@ -790,7 +806,8 @@ function applyLang(){
     const city=String(document.getElementById("city")?.value||"").trim();
     P=ALL.slice();   /* पूरे Kutch के poster, शहर से नहीं छँटते */
     gdraw();
-    t.innerHTML=P.length?P.map(slide).join(""):(loaded&&!GL.length?ph():"");
+    document.getElementById("posters").classList.toggle("dsk",dsk());
+    t.innerHTML=P.length?(dsk()?P.concat(P,P).map(slide).join(""):P.map(slide).join("")):(loaded&&!GL.length?ph():"");
     document.getElementById("pdots").innerHTML=P.length>1?P.map(()=>"<i></i>").join(""):"";
     go(0,false);auto();}
   async function load(){
@@ -803,13 +820,15 @@ function applyLang(){
   /* उँगली से आगे-पीछे खिसकाएँ */
   (function(){const v=document.getElementById("pv");if(!v)return;let sx=0,dx=0,on=false,moved=false;
     v.addEventListener("pointerdown",e=>{if(P.length<2)return;on=true;moved=false;sx=e.clientX;dx=0;clearInterval(timer);tk().classList.add("nd");});
-    addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-sx;if(Math.abs(dx)>6)moved=true;tk().style.transform="translateX(calc("+(-i*100)+"% + "+dx+"px))";});
-    const up=()=>{if(!on)return;on=false;const w=v.clientWidth||1;go(Math.abs(dx)>w*.18?i+(dx<0?1:-1):i);auto();};
+    addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-sx;if(Math.abs(dx)>6)moved=true;if(dsk()){DX=dx;dpos(false);return;}tk().style.transform="translateX(calc("+(-i*100)+"% + "+dx+"px))";});
+    const up=()=>{if(!on)return;on=false;if(dsk()){DX=0;tk().classList.remove("nd");go(Math.abs(dx)>60?i+(dx<0?1:-1):i);auto();return;}const w=v.clientWidth||1;go(Math.abs(dx)>w*.18?i+(dx<0?1:-1):i);auto();};
     addEventListener("pointerup",up);addEventListener("pointercancel",up);
     v.addEventListener("click",e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false;}},true);
     v.addEventListener("dragstart",e=>e.preventDefault());
   })();
   document.getElementById("city")?.addEventListener("change",draw);
+  if(DSK.addEventListener)DSK.addEventListener("change",()=>{if(loaded)draw();});
+  addEventListener("resize",()=>{if(dsk())dpos(false);});
   document.addEventListener("pb-city-auto",draw);
   document.getElementById("city")?.addEventListener("input",()=>{clearTimeout(window.__pbPosterT);window.__pbPosterT=setTimeout(draw,350);});
   if(PB.onChange)PB.onChange(()=>{if(!P.length)draw();});
