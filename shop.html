@@ -707,8 +707,8 @@ function royalEntry(t){
         from.style.animation="none";from.style.transform="scale(1)";void from.offsetWidth;   /* animation हटाओ, वरना transform नहीं चलता */
         from.style.transition="transform .7s cubic-bezier(.6,.05,.25,1)";from.style.transform="translate("+dx+"px,"+dy+"px) scale("+sx+")";}}
     e.classList.add("fly");tm.push(setTimeout(fin,650));};
-  tm.push(setTimeout(fly,Math.round((tEnd+1.4)*1000)));
-  tm.push(setTimeout(fin,6500));
+  tm.push(setTimeout(fly,Math.round((tEnd+2.4)*1000)));   /* पूरा नाम 1 सेकंड और दिखे */
+  tm.push(setTimeout(fin,7500));
   e.addEventListener("click",fin);
 }
 
