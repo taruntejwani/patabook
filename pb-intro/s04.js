@@ -1,0 +1,2 @@
+/* PataBook loader #4 · Gold Dust */
+PBIntro.def(4,{name:"Gold Dust",hide:["streak", "band"],dust:"converge",css:".pbcl.sc4 .comp>.emb{animation:pbi-dz calc(var(--u)*1.3) ease calc(var(--u)*2.1) forwards}@keyframes pbi-dz{0%{opacity:0;filter:blur(10px) brightness(2.2);transform:scale(.96)}100%{opacity:1;filter:none;transform:none}}.pbcl.sc4{--nd:3.1;--rd:4.4;--td:4.7}.pbcl.sc4 canvas.dust{animation:none;opacity:1}",html:function(h){return h.emb()+h.m3()+h.tail();}});

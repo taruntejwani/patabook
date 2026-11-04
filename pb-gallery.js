@@ -1,4 +1,4 @@
-/* PataBook — My Shop → Gallery: 5 फ़ोल्डर (Logo · Profile Banner · Gallery · Home Ad · Opening Photo)
+/* PataBook — My Shop → Gallery: फ़ोल्डर (Logo · Profile Banner · Gallery · Home Ad) + 🎬 Loader (50 में से चुनें; पुराना Opening Photo हटाया)
    हर फ़ोल्डर में ＋ से फ़ोटो जुड़ती है; फ़ोटो पर tap → बड़ी होकर Delete / Set (Photos में दिखाओ-छिपाओ).
    कुल सीमा = plan की "photos" संख्या (सारे फ़ोल्डर मिलाकर, Admin → Plans).
    mybusiness.html की चीज़ें इस्तेमाल होती हैं: rpc, esc, L, $, ME, PBA, SB, KEY, ROWS, draw, PH, PREM, PHOTOS, LOGOS, COVER, BAN,
@@ -8,6 +8,7 @@
   var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   var KINDS = [["logo", "🖼️", "Logo", "Logo"], ["cover", "🌄", "Profile Banner", "Profile Banner"], ["photo", "📷", "Gallery", "Gallery"], ["front", "📢", "Home Ad", "Home Ad"], ["open", "🚪", "Opening Photo", "Opening Photo"]];
   var OPEN = {};
+  var SHOWN = KINDS.filter(function (K) { return K[0] !== "open"; });   /* 🚪 Opening Photo अब नहीं दिखता (फ़ोटो database में वैसी ही रहती हैं) */
   function en() { return L() === "en"; }
   function T(h, e) { return en() ? e : h; }
   function nm(K) { var H = { photo: "प्रोडक्ट और सर्विस", logo: "लोगो", cover: "प्रोफ़ाइल बैनर", front: "होम विज्ञापन", open: "शुरुआती फ़ोटो" }; return K[0] === "photo" ? T(H.photo, "Products & Services") : T(H[K[0]] || K[2], K[2]); }   /* "Gallery" फ़ोल्डर = प्रोडक्ट और सर्विस की फ़ोटो */
@@ -33,7 +34,7 @@
     if (isH(s)) { LIB[s] = []; try { PHOTOS[s] = (await rpc("pb_my_photos", { p_slug: s })) || []; } catch (e) {} draw(); return; }   /* सहायक: सिर्फ़ फ़ोटो */
     try { LIB[s] = (await rpc("pb_lib_my", { p_slug: s })) || []; } catch (e) { LIB[s] = LIB[s] || []; }
     try { PHOTOS[s] = (await rpc("pb_my_photos", { p_slug: s })) || []; } catch (e) {}
-    try { var ou = await rpc("pb_open_get", { p_slug: s }); OPEN[s] = typeof ou === "string" ? ou : ""; } catch (e) {}
+    if (!ILOADED[s]) introLoad(s);
     draw();
   }
   function reload(b) { LOAD[b.slug] = 1; return load(b.slug); }
@@ -45,6 +46,7 @@
     var msg = MSG[s] ? '<div class="err" style="margin:6px 2px">' + esc(MSG[s]) + '</div>' : '';
     var open = GO[s];
     if (open === "staff" && !b.h) return staffPage(b, i);
+    if (open === "intro" && !b.h) return introPage(b, i);
     if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
       var bar = '<div class="gph">' + (b.h ? '' : '<button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button>') + '<b>' + esc(nm(K)) + '</b><span>' + arr.length + '</span>' +
@@ -60,11 +62,11 @@
       var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो सार्वजनिक को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' + (arr.some(function (x) { return "off_since" in x; }) ? '<br><span style="color:#b45309">' + T("बिना ✔ की (छिपी) फ़ोटो 72 घंटे बाद अपने-आप हमेशा के लिए हट जाती है। ✔ लगाते ही वह बच जाती है।", "Photos without ✔ (hidden) are deleted permanently after 72 hours. Tick ✔ to keep one.") + '</span>' : '') : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
       return bar + msg + (arr.length ? sizeNote(k) : "") + hint + body;
     }
-    return msg + '<div class="gl">' + KINDS.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
+    return msg + '<div class="gl">' + SHOWN.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
       if (!can(b, K[0])) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>🔒</i></button>';
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
-    }).join("") + '</div>' + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
-      var parts = KINDS.map(function (K) { return esc(nm(K)) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
+    }).join("") + (b.h ? '' : introRow(b, i)) + '</div>' + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
+      var parts = SHOWN.map(function (K) { return esc(nm(K)) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
       return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
   };
@@ -528,6 +530,84 @@
     h.sh.addEventListener("change", function (e) { if (e.target.matches("select[data-f='sec']")) { read(); err = ""; draw2(); } });
   }
 
+
+  /* 🎬 Loader: दुकानदार 50 cinematic loader में से एक चुने (sql-35). ग्राहक को दुकान का page खुलते ही यही चलता है */
+  var INTRO = {}, ISEL = {}, IERR = {}, IPLAY = null, ILOADED = {};
+  function introRow(b, i) {
+    var cur = INTRO[b.slug], lab = cur ? "#" + cur.scene : (paid(b) ? T("चुनें", "Choose") : "");
+    if (!paid(b)) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">🎬</span><span class="gn"><b>' + T("लोडर", "Loader") + '</b></span><i>🔒</i></button>';
+    return '<button type="button" class="gfh" data-gf="intro" data-i="' + i + '"><span class="gi">🎬</span><span class="gn"><b>' + T("लोडर", "Loader") + '</b></span><i>' + esc(lab) + '</i><em>›</em></button>';
+  }
+  function engine() {
+    return new Promise(function (ok, no) {
+      if (window.PBIntro) return ok(); var e = document.getElementById("pbiEngine");
+      if (!e) { e = document.createElement("script"); e.id = "pbiEngine"; e.src = "pb-intro/engine.js?v=1"; document.head.appendChild(e); }
+      e.addEventListener("load", function () { ok(); }); e.addEventListener("error", function () { no(); });
+    });
+  }
+  async function introLoad(s) {
+    ILOADED[s] = 1;
+    try { var j = await rpc("pb_intro_get", { p_slug: s }); INTRO[s] = j && j.scene ? { scene: +j.scene, style: j.style || "gold" } : null; IERR[s] = ""; }
+    catch (e) { INTRO[s] = null; IERR[s] = /function|schema cache|404/i.test(String(e && e.message)) ? "setup" : ""; }
+    if (!ISEL[s]) ISEL[s] = INTRO[s] ? { scene: INTRO[s].scene, style: INTRO[s].style } : { scene: 1, style: "gold" };
+    draw(); introPlaySoon(s);
+  }
+  function introCss() {
+    if (document.getElementById("pbiGal")) return; var st = document.createElement("style"); st.id = "pbiGal";
+    st.textContent = ".ipw{display:grid;gap:12px;margin:8px 2px}.ipv{position:relative;width:min(100%,300px);aspect-ratio:9/16;margin:0 auto;border-radius:16px;overflow:hidden;background:#050505;box-shadow:0 10px 30px rgba(0,0,0,.25)}" +
+      ".ipv .ipp{position:absolute;inset:0;border:0;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 60%);color:#f2e2b0;font:800 15px/1.3 inherit;cursor:pointer;z-index:2}" +
+      ".ipn{text-align:center;font-size:14px;font-weight:800;color:#0b2f73}.ipn small{display:block;font-weight:600;color:#5b6475;font-size:12.5px}" +
+      ".ist{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.ist button{border:1px solid #d0d7e2;background:#fff;border-radius:10px;padding:8px 4px;font:inherit;font-size:12.5px;font-weight:800;color:#33395a;cursor:pointer}.ist button.on{border-color:#b8862b;background:#fff8e6;color:#7a5716}.ist i{display:block;width:16px;height:16px;border-radius:50%;margin:0 auto 4px}" +
+      ".igd{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}@media(min-width:560px){.igd{grid-template-columns:repeat(8,minmax(0,1fr))}}" +
+      ".igd button{position:relative;border:1px solid #d0d7e2;background:#0e0e10;color:#e9d59a;border-radius:10px;padding:9px 2px 7px;font:inherit;cursor:pointer;min-width:0}.igd button b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.igd button span{display:block;font-size:9.5px;color:#a49a82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px}" +
+      ".igd button.on{outline:3px solid #1a73e8;outline-offset:1px}.igd button.cur::after{content:'✓';position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#137333;color:#fff;font-size:11px;display:grid;place-items:center}" +
+      ".iac{display:flex;gap:8px;flex-wrap:wrap}.iac button{flex:1;min-width:140px;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer}.iac .s{background:#137333;color:#fff}.iac .r{background:#eef1f6;color:#b42318}";
+    document.head.appendChild(st);
+  }
+  function introPage(b, i) {
+    var s = b.slug; introCss(); if (!ILOADED[s]) introLoad(s);
+    if (!window.PBIntro && !introPage.w) { introPage.w = 1; engine().then(function () { draw(); introPlaySoon(s); }, function () {}); }
+    var sel = ISEL[s] || { scene: 1, style: "gold" }, cur = INTRO[s], names = (window.PBIntro && PBIntro.names) || [];
+    var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button><b>🎬 ' + T("लोडर", "Loader") + '</b><span>50</span></div>';
+    if (IERR[s] === "setup") return bar + '<div class="gbd"><small>' + T("यह सुविधा जल्दी चालू होगी।", "This will be available soon.") + '</small></div>';
+    var SN = [["gold", "Gold", "linear-gradient(180deg,#fff1c4,#b8862b 55%,#6e4f16)"], ["silver", "Silver", "linear-gradient(180deg,#fff,#9aa3ae 55%,#4a525c)"], ["black", "Black", "linear-gradient(180deg,#e9ecf1,#2b2f36 55%,#000)"], ["white", "White", "linear-gradient(180deg,#fff,#e9e6df 55%,#bdb6a8)"]];
+    var grid = ""; for (var n = 1; n <= 50; n++) grid += '<button type="button" class="' + (n === sel.scene ? "on" : "") + (cur && cur.scene === n ? " cur" : "") + '" data-ipv="' + n + '" data-i="' + i + '" aria-label="' + T("लोडर", "Loader") + ' ' + n + '"><b>' + n + '</b><span>' + esc(names[n - 1] || "") + '</span></button>';
+    var same = cur && cur.scene === sel.scene && cur.style === sel.style;
+    return bar + '<div class="ipw">' +
+      '<div class="szn">' + T("ग्राहक आपकी दुकान का page खोलते ही यह loader देखेंगे (आपके logo और नाम के साथ)। नंबर दबाकर देखें, पसंद आए तो \"यह लगाएँ\" दबाएँ।", "Customers see this loader when they open your shop page (with your logo and name). Tap a number to preview, then tap \"Use this\".") + '</div>' +
+      '<div class="ipv" id="ipv' + i + '"><button type="button" class="ipp" data-iplay="' + i + '">▶ ' + T("चलाकर देखें", "Play preview") + '</button></div>' +
+      '<div class="ipn">#' + sel.scene + ' · ' + esc(names[sel.scene - 1] || "") + '<small>' + (cur ? T("अभी लगा है: ", "Now in use: ") + "#" + cur.scene + " · " + esc(cur.style) : T("अभी कोई loader नहीं चुना", "No loader chosen yet")) + '</small></div>' +
+      '<div class="ist">' + SN.map(function (z) { return '<button type="button" class="' + (sel.style === z[0] ? "on" : "") + '" data-ist="' + z[0] + '" data-i="' + i + '"><i style="background:' + z[2] + '"></i>' + z[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="iac"><button type="button" class="s" data-isave="' + i + '"' + (same ? " disabled" : "") + '>' + (same ? "✅ " + T("यही लगा है", "In use") : "✅ " + T("यह लगाएँ", "Use this")) + '</button>' + (cur ? '<button type="button" class="r" data-irm="' + i + '">' + T("हटाएँ", "Remove") + '</button>' : '') + '</div>' +
+      (IERR[s] && IERR[s] !== "setup" ? '<div class="err">' + esc(IERR[s]) + '</div>' : '') +
+      '<div class="igd">' + grid + '</div></div>';
+  }
+  function introPlaySoon(s) { setTimeout(function () { var r = (ROWS || []).map(function (x, k) { return x && x.slug === s ? k : -1; }).filter(function (k) { return k >= 0; })[0]; if (r != null && GO[s] === "intro") introPlay(r); }, 30); }
+  async function introPlay(i) {
+    var b = ROWS[i], box = document.getElementById("ipv" + i); if (!b || !box) return;
+    try { await engine(); } catch (e) { return; }
+    if (IPLAY) try { IPLAY.stop(); } catch (e) {}
+    var old = box.querySelector(".pbcl"); if (old) old.remove();
+    var pb = box.querySelector(".ipp"); if (pb) pb.style.display = "none";
+    var sel = ISEL[b.slug] || { scene: 1, style: "gold" };
+    IPLAY = PBIntro.play({ mount: box, scene: sel.scene, style: sel.style, name: b.name, logo: LOGOS[b.slug] || "", tag: [b.category, String(b.address || "").split(",").slice(-1)[0].trim()].filter(Boolean).join(" · "),
+      onDone: function () { var q = box.querySelector(".ipp"); if (q) { q.style.display = ""; q.textContent = "↻ " + T("फिर से देखें", "Play again"); } } });
+  }
+  document.getElementById("list").addEventListener("click", async function (e) {
+    var gfi = e.target.closest('[data-gf="intro"]'); if (gfi) { var bi = ROWS[+gfi.dataset.i]; if (bi) introPlaySoon(bi.slug); return; }
+    var pv = e.target.closest("[data-ipv]"); if (pv) { var b = ROWS[+pv.dataset.i]; ISEL[b.slug] = { scene: +pv.dataset.ipv, style: (ISEL[b.slug] || {}).style || "gold" }; draw(); introPlaySoon(b.slug); return; }
+    var stb = e.target.closest("[data-ist]"); if (stb) { var b2 = ROWS[+stb.dataset.i]; ISEL[b2.slug] = { scene: (ISEL[b2.slug] || {}).scene || 1, style: stb.dataset.ist }; draw(); introPlaySoon(b2.slug); return; }
+    var pl = e.target.closest("[data-iplay]"); if (pl) { introPlay(+pl.dataset.iplay); return; }
+    var sv = e.target.closest("[data-isave]"); if (sv) { var b3 = ROWS[+sv.dataset.isave], s3 = b3.slug, sel = ISEL[s3]; sv.disabled = true;
+      try { ME = await PBA.session(); await rpc("pb_intro_set", { p_slug: s3, p_scene: sel.scene, p_style: sel.style }); INTRO[s3] = { scene: sel.scene, style: sel.style }; IERR[s3] = ""; try { localStorage.setItem("pbi_" + s3, sel.scene + "|" + sel.style); } catch (x) {} }
+      catch (er) { IERR[s3] = /premium/i.test(String(er && er.message)) ? T("यह सुविधा Silver / Gold / Platinum plan में है।", "This is in the Silver / Gold / Platinum plan.") : T("सेव नहीं हो सका। दोबारा कोशिश करें।", "Could not save. Try again."); }
+      draw(); return; }
+    var rm = e.target.closest("[data-irm]"); if (rm) { var b4 = ROWS[+rm.dataset.irm], s4 = b4.slug; rm.disabled = true;
+      try { ME = await PBA.session(); await rpc("pb_intro_set", { p_slug: s4, p_scene: null, p_style: null }); INTRO[s4] = null; IERR[s4] = ""; try { localStorage.removeItem("pbi_" + s4); } catch (x) {} }
+      catch (er) { IERR[s4] = T("हटाया नहीं जा सका। दोबारा कोशिश करें।", "Could not remove. Try again."); }
+      draw(); return; }
+  });
+  window.addEventListener("popstate", function () { if (IPLAY) try { IPLAY.stop(); } catch (e) {} });
   window.addEventListener("popstate", function (ev) { if (ev.state && ev.state.pbgal) return; var any = false; for (var k in GO) if (GO[k]) { any = true; GO[k] = ""; } if (any) draw(); });
   document.getElementById("list").addEventListener("click", function (e) {
     var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }

@@ -1,0 +1,2 @@
+/* PataBook loader #41 · Focus Pull */
+PBIntro.def(41,{name:"Focus Pull",hide:["streak"],dust:"bokeh",css:".pbcl.sc41 .comp{animation:pbi-k41 calc(var(--u)*2.6) cubic-bezier(.5,0,.2,1) calc(var(--u)*.3) both}@keyframes pbi-k41{0%{filter:blur(22px);opacity:0;transform:scale(1.06)}25%{opacity:1}70%{filter:blur(3px)}100%{filter:none;opacity:1;transform:none}}.pbcl.sc41 .comp>.emb{animation:none;opacity:1}.pbcl.sc41 .nm{animation-duration:.01s;animation-delay:0s}.pbcl.sc41{--nd:.1;--rd:3.4;--td:3.7}",html:function(h){return h.emb()+h.m1()+h.tail();}});

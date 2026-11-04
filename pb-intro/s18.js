@@ -1,0 +1,2 @@
+/* PataBook loader #18 · Tilt Up */
+PBIntro.def(18,{name:"Tilt Up",hide:["streak"],dust:"dust",css:".pbcl.sc18 .comp{animation:pbi-k18 calc(var(--u)*3.2) cubic-bezier(.25,.6,.2,1) calc(var(--u)*.2) both}@keyframes pbi-k18{0%{transform:translateY(38%) perspective(900px) rotateX(-14deg);opacity:0;filter:blur(8px)}35%{opacity:1}100%{transform:none;opacity:1;filter:none}}.pbcl.sc18 .comp>.emb{animation:none;opacity:1}.pbcl.sc18{--nd:2.4;--rd:3.9;--td:4.2}",html:function(h){return h.emb()+h.m3()+h.tail();}});

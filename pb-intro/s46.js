@@ -1,0 +1,2 @@
+/* PataBook loader #46 · Name First */
+PBIntro.def(46,{name:"Name First",hide:["streak"],dust:"dust",css:".pbcl.sc46 .nm3{animation-delay:calc(var(--u)*.4);animation-duration:calc(var(--u)*2)}.pbcl.sc46 .comp>.emb{animation:pbi-k46 calc(var(--u)*1.6) cubic-bezier(.2,.7,.2,1) calc(var(--u)*2.1) both}@keyframes pbi-k46{0%{opacity:0;transform:translateY(30%) scale(.9);filter:blur(8px)}100%{opacity:1;transform:none;filter:none}}.pbcl.sc46{--rd:3.9;--td:4.2}",html:function(h){return h.emb()+h.m3()+h.tail();}});

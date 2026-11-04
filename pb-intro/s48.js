@@ -1,0 +1,2 @@
+/* PataBook loader #48 · Gold Leaf */
+PBIntro.def(48,{name:"Gold Leaf",hide:["streak", "band"],dust:"flakes",css:".pbcl.sc48 canvas.dust{animation:none;opacity:1}.pbcl.sc48 .comp>.emb{animation:pbi-dz calc(var(--u)*1.6) ease calc(var(--u)*1) both}.pbcl.sc48{--nd:2.4;--rd:3.9;--td:4.2}@keyframes pbi-dz{0%{opacity:0;filter:blur(10px) brightness(2.2);transform:scale(.96)}100%{opacity:1;filter:none;transform:none}}",html:function(h){return h.emb()+h.m3()+h.tail();}});
