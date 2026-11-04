@@ -122,9 +122,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 @keyframes nsm{from{transform:translateX(0)}to{transform:translateX(calc(-1 * var(--w,50%)))}}
 @media (prefers-reduced-motion:reduce){.nst{animation-duration:calc(var(--dur,60s) * 2)}}
 .nsc-empty{padding:18px 16px;color:var(--muted);font-size:14px;min-width:220px;display:flex;align-items:center;justify-content:center}.nsc{flex:0 0 auto;width:calc((min(560px,100vw) - 32px - 20px) / 3);min-height:132px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 10px 11px;border-radius:16px;color:#0F2C59;
-  background:linear-gradient(135deg,#EAF4FF 0%,#D6E9FF 100%);border:1px solid #BFDBFE;box-shadow:0 2px 8px rgba(29,111,224,.08);position:relative;overflow:hidden}
-/* ☁️ Sky Light: हल्का नीला card */
-.nsc b{color:#0F2C59}.nsc .ad{color:#1D6FE0;font-weight:600;opacity:1}.nsc .ad .dk.adr{color:#5B6B85;opacity:1}
+  background:linear-gradient(135deg,#EAF4FF 0%,#D6E9FF 100%);border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(15,44,89,.08);position:relative;overflow:hidden}
+/* 🎨 Pastel Mix: हल्का नीला · हरा · गुलाबी बारी-बारी से */
+.nsc:nth-child(3n+2){background:linear-gradient(135deg,#E8FBF3 0%,#CFF5E4 100%)}
+.nsc:nth-child(3n+3){background:linear-gradient(135deg,#FFF0F5 0%,#FFD9E6 100%)}
+.nsc b{color:#1f2937}.nsc .ad{color:#2563eb;font-weight:600;opacity:1}.nsc .ad .dk.adr{color:#64748b;opacity:1}
 .nsc .ic{width:38px;height:38px;border-radius:11px;background:#fff;display:grid;place-items:center;font-size:21px}
 .nsc .ic.lg{background:#fff;overflow:hidden;padding:0}.nsc .ic.lg img{width:100%;height:100%;object-fit:cover;display:block}
 .nsc .new{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;background:var(--yellow);color:#12141c;border-radius:999px;padding:1px 6px}
