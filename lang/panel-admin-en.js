@@ -567,3 +567,4 @@ PBL.add([["दुकान सबको दिखती है","Shop is visible
 ["चालू / बंद","On / Off"],["और काम","More actions"],["जानकारी","Details"],["📍 लोकेशन है","📍 Has location"],["⚠ लोकेशन नहीं","⚠ No location"],[" तक"," till"]]);
 
 PBL.add([["➕ नई दुकान जोड़ें (दुकानदार की तरफ़ से)","➕ Add a new shop (for the shopkeeper)"]]);
+PBL.add([["📷 दुकान की जाँच फ़ोटो","📷 Shop verification photos"],["लोड हो रही हैं…","Loading…"],["फ़ोटो नहीं मिल सकीं","Could not load the photos"],["दुकानदार ने अभी जाँच की फ़ोटो नहीं भेजी","The shopkeeper has not sent verification photos yet"],["बार भेजी","times sent"],["फ़ोटो सिर्फ़ आपको दिखती हैं — दबाकर बड़ा देखें","Photos are visible only to you — tap to enlarge"]]);

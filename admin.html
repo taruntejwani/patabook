@@ -629,7 +629,33 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div class="miss ' + (miss.length ? 'bad">⚠ अधूरा (' + miss.length + '): ' + esc(miss.join(' · ')) : 'good">✅ प्रोफ़ाइल 100% पूरी') + '</div>' + srcLine(b) + ownLine(b) + '</div>' +
       '<div class="box"><h4>चालू / बंद</h4><div class="tgs">' + t + '</div></div>' +
       '<div class="box"><h4>और काम</h4><div class="tgs">' + w + '</div></div>' +
+      verBoxHTML(b) +
       (b.description ? '<div class="box"><h4>जानकारी</h4><div class="desc" style="margin:0">' + esc(b.description) + '</div></div>' : '') + '</div>';
+  }
+  /* 📷 दुकानदार ने जाँच के समय जो 2 फ़ोटो खींचीं (बाहर बोर्ड + अंदर) — इसी दुकान के पेज पर, मंज़ूर / Reject के साथ */
+  var VLOAD = 0;
+  function verBoxHTML(b) {
+    var hd = '<div class="box"><h4>📷 दुकान की जाँच फ़ोटो</h4>';
+    if (VERS === null) return hd + '<p class="meta" style="margin:0">' + (VLOAD ? 'लोड हो रही हैं…' : 'फ़ोटो नहीं मिल सकीं') + '</p></div>';
+    var L = VERS.filter(function (v) { return v.slug === b.slug; }).sort(function (x, y) { return String(y.created_at || '').localeCompare(String(x.created_at || '')); });
+    if (!L.length) return hd + '<p class="meta" style="margin:0">दुकानदार ने अभी जाँच की फ़ोटो नहीं भेजी</p></div>';
+    var v = L[0];
+    var img = function (p, t) { var u = VSIGN[p]; return '<figure style="margin:0;flex:1;min-width:0"><figcaption style="font-size:12.5px;font-weight:700;color:#5b6475;margin-bottom:4px">' + t + '</figcaption>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid #e3e8f0;display:block"></a>' : '<div style="aspect-ratio:4/3;border-radius:10px;background:#eef2f8;display:grid;place-items:center;font-size:12px;color:#5b6475">फ़ोटो नहीं</div>') + '</figure>'; };
+    var ai = v.ai_status === 'error' ? '<p class="meta" style="color:#b54708;font-weight:700">⚠️ AI जाँच नहीं हो पाई — बोर्ड का नाम खुद मिलाएँ</p>'
+      : '<p class="meta">🤖 बोर्ड पर पढ़ा: <b>' + esc(v.sign_text || '—') + '</b> ' + (v.ai_match ? '✅ नाम मिला' : '❌ नाम नहीं मिला') + '</p>';
+    return hd + '<p class="meta" style="margin:0 0 6px"><b>' + ({ pending: '⏳ जाँच बाकी', approved: '✅ Verified', rejected: '❌ मना' }[v.status] || esc(v.status)) + '</b> · ' + fmtD(v.created_at) + (L.length > 1 ? ' · ' + L.length + ' बार भेजी' : '') + '</p>' + ai +
+      '<div style="display:flex;gap:8px;margin:8px 0">' + img(v.outside_path, 'बाहर (बोर्ड)') + img(v.inside_path, 'अंदर') + '</div>' +
+      '<p class="meta" style="margin:0">फ़ोटो सिर्फ़ आपको दिखती हैं — दबाकर बड़ा देखें</p>' +
+      (v.reason ? '<p class="meta">कारण: ' + esc(v.reason) + '</p>' : '') +
+      (v.status === 'pending' ? '<div class="tgs" style="margin-top:8px"><button type="button" class="tg ac" data-ver="1" data-id="' + v.id + '" data-n="' + esc(v.shop || b.name) + '" style="background:#137333;color:#fff">✅ मंज़ूर करें</button><button type="button" class="tg ac bad" data-ver="0" data-id="' + v.id + '" data-n="' + esc(v.shop || b.name) + '">❌ Reject</button></div>' : '') + '</div>';
+  }
+  async function verRefresh() { VLOAD = 1; paintShopPg(); try { await loadVers(); } catch (x) {} VLOAD = 0; paintShopPg(); }
+  async function verDecide(vr) {
+    var okv = vr.dataset.ver === '1', whyv = null;
+    if (okv) { if (!confirm('"' + vr.dataset.n + '" को जाँचा हुआ करें? दुकानदार को 🔔 संदेश जाएगा और वह प्लान ले सकेगा।')) return false; }
+    else { whyv = prompt('अस्वीकार का कारण (दुकानदार को 🔔 में दिखेगा), जैसे: बोर्ड का नाम साफ़ नहीं, दुकान बंद दिख रही', ''); if (whyv === null) return false; if (!whyv.trim()) { alert('कारण लिखें।'); return false; } }
+    vr.disabled = true; try { await rpc('pb_admin_verify_decide', { p_id: +vr.dataset.id, p_ok: okv, p_reason: whyv }); } catch (er) { alert('गलती: ' + er.message); }
+    return true;
   }
   function paintShopPg() {
     if (!SPG) return; var el = $('spg'); if (!el) return;
@@ -641,8 +667,9 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     SPG = slug; var el = $('spg');
     if (!el) { el = document.createElement('div'); el.id = 'spg'; el.className = 'spg'; document.body.appendChild(el);
       el.onclick = function (e) { if (e.target.closest('[data-x]')) { closeShopPg(); return; }
-        var cp = e.target.closest('[data-cp]'); if (cp) { e.preventDefault(); e.stopPropagation(); doCopy(cp); return; } shopAct(e); }; }
-    el.hidden = false; el.scrollTop = 0; paintShopPg(); document.body.style.overflow = 'hidden';
+        var cp = e.target.closest('[data-cp]'); if (cp) { e.preventDefault(); e.stopPropagation(); doCopy(cp); return; }
+        var vr = e.target.closest('[data-ver]'); if (vr) { verDecide(vr).then(function (d) { if (d) verRefresh(); }); return; } shopAct(e); }; }
+    el.hidden = false; el.scrollTop = 0; paintShopPg(); document.body.style.overflow = 'hidden'; verRefresh();
     if (!(history.state && history.state.pbs)) history.pushState({ pbs: 1, pbv: (history.state && history.state.pbv) || 'home' }, '', location.pathname + '#shop');
   }
   function doCopy(el) {
@@ -1302,10 +1329,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var ps = e.target.closest('[data-psave]'), pt = e.target.closest('[data-ptier]'), bn = e.target.closest('[data-ban]');
     var vr = e.target.closest('[data-ver]');
     if (vr) {
-      var okv = vr.dataset.ver === '1', whyv = null;
-      if (okv) { if (!confirm('"' + vr.dataset.n + '" को जाँचा हुआ करें? दुकानदार को 🔔 संदेश जाएगा और वह प्लान ले सकेगा।')) return; }
-      else { whyv = prompt('अस्वीकार का कारण (दुकानदार को 🔔 में दिखेगा), जैसे: बोर्ड का नाम साफ़ नहीं, दुकान बंद दिख रही', ''); if (whyv === null) return; if (!whyv.trim()) { alert('कारण लिखें।'); return; } }
-      vr.disabled = true; try { await rpc('pb_admin_verify_decide', { p_id: +vr.dataset.id, p_ok: okv, p_reason: whyv }); } catch (er) { alert('गलती: ' + er.message); } loadPrem(); return;
+      if (await verDecide(vr)) loadPrem(); return;
     }
     if (ps) {
       var box = ps.closest('[data-plan]'), feats = {}, body = {};
