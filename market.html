@@ -58,6 +58,21 @@ h2{font-size:16px;color:var(--navy);margin:16px 2px 10px}
 .sc small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .sgrid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:8px}
 @media(min-width:620px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pov{position:fixed;inset:0;z-index:50;background:rgba(10,20,40,.55);display:flex;align-items:flex-end;justify-content:center}
+.psh{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;animation:pup .22s ease}
+@media(min-width:620px){.pov{align-items:center}.psh{border-radius:20px}}
+@keyframes pup{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.psh .pim{position:relative;background:#eef3fb}.psh .pim img{width:100%;max-height:52vh;object-fit:contain;display:block}
+.psh .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer}
+.psh .pin{padding:14px 16px 18px}
+.psh h3{font-size:18px;line-height:1.3}
+.psh .sz{color:var(--muted);font-size:13px;margin-top:3px}
+.psh .pr{font-size:22px;font-weight:800;color:var(--green);margin-top:6px}
+.psh .os{display:inline-block;margin-top:6px;background:#fdecec;color:#b42318;font-weight:700;font-size:12px;border-radius:8px;padding:3px 8px}
+.psh .shp{margin-top:14px;border:1.5px solid var(--line);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center}
+.psh .shp .lg{width:48px;height:48px;border-radius:12px;background:#eef3fb;flex:none;display:grid;place-items:center;font-size:24px;overflow:hidden}.psh .shp .lg img{width:100%;height:100%;object-fit:cover}
+.psh .shp b{display:block;font-size:15px}.psh .shp small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.psh .open{display:block;margin-top:12px;text-align:center;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:12px;font-size:15px}
 .note{background:#fff8e6;border:1px solid #f3d38a;color:#7a4b00;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin-top:14px}
 .note a{color:var(--blue);font-weight:700}
 .msg{color:var(--muted);text-align:center;padding:28px 10px;font-size:14px}
@@ -102,8 +117,8 @@ function paintTexts(){
   document.getElementById("q").placeholder=T("सामान खोजें…","Search products…");
   document.getElementById("near").textContent=T("📍 मेरे पास","📍 Near me");
   const w=document.getElementById("where"),ws=document.getElementById("whereS");
-  if(MODE==="geo"){w.textContent=T("आपके 20 km के अंदर","Within 20 km of you");ws.textContent=T(NEAR.length+" दुकानें पास में","Shops nearby: "+NEAR.length);}
-  else{w.textContent=CITY?T(CITY+" की दुकानें",CITY+" shops"):T("शहर चुनें","Choose your city");ws.textContent=T("पास की दुकानें देखने के लिए \"मेरे पास\" दबाएँ","Tap \"Near me\" to see shops within 20 km");}
+  if(MODE==="geo"){w.textContent=T("आपके 20 km के अंदर","Within 20 km of you");ws.textContent=T(PRODS.length+" सामान पास की दुकानों में",PRODS.length+" products in nearby shops");}
+  else{w.textContent=CITY?T(CITY+" का बाज़ार",CITY+" market"):T("शहर चुनें","Choose your city");ws.textContent=T("20 km के अंदर का सामान देखने के लिए \"मेरे पास\" दबाएँ","Tap \"Near me\" to see products within 20 km");}
 }
 async function loadShops(){
   try{const r=await fetch(SB+"/rest/v1/businesses?select=slug,name,category,address,latitude,longitude,logo_url&is_active=eq.true&deleted_at=is.null&limit=1000",{headers:H});
@@ -125,17 +140,15 @@ function draw(){
   paintTexts();
   const out=document.getElementById("out"),q=norm(document.getElementById("q").value);
   if(LOADING){out.innerHTML='<div class="msg">'+T("सामान लाया जा रहा है…","Loading products…")+'</div>';return;}
-  const cats=[...new Set(NEAR.map(b=>b.category).filter(Boolean))].slice(0,14);
+  const cats=[...new Set(PRODS.map(p=>p._s.category).filter(Boolean))].slice(0,14);
   document.getElementById("chips").innerHTML=cats.length?['<button class="chip'+(CAT?'':' on')+'" data-c="">'+T("सब","All")+'</button>'].concat(cats.map(c=>'<button class="chip'+(CAT===c?' on':'')+'" data-c="'+esc(c)+'">'+esc(c)+'</button>')).join(""):"";
   const P=PRODS.filter(p=>(!CAT||p._s.category===CAT)&&(!q||norm(p.name+" "+(p.size||"")+" "+p._s.name).includes(q)));
-  const S=NEAR.filter(b=>(!CAT||b.category===CAT)&&(!q||norm(b.name+" "+(b.category||"")).includes(q)));
   let h="";
   if(P.length){h+='<h2>🛒 '+T("सामान","Products")+' ('+P.length+')</h2><div class="grid">'+P.map(p=>{const b=p._s;
-    return '<a class="pc" href="'+esc(shopUrl(b.slug))+'"><div class="im"><img src="'+esc(p.img)+'" alt="" loading="lazy" decoding="async">'+(p.best?'<span class="bs">⭐ '+T("बेस्ट","Best")+'</span>':'')+(p.stock===false?'<span class="os">'+T("अभी स्टॉक में नहीं","Out of stock")+'</span>':'')+'</div>'+
+    return '<a class="pc" href="'+esc(shopUrl(b.slug))+'" data-p="'+PRODS.indexOf(p)+'"><div class="im"><img src="'+esc(p.img)+'" alt="" loading="lazy" decoding="async">'+(p.best?'<span class="bs">⭐ '+T("बेस्ट","Best")+'</span>':'')+(p.stock===false?'<span class="os">'+T("अभी स्टॉक में नहीं","Out of stock")+'</span>':'')+'</div>'+
       '<div class="bd"><span class="nm">'+esc(p.name)+'</span>'+(p.size?'<span class="sz">'+esc(p.size)+'</span>':'')+(p.mrp?'<span class="pr">₹'+esc(Number(p.mrp).toLocaleString("en-IN"))+'</span>':'')+
-      '<span class="sh">🏪 '+esc(b.name)+(dist(b)?' · '+dist(b):'')+'</span><span class="go">'+T("दुकान से लें ›","Buy from shop ›")+'</span></div></a>';}).join("")+'</div>';}
-  if(S.length){h+='<h2>🏪 '+T("पास की दुकानें","Shops nearby")+' ('+S.length+')</h2><div class="sgrid">'+S.slice(0,60).map(b=>'<a class="sc" href="'+esc(shopUrl(b.slug))+'"><span class="lg">'+(window.PBPlan&&PBPlan.has(b.slug,"logo")&&IMG.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" loading="lazy">':'🏪')+'</span><span style="min-width:0"><b>'+esc(b.name)+'</b><small>'+esc([b.category,dist(b)].filter(Boolean).join(" · "))+'</small></span></a>').join("")+'</div>';}
-  if(!P.length&&!S.length)h='<div class="msg">'+(q?T("इस नाम का सामान नहीं मिला।","Nothing found with this name."):MODE==="geo"?T("20 km के अंदर अभी कोई दुकान नहीं मिली।","No shops found within 20 km yet."):T("ऊपर \"मेरे पास\" दबाएँ या होम पेज पर अपना शहर चुनें।","Tap \"Near me\" above or choose your city on the home page."))+'</div>';
+      '<span class="sh">🏪 '+esc(b.name)+(dist(b)?' · '+dist(b):'')+'</span><span class="go">'+T("देखें ›","View ›")+'</span></div></a>';}).join("")+'</div>';}
+  if(!P.length)h='<div class="msg">'+(q?T("इस नाम का सामान नहीं मिला।","Nothing found with this name."):MODE==="geo"?T("20 km के अंदर अभी कोई सामान नहीं मिला।","No products found within 20 km yet."):T("ऊपर \"मेरे पास\" दबाएँ या होम पेज पर अपना शहर चुनें।","Tap \"Near me\" above or choose your city on the home page."))+'</div>';
   h+='<div class="note">🧾 '+T("दुकानदार हैं? \"मेरी दुकान\" में अपना सामान (फ़ोटो, नाम, कीमत) डालें — वह यहाँ City Market में आपके शहर के ग्राहकों को दिखेगा। ","Own a shop? Add your products (photo, name, price) in \"My Shop\" — they show here in City Market to customers in your city. ")+'<a href="mybusiness.html">'+T("मेरी दुकान ›","My Shop ›")+'</a></div>';
   out.innerHTML=h;
 }
@@ -147,6 +160,21 @@ function near(){
   navigator.geolocation.getCurrentPosition(p=>{ME={lat:p.coords.latitude,lng:p.coords.longitude};MODE="geo";try{sessionStorage.setItem("pb-loc",JSON.stringify(ME));}catch(e){}b.disabled=false;refresh();},
     ()=>{b.disabled=false;paintTexts();alert(T("Location नहीं मिली। फ़ोन की Location चालू करके फिर दबाएँ।","Could not get your location. Turn on Location and tap again."));},{enableHighAccuracy:true,timeout:10000,maximumAge:300000});
 }
+/* सामान दबाया → बड़ी फ़ोटो + कीमत + किस दुकान का है; वहाँ से दुकान खोलें। फ़ोन का Back इसे बंद करता है */
+function sheet(p){
+  const b=p._s,lg=window.PBPlan&&PBPlan.has(b.slug,"logo")&&IMG.test(b.logo_url||"");
+  const ov=document.createElement("div");ov.className="pov";
+  ov.innerHTML='<div class="psh" role="dialog" aria-modal="true"><div class="pim"><img src="'+esc(p.img)+'" alt=""><button type="button" class="x" data-x aria-label="'+T("बंद करें","Close")+'">✕</button></div><div class="pin">'+
+    '<h3>'+esc(p.name)+'</h3>'+(p.size?'<div class="sz">'+esc(p.size)+'</div>':'')+(p.mrp?'<div class="pr">₹'+esc(Number(p.mrp).toLocaleString("en-IN"))+'</div>':'')+(p.stock===false?'<span class="os">'+T("अभी स्टॉक में नहीं","Out of stock")+'</span>':'')+
+    '<div class="shp"><span class="lg">'+(lg?'<img src="'+esc(b.logo_url)+'" alt="">':'🏪')+'</span><span style="min-width:0"><small>'+T("यह सामान इस दुकान पर मिलेगा","Available at this shop")+'</small><b>'+esc(b.name)+'</b><small>'+esc([b.category,dist(b),b.address].filter(Boolean).join(" · "))+'</small></span></div>'+
+    '<a class="open" href="'+esc(shopUrl(b.slug))+'">🏪 '+T("दुकान देखें — Call / WhatsApp / रास्ता","Open shop — Call / WhatsApp / Directions")+'</a></div></div>';
+  document.body.appendChild(ov);document.body.style.overflow="hidden";
+  let gone=false;const kill=()=>{if(gone)return;gone=true;ov.remove();document.body.style.overflow="";removeEventListener("popstate",onPop);};
+  const onPop=()=>kill();
+  try{history.pushState({pbm:1},"");}catch(e){}addEventListener("popstate",onPop);
+  ov.addEventListener("click",e=>{if(e.target===ov||e.target.closest("[data-x]")){try{history.back();}catch(_){kill();}}});
+}
+document.getElementById("out").addEventListener("click",e=>{const a=e.target.closest("a.pc[data-p]");if(!a||e.ctrlKey||e.metaKey)return;e.preventDefault();const p=PRODS[+a.dataset.p];if(p)sheet(p);});
 document.getElementById("near").onclick=near;
 document.getElementById("chips").onclick=e=>{const c=e.target.closest("[data-c]");if(!c)return;CAT=c.dataset.c;draw();};
 document.getElementById("q").oninput=()=>{clearTimeout(window.__mq);window.__mq=setTimeout(draw,200);};
