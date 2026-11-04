@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="description" content="PataBook नौकरी — अपने शहर की दुकानों में खाली नौकरियाँ (Helper, Driver, Salesman…) देखें और सीधे दुकान से बात करें। Local shop jobs in your city.">
 <title>💼 नौकरी / नौकरियाँ — PataBook</title>
 <link rel="icon" href="pin.png">
@@ -50,6 +50,7 @@ h1{font-size:22px;color:#0b2f73;margin:6px 0 4px}
 .owner{display:block;text-align:center;margin:18px 0 0;color:#174ea6;font-weight:700;text-decoration:none}
 [hidden]{display:none!important}
 </style>
+<style>/* 🖥️ PC (900px+): बड़ी screen पर चौड़ा पेज; मोबाइल वैसा ही */@media(min-width:900px){.wrap{max-width:1180px}#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}#list>*{margin:0!important}#list>:not(.job){grid-column:1/-1}}</style>
 </head>
 <body>
 <script>/* ₹499 Vacancy plan अभी बंद (site-config.js → jobs:false) — यह पेज न खुले */if(!(window.PB_SITE&&PB_SITE.jobs))location.replace("index.html");</script>

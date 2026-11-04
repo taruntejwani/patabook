@@ -4,6 +4,8 @@
   var ua = navigator.userAgent || "";
   var IOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (!IOS) return;
+  /* iPhone Safari "user-scalable=no" नहीं मानता: दो उँगली से zoom रोको (PC पर असर नहीं) */
+  ["gesturestart", "gesturechange"].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false }); });
   var standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
   if (standalone) return;
   if (/FBAN|FBAV|Instagram|Line\//.test(ua)) return;   /* Facebook/Instagram के अंदर वाले browser में यह काम नहीं करता */
