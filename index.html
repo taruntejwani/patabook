@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <style id="pbmAnim">@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}.pbmp>*:nth-child(4){animation-delay:.19s}.pbmp>*:nth-child(5){animation-delay:.24s}.pbmp>*:nth-child(6){animation-delay:.29s}.pbmp>*:nth-child(n+7){animation-delay:.33s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}</style>
 </head>
 <body>
-<div id="pbL" aria-hidden="true"><div class="row"><div class="lm"><img class="mp" src="map.png" alt=""><i class="sh"></i><img class="pn" src="pin.png" alt=""></div><div class="lw"><div class="in"><img src="wordmark.png" alt=""><small>LOCAL BUSINESS DIRECTORY</small></div></div></div></div>
+<div id="pbL" aria-hidden="true"><div class="row"><div class="lm"><img class="mp" src="map.png" alt=""><i class="sh"></i><img class="pn" src="pin.png" alt=""></div><div class="lw"><div class="in"><img src="wordmark.png" alt=""></div></div></div></div>
 <script>(function(){if(!document.documentElement.classList.contains("pbl"))return;var L=document.getElementById("pbL"),done=false;
   function end(){if(done)return;done=true;L.classList.add("out");setTimeout(function(){document.documentElement.classList.remove("pbl");L.remove();},460);}
   setTimeout(end,3500);L.addEventListener("click",end);   /* दबाने पर तुरंत हट जाए */
