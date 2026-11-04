@@ -131,7 +131,8 @@ $("gpsBtn").onclick=()=>{
       :mid?T("स्थान लगभग मिला (±"+a+" मीटर)। नीला घेरा बताता है कि असली जगह कहाँ तक हो सकती है। पिन को खिसकाकर दुकान पर रखें।","Approximate fix (±"+a+" m). The blue circle shows where the real spot may be. Drag the pin onto your shop.")
       :T("स्थान साफ़ नहीं मिला (±"+a+" मीटर)। बैटरी सेवर बंद करें, खुली जगह जाकर दोबारा दबाएँ, या पिन ख़ुद दुकान पर रखें।","Weak fix (±"+a+" m). Turn off battery saver, go to an open spot and press again, or place the pin yourself."),good?"ok":(mid?"":"err"));
   },e=>{b.disabled=false;
-    st("gpsSt",e&&e.code===1?T("स्थान की अनुमति नहीं मिली। फ़ोन की सेटिंग → Apps → PataBook (या Chrome) → अनुमतियाँ → लोकेशन → अनुमति दें करें। या नक्शे पर पिन रखें।","Location permission denied. Phone Settings → Apps → PataBook (or Chrome) → Permissions → Location → Allow. Or place the pin on the map.")
+    st("gpsSt",e&&e.code===1&&IOS?T("स्थान की अनुमति बंद है। iPhone की Settings → Privacy & Security → Location Services चालू करें → नीचे Chrome (या Safari Websites) → \"While Using the App\" चुनें। Safari में: ऊपर aA → Website Settings → Location → Allow। फिर यह पेज दोबारा खोलकर हरा बटन दबाएँ — या नीचे नक्शे पर दुकान की जगह छूकर पिन रखें।","Location is turned off. On iPhone: Settings → Privacy & Security → Location Services ON → Chrome (or Safari Websites) → \"While Using the App\". In Safari: tap aA → Website Settings → Location → Allow. Then reopen this page and press the green button — or tap your shop's spot on the map below to place the pin.")
+      :e&&e.code===1?T("स्थान की अनुमति नहीं मिली। फ़ोन की सेटिंग → Apps → PataBook (या Chrome) → अनुमतियाँ → लोकेशन → अनुमति दें करें। या नक्शे पर पिन रखें।","Location permission denied. Phone Settings → Apps → PataBook (or Chrome) → Permissions → Location → Allow. Or place the pin on the map.")
       :T("स्थान नहीं मिला। GPS चालू करके दोबारा दबाएँ, या नक्शे पर पिन रखें।","Could not get location. Turn on GPS and try again, or place the pin on the map."),"err");
   },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 };
@@ -145,6 +146,10 @@ $("saveBtn").onclick=async()=>{
       :/bad location/.test(m)?T("पिन भारत के अंदर रखें।","Put the pin inside India.")
       :T("सेव नहीं हो सकी। इंटरनेट जाँचकर दोबारा कोशिश करें।","Could not save. Check your internet and try again."),"err");}
 };
+/* कच्छ / गुजरात के शहर: पते में नाम हो तो नक्शा वहीं से खुले (पिन लगाना आसान) */
+const CITYC=[["gandhidham",23.0753,70.1337],["adipur",23.0700,70.0830],["anjar",23.1130,70.0280],["bhuj",23.2530,69.6690],["mundra",22.8390,69.7210],["mandvi",22.8330,69.3550],["bhachau",23.2960,70.3430],["rapar",23.5700,70.6400],["nakhatrana",23.3470,69.2610],["naliya",23.2600,68.8300],["dayapar",23.6300,68.9000],["ahmedabad",23.0225,72.5714],["rajkot",22.3039,70.8022],["surat",21.1702,72.8311],["vadodara",22.3072,73.1812],["jamnagar",22.4707,70.0577],["morbi",22.8173,70.8377],["kachchh",23.2500,69.7500],["kutch",23.2500,69.7500]];
+function guessCenter(a){a=String(a||"").toLowerCase();for(const c of CITYC)if(a.indexOf(c[0])>=0)return [c[1],c[2]];return null;}
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 (async function start(){
   only("loading");
   if(!/^[a-z0-9][a-z0-9-]{0,118}[a-z0-9]$/.test(slug)){only("notOwner");return;}
@@ -158,7 +163,8 @@ $("saveBtn").onclick=async()=>{
     if(me&&me.lat!=null&&me.lng!=null){orig=[+me.lat,+me.lng];$("curTxt").textContent=T("अभी स्थान लगा हुआ है। बदलना हो तो नीचे से नया लगाएँ।","A location is already set. To change it, set a new one below.");}
     else $("curTxt").textContent=T("अभी नक्शे पर स्थान नहीं लगा है। ग्राहकों को रास्ता दिखाने के लिए ज़रूर लगाएँ।","No map location yet. Set it so customers can find the way.");
     only("main");
-    await loadMap(orig||[22.5,79],orig?17:4.2);
+    const gc=orig?null:guessCenter(b.address||"");   /* स्थान नहीं लगा: पूरा भारत नहीं, दुकान के शहर के पास से नक्शा खुले */
+    await loadMap(orig||(gc?gc:[22.5,79]),orig?17:(gc?14:4.2));
     if(orig){setPos(orig[0],orig[1],false);$("saveBtn").disabled=true;}
   }catch(e){
     if(e.status===401||/JWT|expired/i.test(e.message)){only("needLogin");return;}
