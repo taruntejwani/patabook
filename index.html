@@ -637,10 +637,12 @@ function applyLang(){
         else if(b.dataset.m==="near"){nbGoNear();}
         else if(b.dataset.r){NB.r=+b.dataset.r;try{localStorage.setItem("pb-nb",JSON.stringify({r:NB.r}));}catch(x){}nbLoadNear();}});}
     const c=currentCity(),bt=(on)=>"border:1px solid #e4eaf5;border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;"+(on?"background:#1a73e8;border-color:#1a73e8;color:#fff":"background:#fff;color:#0b2f73");
-    let h='<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" data-m="city" style="'+bt(NB.mode==="city")+'">'+(c?"🏙️ "+esc(c):nbt("chip_all"))+'</button><button type="button" data-m="near" style="'+bt(NB.mode==="near")+'">'+nbt("chip_near")+'</button></div>';
-    if(NB.mode==="near")h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">'+[2,5,10,20].map(r=>'<button type="button" data-r="'+r+'" style="'+bt(r===NB.r)+'">'+r+' km</button>').join("")+'</div>';
-    if(NB.msg)h+='<div style="font-size:13px;color:#5b6475;padding:6px 2px">'+esc(NB.msg)+'</div>';
-    bar.innerHTML=h;
+    /* सब एक ही line में (km और संदेश भी) — "Near me" दबाने पर पन्ना ऊपर-नीचे न हिले */
+    let h='<div class="nbr" style="display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none;align-items:center;min-height:36px"><button type="button" data-m="city" style="flex:none;'+bt(NB.mode==="city")+'">'+(c?"🏙️ "+esc(c):nbt("chip_all"))+'</button><button type="button" data-m="near" style="flex:none;'+bt(NB.mode==="near")+'">'+nbt("chip_near")+'</button>';
+    if(NB.msg)h+='<span style="flex:none;font-size:13px;color:#5b6475;white-space:nowrap;padding:0 4px">'+esc(NB.msg)+'</span>';
+    else if(NB.mode==="near")h+=[2,5,10,20].map(r=>'<button type="button" data-r="'+r+'" style="flex:none;'+bt(r===NB.r)+';padding:7px 11px">'+r+' km</button>').join("");
+    h+='</div>';
+    if(bar.innerHTML!==h)bar.innerHTML=h;
   }
   function nbKm(a,b){const r=Math.PI/180,dLa=(a[0]-b[0])*r,dLn=(a[1]-b[1])*r,x=Math.sin(dLa/2)**2+Math.cos(b[0]*r)*Math.cos(a[0]*r)*Math.sin(dLn/2)**2;return 12742*Math.asin(Math.sqrt(x));}
   async function nbLoadNear(){
@@ -832,9 +834,13 @@ function applyLang(){
     addEventListener("pointerup",up);addEventListener("pointercancel",up);
     v.addEventListener("click",e=>{if(G.moved>6){e.preventDefault();e.stopPropagation();G.moved=0;}},true);v.addEventListener("dragstart",e=>e.preventDefault());}
   document.addEventListener("pb-gp",e=>{GP=Array.isArray(e.detail)?e.detail:[];if(loaded)draw();});
+  let LASTK="";
   function draw(){const t=tk();if(!t)return;
     const city=String(document.getElementById("city")?.value||"").trim();
     P=ALL.slice();   /* पूरे Kutch के poster, शहर से नहीं छँटते */
+    const key=(loaded?1:0)+"|"+DSK.matches+"|"+(PB.lang&&PB.lang())+"|"+P.map(b=>b.slug+b.url).join(",");
+    if(key===LASTK&&t.children.length)return;   /* कुछ बदला नहीं (जैसे "Near me" दबाया): poster दोबारा न बनें, न झपकें */
+    LASTK=key;
     gdraw();
     document.getElementById("posters").classList.toggle("dsk",dsk());
     t.innerHTML=P.length?(dsk()?P.concat(P,P).map(slide).join(""):P.map(slide).join("")):(loaded&&!GL.length?ph():"");
