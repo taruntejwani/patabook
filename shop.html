@@ -6,6 +6,16 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://patabook.in/icon-512.png">
 <link rel="icon" href="pin.png">
+<script>/* 🎬 refresh / खुलते ही: पेज दिखने से पहले ही परदा (intro का रंग), ताकि "पहले पेज, फिर loader" न हो। Back पर नहीं */
+(function(){try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")return;
+  var sl=new URLSearchParams(location.search).get("slug")||"",t="";try{t=localStorage.getItem("pbt_"+sl)||"";}catch(e){}
+  if(t==="free"||t==="silver"||t==="own")return;   /* पिछली बार पता चला था कि इस दुकान का intro नहीं चलता */
+  var h=document.documentElement;h.classList.add("pbcv");h.setAttribute("data-cv",t==="gold"?"gold":"platinum");
+  setTimeout(function(){h.classList.remove("pbcv");},7000);}catch(e){}})();</script>
+<style>html.pbcv body::before{content:"";position:fixed;inset:0;z-index:9999;background:radial-gradient(110% 80% at 50% 45%,#4c1d95,#14052c 75%)}
+html.pbcv[data-cv=gold] body::before{background:radial-gradient(110% 80% at 50% 45%,#5a3d07,#120b01 75%)}
+html.pbcv body::after{content:"";position:fixed;left:50%;top:50%;width:46px;height:56px;margin:-28px 0 0 -23px;z-index:9999;background:url(pin.png) center/contain no-repeat;animation:pbcvHop 1s ease-in-out infinite;opacity:.9}
+@keyframes pbcvHop{50%{transform:translateY(-14px)}}</style>
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="PataBook">
 <meta name="theme-color" content="#fbf6ea">
@@ -575,24 +585,24 @@ function mobRow(){const N=(CT.k==="ok"&&CT.nums)?CT.nums:[],out=[];
 
 async function load(){
   const app=document.getElementById("app");
-  if(!slug){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("दुकान नहीं मिली।","Shop not found.")+'</p>';return;}
+  if(!slug){cvOff();try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("दुकान नहीं मिली।","Shop not found.")+'</p>';return;}
   const COLS="name,slug,address,description,category,website,is_verified,rating,review_count,latitude,longitude";
   const tries=[COLS+",business_code,home_service,logo_url",COLS+",business_code,home_service",COLS];
   try{
     let r,rows=null;
     for(const sel of tries){const u=new URL(SB+"/rest/v1/businesses");u.searchParams.set("select",sel);u.searchParams.set("slug","eq."+slug);u.searchParams.set("limit","1");
       r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});if(r.ok){rows=await r.json();break;}}
-    if(!rows||!rows.length){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("यह दुकान अभी उपलब्ध नहीं है।","This shop is not available right now.")+'<br><br><a href="index.html" style="color:#1a73e8;font-weight:700">PataBook ›</a></p>';return;}
+    if(!rows||!rows.length){cvOff();try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("यह दुकान अभी उपलब्ध नहीं है।","This shop is not available right now.")+'<br><br><a href="index.html" style="color:#1a73e8;font-weight:700">PataBook ›</a></p>';return;}
     B=rows[0];
     document.title=B.name+" — "+(B.category||"Shop")+" | PataBook";
     try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}
     try{var _u=location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),_ds=(document.querySelector('meta[name="description"]')||{}).content||"",_im=(!(window.PBHide&&PBHide.has("logo"))&&/^https?:\/\//.test(B.logo_url||""))?B.logo_url:"https://patabook.in/icon-512.png",_c=document.querySelector('link[rel="canonical"]');if(!_c){_c=document.createElement("link");_c.rel="canonical";document.head.appendChild(_c);}_c.href=_u;[["og:title",document.title],["og:description",_ds],["og:url",_u],["og:image",_im]].forEach(function(p){var m=document.querySelector('meta[property="'+p[0]+'"]');if(!m){m=document.createElement("meta");m.setAttribute("property",p[0]);document.head.appendChild(m);}m.setAttribute("content",p[1]);});}catch(_){}
     render();
-    await Promise.all([loadPrem(),loadContact()]);
+    await Promise.all([loadPrem(),loadContact()]);window.__premDone=1;
     loadNear();loadVacFlag();loadOwner();
     render();
-  }catch(e){app.innerHTML='<p class="note">'+L("इंटरनेट की दिक्कत — दोबारा कोशिश करें।","Connection problem — please try again.")+'</p>';}
+  }catch(e){cvOff();app.innerHTML='<p class="note">'+L("इंटरनेट की दिक्कत — दोबारा कोशिश करें।","Connection problem — please try again.")+'</p>';}
 }
 async function loadPrem(){
   if(!(window.PB_SITE&&PB_SITE.premium))return;
@@ -695,8 +705,11 @@ function render(){drawSoc();
   placeMap();tabsApply();pbIntro();
 }
 /* ✨ intro: Gold/Platinum, दुकान हर बार खुलने पर (Back पर नहीं), टैप से बंद, motion कम हो तो नहीं */
-function pbIntro(){try{
-  if(window.__pbIntro||!B)return;const t=TIER();if(t!=="gold"&&t!=="platinum")return;
+function cvOff(){setTimeout(()=>document.documentElement.classList.remove("pbcv"),60);}
+function pbIntro(){let wait=false;try{
+  if(window.__pbIntro||!B)return;
+  if(!window.__premDone){wait=true;return;}   /* plan अभी पता नहीं (पहला render): परदा रहने दो, दूसरे render पर फ़ैसला */
+  const t=TIER();try{localStorage.setItem("pbt_"+slug,t);}catch(_){}if(t!=="gold"&&t!=="platinum")return;
   if(document.body.classList.contains("pbe-on"))return;
   /* 🖼️ दुकान का अपना poster (posters/<slug>.webp): पूरी screen, ~3 सेकंड timer, Skip / टैप से बंद; लिंक जब भी खुले, हर बार */
   const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp","new-jai-shanker-restaurant-gandhidham":"posters/new-jai-shanker-restaurant-gandhidham.webp"};
@@ -714,7 +727,7 @@ function pbIntro(){try{
   try{const nv=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nv&&nv.type==="back_forward")return;}catch(_){}
   /* कौन-सा intro: "card" = 💳 Business Card (अभी), "royal" = 👑 Royal Entry। जाँचने के लिए link में ?intro=royal / ?intro=card */
   const iq=(location.search.match(/[?&]intro=(royal|card)\b/)||[])[1],IS=iq||"card";
-  if(IS==="royal")royalEntry(t);else cardEntry(t);}catch(_){}}
+  if(IS==="royal")royalEntry(t);else cardEntry(t);}catch(_){}finally{if(!wait)cvOff();}}
 /* 💳 Business Card: 3D visiting card घूमकर आए (पीछे PataBook, आगे दुकान) → चमक गुज़रे → card बड़ा होकर पेज खुले */
 function cardEntry(t){
   window.__pbIntro=1;
@@ -855,7 +868,7 @@ let OWN=false;window.addEventListener("pbhelp",function(){try{drawOwn();}catch(e
 async function loadOwner(){
   try{if(!window.PBA)return;const s=await PBA.session();if(!s)return;
     const r=await fetch(SB+"/rest/v1/rpc/pb_my_businesses",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+s.access_token,"Content-Type":"application/json"},body:"{}"});
-    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
+    if(!r.ok)return;const j=await r.json();OWN=Array.isArray(j)&&j.some(x=>x&&x.slug===slug);if(OWN){const pi=document.getElementById("pbIntro");if(pi)pi.remove();document.body.style.overflow="";try{localStorage.setItem("pbt_"+slug,"own");}catch(_){}cvOff();}if(OWN&&window.PBEdit)PBEdit.start({slug,row:j.find(x=>x&&x.slug===slug),page:"shop"});}catch(e){OWN=false;}
   drawOwn();}
 function drawOwn(){const e=document.getElementById("ownBox");if(e)e.hidden=!OWN;const gz=document.getElementById("gearTop");if(gz)gz.hidden=!(OWN||(window.PBHelp&&PBHelp.list().length>0));const v=document.getElementById("ownVis");if(v)v.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("visible");};const rp=document.getElementById("ownRep");if(rp)rp.onclick=()=>{if(window.PBEdit&&PBEdit.act)PBEdit.act("report");};}
 function contactHTML(){
