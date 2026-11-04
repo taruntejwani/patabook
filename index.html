@@ -305,6 +305,21 @@ footer{padding:14px 16px 18px;text-align:center;color:var(--muted);font-size:12p
   .nsv{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%)}
   .nst{padding:0 6px}
 }
+/* 💻 कंप्यूटर (बड़ी स्क्रीन): पूरा पन्ना चौड़ा — मोबाइल जैसी पतली पट्टी नहीं */
+@media (min-width:900px){
+  main{max-width:1180px;padding:0 28px}
+  .ns h2{max-width:1180px;padding:0 28px}
+  .nsc{width:240px;min-height:140px}
+  .nsc.pm,.nsc.bn{width:490px}
+  .vis{width:360px}
+  .searchbox{max-width:900px}
+  .qcat{max-width:1100px;flex-wrap:wrap;justify-content:center;overflow:visible;gap:14px}
+  .qcat a{width:88px;font-size:13px}.qcat a i{width:66px;height:66px;font-size:32px}
+  .posters{max-width:1000px;margin-left:auto;margin-right:auto}.hsbtn,#jobsBtn{max-width:1100px;margin-left:auto;margin-right:auto}
+  .pv{aspect-ratio:2.4/1}
+  .gpw .nsc.pm{min-height:260px}
+  .hsbtn{padding:16px 20px}.hsbtn b{font-size:18px}.hsbtn small{font-size:14px}
+}
 </style>
 <script>
 window.PATABOOK_SUPABASE={
