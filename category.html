@@ -127,6 +127,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 
  <div class="bar">
   <div class="row" id="subs"></div>
+  <a id="hsLink" href="homeservices.html" hidden style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;padding:11px 14px;border-radius:14px;background:#fff8e1;border:1px solid #f5d46b;color:#5c4100;text-decoration:none;font-weight:700;font-size:14.5px"><span aria-hidden="true" style="font-size:20px">🏠</span><span id="hsLinkT" style="flex:1"></span><span aria-hidden="true">›</span></a>
   <div class="row" id="radius"></div>
  </div>
 
@@ -169,6 +170,10 @@ function drawHead(){
   document.getElementById("title").textContent=nm;
   document.getElementById("crumb").textContent=nm;
   PB.apply();
+  /* Home category: घर पर बुलाने वाली दुकानों (Home Services पेज) का रास्ता */
+  const hl=document.getElementById("hsLink");
+  if(hl&&cat==="Home"){hl.hidden=false;hl.style.display="flex";document.getElementById("hsLinkT").textContent=(PB.lang&&PB.lang()!=="hi")?"Want someone at your home? See Home Services":"घर पर बुलाना है? Home Services देखें";}
+  else if(hl){hl.hidden=true;hl.style.display="none";}
 }
 drawHead();
 
