@@ -644,7 +644,6 @@ function pbIntro(){try{
     const go=()=>{if(tm)return;bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
     im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2000);
     e.onclick=x;document.body.appendChild(e);return;}
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   /* हर बार दुकान खुलने पर (link / होम से / refresh) — सिर्फ़ फ़ोन का Back दबाकर लौटने पर नहीं */
   try{const nv=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nv&&nv.type==="back_forward")return;}catch(_){}
   window.__pbIntro=1;const e=document.createElement("div");e.className="pbx "+t;e.id="pbIntro";
