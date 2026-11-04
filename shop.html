@@ -306,6 +306,41 @@ html body .hero.hascv{min-height:0!important}.hero.hascv::after{display:none!imp
 .chip.op{background:#e8f6ed!important;color:#137333!important;border-color:#bfe3cb!important}.chip.cl{background:#fdecea!important;color:#b42318!important;border-color:#f3c5c0!important}
 .chip.gold{background:linear-gradient(180deg,#fff,var(--cream2))!important;color:var(--gold3)!important;border:1px solid var(--gold1)!important}
 .hlogo img,.hlogo .ini{box-shadow:0 0 0 2px #fff!important}.hlogo.gold img,.hlogo.gold .ini{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold1)!important}
+/* 👑 Royal Entry */
+.rx{position:fixed;inset:0;z-index:10000;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;
+ --c1:#4c1d95;--c2:#16052f;--ink:#f5f0ff;--acc:#c4b5fd;--gold:#e9c46a;background:radial-gradient(120% 85% at 50% 38%,var(--c1) 0%,var(--c2) 72%);animation:rxIn .35s ease both;transition:opacity .5s ease,backdrop-filter .5s}
+.rx-gold{--c1:#5a3d07;--c2:#120b01;--ink:#fff6dc;--acc:#f3d27a;--gold:#f3c64b}
+.rx.out{opacity:0;pointer-events:none}
+.rx.fly .st>*:not(.lo),.rx.fly .tg,.rx.fly .rays,.rx.fly .glow{opacity:0!important;transition:opacity .35s ease}
+.rx.fly{background:transparent;transition:background .6s ease .15s}
+.rx .rays{position:absolute;left:50%;top:38%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;opacity:.1;
+ background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.55) 0deg 4deg,transparent 4deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%);animation:rxSpin 14s linear infinite,rxFadeR 1.2s ease both}
+.rx .glow{position:absolute;left:50%;top:38%;width:70vmin;height:70vmin;margin:-35vmin 0 0 -35vmin;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 55%,transparent),transparent 65%);filter:blur(10px);animation:rxPulse 2.4s ease-in-out infinite}
+.rx .st{position:relative;display:flex;flex-direction:column;align-items:center;padding:0 20px;max-width:92vw;margin-top:-6vh}
+.rx .emb{width:clamp(70px,20vw,96px);height:auto;margin-bottom:-14px;position:relative;z-index:2;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));opacity:0;animation:rxDrop .8s cubic-bezier(.3,1.5,.5,1) .55s forwards}
+.rx .lo{position:relative;width:clamp(104px,30vw,136px);height:clamp(104px,30vw,136px)}
+.rx .lo i{position:absolute;inset:0;border-radius:50%;border:2px solid var(--acc);opacity:0}
+.rx .lo .r1{animation:rxRing 1.6s ease-out .2s infinite}.rx .lo .r2{animation:rxRing 1.6s ease-out .75s infinite}
+.rx .lc{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 85%,#fff),0 0 0 9px rgba(255,255,255,.12),0 18px 40px rgba(0,0,0,.45);transform:scale(0);animation:rxPop .7s cubic-bezier(.3,1.6,.5,1) .2s forwards;will-change:transform}
+.rx .lc img{width:100%;height:100%;object-fit:cover}
+.rx .lc b{font:900 clamp(46px,14vw,64px)/1 "Noto Sans Devanagari","Inter",system-ui,sans-serif;background:linear-gradient(160deg,var(--c1),#000);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rx .nm{margin:22px 0 0;font:800 clamp(28px,8.6vw,46px)/1.18 "Noto Sans Devanagari","Inter",system-ui,sans-serif;color:var(--ink);-webkit-text-fill-color:var(--ink);background:none;letter-spacing:0;text-shadow:0 4px 18px rgba(0,0,0,.45);word-break:break-word}
+.rx .nm span{display:inline-block;opacity:0;transform:translateY(.7em) rotateX(70deg);animation:rxChar .55s cubic-bezier(.2,.9,.3,1.3) forwards}
+.rx .nm .sp{width:.28em;opacity:1;transform:none;animation:none}
+.rx .ln{display:block;height:2px;width:0;margin:14px auto 0;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:rxLine .6s ease forwards}
+.rx .mt{margin-top:10px;font:700 clamp(12px,3.4vw,15px)/1.4 Georgia,"Times New Roman",serif;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);opacity:0;animation:rxFade .5s ease forwards;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+.rx .stars{letter-spacing:.12em;color:var(--gold);font-family:system-ui,sans-serif}
+.rx .tg{position:absolute;left:0;right:0;bottom:calc(30px + env(safe-area-inset-bottom));font:700 clamp(10px,2.8vw,12px)/1 Georgia,serif;letter-spacing:.3em;color:color-mix(in srgb,var(--ink) 70%,transparent);opacity:0;animation:rxFade .6s ease 1.1s forwards}
+@keyframes rxIn{from{opacity:0}to{opacity:1}}
+@keyframes rxFade{from{opacity:0}to{opacity:1}}
+@keyframes rxFadeR{from{opacity:0}to{opacity:.1}}
+@keyframes rxSpin{to{transform:rotate(360deg)}}
+@keyframes rxPulse{50%{transform:scale(1.12);opacity:.8}}
+@keyframes rxPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+@keyframes rxRing{0%{transform:scale(1);opacity:.75}100%{transform:scale(1.9);opacity:0}}
+@keyframes rxDrop{0%{opacity:0;transform:translateY(-60px) scale(.6)}100%{opacity:1;transform:none}}
+@keyframes rxChar{to{opacity:1;transform:none}}
+@keyframes rxLine{to{width:min(66vw,300px)}}
 /* 🎬 Poster intro (Gold / Platinum): गहरा परदा, नाम उभरे, चमक गुज़रे, फिर वेबसाइट */
 .pbx{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;overflow:hidden;
  --b1:#2a3a63;--b2:#070c1a;--base:#aebfe0;--hi:#fff;--ln:#9db4d6;background:radial-gradient(120% 90% at 50% 40%,var(--b1),var(--b2) 70%);animation:pbiOut 4.2s ease-in forwards}
@@ -646,10 +681,36 @@ function pbIntro(){try{
     e.onclick=x;document.body.appendChild(e);return;}
   /* हर बार दुकान खुलने पर (link / होम से / refresh) — सिर्फ़ फ़ोन का Back दबाकर लौटने पर नहीं */
   try{const nv=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nv&&nv.type==="back_forward")return;}catch(_){}
-  window.__pbIntro=1;const e=document.createElement("div");e.className="pbx "+t;e.id="pbIntro";
-  e.innerHTML="<i></i><b>"+esc(B.name)+"</b>"+(B.category?"<em>"+esc(B.category)+"</em>":"")+"<i></i><small>"+t.toUpperCase()+" BUSINESS CARD</small>";
-  const x=()=>{if(e.parentNode)e.remove();};e.onclick=x;e.addEventListener("animationend",ev=>{if(ev.target===e)x();});setTimeout(x,4500);
-  document.body.appendChild(e);}catch(_){}}
+  royalEntry(t);}catch(_){}}
+/* 👑 Royal Entry (Gold / Platinum): शाही परदा + किरणें → logo अँगूठी के साथ उभरे → member निशान ऊपर से टिके →
+   नाम के अक्षर एक-एक उठें → सुनहरी line, category, ⭐ → logo उड़कर पेज के logo की जगह बैठे → पेज */
+function royalEntry(t){
+  window.__pbIntro=1;
+  const nm=String(B.name||"").trim(),lg=LOGO(),ini=INI(),cat=B.category||"",rt=+B.rating||0;
+  const chars=[...nm].slice(0,60),step=Math.max(18,Math.min(45,900/Math.max(1,chars.length)));
+  const letters=chars.map((c,k)=>c===" "?'<span class="sp"> </span>':'<span style="animation-delay:'+(0.95+k*step/1000).toFixed(3)+'s">'+esc(c)+'</span>').join("");
+  const tEnd=0.95+chars.length*step/1000;
+  const e=document.createElement("div");e.className="rx rx-"+t;e.id="pbIntro";e.setAttribute("role","presentation");
+  e.innerHTML='<div class="rays"></div><div class="glow"></div>'+
+    '<div class="st"><img class="emb" src="pb-member-'+t+'.webp" alt="" decoding="async">'+
+    '<div class="lo"><i class="r1"></i><i class="r2"></i><span class="lc">'+(lg?'<img src="'+esc(lg)+'" alt="">':'<b>'+ini+'</b>')+'</span></div>'+
+    '<div class="nm">'+letters+'</div><i class="ln" style="animation-delay:'+(tEnd+.05).toFixed(2)+'s"></i>'+
+    '<div class="mt" style="animation-delay:'+(tEnd+.2).toFixed(2)+'s">'+(cat?esc(cat):"")+(rt?'<span class="stars">'+"★".repeat(Math.round(rt))+"☆".repeat(5-Math.round(rt))+'</span>':"")+'</div></div>'+
+    '<small class="tg">'+t.toUpperCase()+' MEMBER · PATABOOK</small>';
+  document.body.appendChild(e);document.body.style.overflow="hidden";
+  let done=false;const tm=[];
+  const fin=()=>{if(done)return;done=true;tm.forEach(clearTimeout);e.classList.add("out");document.body.style.overflow="";setTimeout(()=>{if(e.parentNode)e.remove();},520);};
+  /* logo उड़कर पेज वाले logo पर */
+  const fly=()=>{if(done)return;const from=e.querySelector(".lc"),to=document.querySelector(".hero .hlogo");
+    if(from&&to){const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
+      if(b.width&&b.top<innerHeight){const sx=b.width/a.width,dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
+        from.style.animation="none";from.style.transform="scale(1)";void from.offsetWidth;   /* animation हटाओ, वरना transform नहीं चलता */
+        from.style.transition="transform .7s cubic-bezier(.6,.05,.25,1)";from.style.transform="translate("+dx+"px,"+dy+"px) scale("+sx+")";}}
+    e.classList.add("fly");tm.push(setTimeout(fin,650));};
+  tm.push(setTimeout(fly,Math.round((tEnd+1.4)*1000)));
+  tm.push(setTimeout(fin,6500));
+  e.addEventListener("click",fin);
+}
 
 function waLink(b,addr){if(window.PBHide&&PBHide.has("addr"))b=Object.assign({},b,{latitude:0,longitude:0,address:""});const en=EN(),la=+b.latitude,ln=+b.longitude,d=la&&ln?"https://patabook.in/map.html?to="+la+","+ln+"&n="+encodeURIComponent(String(b.name||"").slice(0,60)):(b.address?"https://patabook.in/map.html?q="+encodeURIComponent(b.address):""),u="https://patabook.in/shop?slug="+encodeURIComponent(b.slug),P=(()=>{if(CT.k!=="ok")return [staffNo("Phone2"),staffNo("WhatsApp")];const alt="".replace(/\D/g,"");return [String(CT.phone||"").trim(),/^\d{10}$/.test(alt)?alt:String(CT.whatsapp||CT.phone||"").trim()];})(),ph=P[0],wa=P[1];const t=["🏪 "+b.name].concat(addr?["📍 "+(en?"Address: ":"पता: ")+addr]:[]);if(ph)t.push("📞 Mobile: "+ph);if(wa&&wa!==ph)t.push("💬 WhatsApp: "+wa);if(d)t.push("","🧭 "+(en?"Directions (Map):":"रास्ता (नक्शा):"),d);t.push("","ℹ️ "+(en?"Full details:":"पूरी जानकारी:"),u);return "https://wa.me/?text="+encodeURIComponent(t.join("\n"));}
 function hav(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
