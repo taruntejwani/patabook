@@ -72,6 +72,7 @@ main{padding:14px 14px 96px}
 .pvbar.flash{background:#ffd8a8}
 body.pvw #m button:not([data-tab]):not([data-st]):not([data-rp]):not(.pvok),body.pvw #m input:not(#rpF):not(#rpE):not(#sQ),body.pvw #m select:not(#eM),body.pvw #m textarea{pointer-events:none;opacity:.55}
 </style>
+<script>/* iPhone: दो उँगली से zoom नहीं */["gesturestart","gesturechange"].forEach(function(v){document.addEventListener(v,function(e){e.preventDefault()},{passive:false})});</script>
 </head>
 <body>
 <header><h1><span id="ttl">👥 टीम</span><small id="ttlS">PataBook · टीम वर्कस्पेस</small></h1><a href="admin.html" id="adm" hidden>एडमिन</a></header>

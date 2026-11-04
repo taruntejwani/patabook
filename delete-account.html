@@ -35,6 +35,7 @@ html[lang="en"] [data-l="en"]{display:block}
 html[lang="en"] li[data-l="en"]{display:list-item}
 </style>
 <style>/* 🖥️ PC (900px+): बड़ी screen पर चौड़ा पेज; मोबाइल वैसा ही */@media(min-width:900px){.wrap{max-width:920px}}</style>
+<script>/* iPhone: दो उँगली से zoom नहीं */["gesturestart","gesturechange"].forEach(function(v){document.addEventListener(v,function(e){e.preventDefault()},{passive:false})});</script>
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="index.html"><img src="pin.png" alt=""><b>Pata<span>Book</span></b></a><span class="sp"></span><button class="lg" id="lg" type="button">English</button></div></header>
