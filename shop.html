@@ -54,6 +54,8 @@ button{font:inherit}
 .hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(135deg,#0b2f73 0%,#123f96 55%,#1a73e8 100%)}
 .hero .bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.28;filter:saturate(1.1)}
 .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 85% 0%,rgba(255,210,31,.18),transparent 55%),linear-gradient(180deg,rgba(6,22,56,.15),rgba(6,22,56,.55))}
+.hero .hmb{position:absolute;top:8px;right:10px;z-index:2;width:72px;height:auto;pointer-events:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.25))}
+.hero.hasmb .hname{padding-right:64px}
 .hero .wrap{position:relative;z-index:1;padding-top:34px;padding-bottom:34px;display:flex;gap:18px;align-items:center}
 .hlogo{position:relative;flex:none}
 .hlogo img,.hlogo .ini{width:96px;height:96px;border-radius:24px;object-fit:cover;display:block;background:#fff;box-shadow:0 0 0 3px #fff,0 10px 26px rgba(0,0,0,.3)}
@@ -570,9 +572,10 @@ function render(){drawSoc();
     ["Udyam (MSME)",/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(line(b,"Udyam"))&&/^yes$/i.test(line(b,"Udyam-Verified"))?line(b,"Udyam"):""]
   ].filter(r=>r[1]);
   const navs=[G.length&&["photos",L("गैलरी","Gallery")],["vis",L("हमसे मिलें","Visit us")]].filter(Boolean);
+  const MEMB={silver:"pb-member-silver.webp",gold:"pb-member-gold.webp",platinum:"pb-member-platinum.webp"};   /* 🏅 plan का member निशान: नाम वाले हिस्से के कोने में */
   document.getElementById("app").innerHTML=
    (COVER?'<div class="cvbar" data-pbh="photos" style="--cv:url(\''+esc(COVER)+'\')"><img src="'+esc(COVER)+'" alt="" decoding="async"></div>':'')+
-   '<div class="hero'+(COVER?' hascv':'')+'">'+((!COVER&&G[0])?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
+   '<div class="hero'+(COVER?' hascv':'')+(PREM&&MEMB[TIER()]?' hasmb':'')+'">'+(PREM&&MEMB[TIER()]?'<img class="hmb" src="'+MEMB[TIER()]+'" alt="'+esc(TIER().toUpperCase())+' MEMBER" width="72" height="72" decoding="async">':'')+((!COVER&&G[0])?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'" data-pbh="logo">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
