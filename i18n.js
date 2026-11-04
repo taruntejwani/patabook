@@ -308,6 +308,7 @@ function showApp(){
   document.body.insertBefore(w,document.body.firstChild);
   appText();
   w.querySelector(".ib").onclick=function(){
+    if(isIOS&&window.PBIosInstall){PBIosInstall.show();return;}   /* iPhone: चित्र वाले 3 कदम (pb-ios-install.js) */
     if(deferred){deferred.prompt();deferred.userChoice.then(function(r){if(r&&r.outcome==="accepted")markInstalled();deferred=null;});return;}
     var h=w.querySelector(".pba-h");h.hidden=false;h.querySelector("span").textContent=t(isIOS?"app_ios":"app_gen");
   };
