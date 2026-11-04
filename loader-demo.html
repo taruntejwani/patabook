@@ -106,6 +106,66 @@ h1{font-size:21px;color:var(--navy)}
 @keyframes neon{0%{opacity:0}8%{opacity:1}12%{opacity:.15}18%{opacity:1}26%{opacity:.3}32%,100%{opacity:1}}
 @keyframes spark{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1)}}
 
+/* ================= 🎬 MOVIE STYLE ================= */
+.ov{--m1:#fff;--m2:#e9d5ff;--m3:#7c3aed;--m4:#f5f3ff;--m5:#4c1d95;--fl:#c4b5fd}
+.ov.t-gold{--m1:#fffbe8;--m2:#ffe08a;--m3:#b8860b;--m4:#fff3c4;--m5:#6b4a0c;--fl:#ffd36b}
+.ov.t-silver{--m1:#ffffff;--m2:#e5e9ef;--m3:#7b8794;--m4:#f8fafc;--m5:#3b4552;--fl:#dbe4ee}
+.mv{background:#000;font-family:"Inter","Noto Sans Devanagari",system-ui,sans-serif}
+.mv .bar{position:absolute;left:0;right:0;height:13vh;background:#000;z-index:6}.mv .bar.t{top:0}.mv .bar.b{bottom:0}
+.mv .gr{position:absolute;inset:-50%;z-index:5;pointer-events:none;opacity:.08;background-image:radial-gradient(rgba(255,255,255,.9) 1px,transparent 1px);background-size:3px 3px;animation:grain .25s steps(2) infinite}
+@keyframes grain{50%{transform:translate(1%,-1%)}}
+.mv .vig{position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.85) 100%)}
+.mtx{font-weight:900;letter-spacing:.02em;line-height:1.02;text-transform:uppercase;
+ background:linear-gradient(180deg,var(--m1) 0%,var(--m2) 38%,var(--m3) 50%,var(--m4) 53%,var(--m5) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 1px 0 rgba(255,255,255,.35)) drop-shadow(0 6px 14px rgba(0,0,0,.8))}
+.mv .pre{position:absolute;z-index:3;font:600 clamp(10px,3vw,13px)/1 Georgia,"Times New Roman",serif;letter-spacing:.55em;margin-right:-.55em;color:#cfd6e3;opacity:0}
+.flare{position:absolute;z-index:3;left:-40%;top:50%;width:180%;height:2px;margin-top:-1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--fl) 70%,#fff) 45%,#fff 50%,color-mix(in srgb,var(--fl) 70%,#fff) 55%,transparent);filter:blur(.5px);opacity:0}
+.flare:before{content:"";position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:radial-gradient(circle,#fff 0,color-mix(in srgb,var(--fl) 80%,transparent) 18%,transparent 62%)}
+.flare:after{content:"";position:absolute;left:50%;top:50%;width:14px;height:260px;margin:-130px 0 0 -7px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.7),transparent);filter:blur(2px)}
+
+/* 6. Studio Opening — "PATABOOK PRESENTS" → धातु जैसा नाम धीरे-धीरे पास आए, lens flare गुज़रे */
+.M6 .pre{animation:m6pre 1.9s ease .2s forwards}
+@keyframes m6pre{0%{opacity:0;letter-spacing:.9em}30%,70%{opacity:1}100%{opacity:0;letter-spacing:.55em}}
+.M6 .ttl{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 6vw;opacity:0;animation:m6in 3.4s cubic-bezier(.2,.7,.2,1) 1.8s forwards}
+.M6 .ttl .mtx{font-size:clamp(30px,10.5vw,64px)}
+.M6 .ttl .mtx span{display:block}
+.M6 .ttl .sub{font:600 clamp(10px,3vw,13px)/1 Georgia,serif;letter-spacing:.45em;margin-right:-.45em;color:#d7dde8;opacity:0;animation:fa .9s ease 3s forwards}
+.M6 .ttl .ln{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--m2),transparent);animation:m6ln 1.2s ease 2.6s forwards}
+.M6 .flare{animation:m6fl 1.6s cubic-bezier(.4,0,.2,1) 2.4s forwards}
+@keyframes m6in{0%{opacity:0;transform:scale(1.35);filter:blur(10px)}25%{opacity:1;filter:blur(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes m6ln{to{width:min(70vw,360px)}}
+@keyframes m6fl{0%{opacity:0;transform:translateX(-60%)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translateX(60%)}}
+
+/* 7. Trailer Cuts — हर शब्द धमाके से आए (screen हिले), फिर पूरा नाम चमके */
+.M7 .cut{position:absolute;z-index:3;font-size:clamp(46px,17vw,110px);opacity:0}
+.M7 .flash{position:absolute;inset:0;z-index:2;background:radial-gradient(circle,color-mix(in srgb,var(--fl) 55%,transparent),transparent 60%);opacity:0}
+.M7 .all{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;padding:0 6vw}
+.M7 .all .mtx{font-size:clamp(28px,10vw,60px)}.M7 .all .mtx span{display:block}
+.ov.M7{inset:-14px}
+.M7 .all .sub{font:600 clamp(10px,3vw,13px)/1 Georgia,serif;letter-spacing:.45em;margin-right:-.45em;color:#d7dde8}
+.M7.shk{animation:shake .32s linear}
+@keyframes slam{0%{opacity:0;transform:scale(2.6);filter:blur(8px)}18%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1;transform:scale(.96)}100%{opacity:0;transform:scale(.9)}}
+@keyframes flash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+@keyframes allin{0%{opacity:0;transform:scale(1.25);letter-spacing:.3em}30%{opacity:1}100%{opacity:1;transform:scale(1)}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-2px)}}
+
+/* 8. Golden Light (बड़े studio जैसा) — रोशनी के बादलों से नाम उभरे, ऊपर ⭐ की अर्ध-माला घूमकर बैठे */
+.M8{background:radial-gradient(90% 70% at 50% 55%,color-mix(in srgb,var(--m5) 70%,#000) 0,#000 75%)}
+.M8 .cl{position:absolute;inset:-20%;z-index:1;background:radial-gradient(40% 30% at 30% 60%,color-mix(in srgb,var(--fl) 35%,transparent),transparent 70%),radial-gradient(45% 35% at 72% 45%,color-mix(in srgb,var(--m3) 40%,transparent),transparent 70%),radial-gradient(30% 25% at 50% 80%,color-mix(in srgb,var(--fl) 25%,transparent),transparent 70%);filter:blur(20px);animation:m8cl 6s ease-in-out forwards}
+@keyframes m8cl{0%{transform:scale(1.6) translateY(10%);opacity:0}30%{opacity:1}100%{transform:scale(1) translateY(0);opacity:.9}}
+.M8 .rays{position:absolute;left:50%;top:58%;width:200vmax;height:200vmax;margin:-100vmax 0 0 -100vmax;z-index:1;opacity:0;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.35) 0 2deg,transparent 2deg 9deg);-webkit-mask:radial-gradient(circle,#000,transparent 45%);mask:radial-gradient(circle,#000,transparent 45%);animation:m8r 6s ease 1s forwards}
+@keyframes m8r{0%{opacity:0;transform:rotate(-20deg)}40%{opacity:.35}100%{opacity:.2;transform:rotate(10deg)}}
+.M8 .box{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;padding:0 6vw}
+.M8 .arc{position:relative;width:min(78vw,380px);height:min(30vw,140px);margin-bottom:6px}
+.M8 .arc i{position:absolute;left:50%;top:100%;width:0;height:0}
+.M8 .arc i b{position:absolute;left:-10px;top:-10px;width:20px;height:20px;font:20px/20px system-ui;color:var(--m2);text-shadow:0 0 12px var(--fl);opacity:0;animation:m8st .7s ease forwards}
+@keyframes m8st{from{opacity:0;transform:translateY(40px) scale(.3)}to{opacity:1;transform:none}}
+.M8 .mtx{font-size:clamp(30px,10.5vw,62px);opacity:0;animation:m8n 2.4s cubic-bezier(.2,.7,.2,1) 1.4s forwards}
+.M8 .mtx span{display:block}
+@keyframes m8n{0%{opacity:0;transform:translateY(30px) scale(.92);filter:blur(12px) brightness(2)}40%{opacity:1;filter:blur(0) brightness(1.4)}100%{opacity:1;transform:none;filter:brightness(1) drop-shadow(0 6px 14px rgba(0,0,0,.8))}}
+.M8 .sub{margin-top:14px;font:600 clamp(9px,2.5vw,12px)/1 Georgia,serif;letter-spacing:.2em;margin-right:-.2em;white-space:nowrap;color:#e4e7ee;opacity:0;animation:fa 1s ease 3.2s forwards}
+.M8 .flare{animation:m6fl 1.8s cubic-bezier(.4,0,.2,1) 2.6s forwards;top:58%}
+
 /* ---------- 5. Map Pin Drop (PataBook वाला) ---------- */
 .L5{background:#e8eef7}
 .L5 .map{position:absolute;inset:-10%;background:
@@ -141,6 +201,11 @@ h1{font-size:21px;color:var(--navy)}
     <button type="button" class="it" data-l="3"><span class="no">3</span><span><b>🏪 दुकान का शटर</b><small>छतरी खुले, शटर ऊपर उठे, अंदर दुकान का नाम और "OPEN" बोर्ड</small></span><span class="pl">▶</span></button>
     <button type="button" class="it" data-l="4"><span class="no">4</span><span><b>🎤 Spotlight Neon</b><small>अँधेरे में spotlight घूमे, नाम neon board की तरह झिलमिलाकर जले, चिंगारियाँ</small></span><span class="pl">▶</span></button>
     <button type="button" class="it" data-l="5"><span class="no">5</span><span><b>📍 Map Pin Drop</b><small>नक्शा पास आए, PataBook pin दुकान पर गिरे, ऊपर दुकान का card उठे</small></span><span class="pl">▶</span></button>
+    <p class="sub" style="margin-top:14px;font-weight:800;color:#0b2f73">🎬 Movie जैसे (नए)</p>
+    <button type="button" class="it" data-l="6"><span class="no" style="background:#000">6</span><span><b>🎬 Studio Opening</b><small>काली पट्टियाँ, "PATABOOK PRESENTS", फिर धातु जैसा बड़ा नाम धीरे-धीरे पास आए, lens flare गुज़रे</small></span><span class="pl">▶</span></button>
+    <button type="button" class="it" data-l="7"><span class="no" style="background:#000">7</span><span><b>💥 Trailer Cuts</b><small>हर शब्द धमाके से आए, screen हिले, रोशनी चमके — फिर पूरा नाम</small></span><span class="pl">▶</span></button>
+    <button type="button" class="it" data-l="8"><span class="no" style="background:#000">8</span><span><b>✨ Golden Light</b><small>बड़े film studio जैसा — रोशनी के बादल, किरणें, ⭐ की माला, नाम उजाले से उभरे</small></span><span class="pl">▶</span></button>
+
   </div>
   <p class="note">यह सिर्फ़ देखने के लिए demo पेज है (Google में नहीं दिखेगा)। पसंद बताइए — किस plan पर कौन-सा loader लगाना है।</p>
 </div>
@@ -162,6 +227,15 @@ function play(n){
   if(n===4){let sp="";for(let k=0;k<26;k++){const a=Math.random()*Math.PI*2,d=80+Math.random()*140;sp+='<i class="sp" style="left:50%;top:44%;--x:'+Math.cos(a)*d+'px;--y:'+Math.sin(a)*d+'px;animation-delay:'+(1.55+Math.random()*.5).toFixed(2)+'s"></i>';}
     h='<div class="spot"></div>'+sp+'<div class="st">'+LG()+'<div class="nm">'+esc(SHOP.name)+'</div><div class="mt">'+esc(SHOP.cat)+' · '+T.toUpperCase()+' MEMBER</div></div>';}
   if(n===5){h='<div class="map"></div><i class="rip"></i><img class="pin" src="pin.png" alt=""><div class="card"><img class="em" src="pb-member-'+T+'.webp" alt="">'+LG()+'<div><b>'+esc(SHOP.name)+'</b><small>'+esc(SHOP.cat)+' · <span class="s">'+stars()+'</span></small><small>📍 '+esc(SHOP.area)+'</small></div></div><small class="tg">PATABOOK · '+T.toUpperCase()+' MEMBER</small>';}
+  const two=()=>{const w=SHOP.name.toUpperCase().split(" ");const m=Math.ceil(w.length/2);return '<span>'+esc(w.slice(0,m).join(" "))+'</span><span>'+esc(w.slice(m).join(" "))+'</span>';};
+  const BARS='<i class="bar t"></i><i class="bar b"></i><i class="gr"></i><i class="vig"></i>';
+  if(n===6){h=BARS+'<div class="pre">PATABOOK&nbsp;PRESENTS</div><div class="flare"></div><div class="ttl"><div class="mtx">'+two()+'</div><i class="ln"></i><div class="sub">'+esc(SHOP.cat.toUpperCase())+' · GANDHIDHAM</div></div>';dur=6200;ov.className+=" mv M6";}
+  if(n===7){const w=SHOP.name.toUpperCase().split(" ");let x="",t=.25;w.forEach((wd,k)=>{x+='<div class="mtx cut" style="animation:slam .62s cubic-bezier(.2,.8,.3,1) '+t.toFixed(2)+'s forwards">'+esc(wd)+'</div><i class="flash" style="animation:flash .5s ease '+t.toFixed(2)+'s forwards"></i>';t+=.62;});
+    h=BARS+x+'<div class="all" style="animation:allin 1.4s cubic-bezier(.2,.7,.2,1) '+t.toFixed(2)+'s forwards"><div class="mtx">'+two()+'</div><div class="sub">'+T.toUpperCase()+' MEMBER · PATABOOK</div></div><div class="flare" style="animation:m6fl 1.5s ease '+(t+.4).toFixed(2)+'s forwards"></div>';
+    dur=Math.round((t+2.6)*1000);ov.className+=" mv M7";
+    w.forEach((_,k)=>setTimeout(()=>{ov.classList.remove("shk");void ov.offsetWidth;ov.classList.add("shk");},Math.round((.3+k*.62)*1000)));}
+  if(n===8){let st="";const N=5;for(let k=0;k<N;k++){const a=Math.PI*(1-(k+.5)/N),R=Math.min(innerWidth*.36,175);st+='<i style="transform:translate('+(Math.cos(a)*R).toFixed(1)+'px,'+(-Math.sin(a)*R*.75).toFixed(1)+'px)"><b style="animation-delay:'+(2.2+k*.12).toFixed(2)+'s">★</b></i>';}
+    h=BARS+'<div class="cl"></div><div class="rays"></div><div class="flare"></div><div class="box"><div class="arc">'+st+'</div><div class="mtx">'+two()+'</div><div class="sub">'+esc(SHOP.cat.toUpperCase())+' · '+T.toUpperCase()+' MEMBER</div></div>';dur=6400;ov.className+=" mv M8";}
   ov.innerHTML=h+'<button type="button" class="skip">✕</button>';document.body.appendChild(ov);
   let gone=false;const end=()=>{if(gone)return;gone=true;ov.classList.add("out");setTimeout(()=>ov.remove(),650);};
   const tm=setTimeout(end,dur);ov.onclick=()=>{clearTimeout(tm);end();};
