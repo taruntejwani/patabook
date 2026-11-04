@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="PataBook City Market — 20 km के अंदर की दुकानों का सामान एक जगह। Products from shops near you.">
+<title>PataBook City Market</title>
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b2f73">
+<script src="site-config.js"></script><script src="pb-ref.js"></script>
+<script src="i18n.js"></script>
+<script src="pb-plan.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--green:#188038;--saff:#ff7a1a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans Devanagari","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#f5f8fe;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding:0 14px}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(120deg,#0b2f73,#1a56c4 60%,#ff7a1a 160%);color:#fff;box-shadow:0 4px 14px rgba(11,47,115,.25)}
+.nav{display:flex;align-items:center;gap:10px;height:58px}
+.back{font-size:24px;line-height:1;padding:6px 8px 6px 0}
+.ttl{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.ttl b{font-size:18px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
+.ttl small{font-size:11.5px;opacity:.9}
+.sp{flex:1}
+.lang{border:1px solid #ffffff66;background:#ffffff22;color:#fff;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer}
+.srch{display:flex;gap:8px;padding:0 0 12px}
+.srch input{flex:1;min-width:0;border:0;border-radius:12px;padding:11px 13px;font-size:15px;color:var(--ink);outline:none}
+.hero{margin:14px 0 4px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.hero .ic{font-size:30px;flex:none}
+.hero b{display:block;color:var(--navy);font-size:15px}
+.hero small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.hero button{flex:none;border:0;background:var(--blue);color:#fff;font-weight:700;border-radius:999px;padding:8px 12px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+h2{font-size:16px;color:var(--navy);margin:16px 2px 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:620px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:860px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.pc{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 12px rgba(26,115,232,.06)}
+.pc .im{position:relative;aspect-ratio:1/1;background:#eef3fb}
+.pc .im img{width:100%;height:100%;object-fit:cover;display:block}
+.pc .bs{position:absolute;top:6px;left:6px;background:var(--saff);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:2px 6px}
+.pc .os{position:absolute;inset:auto 0 0 0;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:3px}
+.pc .bd{padding:8px 9px 10px;display:flex;flex-direction:column;gap:3px;flex:1}
+.pc .nm{font-size:13.5px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pc .sz{font-size:11.5px;color:var(--muted)}
+.pc .pr{font-size:16px;font-weight:800;color:var(--green)}
+.pc .sh{font-size:11.5px;color:var(--muted);margin-top:auto;padding-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc .go{margin-top:6px;text-align:center;background:#eaf2ff;color:var(--blue);font-weight:700;font-size:12.5px;border-radius:9px;padding:7px}
+.sc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center}
+.sc .lg{width:46px;height:46px;border-radius:12px;background:#eef3fb;flex:none;display:grid;place-items:center;font-size:22px;overflow:hidden}
+.sc .lg img{width:100%;height:100%;object-fit:cover}
+.sc b{display:block;font-size:14px;line-height:1.25}
+.sc small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.sgrid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:8px}
+@media(min-width:620px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.note{background:#fff8e6;border:1px solid #f3d38a;color:#7a4b00;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin-top:14px}
+.note a{color:var(--blue);font-weight:700}
+.msg{color:var(--muted);text-align:center;padding:28px 10px;font-size:14px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:26px 0 30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <a class="back" href="index.html" aria-label="Back">←</a>
+      <div class="ttl"><b>🛍️ PataBook City Market</b><small id="sub">20 km के अंदर की दुकानों का सामान</small></div>
+      <div class="sp"></div>
+      <button class="lang" id="lang" type="button">हिन्दी</button>
+    </div>
+    <div class="srch"><input id="q" type="search" autocomplete="off" placeholder="सामान खोजें…"></div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="hero"><span class="ic">📍</span><div style="flex:1;min-width:0"><b id="where">…</b><small id="whereS"></small></div><button id="near" type="button">📍 मेरे पास</button></div>
+  <div class="chips" id="chips"></div>
+  <div id="out"><div class="msg">…</div></div>
+</main>
+<footer>© PataBook · City Market · www.PataBook.in</footer>
+<script>
+(function(){
+const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8",H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
+const RAD=20;   /* km */
+const EN=()=>{try{return (localStorage.getItem("pb-lang")||"en")!=="hi";}catch(e){return true;}};
+const T=(hi,en)=>EN()?en:hi;
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const IMG=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\//;
+let SHOPS=[],ME=null,MODE="city",CITY="",PRODS=[],NEAR=[],CAT="",LOADING=true;
+function km(a,b,c,d){const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dg=r(d-b),h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9ऀ-ॿ]+/g," ").trim();
+function inCity(b,c){const t=norm(c);if(!t)return false;return [b.address].filter(Boolean).map(norm).some(v=>v===t||v.startsWith(t+" ")||v.endsWith(" "+t)||v.includes(" "+t+" "));}
+function shopUrl(s){return window.PBPlan&&PBPlan.url?PBPlan.url(s):"business.html?slug="+encodeURIComponent(s);}
+function paintTexts(){
+  document.documentElement.lang=EN()?"en":"hi";
+  document.getElementById("lang").textContent=EN()?"हिन्दी":"English";
+  document.getElementById("sub").textContent=T("20 km के अंदर की दुकानों का सामान","Products from shops within 20 km");
+  document.getElementById("q").placeholder=T("सामान खोजें…","Search products…");
+  document.getElementById("near").textContent=T("📍 मेरे पास","📍 Near me");
+  const w=document.getElementById("where"),ws=document.getElementById("whereS");
+  if(MODE==="geo"){w.textContent=T("आपके 20 km के अंदर","Within 20 km of you");ws.textContent=T(NEAR.length+" दुकानें पास में","Shops nearby: "+NEAR.length);}
+  else{w.textContent=CITY?T(CITY+" की दुकानें",CITY+" shops"):T("शहर चुनें","Choose your city");ws.textContent=T("पास की दुकानें देखने के लिए \"मेरे पास\" दबाएँ","Tap \"Near me\" to see shops within 20 km");}
+}
+async function loadShops(){
+  try{const r=await fetch(SB+"/rest/v1/businesses?select=slug,name,category,address,latitude,longitude,logo_url&is_active=eq.true&deleted_at=is.null&limit=1000",{headers:H});
+    SHOPS=r.ok?(await r.json()||[]).filter(b=>b&&b.slug&&b.name):[];}catch(e){SHOPS=[];}
+}
+function pickNear(){
+  if(MODE==="geo"&&ME)NEAR=SHOPS.filter(b=>b.latitude!=null&&b.longitude!=null).map(b=>Object.assign({_d:km(ME.lat,ME.lng,+b.latitude,+b.longitude)},b)).filter(b=>b._d<=RAD).sort((a,b)=>a._d-b._d);
+  else NEAR=SHOPS.filter(b=>inCity(b,CITY));
+}
+async function loadProducts(){
+  const list=NEAR.slice(0,40);PRODS=[];
+  try{if(window.PBPlan)await PBPlan.load(list.map(b=>b.slug));}catch(e){}
+  await Promise.all(list.map(async b=>{try{const r=await fetch(SB+"/rest/v1/rpc/pb_shop_products_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:b.slug})});
+    if(!r.ok)return;const a=await r.json();(Array.isArray(a)?a:[]).forEach(p=>{if(p&&p.name&&IMG.test(p.img||""))PRODS.push(Object.assign({_s:b},p));});}catch(e){}}));
+  PRODS.sort((a,b)=>(b.best?1:0)-(a.best?1:0)||((a._s._d||0)-(b._s._d||0)));
+}
+function dist(b){return b._d!=null?(b._d<1?Math.round(b._d*1000)+" m":b._d.toFixed(1)+" km"):"";}
+function draw(){
+  paintTexts();
+  const out=document.getElementById("out"),q=norm(document.getElementById("q").value);
+  if(LOADING){out.innerHTML='<div class="msg">'+T("सामान लाया जा रहा है…","Loading products…")+'</div>';return;}
+  const cats=[...new Set(NEAR.map(b=>b.category).filter(Boolean))].slice(0,14);
+  document.getElementById("chips").innerHTML=cats.length?['<button class="chip'+(CAT?'':' on')+'" data-c="">'+T("सब","All")+'</button>'].concat(cats.map(c=>'<button class="chip'+(CAT===c?' on':'')+'" data-c="'+esc(c)+'">'+esc(c)+'</button>')).join(""):"";
+  const P=PRODS.filter(p=>(!CAT||p._s.category===CAT)&&(!q||norm(p.name+" "+(p.size||"")+" "+p._s.name).includes(q)));
+  const S=NEAR.filter(b=>(!CAT||b.category===CAT)&&(!q||norm(b.name+" "+(b.category||"")).includes(q)));
+  let h="";
+  if(P.length){h+='<h2>🛒 '+T("सामान","Products")+' ('+P.length+')</h2><div class="grid">'+P.map(p=>{const b=p._s;
+    return '<a class="pc" href="'+esc(shopUrl(b.slug))+'"><div class="im"><img src="'+esc(p.img)+'" alt="" loading="lazy" decoding="async">'+(p.best?'<span class="bs">⭐ '+T("बेस्ट","Best")+'</span>':'')+(p.stock===false?'<span class="os">'+T("अभी स्टॉक में नहीं","Out of stock")+'</span>':'')+'</div>'+
+      '<div class="bd"><span class="nm">'+esc(p.name)+'</span>'+(p.size?'<span class="sz">'+esc(p.size)+'</span>':'')+(p.mrp?'<span class="pr">₹'+esc(Number(p.mrp).toLocaleString("en-IN"))+'</span>':'')+
+      '<span class="sh">🏪 '+esc(b.name)+(dist(b)?' · '+dist(b):'')+'</span><span class="go">'+T("दुकान से लें ›","Buy from shop ›")+'</span></div></a>';}).join("")+'</div>';}
+  if(S.length){h+='<h2>🏪 '+T("पास की दुकानें","Shops nearby")+' ('+S.length+')</h2><div class="sgrid">'+S.slice(0,60).map(b=>'<a class="sc" href="'+esc(shopUrl(b.slug))+'"><span class="lg">'+(window.PBPlan&&PBPlan.has(b.slug,"logo")&&IMG.test(b.logo_url||"")?'<img src="'+esc(b.logo_url)+'" alt="" loading="lazy">':'🏪')+'</span><span style="min-width:0"><b>'+esc(b.name)+'</b><small>'+esc([b.category,dist(b)].filter(Boolean).join(" · "))+'</small></span></a>').join("")+'</div>';}
+  if(!P.length&&!S.length)h='<div class="msg">'+(q?T("इस नाम का सामान नहीं मिला।","Nothing found with this name."):MODE==="geo"?T("20 km के अंदर अभी कोई दुकान नहीं मिली।","No shops found within 20 km yet."):T("ऊपर \"मेरे पास\" दबाएँ या होम पेज पर अपना शहर चुनें।","Tap \"Near me\" above or choose your city on the home page."))+'</div>';
+  h+='<div class="note">🧾 '+T("दुकानदार हैं? \"मेरी दुकान\" में अपना सामान (फ़ोटो, नाम, कीमत) डालें — वह यहाँ City Market में आपके शहर के ग्राहकों को दिखेगा। ","Own a shop? Add your products (photo, name, price) in \"My Shop\" — they show here in City Market to customers in your city. ")+'<a href="mybusiness.html">'+T("मेरी दुकान ›","My Shop ›")+'</a></div>';
+  out.innerHTML=h;
+}
+async function refresh(){LOADING=true;draw();pickNear();await loadProducts();LOADING=false;draw();}
+function near(){
+  const b=document.getElementById("near");
+  if(!navigator.geolocation){alert(T("इस फ़ोन में location नहीं मिल रही।","Location is not available on this phone."));return;}
+  b.disabled=true;b.textContent=T("📍 ढूँढ रहे हैं…","📍 Finding…");
+  navigator.geolocation.getCurrentPosition(p=>{ME={lat:p.coords.latitude,lng:p.coords.longitude};MODE="geo";try{sessionStorage.setItem("pb-loc",JSON.stringify(ME));}catch(e){}b.disabled=false;refresh();},
+    ()=>{b.disabled=false;paintTexts();alert(T("Location नहीं मिली। फ़ोन की Location चालू करके फिर दबाएँ।","Could not get your location. Turn on Location and tap again."));},{enableHighAccuracy:true,timeout:10000,maximumAge:300000});
+}
+document.getElementById("near").onclick=near;
+document.getElementById("chips").onclick=e=>{const c=e.target.closest("[data-c]");if(!c)return;CAT=c.dataset.c;draw();};
+document.getElementById("q").oninput=()=>{clearTimeout(window.__mq);window.__mq=setTimeout(draw,200);};
+document.getElementById("lang").onclick=()=>{try{localStorage.setItem("pb-lang",EN()?"hi":"en");}catch(e){}draw();};
+(async function(){
+  try{CITY=localStorage.getItem("pb-city")||"";}catch(e){}
+  try{const s=JSON.parse(sessionStorage.getItem("pb-loc")||"null");if(s&&isFinite(s.lat)&&isFinite(s.lng)){ME=s;MODE="geo";}}catch(e){}
+  draw();await loadShops();await refresh();
+})();
+})();
+</script>
+</body>
+</html>

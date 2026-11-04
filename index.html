@@ -195,6 +195,11 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:0 16px;display:flex
 .sug .sh{font-size:11.5px;font-weight:800;letter-spacing:.04em;color:#5b6475;background:#f4f7ff;padding:7px 16px}
 
 /* home services button */
+#cmFab{position:fixed;left:12px;bottom:16px;z-index:89;display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #ffb36b;border-radius:16px;padding:5px 11px 5px 5px;box-shadow:0 6px 18px rgba(255,122,26,.28);color:#0b2f73;animation:cmIn .5s ease both}
+#cmFab .cmi{position:relative;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:linear-gradient(145deg,#fff1e2,#ffe0bf);overflow:hidden}
+#cmFab .cmi .aw{position:absolute;top:0;left:0;right:0;height:9px;background:repeating-linear-gradient(90deg,#ff7a1a 0 6px,#fff 6px 12px)}
+#cmFab b{font-size:13px;font-weight:800;white-space:nowrap}
+@keyframes cmIn{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
 .hsbtn{width:100%;margin-top:16px;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:0 6px 18px rgba(26,115,232,.10)}
 .hsbtn:hover,.hsbtn:active{border-color:var(--blue)}
 .hsbtn .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;background:linear-gradient(145deg,#e7f8ee,#e8f1ff);flex:none}
@@ -401,6 +406,8 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
     <div class="gpw" id="gpw" hidden><div class="nsv" id="gpv"><div class="nst" id="gpt"></div></div><div class="gdots" id="gdots" aria-hidden="true"></div></div>
   </section>
 
+  <!-- 🛍️ PataBook City Market: कोने में छोटी दुकान — 20 km के अंदर का सामान -->
+  <a id="cmFab" href="market.html" aria-label="PataBook City Market"><span class="cmi" aria-hidden="true"><i class="aw"></i>🏪</span><b id="cmT">City Market</b></a>
   <a class="hsbtn" href="homeservices.html" id="hsBtn"><span class="ic" aria-hidden="true">🏠</span><span class="tx"><b id="hsT">Home Services</b><small id="hsS">Call an Electrician, Plumber or AC Repair to your home</small></span><span aria-hidden="true" class="go">›</span></a>
   <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:16px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / नौकरियाँ</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
 
@@ -431,6 +438,7 @@ function applyLang(){
   PB.apply();
   drawCats();drawDrawer();
   {const jb=document.getElementById("jobsBtn");if(jb)jb.hidden=!(window.PB_SITE&&PB_SITE.jobs);}
+  {const cm=document.getElementById("cmT");if(cm)cm.textContent=(PB.lang&&PB.lang()!=="hi")?"City Market":"सिटी मार्केट";}
   {const en=PB.lang&&PB.lang()!=="hi",ht=document.getElementById("hsT"),hs=document.getElementById("hsS");if(ht)ht.textContent=en?"Home Services":"घर की सेवाएँ";if(hs)hs.textContent=en?"Call an Electrician, Plumber or AC Repair to your home":"Electrician, Plumber, AC Repair घर पर बुलाएँ";}
   {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / नौकरियाँ";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";}
 }
