@@ -579,9 +579,8 @@ function mobRow(){const N=(CT.k==="ok"&&CT.nums)?CT.nums:[],out=[];
   return out.length?'<div class="row"><span>'+L("मोबाइल","Mobile")+'</span><b>'+out.join("<br>")+'</b></div>':'';}
 
 /* 🌐 Platinum: दुकानदार ने Website Design चुना हो (sql-36) तो ग्राहक को brand.html पर उसी design में; ?std=1 = साधारण page */
-/* 🧪 नए Website Design अभी सिर्फ़ Tejwani Detergent And Chemical पर (test); बाकी Platinum = साधारण purple page */
-const DZOK=slug==="tejwani-detergent-and-chemical-gandhidham-31oyn";
-const STD=!DZOK||new URLSearchParams(location.search).get("std")==="1";
+/* 🛍️ हर Platinum दुकान = "Store" design (#31, Navy Platinum) — pb_design_get Platinum के लिए 31 लौटाता है */
+const STD=new URLSearchParams(location.search).get("std")==="1";
 const toBrand=()=>location.replace("brand.html?slug="+encodeURIComponent(slug)+location.hash);
 try{if(!STD&&slug&&localStorage.getItem("pbd_"+slug)==="1")toBrand();}catch(_){}
 /* design की जाँच पेज खुलते ही शुरू (pb_design_get खुद सिर्फ़ Platinum का लौटाता है) — ताकि पुराना page बीच में न दिखे */
