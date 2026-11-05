@@ -35,6 +35,7 @@
     try { LIB[s] = (await rpc("pb_lib_my", { p_slug: s })) || []; } catch (e) { LIB[s] = LIB[s] || []; }
     try { PHOTOS[s] = (await rpc("pb_my_photos", { p_slug: s })) || []; } catch (e) {}
     if (!ILOADED[s]) introLoad(s);
+    if (!DLOADED[s]) designLoad(s);
     draw();
   }
   function reload(b) { LOAD[b.slug] = 1; return load(b.slug); }
@@ -47,6 +48,7 @@
     var open = GO[s];
     if (open === "staff" && !b.h) return staffPage(b, i);
     if (open === "intro" && !b.h) return introPage(b, i);
+    if (open === "design" && !b.h) return designPage(b, i);
     if (open) {   /* 📂 फ़ोल्डर का पूरा पन्ना: ऊपर ← नाम ＋ ; नीचे फ़ोन जैसी जाली */
       var K = KINDS.filter(function (x) { return x[0] === open; })[0], k = open, arr = listOf(b, k), ok = can(b, k), act = active(b, k);
       var bar = '<div class="gph">' + (b.h ? '' : '<button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button>') + '<b>' + esc(nm(K)) + '</b><span>' + arr.length + '</span>' +
@@ -65,7 +67,7 @@
     return msg + '<div class="gl">' + SHOWN.map(function (K) {   /* चार फ़ोल्डर: सिर्फ़ नाम और गिनती */
       if (!can(b, K[0])) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>🔒</i></button>';
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
-    }).join("") + (b.h ? '' : introRow(b, i)) + '</div>' + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
+    }).join("") + (b.h ? '' : introRow(b, i) + designRow(b, i)) + '</div>' + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
       var parts = SHOWN.map(function (K) { return esc(nm(K)) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
       return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
@@ -593,6 +595,73 @@
     IPLAY = PBIntro.play({ mount: box, scene: sel.scene, style: sel.style, name: b.name, logo: LOGOS[b.slug] || "", tag: [b.category, String(b.address || "").split(",").slice(-1)[0].trim()].filter(Boolean).join(" · "),
       onDone: function () { var q = box.querySelector(".ipp"); if (q) { q.style.display = ""; q.textContent = "↻ " + T("फिर से देखें", "Play again"); } } });
   }
+
+  /* 🌐 Website Design: Platinum दुकानदार 100 design (10 layout × 10 रंग) में से एक चुने (sql-36). ग्राहक को Platinum दुकान का page उसी design में (brand.html) */
+  var DSN = {}, DSEL = {}, DERR = {}, DLOADED = {};
+  var DLY = [["लग्ज़री", "Luxury"], ["सिनेमा", "Cinematic"], ["एडिटोरियल", "Editorial"], ["ऑनलाइन स्टोर", "Store"], ["मिनिमल", "Minimal"], ["पोस्टर", "Bold Poster"], ["स्प्लिट", "Split Screen"], ["बेंटो", "Bento Grid"], ["क्लासिक दुकान", "Classic Shop"], ["मैगज़ीन", "Magazine Cover"]];
+  var DTH = [["नेवी प्लैटिनम", "Navy Platinum", "#0a1230", "#c7d2e8"], ["काला-गोल्ड", "Black Gold", "#0b0b0c", "#d8c39a"], ["रोज़ गोल्ड", "Rose Gold", "#fbf3f0", "#b76e79"], ["एमराल्ड", "Emerald", "#06261d", "#d6b46a"], ["मैरून रॉयल", "Royal Maroon", "#3a0b14", "#e6c27a"], ["सफ़ेद मिनिमल", "Pure White", "#ffffff", "#111111"], ["आइवरी सैंड", "Ivory Sand", "#f4efe6", "#8a6a3d"], ["मिडनाइट वायलेट", "Midnight Violet", "#140c2a", "#b9a3ff"], ["ओशन टील", "Ocean Teal", "#03242b", "#7fe0d4"], ["चारकोल ऑरेंज", "Charcoal Orange", "#16181b", "#ff7a3d"]];
+  function plat(b) { return paid(b) && (typeof tierOf !== "function" || tierOf(b) === "platinum"); }
+  function dsplit(n) { return { ly: Math.floor((n - 1) / 10) + 1, th: (n - 1) % 10 + 1 }; }
+  function dname(n) { var z = dsplit(n); return T(DLY[z.ly - 1][0], DLY[z.ly - 1][1]) + " · " + T(DTH[z.th - 1][0], DTH[z.th - 1][1]); }
+  function designRow(b, i) {
+    if (!plat(b)) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">🌐</span><span class="gn"><b>' + T("वेबसाइट डिज़ाइन", "Website Design") + '</b></span><i>💎🔒</i></button>';
+    var cur = DSN[b.slug];
+    return '<button type="button" class="gfh" data-gf="design" data-i="' + i + '"><span class="gi">🌐</span><span class="gn"><b>' + T("वेबसाइट डिज़ाइन", "Website Design") + '</b></span><i>' + (cur ? "#" + cur : T("चुनें", "Choose")) + '</i><em>›</em></button>';
+  }
+  async function designLoad(s) {
+    DLOADED[s] = 1;
+    try { var j = await rpc("pb_design_get", { p_slug: s }); DSN[s] = +j >= 1 && +j <= 100 ? +j : null; DERR[s] = ""; }
+    catch (e) { DSN[s] = null; DERR[s] = /function|schema cache|404/i.test(String(e && e.message)) ? "setup" : ""; }
+    if (!DSEL[s]) DSEL[s] = DSN[s] || 1;
+    draw();
+  }
+  function designCss() {
+    if (document.getElementById("pbdGal")) return; var st = document.createElement("style"); st.id = "pbdGal";
+    st.textContent = ".dpw{display:grid;gap:12px;margin:8px 2px}.dpf{position:relative;width:min(100%,300px);aspect-ratio:9/17;margin:0 auto;border-radius:22px;overflow:hidden;background:#0a1230;border:6px solid #111;box-shadow:0 12px 34px rgba(0,0,0,.28)}" +
+      ".dpf iframe{position:absolute;left:0;top:0;width:390px;height:737px;border:0;transform-origin:0 0;background:#fff}" +
+      ".dpn{text-align:center;font-size:15px;font-weight:800;color:#0b2f73}.dpn small{display:block;font-weight:600;color:#5b6475;font-size:12.5px;margin-top:2px}" +
+      ".dpl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.dpl button{border:1px solid #d0d7e2;background:#fff;border-radius:10px;padding:8px 2px;font:inherit;font-size:11.5px;font-weight:800;color:#33395a;cursor:pointer;min-width:0}.dpl button span{display:block;font-size:10px;color:#8a93a6}.dpl button.on{border-color:#1a73e8;background:#eef4ff;color:#0b2f73}" +
+      ".dpc{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.dpc button{border:1px solid #d0d7e2;background:#fff;border-radius:10px;padding:8px 2px;font:inherit;font-size:10.5px;font-weight:700;color:#33395a;cursor:pointer;min-width:0}.dpc button.on{border-color:#1a73e8;background:#eef4ff}.dpc i{display:block;width:26px;height:26px;border-radius:50%;margin:0 auto 4px;border:2px solid #d0d7e2;position:relative;overflow:hidden}.dpc i b{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%}" +
+      ".dph{font-size:12.5px;font-weight:800;color:#5b6475;margin:4px 2px -4px}.dpa{display:flex;gap:8px;flex-wrap:wrap}.dpa button,.dpa a{flex:1;min-width:140px;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer;text-align:center;text-decoration:none}.dpa .s{background:#137333;color:#fff}.dpa .s[disabled]{opacity:.7}.dpa .r{background:#eef1f6;color:#b42318}.dpa .o{background:#eef4ff;color:#0b2f73}" +
+      ".dpnv{display:flex;gap:8px}.dpnv button{flex:1;border:1px solid #d0d7e2;background:#fff;border-radius:10px;padding:9px;font:inherit;font-weight:800;color:#33395a;cursor:pointer}";
+    document.head.appendChild(st);
+  }
+  function designFit() { document.querySelectorAll(".dpf").forEach(function (f) { var fr = f.querySelector("iframe"); if (fr) fr.style.transform = "scale(" + (f.clientWidth / 390) + ")"; }); }
+  window.addEventListener("resize", designFit);
+  function designPage(b, i) {
+    var s = b.slug; designCss(); if (!DLOADED[s]) designLoad(s);
+    var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button><b>🌐 ' + T("वेबसाइट डिज़ाइन", "Website Design") + '</b><span>100</span></div>';
+    if (!plat(b)) return bar + '<div class="gbd"><small>' + T("यह सुविधा 💎 Platinum plan में है।", "This is in the 💎 Platinum plan.") + '</small></div>';
+    if (DERR[s] === "setup") return bar + '<div class="gbd"><small>' + T("यह सुविधा जल्दी चालू होगी।", "This will be available soon.") + '</small></div>';
+    var n = DSEL[s] || 1, z = dsplit(n), cur = DSN[s], same = cur === n;
+    var src = "brand.html?slug=" + encodeURIComponent(s) + "&d=" + n;
+    setTimeout(designFit, 0);
+    return bar + '<div class="dpw">' +
+      '<div class="szn">' + T("ग्राहक आपकी दुकान खोलेंगे तो उन्हें आपकी अपनी वेबसाइट इसी डिज़ाइन में दिखेगी — आपके सामान, फ़ोटो, पते और WhatsApp के साथ। लेआउट और रंग चुनकर देखें, पसंद आए तो \"यह लगाएँ\" दबाएँ।", "Customers will see your own website in this design — with your products, photos, address and WhatsApp. Pick a layout and a colour to preview, then tap \"Use this\".") + '</div>' +
+      '<div class="dpf"><iframe src="' + esc(src) + '" title="' + esc(T("डिज़ाइन की झलक", "Design preview")) + '" loading="lazy"></iframe></div>' +
+      '<div class="dpn">#' + n + ' · ' + esc(dname(n)) + '<small>' + (cur ? T("अभी लगा है: ", "Now in use: ") + "#" + cur + " · " + esc(dname(cur)) : T("अभी कोई डिज़ाइन नहीं चुना — ग्राहक को साधारण पेज दिखता है", "No design chosen yet — customers see the standard page")) + '</small></div>' +
+      '<div class="dpnv"><button type="button" data-dstep="-1" data-i="' + i + '" aria-label="' + T("पिछला डिज़ाइन", "Previous design") + '">‹ ' + T("पिछला", "Previous") + '</button><button type="button" data-dstep="1" data-i="' + i + '" aria-label="' + T("अगला डिज़ाइन", "Next design") + '">' + T("अगला", "Next") + ' ›</button></div>' +
+      '<div class="dph">1. ' + T("लेआउट", "Layout") + '</div><div class="dpl">' + DLY.map(function (l, k) { return '<button type="button" class="' + (z.ly === k + 1 ? "on" : "") + '" data-dly="' + (k + 1) + '" data-i="' + i + '"><span>' + (k + 1) + '</span>' + esc(T(l[0], l[1])) + '</button>'; }).join("") + '</div>' +
+      '<div class="dph">2. ' + T("रंग", "Colour") + '</div><div class="dpc">' + DTH.map(function (t, k) { return '<button type="button" class="' + (z.th === k + 1 ? "on" : "") + '" data-dth="' + (k + 1) + '" data-i="' + i + '"><i style="background:' + t[2] + '"><b style="background:' + t[3] + '"></b></i>' + esc(T(t[0], t[1])) + '</button>'; }).join("") + '</div>' +
+      '<div class="dpa"><button type="button" class="s" data-dsave="' + i + '"' + (same ? " disabled" : "") + '>✅ ' + (same ? T("यही लगा है", "In use") : T("यह लगाएँ", "Use this")) + '</button>' +
+      '<a class="o" href="' + esc(src) + '" target="_blank" rel="noopener">↗ ' + T("पूरा देखें", "Open full preview") + '</a>' +
+      (cur ? '<button type="button" class="r" data-drm="' + i + '">' + T("हटाएँ", "Remove") + '</button>' : '') + '</div>' +
+      (DERR[s] && DERR[s] !== "setup" ? '<div class="err">' + esc(DERR[s]) + '</div>' : '') + '</div>';
+  }
+  document.getElementById("list").addEventListener("click", async function (e) {
+    function pick(i, n) { var b = ROWS[i]; if (!b) return; DSEL[b.slug] = n; draw(); }
+    var ly = e.target.closest("[data-dly]"); if (ly) { var b0 = ROWS[+ly.dataset.i], z0 = dsplit(DSEL[b0.slug] || 1); pick(+ly.dataset.i, (+ly.dataset.dly - 1) * 10 + z0.th); return; }
+    var th = e.target.closest("[data-dth]"); if (th) { var b1 = ROWS[+th.dataset.i], z1 = dsplit(DSEL[b1.slug] || 1); pick(+th.dataset.i, (z1.ly - 1) * 10 + +th.dataset.dth); return; }
+    var st = e.target.closest("[data-dstep]"); if (st) { var b2 = ROWS[+st.dataset.i], n2 = (DSEL[b2.slug] || 1) + +st.dataset.dstep; if (n2 < 1) n2 = 100; if (n2 > 100) n2 = 1; pick(+st.dataset.i, n2); return; }
+    var sv = e.target.closest("[data-dsave]"); if (sv) { var b3 = ROWS[+sv.dataset.dsave], s3 = b3.slug, n3 = DSEL[s3] || 1; sv.disabled = true;
+      try { ME = await PBA.session(); await rpc("pb_design_set", { p_slug: s3, p_design: n3 }); DSN[s3] = n3; DERR[s3] = ""; }
+      catch (er) { DERR[s3] = /platinum/i.test(String(er && er.message)) ? T("यह सुविधा Platinum plan में है।", "This is in the Platinum plan.") : /rate/i.test(String(er && er.message)) ? T("आज बहुत बार बदला गया — कल कोशिश करें।", "Changed too many times today — try tomorrow.") : T("सेव नहीं हो सका। दोबारा कोशिश करें।", "Could not save. Try again."); }
+      draw(); return; }
+    var rm = e.target.closest("[data-drm]"); if (rm) { var b4 = ROWS[+rm.dataset.drm], s4 = b4.slug; rm.disabled = true;
+      try { ME = await PBA.session(); await rpc("pb_design_set", { p_slug: s4, p_design: null }); DSN[s4] = null; DERR[s4] = ""; }
+      catch (er) { DERR[s4] = T("हटाया नहीं जा सका। दोबारा कोशिश करें।", "Could not remove. Try again."); }
+      draw(); return; }
+  });
   document.getElementById("list").addEventListener("click", async function (e) {
     var gfi = e.target.closest('[data-gf="intro"]'); if (gfi) { var bi = ROWS[+gfi.dataset.i]; if (bi) introPlaySoon(bi.slug); return; }
     var pv = e.target.closest("[data-ipv]"); if (pv) { var b = ROWS[+pv.dataset.i]; ISEL[b.slug] = { scene: +pv.dataset.ipv, style: (ISEL[b.slug] || {}).style || "gold" }; draw(); introPlaySoon(b.slug); return; }

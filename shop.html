@@ -576,6 +576,15 @@ function mobRow(){const N=(CT.k==="ok"&&CT.nums)?CT.nums:[],out=[];
   N.forEach(n=>{out.push('<a href="tel:+91'+n+'">📞 +91 '+n+'</a> <a href="https://wa.me/91'+n+'" target="_blank" rel="noopener">💬 WhatsApp</a>');});
   return out.length?'<div class="row"><span>'+L("मोबाइल","Mobile")+'</span><b>'+out.join("<br>")+'</b></div>':'';}
 
+/* 🌐 Platinum: दुकानदार ने Website Design चुना हो (sql-36) तो ग्राहक को brand.html पर उसी design में; ?std=1 = साधारण page */
+const STD=new URLSearchParams(location.search).get("std")==="1";
+const toBrand=()=>location.replace("brand.html?slug="+encodeURIComponent(slug)+location.hash);
+try{if(!STD&&slug&&localStorage.getItem("pbd_"+slug)==="1")toBrand();}catch(_){}
+async function brandCheck(){
+  if(STD||TIER()!=="platinum")return false;
+  try{const r=await fetch(SB+"/rest/v1/rpc/pb_design_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})});if(!r.ok)return false;const d=+(await r.json());
+    if(d>=1&&d<=100){try{localStorage.setItem("pbd_"+slug,"1");}catch(_){}toBrand();return true;}try{localStorage.removeItem("pbd_"+slug);}catch(_){}}catch(e){}
+  return false;}
 async function load(){
   const app=document.getElementById("app");
   if(!slug){cvOff();try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("दुकान नहीं मिली।","Shop not found.")+'</p>';return;}
@@ -592,7 +601,9 @@ async function load(){
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}
     try{var _u=location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),_ds=(document.querySelector('meta[name="description"]')||{}).content||"",_im=(!(window.PBHide&&PBHide.has("logo"))&&/^https?:\/\//.test(B.logo_url||""))?B.logo_url:"https://patabook.in/icon-512.png",_c=document.querySelector('link[rel="canonical"]');if(!_c){_c=document.createElement("link");_c.rel="canonical";document.head.appendChild(_c);}_c.href=_u;[["og:title",document.title],["og:description",_ds],["og:url",_u],["og:image",_im]].forEach(function(p){var m=document.querySelector('meta[property="'+p[0]+'"]');if(!m){m=document.createElement("meta");m.setAttribute("property",p[0]);document.head.appendChild(m);}m.setAttribute("content",p[1]);});}catch(_){}
     render();
-    await Promise.all([loadPrem(),loadContact(),loadIntroSel()]);window.__premDone=1;
+    await Promise.all([loadPrem(),loadContact(),loadIntroSel()]);
+    if(await brandCheck())return;
+    window.__premDone=1;
     loadNear();loadVacFlag();loadOwner();
     render();
   }catch(e){cvOff();app.innerHTML='<p class="note">'+L("इंटरनेट की दिक्कत — दोबारा कोशिश करें।","Connection problem — please try again.")+'</p>';}
