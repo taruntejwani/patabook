@@ -347,6 +347,22 @@ footer{padding:14px 16px 18px;text-align:center;color:var(--muted);font-size:12p
   .nsv{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%)}
   .nst{padding:0 6px}
 }
+/* 🗂️ 16 category: एक बार में 8 (फ़ोन 4×2, कंप्यूटर 8 एक लाइन), हर 3 सेकंड अगली 8, उँगली से सरकाएँ; "सभी" = सब एक साथ */
+#qcat.qv{display:block;overflow:visible;padding:16px 0 0;max-width:820px}
+#qcat.qv .qvs{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#qcat.qv .qvs::-webkit-scrollbar{display:none}
+#qcat.qv .qvt{display:flex}
+#qcat.qv .qpg{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 6px;padding:14px 2px 6px;box-sizing:border-box}
+#qcat.qv a{width:auto;flex:none;font-size:12px}
+#qcat.qv a i{background:var(--qb);border-color:var(--qd);box-shadow:none}
+#qcat.qv a i svg{width:28px;height:28px;color:var(--qf)}
+#qcat.qv a.up i{box-shadow:0 10px 18px rgba(26,115,232,.18)}
+#qcat.qv .qdt{display:flex;justify-content:center;gap:6px;margin-top:6px}
+#qcat.qv .qdt button{width:8px;height:8px;border-radius:999px;border:0;background:#c9d6ee;padding:0;cursor:pointer;transition:width .25s,background .25s}
+#qcat.qv .qdt button.on{width:22px;background:#1a73e8}
+#qcat.qv.all .qvs{overflow:visible}#qcat.qv.all .qvt{display:block}#qcat.qv.all .qpg{display:none}#qcat.qv.all .qpg.qall{display:grid}#qcat.qv.all .qdt{display:none}
+#qcat.qv .qpg.qall{display:none}
+@media (min-width:700px){#qcat.qv{max-width:1100px}#qcat.qv .qpg{grid-template-columns:repeat(8,minmax(0,1fr));gap:14px 10px}#qcat.qv a{width:auto;font-size:13px}#qcat.qv a i{width:66px;height:66px}#qcat.qv a i svg{width:32px;height:32px}}
 /* 💻 कंप्यूटर (बड़ी स्क्रीन): पूरा पन्ना चौड़ा — मोबाइल जैसी पतली पट्टी नहीं */
 @media (min-width:900px){
   main{max-width:1180px;padding:0 28px}
@@ -1220,13 +1236,65 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
 })();
 </script>
 <script>
+/* 🗂️ homepage categories: 15 + "सभी"; 8-8 के page, हर 3 सेकंड अगला page (छूने/mouse रखने पर रुकता है) */
 (function(){
+  var S='fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  function sv(b){return '<svg viewBox="0 0 24 24" '+S+' aria-hidden="true">'+b+'</svg>';}
+  var IC={
+    Home:sv('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>'),
+    Automobile:sv('<path d="M5 17H4a1 1 0 0 1-1-1v-3.5L5 7.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5l2 5V16a1 1 0 0 1-1 1h-1"/><path d="M3 12.5h18"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5"/>'),
+    Food:sv('<path d="M6 3v6a2 2 0 0 0 4 0V3"/><path d="M8 3v18"/><path d="M17 3c-2 2-2.5 6 0 8v10"/>'),
+    Health:sv('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M8 11.5h2l1-2 2 4 1-2h2"/>'),
+    Shopping:sv('<path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
+    Education:sv('<path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/>'),
+    Professional:sv('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M3 13h18"/>'),
+    Hotel:sv('<path d="M3 6v14"/><path d="M3 16h18v4"/><path d="M21 16v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="12" r="2"/>'),
+    Beauty:sv('<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 8.6L20 20"/><path d="M8.6 15.4L20 4"/>'),
+    Travel:sv('<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><path d="M7 17v3"/><path d="M17 17v3"/><path d="M8 14h.01"/><path d="M16 14h.01"/>'),
+    RealEstate:sv('<path d="M3 21h18"/><path d="M5 21V7l7-4v18"/><path d="M19 21V11l-7-3"/><path d="M8 9h1"/><path d="M8 13h1"/><path d="M8 17h1"/><path d="M15 13h1"/><path d="M15 17h1"/>'),
+    Finance:sv('<circle cx="12" cy="12" r="9"/><path d="M9 8h6"/><path d="M9 11h6"/><path d="M11 8a3 3 0 0 1 0 6H9l4 4"/>'),
+    Wholesale:sv('<rect x="3" y="12" width="8" height="8" rx="1"/><rect x="13" y="12" width="8" height="8" rx="1"/><rect x="8" y="3" width="8" height="8" rx="1"/>'),
+    Manufacturing:sv('<path d="M3 21V11l5 3v-3l5 3V5h3l1 4h4v12H3z"/><path d="M7 17h2"/><path d="M12 17h2"/><path d="M17 17h1"/>'),
+    Events:sv('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.6 1.8 1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6z"/>'),
+    All:sv('<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>'),
+    Less:sv('<path d="M6 15l6-6 6 6"/>')
+  };
+  /* [key, English, Hindi, icon रंग, पृष्ठभूमि, किनारा] */
+  var C=[["Home","Home Services","होम सर्विस","#E8590C","#FFF1E6","#FFD8BF"],["Automobile","Automobile","ऑटोमोबाइल","#D6336C","#FFEEF3","#FFC9D8"],
+    ["Food","Food","खाना","#F08C00","#FFF6E0","#FFE3A3"],["Health","Health","स्वास्थ्य","#E03131","#FFEDED","#FFC9C9"],
+    ["Shopping","Shopping","शॉपिंग","#7048E8","#F2EEFF","#D9CEFF"],["Education","Education","शिक्षा","#1C7ED6","#E8F3FF","#BFDBFE"],
+    ["Professional","Professional","प्रोफेशनल","#5C4033","#F6F0EB","#E3D3C6"],["Hotel","Hotel","होटल","#0C8599","#E3F8FA","#B2EBF2"],
+    ["Beauty","Beauty & Care","ब्यूटी","#C2255C","#FFEAF4","#FCC2D7"],["Travel","Travel & Transport","ट्रैवल","#1971C2","#E7F1FF","#B9D7FB"],
+    ["RealEstate","Real Estate","प्रॉपर्टी","#495057","#F1F3F5","#DEE2E6"],["Finance","Finance & Insurance","फ़ाइनेंस","#2B8A3E","#EBFBEE","#C3EBCB"],
+    ["Wholesale","Wholesale","होलसेल","#9C6B00","#FFF8E1","#F5DFA0"],["Manufacturing","Manufacturing","मैन्युफैक्चरिंग","#364FC7","#EDF2FF","#C5D3FF"],
+    ["Events","Events & Photos","इवेंट्स","#AE3EC9","#F9EDFF","#EBC8FA"]];
+  var ALL=["All","All","सभी","#1a73e8","#EAF4FF","#BFDBFE"],LESS=["Less","Less","कम","#1a73e8","#EAF4FF","#BFDBFE"];
+  var n=null,sc=null,cur=0,PAGES=2,pause=0,hov=false,tm=0;
+  function hi(){return !!(window.PB&&PB.lang&&PB.lang()==="hi");}
+  function nm(c){return hi()?c[2]:c[1];}
+  function tile(c){var st='style="--qf:'+c[3]+';--qb:'+c[4]+';--qd:'+c[5]+'"';
+    if(c[0]==="All"||c[0]==="Less")return '<a href="#" role="button" data-qa="'+c[0]+'" '+st+'><i>'+IC[c[0]]+'</i>'+nm(c)+'</a>';
+    return '<a href="category.html?cat='+encodeURIComponent(c[0])+'" '+st+'><i>'+IC[c[0]]+'</i>'+nm(c)+'</a>';}
+  function dots(){if(!n)return;n.querySelectorAll(".qdt button").forEach(function(b,i){b.classList.toggle("on",i===cur);});}
+  function go(p,inst){if(!sc)return;cur=(p+PAGES)%PAGES;sc.scrollTo({left:cur*sc.clientWidth,behavior:inst?"auto":"smooth"});dots();}
   function draw(){
-    var n=document.getElementById("qcat");if(!n||typeof SUBS==="undefined")return;
-    var T=function(k,d){try{var v=PB.t(k);return v&&v!==k?v:d}catch(e){return d}};
-    n.innerHTML=SUBS.filter(function(c){return c[0]==="Home"}).concat(SUBS.filter(function(c){return c[0]!=="Home"})).map(function(c){return '<a href="category.html?cat='+encodeURIComponent(c[0])+'"><i aria-hidden="true">'+c[1]+'</i>'+T("c_"+c[0],c[0])+'</a>';}).join("");
+    n=document.getElementById("qcat");if(!n)return;n.classList.add("qv");
+    var L=C.concat([ALL]),pg="";PAGES=Math.ceil(L.length/8);
+    for(var p=0;p<PAGES;p++)pg+='<div class="qpg">'+L.slice(p*8,p*8+8).map(tile).join("")+'</div>';
+    pg+='<div class="qpg qall">'+C.concat([LESS]).map(tile).join("")+'</div>';
+    var d="";for(var k=0;k<PAGES;k++)d+='<button type="button" data-qd="'+k+'" aria-label="'+(hi()?"पेज ":"Page ")+(k+1)+'"></button>';
+    n.innerHTML='<div class="qvs"><div class="qvt">'+pg+'</div></div><div class="qdt">'+d+'</div>';
+    sc=n.querySelector(".qvs");go(cur,true);
+    if(!n.__qv){n.__qv=1;
+      n.addEventListener("click",function(e){var a=e.target.closest("[data-qa]");if(a){e.preventDefault();n.classList.toggle("all",a.dataset.qa==="All");if(a.dataset.qa==="Less"){go(0,true);}return;}
+        var b=e.target.closest("[data-qd]");if(b){pause=Date.now()+6000;go(+b.dataset.qd);}});
+      ["touchstart","pointerdown","wheel"].forEach(function(ev){n.addEventListener(ev,function(){pause=Date.now()+6000;},{passive:true});});
+      n.addEventListener("mouseenter",function(){hov=true;});n.addEventListener("mouseleave",function(){hov=false;});
+      addEventListener("resize",function(){go(cur,true);});}
+    sc.addEventListener("scroll",function(){var p=Math.round(sc.scrollLeft/Math.max(1,sc.clientWidth));if(p!==cur){cur=p;dots();}},{passive:true});
   }
   draw();if(window.PB&&PB.onChange)PB.onChange(draw);
+  clearInterval(tm);tm=setInterval(function(){if(!n||hov||Date.now()<pause||n.classList.contains("all")||document.hidden)return;go(cur+1);},3000);
 })();
 </script>
 <script>

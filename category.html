@@ -155,8 +155,17 @@ const CATS={
  Education:{hi:"शिक्षा",subs:["School & College","Coaching & Tuition","Computer & Skill Training"]},
  Home:{hi:"होम सर्विस",subs:["Plumber","Electrician","Interior & Furniture","Cleaning & Pest Control","Construction & Hardware"]},
  Professional:{hi:"प्रोफेशनल",subs:["Lawyer & Legal","CA & Accounting","Property Dealer","Manufacturer & Wholesaler","Transport & Logistics","Photo & Events","Insurance & Finance"]},
- Hotel:{hi:"होटल",subs:["Hotel & Lodge"]}
+ Hotel:{hi:"होटल",subs:["Hotel & Lodge"]},
+ /* नई 7 category: दुकान के description की "Category: <group> → …" line से मिलती हैं; sub-chips मिली दुकानों से बनते हैं */
+ Beauty:{hi:"ब्यूटी",grp:"Beauty & Personal Care",subs:[]},
+ Travel:{hi:"ट्रैवल",grp:"Travel & Transport",subs:[]},
+ RealEstate:{hi:"प्रॉपर्टी",grp:"Real Estate",subs:[]},
+ Finance:{hi:"फ़ाइनेंस",grp:"Finance & Insurance",subs:[]},
+ Wholesale:{hi:"होलसेल",grp:"Wholesale & Suppliers",subs:[]},
+ Manufacturing:{hi:"मैन्युफैक्चरिंग",grp:"Manufacturing",subs:[]},
+ Events:{hi:"इवेंट्स",grp:"Entertainment & Events",subs:[]}
 };
+function catFilter(u){if(info.grp)u.searchParams.set("description","ilike.*Category: "+info.grp+"*");else u.searchParams.set("category","eq."+cat);}
 const T=(k,v)=>PB.t(k,v);
 const MAP={none:"cnone",map:"dir"};
 const L=new Proxy({},{get:(o,k)=>k==="found"?(n=>T("found",{n})):T(MAP[k]||k)});
@@ -245,7 +254,7 @@ async function load(){
   u.searchParams.set("select",SEL);   /* phone/whatsapp nahi */
   u.searchParams.set("is_active","eq.true");
   u.searchParams.set("deleted_at","is.null");
-  u.searchParams.set("category","eq."+cat);
+  catFilter(u);
   u.searchParams.set("limit","300");
   if(mode==="geo"&&me){
     const dLat=radius/111, dLng=radius/(111*Math.max(.2,Math.cos(me.lat*Math.PI/180)));
@@ -265,7 +274,7 @@ async function load(){
       const u2=new URL(SB+"/rest/v1/businesses");
       u2.searchParams.set("select",SEL);
       u2.searchParams.set("is_active","eq.true");u2.searchParams.set("deleted_at","is.null");
-      u2.searchParams.set("category","eq."+cat);u2.searchParams.set("latitude","is.null");u2.searchParams.set("limit","200");
+      catFilter(u2);u2.searchParams.set("latitude","is.null");u2.searchParams.set("limit","200");
       if(city)u2.searchParams.set("address","ilike.*"+city+"*");
       try{const r2=await fetch(u2,{headers:H});if(r2.ok){const d2=await r2.json();if(Array.isArray(d2)){const seen={};data.forEach(b=>seen[b.slug]=1);d2.forEach(b=>{if(!seen[b.slug]){b._nopos=1;data.push(b);}});}}}catch(e){}
     }
@@ -277,6 +286,7 @@ async function load(){
     }).filter(b=>mode!=="geo"||b._nopos||(b._d!=null&&b._d<=radius));
     const rk=b=>{const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);};   /* star + कितनों ने दी, दोनों; बिना rating = 3.5 */
     rows.sort((a,b)=>mode==="geo"?((a._nopos?1:0)-(b._nopos?1:0))||((a._d??0)-(b._d??0))||String(a.name).localeCompare(b.name):(rk(b)-rk(a))||String(a.name).localeCompare(b.name));
+    if(info.grp){const seen=info.subs.slice();rows.forEach(b=>{if(b._sub&&!seen.includes(b._sub))seen.push(b._sub);});if(seen.length!==info.subs.length){info.subs=seen;drawSubs();}}
     rows=await premiumFirst(rows);
     render();
   }catch(e){list.innerHTML=`<p class="note">${L.err}</p>`;}
