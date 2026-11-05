@@ -159,6 +159,15 @@ h2 .pbi{width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:var(--
 .qa3 a.qd i,.qa3 a.qk i{width:44px;height:44px}.qa3 a.qd i .pbi,.qa3 a.qk i .pbi{width:22px;height:22px}
 .qa3 a.qd b,.qa3 a.qk b{font-size:18px}.qa3 a.qd:last-child{justify-content:center}
 @media(min-width:1024px){.wrap{max-width:1000px}}
+/* Option C: 4 गोल outline icon एक लाइन में (Call / WhatsApp / Directions / Card) */
+.qa3{display:flex!important;gap:6px!important;margin-top:18px;max-width:460px}.qa3>a{flex:1 1 0;min-width:0}
+.qa3 a,.qa3 a.qc,.qa3 a.qw,.qa3 a.qd,.qa3 a.qk{flex-direction:column!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;min-height:0!important;padding:4px 0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:12px;grid-column:auto!important}
+.qa3 a i,.qa3 a.qc i,.qa3 a.qw i,.qa3 a.qd i,.qa3 a.qk i{width:58px!important;height:58px!important;border-radius:50%;background:#fff!important;border:2px solid currentColor}
+.qa3 a i .pbi,.qa3 a.qc i .pbi,.qa3 a.qw i .pbi,.qa3 a.qd i .pbi,.qa3 a.qk i .pbi{width:24px!important;height:24px!important}
+.qa3 a b,.qa3 a.qc b,.qa3 a.qw b,.qa3 a.qd b,.qa3 a.qk b{font-size:13px!important;font-weight:700;color:#14161c;text-align:center!important;white-space:nowrap}
+.qa3 a.qc,html.pbfree .qa3 a.qc{color:#1a73e8;background:none!important}.qa3 a.qw{color:#1e9e57}.qa3 a.qd{color:#e8590c}.qa3 a.qk{color:#6d28d9}
+.qa3 a:focus-visible{outline:2px solid #1a73e8;outline-offset:2px}
+@media(hover:hover){.qa3 a:hover i{background:currentColor!important}.qa3 a:hover i .pbi{color:#fff}}
 </style><script src="pb-guard.js" defer></script><script src="pb-back.js"></script><script src="pb-pgal.js"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
 <script src="pb-icons.js"></script>
 <script src="pb-slide.js"></script><script src="pb-track.js" defer></script><script src="pb-protect.js" defer></script>
@@ -633,8 +642,8 @@ function drawQa(){
   else if(s.k==="locked")need=PBA.loginUrl("business.html?slug="+encodeURIComponent(slug));
   const ph2=s.k==="ok"?staffNo("Phone2"):"";
   const t=(href,ic,lb,cls,ext)=>href?'<a class="'+(cls||"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':'')+'><i>'+ic+'</i><b>'+lb+'</b></a>':'<a class="dis '+(cls||"")+'" aria-disabled="true"><i>'+ic+'</i><b>'+lb+'</b></a>';
-  const callLb=(en?"Call":"कॉल"),waLb='WhatsApp<small>'+(en?"Send message":"संदेश भेजें")+'</small>';
-  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता","qd")+(document.getElementById("cardBtn")?'<a class="qk" href="#" id="qkCard"><i>'+PBI("card")+'</i><b>'+(en?"Digital Card":"डिजिटल कार्ड")+'</b></a>':"");const qk=document.getElementById("qkCard");if(qk)qk.onclick=e=>{e.preventDefault();const c=document.getElementById("cardBtn");if(c)c.click();};
+  const callLb=(en?"Call":"कॉल"),waLb='WhatsApp';
+  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता","qd")+(document.getElementById("cardBtn")?'<a class="qk" href="#" id="qkCard"><i>'+PBI("card")+'</i><b>'+(en?"Card":"कार्ड")+'</b></a>':"");const qk=document.getElementById("qkCard");if(qk)qk.onclick=e=>{e.preventDefault();const c=document.getElementById("cardBtn");if(c)c.click();};
   drawDock(ph,wa,en);
   if(mr){const N=(s.k==="ok"&&s.nums&&s.nums.length)?s.nums:[];const L2=[];N.forEach(n=>{L2.push('<a href="tel:+91'+n+'">'+PBI("call")+'+91 '+n+'</a> <a href="https://wa.me/91'+n+'" target="_blank" rel="noopener">'+PBI("chat")+'WhatsApp</a>');});
     mr.outerHTML='<div id="mobRow">'+(L2.length?'<div class="row"><span>'+(en?"Mobile":"मोबाइल")+'</span><b>'+L2.join("<br>")+'</b></div>':'')+'</div>';}
