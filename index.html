@@ -347,7 +347,7 @@ footer{padding:14px 16px 18px;text-align:center;color:var(--muted);font-size:12p
   .nsv{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%)}
   .nst{padding:0 6px}
 }
-/* 🗂️ 16 category: एक बार में 8 (फ़ोन 4×2, कंप्यूटर 8 एक लाइन), हर 3 सेकंड अगली 8, उँगली से सरकाएँ; "सभी" = सब एक साथ */
+/* 🗂️ 16 category: एक बार में 8 (फ़ोन 4×2, कंप्यूटर 8 एक लाइन), हर 8 सेकंड अगली 8, उँगली से सरकाएँ; "सभी" = सब एक साथ */
 #qcat.qv{display:block;overflow:visible;padding:16px 0 0;max-width:820px}
 #qcat.qv .qvs{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 #qcat.qv .qvs::-webkit-scrollbar{display:none}
@@ -1236,7 +1236,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
 })();
 </script>
 <script>
-/* 🗂️ homepage categories: 15 + "सभी"; 8-8 के page, हर 3 सेकंड अगला page (छूने/mouse रखने पर रुकता है) */
+/* 🗂️ homepage categories: 15 + "सभी"; 8-8 के page, हर 8 सेकंड अगला page (छूने/mouse रखने पर रुकता है) */
 (function(){
   var S='fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   function sv(b){return '<svg viewBox="0 0 24 24" '+S+' aria-hidden="true">'+b+'</svg>';}
@@ -1294,7 +1294,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
     sc.addEventListener("scroll",function(){var p=Math.round(sc.scrollLeft/Math.max(1,sc.clientWidth));if(p!==cur){cur=p;dots();}},{passive:true});
   }
   draw();if(window.PB&&PB.onChange)PB.onChange(draw);
-  clearInterval(tm);tm=setInterval(function(){if(!n||hov||Date.now()<pause||n.classList.contains("all")||document.hidden)return;go(cur+1);},3000);
+  clearInterval(tm);tm=setInterval(function(){if(!n||hov||Date.now()<pause||n.classList.contains("all")||document.hidden)return;go(cur+1);},8000);
 })();
 </script>
 <script>
