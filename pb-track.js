@@ -69,11 +69,21 @@
 
   ev('pv', page());
   var slug = new URLSearchParams(location.search).get('slug');
-  if (page() === 'business' && slug) { ev('shop', slug, true); ping(slug, 'view'); }
+  /* दुकान का पेज: free (business), Silver/Gold (shop), Platinum (brand)। एक बार खोलने में business → shop → brand
+     redirect हो तो भी एक ही बार गिनें (इसी tab में, 30 मिनट तक)। */
+  var SHOPPG = { business: 1, shop: 1, brand: 1 };
+  if (SHOPPG[page()] && slug) {
+    var vk = 'pbv_' + slug, seen = 0;
+    try { seen = +sessionStorage.getItem(vk) || 0; } catch (e) {}
+    if (Date.now() - seen > 1800000) {
+      try { sessionStorage.setItem(vk, String(Date.now())); } catch (e) {}
+      ev('shop', slug, true); ping(slug, 'view');
+    }
+  }
 
   /* Call / WhatsApp / रास्ता — कौन-सी दुकान का */
   function slugNear(a) {
-    if (page() === 'business' && slug) return slug;
+    if (SHOPPG[page()] && slug) return slug;
     var c = a.closest('[data-slug]'); if (c) return c.getAttribute('data-slug');
     var box = a.closest('article,.card,li,.item,.popup,.maplibregl-popup-content,.mapboxgl-popup-content');
     var l = box && box.querySelector('a[href*="business.html?slug="]');
@@ -82,7 +92,7 @@
   }
   document.addEventListener('click', function (e) {
     var tg = e.target.closest && e.target.closest('[data-g],[data-pbh="share"],#pShr,#shareQa');
-    if (tg && (page() === 'business' || page() === 'shop') && slug) {
+    if (tg && SHOPPG[page()] && slug) {
       var kk = tg.hasAttribute('data-g') ? 'photo' : 'share';
       ev(kk, slug); flush(); ping(slug, kk);
     }

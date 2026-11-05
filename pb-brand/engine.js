@@ -67,8 +67,19 @@
   function dirBtn(cls, txt) { return D.dir ? '<a class="' + cls + '" href="' + esc(D.dir) + '">' + I.pin + '<span>' + (txt || L("रास्ता देखें", "Directions")) + '</span></a>' : ''; }
   function openChip(cls) { return D.open ? '<span class="' + (cls || "st") + (D.open.o ? '' : ' cl') + '"><i></i>' + esc(D.open.t) + '</span>' : ''; }
   function navs() { return [D.products.length && !NOCOLL && ["coll", L("कलेक्शन", "Collection")], D.gallery.length && ["gal", L("गैलरी", "Gallery")], ["about", L("हमारे बारे में", "About")], ["visit", L("पता", "Visit")]].filter(Boolean); }
+  /* दुकान का Logo (plan में हो और दुकानदार ने लगाया हो) */
+  function logoImg(c) { return D.logo ? '<img class="mlg ' + (c || '') + '" src="' + esc(D.logo) + '" alt="' + esc(D.name) + ' logo" decoding="async">' : ''; }
+  /* दुकान के काम के बटन: नौकरी · डिजिटल कार्ड · शेयर · शिकायत (हर design में, footer के ऊपर) */
+  function tools() {
+    const T = D.tools || {}, b = [];
+    if (T.hire) b.push('<button type="button" class="tl hire" data-tool="hire"><i>💼</i><span>' + L("नौकरी खाली है", "We're hiring") + '</span></button>');
+    if (T.card) b.push('<button type="button" class="tl" data-tool="card" data-pbh="share"><i>🪪</i><span>' + L("डिजिटल कार्ड", "Digital card") + '</span></button>');
+    if (T.share) b.push('<button type="button" class="tl" data-tool="share" data-pbh="share"><i>📤</i><span>' + L("शेयर करें", "Share") + '</span></button>');
+    if (T.report) b.push('<button type="button" class="tl rp" data-tool="report"><i>🚩</i><span>' + L("शिकायत करें", "Report") + '</span></button>');
+    return b.length ? '<section class="tools" aria-label="' + esc(L("और काम", "More actions")) + '"><div class="w">' + b.join("") + '</div></section>' : '';
+  }
   function nav(extra) {
-    return '<header class="nv"><div class="w in"><a class="mk" href="#top"><b>' + esc(D.name) + '</b><small>' + esc(D.sub) + '</small></a>' +
+    return '<header class="nv"><div class="w in"><a class="mk' + (D.logo ? ' hl' : '') + '" href="#top">' + logoImg() + '<span class="mkt"><b>' + esc(D.name) + '</b><small>' + esc(D.sub) + '</small></span></a>' +
       '<nav class="lk" aria-label="' + esc(L("मुख्य मेनू", "Main menu")) + '">' + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '</nav>' +
       '<div class="nr">' + (extra || '') + setLink("lg nset", 1) + '<button type="button" class="lg" data-lang aria-label="' + esc(L("भाषा बदलें", "Change language")) + '">' + (D.en ? "Hindi" : "English") + '</button><button type="button" class="mn" data-menu>' + L("मेनू", "Menu") + '</button></div></div></header>';
   }
@@ -117,7 +128,7 @@
     return '<div class="vs rv"><div class="vi">' + eb(L("पता", "Address")) + '<h3>' + esc(D.city || D.name) + '</h3>' + addrBlock() + (D.hours ? '<p class="hr">' + esc(D.hours) + '</p>' : '') + contacts() + '<div class="btns">' + dirBtn("btn p") + callBtn("btn") + '</div></div>' + mapHtml() + '</div>';
   }
   function footer() {
-    return '<footer class="ft">' + (D.demo ? '<div class="dm">' + L("डेमो: कीमतें और नंबर नमूना हैं।", "Demo: prices and numbers are samples.") + '</div>' : '') +
+    return tools() + '<footer class="ft">' + (D.demo ? '<div class="dm">' + L("डेमो: कीमतें और नंबर नमूना हैं।", "Demo: prices and numbers are samples.") + '</div>' : '') +
       '<div>' + L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है।", "This information was provided by the shop owner; PataBook has not verified it.") + (D.stdUrl ? ' <a href="' + esc(D.stdUrl) + '">' + L("साधारण पेज", "Standard page") + '</a>' : '') + ' · <a href="terms.html">' + L("नियम", "Terms") + '</a></div>' +
       '<a class="pb" href="index.html"><img src="' + esc(D.pin || "pin.png") + '" alt="">Powered by PataBook</a></footer>';
   }
@@ -214,7 +225,7 @@
   /* 7 · Split — desktop पर बायाँ हिस्सा रुका रहता है, दायाँ scroll */
   LY_[7] = {
     list: P => P.length ? '<div class="sl">' + P.map((p, i) => '<article class="s rv"><button type="button" class="ph" data-pi="' + pidx(p) + '">' + img(p) + tag(p) + '</button><div><span class="no">' + nn(i) + '</span><h3>' + esc(p.name) + '</h3>' + feats(p, 3) + '<div class="sp">' + (p.size ? '<span class="sz">' + esc(p.size) + '</span>' : '') + price(p) + '</div>' + ask(p, "ask", L("WhatsApp पर पूछें", "Enquire on WhatsApp") + " →") + '</div></article>').join("") + '</div>' : empty(),
-    page: () => '<div class="split"><aside class="side" id="top" data-hero><div class="si"><a class="mk" href="#top"><small>' + esc(D.sub) + '</small></a><h1>' + nameSplit() + '</h1>' + (D.services ? '<p class="lead">' + esc(D.services) + '</p>' : '') + openChip() +
+    page: () => '<div class="split"><aside class="side" id="top" data-hero><div class="si"><a class="mk" href="#top">' + logoImg("sl") + '<small>' + esc(D.sub) + '</small></a><h1>' + nameSplit() + '</h1>' + (D.services ? '<p class="lead">' + esc(D.services) + '</p>' : '') + openChip() +
       '<div class="btns">' + waBtn("btn p") + callBtn("btn") + dirBtn("btn") + '</div><nav class="sn">' + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '<button type="button" class="lg" data-lang>' + (D.en ? "Hindi" : "English") + '</button></nav></div></aside><main class="main">' + (D.cover ? '<div class="mtop">' + coverImg() + '</div>' : '') +
       (D.products.length ? '<section class="blk" id="coll">' + secHead(L("उत्पाद", "Products"), L("कलेक्शन", "Collection"), catBar()) + '<div data-plist>' + LY_[7].list(filtered()) + '</div></section>' : '') +
       (D.gallery.length ? '<section class="blk" id="gal">' + secHead(L("झलक", "Look inside"), L("गैलरी", "Gallery")) + gallery("spg") + '</section>' : '') +
@@ -250,6 +261,7 @@
   /* 10 · Prestige — business brand: products पहली screen पर, साफ़ नाम, भरोसे की पट्टी, साफ़ CTA */
   function trust() {
     const t = [];
+    if (D.verified) t.push(["✓", L("PataBook सत्यापित", "PataBook Verified")]);
     if (D.type) t.push(["✓", D.type]);
     if (D.facts.some(f => f[0] === "GST")) t.push(["✓", L("GST सत्यापित", "GST Verified")]);
     if (+D.rating) t.push(["★", Number(D.rating).toFixed(1) + (D.count ? " · " + L(D.count + " रेटिंग", D.count + (D.count == 1 ? " rating" : " ratings")) : "")]);

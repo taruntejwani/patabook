@@ -581,3 +581,14 @@
 .pbb .pbr-in.pbrate{border-radius:var(--rad,14px)}
 .pbb #pbRate{text-transform:none;letter-spacing:normal;font-size:14px;width:100%;max-width:420px;margin:18px auto 0;text-align:left}
 .pbb #pbRate b{color:#14161c!important;-webkit-text-fill-color:#14161c}.pbb #pbRate small{color:#5b6475!important}
+
+/* Logo + दुकान के काम के बटन (नौकरी / कार्ड / शेयर / शिकायत) */
+.pbb .mk.hl{display:flex;align-items:center;gap:10px}.pbb .mk .mkt{min-width:0;display:block}
+.pbb .mlg{width:38px;height:38px;flex:none;border-radius:10px;object-fit:contain;background:#fff;border:1px solid var(--ln)}
+.pbb .mlg.sl{display:block;width:56px;height:56px;border-radius:14px;margin-bottom:12px}
+.pbb .tools{padding:26px 0 6px}.pbb .tools .w{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.pbb .tools .tl{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:10px 16px;border-radius:999px;border:1px solid var(--ln);background:transparent;color:var(--fg);font:inherit;font-size:14.5px;font-weight:600;letter-spacing:normal;text-transform:none;cursor:pointer}
+.pbb .tools .tl i{font-style:normal;font-size:17px;line-height:1}
+.pbb .tools .tl.hire{background:#e8590c;border-color:#e8590c;color:#fff}
+.pbb .tools .tl.rp{color:var(--mu);font-size:13px;min-height:40px;padding:8px 14px}
+.pbb .tools .tl:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
