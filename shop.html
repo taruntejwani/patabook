@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style><link rel="preconnect" href="https://kkvbpzysktozghnxplxv.supabase.co" crossorigin><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
+<html lang="hi"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style><link rel="preconnect" href="https://kkvbpzysktozghnxplxv.supabase.co" crossorigin><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}:focus-visible{outline:2.5px solid #1a73e8!important;outline-offset:2px!important}@media(pointer:coarse){a[href^="tel:"],a[href^="mailto:"],footer a,.pb-legal a,.legal a{display:inline-block;padding-block:11px;margin-block:-11px}}</style>
 <meta name="description" content="दुकान की अपनी website — सारे products, फ़ोटो, पता और WhatsApp। Powered by PataBook.">
 <title>Shop — PataBook</title>
 <meta property="og:site_name" content="PataBook">
@@ -22,17 +22,17 @@
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
-<script src="pb-slide.js"></script><script src="pb-track.js"></script><script src="pb-protect.js"></script>
+<script src="pb-slide.js"></script><script src="pb-track.js" defer></script><script src="pb-protect.js" defer></script>
 <script src="site-config.js"></script>
 <script src="pb-auth.js"></script>
 <script src="pb-guard.js" defer></script>
 <script src="pb-card.js" defer></script>
-<script src="pb-imgcheck.js"></script>
+<script src="pb-imgcheck.js" defer></script>
 <script src="pb-icons.js"></script>
 <script src="pb-back.js"></script><script src="pb-pgal.js"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
 <script src="pb-hide.js"></script>
 <script src="pb-hiring.js"></script>
-<script src="pb-rate.js"></script>
+<script src="pb-rate.js" defer></script>
 
 <style>
 /* दुकानदार की अपनी mini website (shop.html?slug=...) — business.html के "View all" से खुलती है */
@@ -471,6 +471,11 @@ html.t-silver body .qa .pri.c{background:linear-gradient(135deg,#4c5664,#2f3742)
 html.t-silver body .dock a:not(.w){background:linear-gradient(135deg,#4c5664,#2f3742)!important;color:#fff!important}
 /* 🖥️ PC (बड़ी screen): नीचे चिपकी Call/WhatsApp पट्टी नहीं (बटन ऊपर हैं), चौड़ा पेज, "हमसे मिलें" दो कॉलम में (जानकारी | पता + नक्शा) */
 @media(min-width:1024px){#dock{display:none!important}body{padding-bottom:24px!important}.wrap{max-width:1120px}#vis{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 28px;align-items:start}#vis>h2{grid-column:1/-1}#vis>#visit{margin-top:0!important}#vis .smap{height:300px}#vis:not(:has(>#visit)){display:block}}
+/* नक्शे का निशान: लाल भरा pin */
+.mp .pbi{width:34px!important;height:34px!important;fill:#e53935;stroke:#fff;stroke-width:1.4;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+/* एक जैसे बटन: चारों (Call / WhatsApp / Directions / Card) एक ही ऊँचाई-अक्षर */
+.qa a,.qa button{min-height:52px!important;padding:12px 8px!important;font-size:15.5px!important;font-weight:700!important;flex-direction:row!important;justify-content:center!important;gap:8px!important}
+.qa svg{width:20px!important;height:20px!important}.qa span{font-size:inherit!important;display:flex;align-items:center}
 </style>
 </head><body>
 
@@ -668,7 +673,7 @@ function render(){drawSoc();
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
        '<div class="chips">'+(ost?'<span data-pbh="hours" class="chip '+(ost.open?'op':'cl')+'"><i></i>'+esc(ost.t)+'</span>':'')+(PREM?'<span class="chip gold">'+({silver:"🥈 Digital Silver Card",gold:"👑 Digital Gold Card",platinum:"💎 Digital Platinum Card"}[TIER()]||"👑 Premium")+'</span>':'')+
          (gst?'<span class="chip" data-pbh="gst">🧾 '+L("GST Verified","GST Verified")+'</span>':'')+(b.is_verified?'<span class="chip">✅ '+L("Verified","Verified")+'</span>':'')+
-         (b.rating?'<span class="chip">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+'</div>'+
+         (+b.rating?'<span class="chip">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+'</div>'+
      '</div></div></div>'+
    '<div class="wrap">'+
      '<div class="qa">'+
@@ -887,7 +892,7 @@ function openReport(){
 }
 /* 🧭 Directions पट्टी (Call / WhatsApp जैसी): रास्ते का link + 📋 copy + "रास्ता" बटन */
 function dirRow(b,addr,map){if(!map)return "";const en=EN(),full="https://patabook.in/"+map;
-  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (रास्ता)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता कॉपी करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
+  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता कॉपी करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
 function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)return;const en=EN();
   const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
   const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता कॉपी हो गया")).catch(()=>{prompt(en?"Copy the address":"पता कॉपी करें",t);});};
@@ -955,4 +960,5 @@ load();
 </script><script>document.addEventListener("DOMContentLoaded",function(){var t=document.getElementById("tb");if(t)t.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});});</script>
 <script src="pb-helpmenu.js"></script><script src="pb-ownmenu.js"></script>
 <script src="pb-ios-install.js" defer></script>
+<script>/* emoji → एक जैसे icon (हर फ़ोन पर एक जैसे) */try{PBI.watch(document.getElementById("app"));var _d=document.getElementById("dock")||document.getElementById("pbDock");if(_d)PBI.clean(_d);}catch(e){}</script>
 </body></html>

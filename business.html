@@ -4,7 +4,7 @@
    पुराना page देखना हो तो &listing=1 */(function(){try{var q=new URLSearchParams(location.search),s=q.get("slug")||"";if(!s||q.get("listing"))return;
 var K="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
 window.__pbPremQ=fetch("https://kkvbpzysktozghnxplxv.supabase.co/rest/v1/rpc/pb_premium_status",{method:"POST",headers:{apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"},body:JSON.stringify({p_slugs:[s]})})
-.then(function(r){return r.ok?r.json():null;}).then(function(j){var p=!!(j&&j[s]);if(p){window.__pbGone=1;location.replace("shop.html?slug="+encodeURIComponent(s)+location.hash);}return p;}).catch(function(){return null;});}catch(e){}})();</script><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style><meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
+.then(function(r){return r.ok?r.json():null;}).then(function(j){var p=!!(j&&j[s]);if(p){window.__pbGone=1;location.replace("shop.html?slug="+encodeURIComponent(s)+location.hash);}return p;}).catch(function(){return null;});}catch(e){}})();</script><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style><meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">@media(max-width:380px){.nav{gap:4px!important}.nav .add{padding:7px 8px!important}}@media(max-width:420px){.nav:has(.add) #pblBtnTxt{display:none}.nav .add{flex:none!important;max-width:none!important}}/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}:focus-visible{outline:2.5px solid #1a73e8!important;outline-offset:2px!important}@media(pointer:coarse){a[href^="tel:"],a[href^="mailto:"],footer a,.pb-legal a,.legal a{display:inline-block;padding-block:11px;margin-block:-11px}}</style>
 <meta name="description" content="PataBook पर दुकान की जानकारी — पता, Call, WhatsApp और रास्ता। Local business details on PataBook.">
 <title>PataBook — Business</title>
 <meta property="og:site_name" content="PataBook">
@@ -151,14 +151,22 @@ h2 .pbi{width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:var(--
 .qa3 a.dis{opacity:.45;pointer-events:none;filter:grayscale(1)}
 #mobRow:empty{display:none}
 #cardBtn{display:none!important}
+/* नक्शे का निशान: लाल भरा pin */
+.mp .pbi{width:34px!important;height:34px!important;fill:#e53935;stroke:#fff;stroke-width:1.4;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+/* एक जैसे बटन: Directions / Card भी Call-WhatsApp जितने */
+.row[hidden]{display:none!important}
+.qa3 a.qd,.qa3 a.qk{min-height:66px;justify-content:flex-start;padding:10px 12px 10px 10px;gap:10px;box-shadow:none}
+.qa3 a.qd i,.qa3 a.qk i{width:44px;height:44px}.qa3 a.qd i .pbi,.qa3 a.qk i .pbi{width:22px;height:22px}
+.qa3 a.qd b,.qa3 a.qk b{font-size:18px}.qa3 a.qd:last-child{justify-content:center}
+@media(min-width:1024px){.wrap{max-width:1000px}}
 </style><script src="pb-guard.js" defer></script><script src="pb-back.js"></script><script src="pb-pgal.js"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
 <script src="pb-icons.js"></script>
-<script src="pb-slide.js"></script><script src="pb-track.js"></script><script src="pb-protect.js"></script>
+<script src="pb-slide.js"></script><script src="pb-track.js" defer></script><script src="pb-protect.js" defer></script>
 <script src="pb-hiring.js"></script>
-<script src="pb-rate.js"></script>
-<script src="site-config.js"></script><script src="pb-ref.js"></script>
+<script src="pb-rate.js" defer></script>
+<script src="site-config.js"></script><script src="pb-ref.js" defer></script>
 <script src="pb-card.js" defer></script>
-<script src="pb-imgcheck.js"></script>
+<script src="pb-imgcheck.js" defer></script>
 <script src="pb-hide.js"></script><script src="pb-helpmenu.js"></script><script src="pb-ownmenu.js"></script>
 
 </head><body>
@@ -175,7 +183,7 @@ h2 .pbi{width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:var(--
 
 <main class="wrap" id="app"><p class="note" data-i="b_loading">लोड हो रहा है…</p></main>
 
-<footer><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:13px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav>© PataBook · Local Business Directory · www.PataBook.in</footer>
+<footer><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:13px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav>© PataBook · <span data-i="f_tag">Local Business Directory</span> · www.PataBook.in</footer>
 <script>
 function pbDir(b){const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b.address||"");if(b.latitude!=null&&b.longitude!=null&&isFinite(+b.latitude)&&isFinite(+b.longitude))return "map.html?to="+(+b.latitude)+","+(+b.longitude)+"&n="+n+"&a="+a;return b.address?"map.html?q="+a+"&n="+n:"";}
 
@@ -226,12 +234,14 @@ async function load(){
       bn.textContent=ownSt==="pend"?(en0?"⏳ Waiting for approval — only you can see this shop right now.":"⏳ मंज़ूरी का इंतज़ार — यह दुकान अभी सिर्फ़ आपको दिखती है।"):(en0?"🔴 Offline — only you can see this shop right now.":"🔴 ऑफ़लाइन — यह दुकान अभी सिर्फ़ आपको दिखती है।");
       app.parentNode.insertBefore(bn,app);}
     if(!rows||!rows.length){try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<div class="card"><h1>'+esc(T("b_nf"))+'</h1><p class="desc">'+esc(T("b_na"))+'</p></div>';return;}
-    B=rows[0];document.title=B.name+" — PataBook";try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+". पता, कॉल, WhatsApp और रास्ता PataBook पर।").slice(0,300));}catch(_){}try{var _u=location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),_ds=(document.querySelector('meta[name="description"]')||{}).content||"",_im=(!(window.PBHide&&PBHide.has("logo"))&&/^https?:\/\//.test(B.logo_url||""))?B.logo_url:"https://patabook.in/icon-512.png",_c=document.querySelector('link[rel="canonical"]');if(!_c){_c=document.createElement("link");_c.rel="canonical";document.head.appendChild(_c);}_c.href=_u;[["og:title",document.title],["og:description",_ds],["og:url",_u],["og:image",_im]].forEach(function(p){var m=document.querySelector('meta[property="'+p[0]+'"]');if(!m){m=document.createElement("meta");m.setAttribute("property",p[0]);document.head.appendChild(m);}m.setAttribute("content",p[1]);});}catch(_){}
+    B=rows[0];document.title=B.name+" — PataBook";try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}try{const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute("content",(B.name+" — "+[B.category,line(B,"City")||""].filter(Boolean).join(", ")+((localStorage.getItem("pb-lang")||"en")!=="hi"?". Address, call, WhatsApp and directions on PataBook.":". पता, कॉल, WhatsApp और रास्ता PataBook पर।")).slice(0,300));}catch(_){}try{var _u=location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),_ds=(document.querySelector('meta[name="description"]')||{}).content||"",_im=(!(window.PBHide&&PBHide.has("logo"))&&/^https?:\/\//.test(B.logo_url||""))?B.logo_url:"https://patabook.in/icon-512.png",_c=document.querySelector('link[rel="canonical"]');if(!_c){_c=document.createElement("link");_c.rel="canonical";document.head.appendChild(_c);}_c.href=_u;[["og:title",document.title],["og:description",_ds],["og:url",_u],["og:image",_im]].forEach(function(p){var m=document.querySelector('meta[property="'+p[0]+'"]');if(!m){m=document.createElement("meta");m.setAttribute("property",p[0]);document.head.appendChild(m);}m.setAttribute("content",p[1]);});}catch(_){}
     render();bizDist();loadPrem();loadNear();loadContact();loadVac();loadVacFlag();loadOwner();loadLink();
     if(location.hash==="#contact"){const c=document.getElementById("contact");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"start"}),150);}
   }catch(e){app.innerHTML='<div class="card"><h1>'+esc(T("b_conn"))+'</h1><p class="desc">'+esc(T("b_connmsg"))+'</p></div>';}
 }
-const BTYPE_HI={"Manufacturer":"🏭 निर्माता","Processor / Packer":"🏭 प्रोसेसर / पैकर","Job Worker":"🏭 जॉब वर्कर (नौकरी काम)","Job Work":"🏭 जॉब वर्कर (नौकरी काम)","Assembler":"🏭 असेंबलर","Importer":"🚚 इम्पोर्टर","Exporter":"🚚 एक्सपोर्टर","C&F / Super Stockist":"🚚 C&F / सुपर स्टॉकिस्ट","Distributor":"🚚 डिस्ट्रीब्यूटर","Wholesaler":"📦 होलसेलर (थोक)","Stockist":"🚚 स्टॉकिस्ट","Authorised Dealer":"🚚 अधिकृत डीलर","Trader / Commission Agent":"🚚 ट्रेडर / दलाल","Retailer":"🏪 रिटेलर","Showroom":"🏪 शोरूम","Franchise":"🏪 फ्रैंचाइज़ी","Online Seller":"🏪 ऑनलाइन विक्रेता","Hawker / Street Vendor":"🏪 फेरीवाला","Service Provider":"🛠️ सेवा","Contractor":"🛠️ कॉन्ट्रैक्टर","Consultant / Professional":"🛠️ कंसल्टेंट","Rental / Hire":"🛠️ किराये पर","Repair & Service Centre":"🛠️ रिपेयर / सर्विस सेंटर","Employee (Job)":"👷 नौकरी करते हैं","Freelancer / Self-employed":"👷 फ्रीलांसर / खुद का काम","Skilled Worker":"👷 कारीगर"};
+/* दुकानदार की list: "a ,b,c" → "a, b, c" */
+const tidyList=t=>String(t||"").replace(/\s*,\s*/g,", ").replace(/\s{2,}/g," ").replace(/^[,\s]+|[,\s]+$/g,"");
+const BTYPE_HI={"Manufacturer":"निर्माता","Processor / Packer":"प्रोसेसर / पैकर","Job Worker":"जॉब वर्कर (नौकरी काम)","Job Work":"जॉब वर्कर (नौकरी काम)","Assembler":"असेंबलर","Importer":"इम्पोर्टर","Exporter":"एक्सपोर्टर","C&F / Super Stockist":"C&F / सुपर स्टॉकिस्ट","Distributor":"डिस्ट्रीब्यूटर","Wholesaler":"होलसेलर (थोक)","Stockist":"स्टॉकिस्ट","Authorised Dealer":"अधिकृत डीलर","Trader / Commission Agent":"ट्रेडर / दलाल","Retailer":"रिटेलर","Showroom":"शोरूम","Franchise":"फ्रैंचाइज़ी","Online Seller":"ऑनलाइन विक्रेता","Hawker / Street Vendor":"फेरीवाला","Service Provider":"सेवा","Contractor":"कॉन्ट्रैक्टर","Consultant / Professional":"कंसल्टेंट","Rental / Hire":"किराये पर","Repair & Service Centre":"रिपेयर / सर्विस सेंटर","Employee (Job)":"नौकरी करते हैं","Freelancer / Self-employed":"फ्रीलांसर / खुद का काम","Skilled Worker":"कारीगर"};
 const DAY_HI={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
 function hm12(t){if(!/^\d{2}:\d{2}$/.test(t||""))return "";let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
 function hoursText(b){
@@ -292,7 +302,7 @@ function placeMap(){const m=document.getElementById("smap");if(!m)return;const t
 addEventListener("resize",placeMap);
 /* 🧭 Directions पट्टी (Call / WhatsApp जैसी): रास्ते का link + 📋 copy + "रास्ता" बटन */
 function dirRow(b,addr,map){if(!map)return "";const en=PB.lang&&PB.lang()!=="hi",full="https://patabook.in/"+map;
-  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता (रास्ता)")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता कॉपी करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
+  return '<div class="num dir" data-pbh="addr"><div class="l"><small>🧭 '+(en?"Directions":"रास्ता")+'</small><span class="lk"><a href="'+esc(map)+'">'+esc(full.replace(/^https:\/\//,""))+'</a><button type="button" class="cpy" id="cpDir" aria-label="Copy">📋</button></span><span class="cpt">'+(en?"Address copy":"पता कॉपी करें")+'</span></div><a class="d" href="'+esc(map)+'">'+(en?"Directions":"रास्ता")+'</a></div>';}
 function wireDir(b,addr,map){const c=document.getElementById("cpDir");if(!c)return;const en=PB.lang&&PB.lang()!=="hi";
   const t=b.name+"\n📍 "+addr+"\n🧭 "+"https://patabook.in/"+map;
   const go=()=>{(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>ctoast(en?"✅ Address copied":"✅ पता कॉपी हो गया")).catch(()=>{prompt(en?"Copy the address":"पता कॉपी करें",t);});};
@@ -463,6 +473,8 @@ function render(){
   const map=pbDir(b);
   if(window.PBHide)PBHide.apply(b.description);
   const rows=[
+    [(PB.lang&&PB.lang()!=="hi")?"Owner":"मालिक",line(b,"Owner")],
+    [(PB.lang&&PB.lang()!=="hi")?"Products / Services":"उत्पाद / सेवाएँ",tidyList(line(b,"Services"))],
     [(PB.lang&&PB.lang()!=="hi")?"Business type":"बिज़नेस का प्रकार",btypeLabel(line(b,"Type"))],
     [(PB.lang&&PB.lang()!=="hi")?"Hours":"समय",hoursText(b),"hours"],
     ["GST",/^[0-9A-Z]{15}$/.test(line(b,"GST"))&&/^yes$/i.test(line(b,"GST-Verified"))?line(b,"GST"):"","gst"],
@@ -478,7 +490,7 @@ function render(){
      (gst?'<span class="tag" data-pbh="gst" style="background:#e3f7ea;color:#137333">'+PBI("check")+(gstV?(en?"GST Verified":"GST Verified"):"")+'</span>':'')+
      (udy?'<span class="tag" style="background:#eef4ff;color:#174ea6">🏭 '+(en?"MSME Verified":"MSME Verified")+'</span>':'')+
      (/^yes$/i.test(line(b,"Delivery"))?'<span class="tag" style="background:#fff4e5;color:#874d00">🚚 '+((PB.lang&&PB.lang()!=="hi")?"Home Delivery":"होम डिलीवरी")+'</span>':'')+
-     (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()!=="hi")?"Home Service":"होम सर्विस उपलब्ध")+'</span>':'')+(b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
+     (b.home_service?'<span class="tag" style="background:#e7f8ee;color:#137333">🏠 '+((PB.lang&&PB.lang()!=="hi")?"Home Service":"होम सर्विस उपलब्ध")+'</span>':'')+(+b.rating?'<span class="tag rt">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+
    '</div>'+(ost?'<div data-pbh="hours" class="bst'+(ost.open?' op':'')+'"><i></i>'+esc(ost.t)+'</div>':'')+
    '<div class="qa3" id="qa3"></div>'+
    ((PREM)?'<a class="profb" href="shop.html?slug='+encodeURIComponent(b.slug)+'"><span>🏪</span>'+esc(en?"Profile":"प्रोफ़ाइल")+'</a><div id="prods" data-pbh="prods"></div>':'')+
@@ -622,7 +634,7 @@ function drawQa(){
   const ph2=s.k==="ok"?staffNo("Phone2"):"";
   const t=(href,ic,lb,cls,ext)=>href?'<a class="'+(cls||"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':'')+'><i>'+ic+'</i><b>'+lb+'</b></a>':'<a class="dis '+(cls||"")+'" aria-disabled="true"><i>'+ic+'</i><b>'+lb+'</b></a>';
   const callLb=(en?"Call":"कॉल"),waLb='WhatsApp<small>'+(en?"Send message":"संदेश भेजें")+'</small>';
-  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता (रास्ता)","qd")+(document.getElementById("cardBtn")?'<a class="qk" href="#" id="qkCard"><i>'+PBI("card")+'</i><b>'+(en?"Digital Card":"डिजिटल कार्ड")+'</b></a>':"");const qk=document.getElementById("qkCard");if(qk)qk.onclick=e=>{e.preventDefault();const c=document.getElementById("cardBtn");if(c)c.click();};
+  q.innerHTML=t(ph?"tel:"+ph:need,PBI("call"),callLb,"qc")+t(wa?"https://wa.me/91"+wa:need,PBI("chat"),waLb,"qw",!!wa)+t(map,PBI("dir"),en?"Directions":"रास्ता","qd")+(document.getElementById("cardBtn")?'<a class="qk" href="#" id="qkCard"><i>'+PBI("card")+'</i><b>'+(en?"Digital Card":"डिजिटल कार्ड")+'</b></a>':"");const qk=document.getElementById("qkCard");if(qk)qk.onclick=e=>{e.preventDefault();const c=document.getElementById("cardBtn");if(c)c.click();};
   drawDock(ph,wa,en);
   if(mr){const N=(s.k==="ok"&&s.nums&&s.nums.length)?s.nums:[];const L2=[];N.forEach(n=>{L2.push('<a href="tel:+91'+n+'">'+PBI("call")+'+91 '+n+'</a> <a href="https://wa.me/91'+n+'" target="_blank" rel="noopener">'+PBI("chat")+'WhatsApp</a>');});
     mr.outerHTML='<div id="mobRow">'+(L2.length?'<div class="row"><span>'+(en?"Mobile":"मोबाइल")+'</span><b>'+L2.join("<br>")+'</b></div>':'')+'</div>';}
@@ -684,4 +696,5 @@ PB.apply();PB.mount(document.getElementById("pbLang"));
 PB.onChange(()=>{PB.apply();render();bizDist();});
 load();
 </script><script src="pb-ios-install.js" defer></script>
+<script>/* emoji → एक जैसे icon (हर फ़ोन पर एक जैसे) */try{PBI.watch(document.getElementById("app"));var _d=document.getElementById("dock")||document.getElementById("pbDock");if(_d)PBI.clean(_d);}catch(e){}</script>
 </body></html>

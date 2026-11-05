@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
 <meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
-<meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
+<meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}:focus-visible{outline:2.5px solid #1a73e8!important;outline-offset:2px!important}@media(pointer:coarse){a[href^="tel:"],a[href^="mailto:"],footer a,.pb-legal a,.legal a{display:inline-block;padding-block:11px;margin-block:-11px}}</style>
 <title>Contact Us – PataBook</title>
 <link rel="canonical" href="https://patabook.in/contact.html">
 <script>/* pb-title: हिन्दी मोड में tab का नाम हिन्दी */try{if(localStorage.getItem("pb-lang")==="hi")document.title="संपर्क करें – PataBook"}catch(e){}</script>
@@ -27,7 +27,7 @@ header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid 
 .sp{flex:1}
 main{padding:22px 0 30px}
 .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:14px}
-h1{font-size:24px;line-height:1.25;margin-bottom:4px}
+h1,.h1{font-size:24px;line-height:1.25;margin-bottom:4px}
 .upd{font-size:13px;color:var(--muted);margin-bottom:6px}
 h2{font-size:18px;margin:18px 0 6px;color:var(--navy)}
 p,li{font-size:15px}
@@ -74,7 +74,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <main class="wrap">
 
 <div class="card">
-<div data-l="hi"><h1>संपर्क करें</h1><p>सवाल, सुधार या लिस्टिंग हटाने के लिए हमसे संपर्क करें।</p></div>
+<div data-l="hi"><h2 class="h1">संपर्क करें</h2><p>सवाल, सुधार या लिस्टिंग हटाने के लिए हमसे संपर्क करें।</p></div>
 <div data-l="en"><h1>Contact Us</h1><p>Contact us for questions, corrections or listing removal.</p></div>
 <div style="margin-top:8px"><div class="ct" data-if="owner"><i>🏢</i><div><small>PataBook</small><b data-s="owner"></b></div></div>
 <div class="ct" data-if="email"><i>✉️</i><div><small>Email</small><b data-s="email"></b></div></div>
@@ -117,7 +117,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 </main>
 <footer>
   <nav class="legal"><a data-i="f_priv" href="privacy.html">Privacy Policy</a><a data-i="f_terms" href="terms.html">Terms &amp; Conditions</a><a data-i="f_refund" href="refund.html">Refund Policy</a><a data-i="f_contact" href="contact.html">Contact Us</a></nav>
-  © PataBook · Local Business Directory · www.PataBook.in
+  © PataBook · <span data-i="f_tag">Local Business Directory</span> · www.PataBook.in
 </footer>
 <script>
 (function () {

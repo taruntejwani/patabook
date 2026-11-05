@@ -2,11 +2,11 @@
   "id": "/index.html?source=app",
   "name": "PataBook – Business Directory",
   "short_name": "PataBook",
-  "description": "PataBook – find local shops and services in your city: call, WhatsApp and get directions. अपने शहर के बिज़नेस, एक ही जगह।",
+  "description": "PataBook – find local shops and services in your city: call, WhatsApp and get directions.",
   "start_url": "/index.html?source=app",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#1a73e8",
   "icons": [
