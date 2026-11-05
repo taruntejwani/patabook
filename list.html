@@ -204,15 +204,13 @@ form.short .fo{display:none}
       <div class="grp" data-s="shop">
         <div class="emoji">🏪</div>
         <h1 data-i="shop_h">व्यापार का नाम</h1>
-        <div class="fo"><label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
-        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select></div>
         <input id="shop" autocomplete="organization" data-ip="shop_ph" placeholder="जैसे: श्री कृष्णा कार वॉश" maxlength="80">
         <div class="err"></div>
       </div>
 
       <div class="grp" data-s="owner">
         <div class="emoji">🙋</div>
-        <h1 data-i="owner_h">आपका नाम क्या है?</h1>
+        <h1 data-i="owner_h">आपका पूरा नाम</h1>
         <p class="hint" id="ownerHint">दुकान के मालिक या संचालक का नाम।</p>
         <input id="owner" autocomplete="name" data-ip="owner_ph" placeholder="आपका पूरा नाम" maxlength="60">
         <div class="err"></div>
@@ -253,6 +251,8 @@ form.short .fo{display:none}
         <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही श्रेणी खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
         <textarea id="services" data-ip="svc_ph" placeholder="जैसे: कार वॉश, पॉलिश, इंटीरियर सफ़ाई"></textarea>
         <div class="cat" id="cat"></div>
+        <div style="margin-top:14px"><label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
+        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select></div>
         <div class="fo"><label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (होम सर्विस)</span></label>
         <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (होम डिलीवरी)</span></label></div>
         <div class="err"></div>
@@ -262,16 +262,18 @@ form.short .fo{display:none}
         <div class="emoji">🏠</div>
         <h1 id="locH">दुकान का पता लिखें</h1>
         <p class="hint" id="locHint">दुकान या ठेले पर हों तो बटन दबाएँ — ग्राहकों को सीधा रास्ता मिलेगा। बाकी सब वैकल्पिक है, सिर्फ़ शहर चुनना ज़रूरी है।</p>
-        <div style="margin-top:16px"><div style="position:relative"><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" autocomplete="off" placeholder="Gandhidham"><datalist id="cityList"></datalist></div></div>
+        <div style="margin-top:16px"><div style="position:relative"><label class="lbl" id="cityL">शहर / गाँव *</label><input id="city" autocomplete="off"><datalist id="cityList"></datalist></div></div>
         <div class="row">
           <div><label class="lbl" id="stateL">राज्य *</label><select id="state" class="in"><option selected>Gujarat</option><option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option><option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option></select></div>
           <div><label class="lbl" id="distL">ज़िला *</label><select id="distSel" class="in"></select><input id="district" autocomplete="off" placeholder="ज़िले का नाम" style="margin-top:8px" hidden></div>
         </div>
         <div class="fo"><div><label class="lbl" id="areaL">इलाका / इलाका (वैकल्पिक)</label><input id="area" autocomplete="address-level3" placeholder="Sector 5"></div></div>
         <label class="lbl" id="addrL">पूरा पता *</label>
-        <textarea id="address" autocomplete="street-address" placeholder="दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है"></textarea>
-        <div class="fo"><label class="lbl" id="pinL" for="pin">पिन कोड (वैकल्पिक)</label>
-        <input id="pin" autocomplete="postal-code" inputmode="numeric" maxlength="6" placeholder="370201">
+        <textarea id="address" autocomplete="street-address" placeholder="दुकान नंबर, रोड — या ठेला / लारी कहाँ लगती है"></textarea>
+        <label class="lbl" id="lmkL" for="lmk">लैंडमार्क (पास की जानी-मानी जगह)</label>
+        <input id="lmk" maxlength="80" placeholder="जैसे: Apnanagar Circle के पास">
+        <div style="margin-top:12px"><label class="lbl" id="pinL" for="pin">पिन कोड (वैकल्पिक)</label>
+        <input id="pin" autocomplete="postal-code" inputmode="numeric" maxlength="6">
         <p class="hint" id="pinH" style="margin-top:6px;font-size:13px;color:#5f6368">डाकघर वाला 6 अंकों का कोड — ATM / बैंक वाला पिन नहीं।</p></div>
         <div class="err"></div>
       </div>
@@ -636,6 +638,7 @@ function checkKey(key){
   if(key==="shop"&&$("shop").value.trim().length<2){E(T("e_shop"));$("shop").focus();return false;}
   if(key==="owner"&&$("owner").value.trim().length<2){E(T("e_owner"));$("owner").focus();return false;}
   if(key==="svc"&&!categoryIdFor(sel)){E(T("e_cat"));openSheet();return false;}
+  if(key==="svc"&&$("btype")&&!$("btype").value){E(EN()?"Choose your business type (Manufacturer, Retailer, Wholesaler…).":"अपना बिज़नेस का प्रकार चुनें (निर्माता, दुकान, थोक…)।");$("btype").focus();return false;}
   if(key==="addr"&&$("pin")&&/^[1-9]\d{5}$/.test($("pin").value.trim())&&!pinFitsState($("pin").value.trim(),$("state").value)){
     E(EN()?"This PIN code is not of "+$("state").value+". Check the post office PIN of your area (or leave it empty).":"यह पिन कोड "+$("state").value+" का नहीं है। अपने इलाके का डाकघर वाला पिन कोड जाँचें (या खाली छोड़ दें)।");$("pin").focus();return false;}
   if(key==="addr"&&$("pin")&&$("pin").value.trim()&&!/^[1-9]\d{5}$/.test($("pin").value.trim())){E(EN()?"PIN code must be 6 digits (or leave it empty).":"पिन कोड 6 अंकों का होना चाहिए (या खाली छोड़ दें)।");$("pin").focus();return false;}
@@ -709,6 +712,7 @@ function extrasFill(){
   set("onHint","अगर है तो लिखें, नहीं तो खाली छोड़कर \"आगे\" दबाएँ।","Add them if you have them, or leave empty and tap Next.");
   set("emL","✉️ ईमेल (वैकल्पिक)","✉️ Email (optional)");
   set("pinL","📮 शहर / इलाके का पिन कोड (वैकल्पिक)","📮 Area postal PIN code (optional)");
+  set("lmkL","लैंडमार्क (पास की जानी-मानी जगह)","Landmark (a known place nearby)");{const lm=$("lmk");if(lm)lm.placeholder=en?"e.g. Near Apnanagar Circle":"जैसे: Apnanagar Circle के पास";}
   set("pinH","डाकघर वाला 6 अंकों का कोड, जैसे 370201 — ATM / बैंक वाला पिन नहीं।","The 6-digit post office code, like 370201 — not your ATM / bank PIN.");
   set("hdlTxt","🚚 घर पर सामान पहुँचाते हैं (होम डिलीवरी)","🚚 We deliver to your home (Home Delivery)");
   const od=$("offDay");if(od){const v=od.value;od.innerHTML=DAYS.map(d=>'<option value="'+d[0]+'">'+(en?d[2]:d[1])+'</option>').join("");od.value=v;}
@@ -716,11 +720,11 @@ function extrasFill(){
 function btypeFill(){
   extrasFill();
   const sel=$("btype");if(!sel)return;const v=sel.value,en=EN();
-  sel.innerHTML='<option value="">'+(en?"Choose ▾ (optional)":"चुनें ▾ (ज़रूरी नहीं)")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
+  sel.innerHTML='<option value="">'+(en?"Choose ▾":"चुनें ▾")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
   sel.value=v;
   const wl=$("webL");if(wl)wl.innerHTML=en?'🌐 Your website / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(if any)</span>':'🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span>';
   const wi=$("web");if(wi)wi.placeholder=en?"e.g. www.myshop.com":"जैसे: www.meridukaan.com";
-  const L=$("btypeL");if(L)L.innerHTML=en?'Business type <span style="font-weight:400;color:#5f6368">(optional)</span>':'बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span>';
+  const L=$("btypeL");if(L)L.innerHTML=en?'🏷️ Business type * <span style="font-weight:400;color:#5f6368">(Manufacturer / Retailer / Wholesaler / Distributor …)</span>':'🏷️ बिज़नेस का प्रकार * <span style="font-weight:400;color:#5f6368">(निर्माता / दुकान / थोक / डिस्ट्रीब्यूटर …)</span>';
 }
 function ph10(){const d=phoneClean().replace(/\D/g,"");return d.length>10?d.slice(-10):d;}
 function otpMsg(t,bad){const m=$("otpMsg");m.textContent=t;m.style.color=bad?"#b42318":"";}
@@ -887,6 +891,7 @@ async function submit(){
     $("offDay")&&$("offDay").value?"Closed: "+$("offDay").value:"",
     $("pin")&&/^[1-9]\d{5}$/.test($("pin").value.trim())?"PIN: "+$("pin").value.trim():"",
     $("homeDel")&&$("homeDel").checked?"Delivery: Yes":"",
+    $("lmk")&&$("lmk").value.trim()?"Landmark: "+$("lmk").value.trim().replace(/\s+/g," ").slice(0,80):"",
     svc?"Services: "+svc:"",
     d[1]?"Subcategory: "+d[1]:"",
     S?"Category: "+pathOf(S):"",
@@ -1054,8 +1059,8 @@ $("chkBtn").onclick=()=>{location.href="mybusiness.html";};   /* नंबर �
 /* ---------- लॉगिन (ईमेल OTP) ---------- */
 const LXT={
   hi:{rate:"बहुत बार कोशिश हुई। थोड़ी देर बाद फिर से भेजें।",setup:"अभी रजिस्ट्रेशन चालू नहीं है। थोड़ी देर बाद कोशिश करें।",autoc:"📍 आपकी लोकेशन से शहर चुना गया: {c} (बदल सकते हैं)",
-      locH:"दुकान का पता लिखें",locHint:"भारत में कहीं भी — शहर / गाँव का नाम लिखना शुरू करें और सूची से चुनें, राज्य और ज़िला अपने-आप भर जाएँगे (न भरें तो खुद चुनें)। फिर और पूरा पता साफ़ लिखें (दुकान नंबर, रोड, लैंडमार्क)। ठेला / लारी हो तो वह जहाँ लगती है वह जगह लिखें।",
-      mlk:"Google Maps का लिंक (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (सूची में न हो तो ➕ से लिखें)।",areaL:"इलाका / इलाका (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड, लैंडमार्क — या ठेला / लारी कहाँ लगती है",
+      locH:"दुकान का पता लिखें",locHint:"भारत में कहीं भी — शहर / गाँव का नाम लिखना शुरू करें और सूची से चुनें, राज्य और ज़िला अपने-आप भर जाएँगे (न भरें तो खुद चुनें)। फिर और पूरा पता साफ़ लिखें (दुकान नंबर, रोड)। ठेला / लारी हो तो वह जहाँ लगती है वह जगह लिखें।",
+      mlk:"Google Maps का लिंक (वैकल्पिक)",cityL:"शहर / गाँव *",distL:"ज़िला *",stateL:"राज्य *",e_city2:"शहर / गाँव का नाम लिखें (सिर्फ़ अक्षर)।",e_dist:"ज़िला चुनें (सूची में न हो तो ➕ से लिखें)।",areaL:"इलाका / इलाका (वैकल्पिक)",addrL:"पूरा पता *",addrPh:"दुकान नंबर, रोड — या ठेला / लारी कहाँ लगती है",
       chkQ:"पहले से रजिस्टर किया है?",st_card:"अपना मुफ़्त डिजिटल विज़िटिंग कार्ड शेयर करें",st_card_err:"कार्ड अभी नहीं बन पाया, थोड़ी देर बाद कोशिश करें।",st_fest:"अपनी दुकान का पोस्टर शेयर करें",chkB:"मेरी दुकान देखें",
       st_h:"बधाई हो! आपका रजिस्ट्रेशन हो गया 🎊",st_h2:"आपका रजिस्ट्रेशन मिल गया है",st_pend:"लंबित — जाँच चल रही है",
       st_sub:"PataBook पर जुड़ गई है। हमारी टीम जाँच करके इसे जल्द लाइव कर देगी।",st_left:"मिनट बाकी",st_left_h:"घंटे बाकी",
@@ -1070,7 +1075,7 @@ const LXT={
       loc_hint:"दुकान पर हों तो बटन दबाकर लोकेशन जोड़ें, ताकि ग्राहक सीधे रास्ता देख सकें। हर दुकान जाँच के बाद चालू होती है।"},
   en:{rate:"Too many attempts. Please try again in a little while.",setup:"Registration is not open right now. Please try again later.",autoc:"📍 City picked from your location: {c} (you can change it)",
       locH:"Write your shop address",locHint:"Anywhere in India — start typing your city / village and pick it from the list; state and district fill in automatically (choose them if they don’t). Then the full address clearly (shop no., road, landmark). For a stall/cart, write where it stands.",
-      mlk:"Google Maps link (optional)",cityL:"City / Village *",distL:"District *",stateL:"State *",e_city2:"Write the city / village name (letters only).",e_dist:"Choose the district (not in list? use ➕ to write it).",areaL:"Area (optional)",addrL:"Full address *",addrPh:"Shop no., road, landmark — or where your stall/cart stands",
+      mlk:"Google Maps link (optional)",cityL:"City / Village *",distL:"District *",stateL:"State *",e_city2:"Write the city / village name (letters only).",e_dist:"Choose the district (not in list? use ➕ to write it).",areaL:"Area (optional)",addrL:"Full address *",addrPh:"Shop no., road — or where your stall/cart stands",
       chkQ:"Already registered?",st_card:"Share your FREE digital visiting card",st_card_err:"Could not make the card right now, please try again.",st_fest:"share your shop poster",chkB:"See My Shop",
       st_h:"Congratulations! You are registered 🎊",st_h2:"We have your registration",st_pend:"Pending — under review",
       st_sub:"has been added to PataBook. Our team will review it and make it live soon.",st_left:"minutes left",st_left_h:"hours left",
