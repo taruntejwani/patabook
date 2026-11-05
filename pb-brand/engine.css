@@ -264,7 +264,7 @@
 .ly-4 .abx{display:grid;grid-template-columns:1fr 1fr;gap:40px;background:var(--bg2);border-radius:24px;padding:40px}
 .ly-4 .abx h2 em{font-style:normal;color:var(--ac)}
 @media(max-width:820px){.ly-4 .abx{grid-template-columns:1fr;padding:26px}}
-.ly-4 .rate.st{margin-top:40px}
+.ly-4 .rate.stx{margin-top:40px}
 .ly-4 .rate .big{font-family:var(--fb);font-weight:800}
 .ly-4 .vs{border-radius:24px}
 .ly-4 .bagbar{position:fixed;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:35;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--fg);color:var(--bg);border-radius:18px;padding:10px 10px 10px 18px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-weight:700;max-width:640px;margin:0 auto}
@@ -575,3 +575,9 @@
 /* ⚙️ मालिक के लिए Settings */
 .pbb a.nset{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-size:14px;letter-spacing:0;padding:5px 10px}
 .pbb .drw a.dset{font-weight:700}
+
+/* ⭐ रेटिंग इसी पेज पर (pb-rate.js) */
+.pbb .pbr-in{max-width:420px;margin:18px auto 0;text-align:left;color:#14161c}
+.pbb .pbr-in.pbrate{border-radius:var(--rad,14px)}
+.pbb #pbRate{text-transform:none;letter-spacing:normal;font-size:14px;width:100%;max-width:420px;margin:18px auto 0;text-align:left}
+.pbb #pbRate b{color:#14161c!important;-webkit-text-fill-color:#14161c}.pbb #pbRate small{color:#5b6475!important}

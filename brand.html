@@ -7,12 +7,14 @@
 <meta name="theme-color" content="#0a1230">
 <link rel="preconnect" href="https://kkvbpzysktozghnxplxv.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="pb-brand/engine.css?v=7">
+<link rel="stylesheet" href="pb-brand/engine.css?v=11">
 <script src="site-config.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-back.js"></script>
 <script src="pb-hide.js"></script>
-<script src="pb-brand/engine.js?v=9"></script>
+<script src="pb-auth.js"></script>
+<script src="pb-rate.js"></script>
+<script src="pb-brand/engine.js?v=11"></script>
 <style>
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:#0a1230;color:#eef2fa;font-family:Inter,"Hind",system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -95,7 +97,7 @@ function data(){
     addr:hid("addr")?"":fullAddr(b),landmark:hid("addr")?"":line(b,"Landmark"),hours:hrs,dir:hid("addr")?"":dirUrl(b),lat:hid("addr")?0:+b.latitude,lng:hid("addr")?0:+b.longitude,
     rating:+b.rating||0,count:+b.review_count||0,products:P,gallery:hid("photos")?[]:GAL.map(u=>({src:u,cap:CAPS[u]||""})),cover:COVER||(!hid("photos")&&GAL[0])||"",
     type:typeT,facts:[[L("मालिक","Owner"),line(b,"Owner")],[L("व्यवसाय","Business"),typeT],[L("कैटेगरी","Category"),cat],[L("समय","Hours"),hrs],["GST",gst?L("सत्यापित","Verified"):""]].filter(x=>x[1]),
-    rateUrl:stdUrl()+"#pbRate",stdUrl:stdUrl(),pin:"pin.png",
+    rateInline:true,rateUrl:"",stdUrl:"",pin:"pin.png",   /* रेटिंग इसी पेज पर; पुराने page का link नहीं */
     onLang:()=>{render();}};
 }
 function render(){

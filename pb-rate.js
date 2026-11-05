@@ -1,7 +1,7 @@
 /* ⭐ Rating (1–5 star): login के बाद ही; एक user की एक दुकान पर एक rating (दोबारा देने पर बदलती है) */
 (function(){
   var slug=new URLSearchParams(location.search).get("slug")||"",MINE=null,LOADED=false,BUSY=false,MSG="",CSS=false;
-  function en(){return window.PB&&PB.lang&&PB.lang()!=="hi";}
+  function en(){if(window.PB&&PB.lang)return PB.lang()!=="hi";try{return (localStorage.getItem("pb-lang")||"en")!=="hi";}catch(e){return true;}}
   function T(h,e){return en()?e:h;}
   function sb(){try{return {u:SB,k:KEY};}catch(e){return null;}}
   async function call(fn,args,tok){var c=sb();if(!c)throw new Error("no sb");

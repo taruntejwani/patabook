@@ -89,11 +89,15 @@
   }
   function aboutLine() { return esc(D.name) + (D.city ? " — <em>" + esc(D.city) + "</em>" : ""); }
   function rating(cls) {
-    if (!+D.rating) return '';
-    return '<div class="rate ' + (cls || "") + ' rv">' + eb(L("ग्राहकों की रेटिंग", "Customer rating")) + '<div class="big">' + esc(Number(D.rating).toFixed(1)) + '</div><div class="stars">' + "★★★★★".slice(0, Math.round(+D.rating)) + '</div><p>' +
-      (D.count ? L(D.count + " ग्राहकों ने PataBook पर रेटिंग दी", D.count + (D.count == 1 ? " customer rating" : " customer ratings") + " on PataBook") : L("PataBook पर रेटिंग", "Rating on PataBook")) + '</p>' +
-      (D.rateUrl ? '<a class="btn" href="' + esc(D.rateUrl) + '">' + L("अपनी रेटिंग दें", "Rate this shop") + '</a>' : '') + '</div>';
+    const has = +D.rating;
+    if (!has && !D.rateInline) return '';
+    return '<div class="rate ' + (cls || "") + ' rv">' + eb(L("ग्राहकों की रेटिंग", "Customer rating")) +
+      (has ? '<div class="big">' + esc(Number(D.rating).toFixed(1)) + '</div><div class="stars">' + "★★★★★".slice(0, Math.round(+D.rating)) + '</div><p>' +
+        (D.count ? L(D.count + " ग्राहकों ने PataBook पर रेटिंग दी", D.count + (D.count == 1 ? " customer rating" : " customer ratings") + " on PataBook") : L("PataBook पर रेटिंग", "Rating on PataBook")) + '</p>'
+        : '<p>' + L("अभी कोई रेटिंग नहीं — पहली रेटिंग आप दें", "No ratings yet — be the first to rate") + '</p>') +
+      (D.rateInline ? '<div id="pbRate" class="pbr-in"></div>' : D.rateUrl ? '<a class="btn" href="' + esc(D.rateUrl) + '">' + L("अपनी रेटिंग दें", "Rate this shop") + '</a>' : '') + '</div>';
   }
+
   function contacts() {
     return '<div class="cl">' + D.nums.map(n => '<a href="tel:+91' + n + '"><span>' + L("फ़ोन", "Phone") + '</span>+91 ' + n + '</a>').join("") +
       (D.nums[0] && D.waLink("x") ? '<a href="' + esc(D.waLink(L("नमस्ते, PataBook पर आपका पेज देखा।", "Hello, I saw your page on PataBook."))) + '" target="_blank" rel="noopener"><span>WhatsApp</span>+91 ' + D.nums[0] + '</a>' : '') +
@@ -138,7 +142,7 @@
       (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + secHead(L("दुकान की झलक", "Inside the store"), L("गैलरी", "Gallery")) + gallery() + '</div></section>' : '') +
       '<section class="blk deco" id="about"><div class="w"><div class="story"><div class="rv">' + eb(L("हमारे बारे में", "About us")) + '<blockquote>' + aboutLine() + '</blockquote></div>' + facts("rv") + '</div>' +
       (why().length ? '<div class="pill3">' + why().map(p => '<div class="rv"><span>' + esc(p[0]) + '</span><b>' + esc(p[1]) + '</b>' + (p[2] ? '<p>' + esc(p[2]) + '</p>' : '') + '</div>').join("") + '</div>' : '') + '</div></section>' +
-      (+D.rating ? '<section class="blk"><div class="w">' + rating() + '</div></section>' : '') +
+      ((+D.rating || D.rateInline) ? '<section class="blk"><div class="w">' + rating() + '</div></section>' : '') +
       '<section class="blk" id="visit"><div class="w">' + secHead(L("हमसे मिलें", "Visit us"), L("पता और संपर्क", "Find us")) + visit() + '</div></section>'
   };
   /* 2 · Cinematic — पूरी screen, बहुत बड़े अक्षर, products की पट्टी */
@@ -153,7 +157,7 @@
         (D.gallery.length ? '<section class="blk" id="gal">' + D.gallery.map((g, i) => '<button type="button" class="full rv" data-gi="' + i + '"><img src="' + esc(g.src) + '" alt="' + esc(g.cap || "") + '" loading="lazy"><span class="w"><b>' + nn(i) + '</b>' + esc(g.cap || L("दुकान की झलक", "Inside the store")) + '</span></button>').join("") + '</section>' : '') +
         '<section class="blk deco" id="about"><div class="w"><div class="chap rv">' + eb(L("हमारे बारे में", "About")) + '<h2 class="hx">' + aboutLine() + '</h2></div>' +
         (why().length ? '<div class="why">' + why().map((p, i) => '<div class="rv"><b>' + nn(i) + '</b><h3>' + esc(p[1]) + '</h3><p>' + esc(p[0]) + (p[2] ? ' — ' + esc(p[2]) : '') + '</p></div>').join("") + '</div>' : '') + facts("rv") + '</div></section>' +
-        (+D.rating ? '<section class="blk"><div class="w">' + rating() + '</div></section>' : '') +
+        ((+D.rating || D.rateInline) ? '<section class="blk"><div class="w">' + rating() + '</div></section>' : '') +
         '<section class="blk vbig" id="visit"><div class="w">' + secHead(L("पता", "Address"), L("हमसे मिलें", "Visit us")) + (D.nums[0] ? '<a class="huge" href="tel:+91' + D.nums[0] + '">+91 ' + D.nums[0] + '</a>' : '') + visit() + '</div></section>';
     }
   };
@@ -168,7 +172,7 @@
           '<ol class="idx rv">' + D.products.map((p, i) => '<li><a href="#p' + i + '" data-pi="' + i + '"><b>' + nn(i) + '</b><span>' + esc(p.name) + '</span><i>' + esc(p.size || "") + '</i></a></li>').join("") + '</ol><div data-plist>' + LY_[3].list(filtered()) + '</div></div></section>' : '') +
         (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + secHead(L("फ़ोटो निबंध", "Photo essay"), L("दुकान से", "From the store")) + gallery("ed") + '</div></section>' : '') +
         '<section class="blk" id="about"><div class="w"><div class="essay">' + eb(L("हमारे बारे में", "About")) + '<h2 class="rv">' + aboutLine() + '</h2><div class="cols rv">' + why().map(p => '<p><b>' + esc(p[0]) + ':</b> ' + esc(p[1]) + (p[2] ? ' · ' + esc(p[2]) : '') + '</p>').join("") + '</div>' + facts("rv") + '</div></div></section>' +
-        (+D.rating ? '<section class="blk"><div class="w">' + rating("ed") + '</div></section>' : '') +
+        ((+D.rating || D.rateInline) ? '<section class="blk"><div class="w">' + rating("ed") + '</div></section>' : '') +
         '<section class="blk" id="visit"><div class="w">' + secHead(L("पता", "Colophon"), L("हमसे मिलें", "Visit us")) + visit() + '</div></section>';
     }
   };
@@ -183,7 +187,7 @@
         '<div class="usp rv">' + [[I.wa, L("WhatsApp पर ऑर्डर", "Order on WhatsApp")], [I.pin, D.city || L("पता", "Address")], [I.call, D.hours ? D.hours.split("\n")[0] : L("कॉल करें", "Call us")]].map(x => '<div>' + x[0] + '<span>' + esc(x[1]) + '</span></div>').join("") + '</div></div></section>' +
         (D.products.length ? '<section class="blk" id="coll"><div class="w"><div class="shd"><h2>' + L("सारे उत्पाद", "All products") + '</h2><label class="srch"><input type="search" data-q placeholder="' + esc(L("सामान खोजें…", "Search products…")) + '" aria-label="' + esc(L("सामान खोजें", "Search products")) + '"></label></div>' + catBar("chips") + '<div data-plist>' + LY_[4].list(filtered()) + '</div></div></section>' : '') +
         (D.gallery.length ? '<section class="blk" id="gal"><div class="w"><div class="shd"><h2>' + L("दुकान की फ़ोटो", "Store photos") + '</h2></div>' + gallery("st") + '</div></section>' : '') +
-        '<section class="blk" id="about"><div class="w"><div class="abx rv"><div>' + eb(L("हमारे बारे में", "About us")) + '<h2>' + aboutLine() + '</h2></div>' + facts() + '</div>' + (+D.rating ? rating("st") : '') + '</div></section>' +
+        '<section class="blk" id="about"><div class="w"><div class="abx rv"><div>' + eb(L("हमारे बारे में", "About us")) + '<h2>' + aboutLine() + '</h2></div>' + facts() + '</div>' + ((+D.rating || D.rateInline) ? rating("stx") : '') + '</div></section>' +
         '<section class="blk" id="visit"><div class="w"><div class="shd"><h2>' + L("दुकान का पता", "Store location") + '</h2></div>' + visit() + '</div></section>' +
         '<div class="bagbar" data-bagbar hidden><span data-bagt></span><a class="btn p" data-bagwa target="_blank" rel="noopener">' + I.wa + L("WhatsApp पर ऑर्डर भेजें", "Send order on WhatsApp") + '</a></div>';
     }
@@ -194,7 +198,7 @@
     page: () => nav() + '<section class="hero" id="top" data-hero><div class="w in rv">' + eb(D.sub) + '<h1>' + esc(D.name) + '</h1>' + (D.services ? '<p class="lead">' + esc(D.services) + '</p>' : '') + openChip() + '<div class="btns">' + waBtn("btn p") + callBtn("btn") + dirBtn("btn") + '</div></div>' + (D.cover ? '<div class="w"><div class="wide rv"><img src="' + esc(D.cover) + '" alt=""></div></div>' : '') + '</section>' +
       (D.products.length ? '<section class="blk" id="coll"><div class="w nar">' + secHead(L("उत्पाद", "Products"), L("उत्पाद", "Products"), catBar()) + '<div data-plist>' + LY_[5].list(filtered()) + '</div></div></section>' : '') +
       (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + gallery("mn") + '</div></section>' : '') +
-      '<section class="blk" id="about"><div class="w nar"><p class="say rv">' + aboutLine() + '</p>' + facts("rv") + (+D.rating ? rating("mn") : '') + '</div></section>' +
+      '<section class="blk" id="about"><div class="w nar"><p class="say rv">' + aboutLine() + '</p>' + facts("rv") + ((+D.rating || D.rateInline) ? rating("mn") : '') + '</div></section>' +
       '<section class="blk" id="visit"><div class="w nar">' + secHead(L("पता", "Visit"), L("पता", "Visit")) + visit() + '</div></section>'
   };
   /* 6 · Bold Poster — रंग के बड़े blocks, बहुत बड़े नंबर */
@@ -204,7 +208,7 @@
       (D.products.length ? '<section class="blk inv" id="coll"><div class="w">' + secHead(L("उत्पाद", "Products"), L("हमारे उत्पाद", "Our products"), catBar()) + '<div data-plist>' + LY_[6].list(filtered()) + '</div></div></section>' : '') +
       (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + secHead(L("झलक", "Look"), L("गैलरी", "Gallery")) + gallery("pst") + '</div></section>' : '') +
       '<section class="blk acc" id="about"><div class="w"><h2 class="mega rv">' + aboutLine() + '</h2>' + (why().length ? '<div class="why">' + why().map((p, i) => '<div class="rv"><b>' + nn(i) + '</b><h3>' + esc(p[1]) + '</h3>' + (p[2] ? '<p>' + esc(p[2]) + '</p>' : '') + '</div>').join("") + '</div>' : '') + '</div></section>' +
-      '<section class="blk" id="facts"><div class="w">' + facts("rv") + (+D.rating ? rating("pst") : '') + '</div></section>' +
+      '<section class="blk" id="facts"><div class="w">' + facts("rv") + ((+D.rating || D.rateInline) ? rating("pst") : '') + '</div></section>' +
       '<section class="blk" id="visit"><div class="w">' + secHead(L("पता", "Visit"), L("हमसे मिलें", "Visit us")) + visit() + '</div></section>'
   };
   /* 7 · Split — desktop पर बायाँ हिस्सा रुका रहता है, दायाँ scroll */
@@ -214,7 +218,7 @@
       '<div class="btns">' + waBtn("btn p") + callBtn("btn") + dirBtn("btn") + '</div><nav class="sn">' + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '<button type="button" class="lg" data-lang>' + (D.en ? "Hindi" : "English") + '</button></nav></div></aside><main class="main">' + (D.cover ? '<div class="mtop">' + coverImg() + '</div>' : '') +
       (D.products.length ? '<section class="blk" id="coll">' + secHead(L("उत्पाद", "Products"), L("कलेक्शन", "Collection"), catBar()) + '<div data-plist>' + LY_[7].list(filtered()) + '</div></section>' : '') +
       (D.gallery.length ? '<section class="blk" id="gal">' + secHead(L("झलक", "Look inside"), L("गैलरी", "Gallery")) + gallery("spg") + '</section>' : '') +
-      '<section class="blk" id="about">' + eb(L("हमारे बारे में", "About")) + '<h2 class="ab rv">' + aboutLine() + '</h2>' + facts("rv") + (+D.rating ? rating("sp") : '') + '</section>' +
+      '<section class="blk" id="about">' + eb(L("हमारे बारे में", "About")) + '<h2 class="ab rv">' + aboutLine() + '</h2>' + facts("rv") + ((+D.rating || D.rateInline) ? rating("sp") : '') + '</section>' +
       '<section class="blk" id="visit">' + secHead(L("पता", "Visit"), L("हमसे मिलें", "Find us")) + visit() + '</section></main></div>'
   };
   /* 8 · Bento — टाइलों की grid */
@@ -240,7 +244,7 @@
     page: () => nav() + '<section class="hero" id="top" data-hero><div class="w"><div class="board rv"><div class="bin"><div class="orn">✦ ' + esc(D.cat) + ' ✦</div><h1>' + esc(D.name) + '</h1><div class="rule"></div><p class="lead">' + esc(D.services || D.sub) + '</p>' + (D.city ? '<div class="eb">' + esc(D.addr || D.city) + '</div>' : '') + openChip() + '<div class="btns">' + waBtn("btn p") + callBtn("btn") + '</div></div></div>' + (D.cover ? '<div class="cfr">' + coverImg() + '</div>' : '') + '</div></section>' +
       (D.products.length ? '<section class="blk" id="coll"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("हमारे उत्पाद", "Our Products") + '</h2>' + catBar() + '</div><div data-plist>' + LY_[9].list(filtered()) + '</div></div></section>' : '') +
       (D.gallery.length ? '<section class="blk" id="gal"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("हमारी दुकान", "Our Store") + '</h2></div>' + gallery("cl") + '</div></section>' : '') +
-      '<section class="blk" id="about"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("हमारे बारे में", "About Us") + '</h2><p class="say">' + aboutLine() + '</p></div><div class="ctab rv">' + facts() + '</div>' + (+D.rating ? rating("cl") : '') + '</div></section>' +
+      '<section class="blk" id="about"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("हमारे बारे में", "About Us") + '</h2><p class="say">' + aboutLine() + '</p></div><div class="ctab rv">' + facts() + '</div>' + ((+D.rating || D.rateInline) ? rating("cl") : '') + '</div></section>' +
       '<section class="blk" id="visit"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("दुकान पर पधारें", "Visit Our Store") + '</h2></div>' + visit() + '</div></section>'
   };
   /* 10 · Prestige — business brand: products पहली screen पर, साफ़ नाम, भरोसे की पट्टी, साफ़ CTA */
@@ -268,7 +272,7 @@
         (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + secHead(L("गैलरी", "Gallery"), L("उत्पाद और दुकान की झलक", "Products & store")) + gallery("pg") + '</div></section>' : '') +
         '<section class="blk alt" id="about"><div class="w ab2"><div class="rv">' + eb(L("कंपनी के बारे में", "About the company")) + '<h2>' + aboutLine() + '</h2>' +
         (why().length ? '<div class="why">' + why().map(p => '<div><span>' + esc(p[0]) + '</span><b>' + esc(p[1]) + '</b>' + (p[2] ? '<p>' + esc(p[2]) + '</p>' : '') + '</div>').join("") + '</div>' : '') + '</div>' + (function () { const f = D.facts.filter(x => x[1] !== D.type && x[1] !== D.hours); return f.length ? '<div class="facts rv">' + f.map(x => '<div><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></div>').join("") + '</div>' : ''; })() + '</div></section>' +
-        (+D.rating ? '<section class="blk alt"><div class="w">' + rating("pr") + '</div></section>' : '') +
+        ((+D.rating || D.rateInline) ? '<section class="blk alt"><div class="w">' + rating("pr") + '</div></section>' : '') +
         '<section class="blk" id="visit"><div class="w">' + secHead(L("संपर्क", "Contact"), L("हमसे संपर्क करें", "Get in touch")) +
         '<div class="ccards rv">' + callBtn("cc") + waBtn("cc w") + dirBtn("cc") + '</div>' + visit() + '</div></section>';
     }
