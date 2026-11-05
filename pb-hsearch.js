@@ -9,9 +9,9 @@
   var ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
   var css = document.createElement("style");
   css.textContent =
-    ".hsb{flex:1 1 auto;min-width:0;max-width:420px;height:40px;display:flex;align-items:center;gap:8px;border-radius:999px;border:1.5px solid #c9d8f0;background:#f5f8fd;color:#1a73e8;cursor:text;padding:0 14px;margin:0 2px;font:inherit;text-align:left;-webkit-tap-highlight-color:transparent;box-sizing:border-box}" +
-    ".hsb svg{flex:none}.hsb span{flex:1;min-width:0;color:#6b7486;font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
-    ".hsb:active{background:#eaf1fc}" +
+    ".hsb{flex:1 1 auto;min-width:0;max-width:420px;height:40px;display:flex;align-items:center;gap:6px;border-radius:999px;border:1.5px solid #c9d8f0;background:#f5f8fd;color:#1a73e8;cursor:text;padding:0 10px 0 12px;margin:0 2px;font:inherit;text-align:left;-webkit-tap-highlight-color:transparent;box-sizing:border-box}" +
+    ".hsb svg{flex:none;width:18px;height:18px}.hsb span{flex:1;min-width:0;color:#6b7486;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+    ".hsb:active{background:#eaf1fc}.hsb .s{display:none}@media(max-width:400px){.hsb .l{display:none}.hsb .s{display:block}}@media(max-width:345px){.hsb .s{display:none}.hsb{flex:0 0 auto;width:44px;padding:0;justify-content:center}}" +
     /* फ़ोन पर: PataBook सिर्फ़ P निशान (पीछे), search box आगे बड़ा */
     "@media(max-width:640px){.hs-has .pbwm{display:none!important}.hs-has .sp,.hs-has #tb{display:none!important}}" +
     ".hs-go{transition:transform .22s ease,opacity .22s ease!important;transform:translateX(-110%)!important;opacity:0!important}" +
@@ -31,7 +31,7 @@
     var bar = before.parentNode, open = false, backed = false, form = null;
     var b = document.createElement("button");
     b.type = "button"; b.id = "hsBtn"; b.className = "hsb";
-    function lab() { var t = T("दुकान खोजें…", "Search shops…"); b.innerHTML = ICON + "<span>" + t + "</span>"; b.setAttribute("aria-label", T("दूसरी दुकान खोजें", "Search other shops")); }
+    function lab() { b.innerHTML = ICON + "<span class=\"l\">" + T("दुकान खोजें…", "Search shops…") + "</span><span class=\"s\">" + T("खोजें…", "Search…") + "</span>"; b.setAttribute("aria-label", T("दूसरी दुकान खोजें", "Search other shops")); }
     lab(); bar.insertBefore(b, logo.nextSibling); bar.classList.add("hs-has");
     if (window.PB && PB.onChange) { try { PB.onChange(lab); } catch (e) {} }
 
