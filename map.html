@@ -647,6 +647,18 @@ if (MB) {
   });
 }
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: false, showZoom: true }), 'top-right');
+/* 🔄 नक्शा घुमाने के बटन (फ़ोन पर दो उँगली से घुमा सकते हैं; PC पर ये बटन या Right-click खींचें). कम्पास दबाने पर फिर उत्तर (North) ऊपर */
+(function () {
+  var hi = (localStorage.getItem('pb-lang') || 'en') === 'hi';
+  var box = document.createElement('div'); box.className = 'maplibregl-ctrl maplibregl-ctrl-group mapboxgl-ctrl mapboxgl-ctrl-group pbrot';
+  [[-45, '⟲', hi ? 'नक्शा बाईं ओर घुमाएँ' : 'Rotate map left'], [45, '⟳', hi ? 'नक्शा दाईं ओर घुमाएँ' : 'Rotate map right']].forEach(function (z) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = z[1]; b.title = z[2]; b.setAttribute('aria-label', z[2]);
+    b.style.cssText = 'font:700 18px/29px system-ui,sans-serif;color:#333;text-align:center';
+    b.onclick = function () { map.easeTo({ bearing: map.getBearing() + z[0], duration: 450 }); };
+    box.appendChild(b);
+  });
+  map.addControl({ onAdd: function () { return box; }, onRemove: function () { box.remove(); } }, 'top-right');
+})();
 map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 /* Mapbox/OSM की लंबी credit पट्टी खुलते ही बंद करो: सिर्फ छोटा (i) बटन + mapbox लोगो रहे (शर्तों के अनुसार ज़रूरी) */
 function pbCollapseAttrib() {

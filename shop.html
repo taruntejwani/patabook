@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><link rel="preconnect" href="https://kkvbpzysktozghnxplxv.supabase.co" crossorigin><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<html lang="hi"><head><meta charset="utf-8"><link rel="preconnect" href="https://kkvbpzysktozghnxplxv.supabase.co" crossorigin><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
 <meta name="description" content="दुकान की अपनी website — सारे products, फ़ोटो, पता और WhatsApp। Powered by PataBook.">
 <title>Shop — PataBook</title>
 <meta property="og:site_name" content="PataBook">
@@ -469,6 +469,8 @@ html.t-silver .hero .hname .sub{color:#4c5664!important;text-shadow:none!importa
 html.t-silver .hero .chip:not(.gold):not(.op):not(.cl){background:#fff!important;color:#4c5664!important;border:1px solid #aeb7c3!important}
 html.t-silver body .qa .pri.c{background:linear-gradient(135deg,#4c5664,#2f3742)!important;color:#fff!important;border:1px solid #2f3742!important}
 html.t-silver body .dock a:not(.w){background:linear-gradient(135deg,#4c5664,#2f3742)!important;color:#fff!important}
+/* 🖥️ PC (बड़ी screen): नीचे चिपकी Call/WhatsApp पट्टी नहीं (बटन ऊपर हैं), चौड़ा पेज, "हमसे मिलें" दो कॉलम में (जानकारी | पता + नक्शा) */
+@media(min-width:1024px){#dock{display:none!important}body{padding-bottom:24px!important}.wrap{max-width:1120px}#vis{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 28px;align-items:start}#vis>h2{grid-column:1/-1}#vis>#visit{margin-top:0!important}#vis .smap{height:300px}#vis:not(:has(>#visit)){display:block}}
 </style>
 </head><body>
 
