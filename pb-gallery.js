@@ -600,10 +600,13 @@
   var DSN = {}, DSEL = {}, DERR = {}, DLOADED = {};
   var DLY = [["लग्ज़री", "Luxury"], ["सिनेमा", "Cinematic"], ["एडिटोरियल", "Editorial"], ["ऑनलाइन स्टोर", "Store"], ["मिनिमल", "Minimal"], ["पोस्टर", "Bold Poster"], ["स्प्लिट", "Split Screen"], ["बेंटो", "Bento Grid"], ["क्लासिक दुकान", "Classic Shop"], ["प्रेस्टीज ब्रांड", "Prestige Brand"]];
   var DTH = [["नेवी प्लैटिनम", "Navy Platinum", "#0a1230", "#c7d2e8"], ["काला-गोल्ड", "Black Gold", "#0b0b0c", "#d8c39a"], ["रोज़ गोल्ड", "Rose Gold", "#fbf3f0", "#b76e79"], ["एमराल्ड", "Emerald", "#06261d", "#d6b46a"], ["मैरून रॉयल", "Royal Maroon", "#3a0b14", "#e6c27a"], ["सफ़ेद मिनिमल", "Pure White", "#ffffff", "#111111"], ["आइवरी सैंड", "Ivory Sand", "#f4efe6", "#8a6a3d"], ["मिडनाइट वायलेट", "Midnight Violet", "#140c2a", "#b9a3ff"], ["ओशन टील", "Ocean Teal", "#03242b", "#7fe0d4"], ["चारकोल ऑरेंज", "Charcoal Orange", "#16181b", "#ff7a3d"]];
+  /* 🧪 Website Design अभी सिर्फ़ इस एक दुकान पर test */
+  var DTEST = "tejwani-detergent-and-chemical-gandhidham-31oyn";
   function plat(b) { return paid(b) && (typeof tierOf !== "function" || tierOf(b) === "platinum"); }
   function dsplit(n) { return { ly: Math.floor((n - 1) / 10) + 1, th: (n - 1) % 10 + 1 }; }
   function dname(n) { var z = dsplit(n); return T(DLY[z.ly - 1][0], DLY[z.ly - 1][1]) + " · " + T(DTH[z.th - 1][0], DTH[z.th - 1][1]); }
   function designRow(b, i) {
+    if (b.slug !== DTEST) return "";
     if (!plat(b)) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">🌐</span><span class="gn"><b>' + T("वेबसाइट डिज़ाइन", "Website Design") + '</b></span><i>💎🔒</i></button>';
     var cur = DSN[b.slug];
     return '<button type="button" class="gfh" data-gf="design" data-i="' + i + '"><span class="gi">🌐</span><span class="gn"><b>' + T("वेबसाइट डिज़ाइन", "Website Design") + '</b></span><i>' + (cur ? "#" + cur : T("चुनें", "Choose")) + '</i><em>›</em></button>';
@@ -629,6 +632,7 @@
   function designFit() { document.querySelectorAll(".dpf").forEach(function (f) { var fr = f.querySelector("iframe"); if (fr) fr.style.transform = "scale(" + (f.clientWidth / 390) + ")"; }); }
   window.addEventListener("resize", designFit);
   function designPage(b, i) {
+    if (b.slug !== DTEST) return "";
     var s = b.slug; designCss(); if (!DLOADED[s]) designLoad(s);
     var bar = '<div class="gph"><button type="button" class="gbk" data-gb="1" aria-label="' + T("वापस", "Back") + '">‹</button><b>🌐 ' + T("वेबसाइट डिज़ाइन", "Website Design") + '</b><span>100</span></div>';
     if (!plat(b)) return bar + '<div class="gbd"><small>' + T("यह सुविधा 💎 Platinum plan में है।", "This is in the 💎 Platinum plan.") + '</small></div>';
