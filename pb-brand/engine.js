@@ -70,9 +70,12 @@
   function nav(extra) {
     return '<header class="nv"><div class="w in"><a class="mk" href="#top"><b>' + esc(D.name) + '</b><small>' + esc(D.sub) + '</small></a>' +
       '<nav class="lk" aria-label="' + esc(L("मुख्य मेनू", "Main menu")) + '">' + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '</nav>' +
-      '<div class="nr">' + (extra || '') + '<button type="button" class="lg" data-lang aria-label="' + esc(L("भाषा बदलें", "Change language")) + '">' + (D.en ? "Hindi" : "English") + '</button><button type="button" class="mn" data-menu>' + L("मेनू", "Menu") + '</button></div></div></header>';
+      '<div class="nr">' + (extra || '') + setLink("lg nset", 1) + '<button type="button" class="lg" data-lang aria-label="' + esc(L("भाषा बदलें", "Change language")) + '">' + (D.en ? "Hindi" : "English") + '</button><button type="button" class="mn" data-menu>' + L("मेनू", "Menu") + '</button></div></div></header>';
   }
-  function drawer() { return '<div class="drw" data-drw aria-hidden="true"><button type="button" class="x" data-x aria-label="' + esc(L("बंद करें", "Close")) + '">✕</button>' + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '<div class="db">' + waBtn("btn p") + callBtn("btn") + '</div></div>'; }
+  /* ⚙️ दुकान का मालिक (इसी फ़ोन पर login) अपने page पर हो तो Settings का रास्ता */
+  function isOwner() { try { const sl = new URLSearchParams(location.search).get("slug") || ""; const se = JSON.parse(localStorage.getItem("pb-session") || "null"); const a = JSON.parse(localStorage.getItem("pb-my-shops") || "[]"); return !!(sl && se && se.refresh_token && Array.isArray(a) && a.indexOf(sl) >= 0); } catch (e) { return false; } }
+  function setLink(cls, icon) { return isOwner() ? '<a class="' + cls + '" href="mybusiness.html" aria-label="' + esc(L("सेटिंग", "Settings")) + '">⚙️' + (icon ? '' : ' ' + esc(L("सेटिंग", "Settings"))) + '</a>' : ''; }
+  function drawer() { return '<div class="drw" data-drw aria-hidden="true"><button type="button" class="x" data-x aria-label="' + esc(L("बंद करें", "Close")) + '">✕</button>' + setLink("dset") + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '<div class="db">' + waBtn("btn p") + callBtn("btn") + '</div></div>'; }
   function lightbox() { return '<div class="lb" data-lb aria-hidden="true"><button type="button" class="x" data-x aria-label="' + esc(L("बंद करें", "Close")) + '">✕</button><div class="im"><img alt=""></div><div class="cap"><button type="button" data-lp aria-label="' + esc(L("पिछली", "Previous")) + '">‹</button><span></span><button type="button" data-ln aria-label="' + esc(L("अगली", "Next")) + '">›</button></div><div class="lbt"></div></div>'; }
   function sticky() { const a = callBtn(""), b = waBtn("g"); return (a || b) ? '<div class="stk' + (a && b ? '' : ' one') + '" data-stk>' + a + b + '</div>' : ''; }
   function eb(t) { return '<div class="eb">' + esc(t) + '</div>'; }
