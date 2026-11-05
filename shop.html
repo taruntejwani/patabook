@@ -146,6 +146,7 @@ h2 small{font-size:13px;color:var(--muted);font-weight:600}
 @media(max-width:480px){.row span{flex-basis:96px}}
 
 /* Visit */
+.row b .lmk{display:block;margin-top:4px;font-size:13.5px;font-weight:600;color:#8a5a00}
 .addr{display:flex;gap:10px;align-items:flex-start;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:13px}
 .addr .pn{font-size:20px;line-height:1.2}.addr b{display:block;font-size:16px;line-height:1.45}.addr small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
 .smap{position:relative;display:block;height:190px;border-radius:16px;overflow:hidden;margin-top:12px;background:#e5e9ef;border:1px solid var(--line)}
@@ -697,13 +698,14 @@ function render(){drawSoc();
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
      '<div id="pbRate"></div>'+
      '<section class="blk" id="vis"><h2>📍 '+L("हमसे मिलें","Visit us")+'</h2><div id="about" data-pbh="about">'+
-       (rows.length||email||web||mobRow()?'<div class="rows">'+rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
+       (addr||rows.length||email||web||mobRow()?'<div class="rows">'+
+       (addr?'<div class="row" data-pbh="addr"><span>'+L("पता","Address")+'</span><b>'+esc(addr)+(line(b,"Landmark")?'<small class="lmk">🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</b></div>':'')+
+       rows.map(r=>'<div class="row"'+(r[2]?' data-pbh="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><b>'+esc(r[1]).replace(/\n/g,'<br>')+'</b></div>').join("")+
        mobRow()+
        (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)?'<div class="row" data-pbh="web"><span>Email</span><b><a href="mailto:'+esc(email)+'">'+esc(email)+'</a></b></div>':'')+
        (web?'<div class="row" data-pbh="web"><span>Website</span><b><a target="_blank" rel="noopener" href="'+esc(web)+'">'+esc(web.replace(/^https?:\/\//,""))+'</a></b></div>':'')+'</div>'
        :'<p class="empty">'+L("दुकानदार ने अभी और जानकारी नहीं जोड़ी है।","The owner hasn't added more details yet.")+'</p>')+'</div>'+
-     (addr?'<div data-pbh="addr" id="visit" style="margin-top:14px"><div class="addr"><span class="pn">📍</span><div><b>'+esc(addr)+'</b>'+(line(b,"Landmark")?'<small>🏁 '+L("पहचान: ","Landmark: ")+esc(line(b,"Landmark"))+'</small>':'')+'</div></div>'+
-       staticMap(b,dir)+'</div>':'')+'</section>'+
+     (addr?'<div data-pbh="addr" id="visit" style="margin-top:14px">'+staticMap(b,dir)+'</div>':'')+'</section>'+   /* पता ऊपर की सूची में (free पेज जैसा), यहाँ सिर्फ़ नक्शा */
      '<section class="blk" data-pbh="near" id="near" hidden><h2>📍 '+L("पास की दूसरी दुकानें","Other shops nearby")+'</h2><div class="near" id="nearBox"></div></section>'+
    '</div>'+
    '<div class="pw">ℹ '+L("यह जानकारी दुकानदार ने दी है; PataBook ने इसकी पुष्टि नहीं की है। ","This information was provided by the shop owner; PataBook has not verified it. ")+'<a href="terms.html">'+L("नियम","Terms")+'</a>'+
