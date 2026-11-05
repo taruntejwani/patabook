@@ -30,7 +30,7 @@
   function show() {
     css();
     var ov = document.createElement("div"); ov.id = "pbLd"; ov.setAttribute("role", "status"); ov.setAttribute("aria-live", "polite");
-    ov.innerHTML = '<div class="pw"><span class="sh"></span><span class="pn"></span></div><div class="nm">Pata<b>Book</b></div><div class="tx">' + txt() + '</div>';
+    ov.innerHTML = '<div class="pw"><span class="sh"></span><span class="pn"></span></div><div class="nm"><img src="pb-wordmark.webp" alt="PataBook" style="height:26px;width:auto;display:block;margin:0 auto"></div><div class="tx">' + txt() + '</div>';
     document.body.appendChild(ov);
     requestAnimationFrame(function () { ov.classList.add("on"); });
     return { el: ov, at: performance.now() };
