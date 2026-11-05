@@ -467,3 +467,32 @@
 .ly-10 .pq span{display:block;font-size:110px;line-height:.6;color:var(--ac)}
 .ly-10 .pq em{color:var(--ac)}
 .ly-10 .rate.mg{margin-top:60px}
+
+/* दुकान का poster: नाम के पीछे नहीं, अलग पूरा */
+.pbb .cvb{margin:0}
+.pbb .cvb img{width:100%;height:auto;max-height:80vh;object-fit:contain;margin:0 auto;border-radius:var(--rad);box-shadow:0 18px 50px rgba(0,0,0,.28)}
+.ly-1 .hero.hc{min-height:0}.ly-1 .hero.hc .in{padding-block:70px 50px}
+.ly-2 .hero{min-height:0}.ly-2 .hero .in{padding-block:70px 50px}
+.ly-2 .cvb.full2 img{max-height:none;border-radius:0;box-shadow:none}
+.ly-4 .ban{min-height:0;align-items:center}.ly-4 .ban::after{display:none}
+.ly-4 .ban.wc{grid-template-columns:1fr 1fr}
+.ly-4 .bim{padding:20px;display:grid;place-items:center}.ly-4 .bim img{width:100%;border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.18)}
+@media(max-width:820px){.ly-4 .ban,.ly-4 .ban.wc{grid-template-columns:1fr;min-height:0}.ly-4 .bim{order:-1;padding:16px 16px 0}}
+.ly-7 .side::after{background:linear-gradient(180deg,rgba(var(--bgr),.15),rgba(var(--bgr),.7))}
+.ly-7 .mtop{padding-top:40px}
+@media(max-width:900px){.ly-7 .side{min-height:0}.ly-7 .si{padding-top:60px}}
+.ly-9 .cfr{margin-top:30px;border:2px solid var(--ac);padding:8px;background:var(--bg2)}.ly-9 .cfr .cvb img{border-radius:0;box-shadow:none}
+.ly-10 .hero{min-height:0}.ly-10 .hero::after{display:none}
+.ly-10 .cvb.mg{margin:18px 0 6px}.ly-10 .cvb.mg img{border-radius:0}
+.ly-10 .lines{margin-top:20px;padding-top:0;max-width:none;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.ly-10 .lines,.ly-10 h1{text-shadow:none}
+
+/* लंबे नाम: सबसे लंबे शब्द (--mw) के हिसाब से font छोटा, ताकि screen से बाहर न जाए */
+.ly-2 h1{font-size:min(clamp(64px,15vw,210px),calc(min(92vw,1160px) / (var(--mw) * .62)))}
+.ly-6 h1{font-size:min(clamp(66px,17vw,240px),calc(min(80vw,1060px) / (var(--mw) * .62)))}
+.ly-10 h1{font-size:min(clamp(56px,14vw,200px),calc(min(92vw,1160px) / (var(--mw) * .7)))}
+.ly-3 h1{font-size:min(clamp(54px,13vw,190px),calc(min(92vw,1160px) / (var(--mw) * .46)))}
+.ly-1 h1,.ly-7 h1,.ly-9 h1{overflow-wrap:anywhere}
+
+.pbb .hero>*,.pbb .hero .in,.pbb .hz>*,.pbb .bt{min-width:0}
+.pbb .hero>.w{width:100%}
