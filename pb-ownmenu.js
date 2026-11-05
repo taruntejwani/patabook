@@ -28,7 +28,7 @@
   function close() { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else kill(); }
   function open() {
     if (ov) return;
-    var h = !en(), ROW = "display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;font-weight:700;font-size:15.5px;text-decoration:none;cursor:pointer;";
+    var h = !en(), ROW = "display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;cursor:pointer;";
     ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
     var r = btn.getBoundingClientRect(), pn = document.createElement("div");
     pn.style.cssText = "position:absolute;top:" + Math.round(r.bottom + 8) + "px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
@@ -56,7 +56,7 @@
     var nav = document.querySelector("header .nav"); if (!nav || document.getElementById("pbOwnMenu")) return;
     btn = document.createElement("button"); btn.type = "button"; btn.id = "pbOwnMenu";
     btn.setAttribute("aria-label", en() ? "Menu" : "मेन्यू"); btn.setAttribute("aria-haspopup", "true");
-    btn.style.cssText = "flex:none;width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;font-size:19px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(26,115,232,.25)";
+    btn.style.cssText = "flex:none;width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#0b2f73,#1a73e8);color:#fff;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(26,115,232,.25)";
     btn.textContent = "☰";
     var lang = document.getElementById("pbLang"); if (lang && lang.parentNode === nav) nav.insertBefore(btn, lang.nextSibling); else nav.appendChild(btn);
     btn.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); if (ov) close(); else open(); });

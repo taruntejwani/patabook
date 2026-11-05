@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
 <meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}button,input,select,textarea{font-family:inherit}</style>
 <title>Login — PataBook</title>
 <script>/* pb-title: हिन्दी मोड में tab का नाम हिन्दी */try{if(localStorage.getItem("pb-lang")==="hi")document.title="लॉगिन — PataBook"}catch(e){}</script>
@@ -14,22 +14,22 @@
 <script src="pb-auth.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#fff;color:#202124;min-height:100vh}
+body{margin:0;font-family:var(--pbf,system-ui,sans-serif);background:#fff;color:#202124;min-height:100vh}
 .wrap{max-width:480px;margin:0 auto;padding:16px 16px 40px}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .back{background:#fff;border:1px solid #dadce0;border-radius:20px;padding:8px 14px;cursor:pointer;font-size:14px;white-space:nowrap;font-family:inherit;color:inherit}
-.brand{font-size:22px;font-weight:800;color:#174ea6}
+.brand{font-size:22px;font-weight:700;color:#174ea6}
 .top .brand{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pbLang{flex:none}
-@media(max-width:360px){.top{gap:8px}.top .back{padding:7px 10px;font-size:13px}.top .brand{font-size:19px}}
+@media(max-width:360px){.top{gap:8px}.top .back{padding:7px 10px;font-size:13px}.top .brand{font-size:20px}}
 .card{background:#fff;border:1px solid #e5e7eb;border-radius:22px;padding:26px 22px;box-shadow:0 6px 24px #1a73e81a}
 .emoji{font-size:40px;line-height:1;margin-bottom:10px}
-h1{font-size:23px;line-height:1.3;margin:0 0 6px}
+h1{font-size:24px;line-height:1.3;margin:0 0 6px}
 .hint{color:#5f6368;margin:0 0 18px;line-height:1.5;font-size:15px}
 .lbl{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:#3c4043}
-input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:17px;outline:0;font-family:inherit;background:#fff}
+input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:18px;outline:0;font-family:inherit;background:#fff}
 input:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
 #code{letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700}
-.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:16px;font-family:inherit;text-align:center;text-decoration:none}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:18px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:16px;font-family:inherit;text-align:center;text-decoration:none}
 .btn:disabled{opacity:.6}
 .btn.sec{background:#eef2fb;color:#174ea6}
 .links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
@@ -82,7 +82,7 @@ input:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
 
  </div>
 </div>
-<footer style="padding:0 16px 18px"><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:12.5px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav></footer>
+<footer style="padding:0 16px 18px"><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:13px"><a href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a></nav></footer>
 <script>
 const $=id=>document.getElementById(id);
 const T=(k,v)=>PB.t(k,v);

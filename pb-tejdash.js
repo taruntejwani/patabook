@@ -18,28 +18,28 @@
       ".td.t-gold{--a:#B58A2A;--soft:#fdf5df;--hd:linear-gradient(120deg,#6b4e12,#B58A2A 60%,#d9b257)}" +
       ".td.t-platinum{--a:#6D28D9;--soft:#f2ecff;--hd:radial-gradient(circle at 88% 0%,rgba(255,255,255,.30),transparent 46%),linear-gradient(135deg,#6D28D9,#2E0757)}" +
       ".td-row{display:flex;gap:8px;align-items:center}.td-pill2{min-height:44px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7ebf2;border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}" +
-      ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;line-height:1;flex:none}" +
-      ".td-big{font-size:18px!important;font-weight:800;color:#172033!important;margin-bottom:6px}.td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}.td-fx{border:1px solid #dfe5f0;border-radius:16px;background:#fff;margin-bottom:6px;overflow:hidden}.td-fx>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;font-weight:800;font-size:16px;color:#172033}.td-fx>summary::-webkit-details-marker{display:none}.td-fx>summary small{margin-inline-start:auto;font-weight:700;font-size:12.5px;color:#13845b;background:#e3f7ea;border-radius:999px;padding:3px 10px}.td-fx>summary:after{content:'▾';color:#687386;font-size:15px}.td-fx[open]>summary:after{content:'▴'}.td-fx>.td-mini{padding:0 12px 12px}" +
+      ".td-pill2 b{font-weight:700}.td-lk{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;color:#44506a}.td-ed{background:var(--soft);color:var(--a);border:0;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;line-height:1;flex:none}" +
+      ".td-big{font-size:18px!important;font-weight:700;color:#172033!important;margin-bottom:6px}.td-open{grid-column:1/-1}.td-pbody{margin-top:12px;border-top:1px solid #e7ebf2;padding-top:12px}.td-click{cursor:pointer}.td-mini{display:grid;grid-template-columns:1fr;gap:8px}.td-fx{border:1px solid #dfe5f0;border-radius:16px;background:#fff;margin-bottom:6px;overflow:hidden}.td-fx>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;font-weight:700;font-size:16px;color:#172033}.td-fx>summary::-webkit-details-marker{display:none}.td-fx>summary small{margin-inline-start:auto;font-weight:700;font-size:13px;color:#13845b;background:#e3f7ea;border-radius:999px;padding:3px 10px}.td-fx>summary:after{content:'▾';color:#687386;font-size:15px}.td-fx[open]>summary:after{content:'▴'}.td-fx>.td-mini{padding:0 12px 12px}" +
       ".td-mi{display:flex;align-items:center;gap:9px;min-width:0;background:var(--soft);border-radius:12px;padding:8px 10px;font-size:13px}.td-mi b{flex:1;min-width:0;font-weight:700}.td-mic{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}" +
       "" +
-      ".td-eb{color:var(--a);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}" +
-      ".td-h{font-size:22px;font-weight:800;margin:2px 0 4px}.td-sub{color:#687386;font-size:13px;margin-bottom:14px}" +
+      ".td-eb{color:var(--a);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}" +
+      ".td-h{font-size:22px;font-weight:700;margin:2px 0 4px}.td-sub{color:#687386;font-size:13px;margin-bottom:14px}" +
       ".td-shop{background:var(--hd);color:#fff;border-radius:20px;padding:20px;margin-bottom:14px}" +
       ".td-sh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}" +
-      ".td-shop h2{margin:0;font-size:19px}.td-shop p{margin:4px 0 0;font-size:13px;opacity:.85}" +
-      ".td-pc{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.td-ep{background:#fff;color:#172033;border:0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit}" +
-      ".td-pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;white-space:nowrap}" +
-      ".td-meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font-size:12.5px;opacity:.92}" +
+      ".td-shop h2{margin:0;font-size:20px}.td-shop p{margin:4px 0 0;font-size:13px;opacity:.85}" +
+      ".td-pc{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.td-ep{background:#fff;color:#172033;border:0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}" +
+      ".td-pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;white-space:nowrap}" +
+      ".td-meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font-size:13px;opacity:.92}" +
       ".td-st{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}" +
-      ".td-sig{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#172033!important;border-radius:20px;padding:4px 11px 4px 9px;font-weight:800;cursor:pointer}.td-sig i{width:11px;height:11px;border-radius:50%;background:var(--sg,#d93025);box-shadow:0 0 0 0 var(--sg,#d93025);animation:tdSig 1.4s ease-out infinite}.td-sig b{color:var(--sg,#d93025)}.td-sigt{color:var(--sg,#d93025)!important;animation:tdSigT 1.4s ease-in-out infinite}@keyframes tdSig{0%{box-shadow:0 0 0 0 rgba(217,48,37,.65)}70%,100%{box-shadow:0 0 0 9px rgba(217,48,37,0)}}@keyframes tdSigT{50%{opacity:.45}}@media(prefers-reduced-motion:reduce){.td-sig i,.td-sigt{animation:none}}" +
+      ".td-sig{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#172033!important;border-radius:20px;padding:4px 11px 4px 9px;font-weight:700;cursor:pointer}.td-sig i{width:11px;height:11px;border-radius:50%;background:var(--sg,#d93025);box-shadow:0 0 0 0 var(--sg,#d93025);animation:tdSig 1.4s ease-out infinite}.td-sig b{color:var(--sg,#d93025)}.td-sigt{color:var(--sg,#d93025)!important;animation:tdSigT 1.4s ease-in-out infinite}@keyframes tdSig{0%{box-shadow:0 0 0 0 rgba(217,48,37,.65)}70%,100%{box-shadow:0 0 0 9px rgba(217,48,37,0)}}@keyframes tdSigT{50%{opacity:.45}}@media(prefers-reduced-motion:reduce){.td-sig i,.td-sigt{animation:none}}" +
       ".td-s{background:#fff;border:1px solid #e7ebf2;border-radius:14px;padding:13px}.td-s small{display:block;color:#687386;font-size:12px}" +
-      ".td-s strong{display:block;font-size:20px;margin:3px 0}.td-s em{font-style:normal;color:#687386;font-size:11.5px}" +
-      ".td-sec{margin:20px 0 10px}.td-sec h3{margin:0;font-size:17px}.td-sec p{margin:3px 0 0;color:#687386;font-size:12px}" +
+      ".td-s strong{display:block;font-size:20px;margin:3px 0}.td-s em{font-style:normal;color:#687386;font-size:12px}" +
+      ".td-sec{margin:20px 0 10px}.td-sec h3{margin:0;font-size:18px}.td-sec p{margin:3px 0 0;color:#687386;font-size:12px}" +
       ".td-g{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}" +
       ".td-t{background:#fff;border:1px solid #e7ebf2;border-radius:15px;padding:14px;display:flex;gap:12px;align-items:flex-start;min-width:0}" +
       ".td-i{width:40px;height:40px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}" +
       ".td-t h4{margin:0 0 3px;font-size:14px}.td-t p{margin:0 0 6px;color:#687386;font-size:12px;line-height:1.35}" +
-      ".td-tag{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;background:#e3f7ea;color:#13845b}" +
+      ".td-tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;background:#e3f7ea;color:#13845b}" +
       ".td-tag.off{background:#f1f3f7;color:#687386}" +
       ".td-m{background:#fff;border:1px solid #e7ebf2;border-radius:18px;overflow:hidden}" +
       ".td-mt{padding:15px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid #e7ebf2}" +
@@ -48,12 +48,12 @@
       ".td-p{padding:15px;border-inline-end:1px solid #e7ebf2;position:relative}.td-p:last-child{border-inline-end:0}" +
       ".td-p.cur{background:var(--soft);box-shadow:inset 0 0 0 2px var(--a)}" +
       ".td-p h4{margin:0 0 4px;font-size:14px}.td-p ul{margin:8px 0 0;padding-inline-start:16px;font-size:12px;color:#44506a;line-height:1.55}" +
-      ".td-cl{display:inline-block;background:var(--a);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;margin-bottom:6px}" +
+      ".td-cl{display:inline-block;background:var(--a);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-bottom:6px}" +
       ".td-b{display:inline-flex;align-items:center;gap:6px;background:var(--a);color:#fff;font-weight:700;font-size:13px;border-radius:10px;padding:9px 14px}" +
       ".td-b.lt{background:var(--soft);color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}" +
-      ".td-ft{padding:11px 16px;color:#687386;font-size:11.5px;border-top:1px solid #e7ebf2}" +
-      "@media(max-width:700px){.td-st{grid-template-columns:repeat(2,1fr)}.td-g{grid-template-columns:1fr}.td-pl{grid-template-columns:1fr}.td-p{border-inline-end:0;border-bottom:1px solid #e7ebf2}.td-p:last-child{border-bottom:0}.td-h{font-size:19px}}";
-    s.textContent += ".tdov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center}.tdsh{background:#fff;width:100%;max-width:520px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.tdov{align-items:center}.tdsh{border-radius:20px}}.tdsh .td{--a:#0060f0;--soft:#eef5ff}.tdsh .td-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.tdsh .td-hd h3{margin:0;font-size:17px}.tdsh .td-x{font-size:20px;padding:4px 10px;border-radius:10px;background:#f1f3f7}";
+      ".td-ft{padding:11px 16px;color:#687386;font-size:12px;border-top:1px solid #e7ebf2}" +
+      "@media(max-width:700px){.td-st{grid-template-columns:repeat(2,1fr)}.td-g{grid-template-columns:1fr}.td-pl{grid-template-columns:1fr}.td-p{border-inline-end:0;border-bottom:1px solid #e7ebf2}.td-p:last-child{border-bottom:0}.td-h{font-size:20px}}";
+    s.textContent += ".tdov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center}.tdsh{background:#fff;width:100%;max-width:520px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.tdov{align-items:center}.tdsh{border-radius:20px}}.tdsh .td{--a:#0060f0;--soft:#eef5ff}.tdsh .td-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.tdsh .td-hd h3{margin:0;font-size:18px}.tdsh .td-x{font-size:20px;padding:4px 10px;border-radius:10px;background:#f1f3f7}";
     document.head.appendChild(s);
   }
   function load(slug, cb) {
@@ -90,7 +90,7 @@
     var st = c.status, canSw = st === "live" || st === "off", pct = c.pct, done = c.can != null ? !!c.can : (pct == null || pct >= 100);
     var box = function (ic, h, body) { return '<article class="td-t"><div class="td-i">' + ic + '</div><div style="min-width:0;flex:1"><h4>' + h + '</h4>' + body + '</div></article>'; };
     var swBox = box("🟢", T("Online / Offline", "ऑनलाइन / ऑफ़लाइन"),
-      canSw ? '<p>' + T(st === "live" ? "Customers can see your shop." : "Hidden from customers.", st === "live" ? "ग्राहकों को आपकी दुकान दिख रही है।" : "ग्राहकों से छिपी है।") + '</p><div style="display:flex;align-items:center;gap:10px"><button type="button" class="tsw" role="switch" aria-checked="' + (st === "live") + '" aria-label="' + T("Online / Offline", "ऑनलाइन / ऑफ़लाइन") + '" data-tsw="' + c.i + '"></button><b style="font-size:13px">' + T(st === "live" ? "Online" : "Offline", st === "live" ? "ऑनलाइन" : "ऑफ़लाइन") + '</b></div><div class="err" id="sub' + c.i + '" style="font-size:11.5px"></div>'
+      canSw ? '<p>' + T(st === "live" ? "Customers can see your shop." : "Hidden from customers.", st === "live" ? "ग्राहकों को आपकी दुकान दिख रही है।" : "ग्राहकों से छिपी है।") + '</p><div style="display:flex;align-items:center;gap:10px"><button type="button" class="tsw" role="switch" aria-checked="' + (st === "live") + '" aria-label="' + T("Online / Offline", "ऑनलाइन / ऑफ़लाइन") + '" data-tsw="' + c.i + '"></button><b style="font-size:13px">' + T(st === "live" ? "Online" : "Offline", st === "live" ? "ऑनलाइन" : "ऑफ़लाइन") + '</b></div><div class="err" id="sub' + c.i + '" style="font-size:12px"></div>'
         : st === "pend" ? '<p>' + T("PataBook is checking your shop.", "PataBook आपकी दुकान जाँच रहा है।") + '</p><span class="td-tag off">⏳ ' + T("Waiting for approval", "मंज़ूरी का इंतज़ार") + '</span>'
         : '<p>' + T("Your shop is not live yet.", "आपकी दुकान अभी लाइव नहीं है।") + '</p><span class="td-tag off">🔴 Offline</span>');
     var lkBox = box("🔗", T("Your shop link", "आपकी दुकान का लिंक"),
@@ -98,7 +98,7 @@
     var swPill = '<div class="td-pill2">' + (canSw ? '<button type="button" class="tsw" role="switch" aria-checked="' + (st === "live") + '" aria-label="' + T("Online / Offline", "ऑनलाइन / ऑफ़लाइन") + '" data-tsw="' + c.i + '"></button><b>' + T(st === "live" ? "Online" : "Offline", st === "live" ? "ऑनलाइन" : "ऑफ़लाइन") + '</b>'
       : st === "pend" ? '<span>⏳</span><b>' + T("Waiting for approval", "मंज़ूरी का इंतज़ार") + '</b>' : '<span>🔴</span><b>Offline</b>') + '</div>';
     var lkPill = '<div class="td-pill2" style="flex:1;min-width:0;gap:6px;padding:6px 12px;font-size:13px"><b class="td-lk">' + (c.link ? 'patabook.in/' + esc(c.link) : T("No link yet", "अभी लिंक नहीं")) + '</b><button type="button" class="td-ed" data-lk="' + c.i + '" aria-label="' + T(c.link ? "Change link" : "Create link", c.link ? "लिंक बदलें" : "लिंक बनाएँ") + '">' + T("Edit", "बदलें") + '</button></div>';
-    var topRow = '<div class="td-row">' + swPill + lkPill + '</div><div class="err" id="sub' + c.i + '" style="font-size:11.5px"></div>';
+    var topRow = '<div class="td-row">' + swPill + lkPill + '</div><div class="err" id="sub' + c.i + '" style="font-size:12px"></div>';
     var lgBox = box("🖼️", T("Shop logo", "दुकान का लोगो"),
       ph.logo ? '<p>' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;vertical-align:middle;margin-inline-end:8px">' : '') + T(c.logo ? "Your logo is set." : "No logo added yet.", c.logo ? "आपका लोगो लगा है।" : "अभी लोगो नहीं लगाया।") + '</p><a class="td-b lt" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change logo ›" : "Add logo ›", c.logo ? "लोगो बदलें ›" : "लोगो जोड़ें ›") + '</a>'
         : '<p>' + T("Logo is not in your plan.", "लोगो आपके प्लान में नहीं है।") + '</p><span class="td-tag off">' + T("🔒 Not in your plan", "🔒 प्लान में नहीं") + '</span>');
@@ -116,7 +116,7 @@
         : st === "draft" ? '<button type="button" class="td-b" data-tdact="submit" data-tdi="' + c.i + '">📤 ' + T("Send for approval", "मंज़ूरी के लिए भेजें") + '</button>'
         : '<span class="td-tag off">' + T("Offline", "ऑफ़लाइन") + '</span>') + '</div>';
     var lgRow = '<div class="td-mi"><span class="td-mic">' + (c.logo ? '<img src="' + esc(c.logo) + '" alt="" style="width:30px;height:30px;border-radius:8px;object-fit:cover">' : '🏷️') + '</span><b>' + T("Logo", "लोगो") + '</b>' +
-      (ph.logo ? '<a class="td-b lt" style="padding:5px 12px;font-size:12.5px" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change ›" : "Add ›", c.logo ? "बदलें ›" : "जोड़ें ›") + '</a>' : '<span class="td-tag off">' + T("🔒 Not in your plan", "🔒 प्लान में नहीं") + '</span>') + '</div>';
+      (ph.logo ? '<a class="td-b lt" style="padding:5px 12px;font-size:13px" href="business.html?slug=' + encodeURIComponent(b.slug) + '#edit">' + T(c.logo ? "Change ›" : "Add ›", c.logo ? "बदलें ›" : "जोड़ें ›") + '</a>' : '<span class="td-tag off">' + T("🔒 Not in your plan", "🔒 प्लान में नहीं") + '</span>') + '</div>';
     var feats = [
       miniX("📞", "Call & WhatsApp", "कॉल और WhatsApp", "Customers can call or message you directly.", "ग्राहक सीधे फ़ोन या WhatsApp कर सकते हैं।", !!b.phone, "Active", "चालू है", "Add a number", "नंबर जोड़ें"),
       miniX("🖼️", "Business Photos", "दुकान की फ़ोटो", "Show your shop and products.", "दुकान और प्रोडक्ट की फ़ोटो दिखाएँ।", !!ph.photos, "Active", "चालू है", "🔒 Not in your plan", "🔒 प्लान में नहीं"),

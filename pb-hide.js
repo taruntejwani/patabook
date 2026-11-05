@@ -17,7 +17,7 @@
       var q = '[data-pbh~="' + k + '"]';
       css += "body:not(.pbe-on) " + q + "{display:none!important}" +
         ".pbe-on " + q + "{opacity:.42;filter:grayscale(1);position:relative}" +
-        ".pbe-on section" + q + "::before,.pbe-on div.blk" + q + "::before{content:'🙈 Public से छिपा';position:absolute;left:10px;top:-11px;z-index:7;background:#12141c;color:#fff;font:800 11.5px/1 system-ui,sans-serif;padding:5px 9px;border-radius:999px}";
+        ".pbe-on section" + q + "::before,.pbe-on div.blk" + q + "::before{content:'🙈 Public से छिपा';position:absolute;left:10px;top:-11px;z-index:7;background:#12141c;color:#fff;font:700 12px/1 var(--pbf,system-ui,sans-serif);padding:5px 9px;border-radius:999px}";
     });
     st.textContent = css;
     return CUR;

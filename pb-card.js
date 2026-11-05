@@ -407,15 +407,15 @@
   var css = '.pbc-o{position:fixed;inset:0;z-index:90;background:rgba(8,20,48,.62);display:flex;align-items:flex-end;justify-content:center}' +
     '.pbc-b{background:#fff;width:100%;max-width:560px;max-height:94vh;overflow-y:auto;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));font-family:inherit}' +
     '.pbc-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pbc-h b{font-size:18px;color:#0b2f73;flex:1}.pbc-x{border:0;background:#eef2f8;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer}' +
-    '.pbc-t{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.pbc-t button{flex:1 1 28%;white-space:nowrap;border:1px solid #d0d5dd;background:#fff;border-radius:999px;padding:8px;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer}.pbc-t button.on{background:#0b2f73!important;color:#fff;border-color:#0b2f73!important}' +
+    '.pbc-t{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.pbc-t button{flex:1 1 28%;white-space:nowrap;border:1px solid #d0d5dd;background:#fff;border-radius:999px;padding:8px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}.pbc-t button.on{background:#0b2f73!important;color:#fff;border-color:#0b2f73!important}' +
     '.pbc-t.pbc-f{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;margin-bottom:10px}.pbc-t.pbc-f::-webkit-scrollbar{display:none}.pbc-t.pbc-f button{flex:0 0 auto;padding:8px 14px}' +
     '.pbc-p{background:#f2f5fa;border-radius:14px;padding:10px;text-align:center;touch-action:pan-y}.pbc-w{position:relative;display:inline-block;max-width:100%}.pbc-p img{display:block;max-width:100%;max-height:52vh;border-radius:10px;box-shadow:0 6px 20px rgba(11,47,115,.2)}' +
     '.pbc-ar{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.93);box-shadow:0 2px 10px rgba(0,0,0,.32);font-size:28px;line-height:1;padding:0 0 3px;color:#0b2f73;cursor:pointer}.pbc-ar.l{left:6px}.pbc-ar.r{right:6px}' +
     '.pbc-d{margin-top:10px;display:flex;justify-content:center;align-items:center;gap:7px}.pbc-d i{display:block;width:9px;height:9px;border-radius:5px;background:#c5cce0;cursor:pointer;transition:width .15s}.pbc-d i.on{background:#0b2f73;width:22px}.pbc-d small{margin-left:6px;color:#667085;font-size:12px}' +
-    '.pbc-a{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.pbc-a button{border:0;border-radius:14px;padding:14px 10px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}' +
-    '.pbc-a .wa{grid-column:1/-1;background:#25d366;color:#fff;font-size:16.5px}.pbc-a .dl{background:#1a73e8;color:#fff}.pbc-a .cp{background:#eef2f8;color:#0b2f73}' +
-    '.pbc-re{display:block;margin:10px auto 0;border:0;border-radius:999px;padding:11px 22px;font:inherit;font-weight:800;font-size:15px;background:linear-gradient(90deg,#7b2ff7,#f107a3);color:#fff;cursor:pointer}.pbc-an{display:block;margin-top:8px;color:#667085;font-size:12.5px}' +
-    '.pbc-n{font-size:12.5px;color:#667085;text-align:center;margin-top:10px;line-height:1.5}';
+    '.pbc-a{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.pbc-a button{border:0;border-radius:14px;padding:14px 10px;font:inherit;font-weight:700;font-size:15px;cursor:pointer}' +
+    '.pbc-a .wa{grid-column:1/-1;background:#25d366;color:#fff;font-size:16px}.pbc-a .dl{background:#1a73e8;color:#fff}.pbc-a .cp{background:#eef2f8;color:#0b2f73}' +
+    '.pbc-re{display:block;margin:10px auto 0;border:0;border-radius:999px;padding:11px 22px;font:inherit;font-weight:700;font-size:15px;background:linear-gradient(90deg,#7b2ff7,#f107a3);color:#fff;cursor:pointer}.pbc-an{display:block;margin-top:8px;color:#667085;font-size:13px}' +
+    '.pbc-n{font-size:13px;color:#667085;text-align:center;margin-top:10px;line-height:1.5}';
   var D = null, mode = 'L', blobs = {}, aiMsg = '', vi = {}, lastF = null;
   function aiUrl() { return (window.PB_SITE && PB_SITE.aiUrl) || ''; }
   function festOf(m) { return FEST.filter(function (x) { return x.id === m; })[0]; }

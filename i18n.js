@@ -204,7 +204,7 @@ function set(c){
 /* ---- chhota sa bhasha button (▾) ---- */
 var css=".pbl{position:relative;display:inline-block;font-family:inherit}"+
 ".pbl-b{display:inline-flex;align-items:center;gap:6px;border:1px solid #dfe5f1;background:#fff;color:#0b2f73;border-radius:999px;padding:6px 11px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;line-height:1.2;white-space:nowrap}"+
-".pbl-b svg{width:14px;height:14px;flex:none}.pbl-b i{font-style:normal;font-size:10px;opacity:.7}"+
+".pbl-b svg{width:14px;height:14px;flex:none}.pbl-b i{font-style:normal;font-size:11px;opacity:.7}"+
 ".pbl-p{position:absolute;top:calc(100% + 6px);inset-inline-end:0;width:230px;max-height:62vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid #e4eaf5;border-radius:14px;box-shadow:0 10px 30px rgba(11,47,115,.18);padding:6px;z-index:999;display:none;text-align:start}"+
 ".pbl.on .pbl-p{display:block}"+
 ".pbl-p button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;border:0;background:none;padding:9px 10px;border-radius:9px;font:inherit;font-size:15px;color:#12141c;cursor:pointer;text-align:start}"+
@@ -293,10 +293,10 @@ window.addEventListener("appinstalled",function(){markInstalled();});
 var acss=".pba{display:flex;align-items:center;gap:10px;background:#0b2f73;color:#fff;padding:9px 12px;font-family:inherit;position:relative;z-index:60}"+
 ".pba img{width:34px;height:34px;border-radius:9px;flex:none;background:#fff}"+
 ".pba .tx{flex:1;min-width:0;line-height:1.25}.pba b{display:block;font-size:14px}.pba small{display:block;font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"+
-".pba .ib{flex:none;background:#ffd21f;color:#12141c;border:0;border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}"+
+".pba .ib{flex:none;background:#ffd21f;color:#12141c;border:0;border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}"+
 ".pba .x{flex:none;background:none;border:0;color:#fff;opacity:.8;font-size:20px;line-height:1;padding:4px 2px 4px 4px;cursor:pointer}"+
-".pba-h{background:#e8f1ff;color:#0b2f73;font-size:13.5px;line-height:1.5;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}"+
-".pba-h[hidden]{display:none}.pba-h span{flex:1}.pba-h button{flex:none;border:0;background:#1a73e8;color:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}";
+".pba-h{background:#e8f1ff;color:#0b2f73;font-size:14px;line-height:1.5;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}"+
+".pba-h[hidden]{display:none}.pba-h span{flex:1}.pba-h button{flex:none;border:0;background:#1a73e8;color:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}";
 function appEl(){return document.getElementById("pbApp");}
 function showApp(){
   if(!isMobile||isStandalone()||appBlocked())return;

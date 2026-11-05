@@ -20,14 +20,14 @@
   function show() {
     if (document.getElementById("pbIos")) return;
     var st = document.createElement("style");
-    st.textContent = "#pbIos{position:fixed;inset:0;z-index:100001;background:rgba(10,20,40,.5);display:flex;align-items:flex-end;justify-content:center;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
+    st.textContent = "#pbIos{position:fixed;inset:0;z-index:100001;background:rgba(10,20,40,.5);display:flex;align-items:flex-end;justify-content:center;font-family:var(--pbf,system-ui,sans-serif)}" +
       "#pbIos .bx{background:#fff;width:100%;max-width:440px;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.2);animation:pbIosUp .25s ease}" +
       "@keyframes pbIosUp{from{transform:translateY(60px);opacity:.3}to{transform:none;opacity:1}}" +
       "#pbIos .hd{display:flex;align-items:center;gap:12px}#pbIos .hd img{width:52px;height:52px;border-radius:13px;box-shadow:0 2px 8px rgba(0,0,0,.15)}" +
-      "#pbIos .hd b{display:block;font-size:17px;color:#0b2f73}#pbIos .hd small{display:block;font-size:13px;color:#5b6475;margin-top:2px}" +
+      "#pbIos .hd b{display:block;font-size:18px;color:#0b2f73}#pbIos .hd small{display:block;font-size:13px;color:#5b6475;margin-top:2px}" +
       "#pbIos ol{margin:14px 0 0;padding:0;list-style:none;counter-reset:s}#pbIos li{counter-increment:s;display:flex;align-items:center;gap:10px;font-size:15px;color:#12141c;padding:9px 0;border-top:1px solid #eef1f6}" +
-      "#pbIos li:before{content:counter(s);flex:none;width:24px;height:24px;border-radius:50%;background:#e8f0fe;color:#1a73e8;font-weight:800;font-size:13px;display:grid;place-items:center}" +
-      "#pbIos .bt{display:flex;gap:8px;margin-top:14px}#pbIos .bt button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;cursor:pointer}" +
+      "#pbIos li:before{content:counter(s);flex:none;width:24px;height:24px;border-radius:50%;background:#e8f0fe;color:#1a73e8;font-weight:700;font-size:13px;display:grid;place-items:center}" +
+      "#pbIos .bt{display:flex;gap:8px;margin-top:14px}#pbIos .bt button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer}" +
       "#pbIos .ok{background:#1a73e8;color:#fff}#pbIos .no{background:#eef1f6;color:#12141c}" +
       "#pbIos .ar{text-align:center;color:#1a73e8;font-size:24px;margin-top:6px;animation:pbIosB 1.2s ease-in-out infinite}@keyframes pbIosB{50%{transform:translateY(6px)}}";
     document.head.appendChild(st);

@@ -21,7 +21,7 @@
       "#pbLd .sh{position:absolute;left:50%;bottom:12px;width:40px;height:10px;margin-left:-20px;border-radius:50%;background:rgba(11,47,115,.22);animation:pbLdSh 1s cubic-bezier(.35,0,.35,1) infinite}" +
       "@keyframes pbLdHop{0%,100%{transform:translateY(0) scale(1.06,.94)}50%{transform:translateY(-34px) scale(.97,1.03)}}" +
       "@keyframes pbLdSh{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(.55);opacity:.4}}" +
-      "#pbLd .nm{margin-top:6px;font-weight:800;font-size:21px;letter-spacing:.3px}#pbLd .nm b{color:#1a73e8}" +
+      "#pbLd .nm{margin-top:6px;font-weight:700;font-size:22px;letter-spacing:.3px}#pbLd .nm b{color:#1a73e8}" +
       "#pbLd .tx{margin-top:4px;font-size:13px;font-weight:600;opacity:.65}" +
       "@media(prefers-reduced-motion:reduce){#pbLd .pn,#pbLd .sh{animation:none}}";
     document.head.appendChild(s);

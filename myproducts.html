@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
+<html lang="hi"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style><meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
 <title>Products — PataBook</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="pin.png">
@@ -11,13 +11,13 @@
 <style>
 /* ✏️ दुकान के page के अंदर (iframe) खुलने वाला Products manager — My Shop वाला ही code (pb-products-owner.js) */
 *{box-sizing:border-box;margin:0;padding:0}
-button,input,select,textarea{font-family:inherit}body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans Devanagari","Nirmala UI",Mangal,Arial,sans-serif;color:#12141c;background:#fff;padding:10px 14px 40px;-webkit-font-smoothing:antialiased}
-.msg{color:#5b6475;font-size:14.5px;line-height:1.6;padding:30px 6px;text-align:center}
+button,input,select,textarea{font-family:inherit}body{font-family:var(--pbf,system-ui,sans-serif);color:#12141c;background:#fff;padding:10px 14px 40px;-webkit-font-smoothing:antialiased}
+.msg{color:#5b6475;font-size:15px;line-height:1.6;padding:30px 6px;text-align:center}
 .msg a{color:#1a73e8;font-weight:700}
 </style>
 </head><body>
 <div id="list"><p class="msg">…</p></div>
-<div id="svbar" hidden style="position:sticky;bottom:0;background:#fff;padding:10px 0 6px;margin-top:10px"><button type="button" id="svBtn" style="display:block;width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:800;font-size:16px;background:#1e9e57;color:#fff;cursor:pointer">💾 Save</button><div id="svEr" style="color:#c5221f;font-size:13px;font-weight:700;margin-top:6px;min-height:16px"></div></div>
+<div id="svbar" hidden style="position:sticky;bottom:0;background:#fff;padding:10px 0 6px;margin-top:10px"><button type="button" id="svBtn" style="display:block;width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:700;font-size:16px;background:#1e9e57;color:#fff;cursor:pointer">💾 Save</button><div id="svEr" style="color:#c5221f;font-size:13px;font-weight:700;margin-top:6px;min-height:16px"></div></div>
 <script>
 document.getElementById("svBtn").onclick=async function(){const b=this;b.disabled=true;document.getElementById("svEr").textContent="";
   try{await prodPend.save(slug);try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){location.reload();}}

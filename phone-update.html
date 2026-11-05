@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
 <meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}button,input,select,textarea{font-family:inherit}</style>
 <meta name="robots" content="noindex,nofollow">
 <title>मोबाइल नंबर अपडेट — PataBook</title>
@@ -11,24 +11,24 @@
 <script src="pb-auth.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans Devanagari","Nirmala UI",Mangal,Arial,sans-serif;background:#fff;color:#12141c;min-height:100vh}
+body{margin:0;font-family:var(--pbf,system-ui,sans-serif);background:#fff;color:#12141c;min-height:100vh}
 .wrap{max-width:520px;margin:0 auto;padding:14px 16px 40px}
 .top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.back{border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:#0b2f73;text-decoration:none}
-.brand{font-weight:800;font-size:18px;color:#0b2f73}
+.back{border:1px solid #e4eaf5;background:#fff;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600;color:#0b2f73;text-decoration:none}
+.brand{font-weight:700;font-size:18px;color:#0b2f73}
 .card{background:#fff;border:1px solid #e4eaf5;border-radius:20px;padding:22px 18px;margin-bottom:12px;box-shadow:0 6px 18px rgba(26,115,232,.07)}
-h1{font-size:21px;color:#0b2f73;margin:0 0 6px;line-height:1.35}
+h1{font-size:22px;color:#0b2f73;margin:0 0 6px;line-height:1.35}
 .shop{font-weight:700;margin:0 0 4px}
-.addr{color:#5b6475;font-size:13.5px;margin:0 0 12px}
+.addr{color:#5b6475;font-size:14px;margin:0 0 12px}
 .banner{background:#fff4e5;color:#7a3b00;border:1px solid #ffd8a8;border-radius:14px;padding:12px 14px;font-weight:700;line-height:1.5;margin:0 0 16px}
 .lbl{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:#3c4043}
 .ph{display:flex;align-items:center;border:2px solid #dfe1e5;border-radius:14px;overflow:hidden;background:#fff}
-.ph span{padding:0 10px 0 14px;font-size:17px;color:#5f6368}
+.ph span{padding:0 10px 0 14px;font-size:18px;color:#5f6368}
 .ph:focus-within,input:focus{border-color:#1a73e8;box-shadow:0 0 0 4px #1a73e81a}
-input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:17px;outline:0;font-family:inherit;background:#fff}
+input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-size:18px;outline:0;font-family:inherit;background:#fff}
 .ph input{border:0;box-shadow:none!important;padding-left:0}
 #code{letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700}
-.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:16px;font-family:inherit;text-align:center;text-decoration:none}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:18px;font-weight:700;cursor:pointer;background:#1a73e8;color:#fff;margin-top:16px;font-family:inherit;text-align:center;text-decoration:none}
 .btn:disabled{opacity:.6}
 .btn.sec{background:#eef2fb;color:#174ea6}
 .links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
@@ -36,7 +36,7 @@ input{width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:14px;font-s
 .links button:disabled{color:#9aa0a6}
 .err{color:#c5221f;font-size:14px;margin-top:10px;min-height:18px;line-height:1.5}
 .ok{background:#e6f4ea;color:#137333;border-radius:12px;padding:14px;line-height:1.55;font-size:15px;font-weight:600}
-.help{font-size:13.5px;color:#5b6475;line-height:1.6}
+.help{font-size:14px;color:#5b6475;line-height:1.6}
 .help h2{font-size:15px;color:#0b2f73;margin:0 0 6px}
 .help ol{padding-left:20px;margin:6px 0 0}
 [hidden]{display:none!important}

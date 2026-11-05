@@ -80,7 +80,7 @@
     if (!isAdm()) return;
     try {
       var d = document.createElement("div");
-      d.setAttribute("style", "position:fixed;left:8px;right:8px;bottom:12px;z-index:99999;background:#12141c;color:#fff;font:600 12.5px/1.4 system-ui,sans-serif;padding:9px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);word-break:break-word");
+      d.setAttribute("style", "position:fixed;left:8px;right:8px;bottom:12px;z-index:99999;background:#12141c;color:#fff;font:600 13px/1.4 var(--pbf,system-ui,sans-serif);padding:9px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);word-break:break-word");
       d.textContent = t + "  (सिर्फ़ एडमिन को दिखता है)";
       d.onclick = function () { d.remove(); };
       document.body.appendChild(d); setTimeout(function () { d.remove(); }, 9000);

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
 <meta name="viewport" content="width=device-width,initial-scale=1"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:manipulation}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}</style>
 <title>Home Services — PataBook</title>
 <link rel="canonical" href="https://patabook.in/homeservices.html">
@@ -14,41 +14,41 @@
 <style>
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--soft:#eef5ff;--green:#137333}
 *{box-sizing:border-box;margin:0;padding:0}
-button,input,select,textarea{font-family:inherit}body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans Devanagari","Nirmala UI",Mangal,Arial,sans-serif;color:var(--ink);background:#fff;min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit}body{font-family:var(--pbf,system-ui,sans-serif);color:var(--ink);background:#fff;min-height:100vh;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button,select{font:inherit}
 [hidden]{display:none!important}
 .wrap{max-width:620px;margin:0 auto;padding:12px 16px 40px}
 .top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;color:var(--navy)}
-.brand{display:flex;align-items:center;gap:6px;font-weight:800;font-size:18px;color:var(--navy)}
+.back{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600;color:var(--navy)}
+.brand{display:flex;align-items:center;gap:6px;font-weight:700;font-size:18px;color:var(--navy)}
 .brand img{width:22px}
 #pbLang{margin-inline-start:auto}
 h1{font-size:24px;color:var(--navy);display:flex;align-items:center;gap:8px}
-.sub{color:var(--muted);font-size:14.5px;margin:4px 0 16px;line-height:1.5}
-.lbl{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:6px 2px 8px}
+.sub{color:var(--muted);font-size:15px;margin:4px 0 16px;line-height:1.5}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:6px 2px 8px}
 .cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 @media (min-width:520px){.cats{grid-template-columns:repeat(5,minmax(0,1fr))}}
-.cat{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 6px;cursor:pointer;text-align:center;font-size:12.5px;font-weight:600;line-height:1.25;min-width:0}
+.cat{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 6px;cursor:pointer;text-align:center;font-size:13px;font-weight:600;line-height:1.25;min-width:0}
 .cat i{font-style:normal;font-size:24px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--soft)}
 .cat.on{border-color:var(--blue);background:var(--soft);color:var(--navy)}
 .cat:focus-visible,.city:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .cityrow{display:flex;gap:10px;align-items:center;margin:16px 0 6px}
 .city{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;font-size:15px}
-.cnt{color:var(--muted);font-size:13.5px;margin:10px 2px}
+.cnt{color:var(--muted);font-size:14px;margin:10px 2px}
 .list{display:grid;gap:10px}
 .prov{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 6px 16px rgba(26,115,232,.06)}
-.prov h3{font-size:17px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.vf{font-size:11.5px;font-weight:800;color:var(--green);background:#e6f4ea;border-radius:999px;padding:2px 8px}
-.meta{color:var(--muted);font-size:13.5px;margin-top:4px;overflow-wrap:anywhere}
+.prov h3{font-size:18px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.vf{font-size:12px;font-weight:700;color:var(--green);background:#e6f4ea;border-radius:999px;padding:2px 8px}
+.meta{color:var(--muted);font-size:14px;margin-top:4px;overflow-wrap:anywhere}
 .bid{font-size:11px;color:#8a93a3;margin-top:6px;letter-spacing:.03em}
 .acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .acts a,.acts button{flex:1;min-width:130px;text-align:center;border-radius:12px;padding:11px;font-weight:700;font-size:14px}
 .go{background:var(--blue);color:#fff}
 .book{background:#e4e8ef;color:#667085;border:0;cursor:not-allowed}
-.note{color:var(--muted);text-align:center;padding:22px 10px;font-size:14.5px;line-height:1.55}
+.note{color:var(--muted);text-align:center;padding:22px 10px;font-size:15px;line-height:1.55}
 .join{margin-top:22px;text-align:center;font-size:14px;color:var(--muted)}
-.join a{display:inline-block;margin-top:8px;background:#ffd21f;color:var(--ink);font-weight:800;border-radius:999px;padding:11px 22px}
+.join a{display:inline-block;margin-top:8px;background:#ffd21f;color:var(--ink);font-weight:700;border-radius:999px;padding:11px 22px}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script>
 <style>/* 🖥️ PC (900px+): बड़ी screen पर चौड़ा पेज; मोबाइल वैसा ही */@media(min-width:900px){.wrap{max-width:1180px}.cats{grid-template-columns:repeat(8,minmax(0,1fr))!important}#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}#list>*{margin:0!important}#list>:not(.prov){grid-column:1/-1}}</style>

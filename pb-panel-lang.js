@@ -34,7 +34,7 @@
     var b = document.createElement('button');
     b.type = 'button'; b.id = 'pbLangBtn'; b.textContent = L === 'en' ? 'हिन्दी' : 'English';
     var h = document.querySelector('header');
-    b.setAttribute('style', h ? 'border:1px solid #ffffff66;background:#ffffff26;color:#fff;border-radius:11px;padding:6px 11px;font:700 12px system-ui;cursor:pointer;flex:none' : 'position:fixed;top:10px;right:10px;z-index:99;border:1px solid #00000033;background:#fff;color:#0b2f73;border-radius:11px;padding:6px 11px;font:700 12px system-ui;cursor:pointer');
+    b.setAttribute('style', h ? 'border:1px solid #ffffff66;background:#ffffff26;color:#fff;border-radius:11px;padding:6px 11px;font:700 12px var(--pbf,system-ui,sans-serif);cursor:pointer;flex:none' : 'position:fixed;top:10px;right:10px;z-index:99;border:1px solid #00000033;background:#fff;color:#0b2f73;border-radius:11px;padding:6px 11px;font:700 12px var(--pbf,system-ui,sans-serif);cursor:pointer');
     b.onclick = function () { PBL.set(L === 'en' ? 'hi' : 'en'); };
     (h || document.body).appendChild(b);
   }
