@@ -1,6 +1,5 @@
-/* PataBook — दुकान के पेज के ऊपर (PataBook नाम के पास) छोटा 🔍 बटन।
-   दबाने पर: PataBook नाम पीछे खिसककर छिपता है, खोज का box पूरी पट्टी में फैलता है → दूसरी दुकान / सामान खोजें (search.html?q=…)।
-   ✕ / फ़ोन का Back / Esc = बंद।
+/* PataBook — दुकान के पेज के ऊपर (PataBook निशान के पास) खोज का box।
+   उसी box में लिखें → होम जैसे सुझाव (दुकानें, "क्या आपका मतलब", कैटेगरी) नीचे; Enter → search.html?q=…
    PBHS.mount(logoEl, barEl) — logoEl: PataBook वाला link (box इसके ठीक बाद लगता है), barEl: header की पट्टी में कोई तत्व */
 (function () {
   if (window.PBHS) return;
@@ -10,19 +9,10 @@
   var css = document.createElement("style");
   css.textContent =
     ".hsb{flex:1 1 auto;min-width:0;max-width:420px;height:40px;display:flex;align-items:center;gap:6px;border-radius:999px;border:1.5px solid #c9d8f0;background:#f5f8fd;color:#1a73e8;cursor:text;padding:0 10px 0 12px;margin:0 2px;font:inherit;text-align:left;-webkit-tap-highlight-color:transparent;box-sizing:border-box}" +
-    ".hsb svg{flex:none;width:18px;height:18px}.hsb span{flex:1;min-width:0;color:#6b7486;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
-    ".hsb:active{background:#eaf1fc}.hsb .s{display:none}@media(max-width:400px){.hsb .l{display:none}.hsb .s{display:block}}@media(max-width:345px){.hsb .s{display:none}.hsb{flex:0 0 auto;width:44px;padding:0;justify-content:center}}" +
+    ".hsb svg{flex:none;width:18px;height:18px}.hsb input{flex:1;min-width:0;width:100%;border:0;outline:none!important;background:none;font:inherit;font-size:15px;font-weight:500;color:#14161c;padding:0;height:100%}.hsb input::placeholder{color:#6b7486}.hsb input::-webkit-search-cancel-button{display:none}.hsb:focus-within{border-color:#1a73e8;background:#fff}" +
+    
     /* फ़ोन पर: PataBook सिर्फ़ P निशान (पीछे), search box आगे बड़ा */
     "@media(max-width:640px){.hs-has .pbwm{display:none!important}.hs-has .sp,.hs-has #tb{display:none!important}}" +
-    ".hs-go{transition:transform .22s ease,opacity .22s ease!important;transform:translateX(-110%)!important;opacity:0!important}" +
-    ".hs-on>*:not(.hsf){display:none!important}" +
-    ".hsf{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:42px;margin:0;background:#fff;border:1.5px solid #1a73e8;border-radius:999px;padding:0 4px 0 12px;box-sizing:border-box;animation:hsGrow .25s ease-out both;transform-origin:right center}" +
-    "@keyframes hsGrow{from{opacity:.3;transform:scaleX(.2)}to{opacity:1;transform:none}}" +
-    ".hsf svg{flex:none;color:#1a73e8}" +
-    ".hsf input{flex:1;min-width:0;border:0;outline:none!important;background:none;font:inherit;font-size:16px;color:#14161c;padding:0;height:100%}" +
-    ".hsf input::-webkit-search-cancel-button{display:none}" +
-    ".hsf .hsx{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:#eef2f8;color:#3b4252;font-size:15px;cursor:pointer;display:grid;place-items:center}" +
-    ".hsf .hsg{flex:none;height:34px;border-radius:999px;border:0;background:#1a73e8;color:#fff;font:inherit;font-size:14px;font-weight:700;padding:0 14px;cursor:pointer}" +
     ".hsug{position:fixed;left:10px;right:10px;z-index:9990;max-width:720px;margin:0 auto;max-height:62vh;overflow:auto;background:#fff;border:1px solid #e3e6ea;border-radius:18px;box-shadow:0 10px 30px rgba(20,30,60,.18);display:none;font-family:inherit}" +
     ".hsug.on{display:block}.hsug a{display:flex;align-items:center;gap:12px;padding:12px 16px;font-size:16px;cursor:pointer;border-bottom:1px solid #f1f3f4;color:#14161c;text-decoration:none}" +
     ".hsug a:last-child{border:0}.hsug a:hover,.hsug a:focus{background:#f1f6ff;outline:none}.hsug i{font-style:normal;font-size:20px;flex:none;width:34px;text-align:center}" +
@@ -31,7 +21,7 @@
     ".hsug .slg{flex:none;width:34px;height:34px;border-radius:10px;object-fit:cover;background:#fff;box-shadow:0 0 0 1px #e4eaf5}" +
     ".hsug small.km{flex:none;margin-inline-start:6px;background:#e8f0fe;color:#1a73e8;font-weight:700;font-size:12px;border-radius:999px;padding:3px 9px;white-space:nowrap}" +
     ".hsug .sh{font-size:12px;font-weight:700;letter-spacing:.04em;color:#5b6475;background:#f4f7ff;padding:7px 16px}" +
-    "@media(prefers-reduced-motion:reduce){.hsf{animation:none}.hs-go{transition:none!important}}";
+    "";
   document.head.appendChild(css);
 
   /* ---- होम पेज जैसे सुझाव: 3 अक्षर लिखते ही दुकानें (logo, पता, दूरी) + "क्या आपका मतलब" + कैटेगरी ---- */
@@ -102,46 +92,24 @@
 
   function mount(logo, before) {
     if (!logo || !before || !before.parentNode || document.getElementById("hsBtn")) return;
-    var bar = before.parentNode, open = false, backed = false, form = null, sg = null;
-    var b = document.createElement("button");
-    b.type = "button"; b.id = "hsBtn"; b.className = "hsb";
-    function lab() { b.innerHTML = ICON + "<span class=\"l\">" + T("दुकान खोजें…", "Search shops…") + "</span><span class=\"s\">" + T("खोजें…", "Search…") + "</span>"; b.setAttribute("aria-label", T("दूसरी दुकान खोजें", "Search other shops")); }
-    lab(); bar.insertBefore(b, logo.nextSibling); bar.classList.add("hs-has");
+    var bar = before.parentNode;
+    /* box अपनी जगह पर ही रहता है (PataBook का निशान नहीं हटता, box बड़ा नहीं होता) — उसी में लिखें, सुझाव नीचे */
+    var f = document.createElement("form"); f.id = "hsBtn"; f.className = "hsb"; f.setAttribute("role", "search");
+    f.innerHTML = ICON + '<input type="search" enterkeyhint="search" autocomplete="off" maxlength="80">';
+    var inp = f.querySelector("input");
+    function lab() { var sm = innerWidth <= 400; inp.placeholder = sm ? T("खोजें…", "Search…") : T("दुकान खोजें…", "Search shops…"); inp.setAttribute("aria-label", T("दूसरी दुकान या सामान खोजें", "Search other shops or products")); }
+    lab(); bar.insertBefore(f, logo.nextSibling); bar.classList.add("hs-has");
     if (window.PB && PB.onChange) { try { PB.onChange(lab); } catch (e) {} }
-
-    function close(fromBack) {
-      if (!open) return; open = false;
-      if (sg) { sg.kill(); sg = null; }
-      if (form && form.parentNode) form.remove(); form = null;
-      bar.classList.remove("hs-on"); logo.classList.remove("hs-go");
-      if (backed && !fromBack && window.PBBack && PBBack.isOpen()) { backed = false; PBBack.close(); } else backed = false;
-      b.focus({ preventScroll: true });
-    }
-    function show() {
-      if (open) return; open = true;
-      logo.classList.add("hs-go");   /* PataBook नाम पीछे खिसके */
-      setTimeout(function () {
-        if (!open) return;
-        form = document.createElement("form"); form.className = "hsf"; form.setAttribute("role", "search");
-        form.innerHTML = ICON + '<input type="search" enterkeyhint="search" autocomplete="off" maxlength="80" aria-label="' + T("दुकान या सामान खोजें", "Search shops or products") + '" placeholder="' + T("दुकान या सामान खोजें…", "Search shops or products…") + '">' +
-          '<button type="submit" class="hsg">' + T("खोजें", "Search") + '</button>' +
-          '<button type="button" class="hsx" aria-label="' + T("बंद करें", "Close") + '">✕</button>';
-        bar.appendChild(form); bar.classList.add("hs-on");
-        var inp = form.querySelector("input");
-        inp.focus();
-        form.querySelector(".hsx").onclick = function () { close(false); };
-        inp.onkeydown = function (e) { if (e.key === "Escape") close(false); };
-        /* खोज का box खुला = history में एक कदम (Back से बंद)। नए पेज पर जाते समय वही कदम बदल दो, ताकि वापस आने पर Back एक ही बार दबाना पड़े */
-        function nav(u) { if (backed) { backed = false; location.replace(u); } else location.href = u; }
-        function go() { var q = inp.value.trim(); if (!q) { inp.focus(); return; } nav("search.html?q=" + encodeURIComponent(q)); }
-        form.onsubmit = function (e) { e.preventDefault(); go(); };
-        sg = suggester(inp, bar, go, nav);
-      }, 180);
-      if (window.PBBack && PBBack.open) { backed = true; PBBack.open(function () { backed = false; close(true); }); }
-    }
-    b.onclick = function () { myPos(); show(); };
-    /* दूसरी दुकान खोलकर Back से लौटे (browser ने पुराना पेज वैसा ही रखा था) → खोज बंद, पेज साफ़ */
-    addEventListener("pageshow", function (e) { if (e.persisted && open) { backed = false; close(true); } });
+    addEventListener("resize", lab);
+    function nav(u) { location.href = u; }
+    function go() { var q = inp.value.trim(); if (!q) { inp.focus(); return; } nav("search.html?q=" + encodeURIComponent(q)); }
+    f.onsubmit = function (e) { e.preventDefault(); go(); };
+    var sg = null;
+    inp.addEventListener("focus", function () { myPos(); if (!sg) sg = suggester(inp, bar, go, nav); });
+    inp.addEventListener("keydown", function (e) { if (e.key === "Escape") { inp.value = ""; inp.dispatchEvent(new Event("input")); inp.blur(); } });
+    inp.addEventListener("blur", function () { setTimeout(function () { if (document.activeElement !== inp && sg) { sg.kill(); sg = null; } }, 150); });
+    /* दूसरी दुकान खोलकर Back से लौटे → सुझाव साफ़ */
+    addEventListener("pageshow", function (e) { if (e.persisted && sg) { sg.kill(); sg = null; } });
   }
   window.PBHS = { mount: mount };
 })();

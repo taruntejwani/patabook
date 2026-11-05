@@ -17,7 +17,7 @@ window.PB=window.PB||{lang:function(){try{return (localStorage.getItem("pb-lang"
 <script src="pb-auth.js"></script>
 <script src="pb-rate.js"></script>
 <script src="pb-brand/engine.js?v=13"></script>
-<script src="pb-card.js" defer></script><script src="pb-hiring.js" defer></script><script src="pb-track.js" defer></script>
+<script src="pb-hsearch.js?v=2" defer></script><script src="pb-card.js" defer></script><script src="pb-hiring.js" defer></script><script src="pb-track.js" defer></script>
 <style>
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:#0a1230;color:#eef2fa;font-family:Inter,"Hind",system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -25,9 +25,14 @@ body{margin:0;background:#0a1230;color:#eef2fa;font-family:Inter,"Hind",system-u
 .ld i{display:block;width:60px;height:1px;background:#c7d2e8;margin:16px auto 0;animation:ldp 1.4s ease-in-out infinite}
 @keyframes ldp{50%{transform:scaleX(.2);opacity:.4}}
 .msg{min-height:100svh;display:grid;place-items:center;text-align:center;padding:30px;color:#93a0c2}.msg a{color:#c7d2e8}
+.pbtop{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#fff;border-bottom:1px solid #e3e8f0;position:relative;z-index:60}
+.pbtop .pbp{display:flex;align-items:center;gap:8px;flex:none;text-decoration:none}.pbtop .pbp img{display:block}.pbtop .pbwm{height:18px;width:auto}
+.pbtop .hsb{max-width:560px}
 .pvb{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:300;background:#fff;color:#0b2f73;border-radius:999px;padding:7px 14px;font:700 12.5px Inter,"Hind",sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3);white-space:nowrap}
 </style>
 </head><body>
+<!-- PataBook की पट्टी: सबसे ऊपर P निशान + दूसरी दुकान खोजने का box (Free / Silver / Gold पेज जैसा) -->
+<div class="pbtop" id="pbTop"><a class="pbp" href="index.html" aria-label="PataBook Home"><img src="pin.png" alt="" width="30" height="30"><img class="pbwm" src="pb-wordmark.webp" alt="PataBook" width="117" height="20"></a></div>
 <div id="app"><div class="ld"><div>PataBook<i></i></div></div></div>
 <script>
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
@@ -184,5 +189,6 @@ function intro(){try{
 }catch(_){}}
 load();
 })();
+document.addEventListener("DOMContentLoaded",function(){try{var t=document.getElementById("pbTop");PBHS.mount(t.querySelector(".pbp"),t.querySelector(".pbp"));}catch(e){}});
 </script>
 </body></html>
