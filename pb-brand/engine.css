@@ -542,7 +542,7 @@
 .ly-10 .facts span{letter-spacing:.14em}
 
 /* चौड़ी screen पर किनारों की खाली जगह कम */
-.pbb .w{max-width:1320px;padding-inline:max(20px,env(safe-area-inset-left,0px),3.2vw)}
+.pbb .w{max-width:1520px;padding-inline:max(20px,env(safe-area-inset-left,0px),3.2vw)}
 /* Prestige: poster अपने असली आकार में (ऊपर-नीचे स्लेटी पट्टी नहीं), hero संतुलित */
 .ly-10 .hvi{aspect-ratio:auto;background:transparent;box-shadow:0 30px 70px rgba(0,0,0,.35)}
 .ly-10 .hvi img{height:auto;max-height:70vh;object-fit:contain;border-radius:24px}
@@ -550,3 +550,24 @@
 .ly-10 .hero{padding-block:clamp(34px,5vw,64px)}
 .ly-10 .hth{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
 @media(min-width:641px){.ly-10 .pgrid{grid-template-columns:repeat(auto-fit,minmax(240px,300px));justify-content:center}}
+
+/* 🖼️ गैलरी Amazon / Flipkart जैसी: एक जैसे चौकोर खाने, पूरी फ़ोटो (कटे नहीं), हल्का background */
+.pbb .gal,.pbb .gal.mn,.pbb .gal.spg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));grid-auto-rows:auto;gap:12px;margin-top:28px}
+.pbb .gal button,.pbb .gal button:first-child,.pbb .gal.n2 button,.pbb .gal button:nth-child(3n+1),.pbb .gal.spg button:first-child{grid-column:auto!important;grid-row:auto!important;aspect-ratio:1/1;background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:6px}
+.pbb .gal img{object-fit:contain;border-radius:10px}
+.pbb .gal button:hover img{transform:scale(1.03)}
+.pbb .gal small{color:var(--fg);text-shadow:none;position:static;display:block;margin-top:4px;font-size:11px;letter-spacing:.04em;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbb .gal button:has(small){aspect-ratio:auto}.pbb .gal button:has(small) img{aspect-ratio:1/1;height:auto}
+@media(max-width:640px){.pbb .gal,.pbb .gal.mn,.pbb .gal.spg{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.pbb .gal button{border-radius:10px;padding:3px}}
+.ly-2 .full{height:auto;background:var(--card)}.ly-2 .full img{height:auto;max-height:80vh;object-fit:contain}.ly-2 .full span{color:var(--fg);text-shadow:none;position:static;display:block;padding:12px 0;background:var(--bg)}
+/* फ़ोटो बड़ी देखने वाली खिड़की: सफ़ेद, Amazon जैसी, नीचे छोटी फ़ोटो की पट्टी */
+.pbb .lb{background:#fff;grid-template-rows:1fr auto auto}
+.pbb .lb .im{padding:64px 12px 6px}
+.pbb .lb .cap{color:#333;padding:8px 18px 6px}
+.pbb .lb .cap button{border-color:#ddd;color:#111;background:#fff}
+.pbb .lb .x{color:#111;border-color:#ddd;background:#fff}
+.pbb .lbt{display:flex;gap:8px;overflow-x:auto;padding:6px 14px calc(16px + env(safe-area-inset-bottom,0px));justify-content:safe center;scrollbar-width:none}
+.pbb .lbt::-webkit-scrollbar{display:none}
+.pbb .lbt button{flex:none;width:58px;height:58px;border:2px solid #e3e3e3;border-radius:10px;background:#fafafa;padding:3px}
+.pbb .lbt button.on{border-color:#e47911}
+.pbb .lbt img{width:100%;height:100%;object-fit:contain}

@@ -73,7 +73,7 @@
       '<div class="nr">' + (extra || '') + '<button type="button" class="lg" data-lang aria-label="' + esc(L("भाषा बदलें", "Change language")) + '">' + (D.en ? "Hindi" : "English") + '</button><button type="button" class="mn" data-menu>' + L("मेनू", "Menu") + '</button></div></div></header>';
   }
   function drawer() { return '<div class="drw" data-drw aria-hidden="true"><button type="button" class="x" data-x aria-label="' + esc(L("बंद करें", "Close")) + '">✕</button>' + navs().map(n => '<a href="#' + n[0] + '">' + esc(n[1]) + '</a>').join("") + '<div class="db">' + waBtn("btn p") + callBtn("btn") + '</div></div>'; }
-  function lightbox() { return '<div class="lb" data-lb aria-hidden="true"><button type="button" class="x" data-x aria-label="' + esc(L("बंद करें", "Close")) + '">✕</button><div class="im"><img alt=""></div><div class="cap"><button type="button" data-lp aria-label="' + esc(L("पिछली", "Previous")) + '">‹</button><span></span><button type="button" data-ln aria-label="' + esc(L("अगली", "Next")) + '">›</button></div></div>'; }
+  function lightbox() { return '<div class="lb" data-lb aria-hidden="true"><button type="button" class="x" data-x aria-label="' + esc(L("बंद करें", "Close")) + '">✕</button><div class="im"><img alt=""></div><div class="cap"><button type="button" data-lp aria-label="' + esc(L("पिछली", "Previous")) + '">‹</button><span></span><button type="button" data-ln aria-label="' + esc(L("अगली", "Next")) + '">›</button></div><div class="lbt"></div></div>'; }
   function sticky() { const a = callBtn(""), b = waBtn("g"); return (a || b) ? '<div class="stk' + (a && b ? '' : ' one') + '" data-stk>' + a + b + '</div>' : ''; }
   function eb(t) { return '<div class="eb">' + esc(t) + '</div>'; }
   function gallery(cls) { if (!D.gallery.length) return ''; return '<div class="gal ' + (cls || "") + ' n' + Math.min(D.gallery.length, 3) + '">' + D.gallery.map((g, i) => '<button type="button" class="rv" data-gi="' + i + '" aria-label="' + esc(g.cap || L("फ़ोटो", "Photo") + " " + (i + 1)) + '"><img src="' + esc(g.src) + '" alt="' + esc(g.cap || "") + '" loading="lazy" decoding="async">' + (g.cap ? '<small>' + esc(g.cap) + '</small>' : '') + '</button>').join("") + '</div>'; }
@@ -288,7 +288,21 @@
   }
   const STK = [];
   addEventListener("popstate", () => { const f = STK.pop(); if (f) f(); });
-  function lbShow() { const lb = ROOT.querySelector("[data-lb]"), u = LB[LBI]; lb.querySelector("img").src = u.src; lb.querySelector(".cap span").textContent = u.cap || ((LBI + 1) + " / " + LB.length); lb.querySelectorAll("[data-lp],[data-ln]").forEach(b => b.style.visibility = LB.length > 1 ? "visible" : "hidden"); }
+  function lbShow() {
+    const lb = ROOT.querySelector("[data-lb]"), u = LB[LBI]; lb.querySelector(".im img").src = u.src;
+    lb.querySelector(".cap span").textContent = (u.cap ? u.cap + " · " : "") + (LBI + 1) + " / " + LB.length;
+    lb.querySelectorAll("[data-lp],[data-ln]").forEach(b => b.style.visibility = LB.length > 1 ? "visible" : "hidden");
+    /* Amazon जैसा: नीचे छोटी फ़ोटो की पट्टी — दबाओ तो वही फ़ोटो */
+    const t = lb.querySelector(".lbt"); t.innerHTML = LB.length > 1 ? LB.map((x, i) => '<button type="button" data-lt="' + i + '" class="' + (i === LBI ? "on" : "") + '" aria-label="' + esc(L("फ़ोटो", "Photo") + " " + (i + 1)) + '"><img src="' + esc(x.src) + '" alt=""></button>').join("") : "";
+    const on = t.querySelector(".on"); if (on) on.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  /* उँगली से बाएँ-दाएँ खिसकाकर अगली / पिछली फ़ोटो */
+  let SX = null;
+  function lbSwipe(lb) {
+    const im = lb.querySelector(".im");
+    im.ontouchstart = e => { SX = e.touches.length === 1 ? e.touches[0].clientX : null; };
+    im.ontouchend = e => { if (SX == null || LB.length < 2) return; const dx = e.changedTouches[0].clientX - SX; SX = null; if (Math.abs(dx) > 45) { LBI = (LBI + (dx < 0 ? 1 : -1) + LB.length) % LB.length; lbShow(); } };
+  }
   function relist() { const pl = ROOT.querySelector("[data-plist]"); if (pl) { pl.innerHTML = LY_[LY].list(filtered()); reveal(); } }
   function bagPaint() {
     const n = Object.values(BAG).reduce((a, b) => a + b, 0), bn = ROOT.querySelector("[data-bagn]"), bar = ROOT.querySelector("[data-bagbar]"); if (bn) bn.textContent = n;
@@ -307,7 +321,7 @@
       if (t.closest("[data-menu]")) { layer(ROOT.querySelector("[data-drw]")); return; }
       const dl = t.closest("[data-drw] a[href^='#']"); if (dl) { e.preventDefault(); const h = dl.getAttribute("href"), d = ROOT.querySelector("[data-drw]"); d._close && d._close(); setTimeout(() => { const x = ROOT.querySelector(h); if (x) x.scrollIntoView({ behavior: "smooth" }); }, 140); return; }
       const x = t.closest("[data-x]"); if (x) { const l = x.parentElement; l._close && l._close(); return; }
-      const lb = t.closest("[data-lb]"); if (lb) { if (t.closest("[data-lp]")) { LBI = (LBI - 1 + LB.length) % LB.length; lbShow(); } else if (t.closest("[data-ln]")) { LBI = (LBI + 1) % LB.length; lbShow(); } else if (!t.closest("img")) lb._close && lb._close(); return; }
+      const lb = t.closest("[data-lb]"); if (lb) { const lt = t.closest("[data-lt]"); if (lt) { LBI = +lt.dataset.lt; lbShow(); return; } if (t.closest("[data-lp]")) { LBI = (LBI - 1 + LB.length) % LB.length; lbShow(); } else if (t.closest("[data-ln]")) { LBI = (LBI + 1) % LB.length; lbShow(); } else if (t.classList.contains("im")) lb._close && lb._close(); return; }
       const pi = t.closest("[data-pi]"); if (pi) { e.preventDefault(); const p = D.products[+pi.dataset.pi]; if (!p || !p.img) return; LB = [{ src: p.img, cap: p.name + (p.size ? " · " + p.size : "") }]; LBI = 0; lbShow(); layer(ROOT.querySelector("[data-lb]")); return; }
       const gi = t.closest("[data-gi]"); if (gi) { LB = D.gallery.map(g => ({ src: g.src, cap: g.cap || "" })); LBI = +gi.dataset.gi; lbShow(); layer(ROOT.querySelector("[data-lb]")); return; }
       const ad = t.closest("[data-add]"); if (ad) { const i = ad.dataset.add; BAG[i] = (BAG[i] || 0) + 1; relist(); bagPaint(); return; }
@@ -319,6 +333,7 @@
     if (SIO) SIO.disconnect();
     if (s && h && "IntersectionObserver" in window) { SIO = new IntersectionObserver(es => es.forEach(en => s.classList.toggle("on", !en.isIntersecting)), { threshold: .12 }); SIO.observe(h); }
     reveal(); placeMap(); bagPaint(); fitTitles();
+    const lbx = ROOT.querySelector("[data-lb]"); if (lbx) lbSwipe(lbx);
     try { document.fonts && document.fonts.ready.then(fitTitles); } catch (_) { }
   }
   /* बड़े नाम: किसी भी font में screen से बाहर न जाएँ — ज़रूरत हो तो अक्षर छोटे */
