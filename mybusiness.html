@@ -145,6 +145,16 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .cmp .cmh{background:#fff;color:#0b367f;text-align:left;padding-left:10px;border-radius:12px 0 0 0}.cmp th{color:#0b367f;font-size:13px;background:#fff;border:1px solid #b9c6dc}.cmp th em{display:inline-block;font-style:normal;background:#fff;color:#0b367f;border:1px solid #0b367f;border-radius:999px;padding:1px 8px;font-size:12px;margin-top:2px;font-weight:700}
 .cmp .th-free,.cmp .th-silver,.cmp .th-gold,.cmp .th-platinum{background:#fff}
 .cmp .grp td+td{text-align:center}.cmp .grp td{text-align:left;font-weight:700;font-size:18px;padding:10px 10px;color:#fff}.cmp .grp-free td{background:#0875ed}.cmp .grp-silver td{background:#7c8798}.cmp .grp-gold td{background:#c98a05}.cmp .grp-platinum td{background:linear-gradient(135deg,#6D28D9,#2E0757)}
+.rfh{margin:18px 0 6px;background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden}
+.rfh summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;flex-wrap:wrap}.rfh summary::-webkit-details-marker{display:none}
+.rfh summary span{font-weight:700;font-size:16px;color:#0b2f73}.rfh summary small{color:#5b6475;font-size:13px;flex:1}
+.rfh .rfa{width:32px;height:32px;border-radius:50%;background:#eef4ff;color:#1a73e8;display:grid;place-items:center;font-size:16px;transition:transform .25s}.rfh[open] .rfa{transform:rotate(180deg)}
+.rfh ol{list-style:none;margin:0;padding:0 16px 6px}.rfh li{display:grid;grid-template-columns:minmax(0,1fr) 90px 44px;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #eef2f8}
+.rfh .rfn b{display:block;font-size:14px;color:#1f2a44}.rfh .rfn span{font-size:12px;color:#5b6475}
+.rfh .rfb{height:8px;border-radius:999px;background:#e8edf5;overflow:hidden}.rfh .rfb i{display:block;height:100%;border-radius:999px}
+.rfh em{font-style:normal;font-weight:700;font-size:14px;text-align:right;color:#1f2a44}
+.rfh .rfe,.rfh .rfi{margin:0;padding:0 16px 14px;font-size:13px;color:#5b6475}.rfh .rfi{padding-top:8px;border-top:1px solid #eef2f8;margin-top:4px;padding-bottom:14px}
+.offer .rfw{margin:6px 0;font-size:13px;color:#137333;font-weight:600}
 .pgift{position:absolute;left:50%;top:52px;width:170px;margin-left:-85px;cursor:pointer;z-index:4;-webkit-tap-highlight-color:transparent;transform-origin:50% 100%;animation:pgbz 3.2s linear infinite}
 @keyframes pgbz{0%,22%,100%{transform:translate(0,0) rotate(0)}2%{transform:translate(-2px,0) rotate(-5deg)}4%{transform:translate(2px,-1px) rotate(5deg)}6%{transform:translate(-2px,0) rotate(-5deg)}8%{transform:translate(2px,-1px) rotate(5deg)}10%{transform:translate(-2px,0) rotate(-4deg)}12%{transform:translate(2px,-1px) rotate(4deg)}14%{transform:translate(-1px,0) rotate(-3deg)}16%{transform:translate(1px,0) rotate(3deg)}18%{transform:translate(-1px,0) rotate(-2deg)}20%{transform:translate(0,0) rotate(1deg)}}
 .cmp .mrow .pgift img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 8px rgba(20,36,92,.35));pointer-events:none}
@@ -862,16 +872,29 @@ async function loadRef(){
 const FRP=[];   /* दोस्तों की प्रोफ़ाइल % — सर्वर रेफ़रल सिस्टम बनने पर यहाँ भरेगा; अभी खाली = 0% */
 function offerCard(en,cur,b){
   if(cur!=="free"||!gOp())return "";   /* गिफ़्ट खुलने के बाद ही ऑफ़र कार्ड दिखता है */   /* Silver/Gold/Platinum वालों को ऑफ़र नहीं दिखता */
-  const D=(b&&REFD[b.slug])||null,FR=(D&&Array.isArray(D.friends))?D.friends:FRP,SH=Math.max(gSh(),FR.length?1:0),n=Math.max(SH*5,Math.ceil(FR.length/5)*5),pcs=[...Array(n)].map((_,k)=>Math.max(0,Math.min(100,+FR[k]||0))),dn=pcs.filter(x=>x>=100).length;
+  const D=(b&&REFD[b.slug])||null,FR=(D&&Array.isArray(D.friends))?D.friends:FRP,SH=FR.length?1:0,n=FR.length,pcs=FR.map(v=>Math.max(0,Math.min(100,+v||0))),dn=pcs.filter(x=>x>=100).length;
   if(dn>=5)return "";   /* 5 दोस्त पूरे → विंडो हट जाती है */
   const hd='<div class="oh">🎁 '+(en?"Silver Plan FREE for 1 Year":"Silver प्लान 1 साल मुफ़्त")+'</div>',
     vd=(en?"Offer valid till 31 December 2026":"ऑफ़र 31 दिसंबर 2026 तक");
-  if(!SH)return '<div class="offer">'+hd+'<p><strong>'+(en?"Share PataBook with 5 shopkeepers to get your Silver plan free.":"5 दुकानदारों को PataBook शेयर करें और Silver प्लान मुफ़्त पाएँ।")+'</strong></p><button type="button" class="shb" data-psh="1">📤 '+(en?"Share PataBook with shopkeepers":"दुकानदारों को PataBook भेजें")+'</button><small>'+vd+'</small></div>';
+  if(!SH)return '<div class="offer">'+hd+(gSh()?'<p class="rfw">'+(en?"✅ Link sent. As soon as a friend opens your link, their % will show here.":"✅ लिंक भेज दिया। जैसे ही कोई दोस्त आपका लिंक खोलेगा, उसका % यहाँ दिखेगा।")+'</p>':'')+'<p><strong>'+(en?"Share PataBook with 5 shopkeepers to get your Silver plan free.":"5 दुकानदारों को PataBook शेयर करें और Silver प्लान मुफ़्त पाएँ।")+'</strong></p><button type="button" class="shb" data-psh="1">📤 '+(en?"Share PataBook with shopkeepers":"दुकानदारों को PataBook भेजें")+'</button><small>'+vd+'</small></div>';
   return '<div class="offer">'+hd+'<div class="frs" aria-label="'+(en?"Friends profile completion":"दोस्तों की प्रोफ़ाइल कितनी पूरी")+'">'+pcs.map((v,k)=>'<span><i>'+v+'%</i><em>'+(en?"Business Friend ":"दुकानदार दोस्त ")+(k+1)+'</em></span>').join("")+'</div>'+
     '<div class="fcnt">'+(en?n+" friends · "+dn+" complete":n+" दोस्त · "+dn+" पूरे")+'</div>'+
     '<button type="button" class="shb" data-psh="1">📤 '+(en?"Share again":"फिर से शेयर करें")+'</button><small>'+vd+'</small></div>';}
 function gStrip(en){
   return '<div class="gstrip"><b>'+(en?"Share PataBook with 5 shopkeepers to activate your free Silver plan":"मुफ़्त Silver प्लान चालू करने के लिए 5 दुकानदारों को PataBook शेयर करें")+'</b>'+(en?'<span class="hi">मुफ़्त Silver प्लान चालू करने के लिए 5 दुकानदारों को PataBook शेयर करें</span>':'')+'<button type="button" class="shb" data-psh="1">📤 '+(en?"Share PataBook with shopkeepers":"दुकानदारों को PataBook भेजें")+'</button><small>'+(en?"Offer valid till 31 December 2026":"ऑफ़र 31 दिसंबर 2026 तक")+'</small></div>';}
+/* 📜 Silver gift: दोस्तों की history — plans पेज के सबसे नीचे, बंद रहती है; ▾ दबाने पर खुलती है */
+let RFHOPEN=false;
+function refHistory(b,en,cur){
+  const D=(b&&REFD[b.slug])||null,FR=(D&&Array.isArray(D.friends))?D.friends.map(v=>Math.max(0,Math.min(100,+v||0))):[];
+  if(!FR.length&&!(cur==="free"&&gOp())&&!(D&&D.granted))return "";
+  const done=FR.filter(v=>v>=100).length;
+  const row=(v,k)=>{const st=v>=100?(en?"✅ Profile complete":"✅ प्रोफ़ाइल पूरी"):v<=10?(en?"🔗 Opened your link · shop not added yet":"🔗 लिंक खोला · दुकान अभी नहीं जोड़ी"):(en?"🏪 Shop added · profile "+v+"%":"🏪 दुकान जुड़ी · प्रोफ़ाइल "+v+"%");
+    return '<li><div class="rfn"><b>'+(en?"Business Friend ":"दुकानदार दोस्त ")+(k+1)+'</b><span>'+st+'</span></div><div class="rfb"><i style="width:'+v+'%;background:'+(v>=100?"#1e9e57":v>=50?"#1a73e8":"#f29900")+'"></i></div><em>'+v+'%</em></li>';};
+  return '<details class="rfh"'+(RFHOPEN?' open':'')+'><summary><span>📜 '+(en?"History":"हिस्ट्री")+'</span><small>'+(en?FR.length+" friends opened your link · "+done+" complete":FR.length+" दोस्तों ने लिंक खोला · "+done+" पूरे")+'</small><b class="rfa" aria-hidden="true">▾</b></summary>'+
+    (FR.length?'<ol>'+FR.map(row).join("")+'</ol>':'<p class="rfe">'+(en?"No friend has opened your link yet. Share it from the gift above — % starts as soon as a friend opens it.":"अभी तक किसी दोस्त ने आपका लिंक नहीं खोला। ऊपर गिफ्ट से लिंक शेयर करें — दोस्त के लिंक खोलते ही % शुरू होगा।")+'</p>')+
+    '<p class="rfi">'+(en?"5 friends with a 100% profile = Silver plan free for 1 year.":"5 दोस्तों की प्रोफ़ाइल 100% = Silver प्लान 1 साल मुफ़्त।")+'</p></details>';
+}
+document.addEventListener("toggle",e=>{if(e.target&&e.target.classList&&e.target.classList.contains("rfh"))RFHOPEN=e.target.open;},true);
 function plansCompare(b,i,en){
   if(!window.PBPlan)return "";
   const T=["free","silver","gold","platinum"],ic={free:"🔵",silver:"🥈",gold:"👑",platinum:"💎"},cur=tierOf(b);
@@ -911,7 +934,7 @@ function plansCompare(b,i,en){
   const body='<tr class="vrow"><td>'+(en?"Validity":"वैधता")+'</td>'+T.map(t=>'<td class="td-'+t+'"><b>'+(t==="free"?(en?"Lifetime":"आजीवन"):(en?"1 Year":"1 साल"))+'</b></td>').join("")+'</tr>'+T.map(g=>{const rows=ALLR.filter(r=>r[2]===g);return rows.length?(g==="free"?'<tr class="grp grp-'+g+'"><td></td>'+T.map(t=>'<td>'+(t===cur?(en?"Active Plan":"एक्टिव प्लान"):'')+'</td>').join("")+'</tr>':'')+rows.map(r=>'<tr><td>'+r[0]+'</td>'+T.map(t=>'<td class="td-'+t+'">'+r[1](t)+'</td>').join("")+'</tr>').join(""):"";}).join("")+'<tr class="prow"><td>'+(en?"Price":"क़ीमत")+'</td>'+T.map(t=>'<td class="pp pp-'+t+'">'+(GOP&&t==="silver"?'<s>₹'+PLAN_PRICE[t].toLocaleString("en-IN")+'</s><span class="fre">'+(en?"FREE":"मुफ़्त")+'</span>':'₹'+PLAN_PRICE[t].toLocaleString("en-IN"))+'</td>').join("")+'</tr>';
   return ''+
     offerCard(en,cur,b)+
-    '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'"><colgroup><col style="width:250px"><col><col><col><col></colgroup>'+mrow+head+body+'</table></div>'+(GOP?gStrip(en):'')+'<div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>';
+    '<div class="pz"><button type="button" data-pz="-" aria-label="'+(en?"Zoom out":"छोटा करें")+'">−</button><span class="pzv" data-pz="r" title="Reset">'+Math.round(PZ*100)+'%</span><button type="button" data-pz="+" aria-label="'+(en?"Zoom in":"बड़ा करें")+'">+</button></div><div class="cmpw"><table class="cmp" style="zoom:'+PZ+'"><colgroup><col style="width:250px"><col><col><col><col></colgroup>'+mrow+head+body+'</table></div>'+(GOP?gStrip(en):'')+'<div class="pswipe">'+(en?"Swipe left / right ↔":"बाएँ / दाएँ स्क्रॉल करें ↔")+'</div>'+refHistory(b,en,cur);
 }
 function premBlock(b,i){
   if(!PREM)return "";const P=PREM[b.slug]||{},en=L()==="en";
