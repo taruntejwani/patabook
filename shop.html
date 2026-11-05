@@ -582,6 +582,8 @@ function mobRow(){const N=(CT.k==="ok"&&CT.nums)?CT.nums:[],out=[];
 const STD=new URLSearchParams(location.search).get("std")==="1";
 const toBrand=()=>location.replace("brand.html?slug="+encodeURIComponent(slug)+location.hash);
 try{if(!STD&&slug&&localStorage.getItem("pbd_"+slug)==="1")toBrand();}catch(_){}
+/* design की जाँच पेज खुलते ही शुरू (pb_design_get खुद सिर्फ़ Platinum का लौटाता है) — ताकि पुराना page बीच में न दिखे */
+const DZP=(STD||!slug)?Promise.resolve(0):fetch(SB+"/rest/v1/rpc/pb_design_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():0).then(j=>+j||0).catch(()=>0);
 async function brandCheck(){
   if(STD||TIER()!=="platinum")return false;
   try{const r=await fetch(SB+"/rest/v1/rpc/pb_design_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})});if(!r.ok)return false;const d=+(await r.json());
@@ -598,6 +600,7 @@ async function load(){
       r=await fetch(u,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});if(r.ok){rows=await r.json();break;}}
     if(!rows||!rows.length){cvOff();try{var _r=document.createElement("meta");_r.name="robots";_r.content="noindex";document.head.appendChild(_r);}catch(_){}app.innerHTML='<p class="note">'+L("यह दुकान अभी उपलब्ध नहीं है।","This shop is not available right now.")+'<br><br><a href="index.html" style="color:#1a73e8;font-weight:700">PataBook ›</a></p>';return;}
     B=rows[0];
+    {const dz=await Promise.race([DZP,new Promise(r=>setTimeout(()=>r(0),2500))]);if(dz>=1&&dz<=100){try{localStorage.setItem("pbd_"+slug,"1");}catch(_){}toBrand();return;}}
     document.title=B.name+" — "+(B.category||"Shop")+" | PataBook";
     try{var _a=(window.PBHide&&PBHide.has("addr"))?"":(B.address||"");var _j={"@context":"https://schema.org","@type":"LocalBusiness","name":B.name,"url":location.origin+location.pathname+"?slug="+encodeURIComponent(B.slug),"image":"https://patabook.in/icon-512.png"};if(B.category)_j.description=B.name+" — "+B.category+" | PataBook";if(_a)_j.address={"@type":"PostalAddress","streetAddress":_a,"addressCountry":"IN"};var _s=document.createElement("script");_s.type="application/ld+json";_s.textContent=JSON.stringify(_j);document.head.appendChild(_s);}catch(e){}
     try{document.querySelector('meta[name="description"]').setAttribute("content",(B.name+" — "+[B.category,cityOf(B)].filter(Boolean).join(", ")+". Products, photos, address & WhatsApp.").slice(0,300));}catch(_){}

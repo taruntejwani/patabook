@@ -598,7 +598,7 @@
 
   /* 🌐 Website Design: Platinum दुकानदार 100 design (10 layout × 10 रंग) में से एक चुने (sql-36). ग्राहक को Platinum दुकान का page उसी design में (brand.html) */
   var DSN = {}, DSEL = {}, DERR = {}, DLOADED = {};
-  var DLY = [["लग्ज़री", "Luxury"], ["सिनेमा", "Cinematic"], ["एडिटोरियल", "Editorial"], ["ऑनलाइन स्टोर", "Store"], ["मिनिमल", "Minimal"], ["पोस्टर", "Bold Poster"], ["स्प्लिट", "Split Screen"], ["बेंटो", "Bento Grid"], ["क्लासिक दुकान", "Classic Shop"], ["मैगज़ीन", "Magazine Cover"]];
+  var DLY = [["लग्ज़री", "Luxury"], ["सिनेमा", "Cinematic"], ["एडिटोरियल", "Editorial"], ["ऑनलाइन स्टोर", "Store"], ["मिनिमल", "Minimal"], ["पोस्टर", "Bold Poster"], ["स्प्लिट", "Split Screen"], ["बेंटो", "Bento Grid"], ["क्लासिक दुकान", "Classic Shop"], ["प्रेस्टीज ब्रांड", "Prestige Brand"]];
   var DTH = [["नेवी प्लैटिनम", "Navy Platinum", "#0a1230", "#c7d2e8"], ["काला-गोल्ड", "Black Gold", "#0b0b0c", "#d8c39a"], ["रोज़ गोल्ड", "Rose Gold", "#fbf3f0", "#b76e79"], ["एमराल्ड", "Emerald", "#06261d", "#d6b46a"], ["मैरून रॉयल", "Royal Maroon", "#3a0b14", "#e6c27a"], ["सफ़ेद मिनिमल", "Pure White", "#ffffff", "#111111"], ["आइवरी सैंड", "Ivory Sand", "#f4efe6", "#8a6a3d"], ["मिडनाइट वायलेट", "Midnight Violet", "#140c2a", "#b9a3ff"], ["ओशन टील", "Ocean Teal", "#03242b", "#7fe0d4"], ["चारकोल ऑरेंज", "Charcoal Orange", "#16181b", "#ff7a3d"]];
   function plat(b) { return paid(b) && (typeof tierOf !== "function" || tierOf(b) === "platinum"); }
   function dsplit(n) { return { ly: Math.floor((n - 1) / 10) + 1, th: (n - 1) % 10 + 1 }; }

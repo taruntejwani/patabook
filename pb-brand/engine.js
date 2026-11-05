@@ -31,7 +31,7 @@
     { k: "luxury", hi: "लग्ज़री", en: "Luxury" }, { k: "cinema", hi: "सिनेमा", en: "Cinematic" }, { k: "edit", hi: "एडिटोरियल", en: "Editorial" },
     { k: "store", hi: "ऑनलाइन स्टोर", en: "Store" }, { k: "minimal", hi: "मिनिमल", en: "Minimal" }, { k: "poster", hi: "पोस्टर", en: "Bold Poster" },
     { k: "split", hi: "स्प्लिट", en: "Split Screen" }, { k: "bento", hi: "बेंटो", en: "Bento Grid" }, { k: "classic", hi: "क्लासिक दुकान", en: "Classic Shop" },
-    { k: "mag", hi: "मैगज़ीन", en: "Magazine Cover" }
+    { k: "prestige", hi: "प्रेस्टीज ब्रांड", en: "Prestige Brand" }
   ];
   function decoUrl(t) {
     const c = t.v.ac, f = t.v.bg2;
@@ -239,18 +239,35 @@
       '<section class="blk" id="about"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("हमारे बारे में", "About Us") + '</h2><p class="say">' + aboutLine() + '</p></div><div class="ctab rv">' + facts() + '</div>' + (+D.rating ? rating("cl") : '') + '</div></section>' +
       '<section class="blk" id="visit"><div class="w"><div class="ct rv"><div class="orn">✦</div><h2>' + L("दुकान पर पधारें", "Visit Our Store") + '</h2></div>' + visit() + '</div></section>'
   };
-  /* 10 · Magazine Cover — पहली screen magazine के cover जैसी */
+  /* 10 · Prestige — business brand: products पहली screen पर, साफ़ नाम, भरोसे की पट्टी, साफ़ CTA */
+  function trust() {
+    const t = [];
+    if (D.type) t.push(["✓", D.type]);
+    if (D.facts.some(f => f[0] === "GST")) t.push(["✓", L("GST सत्यापित", "GST Verified")]);
+    if (+D.rating) t.push(["★", Number(D.rating).toFixed(1) + (D.count ? " · " + L(D.count + " रेटिंग", D.count + (D.count == 1 ? " rating" : " ratings")) : "")]);
+    if (D.city) t.push(["⌖", D.city]);
+    return t;
+  }
   LY_[10] = {
-    list: P => P.length ? P.map((p, i) => '<article class="feat rv' + (i % 2 ? ' rev' : '') + '"><button type="button" class="ph" data-pi="' + pidx(p) + '">' + img(p) + tag(p) + '</button><div class="fx"><span class="kick">' + L("फ़ीचर", "Feature") + ' ' + nn(i) + '</span><h3>' + esc(p.name) + '</h3><p class="dek">' + esc([p.size].concat((p.feats || []).slice(0, 3)).filter(Boolean).join(" · ")) + '</p>' + price(p) + ask(p, "ask", L("WhatsApp पर पूछें", "Enquire on WhatsApp") + " →") + '</div></article>').join("") : empty(),
+    list: P => P.length ? '<div class="pgrid">' + P.map(p => '<article class="pcard rv"><button type="button" class="ph" data-pi="' + pidx(p) + '">' + img(p) + tag(p) + '</button><div class="pcb"><h3>' + esc(p.name) + '</h3><p class="pm">' + esc([p.size].concat((p.feats || []).slice(0, 2)).filter(Boolean).join(" · ")) + '</p><div class="prow">' + price(p) + ask(p, "btn sm p", I.wa + '<span>' + L("पूछें", "Enquire") + '</span>') + '</div></div></article>').join("") + '</div>' : empty(),
     page: () => {
-      const best = D.products.find(offPct), d = new Date(), mo = d.toLocaleString(D.en ? "en-IN" : "hi-IN", { month: "short", year: "numeric" });
-      return nav() + '<section class="hero" id="top" data-hero><div class="w cv"><div class="mt"><span>' + esc(mo) + '</span><span>' + esc(D.city) + '</span></div><h1 class="rv">' + esc(D.name) + '</h1>' + coverImg("mg") +
-        '<div class="lines"><div class="rv"><span>' + L("अंदर", "Inside") + '</span><b>' + esc(D.services || D.cat) + '</b></div>' + (best ? '<div class="rv"><span>' + L("ऑफ़र", "Offer") + '</span><b>' + esc(best.name) + ' — ' + offPct(best) + '% ' + L("छूट", "off") + '</b></div>' : '') + (D.open ? '<div class="rv"><span>' + L("आज", "Today") + '</span><b>' + esc(D.open.t) + '</b></div>' : '') + '</div>' +
-        '<div class="btns">' + waBtn("btn p") + callBtn("btn") + '</div></div></section>' +
-        (D.products.length ? '<section class="blk" id="coll"><div class="w">' + secHead(L("इस अंक में", "This issue"), L("फ़ीचर्ड उत्पाद", "Featured products"), catBar()) + '<div data-plist>' + LY_[10].list(filtered()) + '</div></div></section>' : '') +
-        (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + secHead(L("फ़ोटो", "Photo story"), L("दुकान की कहानी", "Store story")) + gallery("mg") + '</div></section>' : '') +
-        '<section class="blk deco" id="about"><div class="w"><div class="pq rv"><span>“</span>' + aboutLine() + '</div>' + facts("rv") + (+D.rating ? rating("mg") : '') + '</div></section>' +
-        '<section class="blk" id="visit"><div class="w">' + secHead(L("पता", "Visit"), L("हमसे मिलें", "Find us")) + visit() + '</div></section>';
+      const P = D.products, show = P.filter(p => p.img).slice(0, 4), hero = D.cover || (P.find(p => p.img) || {}).img || "";
+      const tr = trust();
+      return nav('<a class="ncta" href="' + esc(D.waLink(L("नमस्ते, PataBook पर आपका पेज देखा।", "Hello, I saw your page on PataBook.")) || "#visit") + '"' + (D.waLink("x") ? ' target="_blank" rel="noopener"' : '') + '>' + I.wa + '<span>' + L("संपर्क करें", "Contact") + '</span></a>') +
+        '<section class="hero" id="top" data-hero><div class="w hg">' +
+        '<div class="ht rv">' + eb(D.sub) + '<h1>' + esc(D.name) + '</h1>' + (D.services ? '<p class="lead">' + esc(D.services) + '</p>' : '') + openChip() +
+        '<div class="btns">' + (P.length ? '<a class="btn p" href="#coll">' + L("उत्पाद देखें", "View products") + I.arr + '</a>' : '') + waBtn("btn") + callBtn("btn") + '</div></div>' +
+        (hero ? '<div class="hv rv"><div class="hvi"><img src="' + esc(hero) + '" alt="' + esc(D.name) + '" decoding="async"></div>' +
+          (show.length > 1 ? '<div class="hth">' + show.map(p => '<button type="button" data-pi="' + pidx(p) + '" aria-label="' + esc(p.name) + '"><img src="' + esc(p.img) + '" alt="" loading="lazy"><span>' + esc(p.name) + '</span></button>').join("") + '</div>' : '') + '</div>' : '') +
+        '</div></section>' +
+        (tr.length ? '<div class="tbar"><div class="w">' + tr.map(x => '<div><i>' + x[0] + '</i><span>' + esc(x[1]) + '</span></div>').join("") + '</div></div>' : '') +
+        (P.length ? '<section class="blk" id="coll"><div class="w">' + secHead(L("हमारे उत्पाद", "Our products"), L("उत्पाद कलेक्शन", "Product collection"), catBar("chips")) + '<div data-plist>' + LY_[10].list(filtered()) + '</div></div></section>' : '') +
+        '<section class="blk alt" id="about"><div class="w ab2"><div class="rv">' + eb(L("कंपनी के बारे में", "About the company")) + '<h2>' + aboutLine() + '</h2>' +
+        (why().length ? '<div class="why">' + why().map(p => '<div><span>' + esc(p[0]) + '</span><b>' + esc(p[1]) + '</b><p>' + esc(p[2]) + '</p></div>').join("") + '</div>' : '') + '</div>' + (function () { const f = D.facts.filter(x => x[1] !== D.type && x[1] !== D.hours); return f.length ? '<div class="facts rv">' + f.map(x => '<div><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></div>').join("") + '</div>' : ''; })() + '</div></section>' +
+        (D.gallery.length ? '<section class="blk" id="gal"><div class="w">' + secHead(L("गैलरी", "Gallery"), L("उत्पाद और दुकान की झलक", "Products & store")) + gallery("pg") + '</div></section>' : '') +
+        (+D.rating ? '<section class="blk alt"><div class="w">' + rating("pr") + '</div></section>' : '') +
+        '<section class="blk" id="visit"><div class="w">' + secHead(L("संपर्क", "Contact"), L("हमसे संपर्क करें", "Get in touch")) +
+        '<div class="ccards rv">' + callBtn("cc") + waBtn("cc w") + dirBtn("cc") + '</div>' + visit() + '</div></section>';
     }
   };
 
@@ -307,7 +324,7 @@
   /* बड़े नाम: किसी भी font में screen से बाहर न जाएँ — ज़रूरत हो तो अक्षर छोटे */
   function fitTitles() {
     if (!ROOT) return;
-    ROOT.querySelectorAll(".ly-2 .hero h1,.ly-3 .hero h1,.ly-6 .hero h1,.ly-10 .hero h1").forEach(h => {
+    ROOT.querySelectorAll(".ly-2 .hero h1,.ly-3 .hero h1,.ly-6 .hero h1").forEach(h => {
       h.style.fontSize = ""; let fs = parseFloat(getComputedStyle(h).fontSize), n = 0;
       const wide = () => Array.from(h.querySelectorAll("span")).concat([h]).some(e => e.scrollWidth > h.clientWidth + 1);
       while (wide() && fs > 24 && n++ < 40) { fs *= .94; h.style.fontSize = fs + "px"; }
@@ -318,7 +335,7 @@
   /* हर layout के अपने font — सिर्फ़ ज़रूरत वाले ही लोड हों (हिन्दी के लिए Tiro + Hind हमेशा) */
   const FONTS = { 1: "Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500", 2: "Anton&family=Inter:wght@300;400;500;600", 3: "Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;700",
     4: "Plus+Jakarta+Sans:wght@400;500;600;700;800", 5: "Inter:wght@200;300;400;500", 6: "Anton&family=DM+Sans:wght@400;500;700", 7: "Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;700",
-    8: "Plus+Jakarta+Sans:wght@400;500;600;700;800", 9: "Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1", 10: "Bodoni+Moda:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500" };
+    8: "Plus+Jakarta+Sans:wght@400;500;600;700;800", 9: "Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1", 10: "Inter:wght@300;400;500;600;700" };
   function fonts(ly) {
     if (window.PBBrandNoFonts) return;
     const id = "pbbf" + ly; if (document.getElementById(id)) return;
