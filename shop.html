@@ -476,6 +476,14 @@ html.t-silver body .dock a:not(.w){background:linear-gradient(135deg,#4c5664,#2f
 /* एक जैसे बटन: चारों (Call / WhatsApp / Directions / Card) एक ही ऊँचाई-अक्षर */
 .qa a,.qa button{min-height:52px!important;padding:12px 8px!important;font-size:15.5px!important;font-weight:700!important;flex-direction:row!important;justify-content:center!important;gap:8px!important}
 .qa svg{width:20px!important;height:20px!important}.qa span{font-size:inherit!important;display:flex;align-items:center}
+/* Free / Silver / Gold: 4 गोल outline icon एक लाइन में (Call / WhatsApp / Directions / Card) — free page जैसे */
+.qa.rc{display:flex!important;gap:6px!important;margin:18px auto 4px!important;max-width:460px;background:none!important;padding:0!important}
+.qa.rc>a:not(#z),.qa.rc>button:not(#z){flex:1 1 0;min-width:0;flex-direction:column!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;min-height:0!important;padding:4px 0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:12px;font-size:13px!important;font-weight:700!important;color:#14161c!important;white-space:nowrap;font-family:inherit}
+.qa.rc>*>span:not(#z){width:58px;height:58px;border-radius:50%;background:#fff;border:2px solid currentColor;display:grid!important;place-items:center}
+.qa.rc svg:not(#z){width:24px!important;height:24px!important;margin:0!important}
+.qa.rc>.k1:not(#z)>span{color:#1a73e8!important}.qa.rc>.k2:not(#z)>span{color:#1e9e57!important}.qa.rc>.k3:not(#z)>span{color:#e8590c!important}.qa.rc>.k4:not(#z)>span{color:#6d28d9!important}
+.qa.rc>.dis:not(#z){opacity:.45!important;filter:grayscale(1)!important}
+@media(hover:hover){.qa.rc>a:hover>span,.qa.rc>button:hover>span{background:currentColor}.qa.rc>a:hover svg,.qa.rc>button:hover svg{color:#fff}}
 </style>
 </head><body>
 
@@ -676,11 +684,11 @@ function render(){drawSoc();
          (+b.rating?'<span class="chip">★ '+esc(b.rating)+(b.review_count?' ('+esc(b.review_count)+')':'')+'</span>':'')+'</div>'+
      '</div></div></div>'+
    '<div class="wrap">'+
-     '<div class="qa">'+
-       '<a '+(ph?'class="pri c" href="tel:'+esc(ph)+'"':'class="pri c dis"')+'><span>'+PBI("call")+'</span>'+L("कॉल करें","Call Now")+'</a>'+
-       '<a '+(wa?'class="pri w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener"':'class="pri w dis"')+'><span>'+PBI("chat")+'</span>WhatsApp</a>'+
-       '<a data-pbh="addr" '+(dir?'href="'+esc(dir)+'"':'class="dis"')+'><span>🧭</span>'+L("रास्ता","Directions")+'</a>'+
-       (PF("card")?'<button type="button" id="shareQa" class="isCard" data-pbh="share"><span>🪪</span>'+L("डिजिटल कार्ड","Digital Card")+'</button>':'<button type="button" id="shareQa" data-pbh="share"><span>📤</span>'+L("शेयर करें","Share Profile")+'</button>')+
+     '<div class="qa'+(TIER()==="platinum"?'':' rc')+'">'+
+       '<a '+(ph?'class="pri c k1" href="tel:'+esc(ph)+'"':'class="pri c k1 dis"')+'><span>'+PBI("call")+'</span>'+(TIER()==="platinum"?L("कॉल करें","Call Now"):L("कॉल","Call"))+'</a>'+
+       '<a '+(wa?'class="pri w k2" href="https://wa.me/'+wa+'" target="_blank" rel="noopener"':'class="pri w k2 dis"')+'><span>'+PBI("chat")+'</span>WhatsApp</a>'+
+       '<a data-pbh="addr" '+(dir?'class="k3" href="'+esc(dir)+'"':'class="k3 dis"')+'><span>'+PBI("dir")+'</span>'+L("रास्ता","Directions")+'</a>'+
+       (PF("card")?'<button type="button" id="shareQa" class="isCard k4" data-pbh="share"><span>'+PBI("card")+'</span>'+(TIER()==="platinum"?L("डिजिटल कार्ड","Digital Card"):L("कार्ड","Card"))+'</button>':'<button type="button" id="shareQa" class="k4" data-pbh="share"><span>'+PBI("share")+'</span>'+(TIER()==="platinum"?L("शेयर करें","Share Profile"):L("शेयर","Share"))+'</button>')+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',vis:''}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
      (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+PBPGal.title(G,CAPS,!EN())+' <small>('+G.length+')</small></h2>'+PBPGal.grid(G,CAPS)+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
