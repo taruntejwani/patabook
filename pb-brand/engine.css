@@ -592,3 +592,9 @@
 .pbb .tools .tl.hire{background:#e8590c;border-color:#e8590c;color:#fff}
 .pbb .tools .tl.rp{color:var(--mu);font-size:13px;min-height:40px;padding:8px 14px}
 .pbb .tools .tl:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+
+/* Store design: सारे बटन "Shop now" जैसे — एक ही चमकीला रंग, एक ही size (Call / WhatsApp / Directions) */
+.ly-4 .btns .btn{background:var(--metal);color:var(--acfg);border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 22px rgba(0,0,0,.18);min-height:50px;padding:14px 24px;font-size:14px}
+.ly-4 .btns .btn svg{width:18px;height:18px}
+@media(max-width:560px){.ly-4 .hero .btns{display:grid;grid-template-columns:1fr 1fr}.ly-4 .hero .btns .btn{padding:14px 10px}}
+@media(min-width:561px){.ly-4 .hero .btns{display:grid;grid-template-columns:repeat(2,170px)}}
