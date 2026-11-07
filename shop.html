@@ -295,7 +295,7 @@ html body .num a,html body .vbtn a.p{background:#0b2f73!important;color:#fff!imp
 html body .num a.w{background:#1e9e57!important}
 .dock{background:rgba(255,255,255,.97)!important;border-top:1px solid var(--goldline)!important;padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important}
 .dock .in{gap:8px}
-html body .dock a{background:#0b2f73!important;color:#fff!important;padding:11px 8px;font-size:15px;border-radius:12px}
+html body .dock a{margin:0!important;display:flex!important;background:#0b2f73!important;color:#fff!important;padding:11px 8px;font-size:15px;border-radius:12px}
 html body .dock a.w{background:#1e9e57!important}
 body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 #cardBtn{display:none!important}
@@ -714,7 +714,7 @@ function render(){drawSoc();
   /* नीचे चिपका Call / WhatsApp */
   const dock=document.getElementById("dock");
   if(ph||wa){dock.hidden=false;document.getElementById("dockIn").style.gridTemplateColumns=ph&&wa?"1fr 1fr":"1fr";
-    document.getElementById("dockIn").innerHTML=(ph?'<a href="tel:'+esc(ph)+'">'+PBI("call")+L("कॉल करें","Call now")+'</a>':'')+(wa?'<a class="w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'WhatsApp</a>':'');}
+    document.getElementById("dockIn").innerHTML=(ph?'<a class="c" href="tel:'+esc(ph)+'">'+PBI("call")+L("कॉल करें","Call now")+'</a>':'')+(wa?'<a class="w" href="https://wa.me/'+wa+'" target="_blank" rel="noopener">'+PBI("chat")+'WhatsApp</a>':'');}
   else dock.hidden=true;
   document.body.style.paddingBottom=dock.hidden?"16px":"";
   /* events */
@@ -919,7 +919,7 @@ function contactHTML(){
   if(CT.k==="loading")return '<p class="cnote">…</p>';
   const N=CT.k==="ok"?((CT.nums&&CT.nums.length)?CT.nums:[String(CT.phone||"").replace(/\D/g,"").slice(-10)].filter(x=>/^\d{10}$/.test(x))):[];
   if(!N.length)return '<div class="num" style="filter:grayscale(1);opacity:.6"><div class="l"><small>📱 Mobile</small><b>'+L("नंबर बंद है","Not shared")+'</b></div></div><p class="cnote">'+L("दुकानदार ने अपना नंबर सार्वजनिक नहीं रखा है।","The shop owner has kept the number private.")+'</p>';
-  return N.map((n,i)=>'<div class="num"><div class="l"><small>'+(i?L("दूसरा नंबर","Another number"):"📱 Mobile")+'</small><b>'+esc(n)+'</b></div><a href="tel:'+esc(n)+'">Call</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+n+'">WhatsApp</a></div>').join("");
+  return N.map((n,i)=>'<div class="num"><div class="l"><small>'+(i?L("दूसरा नंबर","Another number"):"📱 Mobile")+'</small><b>'+esc(n)+'</b></div><a class="c" href="tel:'+esc(n)+'">Call</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+n+'">WhatsApp</a></div>').join("");
 }
 function prodAsk(p){const wa=waNum();
   if(wa){const t=L("नमस्ते, PataBook पर देखा: ","Hello, saw on PataBook: ")+p.name+(p.size?" ("+p.size+")":"")+L(" — मिलेगा? कीमत बताइए।"," — is it available? Please share the price.");

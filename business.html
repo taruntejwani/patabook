@@ -666,7 +666,7 @@ function drawContact(){
       '<p class="cnote">'+(en?"The shop owner has kept the number private.":"दुकानदार ने अपना नंबर सार्वजनिक नहीं रखा है।")+'</p>';
   }else if(s.k==="ok"){
     const en=PB.lang&&PB.lang()!=="hi",N=(s.nums&&s.nums.length)?s.nums:[String(s.phone||"").replace(/\D/g,"").slice(-10)].filter(x=>/^\d{10}$/.test(x));
-    el.innerHTML=N.map((n,i)=>'<div class="num"><div class="l"><small>'+(i?(en?"Another number":"दूसरा नंबर"):"📱 Mobile")+'</small><b>'+esc(n)+'</b></div><a href="tel:'+esc(n)+'">'+esc(T("call"))+'</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+n+'">WhatsApp</a></div>').join("")+(N.length?'':'<p class="cnote">'+esc(T("c_none"))+'</p>');
+    el.innerHTML=N.map((n,i)=>'<div class="num"><div class="l"><small>'+(i?(en?"Another number":"दूसरा नंबर"):"📱 Mobile")+'</small><b>'+esc(n)+'</b></div><a class="c" href="tel:'+esc(n)+'">'+esc(T("call"))+'</a><a class="w" target="_blank" rel="noopener" href="https://wa.me/91'+n+'">WhatsApp</a></div>').join("")+(N.length?'':'<p class="cnote">'+esc(T("c_none"))+'</p>');
   }else{
     el.innerHTML='<p class="cnote">'+esc(T(s.k==="limit"?"c_limit":"c_setup"))+'</p>'+'';
   }
