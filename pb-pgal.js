@@ -1,5 +1,6 @@
 /* PBPGal — दुकान के पब्लिक पन्ने की Gallery / Products & Services
-   • 2-column जाली, हर फ़ोटो 1:1 बक्से में object-fit:contain (पूरा प्रोडक्ट + लेबल दिखे)
+   • E-commerce जैसी छोटी टाइलें: फ़ोन पर 3, कंप्यूटर पर 6 एक लाइन में; हर फ़ोटो 1:1 बक्से में object-fit:contain
+   • पहले 6 फ़ोटो, बाकी "View all (N)" → पूरी Gallery (सब public फ़ोटो)
    • फ़ोटो के नीचे Product Name (दुकानदार का लिखा caption; न हो तो कुछ नहीं)
    • दबाने पर Full-screen viewer: pinch / double-tap zoom, खिसकाना, ‹ ›, ✕, फ़ोन का Back (PBBack)
    सिर्फ़ पब्लिक पन्नों के लिए — Admin / Owner Dashboard / Database को नहीं छूता। */
@@ -7,19 +8,17 @@
   if (window.PBPGal) return;
   var css = document.createElement("style");
   css.textContent =
-    ".pgal{display:grid;grid-template-columns:1fr;gap:14px;max-width:560px;margin:0 auto}" +
-    ".pgal figure{margin:0;min-width:0;background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(20,40,90,.07)}" +
-    ".pgal figure>button{display:block;width:100%;border:0;padding:0;background:#fff;cursor:zoom-in}" +
-    ".pgal img{width:100%;height:auto;display:block;pointer-events:none}" +
-    ".pgmore{display:block;width:100%;max-width:560px;margin:14px 0 2px;padding:13px;border:1.5px solid #1a4fb0;border-radius:14px;background:#fff;color:#1a4fb0;font:700 16px var(--pbf,system-ui,sans-serif);cursor:pointer}" +
+    ".pgal,.pgp .gr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}" +
+    "@media(min-width:700px){.pgal,.pgp .gr{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}}" +
+    ".pgal figure,.pgp .gr figure{margin:0;min-width:0;background:#fff;border:1px solid #e4eaf5;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(20,40,90,.06);display:flex;flex-direction:column}" +
+    ".pgal figure>button,.pgp .gr figure>button{display:block;width:100%;aspect-ratio:1/1;border:0;padding:6px;background:#fff;cursor:zoom-in}" +
+    ".pgal img,.pgp .gr img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
+    ".pgmore{display:block;width:100%;max-width:360px;margin:14px auto 2px;padding:13px;border:1.5px solid #1a4fb0;border-radius:14px;background:#fff;color:#1a4fb0;font:700 16px var(--pbf,system-ui,sans-serif);cursor:pointer}" +
     ".pgp{position:fixed;inset:0;z-index:10000;background:#f4f7fc;overflow-y:auto;-webkit-overflow-scrolling:touch}" +
     ".pgp .hd{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:#fff;border-bottom:1px solid #e4eaf5;font:700 18px var(--pbf,system-ui,sans-serif);color:#1c2540}" +
     ".pgp .hd button{border:0;background:#eef2f9;width:40px;height:40px;border-radius:50%;font-size:22px;color:#1c2540;cursor:pointer}" +
-    ".pgp .gr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px}" +
-    "@media(min-width:700px){.pgp .gr{grid-template-columns:repeat(5,1fr)}}" +
-    ".pgp .gr button{border:0;padding:0;aspect-ratio:1/1;background:#fff;border-radius:8px;overflow:hidden;cursor:zoom-in}" +
-    ".pgp .gr img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
-    ".pgal figcaption{padding:9px 11px 11px;font-size:14px;font-weight:700;line-height:1.35;color:#1c2540;text-align:center;border-top:1px solid #eef2f9;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
+    ".pgp .gr{padding:10px;max-width:1200px;margin:0 auto}" +
+    ".pgal figcaption,.pgp .gr figcaption{padding:6px 8px 8px;font-size:12.5px;font-weight:600;line-height:1.3;color:#1c2540;text-align:left;border-top:1px solid #eef2f9;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
     ".pgv{position:fixed;inset:0;z-index:10001;background:rgba(5,10,20,.95);display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden;-webkit-user-select:none;user-select:none}" +
     ".pgv img{max-width:100vw;max-height:100vh;object-fit:contain;transform-origin:0 0;will-change:transform;pointer-events:none;-webkit-user-drag:none}" +
     ".pgv button{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:46px;height:46px;border-radius:50%;font-size:24px;cursor:pointer;z-index:2}" +
@@ -31,7 +30,7 @@
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* जाली का HTML: urls = फ़ोटो की list, caps = {url: नाम} */
-  var LIM = 5, cur = { urls: [], caps: {} };
+  var LIM = 6, cur = { urls: [], caps: {} };
   function grid(urls, caps) {
     caps = caps || {}; cur = { urls: urls, caps: caps };
     var h = '<div class="pgal">' + urls.slice(0, LIM).map(function (u, i) {
@@ -39,15 +38,17 @@
       return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
         (c ? '<figcaption>' + esc(c) + '</figcaption>' : '') + '</figure>';
     }).join("") + '</div>';
-    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="1">More (' + (urls.length - LIM) + ') ›</button>';
+    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="1">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' (' + urls.length + ') ›</button>';
     return h;
   }
   /* पूरा Gallery पन्ना: 3 कॉलम की छोटी फ़ोटो; दबाने पर बड़ी + zoom; Back एक-एक परत बंद करता है */
   function page(urls, caps, hi) {
     caps = caps || {};
     var d = document.createElement("div"); d.className = "pgp";
-    d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="Back">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + ' (' + urls.length + ')</span></div><div class="gr">' +
-      urls.map(function (u, i) { return '<button type="button" data-pg="' + i + '" aria-label="' + (hiL() ? "फ़ोटो " : "Photo ") + (i + 1) + '"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></button>'; }).join("") + '</div>';
+    d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="' + (hi ? "वापस" : "Back") + '">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + ' (' + urls.length + ')</span></div><div class="gr">' +
+      urls.map(function (u, i) { var c = caps[u] ? String(caps[u]) : "";
+        return '<figure><button type="button" data-pg="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
+          (c ? '<figcaption>' + esc(c) + '</figcaption>' : '') + '</figure>'; }).join("") + '</div>';
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; }
     d.addEventListener("click", function (e) {
       if (e.target.closest(".bk")) { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); return; }
