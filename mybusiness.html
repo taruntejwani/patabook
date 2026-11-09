@@ -492,10 +492,10 @@ function popEdit(slug,card){
   ov.addEventListener("click",e=>{if(e.target===ov)close();});
   document.body.appendChild(ov);document.body.style.overflow="hidden";if(window.PBBack)PBBack.open(byBack);
 }
-/* % (कुल 100): रजिस्टर की 2 चीज़ें (नाम-पता, लोकेशन) 50 + समय/प्रकार/सेवाएँ/PIN(+लोगो) 33 + दुकान की बाहर-अंदर की फ़ोटो भेजी हुई 12 + Email/वेबसाइट और GST/Udyam 5 */
+/* % (कुल 100): रजिस्टर की 2 चीज़ें (नाम-पता, लोकेशन) 50 + समय / सेवाएँ 38 + दुकान की बाहर-अंदर की फ़ोटो भेजी हुई 12। लोगो, ईमेल/वेबसाइट और GST/Udyam ज़रूरी नहीं — % में नहीं गिनते */
 function photoDone(b){return verOn()&&(verSt(b)==="pending"||verSt(b)==="approved");}
-function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const n=it.length,core=it.slice(0,2),tail=it.slice(n-2),mid=it.slice(2,n-2);
-  const f=a=>a.length?a.filter(x=>x[0]).length/a.length:0;return Math.round(f(core)*50+f(mid)*33+f(tail)*5+(photoDone(b)?12:0));}
+function profPct(b){const it=profItems(b,0);if(!it||!it.length)return null;const req=it.filter(x=>!x.opt),core=req.slice(0,2),mid=req.slice(2);   /* वैकल्पिक (GST) % में नहीं */
+  const f=a=>a.length?a.filter(x=>x[0]).length/a.length:0;return Math.round(f(core)*50+f(mid)*38+(photoDone(b)?12:0));}
 /* मंज़ूरी के लिए भेजने की शर्त: प्रोफ़ाइल 80%+ और दुकान की बाहर/अंदर की फ़ोटो जाँच के लिए भेजी हुई */
 const APPR_MIN=80;
 function photosOk(b){return !verOn()||verSt(b)==="pending"||verSt(b)==="approved";}
@@ -568,12 +568,11 @@ function profItems(b,i){
   return [
     [!!(b.name&&b.address),"🏪",en?"Shop name & address":"दुकान का नाम और पता","pop:cAddr"],
     [p.lat!=null&&p.lng!=null,"📍",en?"Location on map":"नक्शे पर लोकेशन","location.html?slug="+encodeURIComponent(b.slug)],
-    ...(PH(b,"logo")?[[!!LOGOS[b.slug],"🖼️",en?"Logo / photo":"लोगो / फोटो","business.html?slug="+encodeURIComponent(b.slug)+"#edit"]]:[]),
+    /* लोगो / फोटो और ईमेल-वेबसाइट: ज़रूरी नहीं — गैलरी / सेटिंग से बाद में कभी भी (प्रोफ़ाइल % में नहीं गिनते) */
     [has("Hours"),"🕘",en?"Opening hours":"खुलने-बंद होने का समय","pop:cTime"],
     [has("Services"),"🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ","pop:cSvc"],
-    [has("Email")||has("Website"),"🌐",en?"Email or website":"ईमेल या वेबसाइट","pop:cOnline"],
-    [has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number — optional":"GST या उद्यम (MSME) नंबर — वैकल्पिक","pop:gstCard",
-      (has("GST")||has("Udyam"))?((!has("GST")||/^GST-Verified:\s*yes/mi.test(d))&&(!has("Udyam")||/^Udyam-Verified:\s*yes/mi.test(d))?"ok":"pend"):""]
+    Object.assign([has("GST")||has("Udyam"),"🧾",en?"GST or Udyam (MSME) number — optional":"GST या उद्यम (MSME) नंबर — वैकल्पिक","pop:gstCard",
+      (has("GST")||has("Udyam"))?((!has("GST")||/^GST-Verified:\s*yes/mi.test(d))&&(!has("Udyam")||/^Udyam-Verified:\s*yes/mi.test(d))?"ok":"pend"):""],{opt:1})
   ];
 }
 let TAB={};
