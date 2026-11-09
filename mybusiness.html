@@ -1167,7 +1167,8 @@ function completeView(en){
   return '<div class="tp tp-'+tierOf(b)+'"><div class="setbar"><button type="button" data-setback="cp">‹ '+(en?"Dashboard":"डैशबोर्ड")+'</button><b>🏪 '+esc(b.name)+'</b></div>'+
     (full?'<div class="card" style="text-align:center"><div style="font-size:40px">🎉</div><b style="font-size:18px">'+(en?"Your profile is complete!":"आपकी प्रोफ़ाइल पूरी हो गई!")+'</b><p style="margin:8px 0 14px;color:#5b6475">'+(en?"Customers now see all details of your shop.":"अब ग्राहकों को आपकी दुकान की पूरी जानकारी दिखती है।")+'</p><button type="button" class="go" data-setback="cp">'+(en?"Go to dashboard ›":"डैशबोर्ड पर जाएँ ›")+'</button></div>':'')+
     '<div class="card">'+(canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+profBlock(b,i)+verifyBlock(b,i)+'</div>'+
-    (full?'<button type="button" class="cpmore" data-cpmore="'+i+'" style="display:block;margin:14px auto 4px;border:0;background:none;color:#5b6475;font:inherit;font-size:14px;text-decoration:underline;cursor:pointer">'+(en?"Other settings (account, notifications…) ›":"दूसरी सेटिंग (खाता, सूचनाएँ…) ›")+'</button>':'')+'</div>';
+    (full?'<button type="button" class="cpmore" data-cpmore="'+i+'" style="display:block;margin:14px auto 4px;border:0;background:none;color:#5b6475;font:inherit;font-size:14px;text-decoration:underline;cursor:pointer">'+(en?"Other settings (account, notifications…) ›":"दूसरी सेटिंग (खाता, सूचनाएँ…) ›")+'</button>':
+     '<button type="button" class="cpmore" data-tdgo="acct" data-tdi="'+i+'" style="display:block;margin:14px auto 4px;border:0;background:none;color:#5b6475;font:inherit;font-size:14px;text-decoration:underline;cursor:pointer">⚙️ '+(en?"Settings & security (password, logout, delete) ›":"सेटिंग और सुरक्षा (पासवर्ड, लॉगआउट, हटाएँ) ›")+'</button>')+'</div>';
 }
 function settingsView(en){
   const b=ROWS[SET.shop],i=SET.shop;
@@ -1539,7 +1540,7 @@ function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROW
   if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
 /* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
 let PENDCAT="";function openShop(i,cat,raw){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}
-  if(cat!=="cp"&&ROWS&&profIncomplete(ROWS[i]))cat="cp";   /* प्रोफ़ाइल पूरी होने तक सिर्फ़ Dashboard + यही पेज */   /* अधूरी प्रोफ़ाइल: Settings की जगह सीधे "प्रोफ़ाइल पूरी करें" */if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
+  if(cat!=="cp"&&cat!=="acct"&&!raw&&ROWS&&profIncomplete(ROWS[i]))cat="cp";   /* "Settings & security" (खाता: पासवर्ड, लॉगआउट, दुकान/खाता हटाएँ) हमेशा खुले */   /* प्रोफ़ाइल पूरी होने तक सिर्फ़ Dashboard + यही पेज */   /* अधूरी प्रोफ़ाइल: Settings की जगह सीधे "प्रोफ़ाइल पूरी करें" */if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
 function setBack(){if(SD>0)history.back();else{SET.cat=null;draw();}}
 window.addEventListener("popstate",e=>{DEEP=0;const st=e.state||{};SD=st.pbd||0;SET.cat=SD===0?null:(SD===1?"":(st.cat||""));SET.shop=SD===0?null:(st.shop==null?null:st.shop);ntOpen(false);if(ME&&ROWS)draw();window.scrollTo(0,0);});
 /* ☰ मेन्यू: Home जैसा — Preview, Gallery, Report, Notifications, Settings, Log out (एक से ज़्यादा दुकान हो तो दुकान चुनो; plan में न हो तो 🔒) */
