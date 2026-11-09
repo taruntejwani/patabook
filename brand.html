@@ -177,6 +177,7 @@ function intro(){try{
     im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2000);e.onclick=x;document.body.appendChild(e);
     if(window.PBBack){bk=true;PBBack.open(()=>{bk=false;x();},e);}
     return;}
+  return;   /* 🎬 Loader बंद (नवंबर 2026): सिर्फ़ poster वाली दुकानों पर poster, बाकी सीधा पेज */
   const sel=INTROSEL||{scene:1,style:"silver"};
   const d0=new Date(),td=d0.getFullYear()+"-"+(d0.getMonth()+1)+"-"+d0.getDate();
   let dy="";try{dy=localStorage.getItem("pbis_"+slug)||"";}catch(_){}if(dy===td)return;   /* दिन में एक बार */

@@ -11,7 +11,8 @@
   var q=/[?&]intro=\d/.test(location.search),sl=new URLSearchParams(location.search).get("slug")||"",t="",ci="",dy="";
   try{t=localStorage.getItem("pbt_"+sl)||"";ci=localStorage.getItem("pbi_"+sl)||"";dy=localStorage.getItem("pbis_"+sl)||"";}catch(e){}
   var d=new Date(),td=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
-  if(!q){if(t==="free"||t==="own"||ci==="none"||dy===td)return;if(t==="silver"&&!ci)return;}   /* पिछली बार पता चला था कि इस दुकान का loader नहीं चलता */
+  if(!/^(siyaram-ready-made-store-gariyadhar|new-jai-shanker-restaurant-gandhidham)(-|$)/.test(sl))return;   /* loader बंद: काला परदा सिर्फ़ poster वाली दुकानों पर */
+  if(!q){if(t==="own")return;}   /* पिछली बार पता चला था कि इस दुकान का loader नहीं चलता */
   var h=document.documentElement;h.classList.add("pbcv");
   setTimeout(function(){h.classList.remove("pbcv");},7000);}catch(e){}})();</script>
 <style>html.pbcv body::before{content:"";position:fixed;inset:0;z-index:9999;background:#050505}</style>
@@ -749,6 +750,7 @@ function pbIntro(){let wait=false;try{
     const go=()=>{if(tm)return;bar.style.transition="width "+T+"s linear";requestAnimationFrame(()=>{bar.style.width="100%";});tm=setInterval(()=>{n--;if(n<=0){x();return;}lab();},1000);};
     im.onload=go;im.onerror=x;im.src=PST[pk];setTimeout(go,2000);
     e.onclick=x;document.body.appendChild(e);return;}
+  return;   /* 🎬 Loader बंद (नवंबर 2026, मालिक का फ़ैसला): दुकान खुलते ही सीधा पेज। नीचे का पुराना कोड अब नहीं चलता */
   /* हर बार दुकान खुलने पर (link / होम से / refresh) — सिर्फ़ फ़ोन का Back दबाकर लौटने पर नहीं */
   try{const nv=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nv&&nv.type==="back_forward")return;}catch(_){}
   /* 🎬 दुकानदार का चुना हुआ loader (My Shop → Gallery → Loader, sql-35)। न चुना हो: Gold / Platinum पर #1, Silver पर कुछ नहीं।

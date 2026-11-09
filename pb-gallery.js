@@ -536,6 +536,7 @@
   /* 🎬 Loader: दुकानदार 50 cinematic loader में से एक चुने (sql-35). ग्राहक को दुकान का page खुलते ही यही चलता है */
   var INTRO = {}, ISEL = {}, IERR = {}, IPLAY = null, ILOADED = {};
   function introRow(b, i) {
+    return "";   /* 🎬 Loader बंद (नवंबर 2026) — My Shop में चुनने का बटन भी नहीं */
     var cur = INTRO[b.slug], lab = cur ? "#" + cur.scene : (paid(b) ? T("चुनें", "Choose") : "");
     if (!paid(b)) return '<button type="button" class="gfh glk" data-glk="1"><span class="gi">🎬</span><span class="gn"><b>' + T("लोडर", "Loader") + '</b></span><i>🔒</i></button>';
     return '<button type="button" class="gfh" data-gf="intro" data-i="' + i + '"><span class="gi">🎬</span><span class="gn"><b>' + T("लोडर", "Loader") + '</b></span><i>' + esc(lab) + '</i><em>›</em></button>';
