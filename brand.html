@@ -68,7 +68,8 @@ function dirUrl(b){const n=encodeURIComponent(b.name||""),a=encodeURIComponent(b
 const offerOf=p=>{for(const f of (p.feats||[])){const m=String(f).match(/^Offer:\s*(\d+)/i);if(m)return +m[1];}return 0;};
 const hid=k=>!!(window.PBHide&&PBHide.has(k));
 const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f));
-function fail(t){document.getElementById("app").innerHTML='<div class="msg"><div>'+esc(t)+'<br><br><a href="index.html">PataBook ›</a></div></div>';}
+function fail(t){try{const m=document.createElement("meta");m.name="robots";m.content="noindex";document.head.appendChild(m);}catch(_){}   /* दुकान नहीं मिली → Google इसे "Soft 404" न गिने */
+  document.getElementById("app").innerHTML='<div class="msg"><div>'+esc(t)+'<br><br><a href="index.html">PataBook ›</a></div></div>';}
 
 async function load(){
   if(!slug)return fail(L("दुकान नहीं मिली।","Shop not found."));
