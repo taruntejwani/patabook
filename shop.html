@@ -7,7 +7,7 @@
 <meta property="og:image" content="https://patabook.in/icon-512.png">
 <link rel="icon" href="pin.png">
 <script>/* 🎬 खुलते ही: पेज दिखने से पहले काला परदा, ताकि "पहले पेज, फिर loader" न हो। Back पर नहीं; एक ग्राहक को एक दुकान का loader दिन में एक बार */
-(function(){try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")return;
+(function(){try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")return;if(/[?&]own=1\b/.test(location.search))return;
   var q=/[?&]intro=\d/.test(location.search),sl=new URLSearchParams(location.search).get("slug")||"",t="",ci="",dy="";
   try{t=localStorage.getItem("pbt_"+sl)||"";ci=localStorage.getItem("pbi_"+sl)||"";dy=localStorage.getItem("pbis_"+sl)||"";}catch(e){}
   var d=new Date(),td=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
@@ -733,6 +733,7 @@ function render(){drawSoc();
 function cvOff(){setTimeout(()=>document.documentElement.classList.remove("pbcv"),400);}
 function pbIntro(){let wait=false;try{
   if(window.__pbIntro||!B)return;
+  if(/[?&]own=1\b/.test(location.search))return;   /* My Shop का Preview: मालिक खुद देख रहा है → loader / poster नहीं, पेज सीधा */
   if(!window.__premDone){wait=true;return;}   /* plan अभी पता नहीं (पहला render): परदा रहने दो, दूसरे render पर फ़ैसला */
   const t=TIER();try{localStorage.setItem("pbt_"+slug,t);}catch(_){}if(t!=="silver"&&t!=="gold"&&t!=="platinum")return;
   if(document.body.classList.contains("pbe-on"))return;

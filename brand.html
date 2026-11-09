@@ -162,6 +162,7 @@ function openReport(){
 }
 /* 🎬 पेज खुलते ही: दुकान का अपना poster (3 सेकंड) या My Shop → Gallery → Loader — बिल्कुल पुराने पेज जैसा। Back से लौटने पर नहीं। */
 function intro(){try{
+  if(/[?&]own=1\b/.test(location.search))return;   /* My Shop का Preview: loader / poster नहीं */
   const nv=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nv&&nv.type==="back_forward")return;
   if(matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   const PST={"siyaram-ready-made-store-gariyadhar":"posters/siyaram-ready-made-store-gariyadhar.webp","new-jai-shanker-restaurant-gandhidham":"posters/new-jai-shanker-restaurant-gandhidham.webp"};

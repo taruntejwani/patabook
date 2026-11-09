@@ -717,7 +717,7 @@ async function sendVerify(i,btn){
 }
 /* plan: free / silver / gold / platinum — और उसमें कौन-सी सुविधा ON है (Admin → Plans) */
 /* 👁️ Preview: सीधे दुकान का असली पेज (Free → business, Silver/Gold → shop, Platinum → brand) — बीच में दूसरा पेज खुलकर redirect न हो */
-function pvUrl(b){const t=tierOf(b),q="?slug="+encodeURIComponent(b.slug);return (t==="platinum"?"brand.html":t==="free"?"business.html":"shop.html")+q;}
+function pvUrl(b){const t=tierOf(b),q="?slug="+encodeURIComponent(b.slug);return (t==="platinum"?"brand.html":t==="free"?"business.html":"shop.html")+q+"&own=1";}   /* own=1: मालिक खुद देख रहा है → loader / poster नहीं, सीधा पेज */
 window.pbPvUrl=pvUrl;
 function tierOf(b){const P=PREM&&PREM[b.slug];return P&&P.until?(P.tier&&P.tier!=="free"?P.tier:"platinum"):"free";}
 function PH(b,f){return window.PBPlan?PBPlan.hasT(tierOf(b),f):isP(b);}
