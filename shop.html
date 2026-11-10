@@ -486,6 +486,10 @@ html.t-silver body .dock a:not(.w){background:linear-gradient(135deg,#4c5664,#2f
 .qa.rc>.k1:not(#z)>span{color:#1a73e8!important}.qa.rc>.k2:not(#z)>span{color:#1e9e57!important}.qa.rc>.k3:not(#z)>span{color:#e8590c!important}.qa.rc>.k4:not(#z)>span{color:#6d28d9!important}
 .qa.rc>.dis:not(#z){opacity:.45!important;filter:grayscale(1)!important}
 @media(hover:hover){.qa.rc>a:hover>span,.qa.rc>button:hover>span{background:currentColor}.qa.rc>a:hover svg,.qa.rc>button:hover svg{color:#fff}}
+/* 🩶 Silver: banner/cover न हो तो गहरा silver-grey metal (Gallery की फ़ोटो पीछे नहीं लगती) */
+html.t-silver body .hero:not(.hascv){background:linear-gradient(115deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.09) 18%,rgba(255,255,255,0) 34%,rgba(255,255,255,.07) 52%,rgba(255,255,255,0) 70%,rgba(255,255,255,.08) 88%,rgba(255,255,255,0) 100%),linear-gradient(165deg,#3b4350 0%,#232830 48%,#3a424e 100%)!important;color:#e6eaf0!important;border-top:3px solid #9aa4b2!important;border-bottom:1.5px solid #5b6572!important}
+html.t-silver .hero:not(.hascv) .hname h1{-webkit-text-fill-color:#fff!important;color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.55)!important}
+html.t-silver .hero:not(.hascv) .hname .sub{color:#d3d9e1!important;text-shadow:none!important}
 </style>
 </head><body>
 
@@ -677,7 +681,7 @@ function render(){drawSoc();
   const MEMB={silver:"pb-member-silver.webp",gold:"pb-member-gold.webp",platinum:"pb-member-platinum.webp"};   /* 🏅 plan का member निशान: नाम वाले हिस्से के कोने में */
   document.getElementById("app").innerHTML=
    (COVER?'<div class="cvbar" data-pbh="photos" style="--cv:url(\''+esc(COVER)+'\')"><img src="'+esc(COVER)+'" alt="" decoding="async"></div>':'')+
-   '<div class="hero'+(COVER?' hascv':'')+(PREM&&MEMB[TIER()]?' hasmb':'')+'">'+(PREM&&MEMB[TIER()]?'<img class="hmb" src="'+MEMB[TIER()]+'" alt="'+esc(TIER().toUpperCase())+' MEMBER" width="72" height="72" decoding="async">':'')+((!COVER&&G[0])?'<div class="bg" data-pbh="photos" style="background-image:url(\''+esc(G[0])+'\')"></div>':'')+'<div class="wrap">'+
+   '<div class="hero'+(COVER?' hascv':'')+(PREM&&MEMB[TIER()]?' hasmb':'')+'">'+(PREM&&MEMB[TIER()]?'<img class="hmb" src="'+MEMB[TIER()]+'" alt="'+esc(TIER().toUpperCase())+' MEMBER" width="72" height="72" decoding="async">':'')+'<div class="wrap">'+
      '<div class="hlogo'+(PREM?' gold':'')+'" data-pbh="logo">'+(LOGO()?'<img src="'+esc(LOGO())+'" alt="">':'<div class="ini">'+INI()+'</div>')+(PREM?'<img class="crn" src="'+(TIER()==="platinum"?"pb-diamond.webp":TIER()==="silver"?"pb-crown-silver.webp":"pb-crown.webp")+'" alt="">':'')+'</div>'+
      '<div class="hname"><h1>'+esc(b.name)+'</h1>'+
        '<div class="sub">'+esc([sub||b.category,city].filter(Boolean).join(" · "))+'</div>'+
