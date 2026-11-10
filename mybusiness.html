@@ -302,6 +302,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .tp .cat .ci{background:var(--tb);color:var(--tt);border-radius:12px}.tp .cat>i{background:var(--tb);color:var(--tt);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-style:normal}
 .cats{display:grid;gap:10px}.cat{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 6px 18px rgba(26,115,232,.07)}.cat .ci{font-size:24px;width:46px;height:46px;border-radius:14px;background:#eef4ff;display:grid;place-items:center;flex:none}.cat .ct{flex:1;min-width:0}.cat .ct b{display:block;font-size:16px}.cat .ct small{display:block;color:var(--muted);font-size:13px;margin-top:1px}.cat i{font-style:normal;color:var(--blue);font-size:22px;font-weight:700}
 .stl{display:block;margin-top:12px;text-align:center;background:var(--blue);color:#fff;font-weight:700;border-radius:12px;padding:12px;font-size:15px}.stl.alt{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+/* प्रोफ़ाइल पूरी: दुकान की पूरी जानकारी, हर लाइन के बगल में ✏️ (वहीं popup में बदलें) */
+.sdh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}.sdh b{font-size:17px;color:#0b2f73}.sdh em{font-style:normal;font-size:12.5px;font-weight:700;color:#137333;background:#e7f6ec;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.sd{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}.sdh+.sd{border-top:0}
+.sd>i{flex:none;font-style:normal;font-size:18px;width:24px;text-align:center;line-height:1.3}
+.sd>div{flex:1;min-width:0}.sd small{display:block;font-size:12.5px;color:#5b6475;font-weight:600}.sd span{display:block;font-size:15px;color:#1f2937;overflow-wrap:anywhere;white-space:pre-line}.sd span.no{color:#8a93a3}
+.sd>a,.sd>button{flex:none;align-self:center;border:1px solid #cfe0ff;background:#f4f8ff;color:#1a73e8;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
+.sdpv{display:block;text-align:center;margin:12px 0 2px;padding:12px;border-radius:14px;background:#1a73e8;color:#fff!important;font-weight:700;text-decoration:none}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script>
 <style id="pbmAnim">@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}.pbmp>*:nth-child(4){animation-delay:.19s}.pbmp>*:nth-child(5){animation-delay:.24s}.pbmp>*:nth-child(6){animation-delay:.29s}.pbmp>*:nth-child(n+7){animation-delay:.33s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}</style>
@@ -1161,12 +1168,39 @@ function profOverview(en){
 }
 /* 📝 प्रोफ़ाइल अधूरी हो: dashboard / Settings से सीधे यह पेज — सिर्फ़ बाकी कदम (Settings का पैनल नहीं) */
 function profIncomplete(b){const it=b?profItems(b,ROWS.indexOf(b)):null;if(!it||!it.length)return false;const pc=profPct(b);return pc!==null&&pc<100;}
+/* प्रोफ़ाइल पूरी होने पर: दुकान की पूरी जानकारी (जैसी ग्राहक को दिखती है) + हर लाइन पर ✏️ */
+function shopDetails(b,i,en){
+  const p=(PROF&&PROF[b.slug])||{},d=p.d||"",g=k=>((d.match(new RegExp("^"+k+":[ \\t]*(.*)$","mi"))||[])[1]||"").trim();
+  const NO=en?"Not added":"नहीं भरा",DAY={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
+  const tm=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t);if(!m)return t;let h=+m[1];const mm=m[2];
+    if(en)return (h%12||12)+":"+mm+" "+(h<12?"AM":"PM");return (h<12?"सुबह ":h<16?"दोपहर ":h<19?"शाम ":"रात ")+(h%12||12)+":"+mm;};
+  const hr=g("Hours"),hp=hr.split("-"),cl=g("Closed");
+  let hours=hp.length===2?tm(hp[0].trim())+" – "+tm(hp[1].trim()):hr;
+  if(hours&&cl)hours+="\n"+(en?"Closed: "+cl:"बंद: "+cl.split(/\s*,\s*/).map(x=>DAY[x]||x).join(", "));
+  const TY={Retailer:"रिटेलर (दुकान)",Wholesaler:"होलसेलर",Manufacturer:"निर्माता (मैन्युफैक्चरर)",Distributor:"डिस्ट्रीब्यूटर",Service:"सेवा"},ty=g("Type");
+  const addr=[String(b.address||"").split("\n")[0],g("Landmark")?(/^(near|पास)/i.test(g("Landmark"))?"":(en?"Near ":"पास में: "))+g("Landmark"):"",g("PIN")?"PIN "+g("PIN"):""].filter(Boolean).join("\n");
+  const on=[g("Website"),g("Email")].filter(Boolean).join("\n"),tax=[g("GST")?"GST: "+g("GST"):"",g("Udyam")?"Udyam: "+g("Udyam"):""].filter(Boolean).join("\n");
+  const hasLoc=p.lat!=null&&p.lng!=null,E=en?"✏️ Edit":"✏️ बदलें",AD=en?"➕ Add":"➕ जोड़ें";
+  const pop=(c,has)=>'<a href="#" data-pop="'+c+'" data-popshop="'+esc(b.slug)+'">'+(has?E:AD)+'</a>';
+  const row=(ic,lb,val,act)=>'<div class="sd"><i>'+ic+'</i><div><small>'+lb+'</small><span'+(val?'':' class="no"')+'>'+esc(val||NO)+'</span></div>'+(act||"")+'</div>';
+  return '<div class="sdh"><b>📋 '+(en?"Your shop details":"आपकी दुकान की जानकारी")+'</b><em>✅ '+(en?"Profile complete":"प्रोफ़ाइल पूरी")+'</em></div>'+
+    row("🏪",en?"Shop name":"दुकान का नाम",b.name,pop("cAddr",1))+
+    row("📍",en?"Address":"पता",addr,pop("cAddr",!!addr))+
+    row("🗺️",en?"Location on map":"नक्शे पर लोकेशन",hasLoc?(en?"✅ Set":"✅ लगी हुई है"):"",'<a href="location.html?slug='+encodeURIComponent(b.slug)+'">'+(hasLoc?E:AD)+'</a>')+
+    (b.phone?row("📞",en?"Mobile number":"मोबाइल नंबर","+91 "+String(b.phone).replace(/\D/g,"").slice(-10),""):"")+
+    row("🏷️",en?"Business type":"बिज़नेस का प्रकार",en?ty:(TY[ty]||ty),pop("cType",!!ty))+
+    row("🕘",en?"Timings":"खुलने-बंद होने का समय",hours,pop("cTime",!!hours))+
+    row("🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",g("Services"),pop("cSvc",!!g("Services")))+
+    row("🌐",en?"Website / email":"वेबसाइट / ईमेल",on,pop("cOnline",!!on))+
+    row("🧾",en?"GST / Udyam (optional)":"GST / उद्यम (वैकल्पिक)",tax,pop("gstCard",!!tax))+
+    '<a class="sdpv" href="'+esc(pvUrl(b))+'">👁️ '+(en?"See your shop page":"अपनी दुकान का पेज देखें")+' ›</a>';
+}
 function completeView(en){
   const b=ROWS[SET.shop],i=SET.shop;if(!b)return "";
   const pc=profPct(b),full=pc===null||pc>=100;
   return '<div class="tp tp-'+tierOf(b)+'"><div class="setbar"><button type="button" data-setback="cp">‹ '+(en?"Dashboard":"डैशबोर्ड")+'</button><b>🏪 '+esc(b.name)+'</b></div>'+
-    (full?'<div class="card" style="text-align:center"><div style="font-size:40px">🎉</div><b style="font-size:18px">'+(en?"Your profile is complete!":"आपकी प्रोफ़ाइल पूरी हो गई!")+'</b><p style="margin:8px 0 14px;color:#5b6475">'+(en?"Customers now see all details of your shop.":"अब ग्राहकों को आपकी दुकान की पूरी जानकारी दिखती है।")+'</p><button type="button" class="go" data-setback="cp">'+(en?"Go to dashboard ›":"डैशबोर्ड पर जाएँ ›")+'</button></div>':'')+
-    '<div class="card">'+(canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+profBlock(b,i)+verifyBlock(b,i)+'</div>'+
+    (false?'<div class="card" style="text-align:center"><div style="font-size:40px">🎉</div><b style="font-size:18px">'+(en?"Your profile is complete!":"आपकी प्रोफ़ाइल पूरी हो गई!")+'</b><p style="margin:8px 0 14px;color:#5b6475">'+(en?"Customers now see all details of your shop.":"अब ग्राहकों को आपकी दुकान की पूरी जानकारी दिखती है।")+'</p><button type="button" class="go" data-setback="cp">'+(en?"Go to dashboard ›":"डैशबोर्ड पर जाएँ ›")+'</button></div>':'')+
+    '<div class="card">'+(canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+(full&&PROF&&PROF[b.slug]?shopDetails(b,i,en):profBlock(b,i))+verifyBlock(b,i)+'</div>'+
     (full?'<button type="button" class="cpmore" data-cpmore="'+i+'" style="display:block;margin:14px auto 4px;border:0;background:none;color:#5b6475;font:inherit;font-size:14px;text-decoration:underline;cursor:pointer">'+(en?"Other settings (account, notifications…) ›":"दूसरी सेटिंग (खाता, सूचनाएँ…) ›")+'</button>':
      '<button type="button" class="cpmore" data-tdgo="acct" data-tdi="'+i+'" style="display:block;margin:14px auto 4px;border:0;background:none;color:#5b6475;font:inherit;font-size:14px;text-decoration:underline;cursor:pointer">⚙️ '+(en?"Settings & security (password, logout, delete) ›":"सेटिंग और सुरक्षा (पासवर्ड, लॉगआउट, हटाएँ) ›")+'</button>')+'</div>';
 }
@@ -1295,7 +1329,7 @@ function draw(){
   const inSet=SET.cat!==null&&!!ROWS[SET.shop];
   {const er=document.querySelector(".edrow");if(er)er.hidden=inSet;const sb=$("stBtn");if(sb){sb.hidden=false;sb.setAttribute("aria-expanded",inSet?"true":"false");sb.setAttribute("aria-label",en?"Settings":"सेटिंग");}}
   $("who").hidden=!(inSet&&SET.cat==="acct");
-  if(inSet&&ROWS[SET.shop]&&SET.cat==="cp"){$("h1").hidden=false;$("sub").hidden=false;$("h1").textContent=en?"📝 Complete your profile":"📝 प्रोफ़ाइल पूरी करें";$("sub").textContent=en?"Fill in the missing details of your shop, step by step.":"अपनी दुकान की बाकी जानकारी एक-एक कदम भरें।";list.innerHTML=completeView(en);return;}
+  if(inSet&&ROWS[SET.shop]&&SET.cat==="cp"){$("h1").hidden=false;$("sub").hidden=false;{const pc0=profPct(ROWS[SET.shop]),fl=pc0===null||pc0>=100;$("h1").textContent=fl?(en?"📋 Shop details":"📋 दुकान की जानकारी"):(en?"📝 Complete your profile":"📝 प्रोफ़ाइल पूरी करें");$("sub").textContent=fl?(en?"Tap ✏️ next to anything to change it.":"कुछ भी बदलना हो तो उसके बगल में ✏️ दबाएँ।"):(en?"Fill in the missing details of your shop, step by step.":"अपनी दुकान की बाकी जानकारी एक-एक कदम भरें।");}list.innerHTML=completeView(en);return;}
   if(inSet&&ROWS[SET.shop]){$("h1").hidden=false;$("sub").hidden=false;$("h1").textContent=en?"⚙️ Settings":"⚙️ सेटिंग";$("sub").textContent=en?"Everything about your shop, in one place.":"आपकी दुकान की सारी सेटिंग एक ही जगह।";list.innerHTML=settingsView(en);return;}
   if(BOOT&&window.PBTejDash&&ROWS.length){list.innerHTML='<p class="note">…</p>';return;}   /* पूरा डेटा आने तक: पुराना card / FREE फ़्लैश नहीं */
   let _td="";
