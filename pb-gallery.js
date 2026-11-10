@@ -208,6 +208,74 @@
   }
 
   /* ✨ पहले से लगी फ़ोटो का background हटाना: AI → नई फ़ोटो दिखाओ → "यही रखें" पर नई फ़ोटो उसी जानकारी के साथ, पुरानी हटे */
+  /* 🪄 दबाकर हटाएँ (Magic Wand): जहाँ दबाया, वहाँ से जुड़ा उसी रंग का पूरा हिस्सा एक साथ सफ़ेद।
+     जुड़ा नहीं है तो नहीं हटता। magicWand(file) → Promise<File | null>  (null = रद्द) */
+  function magicWand(file) {
+    return new Promise(function (resolve) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onerror = function () { URL.revokeObjectURL(u); resolve(null); };
+      im.onload = function () {
+        URL.revokeObjectURL(u);
+        var W = im.naturalWidth, H = im.naturalHeight, N = W * H, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+        var g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0);
+        var ov = document.createElement("div"); ov.className = "pbgov"; ov.style.zIndex = "340";
+        ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</h3>' +
+          '<p class="hn">' + T("जो हिस्सा हटाना है (जैसे काला छेद या धब्बा), उस पर एक बार दबाएँ। उससे जुड़ा उसी रंग का पूरा हिस्सा सफ़ेद हो जाएगा।", "Tap once on the part to remove (like a black hole or a spot). Everything joined to it in the same colour turns white.") + '</p>' +
+          '<div id="pbmww" style="position:relative;margin:6px auto;border:2px solid #0060f0;border-radius:12px;overflow:hidden;background:#fff;cursor:crosshair"></div>' +
+          '<label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#33395a;margin:8px 0">' + T("कितना मिलता-जुलता रंग", "How similar") + '<input type="range" id="pbmwt" min="10" max="140" value="50" style="flex:1" aria-label="' + esc(T("कितना मिलता-जुलता रंग", "How similar")) + '"></label>' +
+          '<p class="hn" id="pbmws" style="min-height:18px;margin:0 0 8px;color:#0b2f73;font-weight:700"></p>' +
+          '<div style="display:flex;gap:8px"><button type="button" class="pbgsv" id="pbmwd" style="flex:2;margin:0">✔ ' + T("हो गया", "Done") + '</button>' +
+          '<button type="button" class="pbgop" id="pbmwu" style="flex:1;margin:0;justify-content:center">↶ ' + T("वापस", "Undo") + '</button></div>' +
+          '<button type="button" class="pbgop" id="pbmwx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
+        document.body.appendChild(ov);
+        var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
+        var wrap = ov.querySelector("#pbmww"), maxW = Math.min(window.innerWidth - 56, 460), maxH = Math.max(220, window.innerHeight * .5), sc = Math.min(maxW / W, maxH / H);
+        cv.style.cssText = "display:block;width:" + Math.round(W * sc) + "px;height:" + Math.round(H * sc) + "px";
+        wrap.style.width = Math.round(W * sc) + "px"; wrap.appendChild(cv);
+        var hist = [], done = false, tl = ov.querySelector("#pbmwt"), st = ov.querySelector("#pbmws");
+        function fill(px, py) {
+          var id = g.getImageData(0, 0, W, H), d = id.data, s0 = (py * W + px) * 4, r = d[s0], gg = d[s0 + 1], b = d[s0 + 2], tol = +tl.value;
+          if (r > 245 && gg > 245 && b > 245) { st.textContent = T("यहाँ पहले से सफ़ेद है — धब्बे पर दबाएँ।", "Already white here — tap on the spot."); return; }
+          hist.push(g.getImageData(0, 0, W, H)); if (hist.length > 8) hist.shift();
+          var m = new Uint8Array(N), q = new Int32Array(N), qs = 0, qe = 0, cnt = 0, i0 = py * W + px;
+          function ok(i) { var o = i * 4; return Math.abs(d[o] - r) + Math.abs(d[o + 1] - gg) + Math.abs(d[o + 2] - b) <= tol; }
+          m[i0] = 1; q[qe++] = i0;
+          while (qs < qe) {
+            var i = q[qs++], x = i % W; cnt++;
+            if (x > 0 && !m[i - 1] && ok(i - 1)) { m[i - 1] = 1; q[qe++] = i - 1; }
+            if (x < W - 1 && !m[i + 1] && ok(i + 1)) { m[i + 1] = 1; q[qe++] = i + 1; }
+            if (i >= W && !m[i - W] && ok(i - W)) { m[i - W] = 1; q[qe++] = i - W; }
+            if (i < N - W && !m[i + W] && ok(i + W)) { m[i + W] = 1; q[qe++] = i + W; }
+          }
+          /* किनारे की हल्की परछाईं भी: 1 pixel और, अगर रंग थोड़ा-सा भी मिलता हो */
+          for (var j = 0; j < qe; j++) {
+            var k = q[j], kx = k % W, nb = [kx > 0 ? k - 1 : -1, kx < W - 1 ? k + 1 : -1, k >= W ? k - W : -1, k < N - W ? k + W : -1];
+            for (var t = 0; t < 4; t++) { var v = nb[t]; if (v < 0 || m[v]) continue; var o2 = v * 4; if (Math.abs(d[o2] - r) + Math.abs(d[o2 + 1] - gg) + Math.abs(d[o2 + 2] - b) <= tol * 2.2) m[v] = 2; }
+          }
+          for (var z = 0; z < N; z++) if (m[z]) { var o3 = z * 4; d[o3] = d[o3 + 1] = d[o3 + 2] = 255; }
+          g.putImageData(id, 0, 0);
+          st.textContent = cnt > N * .6 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ वापस दबाएँ और slider कम करें।", "A very large part was removed — if wrong, tap ↶ Undo and lower the slider.") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
+        }
+        cv.addEventListener("click", function (e) {
+          var rc = cv.getBoundingClientRect(), px = Math.max(0, Math.min(W - 1, Math.floor((e.clientX - rc.left) / sc))), py = Math.max(0, Math.min(H - 1, Math.floor((e.clientY - rc.top) / sc)));
+          fill(px, py);
+        });
+        function fin(v) { if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; resolve(v); }
+        var pend = null, closeTop = function (v) { pend = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); };
+        if (window.PBBack) PBBack.open(function () { fin(pend); });
+        ov.querySelector("#pbmwu").onclick = function () { var h = hist.pop(); if (h) { g.putImageData(h, 0, 0); st.textContent = ""; } };
+        ov.querySelector("#pbmwx").onclick = function () { closeTop(null); };
+        ov.querySelector("#pbmwd").onclick = function () {
+          if (!hist.length) { closeTop(file); return; }
+          cv.toBlob(function (bl) {
+            if (bl && bl.type !== "image/webp") { closeTop(new File([bl], "wand.jpg", { type: bl.type })); return; }
+            closeTop(bl ? new File([bl], "wand.webp", { type: bl.type }) : file);
+          }, "image/webp", .95);
+        };
+      };
+      im.src = u;
+    });
+  }
   function lightBg(ov, b, k, x, act, close) {
     var s = b.slug, NF = null, img = ov.querySelector("img"), btns = function (on) { Array.prototype.forEach.call(ov.querySelectorAll("button[data-a]"), function (z) { z.disabled = !on; }); };
     var B = "border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;";
@@ -220,13 +288,14 @@
           var bl = await r.blob(), f = new File([bl], "p." + (/webp/.test(bl.type) ? "webp" : "jpg"), { type: bl.type || "image/jpeg" });
           NF = await PBBg.remove(f, function (p) { em.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)", "(first time only, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)") : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait"); });
           img.src = URL.createObjectURL(NF); img.style.background = "#fff";
-          ov.querySelector("#gbr").innerHTML = '<button type="button" data-a="bgsave" style="' + B + 'background:#1e9e57;color:#fff">✔ ' + T("यही रखें", "Keep this") + '</button><button type="button" data-a="bgno" style="' + B + 'background:#fff;color:#0b2f73">↩️ ' + T("पहले वाली ही रखें", "Keep the old one") + '</button>';
+          ov.querySelector("#gbr").innerHTML = '<button type="button" data-a="bgsave" style="' + B + 'background:#1e9e57;color:#fff">✔ ' + T("यही रखें", "Keep this") + '</button><button type="button" data-a="bgno" style="' + B + 'background:#fff;color:#0b2f73">↩️ ' + T("पहले वाली ही रखें", "Keep the old one") + '</button><button type="button" data-a="bgwand" style="' + B + 'background:#eaf2ff;color:#0b2f73">🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</button>';
           var bb = ov.querySelector('[data-a="bg"]'); if (bb) bb.remove();
           em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("Background हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Background removed. Tap \"Keep this\" if you like it.");
         } catch (er) { btns(true); var bb2 = ov.querySelector('[data-a="bg"]'); if (bb2) bb2.disabled = true; em.style.color = "#ffb4ab"; em.textContent = T("इस phone पर background नहीं हट सका।", "Couldn't remove the background on this phone."); }
         return;
       }
       if (w === "bgno") { close(); return; }
+      if (w === "bgwand") { var wf = await magicWand(NF); if (wf && wf !== NF) { NF = wf; img.src = URL.createObjectURL(NF); em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Done. Tap \"Keep this\" if you like it."); } return; }
       /* bgsave */
       btns(false); em.textContent = T("सेव हो रहा है…", "Saving…");
       try {
@@ -282,6 +351,7 @@
       if (e.target === ov || e.target.closest("[data-x]")) { close(); return; }
       var a = e.target.closest("[data-a]"); if (!a) return; var w = a.dataset.a, em = ov.querySelector("#gme"); a.disabled = true;
       if (w === "bg" || w === "bgsave" || w === "bgno") { bgAct(w, a, em); return; }
+      if (w === "bgwand") { a.disabled = false; bgAct(w, a, em); return; }
       try {
         if (w === "del") {
           if (!confirm(T("यह फ़ोटो हटाएँ?" + (act ? " (यही चालू है — हट जाएगी)" : ""), "Delete this photo?"))) { a.disabled = false; return; }
@@ -361,7 +431,7 @@
           '<button type="button" class="pbgop" id="pbgrs" style="flex:1;margin:0;justify-content:center">' + T("रीसेट", "Reset") + '</button>' +
           '<button type="button" class="pbgop" id="pbgsk" style="flex:1;margin:0;justify-content:center">' + T("ऐसे ही रखें", "Keep as is") + '</button></div>' +
           (bg && window.PBBg ? (orig
-            ? '<button type="button" class="pbgop" id="pbgbo" style="margin-top:8px;justify-content:center">↩️ ' + T("पहले वाली फ़ोटो (background के साथ)", "Original photo (with background)") + '</button>'
+            ? '<button type="button" class="pbgop" id="pbgwd" style="margin-top:8px;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">🪄 ' + T("दबाकर हटाएँ (बचा हुआ हिस्सा)", "Tap to remove (leftover part)") + '</button><button type="button" class="pbgop" id="pbgbo" style="margin-top:8px;justify-content:center">↩️ ' + T("पहले वाली फ़ोटो (background के साथ)", "Original photo (with background)") + '</button>'
             : '<button type="button" class="pbgop" id="pbgbg" style="margin-top:8px;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">✨ ' + T("Background हटाएँ", "Remove background") + '</button><p class="hn" id="pbgbs" style="text-align:center;margin:4px 0 0;min-height:0"></p>') : '') +
           '<button type="button" class="pbgop" id="pbgcx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
         document.body.appendChild(ov);
@@ -411,6 +481,7 @@
         ov.querySelector("#pbgsk").onclick = function () { closeTop(file); };
         ov.querySelector("#pbgcx").onclick = function () { closeTop(null); };
         var bo = ov.querySelector("#pbgbo"); if (bo) bo.onclick = function () { swap = { f: orig, orig: null }; closeTop(null); };
+        var wd = ov.querySelector("#pbgwd"); if (wd) wd.onclick = function () { magicWand(file).then(function (wf) { if (wf && wf !== file && !done) { swap = { f: wf, orig: orig }; closeTop(null); } }); };
         var bb = ov.querySelector("#pbgbg");
         if (bb) bb.onclick = function () {
           var st = ov.querySelector("#pbgbs"), btns = ov.querySelectorAll("button");
