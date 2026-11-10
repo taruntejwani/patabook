@@ -221,7 +221,11 @@
         var ov = document.createElement("div"); ov.className = "pbgov"; ov.style.zIndex = "340";
         ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</h3>' +
           '<p class="hn">' + T("जो हिस्सा हटाना है (जैसे काला छेद या धब्बा), उस पर एक बार दबाएँ। उससे जुड़ा उसी रंग का पूरा हिस्सा सफ़ेद हो जाएगा।", "Tap once on the part to remove (like a black hole or a spot). Everything joined to it in the same colour turns white.") + '</p>' +
-          '<div id="pbmww" style="position:relative;margin:6px auto;border:2px solid #0060f0;border-radius:12px;overflow:hidden;background:#fff;cursor:crosshair"></div>' +
+          '<div id="pbmww" style="position:relative;margin:6px auto;border:2px solid #0060f0;border-radius:12px;overflow:hidden;background:#fff;cursor:crosshair;touch-action:none"></div>' +
+          '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 2px"><button type="button" class="pbgop" id="pbmzo" style="width:auto;margin:0;padding:8px 14px" aria-label="' + esc(T("छोटा करें", "Zoom out")) + '">➖</button>' +
+          '<b id="pbmzv" style="min-width:52px;text-align:center;color:#0b2f73">100%</b><button type="button" class="pbgop" id="pbmzi" style="width:auto;margin:0;padding:8px 14px" aria-label="' + esc(T("बड़ा करें", "Zoom in")) + '">➕</button>' +
+          '<button type="button" class="pbgop" id="pbmzr" style="width:auto;margin:0;padding:8px 12px;font-size:13px">' + T("पूरा देखें", "Fit") + '</button></div>' +
+          '<p class="hn" style="text-align:center;margin:0 0 4px;font-size:12px">' + T("दो उँगली से ज़ूम · एक उँगली से खिसकाएँ · हल्का-सा दबाने पर हटेगा", "Pinch to zoom · drag to move · a light tap removes") + '</p>' +
           '<label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#33395a;margin:8px 0">' + T("कितना मिलता-जुलता रंग", "How similar") + '<input type="range" id="pbmwt" min="10" max="140" value="50" style="flex:1" aria-label="' + esc(T("कितना मिलता-जुलता रंग", "How similar")) + '"></label>' +
           '<p class="hn" id="pbmws" style="min-height:18px;margin:0 0 8px;color:#0b2f73;font-weight:700"></p>' +
           '<div style="display:flex;gap:8px"><button type="button" class="pbgsv" id="pbmwd" style="flex:2;margin:0">✔ ' + T("हो गया", "Done") + '</button>' +
@@ -230,9 +234,41 @@
         document.body.appendChild(ov);
         var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
         var wrap = ov.querySelector("#pbmww"), maxW = Math.min(window.innerWidth - 56, 460), maxH = Math.max(220, window.innerHeight * .5), sc = Math.min(maxW / W, maxH / H);
-        cv.style.cssText = "display:block;width:" + Math.round(W * sc) + "px;height:" + Math.round(H * sc) + "px";
-        wrap.style.width = Math.round(W * sc) + "px"; wrap.appendChild(cv);
+        var VW = Math.round(W * sc), VH = Math.round(H * sc);
+        cv.style.cssText = "display:block;width:" + VW + "px;height:" + VH + "px;transform-origin:0 0;will-change:transform";
+        wrap.style.width = VW + "px"; wrap.style.height = VH + "px"; wrap.appendChild(cv);
         var hist = [], done = false, tl = ov.querySelector("#pbmwt"), st = ov.querySelector("#pbmws");
+        /* 🔍 ज़ूम / खिसकाना */
+        var Z = 1, TX = 0, TY = 0, ZMAX = 8, zv = ov.querySelector("#pbmzv");
+        function paint() {
+          Z = Math.max(1, Math.min(ZMAX, Z));
+          TX = Math.min(0, Math.max(VW - VW * Z, TX)); TY = Math.min(0, Math.max(VH - VH * Z, TY));
+          cv.style.transform = "translate(" + TX + "px," + TY + "px) scale(" + Z + ")"; zv.textContent = Math.round(Z * 100) + "%";
+        }
+        function zoomAt(nz, cx, cy) { nz = Math.max(1, Math.min(ZMAX, nz)); TX = cx - (cx - TX) * nz / Z; TY = cy - (cy - TY) * nz / Z; Z = nz; paint(); }
+        ov.querySelector("#pbmzi").onclick = function () { zoomAt(Z * 1.6, VW / 2, VH / 2); };
+        ov.querySelector("#pbmzo").onclick = function () { zoomAt(Z / 1.6, VW / 2, VH / 2); };
+        ov.querySelector("#pbmzr").onclick = function () { Z = 1; TX = 0; TY = 0; paint(); };
+        var P = {}, moved = 0, pinched = false, lastD = 0, sx = 0, sy = 0;
+        wrap.addEventListener("pointerdown", function (e) {
+          e.preventDefault(); wrap.setPointerCapture(e.pointerId); P[e.pointerId] = { x: e.clientX, y: e.clientY };
+          var n = Object.keys(P).length; if (n === 1) { moved = 0; pinched = false; sx = e.clientX; sy = e.clientY; } else { pinched = true; lastD = 0; }
+        });
+        wrap.addEventListener("pointermove", function (e) {
+          var p = P[e.pointerId]; if (!p) return; var ids = Object.keys(P);
+          if (ids.length === 1) { moved = Math.max(moved, Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy)); if (moved > 8 && Z > 1) { TX += e.clientX - p.x; TY += e.clientY - p.y; paint(); } p.x = e.clientX; p.y = e.clientY; }
+          else { p.x = e.clientX; p.y = e.clientY; var a1 = P[ids[0]], a2 = P[ids[1]], d = Math.hypot(a1.x - a2.x, a1.y - a2.y), r = wrap.getBoundingClientRect();
+            if (lastD) zoomAt(Z * d / lastD, (a1.x + a2.x) / 2 - r.left, (a1.y + a2.y) / 2 - r.top); lastD = d; }
+        });
+        function pUp(e) {
+          var was = P[e.pointerId]; delete P[e.pointerId]; lastD = 0;
+          if (!was || pinched || moved > 8 || Object.keys(P).length) { if (!Object.keys(P).length) pinched = false; return; }
+          var rc = cv.getBoundingClientRect(), k = rc.width / W, px = Math.floor((e.clientX - rc.left) / k), py = Math.floor((e.clientY - rc.top) / k);
+          if (px < 0 || py < 0 || px >= W || py >= H) return;
+          fill(px, py);
+        }
+        wrap.addEventListener("pointerup", pUp); wrap.addEventListener("pointercancel", function (e) { delete P[e.pointerId]; lastD = 0; });
+        wrap.addEventListener("wheel", function (e) { e.preventDefault(); var r = wrap.getBoundingClientRect(); zoomAt(Z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
         function fill(px, py) {
           var id = g.getImageData(0, 0, W, H), d = id.data, s0 = (py * W + px) * 4, r = d[s0], gg = d[s0 + 1], b = d[s0 + 2], tol = +tl.value;
           if (r > 245 && gg > 245 && b > 245) { st.textContent = T("यहाँ पहले से सफ़ेद है — धब्बे पर दबाएँ।", "Already white here — tap on the spot."); return; }
@@ -256,10 +292,7 @@
           g.putImageData(id, 0, 0);
           st.textContent = cnt > N * .9 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ वापस दबाएँ और slider कम करें।", "A very large part was removed — if wrong, tap ↶ Undo and lower the slider.") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
         }
-        cv.addEventListener("click", function (e) {
-          var rc = cv.getBoundingClientRect(), px = Math.max(0, Math.min(W - 1, Math.floor((e.clientX - rc.left) / sc))), py = Math.max(0, Math.min(H - 1, Math.floor((e.clientY - rc.top) / sc)));
-          fill(px, py);
-        });
+
         function fin(v) { if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; resolve(v); }
         var pend = null, closeTop = function (v) { pend = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); };
         if (window.PBBack) PBBack.open(function () { fin(pend); });
