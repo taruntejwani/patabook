@@ -69,7 +69,7 @@
       return '<button type="button" class="gfh" data-gf="' + K[0] + '" data-i="' + i + '"><span class="gi">' + K[1] + '</span><span class="gn"><b>' + esc(nm(K)) + '</b></span><i>' + listOf(b, K[0]).length + '</i><em>›</em></button>';
     }).join("") + (b.h ? '' : introRow(b, i) + designRow(b, i)) + '</div>' + '<div class="glkm" id="glkm" style="display:none">' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + ' <button type="button" data-setcat="plan">' + T("प्लान देखें", "See plans") + ' ›</button></div>' + (function () {
       var parts = SHOWN.map(function (K) { return esc(nm(K)) + " <b>" + listOf(b, K[0]).length + "</b>"; }).join(" · ");
-      return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? total(b) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
+      return '<div class="gsum">' + parts + '<div class="gtot">' + T("कुल", "Total") + ' <b>' + (paid(b) ? SHOWN.reduce(function (n, K) { return n + listOf(b, K[0]).length; }, 0) : (PHOTOS[b.slug] || []).length) + '</b> / ' + (lim(b) || 100) + '</div></div>';
     })();
   };
   function gridOf(k, arr, tiles) {   /* फ़ोटो फ़ोल्डर: हर section अलग शीर्षक के साथ */
