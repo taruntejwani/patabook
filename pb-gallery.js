@@ -8,7 +8,7 @@
   var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   var KINDS = [["logo", "🖼️", "Logo", "Logo"], ["cover", "🌄", "Profile Banner", "Profile Banner"], ["photo", "📷", "Gallery", "Gallery"], ["front", "📢", "Home Ad", "Home Ad"], ["open", "🚪", "Opening Photo", "Opening Photo"]];
   var OPEN = {};
-  var SHOWN = KINDS.filter(function (K) { return K[0] !== "open"; });   /* 🚪 Opening Photo अब नहीं दिखता (फ़ोटो database में वैसी ही रहती हैं) */
+  var SHOWN = KINDS.filter(function (K) { return K[0] !== "open" && K[0] !== "cover"; });   /* 🚪 Opening Photo और 🌄 Profile Banner अब Gallery में नहीं दिखते (पुरानी फ़ोटो database में वैसी ही रहती हैं) */
   function en() { return L() === "en"; }
   function T(h, e) { return en() ? e : h; }
   function nm(K) { var H = { photo: "प्रोडक्ट और सर्विस", logo: "लोगो", cover: "प्रोफ़ाइल बैनर", front: "होम विज्ञापन", open: "शुरुआती फ़ोटो" }; return K[0] === "photo" ? T(H.photo, "Products & Services") : T(H[K[0]] || K[2], K[2]); }   /* "Gallery" फ़ोल्डर = प्रोडक्ट और सर्विस की फ़ोटो */
