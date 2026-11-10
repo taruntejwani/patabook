@@ -1502,7 +1502,7 @@ const bellH=async e=>{
   }catch(x){b.disabled=false;note(en?"Could not turn on. Try again in a while.":"चालू नहीं हो पाया। थोड़ी देर बाद दोबारा कोशिश करें।");}
 };
 $("ntPanel").addEventListener("click",bellH);$("list").addEventListener("click",bellH);
-$("out").onclick=async()=>{try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
+$("out").onclick=async()=>{try{localStorage.removeItem("pb-reg");localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(e){}await PBA.logout();ME=null;ROWS=null;draw();};
 function helpBar(en){
   if(!HELP||!HELP.length)return "";
   const PL={add:["➕",en?"Add photos":"फ़ोटो जोड़ना"],edit:["✏️",en?"Edit price & details":"कीमत / कैप्शन बदलना"],hide:["👁️",en?"Show / hide":"दिखाना / छिपाना"],remove:["🗑️",en?"Remove":"हटाना"]};
@@ -1576,7 +1576,7 @@ function ownMenu(){
     const k=a.dataset.k;
     if(k==="back"){main();return;}
     if(k.indexOf("hs:")===0){location.href="helper.html?s="+encodeURIComponent(k.slice(3));return;}
-    if(k==="out"){if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(x){}
+    if(k==="out"){if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;try{localStorage.removeItem("pb-reg");localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(x){}
       (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(()=>{}).then(()=>{kill();location.href="index.html";});return;}
     if(ROWS.length===1){go(k,0);return;}
     pick(k,a.innerText.trim());

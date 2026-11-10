@@ -133,7 +133,7 @@ $("s2").onsubmit=async e=>{
   try{await PBA.verifyOtp(email,c);location.replace(next);}
   catch(x){$("e2").textContent=errText(x)===T("err")?T("l_bad_code"):errText(x);b.disabled=false;}
 };
-$("out").onclick=async()=>{await PBA.logout();show(1);};
+$("out").onclick=async()=>{await PBA.logout();try{localStorage.removeItem("pb-reg");}catch(_){}show(1);};
 $("backBtn").onclick=()=>{history.length>1?history.back():location.href="index.html";};
 
 PB.apply();PB.mount($("pbLang"));

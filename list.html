@@ -1101,7 +1101,7 @@ async function checkLogin(){
   gateText();
   if(ME)loadOwnPhones();else{OWNP={};ownSync();}
 }
-$("whoOut").onclick=async()=>{await PBA.logout();checkLogin();};
+$("whoOut").onclick=async()=>{await PBA.logout();try{localStorage.removeItem("pb-reg");}catch(_){}checkLogin();};
 checkLogin();
 /* Home Service सिर्फ दुकान / फ़र्म के लिए — नौकरी / फ्रीलांसर / कारीगर को checkbox नहीं */
 function hsvByType(){const t=$("btype"),c=$("homeSvc");if(!t||!c)return;const ind=["Employee (Job)","Freelancer / Self-employed","Skilled Worker"].includes(t.value);
@@ -1130,7 +1130,11 @@ function goPhone(){const ix=steps.findIndex(s=>s.dataset.s==="phone");i=ix<0?0:i
 })();
 render();
 /* पेज दोबारा खुला और पहले रजिस्ट्रेशन किया था → सीधे स्टेटस */
-(function(){const r=loadReg();if(r&&r.phone){if(r.created)showStatus({status:"pending",name:r.name,slug:r.slug,created:r.created,skew:r.skew||0});checkPhone(r.phone,true);}})();
+(async function(){const r=loadReg();if(!r||!r.phone)return;
+  /* logout हो चुका हो (या कोई और इस फ़ोन पर) → पुरानी दुकान का "Your shop is live" मत दिखाओ, सीधा नया फ़ॉर्म */
+  let ses=null;try{ses=window.PBA&&await PBA.session();}catch(_){}
+  if(!ses){try{localStorage.removeItem("pb-reg");}catch(_){}return;}
+  if(r.created)showStatus({status:"pending",name:r.name,slug:r.slug,created:r.created,skew:r.skew||0});checkPhone(r.phone,true);})();
 </script>
 <script>
 /* शहर लिखते ही सुझाव: शहर · ज़िला, राज्य — चुनते ही राज्य (और पक्का पता हो तो ज़िला) अपने-आप */

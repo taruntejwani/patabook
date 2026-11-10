@@ -1379,7 +1379,7 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
       if(k==="hs"){location.href=PBHelp.url(a.dataset.s);return;}
       if(k==="out"){
         if(!confirm(h?"लॉग आउट करें?":"Log out?"))return;
-        try{localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(x){}
+        try{localStorage.removeItem("pb-reg");localStorage.removeItem("pb-my-shops");localStorage.removeItem("pb-my-shop-st");localStorage.removeItem("pb-helper-shops");}catch(x){}
         (window.PBA&&PBA.logout?PBA.logout():Promise.resolve()).catch(function(){}).then(function(){kill();bar.style.display="none";location.reload();});return;}
       if(k==="set"){location.href="mybusiness.html";return;}
       a.style.opacity=".6";if(!shops)shops=await myShops();
