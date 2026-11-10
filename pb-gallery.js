@@ -218,7 +218,7 @@
         try {
           var r = await fetch(x.url, { cache: "no-store" }); if (!r.ok) throw new Error("get");
           var bl = await r.blob(), f = new File([bl], "p." + (/webp/.test(bl.type) ? "webp" : "jpg"), { type: bl.type || "image/jpeg" });
-          NF = await PBBg.remove(f, function (p) { em.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~115 MB)", "(first time only, ~115 MB)") : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait"); });
+          NF = await PBBg.remove(f, function (p) { em.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~5 MB)", "(first time only, ~5 MB)") : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait"); });
           img.src = URL.createObjectURL(NF); img.style.background = "#fff";
           ov.querySelector("#gbr").innerHTML = '<button type="button" data-a="bgsave" style="' + B + 'background:#1e9e57;color:#fff">✔ ' + T("यही रखें", "Keep this") + '</button><button type="button" data-a="bgno" style="' + B + 'background:#fff;color:#0b2f73">↩️ ' + T("पहले वाली ही रखें", "Keep the old one") + '</button>';
           var bb = ov.querySelector('[data-a="bg"]'); if (bb) bb.remove();
@@ -419,7 +419,7 @@
           st.textContent = PBBg.ready() ? T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait") : T("AI तैयार हो रहा है… (पहली बार थोड़ा समय लगेगा)", "Getting AI ready… (takes a while the first time)");
           PBBg.remove(file, function (p) {
             if (done) return;
-            st.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~115 MB)", "(first time only, ~115 MB)")
+            st.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~5 MB)", "(first time only, ~5 MB)")
               : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait");
           }).then(function (nf) {
             if (done) return; swap = { f: nf, orig: file }; closeTop(null);
