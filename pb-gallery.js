@@ -245,10 +245,14 @@
           '<div id="pbmwa" style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 8px">' +
             '<div id="pbmww" style="position:relative;overflow:hidden;border-radius:8px;background:' + CHK + ';touch-action:none"></div></div>' +
           '<div style="background:#fff;color:#1f2937;border-radius:16px 16px 0 0;padding:10px 12px 12px">' +
-            '<div style="display:flex;gap:6px;margin-bottom:8px">' +
-              '<button type="button" data-md="tap" style="' + BT + 'flex:1">🪄 ' + T("दबाकर", "Tap") + '</button>' +
-              '<button type="button" data-md="brush" style="' + BT + 'flex:1">🖌️ ' + T("मैजिक ब्रश", "Magic brush") + '</button>' +
-              '<button type="button" data-md="repair" style="' + BT + 'flex:1">🩹 ' + T("वापस लाएँ", "Repair") + '</button></div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">' +
+              '<button type="button" data-md="tap" style="' + BT + '">🪄 ' + T("दबाकर", "Tap") + '</button>' +
+              '<button type="button" data-md="brush" style="' + BT + '">🖌️ ' + T("मैजिक ब्रश", "Magic brush") + '</button>' +
+              '<button type="button" data-md="manual" style="' + BT + '">🧽 ' + T("पूरा मिटाएँ", "Erase all") + '</button>' +
+              '<button type="button" data-md="repair" style="' + BT + '">🩹 ' + T("वापस लाएँ", "Repair") + '</button></div>' +
+            '<div id="pbmcm" style="display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:13px;font-weight:700">' + T("रंग:", "Colour:") +
+              '<button type="button" data-cm="1" style="' + BT + 'padding:6px 10px;font-size:13px">🔄 ' + T("बदलता रहे", "Follow centre") + '</button>' +
+              '<button type="button" data-cm="0" style="' + BT + 'padding:6px 10px;font-size:13px">🔒 ' + T("एक ही रंग", "One colour") + '</button></div>' +
             '<p id="pbmhn" style="margin:0 0 6px;font-size:12px;color:#5b6475;line-height:1.35;min-height:32px"></p>' +
             '<label id="pbmsl1" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("ब्रश", "Brush") + '<input type="range" id="pbmbs" min="14" max="110" value="44" style="flex:1"></label>' +
             '<label id="pbmsl2" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("मिलता-जुलता रंग", "Similar colour") + '<input type="range" id="pbmwt" min="8" max="140" value="45" style="flex:1"></label>' +
@@ -302,16 +306,17 @@
           st.textContent = qe > N * .9 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ दबाएँ और \"मिलता-जुलता रंग\" कम करें।", "A very large part was removed — if wrong, tap ↶ and lower \"Similar colour\".") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
         }
         /* ---- 🖌️ / 🩹 ब्रश ---- */
-        var MODE = "brush", SC = null, LP = null, stroke = false;
+        var MODE = "brush", SC = null, LP = null, stroke = false, ADAPT = true;   /* ADAPT: गोले के बीच का रंग हर कदम पर (दूसरे apps जैसा) */
         function img(cx, cy) { var rc = cv.getBoundingClientRect(), k = rc.width / W; return { x: (cx - rc.left) / k, y: (cy - rc.top) / k, k: k }; }
         function brushAt(cx, cy) {
           var p = img(cx, cy), R0 = (+bsl.value / 2) / p.k, x0 = Math.max(0, Math.floor(p.x - R0)), y0 = Math.max(0, Math.floor(p.y - R0)), x1 = Math.min(W, Math.ceil(p.x + R0)), y1 = Math.min(H, Math.ceil(p.y + R0));
           if (x1 <= x0 || y1 <= y0) return;
           var R2 = R0 * R0, tol = +tl.value;
+          if (MODE === "brush" && ADAPT) { var cx0 = Math.round(p.x), cy0 = Math.round(p.y); if (cx0 >= 0 && cy0 >= 0 && cx0 < W && cy0 < H && M[cy0 * W + cx0]) SC = colAt(cx0, cy0); }
           if (MODE === "brush" && !SC) return;
           for (var y = y0; y < y1; y++) for (var x = x0; x < x1; x++) {
             var dx = x - p.x, dy = y - p.y; if (dx * dx + dy * dy > R2) continue; var i = y * W + x;
-            if (MODE === "repair") M[i] = 255; else if (M[i] && dif(i, SC) <= tol) M[i] = 0;
+            if (MODE === "repair") M[i] = 255; else if (MODE === "manual") M[i] = 0; else if (M[i] && dif(i, SC) <= tol) M[i] = 0;
           }
           render(x0, y0, x1, y1);
         }
@@ -324,7 +329,7 @@
         function showRing(cx, cy, fx, fy) {
           var r = wrap.getBoundingClientRect(), d = +bsl.value;
           ring.style.display = dot.style.display = "block"; ring.style.width = ring.style.height = d + "px";
-          ring.style.borderColor = dot.style.background = MODE === "repair" ? "#1e9e57" : "#e8336d";
+          ring.style.borderColor = dot.style.background = MODE === "repair" ? "#1e9e57" : MODE === "manual" ? "#f29900" : "#e8336d";
           ring.style.transform = "translate(" + (cx - r.left - d / 2) + "px," + (cy - r.top - d / 2) + "px)";
           dot.style.transform = "translate(" + (cx - r.left) + "px," + (cy - r.top) + "px)";
           if (fx != null && Math.abs(fy - cy) > 6) { fdot.style.display = "block"; fdot.style.transform = "translate(" + (fx - r.left) + "px," + (fy - r.top) + "px)"; } else fdot.style.display = "none";
@@ -334,13 +339,24 @@
           MODE = m;
           Array.prototype.forEach.call(ov.querySelectorAll("[data-md]"), function (bn) { var on = bn.dataset.md === m; bn.style.background = on ? "#1a73e8" : "#eef2f8"; bn.style.color = on ? "#fff" : "#0b2f73"; });
           ov.querySelector("#pbmsl1").style.display = m === "tap" ? "none" : "flex";
-          ov.querySelector("#pbmsl2").style.display = m === "repair" ? "none" : "flex";
+          ov.querySelector("#pbmsl2").style.display = m === "repair" || m === "manual" ? "none" : "flex";
+          ov.querySelector("#pbmcm").style.display = m === "brush" ? "flex" : "none";
           ov.querySelector("#pbmsl3").style.display = m === "tap" ? "none" : "flex";
           hn.textContent = m === "tap" ? T("जो हिस्सा हटाना है, उस पर एक बार हल्का-सा दबाएँ — उससे जुड़ा उसी रंग का पूरा हिस्सा हटेगा। एक उँगली से खिसकाएँ, दो से ज़ूम।", "Tap once on the part — everything joined to it in that colour is removed. One finger moves, two fingers zoom.")
-            : m === "brush" ? T("गोले का बीच (बिंदु) background पर रखकर उँगली रखें, फिर किनारे-किनारे फेरें। जो रंग पहले पकड़ा, सिर्फ़ वही मिटेगा — product नहीं। दो उँगली से ज़ूम / खिसकाएँ।", "Put the circle's centre on the background, then run along the edge. Only the colour picked at the start is erased — not the product. Two fingers zoom / move.")
+            : m === "brush" ? (ADAPT ? T("गोले का बीच (बिंदु) हमेशा background पर रखें और किनारे-किनारे फेरें — बीच में जो रंग आए वही मिटेगा (दीवार, फ़्रेम, फूल सब)। बीच product पर गया तो product भी मिटेगा। दो उँगली से ज़ूम / खिसकाएँ।", "Keep the circle's centre on the background and run along the edge — whatever colour is under the centre is erased (wall, frame, flowers). If the centre goes onto the product, it erases the product too. Two fingers zoom / move.")
+                : T("उँगली रखते ही गोले के बीच का रंग पकड़ा जाता है — पूरी लकीर में सिर्फ़ वही मिटेगा, product नहीं (सादे background के लिए)। दो उँगली से ज़ूम / खिसकाएँ।", "The colour under the centre is picked when you touch — only that colour is erased in the whole stroke, not the product (for plain backgrounds). Two fingers zoom / move."))
+            : m === "manual" ? T("गोले के नीचे जो भी हो, सब मिट जाएगा — फूल, पौधा, फ़्रेम जैसी उलझी चीज़ों के लिए। product के पास ब्रश छोटा करें। दो उँगली से ज़ूम / खिसकाएँ।", "Everything under the circle is erased — for messy things like flowers, plants, frames. Use a small brush near the product. Two fingers zoom / move.")
             : T("गलती से मिटा हिस्सा? उस पर फेरें — असली फ़ोटो वापस आ जाएगी। दो उँगली से ज़ूम / खिसकाएँ।", "Erased by mistake? Brush over it to bring the original back. Two fingers zoom / move.");
         }
         Array.prototype.forEach.call(ov.querySelectorAll("[data-md]"), function (bn) { bn.onclick = function () { setMode(bn.dataset.md); }; });
+        function setCM(a) {
+          ADAPT = a; try { localStorage.setItem("pb-wand-cm", a ? "1" : "0"); } catch (e) {}
+          Array.prototype.forEach.call(ov.querySelectorAll("[data-cm]"), function (bn) { var on = (bn.dataset.cm === "1") === a; bn.style.background = on ? "#0b2f73" : "#eef2f8"; bn.style.color = on ? "#fff" : "#0b2f73"; });
+          if (MODE === "brush") setMode("brush");
+        }
+        Array.prototype.forEach.call(ov.querySelectorAll("[data-cm]"), function (bn) { bn.onclick = function () { setCM(bn.dataset.cm === "1"); }; });
+        try { ADAPT = localStorage.getItem("pb-wand-cm") !== "0"; } catch (e) {}
+        setCM(ADAPT);
         setMode("brush");
         /* ---- 🔍 ज़ूम / खिसकाना ---- */
         var Z = 1, TX = 0, TY = 0, ZMAX = 10, ZMIN = .4, zv = ov.querySelector("#pbmzv");
@@ -386,7 +402,7 @@
         function pUp(e) {
           var was = P[e.pointerId]; delete P[e.pointerId]; lastD = 0; lastM = null; var left = Object.keys(P).length;
           if (MODE !== "tap") {
-            if (stroke && !left) { stroke = false; LP = null; if (e.pointerType !== "mouse") hideRing(); st.textContent = MODE === "repair" ? "✅ " + T("वापस आ गया।", "Restored.") : (SC ? "✅ " + T("मिटा दिया। और किनारे पर भी फेरें।", "Erased. Brush more edges.") : T("गोले का बीच फ़ोटो पर रखें।", "Keep the circle's centre on the photo.")); }
+            if (stroke && !left) { stroke = false; LP = null; if (e.pointerType !== "mouse") hideRing(); st.textContent = MODE === "repair" ? "✅ " + T("वापस आ गया।", "Restored.") : MODE === "manual" ? "✅ " + T("मिटा दिया।", "Erased.") : (SC ? "✅ " + T("मिटा दिया। और किनारे पर भी फेरें।", "Erased. Brush more edges.") : T("गोले का बीच फ़ोटो पर रखें।", "Keep the circle's centre on the photo.")); }
             if (!left) pinched = false; return;
           }
           if (!was || pinched || moved > 8 || left) { if (!left) pinched = false; return; }
