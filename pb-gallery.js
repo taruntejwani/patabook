@@ -219,13 +219,15 @@
         var W = im.naturalWidth, H = im.naturalHeight, N = W * H, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         var g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0);
         var ov = document.createElement("div"); ov.className = "pbgov"; ov.style.zIndex = "340";
-        ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</h3>' +
-          '<p class="hn">' + T("जो हिस्सा हटाना है (जैसे काला छेद या धब्बा), उस पर एक बार दबाएँ। उससे जुड़ा उसी रंग का पूरा हिस्सा सफ़ेद हो जाएगा।", "Tap once on the part to remove (like a black hole or a spot). Everything joined to it in the same colour turns white.") + '</p>' +
+        ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>🪄 ' + T("हिस्सा हटाएँ", "Remove parts") + '</h3>' +
+          '<p class="hn">' + T("बचा हुआ background या धब्बा हटाएँ। नीचे तरीका चुनें: 🪄 दबाकर (एक बार दबाओ) या 🖌️ मैजिक ब्रश (किनारे पर फेरो)।", "Remove leftover background or spots. Choose below: 🪄 Tap (tap once) or 🖌️ Magic brush (run along the edge).") + '</p>' +
           '<div id="pbmww" style="position:relative;margin:6px auto;border:2px solid #0060f0;border-radius:12px;overflow:hidden;background:#fff;cursor:crosshair;touch-action:none"></div>' +
           '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 2px"><button type="button" class="pbgop" id="pbmzo" style="width:auto;margin:0;padding:8px 14px" aria-label="' + esc(T("छोटा करें", "Zoom out")) + '">➖</button>' +
           '<b id="pbmzv" style="min-width:52px;text-align:center;color:#0b2f73">100%</b><button type="button" class="pbgop" id="pbmzi" style="width:auto;margin:0;padding:8px 14px" aria-label="' + esc(T("बड़ा करें", "Zoom in")) + '">➕</button>' +
           '<button type="button" class="pbgop" id="pbmzr" style="width:auto;margin:0;padding:8px 12px;font-size:13px">' + T("पूरा देखें", "Fit") + '</button></div>' +
-          '<p class="hn" style="text-align:center;margin:0 0 4px;font-size:12px">' + T("दो उँगली से ज़ूम · एक उँगली से खिसकाएँ · हल्का-सा दबाने पर हटेगा", "Pinch to zoom · drag to move · a light tap removes") + '</p>' +
+          '<div style="display:flex;gap:8px;margin:6px 0"><button type="button" class="pbgop" id="pbmmt" style="flex:1;margin:0;justify-content:center">🪄 ' + T("दबाकर", "Tap") + '</button><button type="button" class="pbgop" id="pbmmb" style="flex:1;margin:0;justify-content:center">🖌️ ' + T("मैजिक ब्रश", "Magic brush") + '</button></div>' +
+          '<p class="hn" id="pbmhn" style="text-align:center;margin:0 0 4px;font-size:12px"></p>' +
+          '<label id="pbmbsl" style="display:none;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#33395a;margin:6px 0">' + T("ब्रश का साइज़", "Brush size") + '<input type="range" id="pbmbs" min="14" max="90" value="40" style="flex:1" aria-label="' + esc(T("ब्रश का साइज़", "Brush size")) + '"></label>' +
           '<label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#33395a;margin:8px 0">' + T("कितना मिलता-जुलता रंग", "How similar") + '<input type="range" id="pbmwt" min="10" max="140" value="50" style="flex:1" aria-label="' + esc(T("कितना मिलता-जुलता रंग", "How similar")) + '"></label>' +
           '<p class="hn" id="pbmws" style="min-height:18px;margin:0 0 8px;color:#0b2f73;font-weight:700"></p>' +
           '<div style="display:flex;gap:8px"><button type="button" class="pbgsv" id="pbmwd" style="flex:2;margin:0">✔ ' + T("हो गया", "Done") + '</button>' +
@@ -249,25 +251,96 @@
         ov.querySelector("#pbmzi").onclick = function () { zoomAt(Z * 1.6, VW / 2, VH / 2); };
         ov.querySelector("#pbmzo").onclick = function () { zoomAt(Z / 1.6, VW / 2, VH / 2); };
         ov.querySelector("#pbmzr").onclick = function () { Z = 1; TX = 0; TY = 0; paint(); };
-        var P = {}, moved = 0, pinched = false, lastD = 0, sx = 0, sy = 0;
+        /* दो तरीके: 🪄 दबाकर (एक बार दबाओ → जुड़ा हुआ उसी रंग का पूरा हिस्सा) · 🖌️ मैजिक ब्रश (किनारे पर फेरो → गोले के बीच वाला रंग ही आसपास से मिटे) */
+        var MODE = "tap", bsl = ov.querySelector("#pbmbs"), hn = ov.querySelector("#pbmhn");
+        var ring = document.createElement("div"); ring.style.cssText = "position:absolute;left:0;top:0;border:2px solid #e8336d;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 1px #fff,inset 0 0 0 1px #fff";
+        var dot = document.createElement("div"); dot.style.cssText = "position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#e8336d;pointer-events:none;display:none";
+        wrap.appendChild(ring); wrap.appendChild(dot);
+        function setMode(m) {
+          MODE = m;
+          ov.querySelector("#pbmmt").style.cssText = "flex:1;margin:0;justify-content:center" + (m === "tap" ? ";background:#1a73e8;color:#fff;border-color:#1a73e8" : "");
+          ov.querySelector("#pbmmb").style.cssText = "flex:1;margin:0;justify-content:center" + (m === "brush" ? ";background:#1a73e8;color:#fff;border-color:#1a73e8" : "");
+          ov.querySelector("#pbmbsl").style.display = m === "brush" ? "flex" : "none";
+          hn.textContent = m === "tap" ? T("दो उँगली से ज़ूम · एक उँगली से खिसकाएँ · हल्का-सा दबाने पर हटेगा", "Pinch to zoom · drag to move · a light tap removes")
+            : T("गोला उँगली से थोड़ा ऊपर रहता है — उसे product के किनारे-किनारे फेरें। गोले के बीच वाला रंग ही मिटेगा। दो उँगली से ज़ूम / खिसकाएँ।", "The circle stays a little above your finger — run it along the product edge. Only the colour at the circle's centre is erased. Two fingers to zoom / move.");
+        }
+        ov.querySelector("#pbmmt").onclick = function () { setMode("tap"); };
+        ov.querySelector("#pbmmb").onclick = function () { setMode("brush"); };
+        setMode("tap");
+        var P = {}, moved = 0, pinched = false, lastD = 0, lastM = null, sx = 0, sy = 0, OFF = 0, stroke = false, SC = null, LP = null;
+        function wpt(cx, cy) { var r = wrap.getBoundingClientRect(); return { x: cx - r.left, y: cy - r.top }; }
+        function img(cx, cy) { var rc = cv.getBoundingClientRect(), k = rc.width / W; return { x: (cx - rc.left) / k, y: (cy - rc.top) / k, k: k }; }
+        function showRing(cx, cy) {
+          var p = wpt(cx, cy), d = +bsl.value; ring.style.display = dot.style.display = "block";
+          ring.style.width = ring.style.height = d + "px"; ring.style.transform = "translate(" + (p.x - d / 2) + "px," + (p.y - d / 2) + "px)";
+          dot.style.left = p.x + "px"; dot.style.top = p.y + "px";
+        }
+        function brushAt(cx, cy) {
+          var p = img(cx, cy), R0 = (+bsl.value / 2) / p.k;
+          if (p.x < -R0 || p.y < -R0 || p.x > W + R0 || p.y > H + R0) return;
+          var ix = Math.round(p.x), iy = Math.round(p.y);
+          if (ix >= 0 && iy >= 0 && ix < W && iy < H) {
+            var c = g.getImageData(Math.max(0, ix - 1), Math.max(0, iy - 1), 3, 3).data, r = 0, gg = 0, b = 0, n = 0;
+            for (var i = 0; i < c.length; i += 4) { r += c[i]; gg += c[i + 1]; b += c[i + 2]; n++; }
+            r /= n; gg /= n; b /= n;
+            if (!(r > 245 && gg > 245 && b > 245)) SC = [r, gg, b];   /* बीच में पहले से सफ़ेद हो तो पिछला रंग ही चलता रहे */
+          }
+          if (!SC) return;
+          var x0 = Math.max(0, Math.floor(p.x - R0)), y0 = Math.max(0, Math.floor(p.y - R0)), x1 = Math.min(W, Math.ceil(p.x + R0)), y1 = Math.min(H, Math.ceil(p.y + R0));
+          if (x1 <= x0 || y1 <= y0) return;
+          var id = g.getImageData(x0, y0, x1 - x0, y1 - y0), d = id.data, w = x1 - x0, R2 = R0 * R0, tol = +tl.value;
+          for (var yy = 0; yy < y1 - y0; yy++) for (var xx = 0; xx < w; xx++) {
+            var dx = x0 + xx - p.x, dy = y0 + yy - p.y; if (dx * dx + dy * dy > R2) continue;
+            var o = (yy * w + xx) * 4;
+            if (Math.abs(d[o] - SC[0]) + Math.abs(d[o + 1] - SC[1]) + Math.abs(d[o + 2] - SC[2]) <= tol) d[o] = d[o + 1] = d[o + 2] = 255;
+          }
+          g.putImageData(id, x0, y0);
+        }
+        function brushLine(cx, cy) {   /* तेज़ फेरने पर बीच के बिंदु भी */
+          if (!LP) { brushAt(cx, cy); LP = { x: cx, y: cy }; return; }
+          var dx = cx - LP.x, dy = cy - LP.y, dist = Math.hypot(dx, dy), step = Math.max(2, +bsl.value / 4), n = Math.ceil(dist / step);
+          for (var i = 1; i <= n; i++) brushAt(LP.x + dx * i / n, LP.y + dy * i / n);
+          LP = { x: cx, y: cy };
+        }
         wrap.addEventListener("pointerdown", function (e) {
           e.preventDefault(); wrap.setPointerCapture(e.pointerId); P[e.pointerId] = { x: e.clientX, y: e.clientY };
-          var n = Object.keys(P).length; if (n === 1) { moved = 0; pinched = false; sx = e.clientX; sy = e.clientY; } else { pinched = true; lastD = 0; }
+          var n = Object.keys(P).length;
+          if (n === 1) {
+            moved = 0; pinched = false; sx = e.clientX; sy = e.clientY;
+            OFF = e.pointerType === "mouse" ? 0 : Math.max(40, +bsl.value * .8);
+            if (MODE === "brush") { stroke = true; SC = null; LP = null; hist.push(g.getImageData(0, 0, W, H)); if (hist.length > 8) hist.shift(); showRing(e.clientX, e.clientY - OFF); brushLine(e.clientX, e.clientY - OFF); }
+          } else { pinched = true; lastD = 0; lastM = null; if (stroke) { stroke = false; } }
         });
         wrap.addEventListener("pointermove", function (e) {
-          var p = P[e.pointerId]; if (!p) return; var ids = Object.keys(P);
-          if (ids.length === 1) { moved = Math.max(moved, Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy)); if (moved > 8 && Z > 1) { TX += e.clientX - p.x; TY += e.clientY - p.y; paint(); } p.x = e.clientX; p.y = e.clientY; }
-          else { p.x = e.clientX; p.y = e.clientY; var a1 = P[ids[0]], a2 = P[ids[1]], d = Math.hypot(a1.x - a2.x, a1.y - a2.y), r = wrap.getBoundingClientRect();
-            if (lastD) zoomAt(Z * d / lastD, (a1.x + a2.x) / 2 - r.left, (a1.y + a2.y) / 2 - r.top); lastD = d; }
+          var p = P[e.pointerId];
+          if (!p) { if (MODE === "brush" && e.pointerType === "mouse") showRing(e.clientX, e.clientY); return; }
+          var ids = Object.keys(P);
+          if (ids.length === 1) {
+            moved = Math.max(moved, Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy));
+            if (MODE === "brush" && stroke) { showRing(e.clientX, e.clientY - OFF); brushLine(e.clientX, e.clientY - OFF); }
+            else if (MODE === "tap" && moved > 8 && Z > 1) { TX += e.clientX - p.x; TY += e.clientY - p.y; paint(); }
+            p.x = e.clientX; p.y = e.clientY;
+          } else {
+            p.x = e.clientX; p.y = e.clientY; var a1 = P[ids[0]], a2 = P[ids[1]], d = Math.hypot(a1.x - a2.x, a1.y - a2.y), r = wrap.getBoundingClientRect(), mx = (a1.x + a2.x) / 2 - r.left, my = (a1.y + a2.y) / 2 - r.top;
+            if (lastM) { TX += mx - lastM.x; TY += my - lastM.y; }
+            if (lastD) zoomAt(Z * d / lastD, mx, my); else paint();
+            lastD = d; lastM = { x: mx, y: my };
+          }
         });
         function pUp(e) {
-          var was = P[e.pointerId]; delete P[e.pointerId]; lastD = 0;
+          var was = P[e.pointerId]; delete P[e.pointerId]; lastD = 0; lastM = null;
+          if (MODE === "brush") {
+            if (stroke && !Object.keys(P).length) { stroke = false; LP = null; if (e.pointerType !== "mouse") ring.style.display = dot.style.display = "none"; st.textContent = "✅ " + T("मिटा दिया। और किनारे पर भी फेरें, या ↶ वापस।", "Erased. Brush more edges, or ↶ Undo."); }
+            if (!Object.keys(P).length) pinched = false;
+            return;
+          }
           if (!was || pinched || moved > 8 || Object.keys(P).length) { if (!Object.keys(P).length) pinched = false; return; }
-          var rc = cv.getBoundingClientRect(), k = rc.width / W, px = Math.floor((e.clientX - rc.left) / k), py = Math.floor((e.clientY - rc.top) / k);
+          var q = img(e.clientX, e.clientY), px = Math.floor(q.x), py = Math.floor(q.y);
           if (px < 0 || py < 0 || px >= W || py >= H) return;
           fill(px, py);
         }
-        wrap.addEventListener("pointerup", pUp); wrap.addEventListener("pointercancel", function (e) { delete P[e.pointerId]; lastD = 0; });
+        wrap.addEventListener("pointerup", pUp); wrap.addEventListener("pointercancel", function (e) { delete P[e.pointerId]; lastD = 0; lastM = null; stroke = false; LP = null; });
+        wrap.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse" && !P[e.pointerId]) ring.style.display = dot.style.display = "none"; });
         wrap.addEventListener("wheel", function (e) { e.preventDefault(); var r = wrap.getBoundingClientRect(); zoomAt(Z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
         function fill(px, py) {
           var id = g.getImageData(0, 0, W, H), d = id.data, s0 = (py * W + px) * 4, r = d[s0], gg = d[s0 + 1], b = d[s0 + 2], tol = +tl.value;
@@ -381,7 +454,7 @@
       (k === "photo" ? (hp(b, "hide") ? '<button type="button" data-a="hide" style="' + btn + 'background:' + (x.hidden ? '#1e9e57' : '#fff') + ';color:' + (x.hidden ? '#fff' : '#0b2f73') + '">' + (x.hidden ? "👁️ " + T("दिखाओ", "Show") : "🙈 " + T("छिपाओ", "Hide")) + '</button>' : '')
         : (act ? '<button type="button" data-a="unset" style="' + btn + 'background:#fff;color:#0b2f73">✖ ' + T("चालू नहीं रखना", "Stop using") + '</button>' : '<button type="button" data-a="set" style="' + btn + 'background:#1e9e57;color:#fff">✔ ' + T("Set (चालू करें)", "Set (use this)") + '</button>')) +
       (hp(b, "remove") ? '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("हटाएँ", "Delete") + '</button>' : '') + '</div>' +
-      ((k === "photo" || k === "logo") && hp(b, "add") && window.PBBg ? '<div id="gbx" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button type="button" data-a="bg" style="' + btn + 'background:#eaf2ff;color:#0b2f73">✨ ' + T("Background हटाएँ", "Remove background") + '</button><button type="button" data-a="bgwand" style="' + btn + 'background:#eaf2ff;color:#0b2f73">🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</button></div>' : '') +
+      ((k === "photo" || k === "logo") && hp(b, "add") && window.PBBg ? '<div id="gbx" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button type="button" data-a="bg" style="' + btn + 'background:#eaf2ff;color:#0b2f73">✨ ' + T("Background हटाएँ", "Remove background") + '</button><button type="button" data-a="bgwand" style="' + btn + 'background:#eaf2ff;color:#0b2f73">🪄 ' + T("हिस्सा हटाएँ", "Remove parts") + '</button></div>' : '') +
       '<div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px;text-align:center;max-width:420px"></div>';
     document.body.appendChild(ov);
     var prev = document.body.style.overflow; document.body.style.overflow = "hidden";
@@ -475,7 +548,7 @@
           '<button type="button" class="pbgop" id="pbgsk" style="flex:1;margin:0;justify-content:center">' + T("ऐसे ही रखें", "Keep as is") + '</button></div>' +
           (bg && window.PBBg ? '<div style="display:flex;gap:8px;margin-top:8px">' +
               (how !== "bg" ? '<button type="button" class="pbgop" id="pbgbg" style="flex:1;margin:0;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">✨ ' + T("Background हटाएँ", "Remove background") + '</button>' : '') +
-              '<button type="button" class="pbgop" id="pbgwd" style="flex:1;margin:0;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</button></div>' +
+              '<button type="button" class="pbgop" id="pbgwd" style="flex:1;margin:0;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">🪄 ' + T("हिस्सा हटाएँ", "Remove parts") + '</button></div>' +
               '<p class="hn" id="pbgbs" style="text-align:center;margin:4px 0 0;min-height:0"></p>' +
               (orig ? '<button type="button" class="pbgop" id="pbgbo" style="margin-top:8px;justify-content:center">↩️ ' + T("पहले वाली फ़ोटो", "Original photo") + '</button>' : '') : '') +
           '<button type="button" class="pbgop" id="pbgcx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
