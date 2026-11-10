@@ -207,6 +207,56 @@
     });
   }
 
+  /* ✨ पहले से लगी फ़ोटो का background हटाना: AI → नई फ़ोटो दिखाओ → "यही रखें" पर नई फ़ोटो उसी जानकारी के साथ, पुरानी हटे */
+  function lightBg(ov, b, k, x, act, close) {
+    var s = b.slug, NF = null, img = ov.querySelector("img"), btns = function (on) { Array.prototype.forEach.call(ov.querySelectorAll("button[data-a]"), function (z) { z.disabled = !on; }); };
+    var B = "border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;";
+    return async function (w, a, em) {
+      em.style.color = "#cfe0ff";
+      if (w === "bg") {
+        btns(false); em.textContent = PBBg.ready() ? T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait") : T("AI तैयार हो रहा है… (पहली बार थोड़ा समय लगेगा)", "Getting AI ready… (takes a while the first time)");
+        try {
+          var r = await fetch(x.url, { cache: "no-store" }); if (!r.ok) throw new Error("get");
+          var bl = await r.blob(), f = new File([bl], "p." + (/webp/.test(bl.type) ? "webp" : "jpg"), { type: bl.type || "image/jpeg" });
+          NF = await PBBg.remove(f, function (p) { em.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~115 MB)", "(first time only, ~115 MB)") : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait"); });
+          img.src = URL.createObjectURL(NF); img.style.background = "#fff";
+          ov.querySelector("#gbr").innerHTML = '<button type="button" data-a="bgsave" style="' + B + 'background:#1e9e57;color:#fff">✔ ' + T("यही रखें", "Keep this") + '</button><button type="button" data-a="bgno" style="' + B + 'background:#fff;color:#0b2f73">↩️ ' + T("पहले वाली ही रखें", "Keep the old one") + '</button>';
+          var bb = ov.querySelector('[data-a="bg"]'); if (bb) bb.remove();
+          em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("Background हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Background removed. Tap \"Keep this\" if you like it.");
+        } catch (er) { btns(true); var bb2 = ov.querySelector('[data-a="bg"]'); if (bb2) bb2.disabled = true; em.style.color = "#ffb4ab"; em.textContent = T("इस phone पर background नहीं हट सका।", "Couldn't remove the background on this phone."); }
+        return;
+      }
+      if (w === "bgno") { close(); return; }
+      /* bgsave */
+      btns(false); em.textContent = T("सेव हो रहा है…", "Saving…");
+      try {
+        ME = await PBA.session();
+        var blob = k === "logo" ? await squareImage(NF) : await resizeImage(NF, 1000), ext = blob.type === "image/webp" ? "webp" : "jpg";
+        var path = encodeURIComponent(s) + "/" + (k === "logo" ? "logo-" : "photo-") + Date.now() + "-bg." + ext;
+        var up2 = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
+        if (!up2.ok) throw new Error("upload");
+        var pub = SB + "/storage/v1/object/public/shop-logos/" + path;
+        if (k === "photo") {
+          var nid = await rpc("pb_photo_add", { p_slug: s, p_url: pub });
+          if (nid) {
+            try { await rpc("pb_photo_set", { p_slug: s, p_id: nid, p_sec: x.sec || null, p_sec_name: x.sec_name || null, p_title: x.title || null, p_price: x.price == null ? null : x.price, p_disc: x.disc == null ? null : x.disc, p_caption: x.caption || null, p_descr: x.descr || null, p_extra: x.extra || null, p_price_from: !!x.price_from, p_sold: !!x.sold }); } catch (e1) {}
+            if (x.hidden) { try { await rpc("pb_photo_hide", { p_slug: s, p_id: nid, p_hidden: true }); } catch (e2) {} }
+          }
+          await rpc("pb_photo_remove", { p_slug: s, p_id: x.id });
+        } else {
+          await rpc("pb_lib_add", { p_slug: s, p_kind: k, p_url: pub });
+          if (act) await setActive(b, k, pub);
+          await rpc("pb_lib_remove", { p_slug: s, p_id: x.id });
+        }
+        purge(s, x.url);
+        try { var hh = await dhash(blob); if (hh) await rpc("pb_img_reg", { p_slug: s, p_hash: hh }); } catch (e3) {}
+        close(); await reload(b);
+      } catch (er) {
+        btns(true); var m = String(er && er.message || ""); em.style.color = "#ffb4ab";
+        em.textContent = /too many/.test(m) ? T("फ़ोटो की सीमा पूरी है। पहले कोई एक फ़ोटो हटाएँ, फिर दोबारा कोशिश करें।", "Photo limit reached. Delete one photo first, then try again.") : T("सेव नहीं हो सका। दोबारा कोशिश करें।", "Could not save. Please try again.");
+      }
+    };
+  }
   function light(i, k, n) {
     var b = ROWS[i], s = b.slug, arr = listOf(b, k), x = arr[n]; if (!x) return;
     var act = k !== "photo" && active(b, k) === x.url, ov = document.createElement("div");
@@ -218,16 +268,20 @@
       '<div id="gbr" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' +
       (k === "photo" ? (hp(b, "hide") ? '<button type="button" data-a="hide" style="' + btn + 'background:' + (x.hidden ? '#1e9e57' : '#fff') + ';color:' + (x.hidden ? '#fff' : '#0b2f73') + '">' + (x.hidden ? "👁️ " + T("दिखाओ", "Show") : "🙈 " + T("छिपाओ", "Hide")) + '</button>' : '')
         : (act ? '<button type="button" data-a="unset" style="' + btn + 'background:#fff;color:#0b2f73">✖ ' + T("चालू नहीं रखना", "Stop using") + '</button>' : '<button type="button" data-a="set" style="' + btn + 'background:#1e9e57;color:#fff">✔ ' + T("Set (चालू करें)", "Set (use this)") + '</button>')) +
-      (hp(b, "remove") ? '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("हटाएँ", "Delete") + '</button>' : '') + '</div><div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px"></div>';
+      (hp(b, "remove") ? '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("हटाएँ", "Delete") + '</button>' : '') + '</div>' +
+      ((k === "photo" || k === "logo") && hp(b, "add") && window.PBBg ? '<button type="button" data-a="bg" style="' + btn + 'background:#eaf2ff;color:#0b2f73">✨ ' + T("Background हटाएँ", "Remove background") + '</button>' : '') +
+      '<div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px;text-align:center;max-width:420px"></div>';
     document.body.appendChild(ov);
     var prev = document.body.style.overflow; document.body.style.overflow = "hidden";
     var gone = false;
     function gc() { if (gone) return; gone = true; ov.remove(); document.body.style.overflow = prev; }
     function close() { if (window.PBBack) PBBack.close(); else gc(); }
     if (window.PBBack) PBBack.open(gc);
+    var bgAct = lightBg(ov, b, k, x, act, close);
     ov.addEventListener("click", async function (e) {
       if (e.target === ov || e.target.closest("[data-x]")) { close(); return; }
       var a = e.target.closest("[data-a]"); if (!a) return; var w = a.dataset.a, em = ov.querySelector("#gme"); a.disabled = true;
+      if (w === "bg" || w === "bgsave" || w === "bgno") { bgAct(w, a, em); return; }
       try {
         if (w === "del") {
           if (!confirm(T("यह फ़ोटो हटाएँ?" + (act ? " (यही चालू है — हट जाएगी)" : ""), "Delete this photo?"))) { a.disabled = false; return; }
