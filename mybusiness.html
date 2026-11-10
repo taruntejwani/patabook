@@ -1683,7 +1683,7 @@ async function start(){
 /* मोबाइल का Back बटन: Settings की हर स्क्रीन browser-history का एक कदम है (मुख्य पेज → सूची → वर्ग) */
 let SD=0;
 let DEEP=0,DEEPN=0;
-function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROWS[SET.shop]?ROWS[SET.shop].slug:"",_u=location.pathname+location.search+(_sl&&/^[a-z]*$/.test(cat)?"#go="+(cat||"home")+"&s="+encodeURIComponent(_sl):"");(DEEP?history.replaceState:history.pushState).call(history,Object.assign({},history.state||{},{pbd:d,cat:cat,shop:SET.shop}),"",_u);}catch(e){}DEEP=0;SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
+function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROWS[SET.shop]?ROWS[SET.shop].slug:"",_u=location.pathname+location.search+(_sl&&/^[a-z]*$/.test(cat)?"#go="+(cat||"home")+"&s="+encodeURIComponent(_sl):"");(DEEP?history.replaceState:history.pushState).call(history,Object.assign({},history.state||{},{pbd:d,cat:cat,shop:SET.shop},DEEP?{}:{pbgal:0,gf:null,gs:null}),"",_u);}catch(e){}DEEP=0;SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
   if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
 /* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
 let PENDCAT="";function openShop(i,cat,raw){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}
@@ -1764,7 +1764,7 @@ start();
 <script src="pb-imgcheck.js"></script>
 <script src="pb-hiring.js"></script>
 
-<script src="pb-back.js"></script><script src="pb-gallery.js?v=20"></script><script src="pb-bgremove.js?v=8"></script>
+<script src="pb-back.js"></script><script src="pb-gallery.js?v=21"></script><script src="pb-bgremove.js?v=8"></script>
 
 <script src="pb-ios-install.js" defer></script>
 <style id="pbwide">/* 🖥️ computer (1024px+): हर page screen की पूरी चौड़ाई में (1600px तक) */@media(min-width:1024px){.wrap,main,.spg .in,.dock .in,.ns h2{max-width:min(1600px,100%)!important;box-sizing:border-box}.wrap,main{padding-left:40px!important;padding-right:40px!important}}</style></body>

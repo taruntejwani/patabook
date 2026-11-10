@@ -5,6 +5,8 @@
    squareImage, coverImage, bannerImage, resizeImage, extOf, PDAYS, PDOPEN, posterDays */
 (function () {
   var LIB = {}, LOAD = {}, GO = {}, MSG = {};
+  /* refresh पर वही फ़ोल्डर खुला रहे (history.state में रखा है) */
+  try { var _hs = history.state; if (_hs && _hs.pbgal && _hs.gs && _hs.gf) GO[_hs.gs] = _hs.gf; } catch (e) {}
   var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   var KINDS = [["logo", "🖼️", "Logo", "Logo"], ["cover", "🌄", "Profile Banner", "Profile Banner"], ["photo", "📷", "Gallery", "Gallery"], ["front", "📢", "Home Ad", "Home Ad"], ["open", "🚪", "Opening Photo", "Opening Photo"]];
   var OPEN = {};
@@ -1004,7 +1006,7 @@
   window.addEventListener("popstate", function () { if (IPLAY) try { IPLAY.stop(); } catch (e) {} });
   window.addEventListener("popstate", function (ev) { if (ev.state && ev.state.pbgal) return; var any = false; for (var k in GO) if (GO[k]) { any = true; GO[k] = ""; } if (any) draw(); });
   document.getElementById("list").addEventListener("click", function (e) {
-    var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1 }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
+    var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1, gf: gf.dataset.gf, gs: b.slug }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-glk]")) { var m = document.getElementById("glkm"); if (m) m.style.display = "block"; return; }
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
     var gk = e.target.closest("[data-gk]"); if (gk) { e.stopPropagation(); tick(+gk.dataset.i, gk.dataset.gk, +gk.dataset.n); return; }
