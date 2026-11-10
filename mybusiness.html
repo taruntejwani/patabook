@@ -1188,6 +1188,8 @@ function sdErr(m,en){m=String(m||"");const H=[
   [/bad Website/i,"Write a correct website link.","वेबसाइट का सही लिंक लिखें।"],[/bad Email/i,"Write a correct email.","सही ईमेल लिखें।"],
   [/bad PIN/i,"PIN code must be 6 digits.","पिन कोड 6 अंकों का होना चाहिए।"],[/bad Hours/i,"Choose both opening and closing time.","खुलने और बंद होने, दोनों का समय चुनें।"],
   [/bad GST/i,"This GST number is not correct.","यह GST नंबर सही नहीं है।"],[/bad Udyam/i,"Udyam number looks like UDYAM-GJ-01-1234567.","उद्यम नंबर ऐसा होता है: UDYAM-GJ-01-1234567"],
+  [/bad Instagram/i,"Write a correct Instagram link or username (like instagram.com/yourshop).","Instagram का सही लिंक या यूज़रनेम लिखें (जैसे instagram.com/yourshop)।"],
+  [/bad Facebook/i,"Write a correct Facebook page link (like facebook.com/yourshop).","Facebook पेज का सही लिंक लिखें (जैसे facebook.com/yourshop)।"],
   [/gst in use|udyam in use/i,"This number is already on another shop.","यह नंबर पहले से किसी दूसरी दुकान पर है।"],
   [/short|long|bad/i,"Please check what you wrote.","जो लिखा है उसे एक बार देख लें।"]];
   const f=H.find(x=>x[0].test(m));return f?(en?f[1]:f[2]):(en?"Could not save. Check internet and try again.":"सेव नहीं हुआ। इंटरनेट देखकर फिर कोशिश करें।");}
@@ -1214,6 +1216,8 @@ function shopDetails(b,i,en){
     else if(k==="svc")f='<textarea id="sdIn" rows="3" maxlength="500" placeholder="'+(en?"e.g. Hair cut, shaving, facial":"जैसे: हेयर कट, शेविंग, फेशियल")+'">'+esc(g("Services"))+'</textarea>';
     else if(k==="web")f='<input id="sdIn" type="url" inputmode="url" maxlength="200" value="'+esc(g("Website"))+'" placeholder="https://…">';
     else if(k==="email")f='<input id="sdIn" type="email" inputmode="email" maxlength="100" value="'+esc(g("Email"))+'" placeholder="name@gmail.com">';
+    else if(k==="ig")f='<input id="sdIn" type="text" inputmode="url" autocapitalize="off" spellcheck="false" maxlength="200" value="'+esc(g("Instagram"))+'" placeholder="instagram.com/yourshop">';
+    else if(k==="fb")f='<input id="sdIn" type="text" inputmode="url" autocapitalize="off" spellcheck="false" maxlength="200" value="'+esc(g("Facebook"))+'" placeholder="facebook.com/yourshop">';
     else if(k==="gst")f='<input id="sdIn" type="text" maxlength="15" style="text-transform:uppercase" value="'+esc(g("GST"))+'" placeholder="24ABCDE1234F1Z5">';
     else if(k==="udyam")f='<input id="sdIn" type="text" maxlength="19" style="text-transform:uppercase" value="'+esc(g("Udyam"))+'" placeholder="UDYAM-GJ-01-1234567">';
     return '<div class="sde">'+f+'<div class="sdb"><button type="button" class="ok" data-sds="'+k+'"'+(SDBUSY?' disabled':'')+'>'+(SDBUSY?(en?"Saving…":"सेव हो रहा है…"):(en?"✔ Save":"✔ सेव करें"))+'</button><button type="button" data-sdc="1">'+(en?"Cancel":"रद्द करें")+'</button></div>'+
@@ -1234,6 +1238,9 @@ function shopDetails(b,i,en){
     row("svc","🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",g("Services"),ed("svc",!!g("Services")))+
     row("web","🌐",en?"Website":"वेबसाइट",g("Website"),ed("web",!!g("Website")))+
     row("email","✉️",en?"Email":"ईमेल",g("Email"),ed("email",!!g("Email")))+
+    row("ig","📸","Instagram",g("Instagram"),ed("ig",!!g("Instagram")))+
+    row("fb","👍","Facebook",g("Facebook"),ed("fb",!!g("Facebook")))+
+    ((g("Instagram")&&g("Facebook"))?'':'<p class="sdn">'+(en?"Instagram / Facebook show on your shop page only if you add them.":"Instagram / Facebook सिर्फ़ जोड़ने पर ही आपकी दुकान के पेज पर दिखेंगे।")+'</p>')+
     row("gst","🧾",en?"GST number (optional)":"GST नंबर (वैकल्पिक)",g("GST")+(g("GST")&&gv?(en?"  ✅ Verified":"  ✅ जाँचा हुआ"):""),gv?LK:ed("gst",!!g("GST")))+
     row("udyam","🧾",en?"Udyam (MSME) number (optional)":"उद्यम (MSME) नंबर (वैकल्पिक)",g("Udyam")+(g("Udyam")&&uv?(en?"  ✅ Verified":"  ✅ जाँचा हुआ"):""),uv?LK:ed("udyam",!!g("Udyam")))+
     '<a class="sdpv" href="'+esc(pvUrl(b))+'">👁️ '+(en?"See your shop page":"अपनी दुकान का पेज देखें")+' ›</a>';
@@ -1244,7 +1251,8 @@ async function sdSave(k){
   const v1=(document.getElementById("sdIn")||{}).value||"",v2=(document.getElementById("sdIn2")||{}).value||"",v3=(document.getElementById("sdIn3")||{}).value||"";
   const clean=x=>String(x).replace(/\s+/g," ").trim(),fail=t=>{SDMSG={k,ok:false,t};SDBUSY=false;draw();sdFocus();};
   let call=null;
-  if(k==="name"){const n=clean(v1);if(n.length<2||n.length>80)return fail(en?"Write the shop name (2–80 letters).":"दुकान का नाम लिखें (2 से 80 अक्षर)।");call=async()=>{await rpc("pb_owner_set_name",{p_slug:b.slug,p_name:n});b.name=n;};}
+  if(k==="ig"||k==="fb"){const x=clean(v1),ig=k==="ig"?x:sdGet(b,"Instagram"),fb=k==="fb"?x:sdGet(b,"Facebook");call=async()=>{await rpc("pb_owner_set_social",{p_slug:b.slug,p_instagram:ig,p_facebook:fb});await loadProf();};}
+  else if(k==="name"){const n=clean(v1);if(n.length<2||n.length>80)return fail(en?"Write the shop name (2–80 letters).":"दुकान का नाम लिखें (2 से 80 अक्षर)।");call=async()=>{await rpc("pb_owner_set_name",{p_slug:b.slug,p_name:n});b.name=n;};}
   else if(k==="addr"){const a=clean(v1);if(a.length<8||a.length>250)return fail(en?"Write the full address (shop no., area, city).":"पूरा पता लिखें (दुकान नंबर, इलाका, शहर)।");call=async()=>{await rpc("pb_owner_set_address",{p_slug:b.slug,p_address:a});b.address=a;};}
   else{
     let P=null;

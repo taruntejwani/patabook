@@ -1,4 +1,4 @@
-/* PataBook — दुकान-मालिक का ☰ मेन्यू (दुकान के पब्लिक पन्ने पर): Settings + Log out
+/* PataBook — दुकान-मालिक का ☰ मेन्यू (दुकान के पब्लिक पन्ने पर): प्रोफ़ाइल बदलें + Settings
    सिर्फ़ तब दिखता है जब यही फ़ोन इस दुकान के मालिक का login है (pb-my-shops में slug + pb-session)।
    Preview यहाँ नहीं — मालिक पहले से Preview में है। फ़ोन का Back बटन पहले मेन्यू बंद करता है। */
 (function () {
@@ -32,12 +32,13 @@
     ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:rgba(10,20,40,.18)";
     var r = btn.getBoundingClientRect(), pn = document.createElement("div");
     pn.style.cssText = "position:absolute;top:" + Math.round(r.bottom + 8) + "px;right:12px;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(11,47,115,.28);padding:6px;font-family:inherit";
-    pn.innerHTML = (isOwn() ? '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>' : "") + (window.PBHelp ? PBHelp.rows(ROW) : "");
+    pn.innerHTML = (isOwn() ? '<a data-k="edit" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">✏️</span>' + (h ? "प्रोफ़ाइल बदलें" : "Edit profile") + '</a>' : "") + (isOwn() ? '<a data-k="set" style="' + ROW + 'color:#0b2f73"><span style="font-size:20px;width:24px;text-align:center">⚙️</span>' + (h ? "सेटिंग" : "Settings") + '</a>' : "") + (window.PBHelp ? PBHelp.rows(ROW) : "");
     css(); pn.className = "pbmp"; ov.appendChild(pn); document.body.appendChild(ov); glyph(true);
     ov.addEventListener("click", function (e) {
       var a = e.target.closest("[data-k]");
       if (!a) { close(); return; }
       if (a.dataset.k === "set") { location.href = "mybusiness.html"; return; }
+      if (a.dataset.k === "edit") { location.href = "mybusiness.html#go=prof&s=" + encodeURIComponent(slug); return; }
       if (a.dataset.k === "hs") { location.href = PBHelp.url(a.dataset.s); return; }
     });
     if (window.PBBack) PBBack.open(kill);
