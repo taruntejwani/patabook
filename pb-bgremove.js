@@ -70,7 +70,20 @@
         if (y > 0 && near[q - S] && !seen[q - S]) { seen[q - S] = 1; st[sp++] = q - S; }
         if (y < S - 1 && near[q + S] && !seen[q + S]) { seen[q + S] = 1; st[sp++] = q + S; }
       }
-      if (cn >= n * .008) for (var k = 0; k < cn; k++) al[comp[k] * 4 + 3] = 0;   /* छोटे धब्बे (अक्षर, बिंदु) नहीं छूते */
+      if (cn < n * .008) continue;   /* छोटे धब्बे (अक्षर, बिंदु) नहीं छूते */
+      /* छेद मिला: किनारे तक फैलाओ — थोड़ा ढीला रंग-मिलान (JPEG के दाने, काली रिंग), फिर 1 pixel और */
+      var hole = new Uint8Array(n), qs = 0, qe = 0, qq = new Int32Array(n);
+      for (var k = 0; k < cn; k++) { hole[comp[k]] = 1; qq[qe++] = comp[k]; }
+      while (qs < qe) {
+        var z = qq[qs++], zx = z % S, zy = (z / S) | 0, nb = [zx > 0 ? z - 1 : -1, zx < S - 1 ? z + 1 : -1, zy > 0 ? z - S : -1, zy < S - 1 ? z + S : -1];
+        for (var t = 0; t < 4; t++) { var v = nb[t]; if (v < 0 || hole[v]) continue;
+          if (Math.abs(px[v * 4] - r) + Math.abs(px[v * 4 + 1] - g) + Math.abs(px[v * 4 + 2] - b) < 75) { hole[v] = 1; seen[v] = 1; qq[qe++] = v; } }
+      }
+      for (var z2 = 0; z2 < n; z2++) if (hole[z2]) {
+        al[z2 * 4 + 3] = 0; var x2 = z2 % S, y2 = (z2 / S) | 0;
+        if (x2 > 0) al[(z2 - 1) * 4 + 3] = 0; if (x2 < S - 1) al[(z2 + 1) * 4 + 3] = 0;
+        if (y2 > 0) al[(z2 - S) * 4 + 3] = 0; if (y2 < S - 1) al[(z2 + S) * 4 + 3] = 0;
+      }
     }
   }
   /* alpha को r pixel अंदर सिकोड़ें (min filter: पहले आड़ा, फिर खड़ा) — बोतल का आकार वही, बस किनारे की काली लकीर कटे */

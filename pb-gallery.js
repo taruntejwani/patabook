@@ -237,10 +237,12 @@
         function at(e) { var r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / sc, y: (e.clientY - r.top) / sc, cx: e.clientX - r.left, cy: e.clientY - r.top }; }
         function rad() { return +rr.value / sc / 2; }
         function show(p) { var d = +rr.value; ring.style.display = "block"; ring.style.width = ring.style.height = d + "px"; ring.style.left = (p.cx - d / 2) + "px"; ring.style.top = (p.cy - d / 2) + "px"; }
-        function sample(p) {
-          var x0 = Math.max(0, Math.round(p.x) - 2), y0 = Math.max(0, Math.round(p.y) - 2), d = g.getImageData(x0, y0, 5, 5).data, r = 0, gg = 0, b = 0, c = 0;
-          for (var i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; c++; }
-          return [r / c, gg / c, b / c];
+        function sample(p) {   /* उँगली के नीचे (छोटे घेरे में) जो रंग सफ़ेद से सबसे अलग है — पतली काली रिंग / स्लेटी धब्बा भी पकड़ में आए */
+          var R0 = Math.max(3, Math.round(rad() * .35)), x0 = Math.max(0, Math.round(p.x) - R0), y0 = Math.max(0, Math.round(p.y) - R0);
+          var ww = Math.min(W - x0, R0 * 2 + 1), hh = Math.min(H - y0, R0 * 2 + 1); if (ww < 1 || hh < 1) return [255, 255, 255];
+          var d = g.getImageData(x0, y0, ww, hh).data, best = [255, 255, 255], bd = -1;
+          for (var i = 0; i < d.length; i += 4) { var e = 765 - d[i] - d[i + 1] - d[i + 2]; if (e > bd) { bd = e; best = [d[i], d[i + 1], d[i + 2]]; } }
+          return best;
         }
         function rub(p) {
           var R0 = rad(), x0 = Math.max(0, Math.floor(p.x - R0)), y0 = Math.max(0, Math.floor(p.y - R0)), x1 = Math.min(W, Math.ceil(p.x + R0)), y1 = Math.min(H, Math.ceil(p.y + R0));
