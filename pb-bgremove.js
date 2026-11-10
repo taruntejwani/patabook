@@ -49,6 +49,30 @@
       im.src = u;
     });
   }
+  /* background एक ही सादे रंग का हो (studio / सादी दीवार) तो product के अंदर बंद उसी रंग के टुकड़े भी हटाएँ —
+     जैसे जार के हैंडल का छेद। अलग-अलग रंग वाला background (असली दुकान की फ़ोटो) हो तो कुछ नहीं करता। */
+  function holes(px, al) {
+    var n = S * S, r = 0, g = 0, b = 0, c = 0, i;
+    for (i = 0; i < n; i++) if (al[i * 4 + 3] < 25) { r += px[i * 4]; g += px[i * 4 + 1]; b += px[i * 4 + 2]; c++; }
+    if (c < n * .05) return;
+    r /= c; g /= c; b /= c;
+    var dv = 0; for (i = 0; i < n; i++) if (al[i * 4 + 3] < 25) { var e = Math.abs(px[i * 4] - r) + Math.abs(px[i * 4 + 1] - g) + Math.abs(px[i * 4 + 2] - b); dv += e; }
+    if (dv / c > 24) return;   /* background सादा नहीं */
+    var near = new Uint8Array(n), seen = new Uint8Array(n), st = new Int32Array(n), comp = new Int32Array(n);
+    for (i = 0; i < n; i++) near[i] = (Math.abs(px[i * 4] - r) + Math.abs(px[i * 4 + 1] - g) + Math.abs(px[i * 4 + 2] - b)) < 14 ? 1 : 0;
+    for (i = 0; i < n; i++) {
+      if (!near[i] || seen[i] || al[i * 4 + 3] < 25) continue;
+      var sp = 0, cn = 0; st[sp++] = i; seen[i] = 1;
+      while (sp) {
+        var q = st[--sp]; comp[cn++] = q; var x = q % S, y = (q / S) | 0;
+        if (x > 0 && near[q - 1] && !seen[q - 1]) { seen[q - 1] = 1; st[sp++] = q - 1; }
+        if (x < S - 1 && near[q + 1] && !seen[q + 1]) { seen[q + 1] = 1; st[sp++] = q + 1; }
+        if (y > 0 && near[q - S] && !seen[q - S]) { seen[q - S] = 1; st[sp++] = q - S; }
+        if (y < S - 1 && near[q + S] && !seen[q + S]) { seen[q + S] = 1; st[sp++] = q + S; }
+      }
+      if (cn >= n * .008) for (var k = 0; k < cn; k++) al[comp[k] * 4 + 3] = 0;   /* छोटे धब्बे (अक्षर, बिंदु) नहीं छूते */
+    }
+  }
   async function remove(file, onStep) {
     STEP = onStep || null;
     try {
@@ -69,6 +93,7 @@
       var rg = hi - lo || 1, mk = document.createElement("canvas"); mk.width = S; mk.height = S;
       var mg = mk.getContext("2d"), md = mg.createImageData(S, S);
       for (var q = 0; q < n; q++) { var v = ((d[q] - lo) / rg - .25) / .5; md.data[q * 4 + 3] = Math.round(Math.max(0, Math.min(1, v)) * 255); }   /* किनारे साफ़: धुंधली परछाईं कम */
+      holes(px, md.data);   /* हैंडल के छेद जैसी अंदर की खाली जगह */
       mg.putImageData(md, 0, 0);
       /* असली फ़ोटो × mask (बड़ा करके, smooth) → सफ़ेद background */
       var c = document.createElement("canvas"); c.width = w; c.height = h;
