@@ -9,7 +9,8 @@
   var ORTV = "1.20.1", ORT = "https://cdn.jsdelivr.net/npm/onnxruntime-web@" + ORTV + "/dist/";
   var BIG = { key: "silueta-v1", parts: ["ai/silueta.part0.bin", "ai/silueta.part1.bin"], size: 44173029 },
       SMALL = { key: "u2netp-v1", parts: ["ai/u2netp.onnx"], size: 4574861 };
-  var MODEL = (navigator.deviceMemory && navigator.deviceMemory <= 2) ? SMALL : BIG, S = 320, MAXS = 1600;
+  /* Silueta की files Cloudflare build में नहीं जा पाईं (build fail) — जब तक दूसरी जगह न रखें, छोटा AI */
+  var MODEL = SMALL, S = 320, MAXS = 1600;
   var P = null, STEP = null;
 
   function script(src) {
