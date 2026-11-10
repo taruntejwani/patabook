@@ -152,7 +152,7 @@
       topRow + '<div style="height:12px"></div>' +
       '<div class="td-shop"><div class="td-sh"><div><h2>' + esc(b.name) + '</h2><p>' + esc([x.category || b.category, city].filter(Boolean).join(" · ")) + '</p></div>' +
       '<div class="td-pc"><div class="td-pill">' + (c.tier === "platinum" ? "💎 " : c.tier === "gold" ? "👑 " : "") + esc(TN) + (paid ? " " + T("MEMBER", "सदस्य") : "") + '</div>' +
-      '<button type="button" class="td-ep" data-pop="all" data-popshop="' + esc(b.slug) + '">✏️ ' + T("Edit profile", "प्रोफ़ाइल बदलें") + '</button></div></div>' +
+      '</div></div>' +
       '<div class="td-meta">' + (x.business_code ? '<span>🆔 ' + esc(x.business_code) + '</span>' : '') + (b.phone ? '<span>📱 +91 ' + esc(String(b.phone).replace(/\D/g, "").slice(-10)) + '</span>' : '') +
       (c.pct == null ? '' : c.pct >= 100 ? '<span>✓ ' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + '</span>' :
         '<span class="td-sig td-click" role="button" tabindex="0" data-tdgo="prof" data-tdi="' + c.i + '" style="--sg:' + (c.pct < 40 ? '#d93025' : c.pct < 70 ? '#f29900' : '#1a73e8') + '"><i></i>' + T("Profile ", "प्रोफ़ाइल ") + c.pct + '%' + T(" complete", " पूरी") + ' · <b>' + T("Complete it ›", "पूरी करें ›") + '</b></span>') + '</div></div>' +

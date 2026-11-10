@@ -128,7 +128,11 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
   </div>
 
   <div class="card" id="cAddr" data-sec="visit">
-   <h2 data-en="📍 Shop address">📍 दुकान का पता</h2>
+   <h2 data-en="🏪 Shop name & address">🏪 दुकान का नाम और पता</h2>
+   <label class="lbl" for="nameIn" data-en="Shop name">दुकान का नाम</label>
+   <input id="nameIn" type="text" maxlength="80" autocomplete="off" data-en-ph="e.g. Krishna Mobile" placeholder="जैसे: कृष्णा मोबाइल">
+   <p class="hint" id="nameHint" data-en="Write the name exactly as on your shop board. Once PataBook approves your shop, only PataBook can change the name.">नाम वैसा ही लिखें जैसा आपके दुकान के बोर्ड पर है। PataBook से मंज़ूरी मिलने के बाद नाम सिर्फ़ PataBook बदल सकता है।</p>
+   <label class="lbl" for="addrIn" style="margin-top:12px" data-en="Shop address">दुकान का पता</label>
    <textarea id="addrIn" maxlength="250" rows="3" data-en-ph="e.g. Plot 17A, Apnanagar, Gandhidham" placeholder="जैसे: Plot 17A, Apnanagar, गांधीधाम"></textarea>
    <p class="hint" data-en="Write the full address — shop no. / plot, area, city. It shows on your shop page and in search.">पूरा पता लिखें — दुकान / प्लॉट नंबर, इलाका, शहर। यही आपकी दुकान के पेज और खोज में दिखेगा।</p>
    <label class="lbl" for="pin" style="margin-top:14px" data-en="📮 Area postal PIN code">📮 शहर / इलाके का पिन कोड</label>
@@ -227,7 +231,7 @@ async function rpc(fn,args){
   return j;
 }
 /* 📱 दुकान / staff का नंबर: नया नंबर डालने पर उसी नंबर पर OTP — बिना OTP के नंबर save नहीं होगा */
-let ORIG={wa:"",p2:""},MAIN="",VERI={},ORIGADDR="",ORIGSOC={ig:"",fb:""};
+let ORIG={wa:"",p2:""},MAIN="",VERI={},ORIGADDR="",ORIGNAME="",NAMELOCK=false,ORIGSOC={ig:"",fb:""};
 const OTPERR={invalid_otp:["OTP गलत है।","Wrong OTP."],otp_expired:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],otp_expired_or_missing:["OTP की समय-सीमा खत्म हो गई। नया OTP मँगाएँ।","OTP expired. Request a new one."],too_many_attempts:["3 बार गलत OTP। नया OTP मँगाएँ।","3 wrong tries. Request a new OTP."],resend_too_soon:["थोड़ी देर बाद दोबारा मँगाएँ।","Please wait before asking again."],rate_limited_mobile:["इस नंबर पर आज के OTP पूरे हो गए। कल कोशिश करें।","Today's OTP limit for this number is used. Try tomorrow."],rate_limited_ip:["बहुत ज़्यादा कोशिशें। थोड़ी देर बाद करें।","Too many attempts. Try later."],sms_failed:["SMS नहीं जा सका। थोड़ी देर बाद कोशिश करें।","SMS failed. Try again later."],login_required:["लॉगिन की समय-सीमा खत्म हो गई। पेज दोबारा खोलें।","Login expired. Reopen the page."],captcha_failed:["\u201cमैं रोबोट नहीं हूँ\u201d जाँच पूरी नहीं हुई। पेज रीफ़्रेश करें।","Robot check failed. Refresh the page."]};
 function otpMsg(e){const c=(e&&(e.code||e.message))||"";const m=OTPERR[c];return (m?m[EN?1:0]:(EN?"Something went wrong. Try again.":"कुछ गड़बड़ हुई। फिर कोशिश करें."))+(c==="invalid_otp"&&e.attempts_left?(EN?" "+e.attempts_left+" tries left.":" "+e.attempts_left+" कोशिश बाकी।"):"");}
 function verifyNum(num,label){
@@ -257,7 +261,7 @@ function errText(m){
     "bad Email":["ईमेल सही लिखें (जैसे name@gmail.com)।","Enter a correct email (like name@gmail.com)."],"bad WhatsApp":["WhatsApp नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit WhatsApp number."],
     "bad Phone2":["दूसरा नंबर 10 अंकों का सही लिखें।","Enter a correct 10-digit second number."],"bad PIN":["पिन कोड 6 अंकों का सही लिखें।","Enter a correct 6-digit PIN code."],
     "bad Services":["सेवाएँ 500 अक्षरों से कम में लिखें।","Keep services under 500 letters."],"bad Landmark":["पहचान 80 अक्षरों से कम में लिखें।","Keep the landmark under 80 letters."],"rate limit":["बहुत बार बदला गया। एक घंटे बाद कोशिश करें।","Changed too many times. Try after an hour."],
-    "bad Instagram":["Instagram का लिंक या यूज़रनेम सही लिखें (जैसे instagram.com/yourshop)।","Enter a correct Instagram link or username (like instagram.com/yourshop)."],"bad Facebook":["Facebook पेज का लिंक सही लिखें (जैसे facebook.com/yourshop)।","Enter a correct Facebook page link (like facebook.com/yourshop)."],"bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
+    "bad Instagram":["Instagram का लिंक या यूज़रनेम सही लिखें (जैसे instagram.com/yourshop)।","Enter a correct Instagram link or username (like instagram.com/yourshop)."],"bad Facebook":["Facebook पेज का लिंक सही लिखें (जैसे facebook.com/yourshop)।","Enter a correct Facebook page link (like facebook.com/yourshop)."],"bad name":["दुकान का नाम 2 से 80 अक्षरों में लिखें।","Write the shop name in 2 to 80 letters."],"name locked":["मंज़ूरी के बाद दुकान का नाम सिर्फ़ PataBook बदल सकता है।","After approval only PataBook can change the shop name."],"bad address":["पता 8 से 250 अक्षरों में लिखें।","Write the address in 8 to 250 letters."],"bad GST":["GST नंबर सही नहीं है। 15 अक्षर ध्यान से जाँचें (जैसे 24ABCDE1234F1Z5)।","GST number is not correct. Check the 15 letters (like 24ABCDE1234F1Z5)."],
     "gst in use":["🚫 यह GST नंबर पहले से किसी दूसरी दुकान पर इस्तेमाल हो चुका है।","🚫 This GST number is already used by another shop."],"udyam in use":["🚫 यह उद्यम (MSME) नंबर पहले से किसी दूसरी दुकान पर इस्तेमाल हो चुका है।","🚫 This Udyam (MSME) number is already used by another shop."],
     "bad Udyam":["उद्यम नंबर ऐसे लिखें: UDYAM-GJ-03-0012345","Write the Udyam number like: UDYAM-GJ-03-0012345"],
     "too long":["जानकारी बहुत लंबी हो गई। सेवाएँ थोड़ी छोटी लिखें।","Details are too long. Shorten the services."],"number not verified":["यह नंबर OTP से पक्का नहीं हुआ है। फिर से सेव दबाएँ और OTP डालें।","This number is not verified by OTP. Press Save again and enter the OTP."]};
@@ -299,11 +303,12 @@ $("main").addEventListener("submit",async e=>{
   if(gst&&!gstOk(gst)){$("err").textContent=errText("bad GST");$("gst").focus();return;}
   if(udy&&!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(udy)){$("err").textContent=errText("bad Udyam");$("udyam").focus();return;}
   if(NT.gst||NT.udyam){$("err").textContent=errText(NT.gst?"gst in use":"udyam in use");$(NT.gst?"gst":"udyam").focus();return;}
+  {const nm=$("nameIn").value.replace(/\s+/g," ").trim();if(!NAMELOCK&&nm!==ORIGNAME&&(nm.length<2||nm.length>80)){$("err").textContent=errText("bad name");$("nameIn").focus();return;}}
   {const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR&&(ad.length<8||ad.length>250)){$("err").textContent=errText("bad address");$("addrIn").focus();return;}}
   const p={GST:gst,Udyam:udy,Type:$("btype").value,Hours:o&&c?o+"-"+c:"",Closed:$("offDay").value,WhatsApp:wa,Phone2:p2,PIN:pin,Delivery:$("homeDel").checked?"Yes":"",Email:em,Website:web||"",Services:$("svc").value.trim(),Landmark:$("lmk").value.trim()};
   /* नया (बदला हुआ) नंबर हो तो पहले उसी नंबर पर OTP से पक्का करें */
   const b=$("saveBtn");b.disabled=true;
-  try{S=await PBA.session();if(!S){only("needLogin");return;}const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR){await rpc("pb_owner_set_address",{p_slug:slug,p_address:ad});ORIGADDR=ad;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});const ig=$("igIn").value.trim(),fb=$("fbIn").value.trim();if(ig!==ORIGSOC.ig||fb!==ORIGSOC.fb){await rpc("pb_owner_set_social",{p_slug:slug,p_instagram:ig,p_facebook:fb});ORIGSOC={ig,fb};}$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
+  try{S=await PBA.session();if(!S){only("needLogin");return;}const nm=$("nameIn").value.replace(/\s+/g," ").trim();if(!NAMELOCK&&nm!==ORIGNAME){try{await rpc("pb_owner_set_name",{p_slug:slug,p_name:nm});ORIGNAME=nm;$("shopName").textContent="🏪 "+nm;}catch(nx){throw new Error(/not found/i.test(nx.message)?"name locked":nx.message);}}const ad=$("addrIn").value.replace(/\s+/g," ").trim();if(ad!==ORIGADDR){await rpc("pb_owner_set_address",{p_slug:slug,p_address:ad});ORIGADDR=ad;}await rpc("pb_owner_set_details",{p_slug:slug,p:p});const ig=$("igIn").value.trim(),fb=$("fbIn").value.trim();if(ig!==ORIGSOC.ig||fb!==ORIGSOC.fb){await rpc("pb_owner_set_social",{p_slug:slug,p_instagram:ig,p_facebook:fb});ORIGSOC={ig,fb};}$("viewShop").href="business.html?slug="+encodeURIComponent(slug);only("done");window.scrollTo(0,0);if(window.PB_EMBED&&parent!==window)try{parent.postMessage({pbEdit:"saved"},location.origin);}catch(_){}}
   catch(x){$("err").textContent=errText(x.message);}
   b.disabled=false;
 });
@@ -348,7 +353,7 @@ numWatch();
   try{
     const rows=await rpc("pb_my_businesses")||[],b=rows.find(x=>x&&x.slug===slug);
     if(!b){only("notOwner");return;}
-    $("shopName").textContent="🏪 "+(b.name||slug);window.PB_CAT=b.category||"";$("shopAddr").textContent=b.address?"📍 "+b.address:"";ORIGADDR=String(b.address||"").replace(/\s+/g," ").trim();$("addrIn").value=ORIGADDR;$("mainNo").textContent=b.phone?"+91 "+String(b.phone).replace(/\D/g,"").slice(-10):"—";$("mainChg").href="phone-update.html?slug="+encodeURIComponent(slug);
+    $("shopName").textContent="🏪 "+(b.name||slug);window.PB_CAT=b.category||"";$("shopAddr").textContent=b.address?"📍 "+b.address:"";ORIGADDR=String(b.address||"").replace(/\s+/g," ").trim();$("addrIn").value=ORIGADDR;ORIGNAME=String(b.name||"").replace(/\s+/g," ").trim();NAMELOCK=b.is_active===true;$("nameIn").value=ORIGNAME;if(NAMELOCK){$("nameIn").disabled=true;$("nameHint").textContent=EN?"Your shop is live, so only PataBook can change the name.":"आपकी दुकान लाइव है, इसलिए नाम सिर्फ़ PataBook बदल सकता है।";}$("mainNo").textContent=b.phone?"+91 "+String(b.phone).replace(/\D/g,"").slice(-10):"—";$("mainChg").href="phone-update.html?slug="+encodeURIComponent(slug);
     const d=await rpc("pb_my_details",{p_slug:slug}),ds=(d&&d.description)||"";
     const t=line(ds,"Type");if(t&&![...$("btype").options].some(x=>x.value===t))$("btype").insertAdjacentHTML("beforeend",'<option value="'+esc(t)+'">'+esc(t)+'</option>');
     $("btype").value=t;
