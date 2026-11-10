@@ -1,0 +1,6 @@
+# Cloudflare: ये files website पर public नहीं होनी चाहिए
+.git
+.wrangler
+.assetsignore
+CLAUDE.md
+wrangler.jsonc
