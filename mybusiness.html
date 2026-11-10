@@ -309,6 +309,13 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .sd>div{flex:1;min-width:0}.sd small{display:block;font-size:12.5px;color:#5b6475;font-weight:600}.sd span{display:block;font-size:15px;color:#1f2937;overflow-wrap:anywhere;white-space:pre-line}.sd span.no{color:#8a93a3}
 .sd>a,.sd>button{flex:none;align-self:center;border:1px solid #cfe0ff;background:#f4f8ff;color:#1a73e8;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
 .sdpv{display:block;text-align:center;margin:12px 0 2px;padding:12px;border-radius:14px;background:#1a73e8;color:#fff!important;font-weight:700;text-decoration:none}
+.sd.on{background:#f4f8ff;margin:0 -10px;padding:11px 10px;border-radius:12px;border-top-color:transparent}
+.sde input,.sde textarea,.sde select{display:block;width:100%;box-sizing:border-box;margin:6px 0 0;padding:10px 12px;border:1.5px solid #1a73e8;border-radius:10px;font:inherit;font-size:16px;background:#fff;color:#1f2937}
+.sde textarea{resize:vertical}.sde label{display:block;margin-top:8px}.sd2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sd2 label{margin-top:4px}
+.sdb{display:flex;gap:8px;margin-top:10px}.sdb button{flex:1;border:1px solid var(--line);background:#fff;color:#334;border-radius:10px;padding:10px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer}
+.sdb button.ok{background:#1a73e8;border-color:#1a73e8;color:#fff}.sdb button:disabled{opacity:.7}
+.sder{margin:8px 0 0;color:#b3261e;font-size:13.5px;font-weight:700}.sdok{display:block;font-style:normal;color:#137333;font-size:13px;font-weight:700;margin-top:2px}
+.sd .sdl{flex:none;align-self:center;font-style:normal;font-size:16px;width:auto;opacity:.7}.sdn{margin:-4px 0 4px 34px;font-size:12px;color:#8a93a3}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script>
 <style id="pbmAnim">@keyframes pbmPn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}@keyframes pbmIt{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.pbmp{transform-origin:top right;animation:pbmPn .2s ease-out both}.pbmp>*{animation:pbmIt .28s ease-out both}.pbmp>*:nth-child(1){animation-delay:.04s}.pbmp>*:nth-child(2){animation-delay:.09s}.pbmp>*:nth-child(3){animation-delay:.14s}.pbmp>*:nth-child(4){animation-delay:.19s}.pbmp>*:nth-child(5){animation-delay:.24s}.pbmp>*:nth-child(6){animation-delay:.29s}.pbmp>*:nth-child(n+7){animation-delay:.33s}@media(prefers-reduced-motion:reduce){.pbmp,.pbmp>*{animation:none}}</style>
@@ -1168,33 +1175,100 @@ function profOverview(en){
 }
 /* 📝 प्रोफ़ाइल अधूरी हो: dashboard / Settings से सीधे यह पेज — सिर्फ़ बाकी कदम (Settings का पैनल नहीं) */
 function profIncomplete(b){const it=b?profItems(b,ROWS.indexOf(b)):null;if(!it||!it.length)return false;const pc=profPct(b);return pc!==null&&pc<100;}
-/* प्रोफ़ाइल पूरी होने पर: दुकान की पूरी जानकारी (जैसी ग्राहक को दिखती है) + हर लाइन पर ✏️ */
+/* प्रोफ़ाइल पूरी होने पर: दुकान की पूरी जानकारी (जैसी ग्राहक को दिखती है)। ✏️ दबाते ही वही एक लाइन वहीं खुलकर बदलती है — सिर्फ़ वही चीज़ सेव होती है */
+let SDE=null,SDMSG=null,SDBUSY=false;
+const SD_TYPES=[["Retailer","रिटेलर (दुकान)"],["Wholesaler","थोक व्यापारी"],["Manufacturer","निर्माता"],["Distributor","डिस्ट्रीब्यूटर"],["Showroom","शोरूम"],["Service Provider","सेवा प्रदाता"],["Repair & Service Centre","मरम्मत और सेवा केंद्र"],["Trader / Commission Agent","व्यापारी / कमीशन एजेंट"]];
+const SD_DAYS=[["Sunday","रविवार"],["Monday","सोमवार"],["Tuesday","मंगलवार"],["Wednesday","बुधवार"],["Thursday","गुरुवार"],["Friday","शुक्रवार"],["Saturday","शनिवार"]];
+function sdGet(b,k){const d=((PROF&&PROF[b.slug])||{}).d||"";return ((d.match(new RegExp("^"+k+":[ \\t]*(.*)$","mi"))||[])[1]||"").trim();}
+function sdTm(t,en){const m=/^(\d{1,2}):(\d{2})$/.exec(t);if(!m)return t;const h=+m[1],mm=m[2];
+  if(en)return (h%12||12)+":"+mm+" "+(h<12?"AM":"PM");return (h<12?"सुबह ":h<16?"दोपहर ":h<19?"शाम ":"रात ")+(h%12||12)+":"+mm;}
+function sdErr(m,en){m=String(m||"");const H=[
+  [/rate limit/i,"Too many changes. Please try again after some time.","बहुत बार बदलाव हुए। थोड़ी देर बाद फिर कोशिश करें।"],
+  [/name locked|not found/i,"The name can't be changed after approval. Contact PataBook.","मंज़ूरी के बाद नाम नहीं बदल सकते। PataBook से संपर्क करें।"],
+  [/bad Website/i,"Write a correct website link.","वेबसाइट का सही लिंक लिखें।"],[/bad Email/i,"Write a correct email.","सही ईमेल लिखें।"],
+  [/bad PIN/i,"PIN code must be 6 digits.","पिन कोड 6 अंकों का होना चाहिए।"],[/bad Hours/i,"Choose both opening and closing time.","खुलने और बंद होने, दोनों का समय चुनें।"],
+  [/bad GST/i,"This GST number is not correct.","यह GST नंबर सही नहीं है।"],[/bad Udyam/i,"Udyam number looks like UDYAM-GJ-01-1234567.","उद्यम नंबर ऐसा होता है: UDYAM-GJ-01-1234567"],
+  [/gst in use|udyam in use/i,"This number is already on another shop.","यह नंबर पहले से किसी दूसरी दुकान पर है।"],
+  [/short|long|bad/i,"Please check what you wrote.","जो लिखा है उसे एक बार देख लें।"]];
+  const f=H.find(x=>x[0].test(m));return f?(en?f[1]:f[2]):(en?"Could not save. Check internet and try again.":"सेव नहीं हुआ। इंटरनेट देखकर फिर कोशिश करें।");}
 function shopDetails(b,i,en){
-  const p=(PROF&&PROF[b.slug])||{},d=p.d||"",g=k=>((d.match(new RegExp("^"+k+":[ \\t]*(.*)$","mi"))||[])[1]||"").trim();
-  const NO=en?"Not added":"नहीं भरा",DAY={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
-  const tm=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t);if(!m)return t;let h=+m[1];const mm=m[2];
-    if(en)return (h%12||12)+":"+mm+" "+(h<12?"AM":"PM");return (h<12?"सुबह ":h<16?"दोपहर ":h<19?"शाम ":"रात ")+(h%12||12)+":"+mm;};
-  const hr=g("Hours"),hp=hr.split("-"),cl=g("Closed");
-  let hours=hp.length===2?tm(hp[0].trim())+" – "+tm(hp[1].trim()):hr;
-  if(hours&&cl)hours+="\n"+(en?"Closed: "+cl:"बंद: "+cl.split(/\s*,\s*/).map(x=>DAY[x]||x).join(", "));
-  const TY={Retailer:"रिटेलर (दुकान)",Wholesaler:"होलसेलर",Manufacturer:"निर्माता (मैन्युफैक्चरर)",Distributor:"डिस्ट्रीब्यूटर",Service:"सेवा"},ty=g("Type");
-  const addr=[String(b.address||"").split("\n")[0],g("Landmark")?(/^(near|पास)/i.test(g("Landmark"))?"":(en?"Near ":"पास में: "))+g("Landmark"):"",g("PIN")?"PIN "+g("PIN"):""].filter(Boolean).join("\n");
-  const on=[g("Website"),g("Email")].filter(Boolean).join("\n"),tax=[g("GST")?"GST: "+g("GST"):"",g("Udyam")?"Udyam: "+g("Udyam"):""].filter(Boolean).join("\n");
-  const hasLoc=p.lat!=null&&p.lng!=null,E=en?"✏️ Edit":"✏️ बदलें",AD=en?"➕ Add":"➕ जोड़ें";
-  const pop=(c,has)=>'<a href="#" data-pop="'+c+'" data-popshop="'+esc(b.slug)+'">'+(has?E:AD)+'</a>';
-  const row=(ic,lb,val,act)=>'<div class="sd"><i>'+ic+'</i><div><small>'+lb+'</small><span'+(val?'':' class="no"')+'>'+esc(val||NO)+'</span></div>'+(act||"")+'</div>';
+  const p=(PROF&&PROF[b.slug])||{},d=p.d||"",g=k=>sdGet(b,k),NO=en?"Not added":"नहीं भरा";
+  const hr=g("Hours"),hp=hr.split("-"),cl=g("Closed"),dayN=x=>{const f=SD_DAYS.find(y=>y[0]===x);return f?(en?f[0]:f[1]):x;};
+  let hours=hp.length===2?sdTm(hp[0].trim(),en)+" – "+sdTm(hp[1].trim(),en):hr;
+  if(hours)hours+="\n"+(cl?(en?"Closed: ":"बंद: ")+dayN(cl):(en?"Open all 7 days":"सातों दिन खुला"));
+  const ty=g("Type"),tyN=(SD_TYPES.find(x=>x[0]===ty)||[ty,ty])[en?0:1];
+  const gv=/^GST-Verified:\s*yes/mi.test(d),uv=/^Udyam-Verified:\s*yes/mi.test(d),hasLoc=p.lat!=null&&p.lng!=null;
+  const E=en?"✏️ Edit":"✏️ बदलें",AD=en?"➕ Add":"➕ जोड़ें",LK='<i class="sdl" title="'+(en?"Locked":"बंद")+'">🔒</i>';
+  const ed=(k,has)=>'<button type="button" data-sde="'+k+'">'+(has?E:AD)+'</button>';
+  const opt=(v,cur,lab)=>'<option value="'+esc(v)+'"'+(v===cur?" selected":"")+'>'+esc(lab)+'</option>';
+  const tOpt=cur=>{let o=opt("",cur,en?"— Choose —":"— चुनें —");for(let h=0;h<48;h++){const v=String(Math.floor(h/2)).padStart(2,"0")+":"+(h%2?"30":"00");o+=opt(v,cur,sdTm(v,en));}return o;};
+  function editor(k){
+    let f="";const v=k==="name"?b.name:k==="addr"?String(b.address||"").split("\n")[0]:"";
+    if(k==="name")f='<input id="sdIn" type="text" maxlength="80" value="'+esc(v)+'">';
+    else if(k==="addr")f='<textarea id="sdIn" rows="3" maxlength="250">'+esc(v)+'</textarea>';
+    else if(k==="pin")f='<input id="sdIn" type="text" inputmode="numeric" maxlength="6" value="'+esc(g("PIN"))+'" placeholder="'+(en?"6 digits, e.g. 370201":"6 अंक, जैसे 370201")+'">';
+    else if(k==="lmk")f='<input id="sdIn" type="text" maxlength="80" value="'+esc(g("Landmark"))+'" placeholder="'+(en?"e.g. Near Apnanagar Circle":"जैसे: अपनानगर सर्कल के पास")+'">';
+    else if(k==="type")f='<select id="sdIn">'+opt("",ty,en?"— Choose —":"— चुनें —")+SD_TYPES.map(x=>opt(x[0],ty,en?x[0]:x[1])).join("")+'</select>';
+    else if(k==="hours")f='<div class="sd2"><label><small>'+(en?"Opens at":"खुलने का समय")+'</small><select id="sdIn">'+tOpt((hp[0]||"").trim())+'</select></label><label><small>'+(en?"Closes at":"बंद होने का समय")+'</small><select id="sdIn2">'+tOpt((hp[1]||"").trim())+'</select></label></div>'+
+      '<label><small>'+(en?"Weekly off":"हफ़्ते की छुट्टी")+'</small><select id="sdIn3">'+opt("",cl,en?"No weekly off (open all 7 days)":"कोई छुट्टी नहीं (सातों दिन खुला)")+SD_DAYS.map(x=>opt(x[0],cl,en?x[0]:x[1])).join("")+'</select></label>';
+    else if(k==="svc")f='<textarea id="sdIn" rows="3" maxlength="500" placeholder="'+(en?"e.g. Hair cut, shaving, facial":"जैसे: हेयर कट, शेविंग, फेशियल")+'">'+esc(g("Services"))+'</textarea>';
+    else if(k==="web")f='<input id="sdIn" type="url" inputmode="url" maxlength="200" value="'+esc(g("Website"))+'" placeholder="https://…">';
+    else if(k==="email")f='<input id="sdIn" type="email" inputmode="email" maxlength="100" value="'+esc(g("Email"))+'" placeholder="name@gmail.com">';
+    else if(k==="gst")f='<input id="sdIn" type="text" maxlength="15" style="text-transform:uppercase" value="'+esc(g("GST"))+'" placeholder="24ABCDE1234F1Z5">';
+    else if(k==="udyam")f='<input id="sdIn" type="text" maxlength="19" style="text-transform:uppercase" value="'+esc(g("Udyam"))+'" placeholder="UDYAM-GJ-01-1234567">';
+    return '<div class="sde">'+f+'<div class="sdb"><button type="button" class="ok" data-sds="'+k+'"'+(SDBUSY?' disabled':'')+'>'+(SDBUSY?(en?"Saving…":"सेव हो रहा है…"):(en?"✔ Save":"✔ सेव करें"))+'</button><button type="button" data-sdc="1">'+(en?"Cancel":"रद्द करें")+'</button></div>'+
+      (SDMSG&&SDMSG.k===k&&!SDMSG.ok?'<p class="sder">'+esc(SDMSG.t)+'</p>':'')+'</div>';
+  }
+  const row=(k,ic,lb,val,act)=>{const on=SDE&&SDE.slug===b.slug&&SDE.k===k;
+    return '<div class="sd'+(on?' on':'')+'" id="sd_'+k+'"><i>'+ic+'</i><div><small>'+lb+'</small>'+(on?editor(k):'<span'+(val?'':' class="no"')+'>'+esc(val||NO)+'</span>'+(SDMSG&&SDMSG.k===k&&SDMSG.ok?'<em class="sdok">✅ '+(en?"Saved":"सेव हो गया")+'</em>':''))+'</div>'+(on?'':(act||""))+'</div>';};
   return '<div class="sdh"><b>📋 '+(en?"Your shop details":"आपकी दुकान की जानकारी")+'</b><em>✅ '+(en?"Profile complete":"प्रोफ़ाइल पूरी")+'</em></div>'+
-    row("🏪",en?"Shop name":"दुकान का नाम",b.name,pop("cAddr",1))+
-    row("📍",en?"Address":"पता",addr,pop("cAddr",!!addr))+
-    row("🗺️",en?"Location on map":"नक्शे पर लोकेशन",hasLoc?(en?"✅ Set":"✅ लगी हुई है"):"",'<a href="location.html?slug='+encodeURIComponent(b.slug)+'">'+(hasLoc?E:AD)+'</a>')+
-    (b.phone?row("📞",en?"Mobile number":"मोबाइल नंबर","+91 "+String(b.phone).replace(/\D/g,"").slice(-10),""):"")+
-    row("🏷️",en?"Business type":"बिज़नेस का प्रकार",en?ty:(TY[ty]||ty),pop("cType",!!ty))+
-    row("🕘",en?"Timings":"खुलने-बंद होने का समय",hours,pop("cTime",!!hours))+
-    row("🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",g("Services"),pop("cSvc",!!g("Services")))+
-    row("🌐",en?"Website / email":"वेबसाइट / ईमेल",on,pop("cOnline",!!on))+
-    row("🧾",en?"GST / Udyam (optional)":"GST / उद्यम (वैकल्पिक)",tax,pop("gstCard",!!tax))+
+    row("name","🏪",en?"Shop name":"दुकान का नाम",b.name,b.is_active?LK:ed("name",1))+
+    (b.is_active&&!(SDE&&SDE.k==="name")?'<p class="sdn">🔒 '+(en?"After approval, only PataBook can change the shop name.":"मंज़ूरी के बाद दुकान का नाम सिर्फ़ PataBook बदल सकता है।")+'</p>':'')+
+    row("addr","📍",en?"Address":"पता",String(b.address||"").split("\n")[0],ed("addr",!!b.address))+
+    row("pin","📮",en?"PIN code":"पिन कोड",g("PIN"),ed("pin",!!g("PIN")))+
+    row("lmk","🏁",en?"Landmark (known place nearby)":"पहचान (पास की जानी-मानी जगह)",g("Landmark"),ed("lmk",!!g("Landmark")))+
+    row("loc","🗺️",en?"Location on map":"नक्शे पर लोकेशन",hasLoc?(en?"✅ Set":"✅ लगी हुई है"):"",'<a href="location.html?slug='+encodeURIComponent(b.slug)+'">'+(hasLoc?E:AD)+'</a>')+
+    (b.phone?row("ph","📞",en?"Mobile number":"मोबाइल नंबर","+91 "+String(b.phone).replace(/\D/g,"").slice(-10),""):"")+
+    row("type","🏷️",en?"Business type":"बिज़नेस का प्रकार",tyN,ed("type",!!ty))+
+    row("hours","🕘",en?"Timings":"खुलने-बंद होने का समय",hours,ed("hours",!!hr))+
+    row("svc","🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",g("Services"),ed("svc",!!g("Services")))+
+    row("web","🌐",en?"Website":"वेबसाइट",g("Website"),ed("web",!!g("Website")))+
+    row("email","✉️",en?"Email":"ईमेल",g("Email"),ed("email",!!g("Email")))+
+    row("gst","🧾",en?"GST number (optional)":"GST नंबर (वैकल्पिक)",g("GST")+(g("GST")&&gv?(en?"  ✅ Verified":"  ✅ जाँचा हुआ"):""),gv?LK:ed("gst",!!g("GST")))+
+    row("udyam","🧾",en?"Udyam (MSME) number (optional)":"उद्यम (MSME) नंबर (वैकल्पिक)",g("Udyam")+(g("Udyam")&&uv?(en?"  ✅ Verified":"  ✅ जाँचा हुआ"):""),uv?LK:ed("udyam",!!g("Udyam")))+
     '<a class="sdpv" href="'+esc(pvUrl(b))+'">👁️ '+(en?"See your shop page":"अपनी दुकान का पेज देखें")+' ›</a>';
 }
+function sdFocus(){setTimeout(()=>{const x=document.getElementById("sdIn");if(x){x.focus();try{if(x.setSelectionRange&&x.type!=="email"&&x.type!=="url")x.setSelectionRange(x.value.length,x.value.length);}catch(_){}const r=x.closest(".sd");if(r)r.scrollIntoView({block:"center",behavior:"smooth"});}},30);}
+async function sdSave(k){
+  const b=ROWS[SET.shop],en=L()==="en";if(!b||SDBUSY)return;
+  const v1=(document.getElementById("sdIn")||{}).value||"",v2=(document.getElementById("sdIn2")||{}).value||"",v3=(document.getElementById("sdIn3")||{}).value||"";
+  const clean=x=>String(x).replace(/\s+/g," ").trim(),fail=t=>{SDMSG={k,ok:false,t};SDBUSY=false;draw();sdFocus();};
+  let call=null;
+  if(k==="name"){const n=clean(v1);if(n.length<2||n.length>80)return fail(en?"Write the shop name (2–80 letters).":"दुकान का नाम लिखें (2 से 80 अक्षर)।");call=async()=>{await rpc("pb_owner_set_name",{p_slug:b.slug,p_name:n});b.name=n;};}
+  else if(k==="addr"){const a=clean(v1);if(a.length<8||a.length>250)return fail(en?"Write the full address (shop no., area, city).":"पूरा पता लिखें (दुकान नंबर, इलाका, शहर)।");call=async()=>{await rpc("pb_owner_set_address",{p_slug:b.slug,p_address:a});b.address=a;};}
+  else{
+    let P=null;
+    if(k==="pin"){const x=v1.replace(/\D/g,"");if(x&&!/^[1-9]\d{5}$/.test(x))return fail(sdErr("bad PIN",en));P={PIN:x};}
+    else if(k==="lmk")P={Landmark:clean(v1)};
+    else if(k==="type")P={Type:v1};
+    else if(k==="hours"){if(!v1||!v2)return fail(sdErr("bad Hours",en));P={Hours:v1+"-"+v2,Closed:v3};}
+    else if(k==="svc")P={Services:String(v1).trim()};
+    else if(k==="web"){let w=clean(v1);if(w&&!/^https?:\/\//i.test(w))w="https://"+w;P={Website:w};}
+    else if(k==="email"){const m=clean(v1);if(m&&!/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(m))return fail(sdErr("bad Email",en));P={Email:m};}
+    else if(k==="gst")P={GST:v1.replace(/\s/g,"").toUpperCase()};
+    else if(k==="udyam")P={Udyam:v1.replace(/\s/g,"").toUpperCase()};
+    if(!P)return;call=async()=>{await rpc("pb_owner_set_details",{p_slug:b.slug,p:P});await loadProf();};
+  }
+  SDBUSY=true;SDMSG=null;draw();
+  try{await call();SDBUSY=false;SDE=null;SDMSG={k,ok:true};draw();setTimeout(()=>{if(SDMSG&&SDMSG.k===k&&SDMSG.ok){SDMSG=null;draw();}},2500);}
+  catch(x){fail(sdErr(k==="name"&&/not found/i.test(x.message||"")?"name locked":x.message,en));}
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-sde]");if(a){e.preventDefault();e.stopPropagation();const b=ROWS[SET.shop];if(!b)return;SDE={slug:b.slug,k:a.dataset.sde};SDMSG=null;draw();sdFocus();return;}
+  const s2=e.target.closest("[data-sds]");if(s2){e.preventDefault();e.stopPropagation();sdSave(s2.dataset.sds);return;}
+  const c=e.target.closest("[data-sdc]");if(c){e.preventDefault();e.stopPropagation();SDE=null;SDMSG=null;draw();}
+},true);
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target&&e.target.id==="sdIn"&&e.target.tagName==="INPUT"){e.preventDefault();const s2=document.querySelector("[data-sds]");if(s2)s2.click();}});
 function completeView(en){
   const b=ROWS[SET.shop],i=SET.shop;if(!b)return "";
   const pc=profPct(b),full=pc===null||pc>=100;
