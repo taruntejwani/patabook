@@ -1147,7 +1147,7 @@ function setCats(en){return [
   ["acct","🔐",en?"Account":"खाता",en?"Password, logout, delete":"पासवर्ड, लॉगआउट, खाता हटाएँ"]];}
 function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
-  if(k==="prof")return (canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+profBlock(b,i)+verifyBlock(b,i);   /* अधूरी प्रोफ़ाइल: ऊपर "Complete profile" वाला डिब्बा नहीं — नीचे वही सूची है */
+  if(k==="prof"){const pc=profPct(b),fl=pc===null||pc>=100;return (canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+(fl&&PROF&&PROF[b.slug]?shopDetails(b,i,en):profBlock(b,i))+verifyBlock(b,i);}   /* अधूरी प्रोफ़ाइल: ऊपर "Complete profile" वाला डिब्बा नहीं — नीचे वही सूची है */
   if(k==="num")return phoneBlock(b,i)+numsBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" एडमिन की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (सेटिंग → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर जाँच करें":"नंबर बदलें"))+'</a>'):'');
@@ -1290,7 +1290,7 @@ function settingsView(en){
     return '<div class="tp tp-'+tierOf(b)+'">'+((TJ&&ROWS.length===1)?'':'<div class="setbar"><button type="button" data-setback="close">‹ '+(en?"My shops":"मेरी दुकानें")+'</button></div>')+
       '<div class="shh">🏪 '+nm+' '+'<span class="st '+stK(b)+'">'+esc(tx(stK(b)))+'</span></div>'+
       (TJ?'':'<a class="stl alt" href="'+pvUrl(b)+'" style="margin:0 0 10px">👁️ '+(en?"Preview profile":"प्रोफ़ाइल प्रीव्यू")+'</a>')+
-      (window.PBTejDash?'':'<div class="card">'+offBlock(b,i,en)+profBlock(b,i)+verifyBlock(b,i)+'</div>')+
+      (window.PBTejDash?'':'<div class="card">'+offBlock(b,i,en)+((profPct(b)===null||profPct(b)>=100)&&PROF&&PROF[b.slug]?shopDetails(b,i,en):profBlock(b,i))+verifyBlock(b,i)+'</div>')+
       '<div class="moreh">'+(en?"More settings":"और सेटिंग")+'</div>'+
       '<div class="cats">'+C.filter(c=>!/^(prof|photo|rep|nt)$/.test(c[0])&&!(/^(feat|plan)$/.test(c[0])&&window.PBTejDash)).map(c=>'<button type="button" class="cat" data-setcat="'+c[0]+'"><span class="ci">'+c[1]+'</span><span class="ct"><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span><i>›</i></button>').join("")+'</div></div>';
   }
