@@ -215,6 +215,20 @@ form.short .fo{display:none}
         <input id="owner" autocomplete="name" maxlength="60">
         <div class="err"></div>
       </div>
+
+      <div class="grp" data-s="svc">
+        <div class="emoji">🛠️</div>
+        <h1 data-i="svc_h">आप क्या काम / सामान बेचते हैं?</h1>
+        <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही श्रेणी खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
+        <textarea id="services" data-ip="svc_ph" placeholder="जैसे: कार वॉश, पॉलिश, इंटीरियर सफ़ाई"></textarea>
+        <div class="cat" id="cat"></div>
+        <div style="margin-top:14px"><label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
+        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select></div>
+        <div class="fo"><label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (होम सर्विस)</span></label>
+        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (होम डिलीवरी)</span></label></div>
+        <div class="err"></div>
+        <div class="sum" id="sum"></div>
+      </div>
       </div>
 
       <!-- नया: समय + छुट्टी -->
@@ -243,21 +257,8 @@ form.short .fo{display:none}
         <div class="err"></div>
       </div>
 
-      <!-- 4: काम + पता (एक स्क्रीन) -->
+      <!-- 4: सिर्फ़ पता (काम / बिज़नेस का प्रकार अब "Business" वाले कदम में) -->
       <div class="step" data-s="work">
-      <div class="grp" data-s="svc">
-        <div class="emoji">🛠️</div>
-        <h1 data-i="svc_h">आप क्या काम / सामान बेचते हैं?</h1>
-        <p class="hint" data-i="svc_hint">इससे PataBook आपकी सही श्रेणी खुद चुन लेगा। आप चाहें तो छोड़ सकते हैं।</p>
-        <textarea id="services" data-ip="svc_ph" placeholder="जैसे: कार वॉश, पॉलिश, इंटीरियर सफ़ाई"></textarea>
-        <div class="cat" id="cat"></div>
-        <div style="margin-top:14px"><label for="btype" id="btypeL" style="display:block;margin:2px 0 6px;font-size:14px;font-weight:700;color:#3c4043">बिज़नेस का प्रकार <span style="font-weight:400;color:#5f6368">(ज़रूरी नहीं)</span></label>
-        <select id="btype" style="width:100%;border:2px solid #dfe1e5;border-radius:14px;padding:12px;font-size:16px;background:#fff;font-family:inherit;margin-bottom:12px"></select></div>
-        <div class="fo"><label class="hsv" for="homeSvc"><input type="checkbox" id="homeSvc"> <span id="hsvTxt">🏠 हमारी दुकान ग्राहक के घर जाकर सेवा देती है (होम सर्विस)</span></label>
-        <label class="hsv" for="homeDel" style="margin-top:8px"><input type="checkbox" id="homeDel"> <span id="hdlTxt">🚚 घर पर सामान पहुँचाते हैं (होम डिलीवरी)</span></label></div>
-        <div class="err"></div>
-        <div class="sum" id="sum"></div>
-      </div>
       <div class="grp" data-s="addr">
         <div class="emoji">🏠</div>
         <h1 id="locH">दुकान का पता लिखें</h1>
@@ -328,7 +329,7 @@ const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const ALLST=[...document.querySelectorAll(".step")],stepBy=k=>ALLST.find(x=>x.dataset.s===k);
 /* ⚡ छोटा फ़ॉर्म: मोबाइल+OTP → दुकान का नाम → मालिक का नाम → क्या काम → पता (शहर, राज्य, ज़िला, पूरा पता) → जमा। पूरा फ़ॉर्म विकल्प के रूप में */
 /* 4 स्क्रीन: भाषा (सिर्फ़ पहली बार) → मोबाइल + OTP → दुकान का नाम + मालिक → काम + पता */
-const GROUP={biz:["shop","owner"],work:["svc","addr"]};
+const GROUP={biz:["shop","owner","svc"],work:["addr"]};
 function langChosen(){try{return localStorage.getItem("pb-lang-chosen")==="1";}catch(_){return true;}}   /* storage बंद हो तो भाषा वाली स्क्रीन छोड़ दो */
 function langFirst(){try{return sessionStorage.getItem("pb-lang-first")==="1";}catch(_){return false;}}  /* अभी-अभी भाषा चुनी (page reload के बाद भी 4 स्क्रीन दिखें) */
 const WITH_LANG=!langChosen()||langFirst();
@@ -514,14 +515,14 @@ function showCat(){
 }
 function later(){clearTimeout(timer);timer=setTimeout(refresh,300);}
 $("services").addEventListener("input",()=>{if(!manual)later();});
-$("shop").addEventListener("input",()=>{if(steps[i]&&steps[i].dataset.s==="work"&&!manual)later();});
+$("shop").addEventListener("input",()=>{if(steps[i]&&steps[i].dataset.s==="biz"&&!manual)later();});
 
 /* ---------- category chunne ki list (bottom sheet): sirf asli 78 categories ---------- */
 let view={v:"main"};
 const sheet=$("sheet"),sl=$("sl"),sq=$("sq");
 function openSheet(){view={v:"main"};sq.value="";sheet.classList.add("on");$("pscrim").classList.add("on");document.body.style.overflow="hidden";drawSheet();}
 function closeSheet(){sheet.classList.remove("on");$("pscrim").classList.remove("on");document.body.style.overflow="";}
-function pick(e){sel=e;manual=true;closeSheet();showCat();if(steps[i].dataset.s==="work")setErr("");if(steps[i].dataset.s==="phone")summary();}
+function pick(e){sel=e;manual=true;closeSheet();showCat();if(steps[i].dataset.s==="biz")setErr("");if(steps[i].dataset.s==="phone")summary();}
 function row(attrs,title,sub,arrow){return '<button type="button" class="pr" '+attrs+'><span><b>'+esc(title)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><i>'+(arrow==null?"›":arrow)+'</i></button>';}
 const catRow=s=>row('data-c="'+s.id+'"',s.typ,s.typ===s.main?"":[s.main,s.grp].filter(Boolean).join(" › "),"");
 const otherRow=(sub)=>row('data-other="1"',T("o_row"),sub||T("o_sub"),"+");
@@ -604,7 +605,7 @@ function render(){
   steps.forEach((s,k)=>s.classList.toggle("on",k===i));
   $("bar").style.width=((i+1)/steps.length*100)+"%";
   /* ऊपर की पट्टी: सारे steps नाम के साथ (हो चुके = हरा ✓, अभी वाला = नीला, आगे वाले = धुँधले) */
-  {const NM={lang:["भाषा","Language"],phone:["मोबाइल","Mobile"],biz:["दुकान और मालिक","Business"],work:["काम और पता","Work & Address"],otp:["OTP","OTP"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
+  {const NM={lang:["भाषा","Language"],phone:["मोबाइल","Mobile"],biz:["दुकान और मालिक","Business"],work:["पता","Address"],otp:["OTP","OTP"],shop:["दुकान","Shop"],owner:["आपका नाम","Owner"],svc:["काम","Work"],addr:["पता","Address"],contact:["संपर्क","Contact"],hours:["समय","Hours"],online:["ऑनलाइन","Online"]};
    $("cnt").innerHTML='<div class="stp" role="list">'+steps.map((x,k)=>{const k2=x.dataset.s,st=k<i?"done":k===i?"on":"todo";
      return '<button type="button" class="'+st+'" role="listitem" data-stp="'+k2+'"'+(k<i?'':' tabindex="-1"')+(k===i?' aria-current="step"':'')+'><i>'+(k<i?"✓":(k+1))+'</i><span>'+(NM[k2]?NM[k2][EN()?1:0]:k2)+'</span></button>';}).join("")+'</div>';
    const cur=$("cnt").querySelector(".on");if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:"center",block:"nearest"});}catch(_){}}
@@ -619,7 +620,7 @@ function render(){
   $("next").textContent=i===steps.length-1?T("submit"):T("next");
   $("btns").style.display=key==="lang"?"none":"";   /* भाषा चुनते ही अपने-आप आगे जाता है — "आगे" बटन नहीं */
   if(key==="biz"){$("ownerHint").textContent=T("owner_hint");}
-  if(key==="work"){if(!manual&&!sel)refresh();else showCat();}
+  if(key==="biz"){if(!manual&&!sel)refresh();else showCat();}
   if(i===steps.length-1){steps[i].appendChild($("sum"));summary();}
   {const fb=$("fullB");if(fb)fb.textContent=FULLF?(EN()?"← Back to the short form":"← छोटा फ़ॉर्म"):(EN()?"Want to add more details? Open the full form →":"और जानकारी देना चाहते हैं? पूरा फ़ॉर्म खोलें →");}
   const inp=steps[i].querySelector("input,textarea");if(inp&&key!=="loc"&&key!=="addr"&&key!=="work"&&key!=="lang")setTimeout(()=>inp.focus({preventScroll:true}),50);
@@ -720,7 +721,7 @@ function extrasFill(){
 function btypeFill(){
   extrasFill();
   const sel=$("btype");if(!sel)return;const v=sel.value,en=EN();
-  sel.innerHTML='<option value="">'+(en?"Choose ▾":"चुनें ▾")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
+  sel.innerHTML='<option value="">'+(en?"Choose":"चुनें")+'</option>'+BTYPES.map(g=>'<optgroup label="'+(en?g[1]:g[0])+'">'+g[2].map(o=>'<option value="'+o[0]+'">'+(en?o[0]:o[1])+'</option>').join("")+'</optgroup>').join("");
   sel.value=v;
   const wl=$("webL");if(wl)wl.innerHTML=en?'🌐 Your website / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(if any)</span>':'🌐 आपकी वेबसाइट / Facebook / Instagram <span style="font-weight:400;color:#5f6368">(अगर है)</span>';
   const wi=$("web");if(wi)wi.placeholder=en?"e.g. www.myshop.com":"जैसे: www.meridukaan.com";
@@ -1113,7 +1114,7 @@ PB.mount($("pbLang"));
 PB.onChange(()=>{
   PB.apply();fixHint();gateText();btypeFill();document.title=T("addshop")+" — PataBook";
   if(!sending)render();
-  if(steps[i]&&steps[i].dataset.s==="work")showCat();
+  if(steps[i]&&steps[i].dataset.s==="biz")showCat();
   if(sheet.classList.contains("on"))drawSheet();
   if(waitLang){waitLang=false;goPhone();}
 });
