@@ -73,6 +73,15 @@
       if (cn >= n * .008) for (var k = 0; k < cn; k++) al[comp[k] * 4 + 3] = 0;   /* छोटे धब्बे (अक्षर, बिंदु) नहीं छूते */
     }
   }
+  /* alpha को r pixel अंदर सिकोड़ें (min filter: पहले आड़ा, फिर खड़ा) — बोतल का आकार वही, बस किनारे की काली लकीर कटे */
+  function erode(g, w, h, r) {
+    var id = g.getImageData(0, 0, w, h), d = id.data, n = w * h, A = new Uint8Array(n), B = new Uint8Array(n), x, y, k, m;
+    for (k = 0; k < n; k++) A[k] = d[k * 4 + 3];
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) { m = 255; for (k = Math.max(0, x - r); k <= Math.min(w - 1, x + r); k++) { var v = A[y * w + k]; if (v < m) m = v; } B[y * w + x] = m; }
+    for (x = 0; x < w; x++) for (y = 0; y < h; y++) { m = 255; for (k = Math.max(0, y - r); k <= Math.min(h - 1, y + r); k++) { var v2 = B[k * w + x]; if (v2 < m) m = v2; } A[y * w + x] = m; }
+    for (k = 0; k < n; k++) d[k * 4 + 3] = A[k];
+    g.putImageData(id, 0, 0);
+  }
   async function remove(file, onStep) {
     STEP = onStep || null;
     try {
@@ -99,6 +108,7 @@
       var c = document.createElement("canvas"); c.width = w; c.height = h;
       var g = c.getContext("2d"); g.drawImage(im, 0, 0, w, h);
       g.globalCompositeOperation = "destination-in"; g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high"; g.drawImage(mk, 0, 0, w, h);
+      erode(g, w, h, Math.max(1, Math.round(Math.max(w, h) / 700)));   /* किनारे की पतली परछाईं (पुराने background की लकीर) हटाएँ */
       var o = document.createElement("canvas"); o.width = w; o.height = h;
       var og = o.getContext("2d"); og.fillStyle = "#fff"; og.fillRect(0, 0, w, h); og.drawImage(c, 0, 0);
       var bl = await new Promise(function (r) { o.toBlob(r, "image/webp", .95); });
