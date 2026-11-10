@@ -79,7 +79,7 @@ async function load(){
   B=rows[0];
   /* सिर्फ़ Platinum: बाकी plan वालों को उनका साधारण पेज */
   let tier="free";try{if(window.PBPlan){await PBPlan.load([slug]);tier=PBPlan.tier(slug);}}catch(e){}
-  if(tier!=="platinum"){location.replace(stdUrl());return;}
+  if(tier!=="platinum"){try{localStorage.removeItem("pbd_"+slug);}catch(e){}location.replace(stdUrl());return;}   /* पुराना "Platinum design" निशान मिटाओ — वरना shop → brand का नीला loader बार-बार दिखता है */
   if(window.PBHide)PBHide.apply(B.description);
   const [cv,pr,ph,cp,nums,dz,vs,it]=await Promise.all([rpc("pb_profile_banner_get",{p_slug:slug}),rpc("pb_shop_products_public",{p_slug:slug}),rpc("pb_shop_photos_public",{p_slug:slug}),rpc("pb_photo_captions",{p_slug:slug}),rpc("pb_public_numbers",{p_slug:slug}),PV?null:rpc("pb_design_get",{p_slug:slug}),rpc("pb_vacancy_status",{p_slugs:[slug]}),rpc("pb_intro_get",{p_slug:slug})]);
   COVER=typeof cv==="string"&&IMG_RX.test(cv)?cv:"";
