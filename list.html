@@ -158,6 +158,11 @@ form.short .fo{display:none}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script><script src="pb-protect.js"></script>
 <script src="pb-card.js" defer></script>
+<script>/* Back से लौटे और दुकान अभी-अभी जुड़ी थी → फ़ॉर्म नहीं, होम पेज */
+(function(){function back(){try{return sessionStorage.getItem("pb-reg-done")==="1";}catch(_){return false;}}
+ try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward"&&back()){location.replace("index.html");return;}if(n&&n.type!=="back_forward")sessionStorage.removeItem("pb-reg-done");}catch(_){}
+ addEventListener("pageshow",function(e){if(e.persisted&&back())location.replace("index.html");});
+ addEventListener("popstate",function(){if(back())location.replace("index.html");});})();</script>
 </head>
 <body>
 <div class="wrap">
@@ -786,7 +791,7 @@ $("otpCode").addEventListener("input",async()=>{
   try{const j=await otpCall("/verify",{purpose:"register",phone:p,code:c});
     if(j.existing&&j.token_hash){   /* दुकान पहले से जुड़ी है → login करके "मेरी दुकान" */
       otpMsg(EN()?"✅ Your shop is already on PataBook. Opening My Shop…":"✅ आपकी दुकान पहले से PataBook पर है। मेरी दुकान खोल रहे हैं…");
-      await PBA.mobile.useTokenHash(j.token_hash,j.email);clearInterval(otpTimer);location.href="mybusiness.html";return;
+      await PBA.mobile.useTokenHash(j.token_hash,j.email);clearInterval(otpTimer);regDone();location.replace("mybusiness.html");return;
     }
     regToken=j.reg_token;regPhone=p;loginTicket=j.login_ticket||"";clearInterval(otpTimer);$("otpBox").classList.add("ok");
     otpMsg(EN()?"✅ Mobile number verified":"✅ मोबाइल नंबर जाँच हो गया");setErr("");
@@ -928,7 +933,7 @@ async function submit(){
     if(rr.ok&&GUESTREG&&ses&&PBA.isGuest&&PBA.isGuest(ses)){   /* guest: प्रोफ़ाइल पूरी करने "मेरी दुकान" में भेजो — OTP आख़िर में वहीं */
       saveReg({phone:phone10(phone),slug:(j&&j.slug)||row.slug,name:name,created:Date.now(),skew:0});
       if(window.PBT)PBT.once("reg",(steps.length+1)+"-done");
-      location.href="mybusiness.html?new=1";return;}
+      regDone();location.replace("mybusiness.html?new=1");return;}
     if(rr.ok){done(name,S,d,{phone:phone,slug:(j&&j.slug)||row.slug,created_at:j&&j.created_at,now:j&&j.now});return;}
     const rt=(j&&(j.message||j.msg))||"";
     if(/gst required/i.test(rt))return fail(EN()?"A second shop can be added only after your first shop's GST is verified.":"दूसरी दुकान तभी जुड़ सकती है जब आपकी पहली दुकान का GST जाँच हो जाए।");
@@ -951,6 +956,8 @@ async function submit(){
 const WAIT_MIN=24*60;   /* admin जाँच के लिए 24 घंटे (रात/छुट्टी में भी वादा सच रहे) */
 let stTimer=null,stPoll=null,ST=null;
 function phone10(p){return String(p||"").replace(/\D/g,"").slice(-10);}
+/* दुकान जुड़ गई → My Shop खुला। वहाँ से फ़ोन का Back दबाने पर यह भरा हुआ फ़ॉर्म दोबारा न खुले, सीधा होम पेज */
+function regDone(){try{sessionStorage.setItem("pb-reg-done","1");}catch(_){}}
 function saveReg(r){try{localStorage.setItem("pb-reg",JSON.stringify(r));}catch(_){}}
 function loadReg(){try{return JSON.parse(localStorage.getItem("pb-reg")||"null");}catch(_){return null;}}
 function done(name,S,d,info){
