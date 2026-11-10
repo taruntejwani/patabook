@@ -256,7 +256,7 @@
             '<p id="pbmhn" style="margin:0 0 6px;font-size:12px;color:#5b6475;line-height:1.35;min-height:32px"></p>' +
             '<label id="pbmsl1" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("ब्रश", "Brush") + '<input type="range" id="pbmbs" min="14" max="110" value="44" style="flex:1"></label>' +
             '<label id="pbmsl2" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("मिलता-जुलता रंग", "Similar colour") + '<input type="range" id="pbmwt" min="8" max="140" value="45" style="flex:1"></label>' +
-            '<label id="pbmsl3" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("गोला ऊपर", "Circle above finger") + '<input type="range" id="pbmof" min="0" max="140" value="60" style="flex:1"></label>' +
+            '<label id="pbmsl3" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("गोला ऊपर", "Circle above finger") + '<input type="range" id="pbmof" min="0" max="140" value="140" style="flex:1"></label>' +
             '<div style="display:flex;align-items:center;gap:6px;margin-top:6px">' +
               '<button type="button" id="pbmwu" style="' + BT + 'background:#eef2f8;color:#0b2f73" aria-label="' + esc(T("वापस", "Undo")) + '">↶</button>' +
               '<button type="button" id="pbmwr" style="' + BT + 'background:#eef2f8;color:#0b2f73" aria-label="' + esc(T("आगे", "Redo")) + '">↷</button>' +
