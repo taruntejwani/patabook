@@ -289,8 +289,8 @@
   }
   /* फ़ोटो चुनने के बाद: दुकानदार खुद ज़ूम/खिसकाकर चौकोर फ्रेम में सेट करे। Done = फ्रेम वाला हिस्सा; Skip = जैसी है वैसी; रद्द/Back = null */
   var RATIO = { logo: 1, front: 2, cover: 16 / 9, open: 9 / 16 };   /* कौन-सी फ़ोटो किस नाप के फ्रेम में सेट होगी */
-  window.pbCrop = function (f, r) { return cropEdit(f, 1, 1, r); };
-  function cropEdit(file, n, tot, ratio) {
+  window.pbCrop = function (f, r) { return cropEdit(f, 1, 1, r, r === 1); };   /* r = 1 → Logo: ✨ Background हटाएँ भी */
+  function cropEdit(file, n, tot, ratio, bg, orig) {   /* bg = "✨ Background हटाएँ" बटन दिखे (Products / Logo); orig = background हटाने से पहले वाली फ़ोटो */
     return new Promise(function (resolve) {
       var url = URL.createObjectURL(file), im = new Image(), done = false;
       im.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
@@ -299,12 +299,16 @@
         var F = Math.min(340, Math.floor(Math.min(window.innerWidth, 420) * .86)), R = ratio > 0 ? ratio : 1, FW, FH;
         if (R >= 1) { FW = F; FH = Math.round(F / R); } else { FH = Math.round(F * 1.15); FW = Math.round(FH * R); }
         ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>' + T("फ़ोटो सेट करें", "Set your photo") + (tot > 1 ? ' (' + n + '/' + tot + ')' : '') + '</h3>' +
+          (orig ? '<p class="hn" style="color:#137333;font-weight:700;margin-bottom:4px">✅ ' + T("Background हटा दिया", "Background removed") + '</p>' : '') +
           '<p class="hn">' + T("दो उँगली से ज़ूम करें और खिसकाकर सही जगह लगाएँ। जो फ्रेम में दिखेगा वही ग्राहक को दिखेगा।", "Pinch to zoom and drag to place it. What you see in the frame is what customers will see.") + '</p>' +
           '<div id="pbgcf" style="width:' + FW + 'px;height:' + FH + 'px;margin:6px auto;position:relative;overflow:hidden;background:#fff;border:2px solid #0060f0;border-radius:14px;touch-action:none"></div>' +
           '<input type="range" id="pbgcz" min="0" max="100" value="0" style="width:' + Math.max(FW, 200) + 'px;display:block;margin:10px auto" aria-label="' + esc(T("ज़ूम", "Zoom")) + '">' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="pbgsv" id="pbgdn" style="flex:2">' + T("हो गया", "Done") + '</button>' +
           '<button type="button" class="pbgop" id="pbgrs" style="flex:1;margin:0;justify-content:center">' + T("रीसेट", "Reset") + '</button>' +
           '<button type="button" class="pbgop" id="pbgsk" style="flex:1;margin:0;justify-content:center">' + T("ऐसे ही रखें", "Keep as is") + '</button></div>' +
+          (bg && window.PBBg ? (orig
+            ? '<button type="button" class="pbgop" id="pbgbo" style="margin-top:8px;justify-content:center">↩️ ' + T("पहले वाली फ़ोटो (background के साथ)", "Original photo (with background)") + '</button>'
+            : '<button type="button" class="pbgop" id="pbgbg" style="margin-top:8px;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">✨ ' + T("Background हटाएँ", "Remove background") + '</button><p class="hn" id="pbgbs" style="text-align:center;margin:4px 0 0;min-height:0"></p>') : '') +
           '<button type="button" class="pbgop" id="pbgcx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
         document.body.appendChild(ov);
         var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
@@ -335,8 +339,11 @@
         box.addEventListener("pointerup", up2); box.addEventListener("pointercancel", up2);
         box.addEventListener("wheel", function (e) { e.preventDefault(); var r = box.getBoundingClientRect(); zoomAt(sc * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
         z.addEventListener("input", function () { zoomAt(fit + (mx - fit) * z.value / 100, FW / 2, FH / 2); });
+        var swap = null;   /* background हटने / वापस लाने पर नई फ़ोटो के साथ यही window फिर खुलती है */
         function fin(v) {
-          if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; URL.revokeObjectURL(url); resolve(v);
+          if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; URL.revokeObjectURL(url);
+          if (swap) { var sw = swap; swap = null; resolve(cropEdit(sw.f, n, tot, ratio, bg, sw.orig)); return; }
+          resolve(v);
         }
         var closeTop = function (v) { pending = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); }, pending = null;
         if (window.PBBack) PBBack.open(function () { fin(pending); });
@@ -349,6 +356,26 @@
         ov.querySelector("#pbgrs").onclick = reset;
         ov.querySelector("#pbgsk").onclick = function () { closeTop(file); };
         ov.querySelector("#pbgcx").onclick = function () { closeTop(null); };
+        var bo = ov.querySelector("#pbgbo"); if (bo) bo.onclick = function () { swap = { f: orig, orig: null }; closeTop(null); };
+        var bb = ov.querySelector("#pbgbg");
+        if (bb) bb.onclick = function () {
+          var st = ov.querySelector("#pbgbs"), btns = ov.querySelectorAll("button");
+          Array.prototype.forEach.call(btns, function (x) { if (x.id !== "pbgcx") x.disabled = true; });
+          st.style.color = "#0b2f73"; st.style.fontWeight = "700";
+          st.textContent = PBBg.ready() ? T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait") : T("AI तैयार हो रहा है… (पहली बार थोड़ा समय लगेगा)", "Getting AI ready… (takes a while the first time)");
+          PBBg.remove(file, function (p) {
+            if (done) return;
+            st.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~115 MB)", "(first time only, ~115 MB)")
+              : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait");
+          }).then(function (nf) {
+            if (done) return; swap = { f: nf, orig: file }; closeTop(null);
+          }).catch(function () {
+            if (done) return;
+            Array.prototype.forEach.call(btns, function (x) { x.disabled = false; });
+            bb.disabled = true; st.style.color = "#b42318";
+            st.textContent = T("इस phone पर background नहीं हट सका। फ़ोटो ऐसे ही रख सकते हैं।", "Couldn't remove the background on this phone. You can keep the photo as it is.");
+          });
+        };
       };
       im.src = url;
     });
@@ -451,7 +478,7 @@
           var out = [];
           for (var q = 0; q < fs.length; q++) {
             if (!/^image\//.test(fs[q].type)) { out.push(fs[q]); continue; }
-            var r = await cropEdit(fs[q], q + 1, fs.length);
+            var r = await cropEdit(fs[q], q + 1, fs.length, 0, true);
             if (r === null) return;   /* रद्द / Back */
             out.push(r);
           }
@@ -700,7 +727,7 @@
     var g = e.target.closest("[data-gup]"); if (g && g.files && g.files.length) { var fs = Array.prototype.slice.call(g.files), gi = +g.dataset.i, gk = g.dataset.gup; g.value = "";
       (async function () {
         var rt = RATIO[gk] || 1, out = [];
-        for (var q = 0; q < fs.length; q++) { if (!/^image\//.test(fs[q].type)) { out.push(fs[q]); continue; } var r = await cropEdit(fs[q], q + 1, fs.length, rt); if (r === null) return; out.push(r); }
+        for (var q = 0; q < fs.length; q++) { if (!/^image\//.test(fs[q].type)) { out.push(fs[q]); continue; } var r = await cropEdit(fs[q], q + 1, fs.length, rt, gk === "logo"); if (r === null) return; out.push(r); }
         GO[ROWS[gi].slug] = gk; up(gi, gk, out);
       })(); }
   });
