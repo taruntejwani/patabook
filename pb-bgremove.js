@@ -1,11 +1,15 @@
 /* PataBook — ✨ फ़ोटो का background हटाना (phone पर ही; फ़ोटो किसी बाहरी कंपनी को नहीं जाती)
-   AI: U²-Net-p (u2netp, Apache-2.0 — कारोबार में मुफ़्त), सिर्फ़ ~4.5 MB, हमारी अपनी साइट से (/ai/u2netp.onnx)।
+   AI: Silueta (U²-Net परिवार, rembg — MIT / Apache-2.0, कारोबार में मुफ़्त) ~44 MB — कपड़े, लोग, सामान, भीड़ वाला background भी अच्छा।
+   Cloudflare पर एक file 25 MB से बड़ी नहीं हो सकती, इसलिए दो टुकड़े (ai/silueta.part0/1.bin), browser में जोड़े जाते हैं।
+   एक बार download होकर phone में रखा रहता है (Cache)। कम memory वाले phone (≤ 2 GB) पर छोटा AI: U²-Net-p (~4.5 MB)।
    चलाने वाला: ONNX Runtime Web (MIT)। पहले वाला बड़ा AI (115 MB) phone की memory में नहीं समाता था — page crash होता था।
    PBBg.remove(file, onStep) → Promise<File>  (सफ़ेद background वाली फ़ोटो)
    onStep({stage:"load"|"run", pct}) — download / काम की प्रगति */
 (function () {
   var ORTV = "1.20.1", ORT = "https://cdn.jsdelivr.net/npm/onnxruntime-web@" + ORTV + "/dist/";
-  var MODEL = "ai/u2netp.onnx?v=1", S = 320, MAXS = 1600;
+  var BIG = { key: "silueta-v1", parts: ["ai/silueta.part0.bin", "ai/silueta.part1.bin"], size: 44173029 },
+      SMALL = { key: "u2netp-v1", parts: ["ai/u2netp.onnx"], size: 4574861 };
+  var MODEL = (navigator.deviceMemory && navigator.deviceMemory <= 2) ? SMALL : BIG, S = 320, MAXS = 1600;
   var P = null, STEP = null;
 
   function script(src) {
@@ -17,16 +21,18 @@
     });
   }
   async function fetchModel() {
-    var r = await fetch(MODEL); if (!r.ok) throw new Error("model");
-    var tot = +r.headers.get("content-length") || 4574861;
-    if (!r.body || !r.body.getReader) return new Uint8Array(await r.arrayBuffer());
-    var rd = r.body.getReader(), parts = [], got = 0;
-    for (;;) {
-      var c = await rd.read(); if (c.done) break;
-      parts.push(c.value); got += c.value.length;
-      if (STEP) STEP({ stage: "load", pct: Math.min(99, Math.round(got / tot * 100)) });
+    var C = null, KEY = "/pb-ai/" + MODEL.key;
+    try { C = await caches.open("pb-ai"); var hit = await C.match(KEY); if (hit) return new Uint8Array(await hit.arrayBuffer()); } catch (e) { C = null; }
+    var buf = new Uint8Array(MODEL.size), got = 0;
+    for (var p = 0; p < MODEL.parts.length; p++) {
+      var r = await fetch(MODEL.parts[p]); if (!r.ok) throw new Error("model");
+      if (r.body && r.body.getReader) {
+        var rd = r.body.getReader();
+        for (;;) { var c = await rd.read(); if (c.done) break; if (got + c.value.length > buf.length) throw new Error("size"); buf.set(c.value, got); got += c.value.length; if (STEP) STEP({ stage: "load", pct: Math.min(99, Math.round(got / MODEL.size * 100)) }); }
+      } else { var ab = new Uint8Array(await r.arrayBuffer()); buf.set(ab, got); got += ab.length; }
     }
-    var buf = new Uint8Array(got), o = 0; parts.forEach(function (p) { buf.set(p, o); o += p.length; });
+    if (got !== MODEL.size) throw new Error("size");
+    if (C) { try { await C.put(KEY, new Response(buf.slice().buffer, { headers: { "Content-Type": "application/octet-stream" } })); } catch (e) {} }
     return buf;
   }
   function load() {
@@ -130,5 +136,5 @@
       return new File([bl], "nobg." + (bl.type === "image/webp" ? "webp" : "jpg"), { type: bl.type });
     } finally { STEP = null; }
   }
-  window.PBBg = { remove: remove, ready: function () { return !!P; } };
+  window.PBBg = { remove: remove, ready: function () { return !!P; }, mb: function () { return Math.round(MODEL.size / 1e6); } };
 })();
