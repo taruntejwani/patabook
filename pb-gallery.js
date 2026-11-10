@@ -213,18 +213,26 @@
      • 🖌️ मैजिक ब्रश: उँगली रखते ही गोले के बीच का रंग पकड़ा जाता है — पूरी लकीर में सिर्फ़ वही रंग मिटता है (product नहीं मिटता)
      • 🩹 वापस लाएँ (Repair): फेरने से मिटा हुआ हिस्सा असली फ़ोटो से वापस
      • मिटा हुआ हिस्सा चेक-डिब्बों में दिखता है; सेव पर सफ़ेद। गोला उँगली से कितना ऊपर — slider। ↶ / ↷
-     magicWand(file) → Promise<File | null>  (null = रद्द) */
-  function magicWand(file) {
+     magicWand(file, src) → Promise<File | null>  (null = रद्द)
+     src = background हटाने से पहले वाली असली फ़ोटो (हो तो): AI का हटाया हिस्सा चेक-डिब्बों में दिखता है और 🩹 उसे भी वापस ला सकता है */
+  function loadImg(f) { return new Promise(function (res) { if (!f) return res(null); var u = URL.createObjectURL(f), i = new Image(); i.onload = function () { URL.revokeObjectURL(u); res(i); }; i.onerror = function () { URL.revokeObjectURL(u); res(null); }; i.src = u; }); }
+  function magicWand(file, src) {
     return new Promise(function (resolve) {
-      var u = URL.createObjectURL(file), im = new Image();
-      im.onerror = function () { URL.revokeObjectURL(u); resolve(null); };
-      im.onload = function () {
-        URL.revokeObjectURL(u);
+      Promise.all([loadImg(file), loadImg(src)]).then(function (L) {
+        var im = L[0], im2 = L[1]; if (!im) { resolve(null); return; }
         var W = im.naturalWidth, H = im.naturalHeight, N = W * H;
         var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         var g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0);
+        var CUR = g.getImageData(0, 0, W, H).data;
+        if (im2) { g.clearRect(0, 0, W, H); g.drawImage(im2, 0, 0, W, H); }   /* असली फ़ोटो उसी नाप में */
         var ORIG = g.getImageData(0, 0, W, H), OD = ORIG.data, VIEW = g.getImageData(0, 0, W, H), VD = VIEW.data;
         var M = new Uint8Array(N); M.fill(255);   /* 255 = रखा, 0 = मिटाया */
+        if (im2) for (var q0 = 0; q0 < N; q0++) {   /* AI ने जो हटाया (अब सफ़ेद, पर असली में कुछ और था) → मिटा हुआ */
+          var o0 = q0 * 4;
+          if (CUR[o0] >= 246 && CUR[o0 + 1] >= 246 && CUR[o0 + 2] >= 246 && Math.abs(OD[o0] - CUR[o0]) + Math.abs(OD[o0 + 1] - CUR[o0 + 1]) + Math.abs(OD[o0 + 2] - CUR[o0 + 2]) > 36) M[q0] = 0;
+        }
+        for (var q1 = 0; q1 < N; q1++) VD[q1 * 4 + 3] = M[q1];
+        g.putImageData(VIEW, 0, 0);
         var CHK = "repeating-conic-gradient(#d9dee8 0% 25%,#ffffff 0% 50%) 0 0/18px 18px";
         var ov = document.createElement("div");
         ov.style.cssText = "position:fixed;inset:0;z-index:360;background:#1d2433;display:flex;flex-direction:column;color:#fff;font-family:inherit;touch-action:none";
@@ -396,8 +404,7 @@
         if (window.PBBack) PBBack.open(function () { fin(pend); });
         ov.querySelector("#pbmwx").onclick = function () { closeTop(null); };
         ov.querySelector("#pbmwd").onclick = function () {
-          var any = false; for (var i = 0; i < N; i++) if (M[i] !== 255) { any = true; break; }
-          if (!any) { closeTop(file); return; }
+          if (!UND.length && !RED.length) { closeTop(file); return; }   /* कुछ बदला नहीं */
           var o = document.createElement("canvas"); o.width = W; o.height = H;
           var og = o.getContext("2d"); og.fillStyle = "#fff"; og.fillRect(0, 0, W, H); render(0, 0, W, H); og.drawImage(cv, 0, 0);
           o.toBlob(function (bl) {
@@ -405,12 +412,11 @@
             closeTop(bl ? new File([bl], "wand.webp", { type: bl.type }) : file);
           }, "image/webp", .95);
         };
-      };
-      im.src = u;
+      });
     });
   }
   function lightBg(ov, b, k, x, act, close) {
-    var s = b.slug, NF = null, img = ov.querySelector("img"), btns = function (on) { Array.prototype.forEach.call(ov.querySelectorAll("button[data-a]"), function (z) { z.disabled = !on; }); };
+    var s = b.slug, NF = null, OF = null, img = ov.querySelector("img"), btns = function (on) { Array.prototype.forEach.call(ov.querySelectorAll("button[data-a]"), function (z) { z.disabled = !on; }); };
     var B = "border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;";
     async function orig() { var r = await fetch(x.url, { cache: "no-store" }); if (!r.ok) throw new Error("get"); var bl = await r.blob(); return new File([bl], "p." + (/webp/.test(bl.type) ? "webp" : "jpg"), { type: bl.type || "image/jpeg" }); }
     function saveMode(didBg) {   /* बदलाव के बाद: ✔ यही रखें / ↩️ पहले वाली — और ✨ / 🪄 साथ में चालू रहें */
@@ -423,7 +429,8 @@
       if (w === "bg") {
         btns(false); em.textContent = PBBg.ready() ? T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait") : T("AI तैयार हो रहा है… (पहली बार थोड़ा समय लगेगा)", "Getting AI ready… (takes a while the first time)");
         try {
-          var f = NF || await orig();
+          if (!OF) OF = await orig();
+          var f = NF || OF;
           NF = await PBBg.remove(f, function (p) { em.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)", "(first time only, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)") : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait"); });
           img.src = URL.createObjectURL(NF); img.style.background = "#fff";
           saveMode(true);
@@ -434,7 +441,8 @@
       if (w === "bgno") { close(); return; }
       if (w === "bgwand") {
         try {
-          var base = NF || await orig(), wf = await magicWand(base);
+          if (!OF) OF = await orig();
+          var base = NF || OF, wf = await magicWand(base, NF ? OF : null);
           if (wf && wf !== base) { var first = !NF; NF = wf; img.src = URL.createObjectURL(NF); img.style.background = "#fff"; if (first) saveMode(false); em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Done. Tap \"Keep this\" if you like it."); }
         } catch (er2) { em.style.color = "#ffb4ab"; em.textContent = T("फ़ोटो नहीं खुल सकी। दोबारा कोशिश करें।", "Couldn't open the photo. Try again."); }
         return;
@@ -626,7 +634,7 @@
         ov.querySelector("#pbgsk").onclick = function () { closeTop(file); };
         ov.querySelector("#pbgcx").onclick = function () { closeTop(null); };
         var bo = ov.querySelector("#pbgbo"); if (bo) bo.onclick = function () { swap = { f: orig, orig: null, how: null }; closeTop(null); };
-        var wd = ov.querySelector("#pbgwd"); if (wd) wd.onclick = function () { magicWand(file).then(function (wf) { if (wf && wf !== file && !done) { swap = { f: wf, orig: orig || file, how: how === "bg" ? "bg" : "wand" }; closeTop(null); } }); };
+        var wd = ov.querySelector("#pbgwd"); if (wd) wd.onclick = function () { magicWand(file, orig || null).then(function (wf) { if (wf && wf !== file && !done) { swap = { f: wf, orig: orig || file, how: how === "bg" ? "bg" : "wand" }; closeTop(null); } }); };
         var bb = ov.querySelector("#pbgbg");
         if (bb) bb.onclick = function () {
           var st = ov.querySelector("#pbgbs"), btns = ov.querySelectorAll("button");
