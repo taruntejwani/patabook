@@ -77,6 +77,11 @@ input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 4p
 </head>
 <body>
 <div class="wrap">
+ <script>/* ऊपर का "← मेरी दुकान": My Shop से आए हों तो phone के Back जैसा — वापस उसी जगह (दुकान की जानकारी वाला पेज), नया Dashboard नहीं */
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.back[href^='mybusiness.html']");if(!a)return;
+  var r="";try{r=new URL(document.referrer).pathname;}catch(_){}
+  if(!/\/mybusiness(\.html)?$/.test(r)||history.length<2)return;
+  e.preventDefault();var d=0;try{d=(history.state&&history.state.pbl)||0;}catch(_){}history.go(-(d+1));});</script>
  <div class="top"><a class="back" href="mybusiness.html" data-en="← My Shop">← मेरी दुकान</a><div class="brand"><img class="pbwm" src="pb-wordmark.webp" alt="PataBook" width="117" height="20" style="height:clamp(15px,5vw,20px);width:auto;display:block"></div></div>
 
  <p class="muted" id="loading">…</p>
