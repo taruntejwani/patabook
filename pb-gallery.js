@@ -208,118 +208,165 @@
   }
 
   /* ✨ पहले से लगी फ़ोटो का background हटाना: AI → नई फ़ोटो दिखाओ → "यही रखें" पर नई फ़ोटो उसी जानकारी के साथ, पुरानी हटे */
-  /* 🪄 दबाकर हटाएँ (Magic Wand): जहाँ दबाया, वहाँ से जुड़ा उसी रंग का पूरा हिस्सा एक साथ सफ़ेद।
-     जुड़ा नहीं है तो नहीं हटता। magicWand(file) → Promise<File | null>  (null = रद्द) */
+  /* 🪄 हिस्सा हटाएँ — पूरी screen वाला editor (दूसरे photo-apps जैसा):
+     • 🪄 दबाकर: एक बार दबाओ → उससे जुड़ा उसी रंग का पूरा हिस्सा हटे
+     • 🖌️ मैजिक ब्रश: उँगली रखते ही गोले के बीच का रंग पकड़ा जाता है — पूरी लकीर में सिर्फ़ वही रंग मिटता है (product नहीं मिटता)
+     • 🩹 वापस लाएँ (Repair): फेरने से मिटा हुआ हिस्सा असली फ़ोटो से वापस
+     • मिटा हुआ हिस्सा चेक-डिब्बों में दिखता है; सेव पर सफ़ेद। गोला उँगली से कितना ऊपर — slider। ↶ / ↷
+     magicWand(file) → Promise<File | null>  (null = रद्द) */
   function magicWand(file) {
     return new Promise(function (resolve) {
       var u = URL.createObjectURL(file), im = new Image();
       im.onerror = function () { URL.revokeObjectURL(u); resolve(null); };
       im.onload = function () {
         URL.revokeObjectURL(u);
-        var W = im.naturalWidth, H = im.naturalHeight, N = W * H, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+        var W = im.naturalWidth, H = im.naturalHeight, N = W * H;
+        var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         var g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0);
-        var ov = document.createElement("div"); ov.className = "pbgov"; ov.style.zIndex = "340";
-        ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>🪄 ' + T("हिस्सा हटाएँ", "Remove parts") + '</h3>' +
-          '<p class="hn">' + T("बचा हुआ background या धब्बा हटाएँ। नीचे तरीका चुनें: 🪄 दबाकर (एक बार दबाओ) या 🖌️ मैजिक ब्रश (किनारे पर फेरो)।", "Remove leftover background or spots. Choose below: 🪄 Tap (tap once) or 🖌️ Magic brush (run along the edge).") + '</p>' +
-          '<div id="pbmww" style="position:relative;margin:6px auto;border:2px solid #0060f0;border-radius:12px;overflow:hidden;background:#fff;cursor:crosshair;touch-action:none"></div>' +
-          '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 2px"><button type="button" class="pbgop" id="pbmzo" style="width:auto;margin:0;padding:8px 14px" aria-label="' + esc(T("छोटा करें", "Zoom out")) + '">➖</button>' +
-          '<b id="pbmzv" style="min-width:52px;text-align:center;color:#0b2f73">100%</b><button type="button" class="pbgop" id="pbmzi" style="width:auto;margin:0;padding:8px 14px" aria-label="' + esc(T("बड़ा करें", "Zoom in")) + '">➕</button>' +
-          '<button type="button" class="pbgop" id="pbmzr" style="width:auto;margin:0;padding:8px 12px;font-size:13px">' + T("पूरा देखें", "Fit") + '</button></div>' +
-          '<div style="display:flex;gap:8px;margin:6px 0"><button type="button" class="pbgop" id="pbmmt" style="flex:1;margin:0;justify-content:center">🪄 ' + T("दबाकर", "Tap") + '</button><button type="button" class="pbgop" id="pbmmb" style="flex:1;margin:0;justify-content:center">🖌️ ' + T("मैजिक ब्रश", "Magic brush") + '</button></div>' +
-          '<p class="hn" id="pbmhn" style="text-align:center;margin:0 0 4px;font-size:12px"></p>' +
-          '<label id="pbmbsl" style="display:none;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#33395a;margin:6px 0">' + T("ब्रश का साइज़", "Brush size") + '<input type="range" id="pbmbs" min="14" max="90" value="40" style="flex:1" aria-label="' + esc(T("ब्रश का साइज़", "Brush size")) + '"></label>' +
-          '<label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#33395a;margin:8px 0">' + T("कितना मिलता-जुलता रंग", "How similar") + '<input type="range" id="pbmwt" min="10" max="140" value="50" style="flex:1" aria-label="' + esc(T("कितना मिलता-जुलता रंग", "How similar")) + '"></label>' +
-          '<p class="hn" id="pbmws" style="min-height:18px;margin:0 0 8px;color:#0b2f73;font-weight:700"></p>' +
-          '<div style="display:flex;gap:8px"><button type="button" class="pbgsv" id="pbmwd" style="flex:2;margin:0">✔ ' + T("हो गया", "Done") + '</button>' +
-          '<button type="button" class="pbgop" id="pbmwu" style="flex:1;margin:0;justify-content:center">↶ ' + T("वापस", "Undo") + '</button></div>' +
-          '<button type="button" class="pbgop" id="pbmwx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
+        var ORIG = g.getImageData(0, 0, W, H), OD = ORIG.data, VIEW = g.getImageData(0, 0, W, H), VD = VIEW.data;
+        var M = new Uint8Array(N); M.fill(255);   /* 255 = रखा, 0 = मिटाया */
+        var CHK = "repeating-conic-gradient(#d9dee8 0% 25%,#ffffff 0% 50%) 0 0/18px 18px";
+        var ov = document.createElement("div");
+        ov.style.cssText = "position:fixed;inset:0;z-index:360;background:#1d2433;display:flex;flex-direction:column;color:#fff;font-family:inherit;touch-action:none";
+        var BT = "border:0;border-radius:10px;padding:9px 12px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;";
+        ov.innerHTML =
+          '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px">' +
+            '<button type="button" id="pbmwx" style="' + BT + 'background:rgba(255,255,255,.12);color:#fff">✕ ' + T("रद्द", "Cancel") + '</button>' +
+            '<b style="flex:1;text-align:center;font-size:16px">🪄 ' + T("हिस्सा हटाएँ", "Remove parts") + '</b>' +
+            '<button type="button" id="pbmwd" style="' + BT + 'background:#1e9e57;color:#fff">✔ ' + T("हो गया", "Done") + '</button></div>' +
+          '<div id="pbmwa" style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 8px">' +
+            '<div id="pbmww" style="position:relative;overflow:hidden;border-radius:8px;background:' + CHK + ';touch-action:none"></div></div>' +
+          '<div style="background:#fff;color:#1f2937;border-radius:16px 16px 0 0;padding:10px 12px 12px">' +
+            '<div style="display:flex;gap:6px;margin-bottom:8px">' +
+              '<button type="button" data-md="tap" style="' + BT + 'flex:1">🪄 ' + T("दबाकर", "Tap") + '</button>' +
+              '<button type="button" data-md="brush" style="' + BT + 'flex:1">🖌️ ' + T("मैजिक ब्रश", "Magic brush") + '</button>' +
+              '<button type="button" data-md="repair" style="' + BT + 'flex:1">🩹 ' + T("वापस लाएँ", "Repair") + '</button></div>' +
+            '<p id="pbmhn" style="margin:0 0 6px;font-size:12px;color:#5b6475;line-height:1.35;min-height:32px"></p>' +
+            '<label id="pbmsl1" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("ब्रश", "Brush") + '<input type="range" id="pbmbs" min="14" max="110" value="44" style="flex:1"></label>' +
+            '<label id="pbmsl2" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("मिलता-जुलता रंग", "Similar colour") + '<input type="range" id="pbmwt" min="8" max="140" value="45" style="flex:1"></label>' +
+            '<label id="pbmsl3" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:4px 0">' + T("गोला ऊपर", "Circle above finger") + '<input type="range" id="pbmof" min="0" max="140" value="60" style="flex:1"></label>' +
+            '<div style="display:flex;align-items:center;gap:6px;margin-top:6px">' +
+              '<button type="button" id="pbmwu" style="' + BT + 'background:#eef2f8;color:#0b2f73" aria-label="' + esc(T("वापस", "Undo")) + '">↶</button>' +
+              '<button type="button" id="pbmwr" style="' + BT + 'background:#eef2f8;color:#0b2f73" aria-label="' + esc(T("आगे", "Redo")) + '">↷</button>' +
+              '<span style="flex:1"></span>' +
+              '<button type="button" id="pbmzo" style="' + BT + 'background:#eef2f8;color:#0b2f73" aria-label="' + esc(T("छोटा करें", "Zoom out")) + '">➖</button>' +
+              '<b id="pbmzv" style="min-width:48px;text-align:center;color:#0b2f73;font-size:14px">100%</b>' +
+              '<button type="button" id="pbmzi" style="' + BT + 'background:#eef2f8;color:#0b2f73" aria-label="' + esc(T("बड़ा करें", "Zoom in")) + '">➕</button>' +
+              '<button type="button" id="pbmzr" style="' + BT + 'background:#eef2f8;color:#0b2f73;font-size:12px">' + T("पूरा", "Fit") + '</button></div>' +
+            '<p id="pbmws" style="margin:6px 0 0;font-size:13px;font-weight:700;color:#0b2f73;min-height:18px"></p></div>';
         document.body.appendChild(ov);
         var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
-        var wrap = ov.querySelector("#pbmww"), maxW = Math.min(window.innerWidth - 56, 460), maxH = Math.max(220, window.innerHeight * .5), sc = Math.min(maxW / W, maxH / H);
-        var VW = Math.round(W * sc), VH = Math.round(H * sc);
+        var area = ov.querySelector("#pbmwa"), wrap = ov.querySelector("#pbmww"), st = ov.querySelector("#pbmws"), hn = ov.querySelector("#pbmhn");
+        var bsl = ov.querySelector("#pbmbs"), tl = ov.querySelector("#pbmwt"), ofs = ov.querySelector("#pbmof");
+        var ar = area.getBoundingClientRect(), sc = Math.min((ar.width - 4) / W, (ar.height - 4) / H), VW = Math.max(1, Math.round(W * sc)), VH = Math.max(1, Math.round(H * sc));
         cv.style.cssText = "display:block;width:" + VW + "px;height:" + VH + "px;transform-origin:0 0;will-change:transform";
-        wrap.style.width = VW + "px"; wrap.style.height = VH + "px"; wrap.style.background = "repeating-conic-gradient(#eef1f6 0% 25%,#fff 0% 50%) 0 0/16px 16px"; wrap.appendChild(cv);
-        var hist = [], done = false, tl = ov.querySelector("#pbmwt"), st = ov.querySelector("#pbmws");
-        /* 🔍 ज़ूम / खिसकाना */
-        var Z = 1, TX = 0, TY = 0, ZMAX = 8, ZMIN = .4, zv = ov.querySelector("#pbmzv");
+        wrap.style.width = VW + "px"; wrap.style.height = VH + "px"; wrap.appendChild(cv);
+        var ring = document.createElement("div"); ring.style.cssText = "position:absolute;left:0;top:0;border:2px solid #e8336d;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 1px #fff,inset 0 0 0 1px #fff";
+        var dot = document.createElement("div"); dot.style.cssText = "position:absolute;left:0;top:0;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#e8336d;border:1px solid #fff;pointer-events:none;display:none";
+        var fdot = document.createElement("div"); fdot.style.cssText = "position:absolute;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:rgba(232,51,109,.55);pointer-events:none;display:none";
+        wrap.appendChild(ring); wrap.appendChild(dot); wrap.appendChild(fdot);
+        /* ---- दिखाना: मिटा हुआ = पारदर्शी (पीछे चेक-डिब्बे) ---- */
+        function render(x0, y0, x1, y1) {
+          x0 = Math.max(0, x0 | 0); y0 = Math.max(0, y0 | 0); x1 = Math.min(W, Math.ceil(x1)); y1 = Math.min(H, Math.ceil(y1)); if (x1 <= x0 || y1 <= y0) return;
+          for (var y = y0; y < y1; y++) for (var x = x0; x < x1; x++) { var i = y * W + x; VD[i * 4 + 3] = M[i]; }
+          g.putImageData(VIEW, 0, 0, x0, y0, x1 - x0, y1 - y0);
+        }
+        /* ---- ↶ / ↷ ---- */
+        var UND = [], RED = [];
+        function snap() { UND.push(M.slice()); if (UND.length > 15) UND.shift(); RED = []; }
+        ov.querySelector("#pbmwu").onclick = function () { if (!UND.length) return; RED.push(M.slice()); M.set(UND.pop()); render(0, 0, W, H); st.textContent = ""; };
+        ov.querySelector("#pbmwr").onclick = function () { if (!RED.length) return; UND.push(M.slice()); M.set(RED.pop()); render(0, 0, W, H); };
+        function dif(i, c) { var o = i * 4; return Math.abs(OD[o] - c[0]) + Math.abs(OD[o + 1] - c[1]) + Math.abs(OD[o + 2] - c[2]); }
+        function colAt(ix, iy) { var r = 0, gg = 0, b = 0, n = 0; for (var y = Math.max(0, iy - 1); y <= Math.min(H - 1, iy + 1); y++) for (var x = Math.max(0, ix - 1); x <= Math.min(W - 1, ix + 1); x++) { var o = (y * W + x) * 4; r += OD[o]; gg += OD[o + 1]; b += OD[o + 2]; n++; } return [r / n, gg / n, b / n]; }
+        /* ---- 🪄 दबाकर ---- */
+        function fill(px, py) {
+          var i0 = py * W + px; if (!M[i0]) { st.textContent = T("यह हिस्सा पहले से हटा है।", "This part is already removed."); return; }
+          var c = colAt(px, py), tol = +tl.value; snap();
+          var q = new Int32Array(N), seen = new Uint8Array(N), qs = 0, qe = 0, x0 = px, y0 = py, x1 = px, y1 = py;
+          seen[i0] = 1; q[qe++] = i0;
+          while (qs < qe) {
+            var i = q[qs++], x = i % W, y = (i / W) | 0; M[i] = 0;
+            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+            var nb = [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1];
+            for (var t = 0; t < 4; t++) { var v = nb[t]; if (v < 0 || seen[v]) continue; seen[v] = 1; if (M[v] && dif(v, c) <= tol) q[qe++] = v; else if (M[v] && dif(v, c) <= tol * 2.2) M[v] = 0; }
+          }
+          render(x0 - 1, y0 - 1, x1 + 2, y1 + 2);
+          st.textContent = qe > N * .9 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ दबाएँ और \"मिलता-जुलता रंग\" कम करें।", "A very large part was removed — if wrong, tap ↶ and lower \"Similar colour\".") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
+        }
+        /* ---- 🖌️ / 🩹 ब्रश ---- */
+        var MODE = "brush", SC = null, LP = null, stroke = false;
+        function img(cx, cy) { var rc = cv.getBoundingClientRect(), k = rc.width / W; return { x: (cx - rc.left) / k, y: (cy - rc.top) / k, k: k }; }
+        function brushAt(cx, cy) {
+          var p = img(cx, cy), R0 = (+bsl.value / 2) / p.k, x0 = Math.max(0, Math.floor(p.x - R0)), y0 = Math.max(0, Math.floor(p.y - R0)), x1 = Math.min(W, Math.ceil(p.x + R0)), y1 = Math.min(H, Math.ceil(p.y + R0));
+          if (x1 <= x0 || y1 <= y0) return;
+          var R2 = R0 * R0, tol = +tl.value;
+          if (MODE === "brush" && !SC) return;
+          for (var y = y0; y < y1; y++) for (var x = x0; x < x1; x++) {
+            var dx = x - p.x, dy = y - p.y; if (dx * dx + dy * dy > R2) continue; var i = y * W + x;
+            if (MODE === "repair") M[i] = 255; else if (M[i] && dif(i, SC) <= tol) M[i] = 0;
+          }
+          render(x0, y0, x1, y1);
+        }
+        function brushLine(cx, cy) {
+          if (!LP) { brushAt(cx, cy); LP = { x: cx, y: cy }; return; }
+          var dx = cx - LP.x, dy = cy - LP.y, n = Math.ceil(Math.hypot(dx, dy) / Math.max(2, +bsl.value / 4));
+          for (var i = 1; i <= n; i++) brushAt(LP.x + dx * i / n, LP.y + dy * i / n);
+          LP = { x: cx, y: cy };
+        }
+        function showRing(cx, cy, fx, fy) {
+          var r = wrap.getBoundingClientRect(), d = +bsl.value;
+          ring.style.display = dot.style.display = "block"; ring.style.width = ring.style.height = d + "px";
+          ring.style.borderColor = dot.style.background = MODE === "repair" ? "#1e9e57" : "#e8336d";
+          ring.style.transform = "translate(" + (cx - r.left - d / 2) + "px," + (cy - r.top - d / 2) + "px)";
+          dot.style.transform = "translate(" + (cx - r.left) + "px," + (cy - r.top) + "px)";
+          if (fx != null && Math.abs(fy - cy) > 6) { fdot.style.display = "block"; fdot.style.transform = "translate(" + (fx - r.left) + "px," + (fy - r.top) + "px)"; } else fdot.style.display = "none";
+        }
+        function hideRing() { ring.style.display = dot.style.display = fdot.style.display = "none"; }
+        function setMode(m) {
+          MODE = m;
+          Array.prototype.forEach.call(ov.querySelectorAll("[data-md]"), function (bn) { var on = bn.dataset.md === m; bn.style.background = on ? "#1a73e8" : "#eef2f8"; bn.style.color = on ? "#fff" : "#0b2f73"; });
+          ov.querySelector("#pbmsl1").style.display = m === "tap" ? "none" : "flex";
+          ov.querySelector("#pbmsl2").style.display = m === "repair" ? "none" : "flex";
+          ov.querySelector("#pbmsl3").style.display = m === "tap" ? "none" : "flex";
+          hn.textContent = m === "tap" ? T("जो हिस्सा हटाना है, उस पर एक बार हल्का-सा दबाएँ — उससे जुड़ा उसी रंग का पूरा हिस्सा हटेगा। एक उँगली से खिसकाएँ, दो से ज़ूम।", "Tap once on the part — everything joined to it in that colour is removed. One finger moves, two fingers zoom.")
+            : m === "brush" ? T("गोले का बीच (बिंदु) background पर रखकर उँगली रखें, फिर किनारे-किनारे फेरें। जो रंग पहले पकड़ा, सिर्फ़ वही मिटेगा — product नहीं। दो उँगली से ज़ूम / खिसकाएँ।", "Put the circle's centre on the background, then run along the edge. Only the colour picked at the start is erased — not the product. Two fingers zoom / move.")
+            : T("गलती से मिटा हिस्सा? उस पर फेरें — असली फ़ोटो वापस आ जाएगी। दो उँगली से ज़ूम / खिसकाएँ।", "Erased by mistake? Brush over it to bring the original back. Two fingers zoom / move.");
+        }
+        Array.prototype.forEach.call(ov.querySelectorAll("[data-md]"), function (bn) { bn.onclick = function () { setMode(bn.dataset.md); }; });
+        setMode("brush");
+        /* ---- 🔍 ज़ूम / खिसकाना ---- */
+        var Z = 1, TX = 0, TY = 0, ZMAX = 10, ZMIN = .4, zv = ov.querySelector("#pbmzv");
         function paint() {
           Z = Math.max(ZMIN, Math.min(ZMAX, Z));
-          if (Z <= 1) { TX = (VW - VW * Z) / 2; TY = (VH - VH * Z) / 2; }   /* छोटा करने पर फ़ोटो बीच में */
-          else { TX = Math.min(0, Math.max(VW - VW * Z, TX)); TY = Math.min(0, Math.max(VH - VH * Z, TY)); }
+          if (Z <= 1) { TX = (VW - VW * Z) / 2; TY = (VH - VH * Z) / 2; } else { TX = Math.min(0, Math.max(VW - VW * Z, TX)); TY = Math.min(0, Math.max(VH - VH * Z, TY)); }
           cv.style.transform = "translate(" + TX + "px," + TY + "px) scale(" + Z + ")"; zv.textContent = Math.round(Z * 100) + "%";
         }
         function zoomAt(nz, cx, cy) { nz = Math.max(ZMIN, Math.min(ZMAX, nz)); TX = cx - (cx - TX) * nz / Z; TY = cy - (cy - TY) * nz / Z; Z = nz; paint(); }
         ov.querySelector("#pbmzi").onclick = function () { zoomAt(Z * 1.6, VW / 2, VH / 2); };
         ov.querySelector("#pbmzo").onclick = function () { zoomAt(Z / 1.6, VW / 2, VH / 2); };
         ov.querySelector("#pbmzr").onclick = function () { Z = 1; TX = 0; TY = 0; paint(); };
-        /* दो तरीके: 🪄 दबाकर (एक बार दबाओ → जुड़ा हुआ उसी रंग का पूरा हिस्सा) · 🖌️ मैजिक ब्रश (किनारे पर फेरो → गोले के बीच वाला रंग ही आसपास से मिटे) */
-        var MODE = "tap", bsl = ov.querySelector("#pbmbs"), hn = ov.querySelector("#pbmhn");
-        var ring = document.createElement("div"); ring.style.cssText = "position:absolute;left:0;top:0;border:2px solid #e8336d;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 1px #fff,inset 0 0 0 1px #fff";
-        var dot = document.createElement("div"); dot.style.cssText = "position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#e8336d;pointer-events:none;display:none";
-        wrap.appendChild(ring); wrap.appendChild(dot);
-        function setMode(m) {
-          MODE = m;
-          ov.querySelector("#pbmmt").style.cssText = "flex:1;margin:0;justify-content:center" + (m === "tap" ? ";background:#1a73e8;color:#fff;border-color:#1a73e8" : "");
-          ov.querySelector("#pbmmb").style.cssText = "flex:1;margin:0;justify-content:center" + (m === "brush" ? ";background:#1a73e8;color:#fff;border-color:#1a73e8" : "");
-          ov.querySelector("#pbmbsl").style.display = m === "brush" ? "flex" : "none";
-          hn.textContent = m === "tap" ? T("दो उँगली से ज़ूम · एक उँगली से खिसकाएँ · हल्का-सा दबाने पर हटेगा", "Pinch to zoom · drag to move · a light tap removes")
-            : T("गोला उँगली से थोड़ा ऊपर रहता है — उसे product के किनारे-किनारे फेरें। गोले के बीच वाला रंग ही मिटेगा। दो उँगली से ज़ूम / खिसकाएँ।", "The circle stays a little above your finger — run it along the product edge. Only the colour at the circle's centre is erased. Two fingers to zoom / move.");
-        }
-        ov.querySelector("#pbmmt").onclick = function () { setMode("tap"); };
-        ov.querySelector("#pbmmb").onclick = function () { setMode("brush"); };
-        setMode("tap");
-        var P = {}, moved = 0, pinched = false, lastD = 0, lastM = null, sx = 0, sy = 0, OFF = 0, stroke = false, SC = null, LP = null;
-        function wpt(cx, cy) { var r = wrap.getBoundingClientRect(); return { x: cx - r.left, y: cy - r.top }; }
-        function img(cx, cy) { var rc = cv.getBoundingClientRect(), k = rc.width / W; return { x: (cx - rc.left) / k, y: (cy - rc.top) / k, k: k }; }
-        function showRing(cx, cy) {
-          var p = wpt(cx, cy), d = +bsl.value; ring.style.display = dot.style.display = "block";
-          ring.style.width = ring.style.height = d + "px"; ring.style.transform = "translate(" + (p.x - d / 2) + "px," + (p.y - d / 2) + "px)";
-          dot.style.left = p.x + "px"; dot.style.top = p.y + "px";
-        }
-        function brushAt(cx, cy) {
-          var p = img(cx, cy), R0 = (+bsl.value / 2) / p.k;
-          if (p.x < -R0 || p.y < -R0 || p.x > W + R0 || p.y > H + R0) return;
-          var ix = Math.round(p.x), iy = Math.round(p.y);
-          if (ix >= 0 && iy >= 0 && ix < W && iy < H) {
-            var c = g.getImageData(Math.max(0, ix - 1), Math.max(0, iy - 1), 3, 3).data, r = 0, gg = 0, b = 0, n = 0;
-            for (var i = 0; i < c.length; i += 4) { r += c[i]; gg += c[i + 1]; b += c[i + 2]; n++; }
-            r /= n; gg /= n; b /= n;
-            if (!(r > 245 && gg > 245 && b > 245)) SC = [r, gg, b];   /* बीच में पहले से सफ़ेद हो तो पिछला रंग ही चलता रहे */
-          }
-          if (!SC) return;
-          var x0 = Math.max(0, Math.floor(p.x - R0)), y0 = Math.max(0, Math.floor(p.y - R0)), x1 = Math.min(W, Math.ceil(p.x + R0)), y1 = Math.min(H, Math.ceil(p.y + R0));
-          if (x1 <= x0 || y1 <= y0) return;
-          var id = g.getImageData(x0, y0, x1 - x0, y1 - y0), d = id.data, w = x1 - x0, R2 = R0 * R0, tol = +tl.value;
-          for (var yy = 0; yy < y1 - y0; yy++) for (var xx = 0; xx < w; xx++) {
-            var dx = x0 + xx - p.x, dy = y0 + yy - p.y; if (dx * dx + dy * dy > R2) continue;
-            var o = (yy * w + xx) * 4;
-            if (Math.abs(d[o] - SC[0]) + Math.abs(d[o + 1] - SC[1]) + Math.abs(d[o + 2] - SC[2]) <= tol) d[o] = d[o + 1] = d[o + 2] = 255;
-          }
-          g.putImageData(id, x0, y0);
-        }
-        function brushLine(cx, cy) {   /* तेज़ फेरने पर बीच के बिंदु भी */
-          if (!LP) { brushAt(cx, cy); LP = { x: cx, y: cy }; return; }
-          var dx = cx - LP.x, dy = cy - LP.y, dist = Math.hypot(dx, dy), step = Math.max(2, +bsl.value / 4), n = Math.ceil(dist / step);
-          for (var i = 1; i <= n; i++) brushAt(LP.x + dx * i / n, LP.y + dy * i / n);
-          LP = { x: cx, y: cy };
-        }
-        wrap.addEventListener("pointerdown", function (e) {
-          e.preventDefault(); wrap.setPointerCapture(e.pointerId); P[e.pointerId] = { x: e.clientX, y: e.clientY };
+        /* ---- उँगली ---- */
+        var P = {}, moved = 0, pinched = false, lastD = 0, lastM = null, sx = 0, sy = 0, OFF = 0;
+        area.addEventListener("pointerdown", function (e) {
+          e.preventDefault(); area.setPointerCapture(e.pointerId); P[e.pointerId] = { x: e.clientX, y: e.clientY };
           var n = Object.keys(P).length;
           if (n === 1) {
-            moved = 0; pinched = false; sx = e.clientX; sy = e.clientY;
-            OFF = e.pointerType === "mouse" ? 0 : Math.max(40, +bsl.value * .8);
-            if (MODE === "brush") { stroke = true; SC = null; LP = null; hist.push(g.getImageData(0, 0, W, H)); if (hist.length > 8) hist.shift(); showRing(e.clientX, e.clientY - OFF); brushLine(e.clientX, e.clientY - OFF); }
-          } else { pinched = true; lastD = 0; lastM = null; if (stroke) { stroke = false; } }
+            moved = 0; pinched = false; sx = e.clientX; sy = e.clientY; OFF = e.pointerType === "mouse" ? 0 : +ofs.value;
+            if (MODE !== "tap") {
+              var p = img(e.clientX, e.clientY - OFF), ix = Math.round(p.x), iy = Math.round(p.y);
+              SC = null; if (MODE === "brush" && ix >= 0 && iy >= 0 && ix < W && iy < H) SC = colAt(ix, iy);   /* रंग एक बार पकड़ा — पूरी लकीर में वही */
+              stroke = true; LP = null; snap(); showRing(e.clientX, e.clientY - OFF, e.clientX, e.clientY); brushLine(e.clientX, e.clientY - OFF);
+            }
+          } else { pinched = true; lastD = 0; lastM = null; stroke = false; LP = null; hideRing(); }
         });
-        wrap.addEventListener("pointermove", function (e) {
+        area.addEventListener("pointermove", function (e) {
           var p = P[e.pointerId];
-          if (!p) { if (MODE === "brush" && e.pointerType === "mouse") showRing(e.clientX, e.clientY); return; }
+          if (!p) { if (MODE !== "tap" && e.pointerType === "mouse") showRing(e.clientX, e.clientY); return; }
           var ids = Object.keys(P);
           if (ids.length === 1) {
             moved = Math.max(moved, Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy));
-            if (MODE === "brush" && stroke) { showRing(e.clientX, e.clientY - OFF); brushLine(e.clientX, e.clientY - OFF); }
-            else if (MODE === "tap" && moved > 8 && Z > 1) { TX += e.clientX - p.x; TY += e.clientY - p.y; paint(); }
+            if (MODE !== "tap" && stroke) { showRing(e.clientX, e.clientY - OFF, e.clientX, e.clientY); brushLine(e.clientX, e.clientY - OFF); }
+            else if (MODE === "tap" && moved > 8) { TX += e.clientX - p.x; TY += e.clientY - p.y; paint(); }
             p.x = e.clientX; p.y = e.clientY;
           } else {
             p.x = e.clientX; p.y = e.clientY; var a1 = P[ids[0]], a2 = P[ids[1]], d = Math.hypot(a1.x - a2.x, a1.y - a2.y), r = wrap.getBoundingClientRect(), mx = (a1.x + a2.x) / 2 - r.left, my = (a1.y + a2.y) / 2 - r.top;
@@ -329,52 +376,31 @@
           }
         });
         function pUp(e) {
-          var was = P[e.pointerId]; delete P[e.pointerId]; lastD = 0; lastM = null;
-          if (MODE === "brush") {
-            if (stroke && !Object.keys(P).length) { stroke = false; LP = null; if (e.pointerType !== "mouse") ring.style.display = dot.style.display = "none"; st.textContent = "✅ " + T("मिटा दिया। और किनारे पर भी फेरें, या ↶ वापस।", "Erased. Brush more edges, or ↶ Undo."); }
-            if (!Object.keys(P).length) pinched = false;
-            return;
+          var was = P[e.pointerId]; delete P[e.pointerId]; lastD = 0; lastM = null; var left = Object.keys(P).length;
+          if (MODE !== "tap") {
+            if (stroke && !left) { stroke = false; LP = null; if (e.pointerType !== "mouse") hideRing(); st.textContent = MODE === "repair" ? "✅ " + T("वापस आ गया।", "Restored.") : (SC ? "✅ " + T("मिटा दिया। और किनारे पर भी फेरें।", "Erased. Brush more edges.") : T("गोले का बीच फ़ोटो पर रखें।", "Keep the circle's centre on the photo.")); }
+            if (!left) pinched = false; return;
           }
-          if (!was || pinched || moved > 8 || Object.keys(P).length) { if (!Object.keys(P).length) pinched = false; return; }
+          if (!was || pinched || moved > 8 || left) { if (!left) pinched = false; return; }
           var q = img(e.clientX, e.clientY), px = Math.floor(q.x), py = Math.floor(q.y);
-          if (px < 0 || py < 0 || px >= W || py >= H) return;
-          fill(px, py);
+          if (px >= 0 && py >= 0 && px < W && py < H) fill(px, py);
         }
-        wrap.addEventListener("pointerup", pUp); wrap.addEventListener("pointercancel", function (e) { delete P[e.pointerId]; lastD = 0; lastM = null; stroke = false; LP = null; });
-        wrap.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse" && !P[e.pointerId]) ring.style.display = dot.style.display = "none"; });
-        wrap.addEventListener("wheel", function (e) { e.preventDefault(); var r = wrap.getBoundingClientRect(); zoomAt(Z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
-        function fill(px, py) {
-          var id = g.getImageData(0, 0, W, H), d = id.data, s0 = (py * W + px) * 4, r = d[s0], gg = d[s0 + 1], b = d[s0 + 2], tol = +tl.value;
-          if (r > 245 && gg > 245 && b > 245) { st.textContent = T("यहाँ पहले से सफ़ेद है — धब्बे पर दबाएँ।", "Already white here — tap on the spot."); return; }
-          hist.push(g.getImageData(0, 0, W, H)); if (hist.length > 8) hist.shift();
-          var m = new Uint8Array(N), q = new Int32Array(N), qs = 0, qe = 0, cnt = 0, i0 = py * W + px;
-          function ok(i) { var o = i * 4; return Math.abs(d[o] - r) + Math.abs(d[o + 1] - gg) + Math.abs(d[o + 2] - b) <= tol; }
-          m[i0] = 1; q[qe++] = i0;
-          while (qs < qe) {
-            var i = q[qs++], x = i % W; cnt++;
-            if (x > 0 && !m[i - 1] && ok(i - 1)) { m[i - 1] = 1; q[qe++] = i - 1; }
-            if (x < W - 1 && !m[i + 1] && ok(i + 1)) { m[i + 1] = 1; q[qe++] = i + 1; }
-            if (i >= W && !m[i - W] && ok(i - W)) { m[i - W] = 1; q[qe++] = i - W; }
-            if (i < N - W && !m[i + W] && ok(i + W)) { m[i + W] = 1; q[qe++] = i + W; }
-          }
-          /* किनारे की हल्की परछाईं भी: 1 pixel और, अगर रंग थोड़ा-सा भी मिलता हो */
-          for (var j = 0; j < qe; j++) {
-            var k = q[j], kx = k % W, nb = [kx > 0 ? k - 1 : -1, kx < W - 1 ? k + 1 : -1, k >= W ? k - W : -1, k < N - W ? k + W : -1];
-            for (var t = 0; t < 4; t++) { var v = nb[t]; if (v < 0 || m[v]) continue; var o2 = v * 4; if (Math.abs(d[o2] - r) + Math.abs(d[o2 + 1] - gg) + Math.abs(d[o2 + 2] - b) <= tol * 2.2) m[v] = 2; }
-          }
-          for (var z = 0; z < N; z++) if (m[z]) { var o3 = z * 4; d[o3] = d[o3 + 1] = d[o3 + 2] = 255; }
-          g.putImageData(id, 0, 0);
-          st.textContent = cnt > N * .9 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ वापस दबाएँ और slider कम करें।", "A very large part was removed — if wrong, tap ↶ Undo and lower the slider.") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
-        }
-
+        area.addEventListener("pointerup", pUp);
+        area.addEventListener("pointercancel", function (e) { delete P[e.pointerId]; lastD = 0; lastM = null; stroke = false; LP = null; hideRing(); });
+        area.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse" && !P[e.pointerId]) hideRing(); });
+        area.addEventListener("wheel", function (e) { e.preventDefault(); var r = wrap.getBoundingClientRect(); zoomAt(Z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+        /* ---- बंद / सेव ---- */
+        var done = false;
         function fin(v) { if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; resolve(v); }
         var pend = null, closeTop = function (v) { pend = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); };
         if (window.PBBack) PBBack.open(function () { fin(pend); });
-        ov.querySelector("#pbmwu").onclick = function () { var h = hist.pop(); if (h) { g.putImageData(h, 0, 0); st.textContent = ""; } };
         ov.querySelector("#pbmwx").onclick = function () { closeTop(null); };
         ov.querySelector("#pbmwd").onclick = function () {
-          if (!hist.length) { closeTop(file); return; }
-          cv.toBlob(function (bl) {
+          var any = false; for (var i = 0; i < N; i++) if (M[i] !== 255) { any = true; break; }
+          if (!any) { closeTop(file); return; }
+          var o = document.createElement("canvas"); o.width = W; o.height = H;
+          var og = o.getContext("2d"); og.fillStyle = "#fff"; og.fillRect(0, 0, W, H); render(0, 0, W, H); og.drawImage(cv, 0, 0);
+          o.toBlob(function (bl) {
             if (bl && bl.type !== "image/webp") { closeTop(new File([bl], "wand.jpg", { type: bl.type })); return; }
             closeTop(bl ? new File([bl], "wand.webp", { type: bl.type }) : file);
           }, "image/webp", .95);
