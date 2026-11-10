@@ -38,16 +38,17 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
 [hidden]{display:none!important}
 /* छोटा पेज + 3 कदम वाली मदद: जो कदम अभी करना है वही नीला / चमकता */
 .card{padding:12px 14px}h1{font-size:18px}.addr{font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.guide{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:6px}
-.guide li{display:flex;gap:10px;align-items:center;font-size:13.5px;line-height:1.35;color:#5b6475;background:#f6f8fc;border:1px solid #e4eaf5;border-radius:12px;padding:8px 10px}
-.guide li b{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e4eaf5;color:#5b6475;font-size:13px}
-.guide li.on{color:#0b2f73;font-weight:700;background:#eaf2ff;border-color:#1a73e8}
-.guide li.on b{background:#1a73e8;color:#fff}
-.guide li.dn{color:#137333}.guide li.dn b{background:#1e9e57;color:#fff}
+#main .card{position:relative}
+.tip{position:absolute;left:14px;right:14px;z-index:1000;background:#0b2f73;color:#fff;border-radius:12px;padding:9px 34px 9px 12px;font-size:14px;line-height:1.35;font-weight:600;box-shadow:0 8px 22px rgba(11,47,115,.3);animation:tipIn .25s ease-out}
+.tip:after{content:"";position:absolute;left:var(--ax,50%);width:14px;height:14px;background:#0b2f73;transform:translateX(-50%) rotate(45deg)}
+.tip.up:after{top:-6px}.tip.dn:after{bottom:-6px}
+.tip .x{position:absolute;top:4px;right:4px;width:28px;height:28px;border:0;background:none;color:#fff;font-size:18px;line-height:28px;cursor:pointer;opacity:.85}
+.tip small{display:block;font-weight:400;opacity:.8;font-size:12px;margin-top:2px}
+@keyframes tipIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .pulse{animation:pbPulse 1.4s ease-in-out infinite}
 @keyframes pbPulse{0%,100%{box-shadow:0 0 0 0 rgba(26,115,232,.45)}50%{box-shadow:0 0 0 7px rgba(26,115,232,0)}}
 .btn.gps.pulse{animation-name:pbPulseG}@keyframes pbPulseG{0%,100%{box-shadow:0 0 0 0 rgba(30,158,87,.5)}50%{box-shadow:0 0 0 7px rgba(30,158,87,0)}}
-@media(prefers-reduced-motion:reduce){.pulse{animation:none}}
+@media(prefers-reduced-motion:reduce){.pulse,.tip{animation:none}}
 </style>
 </head>
 <body>
@@ -71,11 +72,6 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
    <p class="hint" id="curTxt"></p>
   </div>
   <div class="card">
-   <ol class="guide" id="guide">
-    <li id="g1" class="on"><b>1</b><span data-en="At your shop, tap the green button">दुकान पर खड़े होकर हरा बटन दबाएँ</span></li>
-    <li id="g2"><b>2</b><span data-en="Red pin on your shop? If not, drag it">लाल पिन दुकान पर है, देखें (न हो तो खिसकाएँ)</span></li>
-    <li id="g3"><b>3</b><span data-en="Tick the box and tap Save">✔ लगाकर "सेव" दबाएँ</span></li>
-   </ol>
    <button class="btn gps pulse" type="button" id="gpsBtn"><script>document.write(PBI("pin"))</script><span data-en="I'm at my shop — use my location">मैं अभी दुकान पर हूँ — मेरा स्थान लगाएँ</span></button>
    <div class="st" id="gpsSt"></div>
    <div id="map" style="margin-top:12px"></div>
@@ -95,6 +91,7 @@ h1{font-size:20px;color:#0b2f73;margin:0 0 4px}
 document.documentElement.lang="en";document.title="Shop location — PataBook";
 document.querySelectorAll("[data-en]").forEach(function(el){el.textContent=el.getAttribute("data-en");});})();
 </script>
+<script src="pb-back.js"></script>
 <script>
 (function(){
 const SB="https://kkvbpzysktozghnxplxv.supabase.co",KEY="sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
@@ -102,15 +99,35 @@ const $=id=>document.getElementById(id),EN=!!window.PB_EN,T=(h,e)=>EN?e:h;
 const slug=String(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
 let S=null,map=null,mk=null,pos=null,orig=null,accM=0;
 function canSave(){$("saveBtn").disabled=!(pos&&$("chk").checked);guide();}
+let tipOff=false,tipBack=false;
+const TIPS={1:["gpsBtn","up",T("दुकान पर खड़े होकर यह हरा बटन दबाएँ","Stand at your shop and tap this green button"),T("या नक्शे पर अपनी दुकान पर दबाएँ","Or tap your shop on the map")],
+  2:["chkBox","dn",T("लाल पिन दुकान पर नहीं? उसे खींचकर दुकान पर रखें","Pin not on your shop? Drag it onto your shop"),T("फिर यहाँ ✔ लगाएँ","Then tick here")],
+  3:["saveBtn","up",T("अब यह बटन दबाकर सेव करें","Now tap this button to save"),""]};
 function guide(){const k=!pos?1:!$("chk").checked?2:3;
-  [1,2,3].forEach(n=>{const e=$("g"+n);if(e)e.className=n<k?"dn":n===k?"on":"";});
-  $("gpsBtn").classList.toggle("pulse",k===1);$("chkBox").classList.toggle("pulse",k===2);$("saveBtn").classList.toggle("pulse",k===3);}
+  $("gpsBtn").classList.toggle("pulse",k===1);$("chkBox").classList.toggle("pulse",k===2);$("saveBtn").classList.toggle("pulse",k===3);
+  let t=$("pbTip");if(tipOff||$("main").hidden){if(t)t.remove();return;}
+  const [id,dir,txt,sub]=TIPS[k],el=$(id),card=el.closest(".card");
+  if(!t){t=document.createElement("div");t.id="pbTip";t.setAttribute("role","status");}
+  if(t.parentNode!==card)card.appendChild(t);
+  if(t.dataset.k!==String(k)){t.dataset.k=k;t.className="tip "+dir;
+    t.innerHTML='<span></span><small></small><button class="x" type="button">✕</button>';
+    t.firstChild.textContent=txt;t.children[1].textContent=sub;t.children[1].hidden=!sub;
+    const x=t.querySelector(".x");x.setAttribute("aria-label",T("मदद बंद करें","Close help"));x.title=x.getAttribute("aria-label");
+    x.onclick=()=>{tipOff=true;guide();if(tipBack&&window.PBBack)PBBack.close();};}
+  const top=el.offsetTop,h=el.offsetHeight;
+  t.style.top=(dir==="up"?top+h+10:Math.max(0,top-t.offsetHeight-10))+"px";
+  t.style.setProperty("--ax",Math.min(Math.max(el.offsetLeft+el.offsetWidth/2-t.offsetLeft,24),t.offsetWidth-24)+"px");
+  if(!tipBack&&window.PBBack){tipBack=true;PBBack.open(()=>{tipOff=true;guide();});}
+}
+addEventListener("resize",()=>{try{guide();}catch(e){}});
 $("chk").onchange=canSave;
 function circle(la,ln,r){const pts=[],d=r/111320,c=Math.cos(la*Math.PI/180);for(let i=0;i<=48;i++){const t=i/48*2*Math.PI;pts.push([ln+d*Math.sin(t)/c,la+d*Math.cos(t)]);}return{type:"Feature",geometry:{type:"Polygon",coordinates:[pts]}};}
 function drawAcc(la,ln,r){if(!map)return;try{const f=r>0?circle(la,ln,r):{type:"FeatureCollection",features:[]};
   if(map.getSource("acc"))map.getSource("acc").setData(f);
   else{map.addSource("acc",{type:"geojson",data:f});map.addLayer({id:"acc-f",type:"fill",source:"acc",paint:{"fill-color":"#1a73e8","fill-opacity":.15}});map.addLayer({id:"acc-l",type:"line",source:"acc",paint:{"line-color":"#1a73e8","line-width":1.5}});}}catch(e){}}
-function only(id){["loading","needLogin","notOwner","setup","main","done"].forEach(x=>$(x).hidden=x!==id);}
+function only(id){["loading","needLogin","notOwner","setup","main","done"].forEach(x=>$(x).hidden=x!==id);
+  if(id==="main")setTimeout(guide,0);else{if(tipBack&&!tipOff&&window.PBBack){tipOff=true;PBBack.close();}guide();}}
+addEventListener("load",()=>{try{guide();}catch(e){}});
 async function rpc(fn,args){
   const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+S.access_token,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
   let j=null;try{j=await r.json();}catch(e){}
