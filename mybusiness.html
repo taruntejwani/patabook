@@ -314,6 +314,18 @@ h1{font-size:22px;color:var(--navy);margin:4px 2px 4px}
 .sde textarea{resize:vertical}.sde label{display:block;margin-top:8px}.sd2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sd2 label{margin-top:4px}
 .sdb{display:flex;gap:8px;margin-top:10px}.sdb button{flex:1;border:1px solid var(--line);background:#fff;color:#334;border-radius:10px;padding:10px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer}
 .sdb button.ok{background:#1a73e8;border-color:#1a73e8;color:#fff}.sdb button:disabled{opacity:.7}
+
+.nm{margin-top:6px}.nmr{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:1px solid #e1e8f5;border-radius:12px;margin-top:6px}
+.nmt{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px}.nmt small{flex-basis:100%;font-size:12px;color:#5b6475;font-weight:600}.nmt b{font-size:15.5px;color:#1f2937}
+.nmt em{font-style:normal;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px}.nmt em.y{background:#e7f6ec;color:#137333}.nmt em.n{background:#eef0f4;color:#6b7280}
+.nm .sw{transform:scale(.85);transform-origin:right center;border:0;cursor:pointer}
+.nmx{flex:none;border:0;background:none;font-size:17px;padding:4px;cursor:pointer;opacity:.75}
+.nmr.add input{flex:1;min-width:0;border:1px solid #cfd8ea;border-radius:10px;padding:9px 10px;font:inherit;font-size:16px}
+.nmr.add button{flex:none;border:0;background:#1a73e8;color:#fff;border-radius:10px;padding:9px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.nmh{margin:6px 2px 0;font-size:12px;color:#5b6475;line-height:1.4}
+.nmf{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}.nmc{color:#1a73e8;font-weight:700;font-size:14px;text-decoration:none}
+.nmf button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-left:auto}
+.nm .err:empty{display:none}
 .sdnum{margin-top:6px;min-width:0}.sdnum *{max-width:100%;box-sizing:border-box}.sdnum .stl{display:inline-block;margin-top:8px}
 .sder{margin:8px 0 0;color:#b3261e;font-size:13.5px;font-weight:700}.sdok{display:block;font-style:normal;color:#137333;font-size:13px;font-weight:700;margin-top:2px}
 .sd .sdl{flex:none;align-self:center;font-style:normal;font-size:16px;width:auto;opacity:.7}.sdn{margin:-4px 0 4px 34px;font-size:12px;color:#8a93a3}
@@ -1195,6 +1207,23 @@ function sdErr(m,en){m=String(m||"");const H=[
 function numPanel(b,i,en){const sl=encodeURIComponent(b.slug);return phoneBlock(b,i)+numsBlock(b,i)+
     (PREQ[b.slug]?'<div class="err" style="background:#e8f0fe;color:#0b2f73;border-radius:12px;padding:10px 12px;font-weight:700;margin-top:10px">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for Admin approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" एडमिन की मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</div>':'')+
     (PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<div class="nlock">🔒 '+(en?"This number is used by "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" shops, so it cannot be changed now. To change it, first delete the other shops (Settings → Account).":"इस नंबर पर "+ROWS.filter(r=>d10(r.phone)===d10(b.phone)).length+" दुकानें हैं, इसलिए नंबर अभी नहीं बदल सकते। नंबर बदलने के लिए पहले बाक़ी दुकानें हटाएँ (सेटिंग → खाता)।")+'</div>':'<a class="stl" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change number"):(b.phone_update_pending?"नंबर जाँच करें":"नंबर बदलें"))+'</a>'):'');}
+/* 📞 दुकान की जानकारी में मोबाइल नंबर — छोटा: हर नंबर एक लाइन, उसके सामने दिखे / छुपे का स्विच */
+function numMini(b,i,en){
+  const sl=encodeURIComponent(b.slug),M=(NUMS_OK&&NUMS[b.slug])||{},d10x=x=>String(x||"").replace(/\D/g,"").slice(-10);
+  const st=on=>'<em class="'+(on?"y":"n")+'">'+(on?(en?"Visible":"दिख रहा"):(en?"Hidden":"छुपा"))+'</em>';
+  const main=b.show_phone!==false;
+  let h='<div class="nm"><div class="nmr"><div class="nmt"><small>'+(en?"Main number":"मुख्य नंबर")+'</small><b>+91 '+esc(d10x(b.phone))+'</b>'+st(main)+'</div>'+
+    '<button type="button" class="sw" role="switch" aria-checked="'+main+'" aria-label="'+(en?"Show main number to customers":"मुख्य नंबर ग्राहकों को दिखाएँ")+'" data-i="'+i+'"></button></div><div class="err" id="er'+i+'"></div>';
+  if(NUMS_OK)[2,3].forEach(k=>{const x=M[k],on=!!(x&&x.show),lb=(en?"Extra number ":"अतिरिक्त नंबर ")+(k-1);
+    h+=x?'<div class="nmr"><div class="nmt"><small>'+lb+'</small><b>+91 '+esc(d10x(x.phone))+'</b>'+st(on)+'</div>'+
+        '<button type="button" class="nmx" data-nrm="'+k+'" data-ni="'+i+'" aria-label="'+(en?"Remove":"हटाएँ")+'" title="'+(en?"Remove":"हटाएँ")+'">🗑️</button>'+
+        '<button type="button" class="sw" role="switch" aria-checked="'+on+'" aria-label="'+(en?"Show this number to customers":"यह नंबर ग्राहकों को दिखाएँ")+'" data-nslot="'+k+'" data-ni="'+i+'"></button></div>'
+      :'<div class="nmr add"><input id="nin'+i+'_'+k+'" type="tel" inputmode="numeric" maxlength="14" placeholder="'+lb+' (98XXXXXXXX)" aria-label="'+lb+'"><button type="button" data-nsave="'+k+'" data-ni="'+i+'">'+(en?"Add":"जोड़ें")+'</button></div>';});
+  h+='<div class="err" id="nerr'+i+'"></div><p class="nmh">'+(en?"Switch ON = customers can see that number (Call + WhatsApp). Extra numbers need no OTP.":"स्विच चालू = ग्राहकों को वह नंबर दिखेगा (कॉल + WhatsApp)। अतिरिक्त नंबर में OTP नहीं लगता।")+'</p>';
+  if(PREQ[b.slug])h+='<p class="nmh" style="color:#0b2f73;font-weight:700">⏳ '+esc(en?"New number +91 "+PREQ[b.slug].phone+" is waiting for approval. Until then the old number shows.":"नया नंबर +91 "+PREQ[b.slug].phone+" मंज़ूरी के इंतज़ार में है। तब तक पुराना नंबर ही दिखेगा।")+'</p>';
+  const chg=PBA.mobile&&PBA.mobile.enabled()?(phoneLocked(b)?'<span class="nmh">🔒 '+(en?"Main number can't be changed while other shops use it.":"दूसरी दुकानें इसी नंबर पर हैं, इसलिए मुख्य नंबर अभी नहीं बदल सकते।")+'</span>':'<a class="nmc" href="phone-update.html?slug='+sl+'">📱 '+(en?(b.phone_update_pending?"Verify number":"Change main number"):(b.phone_update_pending?"नंबर जाँच करें":"मुख्य नंबर बदलें"))+'</a>'):'';
+  return h+'<div class="nmf">'+chg+'<button type="button" data-sdc="1">'+(en?"Close":"बंद करें")+'</button></div></div>';
+}
 function shopDetails(b,i,en){
   const p=(PROF&&PROF[b.slug])||{},d=p.d||"",g=k=>sdGet(b,k),NO=en?"Not added":"नहीं भरा";
   const hr=g("Hours"),hp=hr.split("-"),cl=g("Closed"),dayN=x=>{const f=SD_DAYS.find(y=>y[0]===x);return f?(en?f[0]:f[1]):x;};
@@ -1234,7 +1263,7 @@ function shopDetails(b,i,en){
     row("pin","📮",en?"PIN code":"पिन कोड",g("PIN"),ed("pin",!!g("PIN")))+
     row("lmk","🏁",en?"Landmark (known place nearby)":"पहचान (पास की जानी-मानी जगह)",g("Landmark"),ed("lmk",!!g("Landmark")))+
     row("loc","🗺️",en?"Location on map":"नक्शे पर लोकेशन",hasLoc?(en?"✅ Set":"✅ लगी हुई है"):"",'<a href="location.html?slug='+encodeURIComponent(b.slug)+'">'+(hasLoc?E:AD)+'</a>')+
-    (b.phone?(SDE&&SDE.slug===b.slug&&SDE.k==="ph"?'<div class="sd on" id="sd_ph" style="display:block"><div><small>📞 '+(en?"Mobile number":"मोबाइल नंबर")+'</small><div class="sdnum">'+numPanel(b,i,en)+'</div><div class="sdb"><button type="button" data-sdc="1">'+(en?"Close":"बंद करें")+'</button></div></div></div>':row("ph","📞",en?"Mobile number":"मोबाइल नंबर","+91 "+String(b.phone).replace(/\D/g,"").slice(-10)+(PREQ&&PREQ[b.slug]?"\n⏳ "+(en?"New number +91 "+PREQ[b.slug].phone+" waiting for approval":"नया नंबर +91 "+PREQ[b.slug].phone+" मंज़ूरी के इंतज़ार में"):""),ed("ph",1))):"")+
+    (b.phone?(SDE&&SDE.slug===b.slug&&SDE.k==="ph"?'<div class="sd on" id="sd_ph" style="display:block"><div><small>📞 '+(en?"Mobile number":"मोबाइल नंबर")+'</small><div class="sdnum">'+numMini(b,i,en)+'</div></div></div>':row("ph","📞",en?"Mobile number":"मोबाइल नंबर","+91 "+String(b.phone).replace(/\D/g,"").slice(-10)+(PREQ&&PREQ[b.slug]?"\n⏳ "+(en?"New number +91 "+PREQ[b.slug].phone+" waiting for approval":"नया नंबर +91 "+PREQ[b.slug].phone+" मंज़ूरी के इंतज़ार में"):""),ed("ph",1))):"")+
     row("type","🏷️",en?"Business type":"बिज़नेस का प्रकार",tyN,ed("type",!!ty))+
     row("hours","🕘",en?"Timings":"खुलने-बंद होने का समय",hours,ed("hours",!!hr))+
     row("svc","🛠️",en?"What you sell / services":"क्या बेचते हैं / सेवाएँ",g("Services"),ed("svc",!!g("Services")))+
