@@ -254,7 +254,7 @@
           }
           for (var z = 0; z < N; z++) if (m[z]) { var o3 = z * 4; d[o3] = d[o3 + 1] = d[o3 + 2] = 255; }
           g.putImageData(id, 0, 0);
-          st.textContent = cnt > N * .6 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ वापस दबाएँ और slider कम करें।", "A very large part was removed — if wrong, tap ↶ Undo and lower the slider.") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
+          st.textContent = cnt > N * .9 ? T("बहुत बड़ा हिस्सा हट गया — गलत लगे तो ↶ वापस दबाएँ और slider कम करें।", "A very large part was removed — if wrong, tap ↶ Undo and lower the slider.") : "✅ " + T("हटा दिया। और कहीं हो तो वहाँ भी दबाएँ।", "Removed. Tap any other spot too.");
         }
         cv.addEventListener("click", function (e) {
           var rc = cv.getBoundingClientRect(), px = Math.max(0, Math.min(W - 1, Math.floor((e.clientX - rc.left) / sc))), py = Math.max(0, Math.min(H - 1, Math.floor((e.clientY - rc.top) / sc)));
@@ -279,23 +279,33 @@
   function lightBg(ov, b, k, x, act, close) {
     var s = b.slug, NF = null, img = ov.querySelector("img"), btns = function (on) { Array.prototype.forEach.call(ov.querySelectorAll("button[data-a]"), function (z) { z.disabled = !on; }); };
     var B = "border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;";
+    async function orig() { var r = await fetch(x.url, { cache: "no-store" }); if (!r.ok) throw new Error("get"); var bl = await r.blob(); return new File([bl], "p." + (/webp/.test(bl.type) ? "webp" : "jpg"), { type: bl.type || "image/jpeg" }); }
+    function saveMode(didBg) {   /* बदलाव के बाद: ✔ यही रखें / ↩️ पहले वाली — और ✨ / 🪄 साथ में चालू रहें */
+      ov.querySelector("#gbr").innerHTML = '<button type="button" data-a="bgsave" style="' + B + 'background:#1e9e57;color:#fff">✔ ' + T("यही रखें", "Keep this") + '</button><button type="button" data-a="bgno" style="' + B + 'background:#fff;color:#0b2f73">↩️ ' + T("पहले वाली ही रखें", "Keep the old one") + '</button>';
+      if (didBg) { var bb = ov.querySelector('[data-a="bg"]'); if (bb) bb.remove(); }
+      btns(true);
+    }
     return async function (w, a, em) {
       em.style.color = "#cfe0ff";
       if (w === "bg") {
         btns(false); em.textContent = PBBg.ready() ? T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait") : T("AI तैयार हो रहा है… (पहली बार थोड़ा समय लगेगा)", "Getting AI ready… (takes a while the first time)");
         try {
-          var r = await fetch(x.url, { cache: "no-store" }); if (!r.ok) throw new Error("get");
-          var bl = await r.blob(), f = new File([bl], "p." + (/webp/.test(bl.type) ? "webp" : "jpg"), { type: bl.type || "image/jpeg" });
+          var f = NF || await orig();
           NF = await PBBg.remove(f, function (p) { em.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)", "(first time only, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)") : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait"); });
           img.src = URL.createObjectURL(NF); img.style.background = "#fff";
-          ov.querySelector("#gbr").innerHTML = '<button type="button" data-a="bgsave" style="' + B + 'background:#1e9e57;color:#fff">✔ ' + T("यही रखें", "Keep this") + '</button><button type="button" data-a="bgno" style="' + B + 'background:#fff;color:#0b2f73">↩️ ' + T("पहले वाली ही रखें", "Keep the old one") + '</button><button type="button" data-a="bgwand" style="' + B + 'background:#eaf2ff;color:#0b2f73">🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</button>';
-          var bb = ov.querySelector('[data-a="bg"]'); if (bb) bb.remove();
+          saveMode(true);
           em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("Background हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Background removed. Tap \"Keep this\" if you like it.");
         } catch (er) { btns(true); var bb2 = ov.querySelector('[data-a="bg"]'); if (bb2) bb2.disabled = true; em.style.color = "#ffb4ab"; em.textContent = T("इस phone पर background नहीं हट सका।", "Couldn't remove the background on this phone."); }
         return;
       }
       if (w === "bgno") { close(); return; }
-      if (w === "bgwand") { var wf = await magicWand(NF); if (wf && wf !== NF) { NF = wf; img.src = URL.createObjectURL(NF); em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Done. Tap \"Keep this\" if you like it."); } return; }
+      if (w === "bgwand") {
+        try {
+          var base = NF || await orig(), wf = await magicWand(base);
+          if (wf && wf !== base) { var first = !NF; NF = wf; img.src = URL.createObjectURL(NF); img.style.background = "#fff"; if (first) saveMode(false); em.style.color = "#8ef0b0"; em.textContent = "✅ " + T("हटा दिया। पसंद हो तो \"यही रखें\" दबाएँ।", "Done. Tap \"Keep this\" if you like it."); }
+        } catch (er2) { em.style.color = "#ffb4ab"; em.textContent = T("फ़ोटो नहीं खुल सकी। दोबारा कोशिश करें।", "Couldn't open the photo. Try again."); }
+        return;
+      }
       /* bgsave */
       btns(false); em.textContent = T("सेव हो रहा है…", "Saving…");
       try {
@@ -338,7 +348,7 @@
       (k === "photo" ? (hp(b, "hide") ? '<button type="button" data-a="hide" style="' + btn + 'background:' + (x.hidden ? '#1e9e57' : '#fff') + ';color:' + (x.hidden ? '#fff' : '#0b2f73') + '">' + (x.hidden ? "👁️ " + T("दिखाओ", "Show") : "🙈 " + T("छिपाओ", "Hide")) + '</button>' : '')
         : (act ? '<button type="button" data-a="unset" style="' + btn + 'background:#fff;color:#0b2f73">✖ ' + T("चालू नहीं रखना", "Stop using") + '</button>' : '<button type="button" data-a="set" style="' + btn + 'background:#1e9e57;color:#fff">✔ ' + T("Set (चालू करें)", "Set (use this)") + '</button>')) +
       (hp(b, "remove") ? '<button type="button" data-a="del" style="' + btn + 'background:#d93025;color:#fff">🗑️ ' + T("हटाएँ", "Delete") + '</button>' : '') + '</div>' +
-      ((k === "photo" || k === "logo") && hp(b, "add") && window.PBBg ? '<button type="button" data-a="bg" style="' + btn + 'background:#eaf2ff;color:#0b2f73">✨ ' + T("Background हटाएँ", "Remove background") + '</button>' : '') +
+      ((k === "photo" || k === "logo") && hp(b, "add") && window.PBBg ? '<div id="gbx" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button type="button" data-a="bg" style="' + btn + 'background:#eaf2ff;color:#0b2f73">✨ ' + T("Background हटाएँ", "Remove background") + '</button><button type="button" data-a="bgwand" style="' + btn + 'background:#eaf2ff;color:#0b2f73">🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</button></div>' : '') +
       '<div id="gme" style="color:#ffb4ab;font-size:13px;min-height:16px;text-align:center;max-width:420px"></div>';
     document.body.appendChild(ov);
     var prev = document.body.style.overflow; document.body.style.overflow = "hidden";
@@ -414,7 +424,7 @@
   /* फ़ोटो चुनने के बाद: दुकानदार खुद ज़ूम/खिसकाकर चौकोर फ्रेम में सेट करे। Done = फ्रेम वाला हिस्सा; Skip = जैसी है वैसी; रद्द/Back = null */
   var RATIO = { logo: 1, front: 2, cover: 16 / 9, open: 9 / 16 };   /* कौन-सी फ़ोटो किस नाप के फ्रेम में सेट होगी */
   window.pbCrop = function (f, r) { return cropEdit(f, 1, 1, r, r === 1); };   /* r = 1 → Logo: ✨ Background हटाएँ भी */
-  function cropEdit(file, n, tot, ratio, bg, orig) {   /* bg = "✨ Background हटाएँ" बटन दिखे (Products / Logo); orig = background हटाने से पहले वाली फ़ोटो */
+  function cropEdit(file, n, tot, ratio, bg, orig, how) {   /* how = "bg" (background हटाया) / "wand" (🪄 से हिस्सा हटाया) */   /* bg = "✨ Background हटाएँ" बटन दिखे (Products / Logo); orig = background हटाने से पहले वाली फ़ोटो */
     return new Promise(function (resolve) {
       var url = URL.createObjectURL(file), im = new Image(), done = false;
       im.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
@@ -423,16 +433,18 @@
         var F = Math.min(340, Math.floor(Math.min(window.innerWidth, 420) * .86)), R = ratio > 0 ? ratio : 1, FW, FH;
         if (R >= 1) { FW = F; FH = Math.round(F / R); } else { FH = Math.round(F * 1.15); FW = Math.round(FH * R); }
         ov.innerHTML = '<div class="pbgsh" role="dialog" aria-modal="true"><h3>' + T("फ़ोटो सेट करें", "Set your photo") + (tot > 1 ? ' (' + n + '/' + tot + ')' : '') + '</h3>' +
-          (orig ? '<p class="hn" style="color:#137333;font-weight:700;margin-bottom:4px">✅ ' + T("Background हटा दिया", "Background removed") + '</p>' : '') +
+          (orig ? '<p class="hn" style="color:#137333;font-weight:700;margin-bottom:4px">✅ ' + (how === "wand" ? T("हिस्सा हटा दिया", "Part removed") : T("Background हटा दिया", "Background removed")) + '</p>' : '') +
           '<p class="hn">' + T("दो उँगली से ज़ूम करें और खिसकाकर सही जगह लगाएँ। जो फ्रेम में दिखेगा वही ग्राहक को दिखेगा।", "Pinch to zoom and drag to place it. What you see in the frame is what customers will see.") + '</p>' +
           '<div id="pbgcf" style="width:' + FW + 'px;height:' + FH + 'px;margin:6px auto;position:relative;overflow:hidden;background:#fff;border:2px solid #0060f0;border-radius:14px;touch-action:none"></div>' +
           '<input type="range" id="pbgcz" min="0" max="100" value="0" style="width:' + Math.max(FW, 200) + 'px;display:block;margin:10px auto" aria-label="' + esc(T("ज़ूम", "Zoom")) + '">' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="pbgsv" id="pbgdn" style="flex:2">' + T("हो गया", "Done") + '</button>' +
           '<button type="button" class="pbgop" id="pbgrs" style="flex:1;margin:0;justify-content:center">' + T("रीसेट", "Reset") + '</button>' +
           '<button type="button" class="pbgop" id="pbgsk" style="flex:1;margin:0;justify-content:center">' + T("ऐसे ही रखें", "Keep as is") + '</button></div>' +
-          (bg && window.PBBg ? (orig
-            ? '<button type="button" class="pbgop" id="pbgwd" style="margin-top:8px;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">🪄 ' + T("दबाकर हटाएँ (बचा हुआ हिस्सा)", "Tap to remove (leftover part)") + '</button><button type="button" class="pbgop" id="pbgbo" style="margin-top:8px;justify-content:center">↩️ ' + T("पहले वाली फ़ोटो (background के साथ)", "Original photo (with background)") + '</button>'
-            : '<button type="button" class="pbgop" id="pbgbg" style="margin-top:8px;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">✨ ' + T("Background हटाएँ", "Remove background") + '</button><p class="hn" id="pbgbs" style="text-align:center;margin:4px 0 0;min-height:0"></p>') : '') +
+          (bg && window.PBBg ? '<div style="display:flex;gap:8px;margin-top:8px">' +
+              (how !== "bg" ? '<button type="button" class="pbgop" id="pbgbg" style="flex:1;margin:0;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">✨ ' + T("Background हटाएँ", "Remove background") + '</button>' : '') +
+              '<button type="button" class="pbgop" id="pbgwd" style="flex:1;margin:0;justify-content:center;border-color:#b9cdf5;background:#f4f8ff">🪄 ' + T("दबाकर हटाएँ", "Tap to remove") + '</button></div>' +
+              '<p class="hn" id="pbgbs" style="text-align:center;margin:4px 0 0;min-height:0"></p>' +
+              (orig ? '<button type="button" class="pbgop" id="pbgbo" style="margin-top:8px;justify-content:center">↩️ ' + T("पहले वाली फ़ोटो", "Original photo") + '</button>' : '') : '') +
           '<button type="button" class="pbgop" id="pbgcx" style="margin-top:8px;justify-content:center">' + T("रद्द करें", "Cancel") + '</button></div>';
         document.body.appendChild(ov);
         var prevO = document.body.style.overflow; document.body.style.overflow = "hidden";
@@ -466,7 +478,7 @@
         var swap = null;   /* background हटने / वापस लाने पर नई फ़ोटो के साथ यही window फिर खुलती है */
         function fin(v) {
           if (done) return; done = true; ov.remove(); document.body.style.overflow = prevO; URL.revokeObjectURL(url);
-          if (swap) { var sw = swap; swap = null; resolve(cropEdit(sw.f, n, tot, ratio, bg, sw.orig)); return; }
+          if (swap) { var sw = swap; swap = null; resolve(cropEdit(sw.f, n, tot, ratio, bg, sw.orig, sw.how)); return; }
           resolve(v);
         }
         var closeTop = function (v) { pending = v; if (window.PBBack && PBBack.isOpen()) PBBack.close(); else fin(v); }, pending = null;
@@ -480,8 +492,8 @@
         ov.querySelector("#pbgrs").onclick = reset;
         ov.querySelector("#pbgsk").onclick = function () { closeTop(file); };
         ov.querySelector("#pbgcx").onclick = function () { closeTop(null); };
-        var bo = ov.querySelector("#pbgbo"); if (bo) bo.onclick = function () { swap = { f: orig, orig: null }; closeTop(null); };
-        var wd = ov.querySelector("#pbgwd"); if (wd) wd.onclick = function () { magicWand(file).then(function (wf) { if (wf && wf !== file && !done) { swap = { f: wf, orig: orig }; closeTop(null); } }); };
+        var bo = ov.querySelector("#pbgbo"); if (bo) bo.onclick = function () { swap = { f: orig, orig: null, how: null }; closeTop(null); };
+        var wd = ov.querySelector("#pbgwd"); if (wd) wd.onclick = function () { magicWand(file).then(function (wf) { if (wf && wf !== file && !done) { swap = { f: wf, orig: orig || file, how: how === "bg" ? "bg" : "wand" }; closeTop(null); } }); };
         var bb = ov.querySelector("#pbgbg");
         if (bb) bb.onclick = function () {
           var st = ov.querySelector("#pbgbs"), btns = ov.querySelectorAll("button");
@@ -493,7 +505,7 @@
             st.textContent = p.stage === "load" ? T("AI download हो रहा है… ", "Downloading AI… ") + (p.pct || 0) + "% " + T("(सिर्फ़ पहली बार, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)", "(first time only, ~" + (PBBg.mb ? PBBg.mb() : 44) + " MB)")
               : T("Background हट रहा है… थोड़ा रुकें", "Removing background… please wait");
           }).then(function (nf) {
-            if (done) return; swap = { f: nf, orig: file }; closeTop(null);
+            if (done) return; swap = { f: nf, orig: orig || file, how: "bg" }; closeTop(null);
           }).catch(function () {
             if (done) return;
             Array.prototype.forEach.call(btns, function (x) { x.disabled = false; });
