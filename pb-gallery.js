@@ -238,16 +238,17 @@
         var wrap = ov.querySelector("#pbmww"), maxW = Math.min(window.innerWidth - 56, 460), maxH = Math.max(220, window.innerHeight * .5), sc = Math.min(maxW / W, maxH / H);
         var VW = Math.round(W * sc), VH = Math.round(H * sc);
         cv.style.cssText = "display:block;width:" + VW + "px;height:" + VH + "px;transform-origin:0 0;will-change:transform";
-        wrap.style.width = VW + "px"; wrap.style.height = VH + "px"; wrap.appendChild(cv);
+        wrap.style.width = VW + "px"; wrap.style.height = VH + "px"; wrap.style.background = "repeating-conic-gradient(#eef1f6 0% 25%,#fff 0% 50%) 0 0/16px 16px"; wrap.appendChild(cv);
         var hist = [], done = false, tl = ov.querySelector("#pbmwt"), st = ov.querySelector("#pbmws");
         /* 🔍 ज़ूम / खिसकाना */
-        var Z = 1, TX = 0, TY = 0, ZMAX = 8, zv = ov.querySelector("#pbmzv");
+        var Z = 1, TX = 0, TY = 0, ZMAX = 8, ZMIN = .4, zv = ov.querySelector("#pbmzv");
         function paint() {
-          Z = Math.max(1, Math.min(ZMAX, Z));
-          TX = Math.min(0, Math.max(VW - VW * Z, TX)); TY = Math.min(0, Math.max(VH - VH * Z, TY));
+          Z = Math.max(ZMIN, Math.min(ZMAX, Z));
+          if (Z <= 1) { TX = (VW - VW * Z) / 2; TY = (VH - VH * Z) / 2; }   /* छोटा करने पर फ़ोटो बीच में */
+          else { TX = Math.min(0, Math.max(VW - VW * Z, TX)); TY = Math.min(0, Math.max(VH - VH * Z, TY)); }
           cv.style.transform = "translate(" + TX + "px," + TY + "px) scale(" + Z + ")"; zv.textContent = Math.round(Z * 100) + "%";
         }
-        function zoomAt(nz, cx, cy) { nz = Math.max(1, Math.min(ZMAX, nz)); TX = cx - (cx - TX) * nz / Z; TY = cy - (cy - TY) * nz / Z; Z = nz; paint(); }
+        function zoomAt(nz, cx, cy) { nz = Math.max(ZMIN, Math.min(ZMAX, nz)); TX = cx - (cx - TX) * nz / Z; TY = cy - (cy - TY) * nz / Z; Z = nz; paint(); }
         ov.querySelector("#pbmzi").onclick = function () { zoomAt(Z * 1.6, VW / 2, VH / 2); };
         ov.querySelector("#pbmzo").onclick = function () { zoomAt(Z / 1.6, VW / 2, VH / 2); };
         ov.querySelector("#pbmzr").onclick = function () { Z = 1; TX = 0; TY = 0; paint(); };
