@@ -578,7 +578,7 @@ const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f)),TIER=()=>window.PBPlan?PBPlan.
 const SECN=()=>SLAB==="product"?"Product":SLAB==="service"?"Service":L("उत्पाद और सेवा","Product & Service");
 /* 🛍️ Gallery को दुकानदार के हिस्सों (Products, Services ... और अपने नाम वाले जैसे "Tejwani Products") में बाँटकर दिखाना */
 let ITM=[],GSEC=[];
-const SEC_ORD=["products","services","properties","menu","gallery"],SEC_NM={products:["Products","प्रोडक्ट"],services:["Services","सर्विस"],properties:["Properties","प्रॉपर्टी"],menu:["Menu","मेन्यू"],gallery:["Gallery","गैलरी"]},SEC_IC={products:"🛍️",services:"🛠️",properties:"🏠",menu:"🍽️",gallery:"🖼️",custom:"✏️"};
+const SEC_ORD=["products","services","properties","menu","gallery"],SEC_NM={products:["Products","प्रोडक्ट"],services:["Services","सर्विस"],properties:["Properties","प्रॉपर्टी"],menu:["Menu","मेन्यू"],gallery:["Gallery","गैलरी"]},SEC_IC={products:"🛍️",services:"🛠️",properties:"🏠",menu:"🍽️",gallery:"🖼️",custom:"🛍️"};
 function galSecs(G){const by={};(ITM||[]).forEach(x=>{if(x&&x.url)by[x.url]=x;});const g=[],cn={};
   SEC_ORD.forEach(k=>{const a=G.filter(u=>by[u]&&(by[u].sec||"products")===k);if(a.length)g.push({k,name:"",a});});
   G.forEach(u=>{const x=by[u];if(x&&x.sec==="custom"){const n=String(x.sec_name||"").trim()||"—";(cn[n]=cn[n]||[]).push(u);}});

@@ -361,7 +361,7 @@ const GAL_RX=/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object
 let GCAP={};
 let ITEMS=null,SGR=[];
 /* 🛍️ Products & Services: हर फ़ोटो अपने section में (Products, Services, Properties, Menu, Gallery, फिर दुकान के अपने नाम वाले) */
-const SEC_ORDER=["products","services","properties","menu","gallery"],SEC_NAME={products:["Products","प्रोडक्ट"],services:["Services","सर्विस"],properties:["Properties","प्रॉपर्टी"],menu:["Menu","मेन्यू"],gallery:["Gallery","गैलरी"]},SEC_ICON={products:"🛍️",services:"🛠️",properties:"🏠",menu:"🍽️",gallery:"🖼️",custom:"✏️"};
+const SEC_ORDER=["products","services","properties","menu","gallery"],SEC_NAME={products:["Products","प्रोडक्ट"],services:["Services","सर्विस"],properties:["Properties","प्रॉपर्टी"],menu:["Menu","मेन्यू"],gallery:["Gallery","गैलरी"]},SEC_ICON={products:"🛍️",services:"🛠️",properties:"🏠",menu:"🍽️",gallery:"🖼️",custom:"🛍️"};
 function secGroups(){const L=(ITEMS||[]).filter(x=>x&&GAL_RX.test(x.url||"")),g=[];
   SEC_ORDER.forEach(k=>{const a=L.filter(x=>(x.sec||"products")===k);if(a.length)g.push({k,name:"",a});});
   const cn={};L.filter(x=>x.sec==="custom").forEach(x=>{const n=String(x.sec_name||"").trim();if(n)(cn[n]=cn[n]||[]).push(x);});
