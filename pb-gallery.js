@@ -897,6 +897,9 @@
       if (e.target.matches && e.target.matches("select[data-f='sec']")) return;
       if (!sv) return;
       read();
+      /* नाम के हर शब्द का पहला अक्षर बड़ा (tejwani tyre polish → Tejwani Tyre Polish); बाकी अक्षर वैसे ही (5Ltr, PVC) */
+      S.title = String(S.title || "").trim().replace(/(^|[\s(\-\/&,.])([a-z])/g, function (m, p, c) { return p + c.toUpperCase(); });
+      if (S.sec === "custom") S.name = String(S.name || "").trim().replace(/(^|[\s(\-\/&,.])([a-z])/g, function (m, p, c) { return p + c.toUpperCase(); });
       if (S.sec === "custom" && !String(S.name).trim()) { err = T("हिस्से का नाम लिखें।", "Please type the section name."); draw2(); return; }
       var pr = O.price && S.price !== "" ? Number(String(S.price).replace(/,/g, "")) : null, dc = O.disc && pr != null && S.disc !== "" ? Math.round(Number(S.disc)) : null;
       if (pr != null && !(pr >= 0)) { err = T("कीमत सही लिखें।", "Enter a valid price."); draw2(); return; }
