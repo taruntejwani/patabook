@@ -58,14 +58,18 @@
   }
   function load(slug, cb) {
     if (AS[slug]) return; AS[slug] = 1;
-    function ok(j) { XS[slug] = j || {}; try { cb && cb(); } catch (e) {} }
+    function ok(j) { XS[slug] = Object.assign(XS[slug] || {}, j || {}); try { cb && cb(); } catch (e) {} }
+    /* 👍 👎 💫 की गिनती — सिर्फ़ दुकानदार (SQL 44) */
+    (async function () { try { var se = window.PBA ? await PBA.session() : null; if (!se) return;
+      var r = await fetch(SB + "/rest/v1/rpc/pb_owner_reactions", { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + se.access_token, "Content-Type": "application/json" }, body: JSON.stringify({ p_slug: slug }) });
+      if (!r.ok) return; var j = await r.json(); if (j) { XS[slug] = Object.assign(XS[slug] || {}, { rx: j }); try { cb && cb(); } catch (e) {} } } catch (e) {} })();
     fetch(SB + "/rest/v1/businesses?select=rating,review_count,is_verified,home_service,business_code,category,address&slug=eq." + encodeURIComponent(slug), { headers: { apikey: KEY, Authorization: "Bearer " + KEY } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (a) {
         if (a && a[0]) return ok(a[0]);
         return fetch(SB + "/rest/v1/businesses?select=business_code,category&slug=eq." + encodeURIComponent(slug), { headers: { apikey: KEY, Authorization: "Bearer " + KEY } })
           .then(function (r) { return r.ok ? r.json() : null; }).then(function (a2) { ok(a2 && a2[0]); });
-      }).catch(function () { XS[slug] = {}; });
+      }).catch(function () { XS[slug] = XS[slug] || {}; });
   }
   function fmtDate(u, en) {
     try { var d = new Date(u); if (isNaN(d)) return ""; return d.toLocaleDateString(en ? "en-IN" : "hi-IN", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; }
@@ -80,6 +84,7 @@
     var until = paid && c.until ? fmtDate(c.until, en) : "";
     var rat = x.rating ? "★ " + esc(x.rating) : (en ? "—" : "—");
     var ratSub = x.rating ? (x.review_count ? esc(x.review_count) + (en ? " reviews" : " समीक्षाएँ") : "") : (en ? "No rating yet" : "अभी कोई रेटिंग नहीं");
+    if (x.rx) ratSub += '<span style="display:block;margin-top:3px;font-style:normal;font-weight:700;color:#0b2f73" title="' + (en ? "Only you can see these counts" : "ये गिनती सिर्फ़ आपको दिखती है") + '">👍 ' + (+x.rx.up || 0) + ' · 👎 ' + (+x.rx.down || 0) + ' · 💫 ' + (+x.rx.fav || 0) + '</span>';
     var ph = c.ph || {};
     function miniX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
       return '<div class="td-mi"><span class="td-mic">' + ic + '</span><b>' + T(e1, h1) + '</b><span class="td-tag' + (on ? '' : ' off') + '">' + T(on ? onE : offE, on ? onH : offH) + '</span></div>';
