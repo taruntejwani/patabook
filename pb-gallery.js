@@ -549,7 +549,7 @@
   function offPct(mrp, pr) { return Math.round((mrp - pr) * 100 / mrp); }
   function netPrice(x) { return hasMrp(x) ? x.price : x.price != null && x.disc ? Math.round(x.price * (100 - x.disc) / 100) : x.price; }
   function sumTxt(x) {   /* फ़ोटो के नीचे बटन पर छोटा सार */
-    if (x.title) return x.title;
+    if (x.title) return x.title + (x.price != null ? " · " + inr(netPrice(x)) : "");
     if (x.price != null) return inr(netPrice(x)) + (hasMrp(x) ? " · -" + offPct(Number(x.mrp), Number(x.price)) + "%" : x.disc ? " · -" + x.disc + "%" : "");
     return x.caption || x.descr || "";
   }
