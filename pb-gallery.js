@@ -4,7 +4,7 @@
    mybusiness.html की चीज़ें इस्तेमाल होती हैं: rpc, esc, L, $, ME, PBA, SB, KEY, ROWS, draw, PH, PREM, PHOTOS, LOGOS, COVER, BAN,
    squareImage, coverImage, bannerImage, resizeImage, extOf, PDAYS, PDOPEN, posterDays */
 (function () {
-  var LIB = {}, LOAD = {}, GO = {}, MSG = {};
+  var LIB = {}, LOAD = {}, GO = {}, MSG = {}, SPN = {};   /* SPN: ✏️ spelling सुधार की सूचना + ↩️ वापस */
   /* refresh पर वही फ़ोल्डर खुला रहे (history.state में रखा है) */
   try { var _hs = history.state; if (_hs && _hs.pbgal && _hs.gs && _hs.gf) GO[_hs.gs] = _hs.gf; } catch (e) {}
   var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
@@ -46,7 +46,8 @@
     var s = b.slug;
     if (b.h) GO[s] = "photo";
     if (!LOAD[s]) { LOAD[s] = 1; load(s); }
-    var msg = MSG[s] ? '<div class="err" style="margin:6px 2px">' + esc(MSG[s]) + '</div>' : '';
+    var msg = (MSG[s] ? '<div class="err" style="margin:6px 2px">' + esc(MSG[s]) + '</div>' : '') +
+      (SPN[s] ? '<div style="margin:6px 2px;padding:8px 10px;border-radius:10px;background:#eef7ff;border:1px solid #cfe0fa;color:#0b2f73;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:0">✏️ ' + T("स्पेलिंग सुधारी: ", "Spelling fixed: ") + SPN[s].ch.map(function (c) { return '<s>' + esc(c[0]) + '</s> → <b>' + esc(c[1]) + '</b>'; }).join(", ") + '</span><button type="button" data-spu="' + esc(s) + '" style="border:1px solid #9db6e6;background:#fff;color:#1a4fb4;border-radius:8px;padding:4px 10px;font:inherit;font-weight:700;cursor:pointer">↩️ ' + T("जैसा लिखा था", "Keep mine") + '</button><button type="button" data-spx="' + esc(s) + '" aria-label="' + esc(T("बंद करें", "Close")) + '" style="border:0;background:none;font-size:16px;cursor:pointer;color:#5b6475">✕</button></div>' : '');
     var open = GO[s];
     if (open === "staff" && !b.h) return staffPage(b, i);
     if (open === "intro" && !b.h) return introPage(b, i);
@@ -904,6 +905,13 @@
       var pr = O.price && S.price !== "" ? Number(String(S.price).replace(/,/g, "")) : null, dc = O.disc && pr != null && S.disc !== "" ? Math.round(Number(S.disc)) : null;
       if (pr != null && !(pr >= 0)) { err = T("कीमत सही लिखें।", "Enter a valid price."); draw2(); return; }
       if (dc != null && !(dc >= 1 && dc <= 95)) { err = T("डिस्काउंट 1 से 95 के बीच हो।", "Discount must be between 1 and 95."); draw2(); return; }
+      /* ✏️ spelling अपने-आप (नाम, कैप्शन, विवरण, अपने हिस्से का नाम) */
+      var raw = { title: S.title, cap: S.cap, desc: S.desc, name: S.name }, sch = [];
+      if (window.PBSpell) { sv.disabled = true; sv.textContent = "⏳"; try {
+        var fx = await Promise.all([PBSpell.fix(S.title), O.cap ? PBSpell.fix(S.cap) : null, O.desc ? PBSpell.fix(S.desc) : null, S.sec === "custom" ? PBSpell.fix(S.name) : null]);
+        if (fx[0]) { S.title = fx[0].text; sch = sch.concat(fx[0].ch); } if (fx[1]) { S.cap = fx[1].text; sch = sch.concat(fx[1].ch); }
+        if (fx[2]) { S.desc = fx[2].text; sch = sch.concat(fx[2].ch); } if (fx[3]) { S.name = fx[3].text; sch = sch.concat(fx[3].ch); }
+      } catch (esp) {} sv.disabled = false; sv.textContent = T("सेव करें", "Save"); }
       var mp = O.mrp && pr != null && String(S.mrp).trim() !== "" ? Number(String(S.mrp).replace(/,/g, "")) : null;
       if (mp != null && !(mp > pr)) { err = T("MRP आपकी कीमत से ज़्यादा होनी चाहिए।", "MRP must be more than your price."); draw2(); return; }
       if (mp != null) dc = null;
@@ -911,6 +919,10 @@
       try {
         ME = await PBA.session();
         await rpc("pb_photo_set", { p_slug: s, p_id: x.id, p_sec: S.sec, p_sec_name: S.sec === "custom" ? String(S.name).trim() : null, p_title: S.title || null, p_price: pr, p_disc: dc, p_caption: O.cap ? S.cap || null : null, p_descr: O.desc ? S.desc || null : null, p_extra: O.extra ? S.extra || null : null, p_price_from: !!(O.price && S.from), p_sold: !!S.sold });
+        if (sch.length) {
+          var undo = { p_slug: s, p_id: x.id, p_sec: S.sec, p_sec_name: S.sec === "custom" ? String(raw.name).trim() : null, p_title: raw.title || null, p_price: pr, p_disc: dc, p_caption: O.cap ? raw.cap || null : null, p_descr: O.desc ? raw.desc || null : null, p_extra: O.extra ? S.extra || null : null, p_price_from: !!(O.price && S.from), p_sold: !!S.sold };
+          SPN[s] = { ch: sch.filter(function (c, q) { return sch.findIndex(function (d) { return d[0] === c[0]; }) === q; }), undo: undo };
+        } else delete SPN[s];
         if (mp != null || x.mrp != null) {
           try { await rpc("pb_photo_set_mrp", { p_slug: s, p_id: x.id, p_mrp: mp }); }
           catch (em) { if (mp != null) { sv.disabled = false; err = T("MRP अभी सेव नहीं हो सका (database अपडेट बाकी)। बाकी विवरण सेव हो गया।", "MRP could not be saved yet (database update pending). Other details were saved."); draw2(); return; } }
@@ -1106,6 +1118,9 @@
   document.getElementById("list").addEventListener("click", function (e) {
     var gf = e.target.closest("[data-gf]"); if (gf) { var b = ROWS[+gf.dataset.i]; GO[b.slug] = gf.dataset.gf; try { history.pushState(Object.assign({}, history.state || {}, { pbgal: 1, gf: gf.dataset.gf, gs: b.slug }), ""); } catch (x) {} draw(); window.scrollTo(0, 0); return; }
     if (e.target.closest("[data-glk]")) { var m = document.getElementById("glkm"); if (m) m.style.display = "block"; return; }
+    var spu = e.target.closest("[data-spu]");
+    if (spu) { var su = SPN[spu.dataset.spu]; if (su) { spu.disabled = true; (async function () { try { ME = await PBA.session(); await rpc("pb_photo_set", su.undo); } catch (e9) {} delete SPN[spu.dataset.spu]; var rb = ROWS.filter(function (r) { return r && r.slug === spu.dataset.spu; })[0]; if (rb) await reload(rb); else draw(); })(); } return; }
+    var spx = e.target.closest("[data-spx]"); if (spx) { delete SPN[spx.dataset.spx]; draw(); return; }
     var gb = e.target.closest("[data-gb]"); if (gb) { if (history.state && history.state.pbgal) history.back(); else { GO = {}; draw(); } return; }
     var gk = e.target.closest("[data-gk]"); if (gk) { e.stopPropagation(); tick(+gk.dataset.i, gk.dataset.gk, +gk.dataset.n); return; }
     var hl = e.target.closest("[data-hlp]"); if (hl) { staffOpen(+hl.dataset.hlp); return; }
