@@ -25,6 +25,14 @@
     if (CSS) return; CSS = true; var st = document.createElement("style");
     st.textContent = ".pbrx{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}.pbrx button{flex:1;min-width:92px;display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid #dbe2ef;background:#fff;color:#1c2540;border-radius:12px;padding:10px 8px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}" +
       ".pbrx button span{font-size:18px;line-height:1}.pbrx button.on{border-color:#1a4fb0;background:#eef4ff;color:#0b2f73}.pbrx button.on.dn{border-color:#b42318;background:#fff1f0;color:#8a1c12}.pbrx button.on.fv{border-color:#b7791f;background:#fff8e6;color:#7a4b00}" +
+      ".pbrx .fbb{flex-basis:100%;border-style:dashed;color:#1a4fb0;font-size:14px}" +
+      ".pbfbo{position:fixed;inset:0;z-index:10050;background:rgba(10,18,35,.55);display:flex;align-items:center;justify-content:center;padding:16px}" +
+      ".pbfbw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:420px;padding:18px 16px 16px;box-shadow:0 18px 50px rgba(0,0,0,.35);font-family:var(--pbf,system-ui,sans-serif);color:#1c2540}" +
+      ".pbfbw h3{margin:0 34px 6px 0;font-size:18px;line-height:1.3}.pbfbw p{margin:0 0 10px;font-size:13.5px;color:#5b6475;line-height:1.45}" +
+      ".pbfbw textarea{width:100%;box-sizing:border-box;min-height:120px;border:1.5px solid #d0d5dd;border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;resize:vertical}" +
+      ".pbfbw textarea:focus{outline:0;border-color:#1a73e8;box-shadow:0 0 0 3px #1a73e822}.pbfbc{text-align:right;font-size:12px;color:#5b6475;margin-top:3px}.pbfbe{color:#b42318;font-size:13.5px;min-height:18px}" +
+      ".pbfbs{width:100%;margin-top:6px;border:0;border-radius:12px;background:#1a73e8;color:#fff;font:inherit;font-size:16px;font-weight:700;padding:13px;cursor:pointer}.pbfbs:disabled{opacity:.6}" +
+      ".pbfbx{position:absolute;top:10px;right:10px;border:0;width:34px;height:34px;border-radius:50%;background:#eef2f9;font-size:16px;cursor:pointer}.pbfbok{text-align:center;padding:6px 0}.pbfbok h3{margin:6px 0 10px}" +
       ".pbrxm{flex-basis:100%;font-size:13px;color:#5b6475;margin-top:2px}.pbrxm a{color:#1a4fb0;font-weight:700}";
     document.head.appendChild(st);
   }
@@ -41,11 +49,48 @@
       '<button type="button" data-rx="up" class="' + (ST.vote === 1 ? "on" : "") + '" aria-pressed="' + (ST.vote === 1) + '"><span>👍</span>' + T("पसंद", "Like") + '</button>' +
       '<button type="button" data-rx="down" class="dn' + (ST.vote === -1 ? " on" : "") + '" aria-pressed="' + (ST.vote === -1) + '"><span>👎</span>' + T("नापसंद", "Dislike") + '</button>' +
       '<button type="button" data-rx="fav" class="fv' + (ST.fav ? " on" : "") + '" aria-pressed="' + ST.fav + '"><span>💫</span>' + (ST.fav ? T("फ़ेवरेट में है", "In favourites") : T("फ़ेवरेट", "Favourite")) + '</button>' +
-      (MSG ? '<div class="pbrxm">' + MSG + '</div>' : '');
+      (MSG ? '<div class="pbrxm">' + MSG + '</div>' : '') +
+      '<button type="button" data-rx="fb" class="fbb"><span>✍️</span>' + T("दुकानदार को सुझाव दें", "Send feedback to the shop owner") + '</button>';
+  }
+  /* ✍️ सुझाव: छोटी खिड़की — सिर्फ़ दुकानदार पढ़ेगा, आपका नाम / नंबर उसे नहीं दिखेगा (SQL 45) */
+  function fbOpen(s) {
+    var ov = document.createElement("div"), gone = false, done = false; ov.className = "pbfbo";
+    ov.innerHTML = '<div class="pbfbw" role="dialog" aria-modal="true" aria-label="' + T("दुकानदार को सुझाव", "Feedback to the shop owner") + '">' +
+      '<button type="button" class="pbfbx" aria-label="' + T("बंद करें", "Close") + '">✕</button>' +
+      '<h3>✍️ ' + T("दुकानदार को सुझाव", "Feedback to the shop owner") + '</h3>' +
+      '<p>' + T("यह सिर्फ़ दुकानदार को दिखेगा, दूसरों को नहीं। आपका नाम और नंबर दुकानदार को नहीं दिखेगा।", "Only the shop owner will see this, not the public. Your name and number are not shown to the owner.") + '</p>' +
+      '<textarea maxlength="500" placeholder="' + T("जैसे: सामान अच्छा है, पर डिलीवरी में देर होती है…", "E.g. Good products, but delivery is often late…") + '" aria-label="' + T("आपका सुझाव", "Your feedback") + '"></textarea>' +
+      '<div class="pbfbc">0 / 500</div><div class="pbfbe"></div>' +
+      '<button type="button" class="pbfbs">' + T("भेजें", "Send") + '</button></div>';
+    document.body.appendChild(ov); document.documentElement.style.overflow = "hidden";
+    var ta = ov.querySelector("textarea"), cnt = ov.querySelector(".pbfbc"), er = ov.querySelector(".pbfbe"), sb = ov.querySelector(".pbfbs");
+    function gc() { if (gone) return; gone = true; ov.remove(); document.documentElement.style.overflow = ""; }
+    function close() { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else gc(); }
+    if (window.PBBack) PBBack.open(gc, ov);
+    ta.addEventListener("input", function () { cnt.textContent = ta.value.length + " / 500"; er.textContent = ""; });
+    ov.addEventListener("click", async function (e) {
+      if (e.target === ov || e.target.closest(".pbfbx") || e.target.closest(".pbfbk")) { close(); return; }
+      if (!e.target.closest(".pbfbs") || done) return;
+      var v = ta.value.trim(); if (v.length < 3) { er.textContent = T("कम से कम 3 अक्षर लिखें।", "Please write at least 3 characters."); return; }
+      sb.disabled = true; sb.textContent = "⏳";
+      try {
+        await call("pb_feedback_send", { p_slug: slug, p_body: v }, s.access_token); done = true;
+        ov.querySelector(".pbfbw").innerHTML = '<div class="pbfbok"><div style="font-size:44px">✅</div><h3>' + T("धन्यवाद! आपका सुझाव दुकानदार को भेज दिया।", "Thank you! Your feedback was sent to the shop owner.") + '</h3><button type="button" class="pbfbs pbfbk">' + T("ठीक है", "OK") + '</button></div>';
+      } catch (x) {
+        var m = String(x && x.message || ""); sb.disabled = false; sb.textContent = T("भेजें", "Send");
+        er.textContent = /own shop/i.test(m) ? T("अपनी ही दुकान को सुझाव नहीं भेज सकते।", "You cannot send feedback to your own shop.")
+          : /rate limit/i.test(m) ? T("आज इस दुकान को काफ़ी सुझाव भेज चुके हैं। कल फिर कोशिश करें।", "You have sent enough feedback to this shop today. Please try tomorrow.")
+          : /login|JWT|expired/i.test(m) ? T("दोबारा लॉगिन करें।", "Please log in again.")
+          : /function|schema cache|404/i.test(m) ? T("यह सुविधा अभी चालू हो रही है।", "This is being switched on.")
+          : T("अभी भेजा नहीं जा सका। थोड़ी देर बाद कोशिश करें।", "Could not send right now. Please try again later.");
+      }
+    });
+    setTimeout(function () { try { ta.focus(); } catch (e) {} }, 60);
   }
   async function act(k) {
     if (BUSY) return;
     var s = await sess(); if (!s) { location.href = window.PBA && PBA.loginUrl ? PBA.loginUrl() : "login.html"; return; }
+    if (k === "fb") { fbOpen(s); return; }
     BUSY = true; var old = { vote: ST.vote, fav: ST.fav };
     try {
       if (k === "fav") {

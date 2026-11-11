@@ -62,7 +62,11 @@
     /* 👍 👎 💫 की गिनती — सिर्फ़ दुकानदार (SQL 44) */
     (async function () { try { var se = window.PBA ? await PBA.session() : null; if (!se) return;
       var r = await fetch(SB + "/rest/v1/rpc/pb_owner_reactions", { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + se.access_token, "Content-Type": "application/json" }, body: JSON.stringify({ p_slug: slug }) });
-      if (!r.ok) return; var j = await r.json(); if (j) { XS[slug] = Object.assign(XS[slug] || {}, { rx: j }); try { cb && cb(); } catch (e) {} } } catch (e) {} })();
+      if (r.ok) { var j = await r.json(); if (j) XS[slug] = Object.assign(XS[slug] || {}, { rx: j }); }
+      /* ✍️ ग्राहकों के सुझाव (SQL 45) */
+      var r2 = await fetch(SB + "/rest/v1/rpc/pb_owner_feedback", { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + se.access_token, "Content-Type": "application/json" }, body: JSON.stringify({ p_slug: slug }) });
+      if (r2.ok) { var j2 = await r2.json(); if (Array.isArray(j2)) XS[slug] = Object.assign(XS[slug] || {}, { fb: j2 }); }
+      try { cb && cb(); } catch (e) {} } catch (e) {} })();
     fetch(SB + "/rest/v1/businesses?select=rating,review_count,is_verified,home_service,business_code,category,address&slug=eq." + encodeURIComponent(slug), { headers: { apikey: KEY, Authorization: "Bearer " + KEY } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (a) {
@@ -84,6 +88,8 @@
     var until = paid && c.until ? fmtDate(c.until, en) : "";
     var rat = x.rating ? "★ " + esc(x.rating) : (en ? "—" : "—");
     var ratSub = x.rating ? (x.review_count ? esc(x.review_count) + (en ? " reviews" : " समीक्षाएँ") : "") : (en ? "No rating yet" : "अभी कोई रेटिंग नहीं");
+    if (x.fb) { var fbN = x.fb.filter(function (f) { return !f.read; }).length;
+      ratSub += '<button type="button" data-tdfb="' + esc(c.b.slug) + '" style="display:block;margin-top:6px;border:1px solid ' + (fbN ? '#f29900' : '#cfdcf5') + ';background:' + (fbN ? '#fff8e6' : '#f4f8ff') + ';color:#0b2f73;border-radius:10px;padding:5px 10px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;font-style:normal">💬 ' + (en ? "Customer feedback" : "ग्राहकों के सुझाव") + (fbN ? ' · <span style="color:#b45309">' + fbN + (en ? " new" : " नए") + '</span>' : ' (' + x.fb.length + ')') + ' ›</button>'; }
     if (x.rx) ratSub += '<span style="display:block;margin-top:3px;font-style:normal;font-weight:700;color:#0b2f73" title="' + (en ? "Only you can see these counts" : "ये गिनती सिर्फ़ आपको दिखती है") + '">👍 ' + (+x.rx.up || 0) + ' · 👎 ' + (+x.rx.down || 0) + ' · 💫 ' + (+x.rx.fav || 0) + '</span>';
     var ph = c.ph || {};
     function miniX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
@@ -194,6 +200,45 @@
     var a = e.target.closest("[data-tdact]");
     if (a) { var k = a.dataset.tdact, i = +a.dataset.tdi; ov._close(); setTimeout(function () { if (window.PBTejDash.act) PBTejDash.act(k, i, a); }, 60); }
   });
+  /* 💬 सुझाव की सूची: सिर्फ़ दुकानदार; ग्राहक का नाम / नंबर नहीं */
+  function fbOpen(slug) {
+    if (document.getElementById("tdFb")) return;
+    var en = !(window.PB && PB.lang ? PB.lang() === "hi" : (function () { try { return localStorage.getItem("pb-lang") === "hi"; } catch (e) { return false; } })());
+    var T = function (e2, h) { return en ? e2 : h; }, L = (XS[slug] && XS[slug].fb) || [];
+    var ov = document.createElement("div"); ov.className = "tdov"; ov.id = "tdFb";
+    function when(u) { try { return new Date(u).toLocaleDateString(en ? "en-IN" : "hi-IN", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } }
+    function draw() {
+      ov.innerHTML = '<div class="tdsh"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><h3 style="margin:0;flex:1;font-size:18px">💬 ' + T("Customer feedback", "ग्राहकों के सुझाव") + '</h3><button type="button" class="td-x" data-fbx="1" aria-label="' + T("Close", "बंद करें") + '" style="border:0;background:#eef2f9;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer">✕</button></div>' +
+        '<p style="margin:0 0 10px;font-size:13px;color:#5b6475">' + T("Only you can see these. Customers' names and numbers are not shown.", "ये सिर्फ़ आपको दिखते हैं। ग्राहक का नाम और नंबर नहीं दिखाया जाता।") + '</p>' +
+        (L.length ? L.map(function (f) {
+          return '<div style="border:1px solid ' + (f.read ? '#e4eaf5' : '#f5c26b') + ';background:' + (f.read ? '#fff' : '#fffaf0') + ';border-radius:12px;padding:10px 12px;margin-bottom:8px">' +
+            '<div style="white-space:pre-line;font-size:15px;line-height:1.5;word-break:break-word">' + esc(f.body) + '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:#5b6475;flex-wrap:wrap"><span style="flex:1">' + esc(when(f.at)) + (f.reported ? ' · 🚩 ' + T("Reported", "Report किया") : '') + '</span>' +
+            (f.read ? '' : '<button type="button" data-fbm="read" data-fbi="' + f.id + '" style="border:1px solid #bfe6cc;background:#e9f9ef;color:#14703d;border-radius:8px;padding:4px 10px;font:inherit;font-weight:700;cursor:pointer">✅ ' + T("Mark read", "पढ़ लिया") + '</button>') +
+            (f.reported ? '' : '<button type="button" data-fbm="report" data-fbi="' + f.id + '" style="border:1px solid #f3c1bb;background:#fff1f0;color:#b42318;border-radius:8px;padding:4px 10px;font:inherit;font-weight:700;cursor:pointer">🚩 Report</button>') + '</div></div>';
+        }).join("") : '<p style="text-align:center;color:#5b6475;padding:16px 0">' + T("No feedback yet.", "अभी कोई सुझाव नहीं आया।") + '</p>') + '</div>';
+    }
+    function gone() { if (ov.isConnected) ov.remove(); document.body.style.overflow = ""; try { if (typeof window.draw === "function") window.draw(); } catch (e) {} }
+    ov.addEventListener("click", async function (e) {
+      if (e.target === ov || e.target.closest("[data-fbx]")) { if (window.PBBack) PBBack.close(); else gone(); return; }
+      var m = e.target.closest("[data-fbm]"); if (!m) return;
+      if (m.dataset.fbm === "report" && !confirmReport(m)) return;
+      m.disabled = true;
+      try {
+        var se = await PBA.session();
+        var r = await fetch(SB + "/rest/v1/rpc/pb_owner_feedback_mark", { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + se.access_token, "Content-Type": "application/json" }, body: JSON.stringify({ p_slug: slug, p_id: +m.dataset.fbi, p_action: m.dataset.fbm }) });
+        if (!r.ok) throw new Error("x");
+        L.forEach(function (f) { if (f.id === +m.dataset.fbi) { f.read = true; if (m.dataset.fbm === "report") f.reported = true; } });
+      } catch (er) { m.disabled = false; }
+      draw();
+    });
+    function confirmReport(m) {   /* दो बार दबाने पर ही Report (गलती से न हो) — browser का confirm नहीं */
+      if (m.dataset.sure) return true; m.dataset.sure = "1"; m.textContent = "🚩 " + T("Tap again to report", "Report के लिए फिर दबाएँ"); return false;
+    }
+    draw(); document.body.appendChild(ov); document.body.style.overflow = "hidden";
+    if (window.PBBack) PBBack.open(gone, ov);
+  }
+  document.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-tdfb]"); if (b) fbOpen(b.dataset.tdfb); });
   document.addEventListener("keydown", function (e) {
     if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("[data-tdopen]")) { e.preventDefault(); openDetails(); }
   });
