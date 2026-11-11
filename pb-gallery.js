@@ -60,7 +60,7 @@
       var body = !ok ? '<div class="gbd"><small>' + T("यह सुविधा आपके प्लान में नहीं है।", "This is not in your plan.") + '</small></div>'
         : arr.length ? gridOf(k, arr, arr.map(function (x, n) {
           var on = k === "photo" ? !x.hidden : !!(act && x.url === act);
-          return (k === "photo" ? '<div class="gw">' : '') + '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy">' + (k === "photo" ? '<span class="gsb" title="' + esc(secLabel(x)) + '">' + secOf(x)[1] + '</span>' : '') + (k === "photo" && !b.h && x.by_role === "helper" ? '<span class="gby" title="' + esc(x.by_who || "") + '">👤 ' + T("सहायक", "Helper") + '</span>' : '') + (hp(b, "hide") || k !== "photo" ? '<span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span>' : '') + (k === "photo" && on && ovl[x.id] ? '<span class="gtm" style="background:rgba(180,35,24,.94)">⛔ ' + T("सीमा पार · छिपी", "Over limit · hidden") + '</span>' : '') + (k === "photo" && !on && x.off_since ? '<span class="gtm">⏳ ' + hrsLeft(x) + T(" घं बचे", "h left") + '</span>' : '') + '</button>' + (k === "photo" && hp(b, "edit") ? '<button type="button" class="gdt' + (sumTxt(x) ? ' has' : '') + '" data-gd="' + n + '" data-i="' + i + '" aria-label="' + esc(T("विवरण जोड़ें", "Add details")) + '">' + (sumTxt(x) ? sumHTML(x) : '＋') + '</button></div>' : '');
+          return (k === "photo" ? '<div class="gw">' : '') + '<button type="button" class="gt' + (on ? '' : ' hid') + '" data-gv="' + k + '" data-n="' + n + '" data-i="' + i + '"><img src="' + esc(x.url) + '" alt="" loading="lazy"' + (k === "photo" ? ' class="pbft"' : '') + '>' + (k === "photo" ? '<span class="gsb" title="' + esc(secLabel(x)) + '">' + secOf(x)[1] + '</span>' : '') + (k === "photo" && !b.h && x.by_role === "helper" ? '<span class="gby" title="' + esc(x.by_who || "") + '">👤 ' + T("सहायक", "Helper") + '</span>' : '') + (hp(b, "hide") || k !== "photo" ? '<span class="gck' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" data-gk="' + k + '" data-n="' + n + '" data-i="' + i + '">' + (on ? '✔' : '') + '</span>' : '') + (k === "photo" && on && ovl[x.id] ? '<span class="gtm" style="background:rgba(180,35,24,.94)">⛔ ' + T("सीमा पार · छिपी", "Over limit · hidden") + '</span>' : '') + (k === "photo" && !on && x.off_since ? '<span class="gtm">⏳ ' + hrsLeft(x) + T(" घं बचे", "h left") + '</span>' : '') + '</button>' + (k === "photo" && hp(b, "edit") ? '<button type="button" class="gdt' + (sumTxt(x) ? ' has' : '') + '" data-gd="' + n + '" data-i="' + i + '" aria-label="' + esc(T("विवरण जोड़ें", "Add details")) + '">' + (sumTxt(x) ? sumHTML(x) : '＋') + '</button></div>' : '');
         }))
         : '<div class="gbd"><small>' + T("अभी इसमें कोई फ़ोटो नहीं — ऊपर ＋ दबाकर जोड़ें।", "No photos yet — tap ＋ above to add.") + '</small>' + sizeNote(k) + '</div>';
       var hint = arr.length && ok ? '<div class="szn" style="margin:6px 2px">' + (k === "photo" ? T("✔ वाली फ़ोटो सार्वजनिक को दिखती है। ✔ दबाकर चुनें।", "Ticked photos are shown to the public. Tap ✔ to choose.") + ' (' + arr.filter(function (x) { return !x.hidden; }).length + '/' + arr.length + ')' + (arr.some(function (x) { return "off_since" in x; }) ? '<br><span style="color:#b45309">' + T("बिना ✔ की (छिपी) फ़ोटो 72 घंटे बाद अपने-आप हमेशा के लिए हट जाती है। ✔ लगाते ही वह बच जाती है।", "Photos without ✔ (hidden) are deleted permanently after 72 hours. Tick ✔ to keep one.") + '</span>' : '') : T("✔ वाली फ़ोटो चालू है। दूसरी पर ✔ लगाने से वह चालू हो जाएगी।", "The ticked photo is in use. Tick another to switch.")) + '</div>' : '';
@@ -548,6 +548,40 @@
   function hasMrp(x) { return x.price != null && x.mrp != null && Number(x.mrp) > Number(x.price); }
   function offPct(mrp, pr) { return Math.round((mrp - pr) * 100 / mrp); }
   function netPrice(x) { return hasMrp(x) ? x.price : x.price != null && x.disc ? Math.round(x.price * (100 - x.disc) / 100) : x.price; }
+  /* 📐 Auto-fit (pb-pgal.js जैसा): सादे background वाली product फ़ोटो बक्से में एक जैसी बड़ी दिखे — सिर्फ़ दिखाने में */
+  var FITQ = {};
+  function fitBox(u, done) {
+    if (FITQ[u] !== undefined) { if (FITQ[u] && FITQ[u].then) FITQ[u].then(done); else done(FITQ[u]); return; }
+    var cbs = [done]; FITQ[u] = { then: function (f) { cbs.push(f); } };
+    var fin = function (r) { FITQ[u] = r; cbs.forEach(function (f) { try { f(r); } catch (e) {} }); };
+    var im = new Image(); im.crossOrigin = "anonymous";
+    im.onerror = function () { fin(null); };
+    im.onload = function () {
+      try {
+        var w0 = im.naturalWidth, h0 = im.naturalHeight; if (!w0 || !h0) return fin(null);
+        var k = Math.min(1, 160 / Math.max(w0, h0)), w = Math.max(1, Math.round(w0 * k)), h = Math.max(1, Math.round(h0 * k));
+        var c = document.createElement("canvas"); c.width = w; c.height = h; var g = c.getContext("2d", { willReadFrequently: true });
+        g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+        var d = g.getImageData(0, 0, w, h).data, px = function (x, y) { var o = (y * w + x) * 4; return [d[o], d[o + 1], d[o + 2]]; };
+        var cs = [px(0, 0), px(w - 1, 0), px(0, h - 1), px(w - 1, h - 1), px(w >> 1, 0), px(w >> 1, h - 1), px(0, h >> 1), px(w - 1, h >> 1)];
+        var bg = [0, 1, 2].map(function (j) { return cs.reduce(function (a, q) { return a + q[j]; }, 0) / cs.length; });
+        if (cs.some(function (q) { return Math.abs(q[0] - bg[0]) + Math.abs(q[1] - bg[1]) + Math.abs(q[2] - bg[2]) > 45; })) return fin(null);
+        var rows = new Uint16Array(h), cols = new Uint16Array(w);
+        for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) { var o = (y * w + x) * 4; if (Math.abs(d[o] - bg[0]) + Math.abs(d[o + 1] - bg[1]) + Math.abs(d[o + 2] - bg[2]) > 40) { rows[y]++; cols[x]++; } }
+        var mr = Math.max(1, Math.round(w * .01)), mc = Math.max(1, Math.round(h * .01)), y0 = 0, y1 = h - 1, x0 = 0, x1 = w - 1;
+        while (y0 < h && rows[y0] < mr) y0++; while (y1 > y0 && rows[y1] < mr) y1--;
+        while (x0 < w && cols[x0] < mc) x0++; while (x1 > x0 && cols[x1] < mc) x1--;
+        if (y0 >= h || x0 >= w || x1 - x0 < 4 || y1 - y0 < 4) return fin(null);
+        var s0 = Math.min(1 / w, 1 / h), ox = (1 - w * s0) / 2, oy = (1 - h * s0) / 2;
+        var z = Math.min(3, .92 / Math.max((x1 - x0 + 1) * s0, (y1 - y0 + 1) * s0));
+        if (z < 1.06) return fin(null);
+        var cx = ox + (x0 + (x1 - x0 + 1) / 2) * s0, cy = oy + (y0 + (y1 - y0 + 1) / 2) * s0;
+        fin("translate(" + (-(cx - .5) * z * 100).toFixed(2) + "%," + (-(cy - .5) * z * 100).toFixed(2) + "%) scale(" + z.toFixed(3) + ")");
+      } catch (e) { fin(null); }
+    };
+    im.src = u;
+  }
+  document.addEventListener("load", function (e) { var t = e.target; if (t && t.tagName === "IMG" && t.classList && t.classList.contains("pbft")) fitBox(t.currentSrc || t.src, function (r) { if (r) t.style.transform = r; }); }, true);
   function sumHTML(x) {   /* बटन पर: पहली लाइन नाम, दूसरी लाइन कीमत (MRP कटी + % छूट) */
     var t = x.title || x.caption || x.descr || "", pr = "";
     if (x.price != null) pr = '<b>' + inr(netPrice(x)) + '</b>' + (hasMrp(x) ? ' <s>' + inr(x.mrp) + '</s> <em>' + offPct(Number(x.mrp), Number(x.price)) + '% ' + T("छूट", "OFF") + '</em>' : x.disc ? ' <s>' + inr(x.price) + '</s> <em>' + x.disc + '% ' + T("छूट", "OFF") + '</em>' : '');
@@ -561,7 +595,7 @@
   (function () {
     if (document.getElementById("pbgCss")) return;
     var st = document.createElement("style"); st.id = "pbgCss";
-    st.textContent = ".pbgov{position:fixed;inset:0;z-index:320;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center}.pbgsh{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.pbgov{align-items:center}.pbgsh{border-radius:20px}}" +
+    st.textContent = ".gt img.pbft{object-fit:contain;background:#fff;transform-origin:50% 50%}.gt:has(img.pbft){background:#fff}" + ".pbgov{position:fixed;inset:0;z-index:320;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center}.pbgsh{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.pbgov{align-items:center}.pbgsh{border-radius:20px}}" +
       ".pbgsh h3{margin:0 0 4px;font-size:18px;color:#0b2f73}.pbgsh .hn{font-size:13px;color:#5b6475;margin:0 0 12px;line-height:1.4}" +
       ".pbgop{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid #e1e8f5;background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:8px;font:inherit;font-weight:700;font-size:15px;color:#0b2f73;cursor:pointer;text-align:left}.pbgop span{font-size:22px}" +
       ".pbgin{width:100%;padding:11px 12px;border:1.5px solid #dbe5f7;border-radius:11px;font:inherit;font-size:15px;margin:2px 0 8px;background:#fff}textarea.pbgin{min-height:78px;resize:vertical}" +
