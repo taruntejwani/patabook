@@ -585,7 +585,7 @@
   }
   document.addEventListener("load", function (e) { var t = e.target; if (t && t.tagName === "IMG" && t.classList && t.classList.contains("pbft")) fitBox(t.currentSrc || t.src, function (r) { if (r) t.style.transform = r; }); }, true);
   function sumHTML(x) {   /* बटन पर: पहली लाइन नाम, दूसरी लाइन कीमत (MRP कटी + % छूट) */
-    var t = x.title || x.caption || x.descr || "", pr = "";
+    var t = x.title ? String(x.title).replace(/(^|[\s(\-\/&,.])([a-z])/g, function (m, p, c) { return p + c.toUpperCase(); }) : (x.caption || x.descr || ""), pr = "";
     if (x.price != null) pr = '<b>' + inr(netPrice(x)) + '</b>' + (hasMrp(x) ? ' <s>' + inr(x.mrp) + '</s> <em>' + offPct(Number(x.mrp), Number(x.price)) + '% ' + T("छूट", "OFF") + '</em>' : x.disc ? ' <s>' + inr(x.price) + '</s> <em>' + x.disc + '% ' + T("छूट", "OFF") + '</em>' : '');
     return (t ? '<span class="gdn">' + esc(t) + '</span>' : '') + (pr ? '<span class="gdp">' + pr + '</span>' : '');
   }
