@@ -37,7 +37,7 @@ var sh={about:["about","numbers"],visit:["visit"],numbers:["numbers"]}[k];
 var st=document.createElement("style");st.textContent='[data-sec]'+sh.map(function(x){return ':not([data-sec="'+x+'"])';}).join("")+'{display:none!important}';
 document.head.appendChild(st);})();</script>
 <style>.embed .top{display:none}.embed body{padding-top:6px}.embed #done .btn{display:none}.pt-silver #saveBtn{background:linear-gradient(135deg,#f3f5f8,#c3cbd6 50%,#8f9aa8);color:#1f2833}.pt-gold #saveBtn{background:linear-gradient(135deg,#f3d98a,#e7c36a 45%,#B58A2A);color:#3a2a08}.pt-platinum #saveBtn{background:linear-gradient(135deg,#8cc4f2,#3f6296 50%,#1c2539);color:#eef3ff}</style>
-<script src="pb-auth.js"></script>
+<script src="pb-auth.js"></script><script src="pb-back.js"></script>
 <script src="pb-imgcheck.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -247,7 +247,8 @@ function verifyNum(num,label){
     ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:18px;font:inherit"><b style="display:block;font-size:16px;color:#123568">📱 '+(EN?"Verify this number":"यह नंबर पक्का करें")+'</b><p style="margin:8px 0 12px;font-size:14px;line-height:1.5;color:#334">'+(EN?label+" +91 "+num+". We will send an OTP to this number; only after the OTP it will show on your page.":label+" +91 "+num+" — इस नंबर पर OTP जाएगा। OTP डालने के बाद ही यह आपके पेज पर दिखेगा।")+'</p><input id="vnC" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #cfd8ea;border-radius:12px;font:inherit;font-size:18px;letter-spacing:4px;text-align:center" hidden><div id="vnE" style="color:#c5221f;font-size:13px;font-weight:700;min-height:18px;margin:8px 0 2px"></div><button type="button" id="vnG" style="width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;background:#1a73e8;color:#fff;cursor:pointer">'+(EN?"Send OTP":"OTP भेजें")+'</button><button type="button" id="vnX" style="width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;background:#f1f4f9;color:#123;cursor:pointer">'+(EN?"Cancel":"रद्द करें")+'</button></div>';
     document.body.appendChild(ov);
     const g=ov.querySelector("#vnG"),x=ov.querySelector("#vnX"),inp=ov.querySelector("#vnC"),er=ov.querySelector("#vnE");let sent=false;
-    const done=v=>{ov.remove();res(v);};
+    let bk=false;if(window.PBBack){bk=true;PBBack.open(()=>{bk=false;if(ov.isConnected){ov.remove();res(false);}});}   /* 📱 फ़ोन का Back popup बंद करे */
+    const done=v=>{ov.remove();res(v);if(bk){bk=false;PBBack.close();}};
     x.onclick=()=>done(false);
     g.onclick=async()=>{
       er.textContent="";g.disabled=true;

@@ -51,6 +51,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script>
 <style>/* 🖥️ PC (900px+): बड़ी screen पर चौड़ा पेज; मोबाइल वैसा ही */@media(min-width:900px){.wrap{max-width:920px}}</style>
+<script src="pb-backlink.js" defer></script>
 </head>
 <body>
 <header><div class="wrap nav">
@@ -107,7 +108,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <h2>4. जानकारी किनके साथ साझा होती है</h2>
 <ul>
 <li>Supabase (डेटाबेस, लॉगिन और लोगो स्टोरेज), Cloudflare (वेबसाइट और OTP सेवा की hosting, और "मैं रोबोट नहीं हूँ" वाली जाँच — Turnstile), Fast2SMS (OTP वाला SMS भेजने के लिए — सिर्फ मोबाइल नंबर और OTP)।</li>
-<li>सूचनाएँ आपके ब्राउज़र की push सेवा से जाती हैं (Android पर Google Firebase Cloud Messaging)।</li>
+<li>सूचनाएँ आपके ब्राउज़र की push सेवा से जाती हैं (Android पर Google की सूचना सेवा — Firebase Cloud Messaging)।</li>
 <li>BigDataCloud — होम पेज पर आपका शहर पहचानने के लिए सिर्फ GPS के अंक (latitude/longitude) भेजे जाते हैं, कोई नाम या नंबर नहीं।</li>
 <li>मैप सेवाएँ: Mapbox, MapTiler, OpenStreetMap/OpenFreeMap, Photon — मैप और खोज के लिए। OSRM / Valhalla (OpenStreetMap Germany के routing सर्वर) — रास्ता निकालने के लिए सिर्फ़ शुरू और मंज़िल के GPS अंक भेजे जाते हैं, कोई नाम या नंबर नहीं।</li>
 <li>Google Maps सिर्फ तब, जब आप खुद "Google Maps में खोलें" दबाएँ।</li>

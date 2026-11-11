@@ -34,6 +34,7 @@ var PB_LIBS = {
 <script src="i18n.js"></script>
 <script src="map-i18n.js"></script>
 <script src="pb-auth.js"></script>
+<script src="pb-back.js"></script>
 <style>input:focus,textarea:focus,select:focus,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none!important}
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5;--top:calc(10px + env(safe-area-inset-top))}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -200,6 +201,7 @@ body.nav .top,body.nav .sbar,body.nav .sres,body.nav .chips,body.nav .sheet,body
 button,input,select,textarea{font-family:inherit}</style>
 <script src="pb-guard.js" defer></script>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script>
+<script src="pb-backlink.js" defer></script>
 </head>
 <body>
 
@@ -829,12 +831,32 @@ function iconKeyJS(p) {
   return 'star';
 }
 
+/* ---------- 📱 फ़ोन का Back: पहले खुली चीज़ बंद (navigation → रास्ता → दुकान का कार्ड), फिर page ---------- */
+var bkHeld = false, bkSkip = false;
+function bkOpen() { return !!(nav || !$('sheet').hidden || (popup && popup.isOpen && popup.isOpen())); }
+function bkBack() {
+  bkHeld = false;
+  if (bkSkip) { bkSkip = false; return; }
+  if (nav) { if (window.speechSynthesis) speechSynthesis.cancel(); stopNav(); }
+  else if (!$('sheet').hidden) closeRoute();
+  else if (popup) popup.remove();
+  bkSync();
+}
+function bkSync() {
+  setTimeout(function () {
+    if (!window.PBBack) return;
+    var o = bkOpen();
+    if (o && !bkHeld) { bkHeld = true; PBBack.open(bkBack); }
+    else if (!o && bkHeld) { bkSkip = true; PBBack.close(); }
+  }, 60);
+}
 /* ---------- कार्ड ---------- */
 var cardDest = null, popup = null;
 function showCard(ll, html, dest) {
   cardDest = dest;
   if (popup) popup.remove();
   popup = new maplibregl.Popup({ offset: 24, maxWidth: '290px' }).setLngLat(ll).setHTML(html).addTo(map);
+  popup.on('close', bkSync); bkSync();
 }
 function poiCard(f, ll) {
   var p = f.properties, key = p.maki !== undefined ? iconKeyMB(p) : iconKeyJS(p);
@@ -1213,7 +1235,7 @@ function openRoute(dest) {
   clearVia();
   route = { to: dest.ll, name: dest.name || '', from: null, data: null, via: null };
   $('rTo').textContent = route.name;
-  $('sheet').hidden = false; document.body.classList.add('route'); sheetH();
+  $('sheet').hidden = false; document.body.classList.add('route'); sheetH(); bkSync();
   $('rSteps').hidden = true; $('rGo').disabled = true;
   $('rSum').textContent = T('finding');
   if (endMk) endMk.remove();
@@ -1286,7 +1308,7 @@ function closeRoute() {
   route = null; picking = false; $('sheet').hidden = true; document.body.classList.remove('route');
   map.getSource('route').setData({ type: 'FeatureCollection', features: [] });
   if (startMk) startMk.remove(); if (endMk) endMk.remove(); startMk = endMk = null; status('');
-  clearVia();
+  clearVia(); bkSync();
 }
 /* ---- दूसरा रास्ता: map पर कहीं भी छुएँ → रास्ता उस जगह से होकर, नया समय ---- */
 var viaMk = null;
@@ -1382,7 +1404,7 @@ $('rGo').onclick = function () {
   if (!route || !route.data) return;
   nav = { step: 1, said: {}, off: 0, last: 0, follow: true }; $('recenter').hidden = true;
   document.body.classList.add('nav'); $('navb').hidden = false; $('navf').hidden = false;
-  if (popup) popup.remove();
+  if (popup) popup.remove(); bkSync();
   ensureWatch();
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
   var first = route.steps[1] || route.steps[0];
@@ -1436,6 +1458,7 @@ function stopNav() {
   try { if (wake) wake.release(); } catch (e) {} wake = null;
   map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 }, pitch: tilted ? 55 : 0, duration: 600 });
   if (route && route.data) fitRoute();
+  bkSync();
 }
 $('nStop').onclick = function () { if (window.speechSynthesis) speechSynthesis.cancel(); stopNav(); };
 $('nVoice').onclick = function () { voice = !voice; this.textContent = voice ? '🔊' : '🔇'; status(T(voice ? 'voice_on' : 'voice_off')); if (!voice && window.speechSynthesis) speechSynthesis.cancel(); };

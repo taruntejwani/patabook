@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#1a73e8">
 <script src="site-config.js"></script>
 <script src="pb-auth.js"></script>
-<script src="i18n.js"></script>
+<script src="i18n.js"></script><script src="pb-back.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:var(--pbf,system-ui,sans-serif);background:#fff;color:#12141c;min-height:100vh}
@@ -51,6 +51,7 @@ h1{font-size:22px;color:#0b2f73;margin:6px 0 4px}
 [hidden]{display:none!important}
 </style>
 <style>/* 🖥️ PC (900px+): बड़ी screen पर चौड़ा पेज; मोबाइल वैसा ही */@media(min-width:900px){.wrap{max-width:1180px}#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}#list>*{margin:0!important}#list>:not(.job){grid-column:1/-1}}</style>
+<script src="pb-backlink.js" defer></script>
 </head>
 <body>
 <script>/* ₹499 Vacancy plan अभी बंद (site-config.js → jobs:false) — यह पेज न खुले */if(!(window.PB_SITE&&PB_SITE.jobs))location.replace("index.html");</script>
@@ -154,8 +155,10 @@ async function contact(id){
   }
 }
 $("list").onclick=e=>{const b=e.target.closest("[data-c]");if(b)contact(+b.dataset.c);};
-function openSheet(){$("sk").hidden=false;$("sk1").hidden=false;$("sk2").hidden=true;$("ske").textContent="";setTimeout(()=>$("sph").focus(),50);}
-$("skx").onclick=()=>{$("sk").hidden=true;pendingJob=null;};
+/* 📱 फ़ोन का Back sheet बंद करे */
+let skB=false;function skClose(){if(skB&&window.PBBack&&PBBack.isOpen())PBBack.close();else $("sk").hidden=true;}
+function openSheet(){if(window.PBBack&&!skB){skB=true;PBBack.open(()=>{skB=false;$("sk").hidden=true;});}$("sk").hidden=false;$("sk1").hidden=false;$("sk2").hidden=true;$("ske").textContent="";setTimeout(()=>$("sph").focus(),50);}
+$("skx").onclick=()=>{skClose();pendingJob=null;};
 function ph10(){let d=$("sph").value.replace(/\D/g,"");if(d.length===12&&d.startsWith("91"))d=d.slice(2);if(d.length===11&&d.startsWith("0"))d=d.slice(1);return /^[6-9]\d{9}$/.test(d)?d:"";}
 function otpErr(e){const c=e&&e.code;
   if(c==="resend_too_soon")return T((e.retry_after||60)+" सेकंड बाद दोबारा OTP मँगाएँ।","Request again after "+(e.retry_after||60)+" seconds.");
@@ -172,7 +175,7 @@ $("sks").onclick=async()=>{const p=ph10();if(!p){$("ske").textContent=T("सह�
   $("sks").disabled=false;};
 async function verify(){const c=$("skc").value.replace(/\D/g,"");if(c.length!==6)return;
   $("skv").disabled=true;$("ske").textContent="";
-  try{const j=await PBA.otp("/verify",{purpose:"seeker",phone:ph10(),code:c});setSeek(j.seeker_token);$("sk").hidden=true;if(pendingJob)contact(pendingJob);pendingJob=null;}
+  try{const j=await PBA.otp("/verify",{purpose:"seeker",phone:ph10(),code:c});setSeek(j.seeker_token);skClose();if(pendingJob)contact(pendingJob);pendingJob=null;}
   catch(e){$("ske").textContent=otpErr(e);$("skc").value="";}
   $("skv").disabled=false;}
 $("skv").onclick=verify;$("skc").addEventListener("input",()=>{const c=$("skc").value.replace(/\D/g,"");$("skc").value=c;if(c.length===6)verify();});

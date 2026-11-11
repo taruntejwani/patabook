@@ -163,10 +163,14 @@ form.short .fo{display:none}
  try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward"&&back()){location.replace("index.html");return;}if(n&&n.type!=="back_forward")sessionStorage.removeItem("pb-reg-done");}catch(_){}
  addEventListener("pageshow",function(e){if(e.persisted&&back())location.replace("index.html");});
  addEventListener("popstate",function(){if(back())location.replace("index.html");});})();</script>
+<script>/* ऊपर का "← वापस": फ़ॉर्म के बीच में हों तो पिछला कदम; PataBook के अंदर से आए हों तो पिछला पेज; वरना Home */
+function pbTopBack(){try{var st=history.state||{};if(typeof st.pbst==="number"&&st.pbst>0){history.back();return;}
+  var r=new URL(document.referrer);if(r.origin===location.origin&&history.length>1&&!/\/(login|admin-login|team-login)(\.html)?$/.test(r.pathname)&&r.pathname!==location.pathname){history.back();return;}}catch(e){}
+  location.href="index.html";}</script>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><button class="back" type="button" onclick="location.href='index.html'" data-i="back">← वापस</button><div class="brand"><img class="pbwm" src="pb-wordmark.webp" alt="PataBook" width="117" height="20" style="height:clamp(15px,5vw,20px);width:auto;display:block"></div><span id="pbLang" style="margin-inline-start:auto"></span></div>
+  <div class="top"><button class="back" type="button" onclick="pbTopBack()" data-i="back">← वापस</button><div class="brand"><img class="pbwm" src="pb-wordmark.webp" alt="PataBook" width="117" height="20" style="height:clamp(15px,5vw,20px);width:auto;display:block"></div><span id="pbLang" style="margin-inline-start:auto"></span></div>
   <div id="pw"><div class="prog"><i id="bar"></i></div><div class="count" id="cnt"></div></div>
 
   <div class="card gate" id="gate" hidden>
