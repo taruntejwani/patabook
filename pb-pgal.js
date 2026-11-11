@@ -28,6 +28,7 @@
     ".pgcx{position:absolute;top:8px;right:8px;z-index:2;border:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 1px 6px rgba(0,0,0,.18);font-size:18px;color:#1c2540;cursor:pointer}" +
     ".pgci{position:relative;display:block;width:100%;aspect-ratio:1/1;max-height:52vh;border:0;padding:12px;background:#fff;cursor:zoom-in;box-sizing:border-box}.pgci img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
     ".pgcz{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.9);border-radius:50%;width:30px;height:30px;line-height:30px;font-size:15px;box-shadow:0 1px 4px rgba(0,0,0,.15)}.pgcs{position:absolute;left:10px;top:10px;margin:0}" +
+    ".pgct{display:flex;justify-content:center;gap:8px;padding:0 12px 8px}.pgct button{width:54px;height:54px;padding:3px;border:2px solid #e4eaf5;border-radius:10px;background:#fff;cursor:pointer}.pgct button.on{border-color:#1a4fb0}.pgct img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
     ".pgcn{display:flex;align-items:center;justify-content:center;gap:14px;padding:2px 0 6px;font-size:13px;color:#5b6475;font-weight:600}.pgcn button{border:0;background:#eef2f9;width:34px;height:34px;border-radius:50%;font-size:20px;color:#1c2540;cursor:pointer}" +
     ".pgcb{padding:12px 16px 16px;border-top:1px solid #eef2f9}.pgcb h3{margin:0 0 4px;font-size:17px;line-height:1.3}.pgcp .pgpr{font-size:14px}.pgcp .pgpr b{font-size:20px}" +
     ".pgce{display:inline-block;margin-top:6px;background:#eef3fd;color:#1a4fb0;border-radius:8px;padding:2px 9px;font-size:13px;font-weight:700}.pgcc{margin:8px 0 0;font-weight:600;font-size:14px}.pgcd{margin:8px 0 0;font-size:14px;line-height:1.5;color:#3b4560;white-space:pre-line}" +
@@ -143,13 +144,15 @@
 
   /* 🪟 छोटी खिड़की: फ़ोटो + नाम + कीमत + साइज़ + विवरण (जो भरा हो वही); फ़ोटो दबाने पर पूरी स्क्रीन + zoom */
   function card(urls, i, caps) {
-    caps = caps || {}; var hi = hiL(), d = document.createElement("div"); d.className = "pgc";
+    caps = caps || {}; var hi = hiL(), d = document.createElement("div"), j = 0; d.className = "pgc";
+    function pics() { var u = urls[i], x = INFO[u] || {}; return [u].concat(Array.isArray(x.extras) ? x.extras.filter(function (v) { return typeof v === "string"; }).slice(0, 2) : []); }
     function body() {
-      var u = urls[i], x = INFO[u] || {}, t = caps[u] ? String(caps[u]) : (x.title || ""), pr = fcapPrice(x), n = urls.length;
+      var u = urls[i], x = INFO[u] || {}, t = caps[u] ? String(caps[u]) : (x.title || ""), pr = fcapPrice(x), n = urls.length, P = pics(); if (j >= P.length) j = 0;
       var cap = x.caption && x.caption !== t ? x.caption : "";
       return '<div class="pgcw" role="dialog" aria-modal="true" aria-label="' + esc(t || (hi ? "फ़ोटो" : "Photo")) + '">' +
         '<button type="button" class="pgcx" aria-label="' + (hi ? "बंद करें" : "Close") + '">✕</button>' +
-        '<button type="button" class="pgci" aria-label="' + (hi ? "बड़ा करके देखें" : "View full size") + '"><img src="' + esc(u) + '" alt="' + esc(t.slice(0, 80)) + '">' + (x.sold ? '<span class="pgso pgcs">' + (hi ? "अभी उपलब्ध नहीं" : "Sold out") + '</span>' : '') + '<span class="pgcz">🔍</span></button>' +
+        '<button type="button" class="pgci" aria-label="' + (hi ? "बड़ा करके देखें" : "View full size") + '"><img src="' + esc(P[j]) + '" alt="' + esc(t.slice(0, 80)) + '">' + (x.sold ? '<span class="pgso pgcs">' + (hi ? "अभी उपलब्ध नहीं" : "Sold out") + '</span>' : '') + '<span class="pgcz">🔍</span></button>' +
+        (P.length > 1 ? '<div class="pgct">' + P.map(function (v, q) { return '<button type="button" data-cj="' + q + '"' + (q === j ? ' class="on"' : '') + ' aria-label="' + (hi ? "फ़ोटो " : "Photo ") + (q + 1) + '"><img src="' + esc(v) + '" alt=""></button>'; }).join("") + '</div>' : '') +
         (n > 1 ? '<div class="pgcn"><button type="button" data-cn="-1" aria-label="' + (hi ? "पिछली" : "Previous") + '">‹</button><span>' + (i + 1) + ' / ' + n + '</span><button type="button" data-cn="1" aria-label="' + (hi ? "अगली" : "Next") + '">›</button></div>' : '') +
         ((t || pr || x.extra || cap || x.descr) ? '<div class="pgcb">' + (t ? '<h3>' + esc(t) + '</h3>' : '') + (pr ? '<div class="pgcp">' + pr + '</div>' : '') +
           (x.extra ? '<div class="pgce">' + esc(x.extra) + '</div>' : '') + (cap ? '<p class="pgcc">' + esc(cap) + '</p>' : '') + (x.descr ? '<p class="pgcd">' + esc(x.descr) + '</p>' : '') + '</div>' : '') +
@@ -158,12 +161,13 @@
     function draw() { d.innerHTML = body(); }
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; document.removeEventListener("keydown", key); }
     function closeBack() { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); }
-    function go(k) { i = (i + k + urls.length) % urls.length; draw(); }
+    function go(k) { i = (i + k + urls.length) % urls.length; j = 0; draw(); }
     function key(e) { if (!d.isConnected || document.querySelector(".pgv")) return; if (e.key === "Escape") closeBack(); else if (e.key === "ArrowRight") go(1); else if (e.key === "ArrowLeft") go(-1); }
     d.addEventListener("click", function (e) {
       if (e.target === d || e.target.closest(".pgcx")) { closeBack(); return; }
       var nb = e.target.closest("[data-cn]"); if (nb) { go(+nb.dataset.cn); return; }
-      if (e.target.closest(".pgci")) view(urls, i, caps);
+      var tb = e.target.closest("[data-cj]"); if (tb) { j = +tb.dataset.cj; draw(); return; }
+      if (e.target.closest(".pgci")) { var P = pics(); view(P, j, P.length > 1 ? {} : caps); }
     });
     var sx = null;
     d.addEventListener("touchstart", function (e) { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });

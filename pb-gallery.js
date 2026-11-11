@@ -479,6 +479,7 @@
           if (nid) {
             try { await rpc("pb_photo_set", { p_slug: s, p_id: nid, p_sec: x.sec || null, p_sec_name: x.sec_name || null, p_title: x.title || null, p_price: x.price == null ? null : x.price, p_disc: x.disc == null ? null : x.disc, p_caption: x.caption || null, p_descr: x.descr || null, p_extra: x.extra || null, p_price_from: !!x.price_from, p_sold: !!x.sold }); } catch (e1) {}
             if (x.mrp) { try { await rpc("pb_photo_set_mrp", { p_slug: s, p_id: nid, p_mrp: x.mrp }); } catch (e3) {} }
+            if (Array.isArray(x.extras) && x.extras.length) { try { await rpc("pb_photo_set_extras", { p_slug: s, p_id: nid, p_urls: x.extras }); } catch (e5) {} }
             if (x.hidden) { try { await rpc("pb_photo_hide", { p_slug: s, p_id: nid, p_hidden: true }); } catch (e2) {} }
           }
           await rpc("pb_photo_remove", { p_slug: s, p_id: x.id });
@@ -595,7 +596,7 @@
   (function () {
     if (document.getElementById("pbgCss")) return;
     var st = document.createElement("style"); st.id = "pbgCss";
-    st.textContent = ".gt img.pbft{object-fit:contain;background:#fff;transform-origin:50% 50%}.gt:has(img.pbft){background:#fff}" + ".pbgov{position:fixed;inset:0;z-index:320;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center}.pbgsh{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.pbgov{align-items:center}.pbgsh{border-radius:20px}}" +
+    st.textContent = ".pbgxp{display:flex;gap:8px;flex-wrap:wrap}.pbgxt{position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden;border:1px solid #dbe4f3;background:#fff}.pbgxt img{width:100%;height:100%;object-fit:contain;display:block}.pbgxt button{position:absolute;top:3px;right:3px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;line-height:22px;padding:0;cursor:pointer}.pbgxa{width:72px;height:72px;border:2px dashed #9db6e6;border-radius:12px;background:#f4f8ff;color:#1a4fb4;font-size:28px;cursor:pointer}" + ".gt img.pbft{object-fit:contain;background:#fff;transform-origin:50% 50%}.gt:has(img.pbft){background:#fff}" + ".pbgov{position:fixed;inset:0;z-index:320;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center}.pbgsh{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 22px}@media(min-width:700px){.pbgov{align-items:center}.pbgsh{border-radius:20px}}" +
       ".pbgsh h3{margin:0 0 4px;font-size:18px;color:#0b2f73}.pbgsh .hn{font-size:13px;color:#5b6475;margin:0 0 12px;line-height:1.4}" +
       ".pbgop{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid #e1e8f5;background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:8px;font:inherit;font-weight:700;font-size:15px;color:#0b2f73;cursor:pointer;text-align:left}.pbgop span{font-size:22px}" +
       ".pbgin{width:100%;padding:11px 12px;border:1.5px solid #dbe5f7;border-radius:11px;font:inherit;font-size:15px;margin:2px 0 8px;background:#fff}textarea.pbgin{min-height:78px;resize:vertical}" +
@@ -850,6 +851,7 @@
   function details(i, n) {
     var b = ROWS[i], s = b.slug, x = listOf(b, "photo")[n]; if (!x) return;
     var S = { sec: x.sec || "products", name: x.sec_name || "", title: x.title || "", price: x.price == null ? "" : String(x.price), disc: x.disc && !hasMrp(x) ? String(x.disc) : "", mrp: hasMrp(x) ? String(x.mrp) : "", cap: x.caption || "", desc: x.descr || "", extra: x.extra || "", from: !!x.price_from, sold: !!x.sold };
+    var EX = Array.isArray(x.extras) ? x.extras.slice(0, 2) : [], XMSG = "", XBUSY = false;   /* 📸 2 और फ़ोटो (प्लान की गिनती में नहीं) */
     var O = { price: S.price !== "", disc: !!S.disc, mrp: !!S.mrp, cap: !!S.cap, desc: !!S.desc, extra: !!S.extra }, err = "", h;
     function field(f, lab, inner) { return '<div class="pbgf"><label>' + lab + '<button type="button" data-rm="' + f + '" aria-label="' + esc(T("हटाएँ", "Remove")) + '">✕</button></label>' + inner + '</div>'; }
     function html() {
@@ -864,6 +866,10 @@
       if (O.cap) out += field("cap", "📝 " + T("कैप्शन", "Caption"), '<input class="pbgin" data-f="cap" maxlength="120" value="' + esc(S.cap) + '" placeholder="' + esc(T("एक छोटी लाइन", "One short line")) + '">');
       if (O.desc) out += field("desc", "📄 " + T("विवरण", "Description"), '<textarea class="pbgin" data-f="desc" maxlength="600" placeholder="' + esc(T("पूरी जानकारी लिखें", "Write the full details")) + '">' + esc(S.desc) + '</textarea>');
       if (O.extra && xl) out += field("extra", "ℹ️ " + T(xl[1], xl[0]), '<input class="pbgin" data-f="extra" maxlength="60" value="' + esc(S.extra) + '">');
+      out += '<div class="pbgf"><label>📸 ' + T("और फ़ोटो (2 तक)", "More photos (up to 2)") + '</label><div class="pbgxp">' +
+        EX.map(function (u, q) { return '<span class="pbgxt"><img src="' + esc(u) + '" alt=""><button type="button" data-xrm="' + q + '" aria-label="' + esc(T("यह फ़ोटो हटाएँ", "Remove this photo")) + '">✕</button></span>'; }).join("") +
+        (EX.length < 2 ? '<button type="button" class="pbgxa" data-xadd="1"' + (XBUSY ? ' disabled' : '') + ' aria-label="' + esc(T("और फ़ोटो जोड़ें", "Add more photos")) + '">' + (XBUSY ? '⏳' : '＋') + '</button>' : '') +
+        '</div><div class="hn" style="margin-top:2px">' + esc(XMSG || T("जैसे आगे-पीछे या अलग-अलग तरफ़ से। ये प्लान की फ़ोटो गिनती में नहीं जुड़तीं।", "E.g. front & back or other views. These don't count in your plan's photo limit.")) + '</div></div>';
       if (!O.price) chips.push(["price", "💰 " + T("कीमत", "Price")]);
       if (!O.mrp && !O.disc) chips.push(["mrp", "🏷️ MRP"]);
       if (!O.disc && !O.mrp) chips.push(["disc", "🏷️ " + T("डिस्काउंट", "Discount")]);
@@ -880,6 +886,11 @@
     function draw2() { h.sh.innerHTML = html(); }
     h = mkSheet(html(), async function (e, close) {
       var a = e.target.closest("[data-add]"), r = e.target.closest("[data-rm]"), sv = e.target.closest("[data-save]");
+      if (e.target.closest("[data-xadd]")) { if (!XBUSY) { read(); xin.click(); } return; }
+      var xr = e.target.closest("[data-xrm]");
+      if (xr) { if (XBUSY) return; read(); var ne = EX.slice(); ne.splice(+xr.dataset.xrm, 1); XBUSY = true; XMSG = T("हटा रहे हैं…", "Removing…"); draw2();
+        try { ME = await PBA.session(); await rpc("pb_photo_set_extras", { p_slug: s, p_id: x.id, p_urls: ne }); EX = ne; x.extras = ne; XMSG = ""; } catch (ex) { XMSG = T("हटा नहीं सका। दोबारा कोशिश करें।", "Could not remove. Try again."); }
+        XBUSY = false; draw2(); return; }
       if (a) { read(); O[a.dataset.add] = true; if (a.dataset.add === "disc" || a.dataset.add === "mrp") O.price = true; err = ""; draw2(); return; }
       if (r) { read(); var f = r.dataset.rm; O[f] = false; if (f === "price") { S.price = ""; O.disc = false; S.disc = ""; O.mrp = false; S.mrp = ""; S.from = false; } if (f === "disc") S.disc = ""; if (f === "mrp") S.mrp = ""; if (f === "cap") S.cap = ""; if (f === "desc") S.desc = ""; if (f === "extra") S.extra = ""; draw2(); return; }
       if (e.target.matches && e.target.matches("select[data-f='sec']")) return;
@@ -904,6 +915,38 @@
       } catch (er) { sv.disabled = false; err = T("सेव नहीं हो सका। दोबारा कोशिश करें।", "Could not save. Try again."); draw2(); }
     });
     h.sh.addEventListener("change", function (e) { if (e.target.matches("select[data-f='sec']")) { read(); err = ""; draw2(); } });
+    var xin = document.createElement("input"); xin.type = "file"; xin.accept = "image/*"; xin.hidden = true; h.ov.appendChild(xin);
+    xin.addEventListener("change", async function () {
+      var f0 = xin.files && xin.files[0]; xin.value = ""; if (!f0 || EX.length >= 2) return;
+      var f1 = /^image\//.test(f0.type) ? await cropEdit(f0, 1, 1, 0, true) : f0; if (f1 === null) return;
+      XBUSY = true; XMSG = "🔍 " + T("AI फ़ोटो जांच रहा है…", "AI is checking the photo…"); draw2();
+      try {
+        var pub = await upExtra(s, f1, function (m) { XMSG = m; draw2(); });
+        var ne = EX.concat([pub]).slice(0, 2);
+        await rpc("pb_photo_set_extras", { p_slug: s, p_id: x.id, p_urls: ne }); EX = ne; x.extras = ne; XMSG = "✅ " + T("फ़ोटो जुड़ गई।", "Photo added.");
+      } catch (ex) {
+        var m = String(ex && ex.message || "");
+        XMSG = m.indexOf("pb:") === 0 ? m.slice(3) : /function|schema cache|404/.test(m) ? T("यह सुविधा अभी चालू हो रही है (database अपडेट बाकी)।", "This is being switched on (database update pending).") : T("फ़ोटो नहीं जुड़ सकी। दोबारा कोशिश करें।", "Could not add the photo. Try again.");
+      }
+      XBUSY = false; if (h.ov.isConnected) draw2();
+    });
+  }
+  /* 📸 product की extra फ़ोटो: वही जाँच (AI, दूसरी दुकान की फ़ोटो) + वही साइज़, फिर upload — link लौटाता है */
+  async function upExtra(s, file, say) {
+    if (!/^image\//.test(file.type)) throw new Error("pb:" + T("सिर्फ़ फ़ोटो डालें।", "Please choose a photo."));
+    var ck = window.PBImg ? await PBImg.check(file, { slug: s, kind: "shop" }) : { ok: true };
+    if (!ck.ok) throw new Error("pb:" + ck.msg);
+    var hh = await dhash(file), dup = false;
+    if (hh) { try { dup = await rpc("pb_img_dup", { p_slug: s, p_hash: hh }); } catch (e2) { dup = false; } }
+    if (dup === true) throw new Error("pb:🚫 " + T("यह फ़ोटो किसी दूसरी दुकान की है। कृपया अपनी खुद की फ़ोटो डालें।", "This photo belongs to another shop. Please upload your own photo."));
+    say(T("अपलोड हो रहा है…", "Uploading…"));
+    ME = await PBA.session();
+    var blob = await resizeImage(await enhance(file), 1000), ext = blob.type === "image/webp" ? "webp" : "jpg";
+    var path = encodeURIComponent(s) + "/photo-" + Date.now() + "-x." + ext;
+    var r = await fetch(SB + "/storage/v1/object/shop-logos/" + path, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + ME.access_token, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
+    if (!r.ok) throw new Error("upload");
+    if (hh) { try { await rpc("pb_img_reg", { p_slug: s, p_hash: hh }); } catch (e3) {} }
+    return SB + "/storage/v1/object/public/shop-logos/" + path;
   }
 
 
