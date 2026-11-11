@@ -89,7 +89,7 @@
     var rat = x.rating ? "★ " + esc(x.rating) : (en ? "—" : "—");
     var ratSub = x.rating ? (x.review_count ? esc(x.review_count) + (en ? " reviews" : " समीक्षाएँ") : "") : (en ? "No rating yet" : "अभी कोई रेटिंग नहीं");
     if (x.fb) { var fbN = x.fb.filter(function (f) { return !f.read; }).length;
-      ratSub += '<button type="button" data-tdfb="' + esc(c.b.slug) + '" style="display:block;margin-top:6px;border:1px solid ' + (fbN ? '#f29900' : '#cfdcf5') + ';background:' + (fbN ? '#fff8e6' : '#f4f8ff') + ';color:#0b2f73;border-radius:10px;padding:5px 10px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;font-style:normal">💬 ' + (en ? "Customer feedback" : "ग्राहकों के सुझाव") + (fbN ? ' · <span style="color:#b45309">' + fbN + (en ? " new" : " नए") + '</span>' : ' (' + x.fb.length + ')') + ' ›</button>'; }
+      ratSub += '<button type="button" data-tdfb="' + esc(c.b.slug) + '" style="display:block;margin-top:6px;border:1px solid ' + (fbN ? '#f29900' : '#cfdcf5') + ';background:' + (fbN ? '#fff8e6' : '#f4f8ff') + ';color:#0b2f73;border-radius:10px;padding:5px 10px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;font-style:normal">💬 ' + (en ? "Customer feedback" : "ग्राहकों के सुझाव") + (fbN ? ' · <span style="color:#b45309">' + fbN + (en ? " new" : fbN === 1 ? " नया" : " नए") + '</span>' : ' (' + x.fb.length + ')') + ' ›</button>'; }
     if (x.rx) ratSub += '<span style="display:block;margin-top:3px;font-style:normal;font-weight:700;color:#0b2f73" title="' + (en ? "Only you can see these counts" : "ये गिनती सिर्फ़ आपको दिखती है") + '">👍 ' + (+x.rx.up || 0) + ' · 👎 ' + (+x.rx.down || 0) + ' · 💫 ' + (+x.rx.fav || 0) + '</span>';
     var ph = c.ph || {};
     function miniX(ic, e1, h1, e2, h2, on, onE, onH, offE, offH) {
@@ -201,8 +201,9 @@
     if (a) { var k = a.dataset.tdact, i = +a.dataset.tdi; ov._close(); setTimeout(function () { if (window.PBTejDash.act) PBTejDash.act(k, i, a); }, 60); }
   });
   /* 💬 सुझाव की सूची: सिर्फ़ दुकानदार; ग्राहक का नाम / नंबर नहीं */
-  function fbOpen(slug) {
+  function fbOpen(slug, list) {
     if (document.getElementById("tdFb")) return;
+    if (Array.isArray(list)) XS[slug] = Object.assign(XS[slug] || {}, { fb: list });
     var en = !(window.PB && PB.lang ? PB.lang() === "hi" : (function () { try { return localStorage.getItem("pb-lang") === "hi"; } catch (e) { return false; } })());
     var T = function (e2, h) { return en ? e2 : h; }, L = (XS[slug] && XS[slug].fb) || [];
     var ov = document.createElement("div"); ov.className = "tdov"; ov.id = "tdFb";
@@ -251,5 +252,5 @@
     var fx = '<details class="td-fx"' + fo + ' ontoggle="try{localStorage.setItem(\'pb-planfx\',this.open?\'1\':\'0\')}catch(e){}"><summary><span aria-hidden="true">📋</span>' + (en ? "Plan features" : "प्लान की सुविधाएँ") + '<small>' + n + (en ? " active" : " चालू") + '</small></summary>' + LAST.html + '</details>';
     return '<div class="td t-' + esc(LAST.c.tier) + '">' + fx + '<div style="height:14px"></div>' + (m ? m.outerHTML : "") + '</div>';
   }
-  window.PBTejDash = { SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function (slug) { return !!XS[slug]; } };
+  window.PBTejDash = { fb: fbOpen, SLUG: SLUG, html: html, planPage: planPage, load: load, ready: function (slug) { return !!XS[slug]; } };
 })();

@@ -13,7 +13,7 @@
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-helpmenu.js"></script>
-<script src="pb-tejdash.js?v=5"></script>
+<script src="pb-tejdash.js?v=7"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -992,7 +992,15 @@ function premBlock(b,i){
     '<textarea id="pmn'+i+'" maxlength="300" placeholder="'+(en?"Anything to tell us? (optional)":"कुछ बताना हो तो लिखें (ज़रूरी नहीं)")+'"></textarea><button type="button" class="go" data-preq="'+i+'">'+(en?"Send Premium request":"प्रीमियम के लिए अनुरोध भेजें")+'</button><div class="err" id="pqe'+i+'"></div>';
   return '<div class="pm"><div class="ph">💎 PataBook Premium</div>'+feats+tail+'</div>';
 }
-let ARNG={};
+let ARNG={},RXO={};
+/* 👍 👎 💫 + ✍️ सुझाव — रिपोर्ट में (सिर्फ़ दुकानदार; SQL 44/45) */
+async function loadRx(b){try{const [r,f]=await Promise.all([rpc("pb_owner_reactions",{p_slug:b.slug}).catch(()=>null),rpc("pb_owner_feedback",{p_slug:b.slug}).catch(()=>null)]);RXO[b.slug]={rx:r,fb:Array.isArray(f)?f:null};}catch(e){}}
+function rxPanel(b,en){const X=RXO[b.slug];if(!X||(!X.rx&&!X.fb))return "";const r=X.rx||{},fb=X.fb||[],nw=fb.filter(f=>!f.read).length,box=(ic,v,lab,c)=>'<div style="flex:1;min-width:90px;background:'+c+';border-radius:14px;padding:12px 10px;text-align:center"><div style="font-size:22px">'+ic+'</div><b style="display:block;font-size:22px;color:#0b2f73">'+(+v||0)+'</b><small style="color:#5b6475;font-weight:600">'+lab+'</small></div>';
+  return '<div class="anp"><h3>'+(en?"Customer opinion":"ग्राहकों की राय")+'</h3><p>'+(en?"Only you can see this — not shown to the public":"यह सिर्फ़ आपको दिखता है — दूसरों को नहीं")+'</p>'+
+   (X.rx?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">'+box("👍",r.up,en?"Likes":"पसंद","#eef4ff")+box("👎",r.down,en?"Dislikes":"नापसंद","#fff1f0")+box("💫",r.fav,en?"Favourites":"फ़ेवरेट","#fff8e6")+'</div>':'')+
+   (X.fb?'<div style="margin-top:6px">'+(fb.length?fb.slice(0,2).map(f=>'<div style="border:1px solid '+(f.read?'#e4eaf5':'#f5c26b')+';background:'+(f.read?'#fff':'#fffaf0')+';border-radius:12px;padding:8px 10px;margin-bottom:6px;font-size:14px;line-height:1.45;word-break:break-word">💬 '+esc(f.body)+'</div>').join(""):'<p class="note" style="margin:4px 0">'+(en?"No feedback yet.":"अभी कोई सुझाव नहीं आया।")+'</p>')+
+     '<button type="button" data-repfb="'+esc(b.slug)+'" style="margin-top:4px;border:1px solid '+(nw?'#f29900':'#cfdcf5')+';background:'+(nw?'#fff8e6':'#f4f8ff')+';color:#0b2f73;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:14px;cursor:pointer">💬 '+(en?"All customer feedback":"सारे ग्राहक सुझाव")+' ('+fb.length+')'+(nw?' · '+nw+(en?" new":nw===1?" नया":" नए"):'')+' ›</button></div>':'')+'</div>';}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-repfb]");if(!t||!window.PBTejDash||!PBTejDash.fb)return;const X=RXO[t.dataset.repfb];PBTejDash.fb(t.dataset.repfb,X&&X.fb||[]);});
 function reportHTML(b){
   const R=REPORT[b.slug],en=L()==="en";if(!R)return '<div class="rp"><small>…</small></div>';
   const maxD=R.days||7,n=Math.min(ARNG[b.slug]||7,maxD),end=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));const D=[];
@@ -1016,6 +1024,7 @@ function reportHTML(b){
   const rng='<div class="anrg">'+[7,30].filter(x=>x<=maxD||x===7).map(x=>'<button type="button" data-arng="'+x+'" data-i="'+ROWS.indexOf(b)+'" class="'+(x===n?"on":"")+'">'+x+(en?" Days":" दिन")+'</button>').join("")+'</div>';
   return '<div class="an"><div class="anp"><div class="anhd"><div><h3>'+(en?"Customer engagement":"ग्राहकों की गतिविधि")+'</h3><p>'+(en?"What customers did on your shop":"आपकी दुकान पर ग्राहकों की गतिविधियाँ")+'</p></div>'+rng+'</div><div class="ang">'+kp+'</div></div>'+
    '<div class="anp"><h3>'+(en?"Profile views trend":"प्रोफ़ाइल व्यू का रुझान")+'</h3><p>'+(en?"Views per day":"दिन के हिसाब से दुकान कितनी बार देखी गई")+'</p><div class="anch">'+svg+'</div><div class="antip" id="antip">'+(en?"Tap a dot to see the day":"किसी बिंदु को दबाकर दिन देखें")+'</div><div class="anbt"><span>'+(en?"Last "+n+" days":"पिछले "+n+" दिन")+'</span><span>'+(en?"All numbers are totals":"सभी आंकड़े कुल संख्या में")+'</span></div></div>'+
+   rxPanel(b,en)+
    '<div class="anp"><h3>'+(en?"Customer actions":"ग्राहकों की कार्रवाई")+'</h3><p>'+(en?"Which step customers took":"ग्राहकों ने कौन-सा कदम उठाया")+'</p><div class="anrl">'+act+'</div></div>'+
    '<div class="anp"><h3>'+(en?"Discovery to action":"खोज से कार्रवाई तक")+'</h3><p>'+(en?"From viewing to contact":"देखने से संपर्क तक का सफर")+'</p>'+fr(en?"Profile views":"प्रोफ़ाइल व्यू",T.view,"#315eea")+fr(en?"Contact clicks":"संपर्क क्लिक",ct,"#0e9f85")+fr(en?"Directions":"रास्ता",T.dir,"#e49a32")+'<div class="anbt" style="margin-top:12px"><span>'+(en?"Engagement actions ÷ profile views":"संपर्क कार्रवाई ÷ प्रोफ़ाइल व्यू")+'</span><b>'+eng.toFixed(1)+'%</b></div></div>'+
    '<button type="button" class="anex" data-aexp="'+ROWS.indexOf(b)+'">'+(en?"↓ Export (CSV)":"↓ एक्सपोर्ट (CSV)")+'</button>'+
@@ -1684,7 +1693,8 @@ async function start(){
 let SD=0;
 let DEEP=0,DEEPN=0;
 function setGo(cat){const d=cat===""?1:2;if(DEEP)DEEPN=d;try{const _sl=ROWS&&ROWS[SET.shop]?ROWS[SET.shop].slug:"",_u=location.pathname+location.search+(_sl&&/^[a-z]*$/.test(cat)?"#go="+(cat||"home")+"&s="+encodeURIComponent(_sl):"");(DEEP?history.replaceState:history.pushState).call(history,Object.assign({},history.state||{},{pbd:d,cat:cat,shop:SET.shop},DEEP?{}:{pbgal:0,gf:null,gs:null}),"",_u);}catch(e){}DEEP=0;SD=d;SET.cat=cat;draw();window.scrollTo(0,0);
-  if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}})();}
+  if(cat==="rep")(async()=>{try{for(const b of ROWS){if(PH(b,"report")&&!REPORT[b.slug]){REPORT[b.slug]=await rpc("pb_my_report",{p_slug:b.slug});if(SET.cat==="rep")draw();}}}catch(x){}
+    for(const b of ROWS){if(PH(b,"report")){await loadRx(b);if(SET.cat==="rep")draw();}}})();}
 /* दुकान का डिब्बा खोलना: उसी पन्ने पर उस दुकान की Settings (ऊपर 9 कदम, नीचे और सेटिंग) */
 let PENDCAT="";function openShop(i,cat,raw){if(PENDCAT&&!cat){cat=PENDCAT;PENDCAT="";}
   if(cat!=="cp"&&cat!=="acct"&&!raw&&ROWS&&profIncomplete(ROWS[i]))cat="cp";   /* "Settings & security" (खाता: पासवर्ड, लॉगआउट, दुकान/खाता हटाएँ) हमेशा खुले */   /* प्रोफ़ाइल पूरी होने तक सिर्फ़ Dashboard + यही पेज */   /* अधूरी प्रोफ़ाइल: Settings की जगह सीधे "प्रोफ़ाइल पूरी करें" */if(SET.shop===i&&(SET.cat||"")===(cat||"")&&SET.cat!==null)return;SET.shop=i;setGo(cat||"");}
