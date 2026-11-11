@@ -78,7 +78,7 @@
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* जाली का HTML: urls = फ़ोटो की list, caps = {url: नाम} */
-  var LIM = 6, cur = { urls: [], caps: {} }, INFO = {};
+  var LIM = 6, cur = { urls: [], caps: {} }, INFO = {}, REG = [];
   /* फ़ोटो के नीचे: नाम + कीमत (MRP कटी हुई + % छूट) + साइज़ — INFO = {url: {price, mrp, disc, extra, sold, price_from}} */
   function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
   function fcap(u, c) {
@@ -93,13 +93,13 @@
     return '<figcaption>' + (c ? '<span class="pgt">' + esc(c) + '</span>' : '') + pr + ex + so + '</figcaption>';
   }
   function grid(urls, caps) {
-    caps = caps || {}; cur = { urls: urls, caps: caps };
+    caps = caps || {}; cur = { urls: urls, caps: caps }; REG.push(cur); var rid = REG.length - 1;
     var h = '<div class="pgal">' + urls.slice(0, LIM).map(function (u, i) {
       var c = caps[u] ? String(caps[u]) : "";
       return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
         fcap(u, c) + '</figure>';
     }).join("") + '</div>';
-    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="1">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' (' + urls.length + ') ›</button>';
+    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="' + rid + '">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' (' + urls.length + ') ›</button>';
     return h;
   }
   /* पूरा Gallery पन्ना: 3 कॉलम की छोटी फ़ोटो; दबाने पर बड़ी + zoom; Back एक-एक परत बंद करता है */
@@ -120,7 +120,8 @@
   }
   document.addEventListener("click", function (e) {
     var m = e.target.closest && e.target.closest("[data-gm]");
-    if (m && cur.urls.length) page(cur.urls, cur.caps, !!(window.PB && PB.lang && PB.lang() === "hi"));
+    var rg = m && REG[+m.dataset.gm] || cur;
+    if (m && rg.urls.length) page(rg.urls, rg.caps, !!(window.PB && PB.lang && PB.lang() === "hi"));
   });
   /* सारी फ़ोटो पर नाम लिखा हो तो "Products & Services", वरना "Gallery" */
   function title(urls, caps, hi) {

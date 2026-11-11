@@ -30,7 +30,7 @@
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js" defer></script>
 <script src="pb-icons.js"></script>
-<script src="pb-back.js"></script><script src="pb-pgal.js?v=4"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
+<script src="pb-back.js"></script><script src="pb-pgal.js?v=5"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
 <script src="pb-hide.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-rate.js" defer></script>
@@ -576,6 +576,18 @@ const INI=()=>esc((String(B&&B.name||"").trim()[0]||"P").toUpperCase());
 /* plan (Silver / Gold / Platinum) में यह सुविधा ON है? — Admin → Plans */
 const PF=f=>!!(window.PBPlan&&PBPlan.has(slug,f)),TIER=()=>window.PBPlan?PBPlan.tier(slug):(PREM?"platinum":"free");
 const SECN=()=>SLAB==="product"?"Product":SLAB==="service"?"Service":L("उत्पाद और सेवा","Product & Service");
+/* 🛍️ Gallery को दुकानदार के हिस्सों (Products, Services ... और अपने नाम वाले जैसे "Tejwani Products") में बाँटकर दिखाना */
+let ITM=[],GSEC=[];
+const SEC_ORD=["products","services","properties","menu","gallery"],SEC_NM={products:["Products","प्रोडक्ट"],services:["Services","सर्विस"],properties:["Properties","प्रॉपर्टी"],menu:["Menu","मेन्यू"],gallery:["Gallery","गैलरी"]},SEC_IC={products:"🛍️",services:"🛠️",properties:"🏠",menu:"🍽️",gallery:"🖼️",custom:"✏️"};
+function galSecs(G){const by={};(ITM||[]).forEach(x=>{if(x&&x.url)by[x.url]=x;});const g=[],cn={};
+  SEC_ORD.forEach(k=>{const a=G.filter(u=>by[u]&&(by[u].sec||"products")===k);if(a.length)g.push({k,name:"",a});});
+  G.forEach(u=>{const x=by[u];if(x&&x.sec==="custom"){const n=String(x.sec_name||"").trim()||"—";(cn[n]=cn[n]||[]).push(u);}});
+  Object.keys(cn).forEach(n=>g.push({k:"custom",name:n,a:cn[n]}));
+  const seen=new Set();g.forEach(z=>z.a.forEach(u=>seen.add(u)));const rest=G.filter(u=>!seen.has(u));if(rest.length)g.push({k:"gallery",name:"",a:rest});
+  return g;}
+function galSecsHTML(G){const hi=!EN();GSEC=galSecs(G);
+  if(GSEC.length<2){GSEC=[{k:"",a:G}];return '<h2>🖼️ '+PBPGal.title(G,CAPS,hi)+' <small>('+G.length+')</small></h2><div data-grp="0">'+PBPGal.grid(G,CAPS)+'</div>';}
+  return GSEC.map((z,n)=>{const nm=z.k==="custom"?z.name:SEC_NM[z.k][hi?1:0];return '<div class="gsec"'+(n?' style="margin-top:18px"':'')+'><h2>'+SEC_IC[z.k]+' '+esc(nm)+' <small>('+z.a.length+')</small></h2><div data-grp="'+n+'">'+PBPGal.grid(z.a,CAPS)+'</div></div>';}).join("");}
 const GALP=()=>PF("photos")?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
 const PRODP=()=>[];   /* Products हटा दिए (सिर्फ़ Logo, Banner, Gallery, Front photo) */
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);
@@ -644,7 +656,7 @@ async function loadPrem(){
     fetch(SB+"/rest/v1/rpc/pb_shop_photos_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{GAL=j||[];}).catch(()=>{GAL=[];}),
     fetch(SB+"/rest/v1/rpc/pb_shop_label_get",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():"").then(j=>{SLAB=(j==="product"||j==="service")?j:"";}).catch(()=>{SLAB="";}),
     /* नाम + कीमत + MRP: pb_shop_items_public (वही जो Free page पर दिखता है) */
-    fetch(SB+"/rest/v1/rpc/pb_shop_items_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{CAPS={};const inf={};(Array.isArray(j)?j:[]).forEach(c=>{if(!c||!c.url)return;const t=c.title||c.caption;if(t)CAPS[c.url]=t;inf[c.url]={price:c.price,mrp:c.mrp,disc:c.disc,extra:c.extra,sold:c.sold,price_from:c.price_from};});if(window.PBPGal&&PBPGal.info)PBPGal.info(inf);}).catch(()=>{CAPS={};})
+    fetch(SB+"/rest/v1/rpc/pb_shop_items_public",{method:"POST",headers:H,body:JSON.stringify({p_slug:slug})}).then(r=>r.ok?r.json():[]).then(j=>{CAPS={};ITM=[];const inf={};(Array.isArray(j)?j:[]).forEach(c=>{if(!c||!c.url)return;const t=c.title||c.caption;if(t)CAPS[c.url]=t;ITM.push(c);inf[c.url]={price:c.price,mrp:c.mrp,disc:c.disc,extra:c.extra,sold:c.sold,price_from:c.price_from};});if(window.PBPGal&&PBPGal.info)PBPGal.info(inf);}).catch(()=>{CAPS={};})
   ]);
 }
 async function loadContact(){
@@ -698,7 +710,7 @@ function render(){drawSoc();
        (PF("card")?'<button type="button" id="shareQa" class="isCard k4" data-pbh="share"><span>'+PBI("card")+'</span>'+(TIER()==="platinum"?L("डिजिटल कार्ड","Digital Card"):L("कार्ड","Card"))+'</button>':'<button type="button" id="shareQa" class="k4" data-pbh="share"><span>'+PBI("share")+'</span>'+(TIER()==="platinum"?L("शेयर करें","Share Profile"):L("शेयर","Share"))+'</button>')+
      '</div>'+
      '<nav class="snav"><div class="in">'+navs.map(n=>'<a data-pbh="'+({prods:'prods',photos:'photos',vis:''}[n[0]]||'')+'" href="#'+n[0]+'">'+esc(n[1])+'</a>').join("")+'</div></nav>'+
-     (G.length?'<section class="blk" data-pbh="photos" id="photos"><h2>🖼️ '+PBPGal.title(G,CAPS,!EN())+' <small>('+G.length+')</small></h2>'+PBPGal.grid(G,CAPS)+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
+     (G.length?'<section class="blk" data-pbh="photos" id="photos">'+galSecsHTML(G)+'</section>':'<section class="blk pbe-empty" id="photos"><h2>🖼️ '+L("गैलरी","Gallery")+'</h2><button type="button" class="pbe-add" onclick="PBEdit.act(\'photos\')">➕ '+L("फ़ोटो जोड़ें","Add photos")+'</button></section>')+
      
      '<div class="vflag" data-pbh="vac" id="vacFlag" style="display:none"></div>'+
      (PF("card")?'<button type="button" class="shr crd" data-pbh="share" id="cardBtn"><span class="ic">🪪</span><span><b>'+L("विज़िटिंग कार्ड दोस्त को भेजें","Send visiting card to a friend")+'</b><small>'+L("दुकान का कार्ड QR के साथ, फ़ोटो में","Shop card with QR, as a photo")+'</small></span><span class="go">'+L("भेजें","Send")+'</span></button>':'')+
@@ -727,7 +739,7 @@ function render(){drawSoc();
   const pr=document.getElementById("prods");if(pr)pr.onclick=e=>{const v=e.target.closest("[data-pv]");if(v)return prodSheet(P[+v.dataset.pv]);const a=e.target.closest("[data-pa]");if(a)return prodAsk(P[+a.dataset.pa]);const sh=e.target.closest("[data-ps]");if(sh)prodShare(P[+sh.dataset.ps]);};
   /* दोस्त का भेजा link (#p<id>) खुले तो वही product सामने खुले */
   if(!window.__pOpened){const hm=location.hash.match(/^#p(\d+)$/);if(hm){const q=P.find(x=>String(x.id)===hm[1]);if(q){window.__pOpened=1;setTimeout(()=>{const s2=document.getElementById("prods");if(s2)s2.scrollIntoView({block:"start"});prodSheet(q);},300);}}}
-  const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(g)PBPGal.view(G,+g.dataset.g,CAPS);};
+  const ga=document.getElementById("photos");if(ga)ga.onclick=e=>{const g=e.target.closest("[data-g]");if(!g)return;const w=g.closest("[data-grp]"),z=w&&GSEC[+w.dataset.grp];PBPGal.view(z?z.a:G,+g.dataset.g,CAPS);};
   document.getElementById("shareQa").onclick=document.getElementById("shareQa").classList.contains("isCard")?()=>{const c=document.getElementById("cardBtn");if(c)c.click();}:()=>{window.open(waLink(b,window.PBHide&&PBHide.has("addr")?"":addr),"_blank","noopener");};
   document.getElementById("repBtn").onclick=openReport;
   wireDir(b,addr,dir);drawOwn();
