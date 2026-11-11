@@ -19,7 +19,10 @@
     ".pgp .hd{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:#fff;border-bottom:1px solid #e4eaf5;font:700 18px var(--pbf,system-ui,sans-serif);color:#1c2540}" +
     ".pgp .hd button{border:0;background:#eef2f9;width:40px;height:40px;border-radius:50%;font-size:22px;color:#1c2540;cursor:pointer}" +
     ".pgp .gr{padding:10px;max-width:1200px;margin:0 auto}" +
-    ".pgal figcaption,.pgp .gr figcaption{padding:6px 8px 8px;font-size:12.5px;font-weight:600;line-height:1.3;color:#1c2540;text-align:left;border-top:1px solid #eef2f9;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
+    ".pgal figcaption,.pgp .gr figcaption{padding:6px 8px 8px;font-size:12.5px;font-weight:600;line-height:1.3;color:#1c2540;text-align:left;border-top:1px solid #eef2f9;word-break:break-word}" +
+    ".pgal .pgt,.pgp .gr .pgt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
+    ".pgpr{display:block;margin-top:3px;font-size:12.5px;line-height:1.35}.pgpr b{font-size:14px;color:#0b2f73}.pgpr s{color:#8a93a6;font-weight:500;margin-left:2px}.pgpr em{font-style:normal;color:#1e8e3e;font-weight:700;margin-left:2px;white-space:nowrap}" +
+    ".pgex{display:block;margin-top:2px;font-size:11.5px;color:#5b6475;font-weight:600}.pgso{display:inline-block;margin-top:3px;background:#b42318;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px}" +
     ".pgv{position:fixed;inset:0;z-index:10001;background:rgba(5,10,20,.95);display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden;-webkit-user-select:none;user-select:none}" +
     ".pgv img{max-width:100vw;max-height:100vh;object-fit:contain;transform-origin:0 0;will-change:transform;pointer-events:none;-webkit-user-drag:none}" +
     ".pgv button{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:46px;height:46px;border-radius:50%;font-size:24px;cursor:pointer;z-index:2}" +
@@ -75,13 +78,26 @@
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* जाली का HTML: urls = फ़ोटो की list, caps = {url: नाम} */
-  var LIM = 6, cur = { urls: [], caps: {} };
+  var LIM = 6, cur = { urls: [], caps: {} }, INFO = {};
+  /* फ़ोटो के नीचे: नाम + कीमत (MRP कटी हुई + % छूट) + साइज़ — INFO = {url: {price, mrp, disc, extra, sold, price_from}} */
+  function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
+  function fcap(u, c) {
+    var x = INFO[u] || {}, hi = hiL(), pr = "";
+    if (x.price != null) {
+      var p = Number(x.price), m = x.mrp != null && Number(x.mrp) > p ? Number(x.mrp) : null, net = m ? p : x.disc ? Math.round(p * (100 - x.disc) / 100) : p;
+      var v = inr(net); if (x.price_from) v = hi ? v + " से शुरू" : "From " + v;
+      pr = '<span class="pgpr"><b>' + v + '</b>' + (m ? ' <s>' + inr(m) + '</s> <em>' + Math.round((m - p) * 100 / m) + '% ' + (hi ? "छूट" : "OFF") + '</em>' : x.disc ? ' <s>' + inr(p) + '</s> <em>' + x.disc + '% ' + (hi ? "छूट" : "OFF") + '</em>' : '') + '</span>';
+    }
+    var ex = x.extra ? '<span class="pgex">' + esc(x.extra) + '</span>' : "", so = x.sold ? '<span class="pgso">' + (hi ? "अभी उपलब्ध नहीं" : "Sold out") + '</span>' : "";
+    if (!c && !pr && !ex && !so) return "";
+    return '<figcaption>' + (c ? '<span class="pgt">' + esc(c) + '</span>' : '') + pr + ex + so + '</figcaption>';
+  }
   function grid(urls, caps) {
     caps = caps || {}; cur = { urls: urls, caps: caps };
     var h = '<div class="pgal">' + urls.slice(0, LIM).map(function (u, i) {
       var c = caps[u] ? String(caps[u]) : "";
       return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
-        (c ? '<figcaption>' + esc(c) + '</figcaption>' : '') + '</figure>';
+        fcap(u, c) + '</figure>';
     }).join("") + '</div>';
     if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="1">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' (' + urls.length + ') ›</button>';
     return h;
@@ -93,7 +109,7 @@
     d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="' + (hi ? "वापस" : "Back") + '">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + ' (' + urls.length + ')</span></div><div class="gr">' +
       urls.map(function (u, i) { var c = caps[u] ? String(caps[u]) : "";
         return '<figure><button type="button" data-pg="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
-          (c ? '<figcaption>' + esc(c) + '</figcaption>' : '') + '</figure>'; }).join("") + '</div>';
+          fcap(u, c) + '</figure>'; }).join("") + '</div>';
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; }
     d.addEventListener("click", function (e) {
       if (e.target.closest(".bk")) { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); return; }
@@ -109,7 +125,7 @@
   /* सारी फ़ोटो पर नाम लिखा हो तो "Products & Services", वरना "Gallery" */
   function title(urls, caps, hi) {
     var all = urls.length && urls.every(function (u) { return caps && caps[u]; });
-    return all ? "Products & Services" : (hi ? "गैलरी" : "Gallery");
+    return all ? (hi ? "प्रोडक्ट और सर्विस" : "Products & Services") : (hi ? "गैलरी" : "Gallery");
   }
 
   function view(urls, i, caps) {
@@ -195,5 +211,6 @@
     fitAll(root);
     root.addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (b && root.contains(b)) view(urls, +b.dataset.g, caps); });
   }
-  window.PBPGal = { grid: grid, title: title, view: view, bind: bind, page: page };
+  function info(m) { INFO = m || {}; }
+  window.PBPGal = { info: info, grid: grid, title: title, view: view, bind: bind, page: page };
 })();
