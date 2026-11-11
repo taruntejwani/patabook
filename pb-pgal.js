@@ -12,7 +12,8 @@
     "@media(min-width:700px){.pgal,.pgp .gr{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}}" +
     ".pgal figure,.pgp .gr figure{margin:0;min-width:0;background:#fff;border:1px solid #e4eaf5;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(20,40,90,.06);display:flex;flex-direction:column}" +
     ".pgal figure>button,.pgp .gr figure>button{display:block;width:100%;aspect-ratio:1/1;border:0;padding:6px;background:#fff;cursor:zoom-in}" +
-    ".pgal img,.pgp .gr img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
+    ".pgal figure>button,.pgp .gr figure>button{overflow:hidden}" +
+    ".pgal img,.pgp .gr img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;transform-origin:50% 50%}" +
     ".pgmore{display:block;width:100%;max-width:360px;margin:14px auto 2px;padding:13px;border:1.5px solid #1a4fb0;border-radius:14px;background:#fff;color:#1a4fb0;font:700 16px var(--pbf,system-ui,sans-serif);cursor:pointer}" +
     ".pgp{position:fixed;inset:0;z-index:10000;background:#f4f7fc;overflow-y:auto;-webkit-overflow-scrolling:touch}" +
     ".pgp .hd{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:#fff;border-bottom:1px solid #e4eaf5;font:700 18px var(--pbf,system-ui,sans-serif);color:#1c2540}" +
@@ -25,6 +26,50 @@
     ".pgv .x{top:max(14px,env(safe-area-inset-top));right:14px}.pgv .pv{left:10px;top:50%;margin-top:-23px}.pgv .nx{right:10px;top:50%;margin-top:-23px}" +
     ".pgv .cp{position:absolute;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));text-align:center;color:#fff;font:700 14px/1.4 var(--pbf,system-ui,sans-serif);padding:0 70px;text-shadow:0 1px 6px #000;z-index:2;pointer-events:none}";
   document.head.appendChild(css);
+
+  /* 📐 Auto-fit: सादे (सफ़ेद/एक रंग) background वाली फ़ोटो में product कितना भी छोटा हो,
+     बक्से में सब products एक जैसे बड़े दिखें — खाली किनारा देखकर फ़ोटो अपने आप बड़ी (सिर्फ़ दिखाने में, असली फ़ोटो नहीं बदलती) */
+  var FITQ = {};
+  function fitBox(u, done) {
+    if (FITQ[u] !== undefined) { if (FITQ[u] && FITQ[u].then) FITQ[u].then(done); else done(FITQ[u]); return; }
+    var cbs = [done]; FITQ[u] = { then: function (f) { cbs.push(f); } };
+    var fin = function (r) { FITQ[u] = r; cbs.forEach(function (f) { try { f(r); } catch (e) {} }); };
+    var im = new Image(); im.crossOrigin = "anonymous"; im.decoding = "async";
+    im.onerror = function () { fin(null); };
+    im.onload = function () {
+      try {
+        var w0 = im.naturalWidth, h0 = im.naturalHeight; if (!w0 || !h0) return fin(null);
+        var k = Math.min(1, 160 / Math.max(w0, h0)), w = Math.max(1, Math.round(w0 * k)), h = Math.max(1, Math.round(h0 * k));
+        var c = document.createElement("canvas"); c.width = w; c.height = h; var g = c.getContext("2d", { willReadFrequently: true });
+        g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+        var d = g.getImageData(0, 0, w, h).data;
+        var px = function (x, y) { var o = (y * w + x) * 4; return [d[o], d[o + 1], d[o + 2]]; };
+        var cs = [px(0, 0), px(w - 1, 0), px(0, h - 1), px(w - 1, h - 1), px(w >> 1, 0), px(w >> 1, h - 1), px(0, h >> 1), px(w - 1, h >> 1)];
+        var bg = [0, 1, 2].map(function (j) { return cs.reduce(function (a, q) { return a + q[j]; }, 0) / cs.length; });
+        var df = function (q) { return Math.abs(q[0] - bg[0]) + Math.abs(q[1] - bg[1]) + Math.abs(q[2] - bg[2]); };
+        if (cs.some(function (q) { return df(q) > 45; })) return fin(null);   /* किनारे एक रंग के नहीं → असली दृश्य, मत छेड़ो */
+        var rows = new Uint16Array(h), cols = new Uint16Array(w);
+        for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) { var o = (y * w + x) * 4; if (Math.abs(d[o] - bg[0]) + Math.abs(d[o + 1] - bg[1]) + Math.abs(d[o + 2] - bg[2]) > 40) { rows[y]++; cols[x]++; } }
+        var mr = Math.max(1, Math.round(w * .01)), mc = Math.max(1, Math.round(h * .01)), y0 = 0, y1 = h - 1, x0 = 0, x1 = w - 1;
+        while (y0 < h && rows[y0] < mr) y0++; while (y1 > y0 && rows[y1] < mr) y1--;
+        while (x0 < w && cols[x0] < mc) x0++; while (x1 > x0 && cols[x1] < mc) x1--;
+        if (y0 >= h || x0 >= w || x1 - x0 < 4 || y1 - y0 < 4) return fin(null);
+        /* contain में दिखने वाली फ़ोटो (बक्सा = 1 x 1) */
+        var s0 = Math.min(1 / w, 1 / h), ox = (1 - w * s0) / 2, oy = (1 - h * s0) / 2;
+        var bw = (x1 - x0 + 1) * s0, bh = (y1 - y0 + 1) * s0, z = Math.min(3, .92 / Math.max(bw, bh));
+        if (z < 1.06) return fin(null);
+        var cx = ox + (x0 + (x1 - x0 + 1) / 2) * s0, cy = oy + (y0 + (y1 - y0 + 1) / 2) * s0;
+        fin("translate(" + (-(cx - .5) * z * 100).toFixed(2) + "%," + (-(cy - .5) * z * 100).toFixed(2) + "%) scale(" + z.toFixed(3) + ")");
+      } catch (e) { fin(null); }
+    };
+    im.src = u;
+  }
+  function autoFit(img) {
+    if (!img || img.dataset.pgf) return; img.dataset.pgf = "1";
+    fitBox(img.currentSrc || img.src, function (t) { if (t) img.style.transform = t; });
+  }
+  document.addEventListener("load", function (e) { var t = e.target; if (t && t.tagName === "IMG" && t.closest && t.closest(".pgal,.pgp .gr")) autoFit(t); }, true);
+  function fitAll(root) { Array.prototype.forEach.call((root || document).querySelectorAll(".pgal img,.pgp .gr img"), function (i) { if (i.complete && i.naturalWidth) autoFit(i); }); }
 
   function hiL() { return !!(window.PB && PB.lang && PB.lang() === "hi"); }
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -54,7 +99,7 @@
       if (e.target.closest(".bk")) { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); return; }
       var b = e.target.closest("[data-pg]"); if (b) view(urls, +b.dataset.pg, caps);
     });
-    document.body.appendChild(d); document.documentElement.style.overflow = "hidden";
+    document.body.appendChild(d); document.documentElement.style.overflow = "hidden"; fitAll(d);
     if (window.PBBack) PBBack.open(close, d);
   }
   document.addEventListener("click", function (e) {
@@ -147,6 +192,7 @@
   /* जाली के बटन दबाने पर viewer: root के अंदर [data-g] */
   function bind(root, urls, caps) {
     if (!root) return;
+    fitAll(root);
     root.addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (b && root.contains(b)) view(urls, +b.dataset.g, caps); });
   }
   window.PBPGal = { grid: grid, title: title, view: view, bind: bind, page: page };
