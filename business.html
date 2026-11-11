@@ -353,7 +353,7 @@ async function loadPrem(){
   if(window.OWNOFF&&(!ITEMS||!ITEMS.length)){   /* मालिक अपनी Offline/Pending दुकान पर अपनी फ़ोटो देख सके (जनता को नहीं दिखती) */
     try{const ss=await PBA.session();if(ss){const rr=await fetch(SB+"/rest/v1/rpc/pb_my_photos",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+ss.access_token,"Content-Type":"application/json"},body:JSON.stringify({p_slug:B.slug})});
       const v=(rr.ok?await rr.json():[]||[]).filter(x=>x&&x.url&&!x.hidden);
-      if(v.length){ITEMS=v.map(x=>({url:x.url,sec:x.sec,sec_name:x.sec_name,title:x.title,price:x.price,disc:x.disc,caption:x.caption,descr:x.descr,extra:x.extra,price_from:x.price_from,sold:x.sold}));GAL=v.map(x=>x.url);}}}catch(e){}}
+      if(v.length){ITEMS=v.map(x=>({url:x.url,sec:x.sec,sec_name:x.sec_name,title:x.title,price:x.price,disc:x.disc,mrp:x.mrp,caption:x.caption,descr:x.descr,extra:x.extra,price_from:x.price_from,sold:x.sold}));GAL=v.map(x=>x.url);}}}catch(e){}}
   try{const rc=await fetch(SB+"/rest/v1/rpc/pb_photo_captions",{method:"POST",headers:H,body:JSON.stringify({p_slug:B.slug})});GCAP={};if(rc.ok)(await rc.json()||[]).forEach(c=>{if(c&&c.url&&c.caption)GCAP[c.url]=c.caption;});}catch(e){GCAP={};}
   render();bizDist();
 }
@@ -371,8 +371,8 @@ function galTabLabel(en){const g=secGroups();if(!g.length)return en?"Gallery":"�
   if(g.length===2&&ks[0]==="products"&&ks[1]==="services")return en?"Products & Services":"प्रोडक्ट और सर्विस";
   return en?"Gallery":"गैलरी";}
 function itemCard(x,gi,ii,en){
-  const inr=n=>"₹"+Number(n).toLocaleString("en-IN"),cap=x.title||x.caption||"",net=x.price!=null&&x.disc?Math.round(x.price*(100-x.disc)/100):x.price;
-  let pr="";if(x.price!=null){const v=inr(net);pr='<div class="itp"><b>'+(x.price_from?(en?"From "+v:v+" से शुरू"):v)+'</b>'+(x.disc?' <s>'+inr(x.price)+'</s> <em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':'')+'</div>';}
+  const inr=n=>"₹"+Number(n).toLocaleString("en-IN"),cap=x.title||x.caption||"",mr=x.price!=null&&x.mrp!=null&&Number(x.mrp)>Number(x.price),net=mr?x.price:x.price!=null&&x.disc?Math.round(x.price*(100-x.disc)/100):x.price;
+  let pr="";if(x.price!=null){const v=inr(net);pr='<div class="itp"><b>'+(x.price_from?(en?"From "+v:v+" से शुरू"):v)+'</b>'+(mr?' <s>'+inr(x.mrp)+'</s> <em>'+Math.round((x.mrp-x.price)*100/x.mrp)+'% '+(en?"OFF":"छूट")+'</em>':x.disc?' <s>'+inr(x.price)+'</s> <em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':'')+'</div>';}
   return '<div class="itc'+(x.sold?' sold':'')+'"><button type="button" class="itm" data-ig="'+gi+'.'+ii+'" aria-label="'+esc(cap||(en?"Photo":"फ़ोटो"))+'"><img src="'+esc(x.url)+'" alt="'+esc(String(cap).slice(0,80))+'" loading="lazy" decoding="async">'+(x.sold?'<span class="its">'+(en?"Sold out":"उपलब्ध नहीं")+'</span>':'')+'</button><div class="iti">'+
     (x.title?'<b class="ith">'+esc(x.title)+'</b>':'')+pr+(x.extra?'<span class="itx">'+esc(x.extra)+'</span>':'')+(x.caption&&x.title?'<div class="itcp">'+esc(x.caption)+'</div>':'')+(x.descr?'<div class="itd" data-itx="1">'+esc(x.descr)+'</div>':'')+'</div></div>';}
 function itemsHTML(en){

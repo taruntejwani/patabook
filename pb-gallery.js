@@ -478,6 +478,7 @@
           var nid = await rpc("pb_photo_add", { p_slug: s, p_url: pub });
           if (nid) {
             try { await rpc("pb_photo_set", { p_slug: s, p_id: nid, p_sec: x.sec || null, p_sec_name: x.sec_name || null, p_title: x.title || null, p_price: x.price == null ? null : x.price, p_disc: x.disc == null ? null : x.disc, p_caption: x.caption || null, p_descr: x.descr || null, p_extra: x.extra || null, p_price_from: !!x.price_from, p_sold: !!x.sold }); } catch (e1) {}
+            if (x.mrp) { try { await rpc("pb_photo_set_mrp", { p_slug: s, p_id: nid, p_mrp: x.mrp }); } catch (e3) {} }
             if (x.hidden) { try { await rpc("pb_photo_hide", { p_slug: s, p_id: nid, p_hidden: true }); } catch (e2) {} }
           }
           await rpc("pb_photo_remove", { p_slug: s, p_id: x.id });
@@ -544,10 +545,12 @@
   function secOf(x) { var k = (x && x.sec) || "products"; return SECS.filter(function (z) { return z[0] === k; })[0] || SECS[0]; }
   function secLabel(x) { var z = secOf(x); return z[0] === "custom" ? (x.sec_name || T("अपने काम का नाम रखें", "Set your work name")) : T(z[3], z[2]); }
   function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
-  function netPrice(x) { return x.price != null && x.disc ? Math.round(x.price * (100 - x.disc) / 100) : x.price; }
+  function hasMrp(x) { return x.price != null && x.mrp != null && Number(x.mrp) > Number(x.price); }
+  function offPct(mrp, pr) { return Math.round((mrp - pr) * 100 / mrp); }
+  function netPrice(x) { return hasMrp(x) ? x.price : x.price != null && x.disc ? Math.round(x.price * (100 - x.disc) / 100) : x.price; }
   function sumTxt(x) {   /* फ़ोटो के नीचे बटन पर छोटा सार */
     if (x.title) return x.title;
-    if (x.price != null) return inr(netPrice(x)) + (x.disc ? " · -" + x.disc + "%" : "");
+    if (x.price != null) return inr(netPrice(x)) + (hasMrp(x) ? " · -" + offPct(Number(x.mrp), Number(x.price)) + "%" : x.disc ? " · -" + x.disc + "%" : "");
     return x.caption || x.descr || "";
   }
   (function () {
@@ -807,8 +810,8 @@
   /* फ़ोटो के नीचे ＋: कीमत / डिस्काउंट / Caption / Description जो चाहें वही जोड़ें */
   function details(i, n) {
     var b = ROWS[i], s = b.slug, x = listOf(b, "photo")[n]; if (!x) return;
-    var S = { sec: x.sec || "products", name: x.sec_name || "", title: x.title || "", price: x.price == null ? "" : String(x.price), disc: x.disc ? String(x.disc) : "", cap: x.caption || "", desc: x.descr || "", extra: x.extra || "", from: !!x.price_from, sold: !!x.sold };
-    var O = { price: S.price !== "", disc: !!S.disc, cap: !!S.cap, desc: !!S.desc, extra: !!S.extra }, err = "", h;
+    var S = { sec: x.sec || "products", name: x.sec_name || "", title: x.title || "", price: x.price == null ? "" : String(x.price), disc: x.disc && !hasMrp(x) ? String(x.disc) : "", mrp: hasMrp(x) ? String(x.mrp) : "", cap: x.caption || "", desc: x.descr || "", extra: x.extra || "", from: !!x.price_from, sold: !!x.sold };
+    var O = { price: S.price !== "", disc: !!S.disc, mrp: !!S.mrp, cap: !!S.cap, desc: !!S.desc, extra: !!S.extra }, err = "", h;
     function field(f, lab, inner) { return '<div class="pbgf"><label>' + lab + '<button type="button" data-rm="' + f + '" aria-label="' + esc(T("हटाएँ", "Remove")) + '">✕</button></label>' + inner + '</div>'; }
     function html() {
       var xl = XTRA[S.sec], chips = [];
@@ -817,12 +820,14 @@
         (S.sec === "custom" ? '<input class="pbgin" data-f="name" maxlength="24" value="' + esc(S.name) + '" placeholder="' + esc(T("अपने हिस्से का नाम", "Your section name")) + '" aria-label="' + esc(T("हिस्से का नाम", "Section name")) + '">' : '') + '</div>' +
         '<div class="pbgf"><label>' + T("नाम", "Name") + '</label><input class="pbgin" data-f="title" maxlength="80" value="' + esc(S.title) + '" placeholder="' + esc(T("प्रोडक्ट / सर्विस का नाम", "Product / service name")) + '"></div>';
       if (O.price) out += field("price", "💰 " + T("कीमत (₹)", "Price (₹)"), '<input class="pbgin" data-f="price" inputmode="decimal" value="' + esc(S.price) + '" placeholder="499">');
+      if (O.mrp) { var pv2 = Number(String(S.price).replace(/,/g, "")), mv = Number(String(S.mrp).replace(/,/g, "")); out += field("mrp", "🏷️ " + T("MRP (₹) — छपी हुई कीमत", "MRP (₹) — printed price"), '<input class="pbgin" data-f="mrp" inputmode="decimal" value="' + esc(S.mrp) + '" placeholder="1499">' + (pv2 > 0 && mv > pv2 ? '<div class="hn" style="margin-top:-4px">' + T("ग्राहक को दिखेगा: ", "Customers see: ") + '<b>' + inr(pv2) + '</b> <s>' + inr(mv) + '</s> <b style="color:#1e8e3e">' + offPct(mv, pv2) + '% ' + T("छूट", "OFF") + '</b></div>' : '<div class="hn" style="margin-top:-4px">' + T("ऊपर \"कीमत\" में आपकी कीमत लिखें, यहाँ MRP।", "Type your price in \"Price\" above, and the MRP here.") + '</div>')); }
       if (O.disc) { var pv = Number(S.price), dv = Number(S.disc); out += field("disc", "🏷️ " + T("डिस्काउंट (%)", "Discount (%)"), '<input class="pbgin" data-f="disc" inputmode="numeric" maxlength="2" value="' + esc(S.disc) + '" placeholder="10">' + (pv > 0 && dv > 0 && dv < 96 ? '<div class="hn" style="margin-top:-4px">' + T("ग्राहक को दिखेगा: ", "Customers see: ") + '<b>' + inr(Math.round(pv * (100 - dv) / 100)) + '</b> <s>' + inr(pv) + '</s></div>' : '')); }
       if (O.cap) out += field("cap", "📝 " + T("कैप्शन", "Caption"), '<input class="pbgin" data-f="cap" maxlength="120" value="' + esc(S.cap) + '" placeholder="' + esc(T("एक छोटी लाइन", "One short line")) + '">');
       if (O.desc) out += field("desc", "📄 " + T("विवरण", "Description"), '<textarea class="pbgin" data-f="desc" maxlength="600" placeholder="' + esc(T("पूरी जानकारी लिखें", "Write the full details")) + '">' + esc(S.desc) + '</textarea>');
       if (O.extra && xl) out += field("extra", "ℹ️ " + T(xl[1], xl[0]), '<input class="pbgin" data-f="extra" maxlength="60" value="' + esc(S.extra) + '">');
       if (!O.price) chips.push(["price", "💰 " + T("कीमत", "Price")]);
-      if (!O.disc) chips.push(["disc", "🏷️ " + T("डिस्काउंट", "Discount")]);
+      if (!O.mrp && !O.disc) chips.push(["mrp", "🏷️ MRP"]);
+      if (!O.disc && !O.mrp) chips.push(["disc", "🏷️ " + T("डिस्काउंट", "Discount")]);
       if (!O.cap) chips.push(["cap", "📝 " + T("कैप्शन", "Caption")]);
       if (!O.desc) chips.push(["desc", "📄 " + T("विवरण", "Description")]);
       if (!O.extra && xl) chips.push(["extra", "ℹ️ " + T(xl[1], xl[0])]);
@@ -836,8 +841,8 @@
     function draw2() { h.sh.innerHTML = html(); }
     h = mkSheet(html(), async function (e, close) {
       var a = e.target.closest("[data-add]"), r = e.target.closest("[data-rm]"), sv = e.target.closest("[data-save]");
-      if (a) { read(); O[a.dataset.add] = true; if (a.dataset.add === "disc") O.price = true; err = ""; draw2(); return; }
-      if (r) { read(); var f = r.dataset.rm; O[f] = false; if (f === "price") { S.price = ""; O.disc = false; S.disc = ""; S.from = false; } if (f === "disc") S.disc = ""; if (f === "cap") S.cap = ""; if (f === "desc") S.desc = ""; if (f === "extra") S.extra = ""; draw2(); return; }
+      if (a) { read(); O[a.dataset.add] = true; if (a.dataset.add === "disc" || a.dataset.add === "mrp") O.price = true; err = ""; draw2(); return; }
+      if (r) { read(); var f = r.dataset.rm; O[f] = false; if (f === "price") { S.price = ""; O.disc = false; S.disc = ""; O.mrp = false; S.mrp = ""; S.from = false; } if (f === "disc") S.disc = ""; if (f === "mrp") S.mrp = ""; if (f === "cap") S.cap = ""; if (f === "desc") S.desc = ""; if (f === "extra") S.extra = ""; draw2(); return; }
       if (e.target.matches && e.target.matches("select[data-f='sec']")) return;
       if (!sv) return;
       read();
@@ -845,10 +850,17 @@
       var pr = O.price && S.price !== "" ? Number(String(S.price).replace(/,/g, "")) : null, dc = O.disc && pr != null && S.disc !== "" ? Math.round(Number(S.disc)) : null;
       if (pr != null && !(pr >= 0)) { err = T("कीमत सही लिखें।", "Enter a valid price."); draw2(); return; }
       if (dc != null && !(dc >= 1 && dc <= 95)) { err = T("डिस्काउंट 1 से 95 के बीच हो।", "Discount must be between 1 and 95."); draw2(); return; }
+      var mp = O.mrp && pr != null && String(S.mrp).trim() !== "" ? Number(String(S.mrp).replace(/,/g, "")) : null;
+      if (mp != null && !(mp > pr)) { err = T("MRP आपकी कीमत से ज़्यादा होनी चाहिए।", "MRP must be more than your price."); draw2(); return; }
+      if (mp != null) dc = null;
       sv.disabled = true;
       try {
         ME = await PBA.session();
         await rpc("pb_photo_set", { p_slug: s, p_id: x.id, p_sec: S.sec, p_sec_name: S.sec === "custom" ? String(S.name).trim() : null, p_title: S.title || null, p_price: pr, p_disc: dc, p_caption: O.cap ? S.cap || null : null, p_descr: O.desc ? S.desc || null : null, p_extra: O.extra ? S.extra || null : null, p_price_from: !!(O.price && S.from), p_sold: !!S.sold });
+        if (mp != null || x.mrp != null) {
+          try { await rpc("pb_photo_set_mrp", { p_slug: s, p_id: x.id, p_mrp: mp }); }
+          catch (em) { if (mp != null) { sv.disabled = false; err = T("MRP अभी सेव नहीं हो सका (database अपडेट बाकी)। बाकी विवरण सेव हो गया।", "MRP could not be saved yet (database update pending). Other details were saved."); draw2(); return; } }
+        }
         close(); await reload(b);
       } catch (er) { sv.disabled = false; err = T("सेव नहीं हो सका। दोबारा कोशिश करें।", "Could not save. Try again."); draw2(); }
     });
