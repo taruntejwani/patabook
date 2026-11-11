@@ -539,6 +539,8 @@ function render(){
   const rb=document.getElementById("repBtn");if(rb)rb.onclick=openReport;
   const cbtn=document.getElementById("cardBtn");
   /* कार्ड: नंबर तभी छपता है जब दुकानदार का "नंबर सबको दिखे" चालू हो और देखने वाला login हो (contactState ok); नहीं तो "नंबर PataBook पर देखें" */
+  /* ☰ "विज़िटिंग कार्ड भेजें" से आए (#card) → कार्ड अपने-आप खुले */
+  if(location.hash==="#card"&&!window.__cardAuto){window.__cardAuto=1;setTimeout(()=>{const c=document.getElementById("cardBtn");if(c){try{history.replaceState(history.state,"",location.pathname+location.search);}catch(e){}c.click();}},600);}
   if(cbtn)cbtn.onclick=()=>{if(!window.PBCard)return;
     PBCard.open({slug:b.slug,name:b.name,category:b.category,sub:sub,owner:line(b,"Owner"),address:b.address,city:city,phone:(contactState&&contactState.k==="ok"?String(contactState.phone||"").replace(/\D/g,"").slice(-10):""),wa:(contactState&&contactState.k==="ok"?(()=>{const w=line(b,"WhatsApp").replace(/\D/g,"");return /^\d{10}$/.test(w)?w:"";})():""),insta:socUrl("Instagram"),fb:socUrl("Facebook"),tier:(window.PBPlan&&PBPlan.paid(b.slug)?PBPlan.tier(b.slug):""),link:(LNK&&LNK.link)||"",code:b.business_code||"",visitor:true});};
 }
