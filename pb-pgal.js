@@ -23,6 +23,14 @@
     ".pgal .pgt,.pgp .gr .pgt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}" +
     ".pgpr{display:block;margin-top:3px;font-size:12.5px;line-height:1.35}.pgpr b{font-size:14px;color:#0b2f73}.pgpr s{color:#8a93a6;font-weight:500;margin-left:2px}.pgpr em{font-style:normal;color:#1e8e3e;font-weight:700;margin-left:2px;white-space:nowrap}" +
     ".pgex{display:block;margin-top:2px;font-size:11.5px;color:#5b6475;font-weight:600}.pgso{display:inline-block;margin-top:3px;background:#b42318;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px}" +
+    ".pgc{position:fixed;inset:0;z-index:10000;background:rgba(10,18,35,.55);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}" +
+    ".pgcw{position:relative;background:#fff;border-radius:18px;width:100%;max-width:400px;max-height:88vh;overflow-y:auto;box-shadow:0 18px 50px rgba(0,0,0,.35);font-family:var(--pbf,system-ui,sans-serif);color:#1c2540}" +
+    ".pgcx{position:absolute;top:8px;right:8px;z-index:2;border:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 1px 6px rgba(0,0,0,.18);font-size:18px;color:#1c2540;cursor:pointer}" +
+    ".pgci{position:relative;display:block;width:100%;aspect-ratio:1/1;max-height:52vh;border:0;padding:12px;background:#fff;cursor:zoom-in;box-sizing:border-box}.pgci img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}" +
+    ".pgcz{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.9);border-radius:50%;width:30px;height:30px;line-height:30px;font-size:15px;box-shadow:0 1px 4px rgba(0,0,0,.15)}.pgcs{position:absolute;left:10px;top:10px;margin:0}" +
+    ".pgcn{display:flex;align-items:center;justify-content:center;gap:14px;padding:2px 0 6px;font-size:13px;color:#5b6475;font-weight:600}.pgcn button{border:0;background:#eef2f9;width:34px;height:34px;border-radius:50%;font-size:20px;color:#1c2540;cursor:pointer}" +
+    ".pgcb{padding:12px 16px 16px;border-top:1px solid #eef2f9}.pgcb h3{margin:0 0 4px;font-size:17px;line-height:1.3}.pgcp .pgpr{font-size:14px}.pgcp .pgpr b{font-size:20px}" +
+    ".pgce{display:inline-block;margin-top:6px;background:#eef3fd;color:#1a4fb0;border-radius:8px;padding:2px 9px;font-size:13px;font-weight:700}.pgcc{margin:8px 0 0;font-weight:600;font-size:14px}.pgcd{margin:8px 0 0;font-size:14px;line-height:1.5;color:#3b4560;white-space:pre-line}" +
     ".pgv{position:fixed;inset:0;z-index:10001;background:rgba(5,10,20,.95);display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden;-webkit-user-select:none;user-select:none}" +
     ".pgv img{max-width:100vw;max-height:100vh;object-fit:contain;transform-origin:0 0;will-change:transform;pointer-events:none;-webkit-user-drag:none}" +
     ".pgv button{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:46px;height:46px;border-radius:50%;font-size:24px;cursor:pointer;z-index:2}" +
@@ -81,13 +89,17 @@
   var LIM = 6, cur = { urls: [], caps: {} }, INFO = {}, REG = [];
   /* फ़ोटो के नीचे: नाम + कीमत (MRP कटी हुई + % छूट) + साइज़ — INFO = {url: {price, mrp, disc, extra, sold, price_from}} */
   function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
-  function fcap(u, c) {
-    var x = INFO[u] || {}, hi = hiL(), pr = "";
+  function fcapPrice(x) {
+    var hi = hiL(), pr = "";
     if (x.price != null) {
       var p = Number(x.price), m = x.mrp != null && Number(x.mrp) > p ? Number(x.mrp) : null, net = m ? p : x.disc ? Math.round(p * (100 - x.disc) / 100) : p;
       var v = inr(net); if (x.price_from) v = hi ? v + " से शुरू" : "From " + v;
       pr = '<span class="pgpr"><b>' + v + '</b>' + (m ? ' <s>' + inr(m) + '</s> <em>' + Math.round((m - p) * 100 / m) + '% ' + (hi ? "छूट" : "OFF") + '</em>' : x.disc ? ' <s>' + inr(p) + '</s> <em>' + x.disc + '% ' + (hi ? "छूट" : "OFF") + '</em>' : '') + '</span>';
     }
+    return pr;
+  }
+  function fcap(u, c) {
+    var x = INFO[u] || {}, hi = hiL(), pr = fcapPrice(x);
     var ex = x.extra ? '<span class="pgex">' + esc(x.extra) + '</span>' : "", so = x.sold ? '<span class="pgso">' + (hi ? "अभी उपलब्ध नहीं" : "Sold out") + '</span>' : "";
     if (!c && !pr && !ex && !so) return "";
     return '<figcaption>' + (c ? '<span class="pgt">' + esc(c) + '</span>' : '') + pr + ex + so + '</figcaption>';
@@ -113,7 +125,7 @@
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; }
     d.addEventListener("click", function (e) {
       if (e.target.closest(".bk")) { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); return; }
-      var b = e.target.closest("[data-pg]"); if (b) view(urls, +b.dataset.pg, caps);
+      var b = e.target.closest("[data-pg]"); if (b) card(urls, +b.dataset.pg, caps);
     });
     document.body.appendChild(d); document.documentElement.style.overflow = "hidden"; fitAll(d);
     if (window.PBBack) PBBack.open(close, d);
@@ -129,6 +141,36 @@
     return all ? (hi ? "प्रोडक्ट और सर्विस" : "Products & Services") : (hi ? "गैलरी" : "Gallery");
   }
 
+  /* 🪟 छोटी खिड़की: फ़ोटो + नाम + कीमत + साइज़ + विवरण (जो भरा हो वही); फ़ोटो दबाने पर पूरी स्क्रीन + zoom */
+  function card(urls, i, caps) {
+    caps = caps || {}; var hi = hiL(), d = document.createElement("div"); d.className = "pgc";
+    function body() {
+      var u = urls[i], x = INFO[u] || {}, t = caps[u] ? String(caps[u]) : (x.title || ""), pr = fcapPrice(x), n = urls.length;
+      var cap = x.caption && x.caption !== t ? x.caption : "";
+      return '<div class="pgcw" role="dialog" aria-modal="true" aria-label="' + esc(t || (hi ? "फ़ोटो" : "Photo")) + '">' +
+        '<button type="button" class="pgcx" aria-label="' + (hi ? "बंद करें" : "Close") + '">✕</button>' +
+        '<button type="button" class="pgci" aria-label="' + (hi ? "बड़ा करके देखें" : "View full size") + '"><img src="' + esc(u) + '" alt="' + esc(t.slice(0, 80)) + '">' + (x.sold ? '<span class="pgso pgcs">' + (hi ? "अभी उपलब्ध नहीं" : "Sold out") + '</span>' : '') + '<span class="pgcz">🔍</span></button>' +
+        (n > 1 ? '<div class="pgcn"><button type="button" data-cn="-1" aria-label="' + (hi ? "पिछली" : "Previous") + '">‹</button><span>' + (i + 1) + ' / ' + n + '</span><button type="button" data-cn="1" aria-label="' + (hi ? "अगली" : "Next") + '">›</button></div>' : '') +
+        ((t || pr || x.extra || cap || x.descr) ? '<div class="pgcb">' + (t ? '<h3>' + esc(t) + '</h3>' : '') + (pr ? '<div class="pgcp">' + pr + '</div>' : '') +
+          (x.extra ? '<div class="pgce">' + esc(x.extra) + '</div>' : '') + (cap ? '<p class="pgcc">' + esc(cap) + '</p>' : '') + (x.descr ? '<p class="pgcd">' + esc(x.descr) + '</p>' : '') + '</div>' : '') +
+        '</div>';
+    }
+    function draw() { d.innerHTML = body(); }
+    function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; document.removeEventListener("keydown", key); }
+    function closeBack() { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); }
+    function go(k) { i = (i + k + urls.length) % urls.length; draw(); }
+    function key(e) { if (!d.isConnected || document.querySelector(".pgv")) return; if (e.key === "Escape") closeBack(); else if (e.key === "ArrowRight") go(1); else if (e.key === "ArrowLeft") go(-1); }
+    d.addEventListener("click", function (e) {
+      if (e.target === d || e.target.closest(".pgcx")) { closeBack(); return; }
+      var nb = e.target.closest("[data-cn]"); if (nb) { go(+nb.dataset.cn); return; }
+      if (e.target.closest(".pgci")) view(urls, i, caps);
+    });
+    var sx = null;
+    d.addEventListener("touchstart", function (e) { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+    d.addEventListener("touchend", function (e) { if (sx == null || urls.length < 2) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1); }, { passive: true });
+    draw(); document.body.appendChild(d); document.documentElement.style.overflow = "hidden"; document.addEventListener("keydown", key);
+    if (window.PBBack) PBBack.open(close, d);
+  }
   function view(urls, i, caps) {
     caps = caps || {};
     var d = document.createElement("div"); d.className = "pgv";
@@ -213,5 +255,5 @@
     root.addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (b && root.contains(b)) view(urls, +b.dataset.g, caps); });
   }
   function info(m) { INFO = m || {}; }
-  window.PBPGal = { info: info, grid: grid, title: title, view: view, bind: bind, page: page };
+  window.PBPGal = { info: info, card: card, grid: grid, title: title, view: view, bind: bind, page: page };
 })();
