@@ -30,7 +30,7 @@
 <script src="pb-card.js" defer></script>
 <script src="pb-imgcheck.js" defer></script>
 <script src="pb-icons.js"></script>
-<script src="pb-back.js"></script><script src="pb-pgal.js?v=6"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
+<script src="pb-back.js"></script><script src="pb-pgal.js?v=7"></script><script src="pb-backhome.js"></script><script src="pb-loader.js"></script>
 <script src="pb-hide.js"></script>
 <script src="pb-hiring.js"></script>
 <script src="pb-rate.js" defer></script>
@@ -586,8 +586,8 @@ function galSecs(G){const by={};(ITM||[]).forEach(x=>{if(x&&x.url)by[x.url]=x;})
   const seen=new Set();g.forEach(z=>z.a.forEach(u=>seen.add(u)));const rest=G.filter(u=>!seen.has(u));if(rest.length)g.push({k:"gallery",name:"",a:rest});
   return g;}
 function galSecsHTML(G){const hi=!EN();GSEC=galSecs(G);
-  if(GSEC.length<2){GSEC=[{k:"",a:G}];return '<h2>🖼️ '+PBPGal.title(G,CAPS,hi)+' <small>('+G.length+')</small></h2><div data-grp="0">'+PBPGal.grid(G,CAPS)+'</div>';}
-  return GSEC.map((z,n)=>{const nm=z.k==="custom"?z.name:SEC_NM[z.k][hi?1:0];return '<div class="gsec"'+(n?' style="margin-top:18px"':'')+'><h2>'+SEC_IC[z.k]+' '+esc(nm)+' <small>('+z.a.length+')</small></h2><div data-grp="'+n+'">'+PBPGal.grid(z.a,CAPS)+'</div></div>';}).join("");}
+  if(GSEC.length<2){GSEC=[{k:"",a:G}];return '<h2>🖼️ '+PBPGal.title(G,CAPS,hi)+'</h2><div data-grp="0">'+PBPGal.grid(G,CAPS)+'</div>';}
+  return GSEC.map((z,n)=>{const nm=z.k==="custom"?z.name:SEC_NM[z.k][hi?1:0];return '<div class="gsec"'+(n?' style="margin-top:18px"':'')+'><h2>'+SEC_IC[z.k]+' '+esc(nm)+'</h2><div data-grp="'+n+'">'+PBPGal.grid(z.a,CAPS)+'</div></div>';}).join("");}
 const GALP=()=>PF("photos")?(GAL||[]).filter(u=>IMG_RX.test(u)):[];
 const PRODP=()=>[];   /* Products हटा दिए (सिर्फ़ Logo, Banner, Gallery, Front photo) */
 const shopUrl=()=>"https://patabook.in/shop?slug="+encodeURIComponent(slug);

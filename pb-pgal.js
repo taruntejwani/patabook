@@ -111,14 +111,14 @@
       return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
         fcap(u, c) + '</figure>';
     }).join("") + '</div>';
-    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="' + rid + '">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' (' + urls.length + ') ›</button>';
+    if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="' + rid + '">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' ›</button>';
     return h;
   }
   /* पूरा Gallery पन्ना: 3 कॉलम की छोटी फ़ोटो; दबाने पर बड़ी + zoom; Back एक-एक परत बंद करता है */
   function page(urls, caps, hi) {
     caps = caps || {};
     var d = document.createElement("div"); d.className = "pgp";
-    d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="' + (hi ? "वापस" : "Back") + '">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + ' (' + urls.length + ')</span></div><div class="gr">' +
+    d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="' + (hi ? "वापस" : "Back") + '">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + '</span></div><div class="gr">' +
       urls.map(function (u, i) { var c = caps[u] ? String(caps[u]) : "";
         return '<figure><button type="button" data-pg="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
           fcap(u, c) + '</figure>'; }).join("") + '</div>';
