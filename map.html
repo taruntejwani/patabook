@@ -142,6 +142,15 @@ body.nav .basic,body.route .basic{display:none}
 body.dark:not(.satv) #map canvas{filter:invert(.92) hue-rotate(180deg) brightness(.92) contrast(.92)}
 body.dark{background:#0d1117}
 body.route .fab #dark,body.route .fab #tilt{display:none}
+.navx{position:absolute;z-index:10;left:10px;right:70px;bottom:calc(100px + env(safe-area-inset-bottom));display:flex;gap:7px;overflow-x:auto;padding:2px}
+.navx button{flex:none;border:0;border-radius:999px;background:#fff;box-shadow:0 4px 14px #102a4330;padding:9px 12px;font-size:13px;font-weight:700;color:#0b2f73;white-space:nowrap}
+.navx button.on{background:#fff4e6;color:#a35200}
+.navp{position:absolute;z-index:12;left:0;right:0;bottom:0;max-height:55vh;display:flex;flex-direction:column;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -10px 34px #102a4340;padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.np-h{display:flex;align-items:center;gap:10px}.np-h b{flex:1;font-size:16px}.np-h button{border:0;background:#f2f4f7;border-radius:10px;width:34px;height:34px;font-size:16px}
+.navp input{margin-top:8px;border:1px solid #d0d5dd;border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit;width:100%}
+.navp .alist{overflow:auto;min-height:0}
+body.navp-on .navx,body.navp-on .navf{display:none!important}
+@media (min-width:760px){.navx{width:440px;left:18px;right:auto}.navp{width:440px;left:18px;right:auto}}
 .steps{list-style:none;margin:10px 0 0;padding:0;overflow:auto;border-top:1px solid #f1f3f6}
 .steps li{display:flex;gap:11px;align-items:center;padding:9px 2px;border-bottom:1px solid #f1f3f6;font-size:14px}
 .steps .a{width:30px;height:30px;flex:none;border-radius:9px;background:#f2f4f7;display:grid;place-items:center;font-size:18px;font-weight:700;color:var(--navy)}
@@ -284,6 +293,8 @@ button,input,select,textarea{font-family:inherit}</style>
   <div class="ntx"><b id="nDist"></b><span id="nTxt"></span></div>
   <div class="nbtns"><button type="button" id="nVoice" aria-label="Voice">🔊</button><button type="button" class="lgb" data-lg aria-label="Language"><span class="lgt">हि</span>▾</button></div>
 </div>
+<div class="navx" id="navx" hidden></div>
+<section class="navp" id="navp" hidden><div class="np-h"><b id="npT"></b><button type="button" id="npX" aria-label="Close">✕</button></div><input id="npQ" type="search" enterkeyhint="search" autocomplete="off" hidden><div class="alist" id="npL"></div></section>
 <div class="navf" id="navf" hidden>
   <div><b id="nRem"></b><small id="nEta"></small></div>
   <button type="button" class="eta" id="nShare">📤 <span data-t="share_eta">पहुँचने का समय भेजें</span></button><button type="button" id="nStop" data-t="stop">रोकें</button>
@@ -323,7 +334,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function
    भाषा — पूरा पेज एक ही भाषा में (English चुनें तो English, बाकी हिंदी)
    ========================================================= */
 var TX = {
-  hi: { al_title: 'रास्ते में', al_fuel: 'पेट्रोल पंप', al_hotel: 'होटल', al_food: 'खाना', al_garage: 'गैराज', al_tyre: 'पंचर / टायर', al_med: 'मेडिकल', al_hosp: 'अस्पताल', al_atm: 'ATM', al_ev: 'EV चार्जिंग', al_loading: 'रास्ते के पास ढूँढ रहे हैं…', al_none: 'इस रास्ते के पास कुछ नहीं मिला।', al_fail: 'अभी नहीं ढूँढ पाए। थोड़ी देर बाद फिर दबाएँ।', al_ahead: '{k} आगे', al_off: 'रास्ते से {d}', al_pb: 'PataBook दुकानें', al_other: 'दूसरी जगहें (OpenStreetMap)', al_view: 'देखें', st_add: '➕ यहाँ रुकें', st_t: 'रुकना', st_max: 'ज़्यादा से ज़्यादा 5 जगह रुक सकते हैं', st_reached: 'रुकने की जगह आ गई', st_added: 'रास्ते में जोड़ दिया', alt_n: 'रास्ता {n}', alt_fast: 'सबसे तेज़', alt_short: 'सबसे छोटा', share: 'शेयर', share_eta: 'पहुँचने का समय भेजें', share_route: '{a} से {b}: {d} · लगभग {t}। PataBook नक्शे पर देखें:', eta_txt: 'मैं लगभग {t} तक {n} पहुँच जाऊँगा। (PataBook नक्शा)', recent_r: 'पिछले रास्ते', dark: 'रात का नक्शा', my_loc: 'मेरी जगह', copied: 'कॉपी हो गया', loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
+  hi: { al_title: 'रास्ते में', nv_srch: 'खोजें', nv_ahead: 'आगे रास्ते में', nv_ph: 'दुकान या जगह का नाम लिखें', nv_none: 'आगे रास्ते में कुछ नहीं मिला।', al_fuel: 'पेट्रोल पंप', al_hotel: 'होटल', al_food: 'खाना', al_garage: 'गैराज', al_tyre: 'पंचर / टायर', al_med: 'मेडिकल', al_hosp: 'अस्पताल', al_atm: 'ATM', al_ev: 'EV चार्जिंग', al_loading: 'रास्ते के पास ढूँढ रहे हैं…', al_none: 'इस रास्ते के पास कुछ नहीं मिला।', al_fail: 'अभी नहीं ढूँढ पाए। थोड़ी देर बाद फिर दबाएँ।', al_ahead: '{k} आगे', al_off: 'रास्ते से {d}', al_pb: 'PataBook दुकानें', al_other: 'दूसरी जगहें (OpenStreetMap)', al_view: 'देखें', st_add: '➕ यहाँ रुकें', st_t: 'रुकना', st_max: 'ज़्यादा से ज़्यादा 5 जगह रुक सकते हैं', st_reached: 'रुकने की जगह आ गई', st_added: 'रास्ते में जोड़ दिया', alt_n: 'रास्ता {n}', alt_fast: 'सबसे तेज़', alt_short: 'सबसे छोटा', share: 'शेयर', share_eta: 'पहुँचने का समय भेजें', share_route: '{a} से {b}: {d} · लगभग {t}। PataBook नक्शे पर देखें:', eta_txt: 'मैं लगभग {t} तक {n} पहुँच जाऊँगा। (PataBook नक्शा)', recent_r: 'पिछले रास्ते', dark: 'रात का नक्शा', my_loc: 'मेरी जगह', copied: 'कॉपी हो गया', loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
     start_nav: 'चलना शुरू करें', steps: 'स्टेप्स', gmaps: 'Google Maps में भी खोलें', stop: 'रोकें', all: 'सभी', health: 'अस्पताल', worship: 'मंदिर',
     food: 'खाना', hotel: 'होटल', fuel: 'पेट्रोल', bank: 'बैंक', school: 'स्कूल', shop: 'दुकान', travel: 'बस/रेल',
     nolib: 'मैप लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।', pb_n: '{n} PataBook दुकानें मैप पर', pb_fail: 'PataBook दुकानें लोड नहीं हुईं',
@@ -333,7 +344,7 @@ var TX = {
     tap_start: 'लोकेशन नहीं मिली — नक्शे पर अपनी शुरुआत की जगह टैप करें', addr_fail: 'यह पता नक्शे पर नहीं मिला', est: 'ट्रैफ़िक के बिना अंदाज़ा',
     arrived: 'आप पहुँच गए', reroute: 'नया रास्ता बना रहे हैं', pb: 'PataBook दुकानें', places: 'जगहें', none: 'कुछ नहीं मिला',
     rem: 'बाकी', m: 'मी.', km: 'किमी', min: 'मिनट', hr: 'घंटा', in_m: '{d} बाद', now: 'अब', voice_on: 'आवाज़ चालू', voice_off: 'आवाज़ बंद', shop_t: 'दुकान', nokey: 'सैटेलाइट फ़ोटो के लिए MapTiler चाबी अभी नहीं डाली गई है' },
-  en: { al_title: 'On the way', al_fuel: 'Petrol pump', al_hotel: 'Hotel', al_food: 'Food', al_garage: 'Garage', al_tyre: 'Puncture / Tyre', al_med: 'Medical', al_hosp: 'Hospital', al_atm: 'ATM', al_ev: 'EV charging', al_loading: 'Searching along the route…', al_none: 'Nothing found near this route.', al_fail: 'Could not search right now. Tap again in a little while.', al_ahead: '{k} ahead', al_off: '{d} off route', al_pb: 'PataBook shops', al_other: 'Other places (OpenStreetMap)', al_view: 'View', st_add: '➕ Add stop', st_t: 'Stop', st_max: 'You can add up to 5 stops', st_reached: 'You have reached your stop', st_added: 'Added to the route', alt_n: 'Route {n}', alt_fast: 'Fastest', alt_short: 'Shortest', share: 'Share', share_eta: 'Send arrival time', share_route: '{a} to {b}: {d} · about {t}. See it on PataBook map:', eta_txt: 'I will reach {n} around {t}. (PataBook map)', recent_r: 'Recent routes', dark: 'Night map', my_loc: 'My location', copied: 'Copied', loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
+  en: { al_title: 'On the way', nv_srch: 'Search', nv_ahead: 'Ahead on your route', nv_ph: 'Type a shop or place name', nv_none: 'Nothing found ahead on your route.', al_fuel: 'Petrol pump', al_hotel: 'Hotel', al_food: 'Food', al_garage: 'Garage', al_tyre: 'Puncture / Tyre', al_med: 'Medical', al_hosp: 'Hospital', al_atm: 'ATM', al_ev: 'EV charging', al_loading: 'Searching along the route…', al_none: 'Nothing found near this route.', al_fail: 'Could not search right now. Tap again in a little while.', al_ahead: '{k} ahead', al_off: '{d} off route', al_pb: 'PataBook shops', al_other: 'Other places (OpenStreetMap)', al_view: 'View', st_add: '➕ Add stop', st_t: 'Stop', st_max: 'You can add up to 5 stops', st_reached: 'You have reached your stop', st_added: 'Added to the route', alt_n: 'Route {n}', alt_fast: 'Fastest', alt_short: 'Shortest', share: 'Share', share_eta: 'Send arrival time', share_route: '{a} to {b}: {d} · about {t}. See it on PataBook map:', eta_txt: 'I will reach {n} around {t}. (PataBook map)', recent_r: 'Recent routes', dark: 'Night map', my_loc: 'My location', copied: 'Copied', loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
     start_nav: 'Start', steps: 'Steps', gmaps: 'Also open in Google Maps', stop: 'Stop', all: 'All', health: 'Hospital', worship: 'Temple',
     food: 'Food', hotel: 'Hotel', fuel: 'Petrol', bank: 'Bank', school: 'School', shop: 'Shops', travel: 'Bus/Rail',
     nolib: 'Map library did not load. Check internet.', pb_n: '{n} PataBook shops on map', pb_fail: 'Could not load PataBook shops',
@@ -857,11 +868,12 @@ function iconKeyJS(p) {
 
 /* ---------- 📱 फ़ोन का Back: पहले खुली चीज़ बंद (navigation → रास्ता → दुकान का कार्ड), फिर page ---------- */
 var bkHeld = false, bkSkip = false;
-function bkOpen() { return !!(nav || !$('sheet').hidden || (popup && popup.isOpen && popup.isOpen())); }
+function bkOpen() { return !!(!$('navp').hidden || nav || !$('sheet').hidden || (popup && popup.isOpen && popup.isOpen())); }
 function bkBack() {
   bkHeld = false;
   if (bkSkip) { bkSkip = false; return; }
-  if (nav) { if (window.speechSynthesis) speechSynthesis.cancel(); stopNav(); }
+  if (!$('navp').hidden) closeNavP();
+  else if (nav) { if (window.speechSynthesis) speechSynthesis.cancel(); stopNav(); }
   else if (!$('sheet').hidden) closeRoute();
   else if (popup) popup.remove();
   bkSync();
@@ -1431,9 +1443,9 @@ function overpass(q) {
 function alongSearch(k) {
   if (!route || !route.data) return;
   var A = ALONG.filter(function (a) { return a.k === k; })[0]; if (!A) return;
-  alongK = k; fillSheet();
+  alongK = k; if (nav) drawNavX(); else fillSheet();
   var my = ++alongSeq, line = route.data.geometry.coordinates, R = rMode === 'walk' ? 300 : 1500;
-  var box = $('rAlong'); box.hidden = false; box.innerHTML = '<div class="msg">' + esc(T('al_loading')) + '</div>'; sheetH();
+  var box = nav ? $('npL') : $('rAlong'); box.hidden = false; box.innerHTML = '<div class="msg">' + esc(T('al_loading')) + '</div>'; sheetH();
   var cum = cumDist(line), total = cum[cum.length - 1];
   var aheadKm = function (p) { return cum[nearIdx(p, line)] / 1000; };
   /* PataBook दुकानें: रास्ते के 2 गुना दायरे तक */
@@ -1461,11 +1473,16 @@ function alongSearch(k) {
   });
 }
 function showAlong(pb, osm, failed) {
-  var box = $('rAlong'), byKm = function (a, b) { return a.km - b.km; };
+  var box = nav ? $('npL') : $('rAlong'), byKm = function (a, b) { return a.km - b.km; };
+  if (nav && myPos && route && route.data) {   /* चलते समय: सिर्फ़ आगे वाली जगहें, आगे की दूरी अभी की जगह से */
+    var ln = route.data.geometry.coordinates, here = cumDist(ln)[nearIdx(myPos, ln)] / 1000;
+    var ah = function (x) { return x.km >= here - 0.2; }, rel = function (x) { x.km = Math.max(0, x.km - here); return x; };
+    pb = pb.filter(ah).map(rel); osm = osm.filter(ah).map(rel);
+  }
   pb.sort(byKm); osm.sort(byKm); osm = osm.slice(0, 80);
   ALR = pb.concat(osm);
   map.getSource('along').setData({ type: 'FeatureCollection', features: ALR.map(function (x, i) { return { type: 'Feature', geometry: { type: 'Point', coordinates: x.ll }, properties: { i: i, pb: !!x.pb } }; }) });
-  if (!ALR.length) { box.innerHTML = '<div class="msg">' + esc(T('al_none')) + '</div>'; sheetH(); return; }
+  if (!ALR.length) { box.innerHTML = '<div class="msg">' + esc(T(nav ? 'nv_none' : 'al_none')) + '</div>'; sheetH(); return; }
   var row = function (x, i) {
     var meta = T('al_ahead', { k: fmtDist(x.km * 1000) }) + ' · ' + T('al_off', { d: fmtDist(x.off) }) + (x.sub ? ' · ' + x.sub : '') + (x.b && x.b.address ? ' · ' + x.b.address : '');
     return '<div class="it"><div class="tx"><b>' + esc(x.name) + (x.pb ? '<span class="pbb">PataBook</span>' : '') + (x.b && x.b.v ? ' <span class="pbb">✓</span>' : '') + '</b><small>' + esc(meta) + '</small></div><div class="bt">' +
@@ -1494,14 +1511,75 @@ function addStop(ll, name) {
   route.stops.push({ ll: ll, name: name || '', _d: pos(ll) });
   route.stops.forEach(function (x) { if (x._d == null) x._d = pos(x.ll); });
   route.stops.sort(function (a, b) { return a._d - b._d; });
-  clearVia(); drawStops(); status(T('st_added')); calcRoute(false);
+  clearVia(); drawStops(); status(T('st_added'));
+  if (nav) { closeNavP(); route.from = myPos || route.from; calcRoute(true).then(function () { if (nav) { nav.step = 1; nav.said = {}; } }); }
+  else calcRoute(false);
+}
+/* =========================================================
+   🚗 चलते समय: नीचे पट्टी — 🔍 खोजें · ⛽ · 🍽️ · 🔧 … (navigation बंद किए बिना)
+   ========================================================= */
+function drawNavX() {
+  if (!nav) return;
+  $('navx').hidden = false;
+  $('navx').innerHTML = '<button type="button" data-nvs="1">🔍 ' + esc(T('nv_srch')) + '</button>' +
+    ALONG.map(function (a) { return '<button type="button" data-nva="' + a.k + '" class="' + (alongK === a.k && !$('navp').hidden ? 'on' : '') + '">' + a.i + ' ' + esc(T('al_' + a.k)) + '</button>'; }).join('');
+}
+function openNavP(title, withInput) {
+  $('npT').textContent = title; $('npQ').hidden = !withInput; $('npQ').placeholder = T('nv_ph'); $('npL').innerHTML = '';
+  $('navp').hidden = false; document.body.classList.add('navp-on'); bkSync();
+  if (withInput) { $('npQ').value = ''; setTimeout(function () { $('npQ').focus(); }, 50); }
+}
+function closeNavP(quiet) {
+  if ($('navp').hidden) return;
+  $('navp').hidden = true; document.body.classList.remove('navp-on'); $('npQ').blur();
+  if (!quiet) { drawNavX(); bkSync(); }
+}
+$('npX').onclick = function () { closeNavP(); };
+$('navx').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b || !nav) return;
+  if (b.dataset.nvs) { openNavP('🔍 ' + T('nv_srch'), true); return; }
+  var A = ALONG.filter(function (a) { return a.k === b.dataset.nva; })[0]; if (!A) return;
+  openNavP(A.i + ' ' + T('al_' + A.k) + ' · ' + T('nv_ahead'), false);
+  alongSearch(A.k);
+};
+/* चलते समय नाम से खोज: PataBook दुकानें + जगहें (आस-पास) — "➕ यहाँ रुकें" से रास्ते में जुड़ती हैं */
+var npT = null, npSeq = 0;
+$('npQ').addEventListener('input', function () {
+  var v = this.value.trim(); clearTimeout(npT);
+  if (v.length < 2) { $('npL').innerHTML = ''; return; }
+  npT = setTimeout(function () { npSearch(v); }, 350);
+});
+function npSearch(v) {
+  var my = ++npSeq, lv = v.toLowerCase(), line = route && route.data ? route.data.geometry.coordinates : null;
+  var pos = myPos || (route && route.from);
+  var near = function (ll) { return pos ? hav(pos, ll) : 0; };
+  var pb = BIZ.filter(function (b) { return b.ll && (b.name + ' ' + b.address + ' ' + b.category).toLowerCase().indexOf(lv) >= 0; })
+    .map(function (b) { return { pb: 1, b: b, ll: b.ll, name: b.name, off: line ? distToLine(b.ll, line) : 0, km: near(b.ll) / 1000 }; })
+    .sort(function (a, b) { return a.off - b.off; }).slice(0, 8);
+  var draw = function (pl) {
+    if (my !== npSeq) return;
+    ALR = pb.concat(pl);
+    map.getSource('along').setData({ type: 'FeatureCollection', features: ALR.map(function (x, i) { return { type: 'Feature', geometry: { type: 'Point', coordinates: x.ll }, properties: { i: i, pb: !!x.pb } }; }) });
+    if (!ALR.length) { $('npL').innerHTML = '<div class="msg">' + esc(T('none')) + '</div>'; return; }
+    $('npL').innerHTML = ALR.map(function (x, i) {
+      var meta = fmtDist(x.km * 1000) + (line ? ' · ' + T('al_off', { d: fmtDist(x.off) }) : '') + (x.sub ? ' · ' + x.sub : '') + (x.b && x.b.address ? ' · ' + x.b.address : '');
+      return '<div class="it"><div class="tx"><b>' + esc(x.name) + (x.pb ? '<span class="pbb">PataBook</span>' : '') + '</b><small>' + esc(meta) + '</small></div><div class="bt">' +
+        '<button type="button" data-alv="' + i + '">📍 ' + esc(T('al_view')) + '</button><button type="button" data-als="' + i + '">' + esc(T('st_add')) + '</button>' +
+        (x.pb && x.b.slug ? '<button type="button" data-call="' + esc(x.b.slug) + '">📞 ' + esc(T('call')) + '</button>' : '') + '</div></div>';
+    }).join('');
+  };
+  draw([]);
+  if (v.length < 3) return;
+  photon(v, 6).then(function (fs) {
+    draw(fs.map(function (f) { var p = f.properties || {}, ll = f.geometry.coordinates; return { pb: 0, ll: ll, name: p.name || v, sub: [p.city || p.district, p.state].filter(Boolean).join(', '), off: line ? distToLine(ll, line) : 0, km: near(ll) / 1000 }; }));
+  }).catch(function () {});
 }
 document.addEventListener('click', function (e) {
   var t = e.target.closest('[data-alt],[data-unstop],[data-al],[data-alv],[data-als],[data-addstop]'); if (!t || !route) return;
   if (t.hasAttribute('data-alt')) { useAlt(+t.dataset.alt, true); clearAlong(); fillSheet(); return; }
   if (t.hasAttribute('data-unstop')) { route.stops.splice(+t.dataset.unstop, 1); route.stops.forEach(function (x) { x._d = null; }); drawStops(); calcRoute(false); return; }
   if (t.hasAttribute('data-al')) { if (alongK === t.dataset.al) { clearAlong(); fillSheet(); } else alongSearch(t.dataset.al); return; }
-  if (t.hasAttribute('data-alv')) { var x = ALR[+t.dataset.alv]; if (!x) return; map.flyTo({ center: x.ll, zoom: 15.5, duration: 900 }); if (x.pb) bizCard(x.b); else showCard(x.ll, '<div class="pc"><div><div class="pt">' + esc(x.name) + '</div><div class="ps">' + esc(T('al_' + alongK)) + '</div></div></div><div class="pb"><button type="button" class="dir" data-go="1">📍 ' + esc(T('directions')) + '</button></div>', { ll: x.ll, name: x.name }); return; }
+  if (t.hasAttribute('data-alv')) { var x = ALR[+t.dataset.alv]; if (!x) return; if (nav) { nav.follow = false; closeNavP(); try { showRecenter(); } catch (er) {} } map.flyTo({ center: x.ll, zoom: 15.5, duration: 900 }); if (x.pb) bizCard(x.b); else showCard(x.ll, '<div class="pc"><div><div class="pt">' + esc(x.name) + '</div><div class="ps">' + esc(T('al_' + alongK)) + '</div></div></div><div class="pb"><button type="button" class="dir" data-go="1">📍 ' + esc(T('directions')) + '</button></div>', { ll: x.ll, name: x.name }); return; }
   if (t.hasAttribute('data-als')) { var y = ALR[+t.dataset.als]; if (y) addStop(y.ll, y.name); return; }
   if (t.hasAttribute('data-addstop') && cardDest) { if (popup) popup.remove(); addStop(cardDest.ll, cardDest.name); }
 });
@@ -1645,7 +1723,7 @@ $('rGo').onclick = function () {
   setTimeout(function () { setVeh(true); }, 0);
   if (!route || !route.data) return;
   nav = { step: 1, said: {}, off: 0, last: 0, follow: true }; $('recenter').hidden = true;
-  document.body.classList.add('nav'); $('navb').hidden = false; $('navf').hidden = false;
+  document.body.classList.add('nav'); $('navb').hidden = false; $('navf').hidden = false; drawNavX();
   if (popup) popup.remove(); bkSync();
   ensureWatch();
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
@@ -1698,7 +1776,7 @@ function navTick(ll, jump) {
 }
 function stopNav() {
   setVeh(false);
-  nav = null; clearTimeout(rcTimer); $('recenter').hidden = true; document.body.classList.remove('nav'); $('navb').hidden = true; $('navf').hidden = true;
+  nav = null; clearTimeout(rcTimer); $('recenter').hidden = true; document.body.classList.remove('nav'); $('navb').hidden = true; $('navf').hidden = true; $('navx').hidden = true; closeNavP(true);
   try { if (wake) wake.release(); } catch (e) {} wake = null;
   map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 }, pitch: tilted ? 55 : 0, duration: 600 });
   if (route && route.data) fitRoute();
