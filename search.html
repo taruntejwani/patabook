@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PataBook">
 <script src="site-config.js"></script>
-<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=3"></script>
+<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=4"></script><script src="pb-cities.js?v=1"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -393,13 +393,22 @@ async function suggestWords(q,limit){
 }
 var NEARG="",WIDE="",NLI=null,BIGROW=null,NFHIDE=false,LASTROWS=[];
 let reqN=0,CITYUSER=false;
+let RUNID=0;
 async function run(push){
+  const rid=++RUNID;
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
   try{if(push&&q0&&window.PBRecent)PBRecent.add(q0);}catch(e){}   /* 🕘 पिछली खोजें (सिर्फ़ इसी फ़ोन में) */
   const PQ=priceQ(q);if(PQ)q=PQ.rest;
   TQ=null;if(FAUTO){FOPEN=false;FAUTO=false;}{const tq=timeQ(q);if(tq&&tq.rest){q=tq.rest;if(tq.now){if(!FOPEN)FAUTO=true;FOPEN=true;}else TQ=tq;}}   /* "raat ko khula medical" → medical + समय फ़िल्टर */   /* "500 se kam" → सिर्फ़ Products की कीमत पर; दुकान की खोज बाकी शब्दों से */
-  try{window.pbP2P&&window.pbP2P(q0);}catch(e){}try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
+  /* 🧭 "A to B" → सिर्फ़ रास्ता; दुकान की खोज को यह text नहीं भेजते (जगह न मिले तभी सामान्य खोज) */
+  if(window.pbP2PIs&&pbP2PIs(q0)){
+    cnt.textContent="";list.innerHTML="";FRAW=null;{const fc=$("fch");if(fc)fc.hidden=true;const pd=$("prods");if(pd){pd.hidden=true;pd.innerHTML="";}const vt=$("vtabs");if(vt)vt.hidden=true;const ph=$("phelp");if(ph)ph.remove();}
+    let ok=false;try{ok=await window.pbP2P(q0);}catch(e){}
+    if(rid!==RUNID)return;
+    if(ok){if(push){const u=new URL(location.href);u.searchParams.set("q",q0);u.searchParams.delete("city");history.replaceState(null,"",u);}return;}
+  }else{try{window.pbP2P&&window.pbP2P("");}catch(e){}}
+  try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
@@ -636,7 +645,7 @@ function openSt(b){
      • पक्की जगह → {ll, lab, alts} */
   const IN="68.0,6.5,97.5,35.7";
   const toRom=x=>{x=String(x||"");if(/[\u0A80-\u0AFF]/.test(x))x=x.replace(/[\u0A80-\u0AFF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180));return /[\u0900-\u097F]/.test(x)?deva2rom(x):x;};
-  const pkey=x=>toRom(x).toLowerCase().normalize("NFKD").replace(/[^a-z]+/g,"").replace(/ee/g,"i").replace(/oo/g,"u").replace(/w/g,"v").replace(/ph/g,"f").replace(/z/g,"j").replace(/([bcdgjkpt])h/g,"$1").replace(/aa/g,"a").replace(/(.)\1+/g,"$1").replace(/a(?=[^aeiou]*$)/,"a");
+  const pkey=x=>toRom(x).toLowerCase().normalize("NFKD").replace(/[^a-z]+/g,"").replace(/ee/g,"i").replace(/oo/g,"u").replace(/w/g,"v").replace(/ph/g,"f").replace(/z/g,"j").replace(/([bcdgjkpt])h/g,"$1").replace(/aa/g,"a").replace(/(.)\1+/g,"$1").replace(/aya/g,"ai").replace(/ay(?=[^aeiou]|$)/g,"ai");   /* जयपुर → jayapur = Jaipur */
   const PLR={city:0,town:1,district:2,county:2,suburb:3,village:4,locality:4,neighbourhood:5,quarter:5,hamlet:6};
   const cand=f=>{const pr=f.properties||{},ll=f.geometry.coordinates;return {ll,ty:pr.type||"",nm:pr.name||"",
     lab:[pr.name,pr.city&&pr.city!==pr.name?pr.city:"",pr.district||pr.county,pr.state,pr.postcode].filter((x,i,a)=>x&&a.indexOf(x)===i).join(", ")};};
@@ -644,8 +653,12 @@ function openSt(b){
   const PICKF=new Set();   /* "बदलें" दबाया → इस नाम के लिए फिर से पूछो */
   async function geoP(n){
     const pk=pkey(n);if(pk.length<2)return null;
-    if(!PICKF.has(pk)){try{const v=JSON.parse(localStorage.getItem("pbpick:"+pk)||"null");if(v&&v.ll)return {ll:v.ll,lab:v.lab,alts:v.alts||[],k:1,picked:1};}catch(_){}}
-    const ck="pbgeo4:"+pk;
+    if(!PICKF.has(pk)){try{const v=JSON.parse(localStorage.getItem("pbpick2:"+pk)||"null");if(v&&v.ll)return {ll:v.ll,lab:v.lab,alts:v.alts||[],k:1,picked:1};}catch(_){}}
+    /* 1) बड़े शहरों की पक्की सूची (pb-cities.js): Jaipur = Jaipur, Rajasthan — Photon की ranking पर निर्भर नहीं */
+    try{const gz=(window.PB_CITIES||[]).filter(r=>r.slice(0,1).concat(r.slice(4)).some(x=>pkey(x)===pk)).map(r=>({ll:[r[3],r[2]],lab:r[0]+", "+r[1],ty:"city",nm:r[0]}));
+      if(gz.length===1)return {ll:gz[0].ll,lab:gz[0].lab,alts:[],k:gz[0].lab.endsWith("Gujarat")?1:0,gz:1};
+      if(gz.length>1)return {ask:gz};}catch(_){}
+    const ck="pbgeo5:"+pk;
     if(!PICKF.has(pk)){try{const v=JSON.parse(localStorage.getItem(ck)||"null");if(v&&Date.now()-v.t<30*864e5&&(v.ll||v.ask))return v;}catch(_){}}
     const rom=toRom(n).trim(),vs=[rom],m=rom.match(/^(\S{3,})(nagar|pur|wadi|vas)$/i);if(m)vs.push(m[1]+" "+m[2]);
     const scopes=[[KB,""],[null," Gujarat"],[IN,""]];let near=[];
@@ -653,7 +666,7 @@ function openSt(b){
       const ex=[];
       for(const v of vs){
         try{
-          const j=await getJ(PHO+"?q="+encodeURIComponent(v+sfx)+"&limit=10&lang=en&lat=23.07&lon=70.13"+(bb?"&bbox="+bb:""),7000);
+          const j=await getJ(PHO+"?q="+encodeURIComponent(v+sfx)+"&limit="+(bb===IN?15:10)+"&lang=en"+(bb===IN?"":"&lat=23.07&lon=70.13")+(bb?"&bbox="+bb:""),7000);   /* पूरे भारत में Gandhidham की ओर झुकाव नहीं — वरना पास के छोटे गाँव बड़े शहर से ऊपर आ जाते हैं */
           (j.features||[]).filter(f=>f&&f.geometry&&((f.properties||{}).countrycode||"IN").toUpperCase()==="IN").forEach(f=>{
             const pr=f.properties||{},c=cand(f);
             if([pr.name,pr["name:en"]].some(x=>x&&pkey(x)===pk))ex.push(c);else if(near.length<8&&PLR[c.ty]!=null)near.push(c);});
@@ -680,7 +693,7 @@ function openSt(b){
     near=uniq(near).slice(0,4);
     return near.length?{sugg:near}:null;
   }
-  function pickSave(n,c,alts){try{localStorage.setItem("pbpick:"+pkey(n),JSON.stringify({ll:c.ll,lab:c.lab,alts:(alts||[]).filter(x=>x!==c).slice(0,5)}));}catch(_){}PICKF.delete(pkey(n));}
+  function pickSave(n,c,alts){try{localStorage.setItem("pbpick2:"+pkey(n),JSON.stringify({ll:c.ll,lab:c.lab,alts:(alts||[]).filter(x=>x!==c).slice(0,5)}));}catch(_){}PICKF.delete(pkey(n));}
   /* "PataBook क्या है / क्या-क्या बता सकता है" — मदद कार्ड */
   const HELPQ=[["Gandhidham AC repair","गांधीधाम में AC मरम्मत"],["Jay Shankar restaurant ka phone number","Jay Shankar रेस्टोरेंट का फ़ोन नंबर"],["Tejwani detergent kaha hai","Tejwani detergent कहाँ है (पता)"],["Shri Ram hardware kab tak khula hai","Shri Ram हार्डवेयर कब तक खुला है"],["Shri Ram hardware ka rasta batao","Shri Ram हार्डवेयर का रास्ता / दूरी"],["Bharat Nagar to Kandla","Bharat Nagar से Kandla का रास्ता"]];
   function isHelpQ(q){
@@ -701,15 +714,15 @@ function openSt(b){
   window.pbP2P=async function(q){
     const my=++P2S,list=document.getElementById("list");let box=document.getElementById("ptp");
     const pr=p2pParse(q);
-    if(!pr||!list){if(box)box.remove();return;}
+    if(!pr||!list){if(box)box.remove();return false;}
     if(!box){box=document.createElement("div");box.id="ptp";list.parentNode.insertBefore(box,list);}
     const en=FEN(),A=cap(pr[0]),B=cap(pr[1]);
     box.innerHTML='<article class="card bigc"><div class="okl">🧭 '+esc(en?"Route":"रास्ता")+'</div><h2>'+esc(A)+' → '+esc(B)+'</h2><div class="gto">'+esc(en?"Finding the places…":"जगहें ढूँढ रहे हैं…")+'</div></article>';
     const out=box.querySelector(".gto"),card=box.firstChild;
     try{
       const [ga,gb]=await Promise.all([geoP(pr[0]),geoP(pr[1])]);
-      if(my!==P2S)return;
-      if(!ga||!gb){box.remove();return;}   /* जगह न मिले → कार्ड नहीं, सामान्य खोज ही */
+      if(my!==P2S)return true;
+      if(!ga||!gb){box.remove();return false;}   /* जगह न मिले → कार्ड नहीं, सामान्य खोज ही */
       /* कई जगहें / पक्का नाम नहीं → पहले ग्राहक चुने, फिर ही दूरी */
       for(const [g,nm] of [[ga,pr[0]],[gb,pr[1]]]){
         if(!g.ask&&!g.sugg)continue;
@@ -718,7 +731,7 @@ function openSt(b){
         out.innerHTML='<span style="font-weight:700">'+esc(g.ask?(en?"There are "+L.length+" places named \u201c"+N+"\u201d. Which one?":"\u201c"+N+"\u201d नाम की "+L.length+" जगहें मिलीं। कौन-सी?"):(en?"No place named \u201c"+N+"\u201d was found. Did you mean:":"\u201c"+N+"\u201d नाम की जगह नहीं मिली। क्या आपका मतलब:"))+'</span>'+
           '<div class="pch">'+L.map((c,i)=>'<button type="button" data-pi="'+i+'">📍 '+esc(c.lab||c.nm)+'</button>').join("")+'</div>'+
           '<small>'+esc(en?"The distance is calculated after you choose. Your choice is remembered on this phone.":"चुनने के बाद ही दूरी निकलेगी। आपकी चुनी जगह इसी फ़ोन में याद रहेगी।")+'</small>';
-        return;
+        return true;
       }
       const ul=ga.ll[1],ug=ga.ll[0],tl=gb.ll[1],tg=gb.ll[0];
       out.textContent=en?"Calculating the route…":"रास्ता निकाल रहे हैं…";
@@ -731,7 +744,7 @@ function openSt(b){
       if(km==null){   /* सड़क की दूरी नहीं मिली → अंदाज़ा सड़क की दूरी बनाकर नहीं दिखाते */
         out.innerHTML='<b style="color:#b3261e">⚠ '+esc(en?"Road distance is not available right now (map service did not respond).":"अभी सड़क की दूरी नहीं निकल पाई (नक्शे की सेवा ने जवाब नहीं दिया)।")+'</b><small>'+esc((en?"Straight-line distance: ":"सीधी (हवाई) दूरी: ")+(sl<1?Math.round(sl*1000)+" m":sl.toFixed(1)+" km")+(en?" — this is not the road distance. Try again in a little while, or tap Directions.":" — यह सड़क की दूरी नहीं है। थोड़ी देर बाद फिर कोशिश करें या 🧭 रास्ता दबाइए।"))+'</small><small>📍 '+esc((en?"Found: ":"मिला: ")+(ga.lab||A)+" → "+(gb.lab||B))+'</small>';
         out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm0)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"रास्ता (रास्ता चलाएँ)")+'</a></div>');
-        return;
+        return true;
       }
       const kmT=km<1?Math.round(km*1000)+" m":km.toFixed(1)+" km";
       const note=(exact?(en?"Road distance and time (OpenStreetMap), preferring main roads.":"सड़क की दूरी और समय (OpenStreetMap), बड़ी सड़क को तरजीह।"):(en?"Approximate (straight-line estimate).":"यह अंदाज़ा है (सीधी दूरी से)।"))+(ga.vague||gb.vague?(en?" A place name is not exact, so the point may be roughly right.":" किसी जगह का नाम पक्का नहीं मिला, इसलिए बिंदु थोड़ा आगे-पीछे हो सकता है।"):"");
@@ -742,13 +755,15 @@ function openSt(b){
       const gm="https://www.google.com/maps/dir/?api=1&origin="+ul+","+ug+"&destination="+tl+","+tg+"&travelmode=driving";
       out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"रास्ता (रास्ता चलाएँ)")+'</a></div>');
       if(line)drawMap(card,line,ul,ug,tl,tg);
-    }catch(_){if(my===P2S)box.remove();}
+      return true;
+    }catch(_){if(my===P2S)box.remove();return false;}
   };
+  window.pbP2PIs=q=>!!p2pParse(q);
   /* 📍 जगह चुनना / बदलना */
   document.addEventListener("click",e=>{
     const t=e.target.closest&&e.target.closest("#ptp [data-pi], #ptp .pchg");if(!t)return;e.preventDefault();
     const card=t.closest("article");if(!card)return;
-    if(t.classList.contains("pchg")){(card._chg||[]).forEach(n=>{PICKF.add(pkey(n));try{localStorage.removeItem("pbpick:"+pkey(n));}catch(_){}});window.pbP2P(card._q);return;}
+    if(t.classList.contains("pchg")){(card._chg||[]).forEach(n=>{PICKF.add(pkey(n));try{localStorage.removeItem("pbpick2:"+pkey(n));}catch(_){}});window.pbP2P(card._q);return;}
     const ch=card._ch;if(!ch)return;const c=ch.L[+t.dataset.pi];if(!c)return;
     pickSave(ch.nm,c,ch.all);window.pbP2P(ch.q);
   });

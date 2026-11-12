@@ -1,0 +1,65 @@
+/* PataBook — भारत के बड़े शहरों की छोटी पक्की सूची (रास्ता / दूरी के लिए)
+   • नाम बिल्कुल मिले तो Photon की ranking पर निर्भर नहीं: "Jaipur" = Jaipur, Rajasthan (दूसरे राज्यों के Jaipur गाँव नहीं)
+   • [नाम, राज्य, lat, lon, ...दूसरे नाम]   — निर्देशांक शहर के केंद्र के पास (रास्ता सड़क पर अपने-आप जुड़ता है)
+   • एक नाम के 2 बड़े शहर (Aurangabad, Bilaspur…) → दोनों, ग्राहक चुने */
+window.PB_CITIES = [
+  /* Kutch */
+  ["Gandhidham","Gujarat",23.0753,70.1337],["Adipur","Gujarat",23.0700,70.0950],["Anjar","Gujarat",23.1130,70.0280],["Bhuj","Gujarat",23.2420,69.6669],
+  ["Mundra","Gujarat",22.8390,69.7210],["Mandvi","Gujarat",22.8333,69.3530],["Bhachau","Gujarat",23.2960,70.3430],["Rapar","Gujarat",23.5720,70.6420],
+  ["Nakhatrana","Gujarat",23.3450,69.2620],["Kandla","Gujarat",23.0330,70.2170],
+  /* Gujarat */
+  ["Ahmedabad","Gujarat",23.0225,72.5714,"Amdavad"],["Surat","Gujarat",21.1702,72.8311],["Vadodara","Gujarat",22.3072,73.1812,"Baroda"],["Rajkot","Gujarat",22.3039,70.8022],
+  ["Gandhinagar","Gujarat",23.2156,72.6369],["Bhavnagar","Gujarat",21.7645,72.1519],["Jamnagar","Gujarat",22.4707,70.0577],["Junagadh","Gujarat",21.5222,70.4579],
+  ["Morbi","Gujarat",22.8173,70.8377,"Morvi"],["Surendranagar","Gujarat",22.7277,71.6480],["Palanpur","Gujarat",24.1720,72.4380],["Mehsana","Gujarat",23.5880,72.3693,"Mahesana"],
+  ["Patan","Gujarat",23.8493,72.1266],["Porbandar","Gujarat",21.6417,69.6293],["Dwarka","Gujarat",22.2394,68.9678],["Amreli","Gujarat",21.6032,71.2221],
+  ["Botad","Gujarat",22.1700,71.6680],["Anand","Gujarat",22.5645,72.9289],["Nadiad","Gujarat",22.6916,72.8634],["Bharuch","Gujarat",21.7051,72.9959],
+  ["Ankleshwar","Gujarat",21.6264,73.0152],["Navsari","Gujarat",20.9467,72.9520],["Valsad","Gujarat",20.5992,72.9342],["Vapi","Gujarat",20.3893,72.9106],
+  ["Godhra","Gujarat",22.7788,73.6143],["Dahod","Gujarat",22.8350,74.2550],["Himmatnagar","Gujarat",23.5980,72.9660],["Modasa","Gujarat",23.4620,73.2990],
+  ["Veraval","Gujarat",20.9070,70.3670],["Somnath","Gujarat",20.8880,70.4010],["Gondal","Gujarat",21.9600,70.8000],["Jetpur","Gujarat",21.7540,70.6230],
+  ["Dhrangadhra","Gujarat",22.9920,71.4670],["Halvad","Gujarat",23.0170,71.1800],["Radhanpur","Gujarat",23.8330,71.6000],["Deesa","Gujarat",24.2580,72.1920],
+  ["Wankaner","Gujarat",22.6110,70.9440],["Khambhaliya","Gujarat",22.2050,69.6550],["Rajpipla","Gujarat",21.8710,73.5030],["Vyara","Gujarat",21.1100,73.3940],
+  ["Lunawada","Gujarat",23.1280,73.6110],["Chhota Udaipur","Gujarat",22.3050,74.0110],["Ambaji","Gujarat",24.3370,72.8500],
+  /* Rajasthan */
+  ["Jaipur","Rajasthan",26.9124,75.7873],["Jodhpur","Rajasthan",26.2389,73.0243],["Udaipur","Rajasthan",24.5854,73.7125],["Kota","Rajasthan",25.2138,75.8648],
+  ["Ajmer","Rajasthan",26.4499,74.6399],["Bikaner","Rajasthan",28.0229,73.3119],["Alwar","Rajasthan",27.5530,76.6346],["Bhilwara","Rajasthan",25.3407,74.6313],
+  ["Sikar","Rajasthan",27.6094,75.1399],["Pali","Rajasthan",25.7711,73.3234],["Barmer","Rajasthan",25.7532,71.4181],["Jaisalmer","Rajasthan",26.9157,70.9083],
+  ["Jalore","Rajasthan",25.3450,72.6150],["Sirohi","Rajasthan",24.8850,72.8590],["Mount Abu","Rajasthan",24.5926,72.7156,"Abu"],["Abu Road","Rajasthan",24.4810,72.7810],
+  ["Sri Ganganagar","Rajasthan",29.9038,73.8772,"Ganganagar"],["Hanumangarh","Rajasthan",29.5810,74.3290],["Churu","Rajasthan",28.2900,74.9600],["Jhunjhunu","Rajasthan",28.1290,75.3990],
+  ["Nagaur","Rajasthan",27.2020,73.7340],["Tonk","Rajasthan",26.1660,75.7880],["Bundi","Rajasthan",25.4380,75.6370],["Chittorgarh","Rajasthan",24.8887,74.6269],
+  ["Rajsamand","Rajasthan",25.0710,73.8800],["Banswara","Rajasthan",23.5460,74.4330],["Dungarpur","Rajasthan",23.8430,73.7140],["Bharatpur","Rajasthan",27.2170,77.4900],
+  ["Dholpur","Rajasthan",26.7000,77.9000],["Sawai Madhopur","Rajasthan",26.0230,76.3450],["Karauli","Rajasthan",26.4980,77.0200],["Dausa","Rajasthan",26.8890,76.3370],
+  ["Jhalawar","Rajasthan",24.5960,76.1610],["Baran","Rajasthan",25.1000,76.5160],["Beawar","Rajasthan",26.1010,74.3200],["Kishangarh","Rajasthan",26.5900,74.8540],
+  ["Pushkar","Rajasthan",26.4900,74.5510],["Nathdwara","Rajasthan",24.9380,73.8230],["Balotra","Rajasthan",25.8330,72.2400],
+  /* State capitals and big cities */
+  ["Mumbai","Maharashtra",19.0760,72.8777,"Bombay"],["Delhi","Delhi",28.6139,77.2090,"New Delhi","Dilli"],["Bengaluru","Karnataka",12.9716,77.5946,"Bangalore"],
+  ["Hyderabad","Telangana",17.3850,78.4867],["Chennai","Tamil Nadu",13.0827,80.2707,"Madras"],["Kolkata","West Bengal",22.5726,88.3639,"Calcutta"],
+  ["Pune","Maharashtra",18.5204,73.8567,"Poona"],["Nagpur","Maharashtra",21.1458,79.0882],["Nashik","Maharashtra",19.9975,73.7898],["Thane","Maharashtra",19.2183,72.9781],
+  ["Solapur","Maharashtra",17.6599,75.9064],["Kolhapur","Maharashtra",16.7050,74.2433],["Amravati","Maharashtra",20.9374,77.7796],["Navi Mumbai","Maharashtra",19.0330,73.0297],
+  ["Lucknow","Uttar Pradesh",26.8467,80.9462],["Kanpur","Uttar Pradesh",26.4499,80.3319],["Agra","Uttar Pradesh",27.1767,78.0081],["Varanasi","Uttar Pradesh",25.3176,82.9739,"Banaras","Kashi"],
+  ["Prayagraj","Uttar Pradesh",25.4358,81.8463,"Allahabad"],["Meerut","Uttar Pradesh",28.9845,77.7064],["Ghaziabad","Uttar Pradesh",28.6692,77.4538],["Noida","Uttar Pradesh",28.5355,77.3910],
+  ["Mathura","Uttar Pradesh",27.4924,77.6737],["Ayodhya","Uttar Pradesh",26.7922,82.1998],["Gorakhpur","Uttar Pradesh",26.7606,83.3732],["Bareilly","Uttar Pradesh",28.3670,79.4304],
+  ["Aligarh","Uttar Pradesh",27.8974,78.0880],["Jhansi","Uttar Pradesh",25.4484,78.5685],
+  ["Bhopal","Madhya Pradesh",23.2599,77.4126],["Indore","Madhya Pradesh",22.7196,75.8577],["Jabalpur","Madhya Pradesh",23.1815,79.9864],["Gwalior","Madhya Pradesh",26.2183,78.1828],
+  ["Ujjain","Madhya Pradesh",23.1765,75.7885],["Ratlam","Madhya Pradesh",23.3315,75.0367],["Neemuch","Madhya Pradesh",24.4700,74.8700],["Mandsaur","Madhya Pradesh",24.0700,75.0700],
+  ["Patna","Bihar",25.5941,85.1376],["Gaya","Bihar",24.7914,85.0002],["Ranchi","Jharkhand",23.3441,85.3096],["Jamshedpur","Jharkhand",22.8046,86.2029],["Dhanbad","Jharkhand",23.7957,86.4304],
+  ["Raipur","Chhattisgarh",21.2514,81.6296],["Bhubaneswar","Odisha",20.2961,85.8245],["Cuttack","Odisha",20.4625,85.8830],["Puri","Odisha",19.8135,85.8312],
+  ["Chandigarh","Chandigarh",30.7333,76.7794],["Amritsar","Punjab",31.6340,74.8723],["Ludhiana","Punjab",30.9010,75.8573],["Jalandhar","Punjab",31.3260,75.5762],
+  ["Gurugram","Haryana",28.4595,77.0266,"Gurgaon"],["Faridabad","Haryana",28.4089,77.3178],["Panipat","Haryana",29.3909,76.9635],
+  ["Dehradun","Uttarakhand",30.3165,78.0322],["Haridwar","Uttarakhand",29.9457,78.1642],["Rishikesh","Uttarakhand",30.0869,78.2676],["Shimla","Himachal Pradesh",31.1048,77.1734],
+  ["Srinagar","Jammu and Kashmir",34.0837,74.7973],["Jammu","Jammu and Kashmir",32.7266,74.8570],["Leh","Ladakh",34.1526,77.5771],
+  ["Guwahati","Assam",26.1445,91.7362],["Shillong","Meghalaya",25.5788,91.8933],["Agartala","Tripura",23.8315,91.2868],["Imphal","Manipur",24.8170,93.9368],
+  ["Aizawl","Mizoram",23.7271,92.7176],["Kohima","Nagaland",25.6747,94.1100],["Itanagar","Arunachal Pradesh",27.0844,93.6053],["Gangtok","Sikkim",27.3389,88.6065],
+  ["Siliguri","West Bengal",26.7271,88.3953],["Darjeeling","West Bengal",27.0410,88.2663],
+  ["Thiruvananthapuram","Kerala",8.5241,76.9366,"Trivandrum"],["Kochi","Kerala",9.9312,76.2673,"Cochin"],["Kozhikode","Kerala",11.2588,75.7804,"Calicut"],
+  ["Coimbatore","Tamil Nadu",11.0168,76.9558],["Madurai","Tamil Nadu",9.9252,78.1198],["Tiruchirappalli","Tamil Nadu",10.7905,78.7047,"Trichy"],
+  ["Mysuru","Karnataka",12.2958,76.6394,"Mysore"],["Mangaluru","Karnataka",12.9141,74.8560,"Mangalore"],["Hubballi","Karnataka",15.3647,75.1240,"Hubli"],["Belagavi","Karnataka",15.8497,74.4977,"Belgaum"],
+  ["Visakhapatnam","Andhra Pradesh",17.6868,83.2185,"Vizag"],["Vijayawada","Andhra Pradesh",16.5062,80.6480],["Tirupati","Andhra Pradesh",13.6288,79.4192],["Amaravati","Andhra Pradesh",16.5150,80.5160],
+  ["Warangal","Telangana",17.9689,79.5941],["Panaji","Goa",15.4909,73.8278,"Panjim"],["Goa","Goa",15.4909,73.8278],["Puducherry","Puducherry",11.9416,79.8083,"Pondicherry"],
+  ["Silvassa","Dadra and Nagar Haveli and Daman and Diu",20.2766,73.0083],["Daman","Dadra and Nagar Haveli and Daman and Diu",20.3974,72.8328],["Diu","Dadra and Nagar Haveli and Daman and Diu",20.7144,70.9874],
+  ["Port Blair","Andaman and Nicobar Islands",11.6234,92.7265],
+  /* एक नाम, दो बड़े शहर → ग्राहक चुने */
+  ["Aurangabad","Maharashtra",19.8762,75.3433,"Chhatrapati Sambhajinagar"],["Aurangabad","Bihar",24.7520,84.3740],
+  ["Bilaspur","Chhattisgarh",22.0797,82.1409],["Bilaspur","Himachal Pradesh",31.3390,76.7600],
+  ["Pratapgarh","Rajasthan",24.0310,74.7810],["Pratapgarh","Uttar Pradesh",25.8970,81.9450],
+  ["Hamirpur","Himachal Pradesh",31.6860,76.5210],["Hamirpur","Uttar Pradesh",25.9560,80.1480]
+];
