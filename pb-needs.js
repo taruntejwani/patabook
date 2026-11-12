@@ -22,7 +22,7 @@
       L.map(function (n) {
         var mine = n.mine || null;
         return '<div style="border:1px solid #ffd8a8;background:#fffaf2;border-radius:12px;padding:10px 12px;margin-bottom:10px">' +
-          '<small style="display:block;color:#7a5a2b">📍 ' + esc(n.city) + ' · ' + esc(ago(n.at, en)) + ' · ' + esc(en ? n.replies + " replies" : n.replies + " जवाब") + '</small>' +
+          '<small style="display:block;color:#7a5a2b">📍 ' + esc(en ? n.city : (CH[n.city] || n.city)) + ' · ' + esc(ago(n.at, en)) + ' · ' + esc(en ? n.replies + " replies" : n.replies + " जवाब") + '</small>' +
           '<p style="margin:4px 0 8px;font-size:15px;white-space:pre-line">' + esc(n.body) + '</p>' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="number" inputmode="decimal" min="0" data-ndp="' + n.id + '" placeholder="₹ ' + esc(en ? "Price (optional)" : "भाव (वैकल्पिक)") + '" value="' + (mine && mine.price != null ? esc(mine.price) : "") + '" style="width:130px;font:inherit;padding:8px;border:1px solid #d0d5dd;border-radius:8px">' +
           '<input data-ndb="' + n.id + '" maxlength="200" placeholder="' + esc(en ? "Your reply (e.g. available today)" : "आपका जवाब (जैसे आज मिल जाएगा)") + '" value="' + (mine ? esc(mine.body) : "") + '" style="flex:1;min-width:160px;font:inherit;padding:8px;border:1px solid #d0d5dd;border-radius:8px"></div>' +
