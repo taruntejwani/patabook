@@ -10,7 +10,7 @@
 <script src="pb-auth.js"></script>
 <script src="site-config.js"></script>
 <script src="pb-panel-lang.js"></script>
-<script src="lang/panel-admin-en.js"></script>
+<script src="lang/panel-admin-en.js?v=2"></script>
 <style>
 :root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -906,6 +906,18 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       return;
     }
     drawStats(SDATA);
+    loadSearchSum();
+  }
+  /* 🔎 खोज का पूरा हिसाब (sql-48: pb_admin_search_summary) — न हो तो चुपचाप कुछ नहीं */
+  async function loadSearchSum() {
+    var el = $('srchSum'); if (!el) return;
+    var d; try { d = await rpc('pb_admin_search_summary', { p_days: SD }); } catch (e) { el.innerHTML = ''; return; }
+    if (!d || !$('srchSum')) return;
+    var f = +d.found || 0, z = +d.notfound || 0, t = f + z, per = SD === 1 ? 'आज' : 'पिछले ' + SD + ' दिन';
+    var daily = (d.daily || []).map(function (x) { return { lab: dd(x.d), short: dd(x.d), n: (+x.f || 0) + (+x.z || 0) }; });
+    $('srchSum').innerHTML = gc('🔎 खोज का हिसाब', per + ' · कुल ' + fmt(t) + ' खोज · ' + fmt(+d.words || 0) + ' अलग-अलग शब्द',
+      (t ? stack([['दुकान मिली', f, '#12a150'], ['दुकान नहीं मिली', z, '#d92d20']]) : '<p class="emp">अभी कोई गिनती नहीं</p>') +
+      (SD > 1 && t ? '<div style="height:10px"></div><div class="sub">रोज़ कितनी खोज</div>' + bars(daily, 'n', 120) : '')) + '<div style="height:12px"></div>';
   }
   function bars(daily, key, h) {   /* खड़े bar: रोज़ / घंटे */
     var W = Math.max(300, Math.min(760, ($('sBody').clientWidth || 360) - 30)), H = h || 170, P = 22, n = daily.length, max = Math.max.apply(null, daily.map(function (d) { return d[key]; }).concat([1]));
@@ -956,6 +968,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div><b>' + fmt(SD === 1 ? d.pv_today : d.pv_period) + '</b><span>' + per + ' पेज खुले</span></div>' +
       '<div><b>' + fmt(d.card_period) + '</b><span>📇 ' + per + ' कार्ड शेयर</span></div></div>';
     if (SD > 1) html += gc('📈 रोज़ कितने लोग आए', per + ' · कुल ' + fmt(d.uv_period) + ' अलग-अलग लोग · पट्टी पर उँगली रखें तो गिनती दिखेगी', bars(daily, 'uv'));
+    html += '<div id="srchSum"></div>';
     html += gc('⏰ किस समय लोग आते हैं', per + (hr && hr.pv ? ' · सबसे ज़्यादा भीड़ ' + hr.lab : '') + ' (पेज खुलने के हिसाब से)', bars(hrs, 'pv', 140));
     html += '<div class="g2">' +
       gc('🆕 नए या दोबारा आए', per, stack([['पहली बार आए', sum('new'), '#1a73e8'], ['दोबारा आए', sum('ret'), '#f9ab00']])) +
