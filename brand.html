@@ -93,6 +93,7 @@ async function load(){
   if(!PV)try{localStorage.setItem("pbd_"+slug,"1");}catch(e){}
   DSN=PV||+dz;
   document.title=B.name+" — "+(B.category||"")+" | PataBook";
+try{if(B&&B.slug){const k="pb-seen",a=(JSON.parse(localStorage.getItem(k)||"[]")||[]).filter(x=>x&&x.s!==B.slug);a.unshift({s:B.slug,n:String(B.name||"").slice(0,80),c:String(B.category||"").slice(0,40),t:Date.now()});localStorage.setItem(k,JSON.stringify(a.slice(0,8)));}}catch(_){}   /* 👀 हाल ही में देखी (सिर्फ़ इसी फ़ोन में) */
   try{const c=document.querySelector('link[rel="canonical"]')||document.head.appendChild(Object.assign(document.createElement("link"),{rel:"canonical"}));c.href="https://patabook.in/shop?slug="+encodeURIComponent(slug);}catch(e){}
   render();
 }
