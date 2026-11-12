@@ -187,6 +187,8 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","tayar":"tyre","taayar":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
 const CATHI={"ऑटोमोबाइल":"Automobile","खाना":"Food","स्वास्थ्य":"Health","शॉपिंग":"Shopping","शिक्षा":"Education","होम":"Home","प्रोफेशनल":"Professional","होटल":"Hotel"};
 
+/* ગુજરાતી: Gujarati शब्द (गुजराती लिपि और English अक्षरों में) → वही English शब्द, ताकि કપડાં = कपड़े = Clothes */
+Object.assign(ALIAS,{"કપડાં": "cloth clothing", "કપડા": "cloth clothing", "સાડી": "saree", "દવા": "medicine medical", "દવાઓ": "medicine medical", "દવાખાનું": "hospital clinic", "દવાખાનુ": "hospital clinic", "હોસ્પિટલ": "hospital", "ડોક્ટર": "doctor", "ડૉક્ટર": "doctor", "મેડિકલ": "medical", "દાંત": "dental dentist", "કરિયાણું": "kirana grocery", "કરિયાણા": "kirana grocery", "કરીયાણું": "kirana grocery", "કરીયાણા": "kirana grocery", "મીઠાઈ": "sweet mithai", "ફરસાણ": "farsan snacks", "નાસ્તો": "snacks", "ચા": "tea", "જમવાનું": "restaurant food", "ભોજન": "restaurant food", "થાળી": "thali restaurant", "હોટેલ": "hotel", "હોટલ": "hotel", "બેકરી": "bakery", "કેક": "cake", "દૂધ": "milk dairy", "ડેરી": "dairy", "શાકભાજી": "vegetable", "ફળ": "fruit", "ગેરેજ": "garage", "ટાયર": "tyre", "બેટરી": "battery", "પંચર": "puncture", "ગાડી": "car vehicle", "કાર": "car", "બાઈક": "bike", "બાઇક": "bike", "રિક્ષા": "rickshaw auto", "વોશ": "wash", "ધોવા": "wash", "પોલિશ": "polish", "સર્વિસ": "service", "મોબાઈલ": "mobile", "મોબાઇલ": "mobile", "ઇલેક્ટ્રોનિક્સ": "electronics", "ઇલેક્ટ્રિશિયન": "electrician", "લાઈટ": "electrician electrical", "પ્લમ્બર": "plumber", "ફર્નિચર": "furniture", "સુથાર": "carpenter", "હાર્ડવેર": "hardware", "સિમેન્ટ": "cement", "કલર": "paint", "રંગ": "paint", "દરજી": "tailor", "વકીલ": "lawyer advocate", "ટેક્સ": "tax", "વીમો": "insurance", "વીમા": "insurance", "લોન": "loan", "મકાન": "property house", "પ્રોપર્ટી": "property", "ભાડે": "rent", "ફોટો": "photographer photography", "લગ્ન": "wedding", "મંડપ": "tent decor", "કેટરિંગ": "catering", "ટિફિન": "tiffin", "શાળા": "school", "સ્કૂલ": "school", "કોલેજ": "college", "ટ્યુશન": "tuition", "ક્લાસ": "classes coaching", "કોચિંગ": "coaching", "કમ્પ્યુટર": "computer", "ઝેરોક્ષ": "xerox", "પ્રિન્ટિંગ": "printing", "સલૂન": "salon", "વાળ": "salon hair", "બ્યુટી": "beauty", "પાર્લર": "parlour", "જીમ": "gym", "યોગ": "yoga", "સોની": "jewellery gold", "ઝવેરી": "jewellery", "સોનું": "gold", "ચાંદી": "silver", "ચશ્મા": "optical", "ચંપલ": "footwear", "બૂટ": "footwear shoe", "બેગ": "bag", "રમકડાં": "toy", "ચોપડી": "book", "સ્ટેશનરી": "stationery", "ગિફ્ટ": "gift", "કુરિયર": "courier", "ટેક્સી": "taxi", "ટ્રાન્સપોર્ટ": "transport", "ભંગાર": "scrap", "પાણી": "water", "ગેસ": "gas", "રિપેર": "repair", "એસી": "ac air conditioning", "ફ્રિજ": "fridge refrigerator", "ટીવી": "tv television", "ખાતર": "fertilizer", "બિયારણ": "seed", "પશુ": "veterinary animal", "ડિટર્જન્ટ": "detergent", "કેમિકલ": "chemical", "સાબુ": "soap", "kapda": "cloth clothing", "kapdaa": "cloth clothing", "dava": "medicine medical", "davakhanu": "hospital clinic", "davakhana": "hospital clinic", "kariyanu": "kirana grocery", "kariyana": "kirana grocery", "farsan": "farsan snacks", "nasto": "snacks", "jamvanu": "restaurant food", "shakbhaji": "vegetable", "soni": "jewellery gold", "zaveri": "jewellery", "jhaveri": "jewellery", "bhangar": "scrap", "chashma": "optical", "chasma": "optical", "ramakda": "toy", "chopdi": "book", "suthar": "carpenter", "vakil": "lawyer advocate", "vimo": "insurance", "shala": "school", "mandap": "tent decor", "sabu": "soap"});
 /* ✍️ spelling के रूप: बोलने/लिखने में Shriram, Shri Ram, Shree Ram, Sri Ram — सब एक दुकान तक पहुँचें ("*" = कुछ भी / खाली) */
 const HI2EN={"श्री":"shree","श्रीराम":"shree*ram","राम":"ram","कृष्णा":"krishna","कृष्ण":"krishna","गणेश":"ganesh","साई":"sai","शंकर":"shankar","जय":"jai","दुर्गा":"durga","लक्ष्मी":"laxmi","हनुमान":"hanuman","बालाजी":"balaji","महादेव":"mahadev","भवानी":"bhavani","अंबे":"ambe","खोडियार":"khodiyar","पटेल":"patel","शर्मा":"sharma"};
 function spell(w){
@@ -200,7 +202,7 @@ function spell(w){
 }
 const rxOf=a=>new RegExp(a.replace(/[.+?^${}()|[\]\\]/g,"\\$&").replace(/\*/g,".*"),"i");
 /* query ko words me todo; har word ke liye alag roop (alias) */
-const STOPW=new Set(["shop","shops","store","stores","dukan","dukaan","dukane","dukano","dukaanein","दुकान","दुकानें","दुकाने","शॉप","near","nearby","me","nearest","paas","aaspass","najdik","nazdik","mein","आसपास","नज़दीक","नजदीक","in","at","ka","ki","ke","ko","the","for","and","best","top","list","पास","में","का","की","के"]);
+const STOPW=new Set(["shop","shops","store","stores","dukan","dukaan","dukane","dukano","dukaanein","दुकान","दुकानें","दुकाने","शॉप","near","nearby","me","nearest","paas","aaspass","najdik","nazdik","mein","आसपास","नज़दीक","नजदीक","in","at","ka","ki","ke","ko","the","for","and","best","top","list","पास","में","का","की","के","દુકાન","દુકાનો","શોપ","નજીક","પાસે","માં","ની","નું","નો","ના","ને","મારે","જોઈએ","છે","બતાવો","સારી","સારું","સારા"]);
 function terms(q,keepEmpty){
   let ws=String(q||"").toLowerCase().replace(/[,()*\\"'%:;]/g," ").split(/\s+/).filter(w=>w.length>=2||/^\d+$/.test(w)).slice(0,6);
   const w2=ws.filter(w=>!STOPW.has(w));if(w2.length||keepEmpty)ws=w2;   /* "shop / store / dukan" जैसे आम शब्द खोज में नहीं गिनते (सिर्फ़ वही लिखा हो तब छोड़कर) */
@@ -209,6 +211,7 @@ function terms(q,keepEmpty){
     const alt=[w];
     (ALIAS[w]||"").split(" ").filter(Boolean).slice(0,3).forEach(a=>alt.includes(a)||alt.push(a));
     if(CATHI[w])alt.push(CATHI[w].toLowerCase());
+    if(/[\u0A80-\u0AFF]/.test(w)&&!ALIAS[w]){try{const r=deva2rom(w.replace(/[\u0A80-\u0AFF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x180))).split(/\s+/)[0];if(r&&r.length>=3&&!alt.includes(r))alt.push(r);}catch(e){}}   /* ગુજરાતી નામ → रोमन (Patel = પટેલ) */
     if(w.length>4&&/[a-z]s$/.test(w))alt.push(w.slice(0,-1));       /* "plumbers" -> "plumber" */
     if(!/^\d+$/.test(w))spell(w).forEach(a=>alt.includes(a)||alt.length>=8||alt.push(a));   /* Shriram = Shree Ram = Sri Ram */
     return {w,alt,pin:/^\d{6}$/.test(w),num:/^\d+$/.test(w)};
@@ -394,7 +397,8 @@ async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
   try{if(push&&q0&&window.PBRecent)PBRecent.add(q0);}catch(e){}   /* 🕘 पिछली खोजें (सिर्फ़ इसी फ़ोन में) */
-  const PQ=priceQ(q);if(PQ)q=PQ.rest;   /* "500 se kam" → सिर्फ़ Products की कीमत पर; दुकान की खोज बाकी शब्दों से */
+  const PQ=priceQ(q);if(PQ)q=PQ.rest;
+  TQ=null;if(FAUTO){FOPEN=false;FAUTO=false;}{const tq=timeQ(q);if(tq&&tq.rest){q=tq.rest;if(tq.now){if(!FOPEN)FAUTO=true;FOPEN=true;}else TQ=tq;}}   /* "raat ko khula medical" → medical + समय फ़िल्टर */   /* "500 se kam" → सिर्फ़ Products की कीमत पर; दुकान की खोज बाकी शब्दों से */
   try{window.pbP2P&&window.pbP2P(q0);}catch(e){}try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
@@ -760,9 +764,9 @@ var IMGTOK=0,LASTR=null;
 function setView(v){VIEW=v;if(LASTR)render.apply(null,LASTR.concat([true]));}
 /* ₹ कीमत वाली खोज: "500 se kam", "under 500", "₹1000 तक", "500 ke andar" → {max, rest} */
 function priceQ(q){
-  const N="(?:₹|rs\\.?|inr)?\\s*(\\d{2,6})\\s*(?:₹|rs\\.?|rupees?|rupaye|rupye|रुपये|रुपए|रु\\.?)?";
+  const N="(?:₹|rs\\.?|inr)?\\s*(\\d{2,6})\\s*(?:₹|rs\\.?|rupees?|rupaye|rupye|रुपये|रुपए|रु\\.?|રૂપિયા|રૂ\\.?)?";
   const A=new RegExp("(?:^|\\s)(?:under|below|less\\s*than|up\\s*to|upto|within|max|maximum)\\s*"+N+"(?=\\s|$)","i");
-  const B=new RegExp("(?:^|\\s)"+N+"\\s*(?:se\\s*kam|se\\s*niche|से\\s*कम|से\\s*नीचे|tak|तक|ke\\s*andar|के\\s*अंदर|ke\\s*niche|के\\s*नीचे|ya\\s*kam|या\\s*कम|or\\s*less|and\\s*below|me|में|mein)(?=\\s|$)","i");
+  const B=new RegExp("(?:^|\\s)"+N+"\\s*(?:se\\s*kam|se\\s*niche|से\\s*कम|से\\s*नीचे|tak|तक|ke\\s*andar|के\\s*अंदर|ke\\s*niche|के\\s*नीचे|ya\\s*kam|या\\s*कम|or\\s*less|and\\s*below|me|में|mein|થી\\s*ઓછ\\S*|થી\\s*નીચે|સુધી|ની\\s*અંદર)(?=\\s|$)","i");
   let m=q.match(A)||q.match(B);if(!m)return null;const max=+m[1];if(!(max>=10))return null;
   return {max,rest:q.replace(m[0]," ").replace(/\s+/g," ").trim()};
 }
@@ -786,12 +790,51 @@ async function loadProds(q,max){
     return '<a class="pt" href="'+esc(href)+'"><div class="im"><img src="'+esc(x.url)+'" alt="" loading="lazy" decoding="async"></div><div class="tx"><b>'+esc(x.name)+'</b>'+pr+(x.sold?'<span class="so">'+(en?"Sold out":"अभी उपलब्ध नहीं")+'</span>':'')+'<span class="sh">🏪 '+esc(x.shop)+'</span></div></a>';}).join("")+'</div>';
   el.hidden=false;
 }
+/* 🕙 समय वाला सवाल: "raat ko khula medical", "Sunday ko khula garage", "24 ghante khula", "રાત્રે ખુલ્લું" → {day, min, h24}
+   खुला/open जैसा शब्द (या 24 घंटे) हो तभी — वरना कुछ नहीं बदलता */
+const TQ_OPEN=/^(khula|khuli|khule|khulla|khulli|open|opened|chalu|खुला|खुली|खुले|चालू|ખુલ્લું|ખુલ્લી|ખુલ્લા|ખુલ્લુ|ચાલુ)$/i;
+const TQ_PART=[[/^(raat|rat|raatko|night|nights|रात|रात्रि|રાત|રાત્રે|રાતે)$/i,22*60,"night"],[/^(subah|subhe|savere|morning|सुबह|સવારે|સવાર)$/i,8*60,"morning"],[/^(dopahar|dopaher|afternoon|दोपहर|બપોરે|બપોર)$/i,14*60,"afternoon"],[/^(shaam|sham|evening|शाम|સાંજે|સાંજ)$/i,19*60,"evening"]];
+const TQ_NOW=/^(abhi|abi|now|अभी|હમણાં|હમણા|અત્યારે)$/i;
+const TQ_DAYS=[["sunday|ravivar|raviwar|itwar|रविवार|इतवार|રવિવાર|રવિવારે"],["monday|somvar|somwar|सोमवार|સોમવાર|સોમવારે"],["tuesday|mangalvar|mangalwar|मंगलवार|મંગળવાર|મંગળવારે"],["wednesday|budhvar|budhwar|बुधवार|બુધવાર|બુધવારે"],["thursday|guruvar|guruwar|गुरुवार|ગુરુવાર|ગુરુવારે"],["friday|shukravar|shukrawar|शुक्रवार|શુક્રવાર|શુક્રવારે"],["saturday|shanivar|shaniwar|शनिवार|શનિવાર|શનિવારે"]].map(x=>new RegExp("^("+x[0]+")$","i"));
+const TQ_FILL=/^(ko|को|me|mein|में|pe|par|bhi|ke|ka|ki|baje|बजे|વાગ્યે|વાગે|ne|ને|time|समय|ghante|ghanta|घंटे|घंटा|કલાક|hours|hour|hrs|x7|\/7)$/i;
+function timeQ(q){
+  const toks=String(q||"").split(/\s+/).filter(Boolean);if(toks.length<2)return null;
+  const low=toks.map(t=>t.toLowerCase().replace(/[?!।,]/g,""));
+  const open=low.some(t=>TQ_OPEN.test(t)),h24=/(^|\s)24\s*(x\s*7|\/\s*7|ghante|ghanta|hours?|hrs|घंटे|घंटा|કલાક)(\s|$)/i.test(low.join(" "))||low.includes("24x7");
+  if(!open&&!h24)return null;
+  let day=null,min=null,part="",now=false,hr=null;
+  low.forEach((t,i)=>{TQ_DAYS.forEach((re,d)=>{if(re.test(t))day=d;});TQ_PART.forEach(p=>{if(p[0].test(t)){min=p[1];part=p[2];}});if(TQ_NOW.test(t))now=true;
+    if(/^\d{1,2}$/.test(t)&&/^(baje|बजे|વાગ્યે|વાગે|pm|am)$/i.test(low[i+1]||""))hr=+t;});
+  if(hr!=null&&hr<=24){let h=hr%24;if((part==="night"||part==="evening"||part==="afternoon"||low.includes("pm"))&&h<12)h+=12;if(part==="night"&&h<16&&hr<5)h=hr;min=h*60;}
+  const keep=toks.filter((t,i)=>{const l=low[i];return !(TQ_OPEN.test(l)||TQ_NOW.test(l)||TQ_DAYS.some(re=>re.test(l))||TQ_PART.some(p=>p[0].test(l))||TQ_FILL.test(l)||l==="24"||l==="24x7"||l==="pm"||l==="am"||(/^\d{1,2}$/.test(l)&&/^(baje|बजे|વાગ્યે|વાગે|pm|am)$/i.test(low[i+1]||"")));});
+  if(day==null&&min==null&&!h24)now=true;
+  return {day,min,h24,now:now&&day==null&&min==null,rest:keep.join(" ")};
+}
+function tqLabel(t,en){
+  const DN=en?["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]:["रविवार","सोमवार","मंगलवार","बुधवार","गुरुवार","शुक्रवार","शनिवार"];
+  const hm=m=>{let h=Math.floor(m/60),x=m%60,mm=x?":"+String(x).padStart(2,"0"):"";if(!en){const pt=h>=4&&h<12?"सुबह":h>=12&&h<16?"दोपहर":h>=16&&h<20?"शाम":"रात";return pt+" "+(h%12||12)+mm+" बजे";}const ap=h>=12?"PM":"AM";h=h%12||12;return h+mm+" "+ap;};
+  if(t.h24)return en?"Open 24 hours":"24 घंटे खुली";
+  const d=t.day!=null?DN[t.day]:"",m=t.min!=null?hm(t.min):"";
+  if(en)return "Open "+(d?"on "+d:"")+(d&&m?" at ":m?"at ":"")+m;
+  return (d?d+" को ":"")+(m?m+" ":"")+"खुली";
+}
+function openAt(b,t){
+  const h=line(b,"Hours"),off=line(b,"Closed"),m=h.match(/^(\d{2}):(\d{2})-(\d{2}):(\d{2})$/);if(!m)return false;
+  const a=+m[1]*60+ +m[2],z=+m[3]*60+ +m[4],DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),day=t.day!=null?t.day:now.getDay();
+  if(DN[day]===off)return false;
+  if(t.h24)return ((z-a+1440)%1440)>=23*60||a===z;
+  if(t.min==null)return true;
+  return a<=z?t.min>=a&&t.min<z:t.min>=a||t.min<z;
+}
 /* 🟢 अभी खुली / 📍 सबसे पास / ⭐ अच्छी रेटिंग — नतीजों के ऊपर बटन (कुछ save नहीं होता) */
-let FOPEN=false,FSORT="",FME=null,FRAW=null,FMSG="";
+let FOPEN=false,FSORT="",FME=null,FRAW=null,FMSG="",FVER=false,TQ=null,FAUTO=false;
 function fRk(b){const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);}
 function fltApply(rows){
   let r=(rows||[]).slice();
   if(FOPEN)r=r.filter(b=>{const s=openSt(b);return !!(s&&s.open);});
+  if(TQ)r=r.filter(b=>openAt(b,TQ));
+  if(FVER)r=r.filter(b=>!!b.is_verified);
   if(FSORT==="near"&&FME){r.forEach(b=>{b._km=+b.latitude&&+b.longitude?kmTo(FME,{la:+b.latitude,ln:+b.longitude}):null;});const dk=b=>b._km==null?1e9:b._km;r=r.map((b,i)=>[b,i]).sort((x,y)=>(x[0]._o?1:0)-(y[0]._o?1:0)||dk(x[0])-dk(y[0])||x[1]-y[1]).map(x=>x[0]);}
   else if(FSORT==="rate")r=r.map((b,i)=>[b,i]).sort((x,y)=>(x[0]._o?1:0)-(y[0]._o?1:0)||fRk(y[0])-fRk(x[0])||x[1]-y[1]).map(x=>x[0]);
   return r;
@@ -799,17 +842,21 @@ function fltApply(rows){
 function fRedo(){PGI=0;if(LASTR)render(LASTR[0],LASTR[1],LASTR[2]);}
 function drawF(){
   const el=$("fch");if(!el)return;const en=FEN();
-  if(!FRAW||(FRAW.length<2&&!FOPEN&&!FSORT)){el.hidden=true;return;}
+  if(!FRAW||(FRAW.length<2&&!FOPEN&&!FSORT&&!FVER&&!TQ)){el.hidden=true;return;}
   el.hidden=false;
   el.innerHTML='<button type="button" data-f="open" class="'+(FOPEN?"on":"")+'" aria-pressed="'+FOPEN+'">🟢 '+(en?"Open now":"अभी खुली")+'</button>'+
     '<button type="button" data-f="near" class="'+(FSORT==="near"?"on":"")+'" aria-pressed="'+(FSORT==="near")+'">📍 '+(en?"Nearest":"सबसे पास")+'</button>'+
     '<button type="button" data-f="rate" class="'+(FSORT==="rate"?"on":"")+'" aria-pressed="'+(FSORT==="rate")+'">⭐ '+(en?"Top rated":"अच्छी रेटिंग")+'</button>'+
+    '<button type="button" data-f="ver" class="'+(FVER?"on":"")+'" aria-pressed="'+FVER+'">✅ '+(en?"Verified":"वेरिफ़ाइड")+'</button>'+
+    (TQ?'<button type="button" data-f="tq" class="on" aria-label="'+esc(en?"Remove time filter":"समय वाला फ़िल्टर हटाएँ")+'">🕙 '+esc(tqLabel(TQ,en))+' ✕</button>':'')+
     (FMSG?'<small>'+esc(FMSG)+'</small>':'');
 }
 document.addEventListener("click",e=>{
   const b=e.target.closest&&e.target.closest("#fch [data-f]");if(!b)return;const f=b.dataset.f,en=FEN();FMSG="";
-  if(f==="open"){FOPEN=!FOPEN;return fRedo();}
+  if(f==="open"){FOPEN=!FOPEN;FAUTO=false;return fRedo();}
   if(f==="rate"){FSORT=FSORT==="rate"?"":"rate";return fRedo();}
+  if(f==="ver"){FVER=!FVER;return fRedo();}
+  if(f==="tq"){TQ=null;return fRedo();}
   if(f==="near"){
     if(FSORT==="near"){FSORT="";return fRedo();}
     if(FME){FSORT="near";return fRedo();}
@@ -824,10 +871,11 @@ function render(rows,q,city,keep){
   LASTR=[FRAW||rows,q,city];
   drawF();
   rows=fltApply(keep?rows:FRAW);
-  if(FOPEN&&FRAW&&FRAW.length&&!rows.length&&!BIGROW){
+  if((FOPEN||TQ||FVER)&&FRAW&&FRAW.length&&!rows.length&&!BIGROW){
     const en=FEN();$("count").textContent="";const tb=$("vtabs");if(tb)tb.hidden=true;
-    $("list").innerHTML='<div class="empty"><p><b>'+esc(en?"None of these shops are open right now.":"इनमें से कोई दुकान अभी खुली नहीं है।")+'</b></p><p>'+esc(en?"Shops that have not added their timings are not shown with this filter.":"जिन दुकानों ने अपना समय नहीं डाला, वे इस फ़िल्टर में नहीं दिखतीं।")+'</p><button type="button" class="btn" id="fOff">'+esc(en?"Show all shops":"सभी दुकानें दिखाएँ")+'</button></div>';
-    $("fOff").onclick=()=>{FOPEN=false;fRedo();};return;
+    const tm=FOPEN||TQ,msg=tm?(TQ&&!TQ.now?(en?"None of these shops match \u201c"+tqLabel(TQ,en)+"\u201d.":"इनमें से कोई दुकान \u201c"+tqLabel(TQ,en)+"\u201d नहीं मिली।"):(en?"None of these shops are open right now.":"इनमें से कोई दुकान अभी खुली नहीं है।")):(en?"None of these shops are verified.":"इनमें से कोई दुकान वेरिफ़ाइड नहीं है।");
+    $("list").innerHTML='<div class="empty"><p><b>'+esc(msg)+'</b></p>'+(tm?'<p>'+esc(en?"Shops that have not added their timings are not shown with this filter.":"जिन दुकानों ने अपना समय नहीं डाला, वे इस फ़िल्टर में नहीं दिखतीं।")+'</p>':'')+'<button type="button" class="btn" id="fOff">'+esc(en?"Show all shops":"सभी दुकानें दिखाएँ")+'</button></div>';
+    $("fOff").onclick=()=>{FOPEN=false;TQ=null;FVER=false;fRedo();};return;
   }
   const tb=$("vtabs");
   if(tb){const has=(rows&&rows.length)||BIGROW;tb.hidden=!has||(NFHIDE&&!keep);if(!tb.hidden){$("tabAllT").textContent=FEN()?"All":"सब";$("tabAll").className=VIEW==="all"?"on":"";$("tabImg").className=VIEW==="img"?"on":"";}}
