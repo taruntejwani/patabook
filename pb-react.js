@@ -4,7 +4,7 @@
    • SQL 44: pb_my_shop_react, pb_vote_set, pb_fav_set */
 (function () {
   if (window.PBReact) return;
-  var slug = new URLSearchParams(location.search).get("slug") || "", ST = { vote: 0, fav: false }, LOADED = false, BUSY = false, MSG = "", CSS = false;
+  var slug = new URLSearchParams(location.search).get("slug") || "", OWN = false, ST = { vote: 0, fav: false }, LOADED = false, BUSY = false, MSG = "", CSS = false;
   function en() { if (window.PB && PB.lang) return PB.lang() !== "hi"; try { return (localStorage.getItem("pb-lang") || "en") !== "hi"; } catch (e) { return true; } }
   function T(h, e) { return en() ? e : h; }
   function cfg() { try { return { u: SB, k: KEY }; } catch (e) { return null; } }
@@ -18,6 +18,7 @@
   async function sess() { try { var s = window.PBA ? await PBA.session() : null; if (s && PBA.isGuest && PBA.isGuest(s)) return null; return s; } catch (e) { return null; } }
   async function loadMine() {
     if (LOADED) return; LOADED = true; var s = await sess(); if (!s) return;
+    try { OWN = (JSON.parse(localStorage.getItem("pb-my-shops") || "[]") || []).indexOf(slug) >= 0; } catch (e) {}
     try { var j = await call("pb_my_shop_react", { p_slug: slug }, s.access_token); if (j) { ST.vote = j.vote || 0; ST.fav = !!j.fav; } } catch (e) {}
     paint();
   }
@@ -45,6 +46,10 @@
   function paint() {
     var x = el(); if (!x) return; css();
     x.className = "pbrx";
+    if (OWN) {   /* अपनी दुकान: 👍👎✍️ नहीं (सर्वर भी मना करता है) — सिर्फ़ एक छोटी सूचना */
+      x.innerHTML = '<div class="pbrxm" style="flex-basis:100%">' + T("👍 पसंद, 👎 नापसंद और ✍️ सुझाव ग्राहक देते हैं — इनकी गिनती आपकी Report में दिखती है।", "👍 Likes, 👎 dislikes and ✍️ feedback come from customers — see the counts in your Report.") + '</div>';
+      return;
+    }
     x.innerHTML =
       '<button type="button" data-rx="up" class="' + (ST.vote === 1 ? "on" : "") + '" aria-pressed="' + (ST.vote === 1) + '"><span>👍</span>' + T("पसंद", "Like") + '</button>' +
       '<button type="button" data-rx="down" class="dn' + (ST.vote === -1 ? " on" : "") + '" aria-pressed="' + (ST.vote === -1) + '"><span>👎</span>' + T("नापसंद", "Dislike") + '</button>' +
