@@ -944,7 +944,7 @@ function applyLang(){
   let LASTK="";
   function draw(){const t=tk();if(!t)return;
     const city=String(document.getElementById("city")?.value||"").trim();
-    P=ALL.slice();   /* पूरे Kutch के poster, शहर से नहीं छँटते */
+    P=city?ALL.filter(b=>inCity(b,city)):ALL.slice();   /* ऊपर चुने शहर के ही poster (मालिक के कहने पर); "सब जगह" = सब */
     const key=(loaded?1:0)+"|"+DSK.matches+"|"+(PB.lang&&PB.lang())+"|"+P.map(b=>b.slug+b.url).join(",");
     if(key===LASTK&&t.children.length)return;   /* कुछ बदला नहीं (जैसे "Near me" दबाया): poster दोबारा न बनें, न झपकें */
     LASTK=key;
