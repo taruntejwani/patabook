@@ -954,14 +954,20 @@ function prodSheet(p){const d=document.createElement("div");d.className="psh";
    (DSCP[p.id]?'<p class="pdesc">'+esc(DSCP[p.id])+'</p>':'')+
    (featsOf(p).length?'<div class="pft">'+featsOf(p).map(f=>'<span>✔ '+esc(f)+'</span>').join("")+'</div>':'')+
    '<button type="button" class="pask big" id="pAsk">💬 '+L("WhatsApp पर पूछें / ऑर्डर","Ask / order on WhatsApp")+'</button>'+
-   '<button type="button" class="pshr big" id="pShr">📤 '+L("दोस्त को भेजें","Share with a friend")+'</button></div>';
+   '<button type="button" class="pshr big" id="pWa" style="margin-top:8px">📤 '+L("WhatsApp पर भेजें","Send on WhatsApp")+'</button>'+
+   '<button type="button" class="pshr big" id="pShr" style="margin-top:8px">🔗 '+L("दोस्त को भेजें","Share with a friend")+'</button></div>';
   d.onclick=e=>{if(e.target===d||e.target.closest(".px"))d.remove();};document.body.appendChild(d);
   d.querySelector("#pAsk").onclick=()=>{d.remove();prodAsk(p);};
+  d.querySelector("#pWa").onclick=()=>prodWa(p);
   d.querySelector("#pShr").onclick=()=>prodShare(p);}
-function prodShare(p){if(!B||!p)return;const u=shopUrl()+(p.id?"#p"+p.id:"");
+function prodMsg(p){const u=shopUrl()+(p.id?"#p"+p.id:"");
   const t="🛍️ "+p.name+(p.size?" ("+p.size+")":"")+(offerOf(p)?" · "+rsF(offerOf(p))+(p.mrp&&offerOf(p)<p.mrp?" (MRP "+rsF(p.mrp)+")":""):p.mrp?" · "+rsF(p.mrp)+" MRP":"")+"\n🏪 "+B.name+"\n"+L("PataBook पर देखें:","See it on PataBook:");
-  if(navigator.share){navigator.share({title:p.name,text:t,url:u}).catch(()=>{});return;}
-  window.open("https://wa.me/?text="+encodeURIComponent(t+"\n"+u),"_blank","noopener");}
+  return {u:u,t:t};}
+function prodShare(p){if(!B||!p)return;const m=prodMsg(p);
+  if(navigator.share){navigator.share({title:p.name,text:m.t,url:m.u}).catch(()=>{});return;}
+  window.open("https://wa.me/?text="+encodeURIComponent(m.t+"\n"+m.u),"_blank","noopener");}
+function prodWa(p){if(!B||!p)return;const m=prodMsg(p);   /* सीधे WhatsApp में (share menu के बिना) */
+  window.open("https://wa.me/?text="+encodeURIComponent(m.t+"\n"+m.u),"_blank","noopener");}
 function lightbox(Ls,i){const d=document.createElement("div");d.className="lbx";
   const show=()=>{d.innerHTML='<img src="'+esc(Ls[i])+'" alt=""><button class="x" aria-label="Close">✕</button>'+(Ls.length>1?'<button class="pv" aria-label="Previous">‹</button><button class="nx" aria-label="Next">›</button>':'');};
   show();d.onclick=e=>{if(e.target.closest(".pv")){i=(i-1+Ls.length)%Ls.length;show();return;}if(e.target.closest(".nx")){i=(i+1)%Ls.length;show();return;}if(e.target===d||e.target.closest(".x"))d.remove();};
