@@ -599,9 +599,14 @@ function openSt(b){
     if(window.maplibregl)return Promise.resolve();
     if(MLP)return MLP;
     MLP=new Promise((ok,no)=>{
-      const l=document.createElement("link");l.rel="stylesheet";l.href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";document.head.appendChild(l);
-      const sc=document.createElement("script");sc.src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js";sc.onload=()=>window.maplibregl?ok():no(new Error("ml"));sc.onerror=()=>{MLP=null;no(new Error("ml"));};document.head.appendChild(sc);
-      setTimeout(()=>no(new Error("ml timeout")),10000);
+      /* unpkg → jsDelivr → cdnjs (कोई एक न खुले तो अगला) */
+      const SRC=[["https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css","https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"],["https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css","https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"],["https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css","https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"]];
+      let fin=false;
+      const tryI=i=>{if(fin)return;if(i>=SRC.length){fin=true;MLP=null;return no(new Error("ml"));}
+        let moved=false;const nx=()=>{if(moved||fin)return;moved=true;l.remove();tryI(i+1);};
+        const l=document.createElement("link");l.rel="stylesheet";l.href=SRC[i][0];document.head.appendChild(l);
+        const sc=document.createElement("script");sc.src=SRC[i][1];sc.onload=()=>{if(fin)return;if(window.maplibregl){fin=true;ok();}else nx();};sc.onerror=nx;document.head.appendChild(sc);setTimeout(nx,8000);};
+      tryI(0);
     });
     return MLP;
   }

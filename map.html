@@ -14,21 +14,33 @@
 var PB_USE_MAPBOX = true;
 var PB_LIBS = {
   mapbox: ['https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.css', 'https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.js'],
-  free: ['https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css', 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js']
+  free: ['https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css', 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'],
+  /* unpkg न खुले / अटके (कुछ mobile network पर) → यही library दूसरी जगह से */
+  free2: ['https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css', 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js'],
+  free3: ['https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css', 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js']
 };
 (function () {
   var freeUntil = 0; try { freeUntil = +localStorage.getItem('pb-free-until') || 0; } catch (e) {}
   window.PB_PROVIDER = PB_USE_MAPBOX && freeUntil < Date.now() ? 'mapbox' : 'free';
+  var done = false;
   function load(kind, fail) {
+    var moved = false, next = function () { if (moved || done) return; moved = true; l.remove(); fail(); };
     var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = PB_LIBS[kind][0]; document.head.appendChild(l);
     var sc = document.createElement('script'); sc.src = PB_LIBS[kind][1];
-    sc.onload = function () { if (kind === 'mapbox') window.maplibregl = window.mapboxgl; window.PB_PROVIDER = kind; window.__libReady = true; if (window.PBMAIN) window.PBMAIN(); };
-    sc.onerror = fail;
+    sc.onload = function () {
+      if (done) return;
+      if (kind === 'mapbox') window.maplibregl = window.mapboxgl;
+      if (!window.maplibregl) return next();
+      done = true; window.PB_PROVIDER = kind === 'mapbox' ? 'mapbox' : 'free'; window.__libReady = true; if (window.PBMAIN) window.PBMAIN();
+    };
+    sc.onerror = next;
+    setTimeout(next, 9000);   /* 9 सेकंड में न आए → अगली जगह से */
     document.head.appendChild(sc);
   }
-  var giveUp = function () { window.__libReady = true; if (window.PBMAIN) window.PBMAIN(); };
-  if (window.PB_PROVIDER === 'mapbox') load('mapbox', function () { load('free', giveUp); });
-  else load('free', giveUp);
+  var giveUp = function () { if (done) return; done = true; window.__libReady = true; if (window.PBMAIN) window.PBMAIN(); };
+  var freeChain = function () { load('free', function () { load('free2', function () { load('free3', giveUp); }); }); };
+  if (window.PB_PROVIDER === 'mapbox') load('mapbox', freeChain);
+  else freeChain();
 })();
 </script>
 <script src="i18n.js"></script>
