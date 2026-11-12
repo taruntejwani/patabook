@@ -435,6 +435,9 @@ async function run(push){
       if(kind==="of")loadProds("",0,cy||"");else loadProds("",0);
       return;
     }
+    /* "dashboard polish offer" → "dashboard polish" खोजें, सामान में छूट वाले पहले (शब्द "offer" से दुकान न छूटे) */
+    PDISC=false;
+    if(kind==="of"&&rest.length){const q2=q.split(/\s+/).filter(x=>!OFW.test(x.toLowerCase().replace(/[?.!,]/g,""))).join(" ").trim();if(q2){q=q2;PDISC=true;}}
   }
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
@@ -897,6 +900,7 @@ function priceQ(q){
 /* 🛍️ दुकानों के Products में खोज (sql-47: pb_search_products) — नतीजों के ऊपर एक पट्टी */
 let PRN=0;
 function prodWords(q){return String(q||"").toLowerCase().split(/\s+/).filter(w=>w&&!STOPW.has(w)).map(w=>{const a=ALIAS[w];return a?a.split(" ")[0]:w;}).join(" ");}
+let PDISC=false;
 async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वाले सामान (sql-55), उस शहर के; "" = सब शहर */
   const el=$("prods");if(!el)return;const n=++PRN;el.hidden=true;el.innerHTML="";
   const DISC=typeof dc==="string";
@@ -908,9 +912,10 @@ async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वा�
   const inr=v=>"₹"+Number(v).toLocaleString("en-IN");
   const lim=max?(en?" up to "+inr(max):" · "+inr(max)+" तक"):"";
   if(!rows.length){if(max){el.hidden=false;el.innerHTML='<h3>🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+'</h3><p class="nt">'+esc(en?"No product found up to "+inr(max)+".":inr(max)+" तक का कोई प्रोडक्ट नहीं मिला।")+'</p>';}return;}
+  let PD=false;if(!DISC&&PDISC){const d=rows.filter(x=>x.price!=null&&((x.mrp!=null&&+x.mrp>+x.price)||+x.disc>0));if(d.length){rows=d;PD=true;}}   /* "… offer" → सिर्फ़ छूट वाले (हों तो) */
   PRROWS=rows;
   const cmpN=rows.filter(x=>x.net!=null&&!x.sold).length,cmpShops=new Set(rows.filter(x=>x.net!=null).map(x=>x.slug)).size;
-  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+(DISC?'🏷️ '+esc(en?"Discounted products"+(dc?" in "+dc:""):"छूट वाले सामान"):'🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim))+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
+  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+(DISC||PD?'🏷️ '+esc(en?"Discounted products"+(dc?" in "+dc:""):"छूट वाले सामान"):'🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim))+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
     const href=(window.PBPlan&&PBPlan.url?PBPlan.url(x.slug):"business.html?slug="+encodeURIComponent(x.slug));
     const p=x.price!=null?+x.price:null,m=x.mrp!=null&&p!=null&&+x.mrp>p?+x.mrp:null,net=x.net!=null?+x.net:p;
     let pr="";if(net!=null){pr='<span class="pr"><strong>'+(x.price_from?(en?"From ":"")+inr(net)+(en?"":" से शुरू"):inr(net))+'</strong>'+(m?'<s>'+inr(m)+'</s><em>'+Math.round((m-p)*100/m)+'% '+(en?"OFF":"छूट")+'</em>':(x.disc&&p!=null?'<s>'+inr(p)+'</s><em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':''))+'</span>';}
