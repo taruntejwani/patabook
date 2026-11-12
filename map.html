@@ -1243,7 +1243,7 @@ function addRouteLayers() {
     paint: { 'line-color': '#1a73e8', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 3.5, 18, 11] } }, 'poi-glow', 'middle');
 }
 var route = null, rMode = 'car', startMk = null, endMk = null, picking = false;
-function openRoute(dest) {
+function openRoute(dest, from) {
   clearVia();
   route = { to: dest.ll, name: dest.name || '', from: null, data: null, via: null };
   $('rTo').textContent = route.name;
@@ -1252,6 +1252,7 @@ function openRoute(dest) {
   $('rSum').textContent = T('finding');
   if (endMk) endMk.remove();
   endMk = new maplibregl.Marker({ color: '#e5383b' }).setLngLat(dest.ll).addTo(map);
+  if (from) { route.from = from; calcRoute(false); return; }   /* ?from=… (खोज के "A to B" से आए) → GPS नहीं, वही जगह */
   getPos().then(function (ll) { route.from = ll; calcRoute(false); }, pickStart);
 }
 function pickStart() {
@@ -1476,15 +1477,17 @@ $('nStop').onclick = function () { if (window.speechSynthesis) speechSynthesis.c
 $('nVoice').onclick = function () { voice = !voice; this.textContent = voice ? '🔊' : '🔇'; status(T(voice ? 'voice_on' : 'voice_off')); if (!voice && window.speechSynthesis) speechSynthesis.cancel(); };
 
 /* =========================================================
-   दूसरे पेज से आए: map.html?to=lat,lng&n=नाम  या  ?q=पता&n=नाम
+   दूसरे पेज से आए: map.html?to=lat,lng&n=नाम  या  ?q=पता&n=नाम   (+ &from=lat,lng → उस जगह से रास्ता)
    ========================================================= */
 function handleUrl() {
   var P = new URLSearchParams(location.search), n = (P.get('n') || '').slice(0, 120), a = (P.get('a') || '').slice(0, 200);
   var to = (P.get('to') || '').split(',').map(Number);
+  var fr = (P.get('from') || '').split(',').map(Number), fll = null;
+  if (fr.length === 2 && isFinite(fr[0]) && isFinite(fr[1]) && Math.abs(fr[0]) <= 90 && Math.abs(fr[1]) <= 180 && (fr[0] || fr[1])) fll = [fr[1], fr[0]];
   if (to.length === 2 && isFinite(to[0]) && isFinite(to[1]) && Math.abs(to[0]) <= 90 && Math.abs(to[1]) <= 180) {
     var ll = [to[1], to[0]];
     map.jumpTo({ center: ll, zoom: 16 });
-    openRoute({ ll: ll, name: n || a });
+    openRoute({ ll: ll, name: n || a }, fll);
     return;
   }
   var q = (P.get('q') || '').slice(0, 200);

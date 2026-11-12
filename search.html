@@ -748,7 +748,8 @@ function openSt(b){
       const gm0="https://www.google.com/maps/dir/?api=1&origin="+ul+","+ug+"&destination="+tl+","+tg+"&travelmode=driving";
       if(km==null){   /* सड़क की दूरी नहीं मिली → अंदाज़ा सड़क की दूरी बनाकर नहीं दिखाते */
         out.innerHTML='<b style="color:#b3261e">⚠ '+esc(en?"Road distance is not available right now (map service did not respond).":"अभी सड़क की दूरी नहीं निकल पाई (नक्शे की सेवा ने जवाब नहीं दिया)।")+'</b><small>'+esc((en?"Straight-line distance: ":"सीधी (हवाई) दूरी: ")+(sl<1?Math.round(sl*1000)+" m":sl.toFixed(1)+" km")+(en?" — this is not the road distance. Try again in a little while, or tap Directions.":" — यह सड़क की दूरी नहीं है। थोड़ी देर बाद फिर कोशिश करें या 🧭 रास्ता दबाइए।"))+'</small><small>📍 '+esc((en?"Found: ":"मिला: ")+(ga.lab||A)+" → "+(gb.lab||B))+'</small>';
-        out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm0)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"रास्ता (रास्ता चलाएँ)")+'</a></div>');
+        const pm0="map.html?from="+ul.toFixed(6)+","+ug.toFixed(6)+"&to="+tl.toFixed(6)+","+tg.toFixed(6)+"&n="+encodeURIComponent((gb.lab||B).split(",")[0]);
+        out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><a class="call" href="'+esc(pm0)+'">🧭 '+esc(en?"Directions on PataBook map":"PataBook नक्शे पर रास्ता")+'</a><a href="'+esc(gm0)+'" target="_blank" rel="noopener" style="color:#0b4db3;font-weight:700;font-size:14px">'+esc(en?"Open in Google Maps":"Google Maps में खोलें")+'</a></div>');
         return true;
       }
       const kmT=km<1?Math.round(km*1000)+" m":km.toFixed(1)+" km";
@@ -758,7 +759,8 @@ function openSt(b){
       const chg=[[ga,pr[0]],[gb,pr[1]]].filter(x=>x[0].alts&&x[0].alts.length).map(x=>x[1]);card._chg=chg;card._q=q;
       out.innerHTML=(exact?"":(en?"About ":"लगभग "))+"<b>"+kmT+"</b> · 🚗 "+(exact?"":"~")+fm(dm)+(wm!=null&&km<=8?" · 🚶 "+(exact?"":"~")+fm(wm):"")+"<small>"+esc(note)+"</small><small>📍 "+esc(lbl)+(chg.length?' <a href="#" class="pchg" style="color:#0b4db3;font-weight:700">'+esc(en?"Change place":"जगह बदलें")+'</a>':"")+"</small>"+(far?"<small style=\"color:#b3261e;font-weight:700\">⚠ "+esc(en?"This is far away — a place may be matched wrongly. Please write the full name, e.g. \u201cBharat Nagar Gandhidham\u201d.":"यह बहुत दूर है — कोई जगह गलत पकड़ी गई हो सकती है। पूरा नाम लिखें, जैसे \u201cBharat Nagar गांधीधाम\u201d।")+"</small>":"");
       const gm="https://www.google.com/maps/dir/?api=1&origin="+ul+","+ug+"&destination="+tl+","+tg+"&travelmode=driving";
-      out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px"><a class="call" href="'+esc(gm)+'" target="_blank" rel="noopener">🧭 '+esc(en?"Directions":"रास्ता (रास्ता चलाएँ)")+'</a></div>');
+      const pm="map.html?from="+ul.toFixed(6)+","+ug.toFixed(6)+"&to="+tl.toFixed(6)+","+tg.toFixed(6)+"&n="+encodeURIComponent((gb.lab||B).split(",")[0]);   /* PataBook का अपना नक्शा: वही दोनों जगह */
+      out.insertAdjacentHTML("afterend",'<div class="acts" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><a class="call" href="'+esc(pm)+'">🧭 '+esc(en?"Directions on PataBook map":"PataBook नक्शे पर रास्ता")+'</a><a href="'+esc(gm)+'" target="_blank" rel="noopener" style="color:#0b4db3;font-weight:700;font-size:14px">'+esc(en?"Open in Google Maps":"Google Maps में खोलें")+'</a></div>');
       if(line)drawMap(card,line,ul,ug,tl,tg);
       return true;
     }catch(_){if(my===P2S)box.remove();return false;}
