@@ -514,7 +514,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 
 <footer><nav class="pb-legal" style="display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;margin:0 0 8px;font-size:13px"><a data-i="f_priv" href="privacy.html" style="color:#5b6475;text-decoration:none">Privacy Policy</a><a data-i="f_terms" href="terms.html" style="color:#5b6475;text-decoration:none">Terms &amp; Conditions</a><a data-i="f_about" href="about.html" style="color:#5b6475;text-decoration:none">About Us</a><a data-i="f_faq" href="faq.html" style="color:#5b6475;text-decoration:none">FAQ</a><a data-i="f_contact" href="contact.html" style="color:#5b6475;text-decoration:none">Contact Us</a><a href="mybusiness.html" style="color:#5b6475;text-decoration:none" data-i="myshop">मेरी दुकान</a></nav>© PataBook · <span data-i="f_tag">Local Business Directory</span><div style="font-size:11px;opacity:.35;margin-top:4px;letter-spacing:.2px">Created by Tarun Tejwani</div></footer>
 
-<style>.seen{margin:16px 0 0}.seen h2{display:flex;align-items:center;justify-content:space-between;font-size:16px;margin:0 2px 8px;color:#0b2f73}.seen h2 button{border:0;background:none;color:#5b6475;font:600 13px inherit;font-family:inherit;padding:4px}.seenr{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px}.seenr a{flex:0 0 auto;max-width:200px;display:flex;flex-direction:column;gap:2px;border:1px solid #e3e8f2;border-radius:14px;background:#fff;padding:10px 12px;text-decoration:none;color:#14161c;box-shadow:0 2px 8px rgba(20,40,90,.05)}.seenr b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.seenr small{font-size:12px;color:#5b6475;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style>
+<style>.seen{margin:16px 0 0;width:100%;max-width:100%;min-width:0;box-sizing:border-box;align-self:stretch}.seen h2{display:flex;align-items:center;justify-content:space-between;font-size:16px;margin:0 2px 8px;color:#0b2f73}.seen h2 button{border:0;background:none;color:#5b6475;font:600 13px inherit;font-family:inherit;padding:4px}.seenr{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;max-width:100%;min-width:0;padding:2px 2px 6px}.seenr a{scroll-snap-align:start}.seenr a{flex:0 0 auto;max-width:200px;display:flex;flex-direction:column;gap:2px;border:1px solid #e3e8f2;border-radius:14px;background:#fff;padding:10px 12px;text-decoration:none;color:#14161c;box-shadow:0 2px 8px rgba(20,40,90,.05)}.seenr b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.seenr small{font-size:12px;color:#5b6475;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style>
 <script>
 /* 👀 हाल ही में देखी दुकानें — सिर्फ़ इसी फ़ोन में (localStorage "pb-seen"), दुकान के पेज पर खुलते ही जुड़ती है */
 (function(){
@@ -537,7 +537,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   async function fy(){
     const box=document.getElementById("forYou");if(!box)return;
     let seen=[];try{seen=(JSON.parse(localStorage.getItem("pb-seen")||"[]")||[]).filter(x=>x&&x.s);}catch(_){}
-    const cnt={};seen.forEach((x,i)=>{if(x.c)cnt[x.c]=(cnt[x.c]||0)+(8-i);});
+    const cnt={};seen.slice(0,8).forEach((x,i)=>{if(x.c)cnt[x.c]=(cnt[x.c]||0)+(8-i);});   /* सुझाव के लिए सिर्फ़ ताज़ा 8 */
     const cat=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
     if(!cat){box.hidden=true;return;}
     if(cat!==FYC||!FY){
