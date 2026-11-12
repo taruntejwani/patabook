@@ -165,9 +165,34 @@
       (tel ? '<a class="c" href="' + esc(tel) + '">📞 ' + (hi ? "कॉल" : "Call") + '</a>' : '') +
       '<button type="button" class="s" data-ca="share" data-pbh="share">📤 ' + (hi ? "शेयर करें" : "Share") + '</button></div>';
   }
+  /* 📤 Share में product की असली फ़ोटो भी जाए: खिड़की खुलते ही फ़ोटो को JPG बनाकर तैयार रखते हैं (WhatsApp webp को sticker समझ लेता है) */
+  var SHF = {};
+  function prepShare(u) {
+    if (!u || SHF[u] || !navigator.canShare || !window.fetch) return;
+    SHF[u] = "…";
+    fetch(u, { mode: "cors" }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (bl) {
+      return new Promise(function (res, rej) {
+        var im = new Image(), ou = URL.createObjectURL(bl);
+        im.onload = function () {
+          try {
+            var k = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
+            c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+            var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+            URL.revokeObjectURL(ou); c.toBlob(function (b) { b ? res(b) : rej(); }, "image/jpeg", 0.88);
+          } catch (e) { rej(e); }
+        };
+        im.onerror = rej; im.src = ou;
+      });
+    }).then(function (jb) {
+      var f = new File([jb], (pseg(u).replace(/\.[a-z0-9]+$/i, "") || "product") + ".jpg", { type: "image/jpeg" });
+      SHF[u] = navigator.canShare({ files: [f] }) ? f : null;
+    }).catch(function () { SHF[u] = null; });
+  }
   function doAct(k, u, t) {
     var x = INFO[u] || {}, hi = hiL(), link = plink(u), shop = shopName(), pt = priceTxt(x);
-    var txt = (t ? t : (hi ? "यह देखें" : "Have a look")) + (pt ? " — " + pt : "") + (shop ? (hi ? " · " + shop + " पर" : " · at " + shop) : "");
+    var txt = (t ? t : (hi ? "यह देखें" : "Have a look")) + (pt ? " — " + pt + (x.extra ? " · " + x.extra : "") : "") + (shop ? (hi ? "\n🏪 " + shop : "\n🏪 " + shop) : "");
+    var f = SHF[u];
+    if (f && f.name && navigator.share) { navigator.share({ files: [f], text: txt + "\n" + link }).catch(function (e) { if (e && e.name !== "AbortError") navigator.share({ title: t || shop || "PataBook", text: txt, url: link }).catch(function () {}); }); return; }
     if (navigator.share) { navigator.share({ title: t || shop || "PataBook", text: txt, url: link }).catch(function () {}); return; }
     window.open("https://wa.me/?text=" + encodeURIComponent(txt + "\n" + link), "_blank", "noopener");
   }
@@ -196,7 +221,7 @@
           (x.extra ? '<div class="pgce">' + esc(x.extra) + '</div>' : '') + (cap ? '<p class="pgcc">' + esc(cap) + '</p>' : '') + (x.descr ? '<p class="pgcd">' + esc(x.descr) + '</p>' : '') + '</div>' : '') +
         acts(u, t, pr) + '</div>';
     }
-    function draw() { d.innerHTML = body(); }
+    function draw() { d.innerHTML = body(); prepShare(urls[i]); }
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; document.removeEventListener("keydown", key); }
     function closeBack() { if (window.PBBack && PBBack.isOpen()) PBBack.close(); else close(); }
     function go(k) { i = (i + k + urls.length) % urls.length; j = 0; draw(); }
