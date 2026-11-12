@@ -13,7 +13,7 @@
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-helpmenu.js"></script>
-<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script><script src="pb-offers.js?v=1"></script>
+<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script><script src="pb-offers.js?v=1"></script><script src="pb-needs.js?v=1"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -662,7 +662,7 @@ function notifBlock(){
   const en=L()==="en",ev=(EVS.events||[]).filter(e=>e.kind!=="live").slice(0,5);
   return '<div class="nt"><div class="bh"><span class="ic">🔔</span><span class="tx"><b>'+(en?"Notifications on your phone":"फ़ोन पर सूचनाएँ")+'</b><small>'+(en?"When your shop goes Live, a customer taps Call, and a weekly report every Monday.":"दुकान लाइव होने पर, ग्राहक के कॉल दबाने पर, और हर सोमवार हफ़्ते की रिपोर्ट।")+'</small></span>'+
     (bellOK()?'<button type="button" class="bb'+(BELL?" on":"")+'" id="bellBtn">'+(BELL?(en?"✅ On":"✅ चालू"):(en?"Turn on":"चालू करें"))+'</button>':'')+'</div><div class="bn" id="bellNote"></div>'+
-    (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(e.kind==="feedback"?(en?"💬 New feedback from a customer":"💬 ग्राहक का नया सुझाव"):e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
+    (ev.length?'<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+'</h3>'+ev.map(e=>'<div class="e"><b>'+esc(e.kind==="feedback"?(en?"💬 New feedback from a customer":"💬 ग्राहक का नया सुझाव"):e.kind==="need"?(en?"🔥 New customer request":"🔥 ग्राहक की नई माँग"):e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join("")+'</div>':'')+
     '</div>';
 }
 /* 🔔 Notifications का अलग पन्ना: ऊपर फ़ोन-सूचना On/Off, नीचे PataBook के संदेश 5-5 करके (पिछला / अगला) */
@@ -675,7 +675,7 @@ function notifPage(){
   return '<div class="nt"><div class="bh"><span class="ic">🔔</span><span class="tx"><b>'+(en?"Notifications on your phone":"फ़ोन पर सूचनाएँ")+'</b><small>'+(en?"When your shop goes Live, a customer taps Call, and a weekly report every Monday.":"दुकान लाइव होने पर, ग्राहक के कॉल दबाने पर, और हर सोमवार हफ़्ते की रिपोर्ट।")+'</small></span>'+
     (bellOK()?'<button type="button" class="bb'+(BELL?" on":"")+'" id="bellBtn">'+(BELL?(en?"✅ On":"✅ चालू"):(en?"Turn on":"चालू करें"))+'</button>':'')+'</div><div class="bn" id="bellNote"></div>'+
     '<div class="ev"><h3>📬 '+(en?"Messages from PataBook":"PataBook से संदेश")+(ev.length?' <small>('+ev.length+')</small>':'')+'</h3>'+
-    (sl.length?sl.map(e=>'<div class="e"><b>'+esc(e.kind==="feedback"?(en?"💬 New feedback from a customer":"💬 ग्राहक का नया सुझाव"):e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join(""):'<p class="note" style="margin:8px 0">'+(en?"No messages yet.":"अभी कोई संदेश नहीं।")+'</p>')+'</div>'+
+    (sl.length?sl.map(e=>'<div class="e"><b>'+esc(e.kind==="feedback"?(en?"💬 New feedback from a customer":"💬 ग्राहक का नया सुझाव"):e.kind==="need"?(en?"🔥 New customer request":"🔥 ग्राहक की नई माँग"):e.title)+'</b>'+(e.body?esc(e.body)+'<br>':'')+'<small>'+esc(ago(e.created_at))+(ROWS&&ROWS.length>1?' · '+esc(e.shop):'')+'</small></div>').join(""):'<p class="note" style="margin:8px 0">'+(en?"No messages yet.":"अभी कोई संदेश नहीं।")+'</p>')+'</div>'+
     (pages>1?'<div class="ntpg"><button type="button" data-ntp="-1"'+(NTPG===0?" disabled":"")+'>‹ '+(en?"Previous":"पिछला")+'</button><span>'+(NTPG+1)+' / '+pages+'</span><button type="button" data-ntp="1"'+(NTPG>=pages-1?" disabled":"")+'>'+(en?"Next":"अगला")+' ›</button></div>':'')+'</div>';
 }
 /* 💎 Premium (sql-23) — अभी Admin से मिलता है; request वाला हिस्सा PB_SITE.premiumReq से */
@@ -1162,6 +1162,7 @@ function setCats(en){return [
   ["prof","👤",en?"Profile":"प्रोफ़ाइल",en?"Edit, Verify, % complete":"बदलाव, जाँच, कितनी पूरी"],
   ["live","🟢",en?"Today's status":"आज की स्थिति",en?"Closed today, closing early, home delivery":"आज बंद, जल्दी बंद, होम डिलीवरी"],
   ["offers","🎁",en?"Offers":"ऑफ़र",en?"Post up to 3 offers for customers":"ग्राहकों के लिए 3 तक ऑफ़र डालें"],
+  ["needs","🔥",en?"Customer requests":"ग्राहकों की माँग",en?"Reply with your price to customers in your city":"अपने शहर के ग्राहकों को भाव / जवाब भेजें"],
   ["num","📞",en?"Number & contact":"नंबर और संपर्क",en?"Show / hide number, change number":"नंबर दिखे / छुपे, नंबर बदलना"],
   ["feat","🛠️",en?"Advance Features":"Advance Features",en?"Hiring, Home Service":"नौकरी (नौकरी), होम सर्विस"],
   ["photo","🖼️","Gallery",en?"Logo, Banner, Gallery, Home Ad, Loader":"Logo, Banner, Gallery, Home Ad, Loader"],
@@ -1173,6 +1174,7 @@ function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof"){const pc=profPct(b),fl=pc===null||pc>=100;return (canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+(fl&&PROF&&PROF[b.slug]?shopDetails(b,i,en):profBlock(b,i))+verifyBlock(b,i);}   /* अधूरी प्रोफ़ाइल: ऊपर "Complete profile" वाला डिब्बा नहीं — नीचे वही सूची है */
   if(k==="offers")return window.PBOffers?PBOffers.ownerHTML(b,en):"";
+  if(k==="needs")return window.PBNeeds?PBNeeds.ownerHTML(b,en):"";
   if(k==="live")return window.PBLive?PBLive.ownerHTML(b,en):"";
   if(k==="num")return numPanel(b,i,en);
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:pan-x pan-y;-webkit-tap-highlight-color:transparent}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}input:focus,textarea:focus,select:focus,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none!important}@media(pointer:coarse){a[href^="tel:"]:not([class]),a[href^="mailto:"]:not([class]),footer a,.pb-legal a,.legal a{display:inline-block;padding-block:11px;margin-block:-11px}}</style>
+<title>What do I need today? – PataBook</title>
+<script>try{if(localStorage.getItem("pb-lang")==="hi")document.title="आज मुझे क्या चाहिए? – PataBook"}catch(e){}</script>
+<meta name="robots" content="noindex">
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="i18n.js"></script>
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5}
+*{box-sizing:border-box;margin:0;padding:0}
+button,input,select,textarea{font-family:inherit}body{font-family:var(--pbf,system-ui,sans-serif);color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:var(--blue)}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.nav{display:flex;align-items:center;gap:10px;height:60px}
+.back{font-size:22px;line-height:1;padding:6px 8px 6px 0;color:var(--navy);text-decoration:none}
+.brand{display:flex;align-items:center;gap:8px;line-height:1;text-decoration:none;color:var(--ink)}
+.brand img{width:28px;height:auto}
+.brand b{font-size:22px;font-weight:700;letter-spacing:-.5px}.brand b span{color:var(--blue)}
+.sp{flex:1}
+main{padding:22px 0 30px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:14px}
+h1,.h1{font-size:24px;line-height:1.25;margin-bottom:4px}
+.upd{font-size:13px;color:var(--muted);margin-bottom:6px}
+h2{font-size:18px;margin:18px 0 6px;color:var(--navy)}
+p,li{font-size:15px}
+ul{padding-left:20px;margin:4px 0}
+li{margin:3px 0}
+.note{background:#fffaeb;border:1px solid #fedf89;color:#7a4b00;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:10px}
+.ct{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #eef1f6}
+.ct:last-child{border:0}
+.ct i{font-style:normal;font-size:22px;width:30px;text-align:center}
+.ct small{display:block;color:var(--muted);font-size:13px}
+.ct b{font-size:16px;word-break:break-word}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns a{text-decoration:none;font-weight:700;font-size:14px;border-radius:12px;padding:11px 16px;background:var(--blue);color:#fff}
+.btns a.alt{background:#eff4ff;color:var(--blue)}
+.pending{color:#b54708;font-weight:700}
+footer{padding:16px;text-align:center;color:var(--muted);font-size:13px}
+.legal{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-bottom:6px}
+.legal a{color:var(--muted);text-decoration:none}
+[data-l]{display:none}
+html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
+.cf label{display:block;font-size:13px;font-weight:700;color:#344054;margin:12px 0 5px}
+.cf input,.cf select,.cf textarea{width:100%;box-sizing:border-box;border:1.5px solid #d0d5dd;border-radius:12px;padding:11px 12px;font:inherit;font-size:16px;background:#fff;color:#12141c}
+.cf textarea{min-height:150px;resize:vertical;line-height:1.5}
+.cf input:focus,.cf select:focus,.cf textarea:focus{outline:0;border-color:#1a73e8;box-shadow:0 0 0 3px #1a73e822}
+.cf .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:520px){.cf .row2{grid-template-columns:1fr}}
+.cf .cnt{text-align:right;font-size:12px;color:#5b6475;margin-top:4px}
+.cf .err{color:#b42318;font-size:14px;min-height:18px;margin-top:8px}
+.cf button{width:100%;margin-top:12px;border:0;border-radius:12px;background:#1a73e8;color:#fff;font:inherit;font-size:16px;font-weight:700;padding:14px;cursor:pointer}
+.cf button:disabled{opacity:.6}
+.cf .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.okbox{text-align:center;padding:10px 0}.okbox .big{font-size:48px}.okbox h3{margin:6px 0;color:#0b2f73}.okbox .tk{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:18px;background:#eaf2ff;color:#0b2f73;border-radius:10px;padding:6px 14px;margin:8px 0}
+.okbox button{width:auto;margin-top:10px;background:#eef2f8;color:#0b2f73;padding:10px 18px}
+</style>
+<style>
+.cty{display:flex;gap:8px;flex-wrap:wrap;padding:2px 0 4px}
+.cty button{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.cty button.on{border-color:#f08c00;background:#fff4e6;color:#a35200}
+.cf .cty button{width:auto;margin-top:0;background:#fff;color:var(--ink);padding:8px 14px;font-size:14px;border-radius:999px}.cf .cty button.on{background:#fff4e6;color:#a35200}
+.nd{border:1px solid #ffd8a8;background:#fffaf2;border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.nd .mt{font-size:12px;color:#7a5a2b}.nd .bd{margin:4px 0 8px;font-size:15px;white-space:pre-line}
+.rp{display:block;background:#fff;border:1px solid #ffe0b2;border-radius:12px;padding:10px 12px;margin-top:8px;text-decoration:none;color:var(--ink)}
+.rp b{color:#0b4db3;font-size:14px}.rp .pr{float:right;font-weight:700;color:#1e8e3e}.rp p{font-size:14px;color:#344054;margin-top:2px}
+.cl{border:0;background:none;color:#b42318;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:4px 0}
+.badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:6px}
+</style>
+<script src="pb-track.js"></script>
+<style>@media(min-width:900px){.wrap{max-width:920px}}</style>
+<script src="pb-backlink.js" defer></script>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="back" href="index.html" aria-label="Home">←</a>
+  <a class="brand" href="index.html"><img src="pin.png" alt=""><img class="pbwm" src="pb-wordmark.webp" alt="PataBook" width="117" height="20" style="height:clamp(15px,5vw,20px);width:auto;display:block"></a>
+  <div class="sp"></div>
+  <span id="pbLang"></span>
+</div></header>
+<main class="wrap">
+<div class="card cf">
+  <h1 id="nH"></h1>
+  <p class="upd" id="nS"></p>
+  <div id="nForm"></div>
+</div>
+<div class="card">
+  <h2 id="nMyH" style="margin-top:0"></h2>
+  <div id="nMine"><p class="upd">…</p></div>
+</div>
+</main>
+<script>
+(function () {
+  /* 🔥 आज मुझे क्या चाहिए? (sql-53) — ग्राहक माँग लिखे, उस शहर + category की दुकानें भाव / जवाब भेजें। ग्राहक का नंबर किसी दुकान को नहीं दिखता। */
+  var CITIES = ["Gandhidham", "Adipur", "Anjar", "Bhuj", "Mundra", "Mandvi", "Bhachau", "Rapar"];
+  var CH = { Gandhidham: "गांधीधाम", Adipur: "आदिपुर", Anjar: "अंजार", Bhuj: "भुज", Mundra: "मुंद्रा", Mandvi: "मांडवी", Bhachau: "भचाऊ", Rapar: "रापर" };
+  var CATS = [["Shopping", "🛍️", "दुकान / सामान", "Shopping"], ["Food", "🍽️", "खाना", "Food"], ["Automobile", "🚗", "गाड़ी / मैकेनिक", "Vehicle / mechanic"], ["Home", "🔧", "घर का काम / रिपेयर", "Home service / repair"],
+    ["Health", "🩺", "दवाई / डॉक्टर", "Medicine / doctor"], ["Education", "📚", "पढ़ाई / कोचिंग", "Education / coaching"], ["Hotel", "🏨", "होटल / रुकना", "Hotel / stay"], ["Professional", "💼", "प्रोफ़ेशनल सेवा", "Professional service"], ["Other", "✨", "कुछ और", "Something else"]];
+  var city = "", cat = "", MINE = null, TOK = null, busy = false;
+  try { city = localStorage.getItem("pb-nd-city") || localStorage.getItem("pb-of-city") || ""; } catch (e) {}
+  if (CITIES.indexOf(city) < 0) city = "";
+  function en() { return (localStorage.getItem("pb-lang") || "en") !== "hi"; }
+  function T(h, e) { return en() ? e : h; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function $(i) { return document.getElementById(i); }
+  function rpc(fn, body) {
+    return fetch(SB + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + (TOK || KEY), "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
+      .then(function (r) { return r.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} if (!r.ok) throw new Error((j && (j.message || j.hint)) || ("HTTP " + r.status)); return j; }); });
+  }
+  function ago(t) { var m = Math.max(1, Math.round((Date.now() - new Date(t).getTime()) / 60000)); if (m < 60) return T(m + " मिनट पहले", m + " min ago"); var h = Math.round(m / 60); if (h < 48) return T(h + " घंटे पहले", h + " h ago"); return T(Math.round(h / 24) + " दिन पहले", Math.round(h / 24) + " days ago"); }
+  function catName(k) { for (var i = 0; i < CATS.length; i++) if (CATS[i][0] === k) return CATS[i][1] + " " + (en() ? CATS[i][3] : CATS[i][2]); return k; }
+  function login() { location.href = window.PBA && PBA.loginUrl ? PBA.loginUrl("need.html") : "login.html?next=need.html"; }
+  function drawForm() {
+    var keep = $("nBody") ? $("nBody").value : "";
+    $("nForm").innerHTML = '<label>' + esc(T("1. शहर", "1. City")) + '</label><nav class="cty" id="nC">' + CITIES.map(function (c) { return '<button type="button" data-c="' + c + '" class="' + (city === c ? "on" : "") + '">' + esc(en() ? c : CH[c]) + '</button>'; }).join("") + '</nav>' +
+      '<label>' + esc(T("2. किस तरह की दुकान?", "2. What kind of shop?")) + '</label><nav class="cty" id="nK">' + CATS.map(function (c) { return '<button type="button" data-k="' + c[0] + '" class="' + (cat === c[0] ? "on" : "") + '">' + c[1] + " " + esc(en() ? c[3] : c[2]) + '</button>'; }).join("") + '</nav>' +
+      '<label for="nBody">' + esc(T("3. आपको क्या चाहिए?", "3. What do you need?")) + '</label><textarea id="nBody" maxlength="300" style="min-height:100px" placeholder="' + esc(T("जैसे: आज शाम तक 2 किलो पनीर चाहिए", "e.g. Need 2 kg paneer by this evening")) + '"></textarea><div class="cnt" id="nCnt"></div>' +
+      '<p class="note">🔒 ' + esc(T("आपका नाम और नंबर किसी दुकान को नहीं दिखेगा। दुकानें भाव / जवाब भेजेंगी — आप पसंद की दुकान को खुद Call या WhatsApp करें। माँग 48 घंटे खुली रहती है।", "Your name and number are never shown to any shop. Shops send a price or reply — you call or WhatsApp the shop you like. A request stays open for 48 hours.")) + '</p>' +
+      '<div class="err" id="nErr"></div><button type="button" id="nGo">' + esc(T("🔥 माँग भेजें", "🔥 Send request")) + '</button>';
+    $("nBody").value = keep; cnt();
+  }
+  function cnt() { var b = $("nBody"); if (b) $("nCnt").textContent = b.value.length + " / 300"; }
+  function drawMine() {
+    $("nMyH").textContent = T("मेरी माँगें", "My requests");
+    var box = $("nMine");
+    if (TOK === "") { box.innerHTML = '<p class="upd">' + esc(T("अपनी माँगें और दुकानों के जवाब देखने के लिए Login करें।", "Log in to see your requests and replies from shops.")) + '</p><div class="btns"><a href="#" id="nLog">' + esc(T("Login करें", "Log in")) + '</a></div>'; return; }
+    if (MINE === null) { box.innerHTML = '<p class="upd">' + esc(T("लोड हो रहा है…", "Loading…")) + '</p>'; return; }
+    if (MINE === "off") { box.innerHTML = '<p class="upd">' + esc(T("यह सुविधा अभी चालू हो रही है। थोड़ी देर बाद फिर कोशिश करें।", "This feature is being switched on. Please try again later.")) + '</p>'; return; }
+    if (MINE === "err") { box.innerHTML = '<p class="upd">' + esc(T("अभी नहीं खुल सका। थोड़ी देर बाद कोशिश करें।", "Could not load. Please try again later.")) + '</p>'; return; }
+    if (!MINE.length) { box.innerHTML = '<p class="upd">' + esc(T("अभी आपने कोई माँग नहीं भेजी।", "You have not sent any request yet.")) + '</p>'; return; }
+    box.innerHTML = MINE.map(function (n) {
+      var st = n.hidden ? '<span class="badge" style="background:#fee4e2;color:#b42318">' + esc(T("छिपाई गई", "Hidden")) + '</span>' : n.open ? '<span class="badge" style="background:#dcfae6;color:#067647">' + esc(T("खुली", "Open")) + '</span>' : '<span class="badge" style="background:#eef2f6;color:#5b6475">' + esc(T("बंद", "Closed")) + '</span>';
+      var R = n.replies || [];
+      return '<div class="nd"><div class="mt">📍 ' + esc(en() ? n.city : (CH[n.city] || n.city)) + ' · ' + esc(catName(n.category)) + ' · ' + esc(ago(n.at)) + st + '</div><div class="bd">' + esc(n.body) + '</div>' +
+        (R.length ? R.map(function (r) { return '<a class="rp" href="business.html?slug=' + encodeURIComponent(r.slug) + '">' + (r.price != null ? '<span class="pr">₹' + esc(Number(r.price).toLocaleString("en-IN")) + '</span>' : '') + '<b>🏪 ' + esc(r.shop) + '</b>' + (r.body ? '<p>' + esc(r.body) + '</p>' : '') + '</a>'; }).join("")
+          : '<p class="upd">' + esc(n.open ? T("अभी कोई जवाब नहीं आया। दुकानों को सूचना भेज दी गई है।", "No replies yet. Shops have been notified.") : T("कोई जवाब नहीं आया।", "No replies.")) + '</p>') +
+        (n.open ? '<button type="button" class="cl" data-close="' + n.id + '">✕ ' + esc(T("माँग बंद करें", "Close request")) + '</button>' : '') + '</div>';
+    }).join("");
+  }
+  function draw() {
+    document.documentElement.lang = en() ? "en" : "hi";
+    $("nH").textContent = "🔥 " + T("आज मुझे क्या चाहिए?", "What do I need today?");
+    $("nS").textContent = T("अपनी ज़रूरत लिखें — आपके शहर की दुकानें भाव और जवाब भेजेंगी।", "Write what you need — shops in your city will send prices and replies.");
+    drawForm(); drawMine();
+  }
+  function loadMine() { if (!TOK) { drawMine(); return; } MINE = null; drawMine(); rpc("pb_needs_mine", {}).then(function (j) { MINE = Array.isArray(j) ? j : []; drawMine(); }).catch(function (e) { MINE = /404|PGRST202|function/i.test(e.message) ? "off" : "err"; drawMine(); }); }
+  document.addEventListener("input", function (e) { if (e.target.id === "nBody") cnt(); });
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-c],[data-k],#nGo,#nLog,[data-close]"); if (!t) return;
+    if (t.dataset.c) { city = t.dataset.c; try { localStorage.setItem("pb-nd-city", city); } catch (er) {} drawForm(); return; }
+    if (t.dataset.k) { cat = t.dataset.k; drawForm(); return; }
+    if (t.id === "nLog") { e.preventDefault(); login(); return; }
+    if (t.dataset.close) {
+      if (t.dataset.armed !== "1") { t.dataset.armed = "1"; t.textContent = T("पक्का बंद करें? फिर दबाएँ", "Close for sure? Tap again"); return; }
+      t.disabled = true; rpc("pb_need_close", { p_id: +t.dataset.close }).then(loadMine).catch(function () { t.disabled = false; }); return;
+    }
+    if (t.id === "nGo") {
+      if (busy) return; var er = $("nErr"), body = $("nBody").value.trim();
+      if (!city) { er.textContent = T("शहर चुनें।", "Choose a city."); return; }
+      if (!cat) { er.textContent = T("दुकान का प्रकार चुनें।", "Choose the kind of shop."); return; }
+      if (body.length < 5) { er.textContent = T("थोड़ा और लिखें (कम से कम 5 अक्षर)।", "Write a little more (at least 5 characters)."); return; }
+      if (!TOK) { try { sessionStorage.setItem("pb-nd-draft", JSON.stringify({ c: city, k: cat, b: body })); } catch (x) {} login(); return; }
+      busy = true; t.disabled = true; er.style.color = "#5b6475"; er.textContent = T("भेज रहे हैं…", "Sending…");
+      rpc("pb_need_create", { p_city: city, p_category: cat, p_body: body }).then(function () {
+        er.style.color = "#067647"; er.textContent = "✅ " + T("माँग भेज दी! जवाब नीचे ‘मेरी माँगें’ में दिखेंगे।", "Request sent! Replies will show below in ‘My requests’.");
+        $("nBody").value = ""; cnt(); loadMine();
+      }).catch(function (x) {
+        var m = String(x.message); er.style.color = "";
+        er.textContent = /max 3/.test(m) ? T("एक साथ 3 माँगें ही खुली रह सकती हैं। पहले कोई पुरानी बंद करें।", "Only 3 requests can be open at once. Close an old one first.") :
+          /rate/.test(m) ? T("आज की 3 माँगें हो गईं। कल फिर कोशिश करें।", "You have sent 3 requests today. Try again tomorrow.") :
+          /login/.test(m) ? T("दोबारा Login करें।", "Please log in again.") :
+          /404|PGRST202|function/i.test(m) ? T("यह सुविधा अभी चालू हो रही है। थोड़ी देर बाद फिर कोशिश करें।", "This feature is being switched on. Please try again later.") : T("माँग नहीं भेजी जा सकी। दोबारा कोशिश करें।", "Could not send the request. Please try again.");
+      }).then(function () { busy = false; t.disabled = false; });
+    }
+  });
+  if (window.PB) { PB.mount($("pbLang")); PB.onChange(function () { PB.apply(); draw(); }); PB.apply(); }
+  draw();
+  (async function () {
+    var s = null; try { s = window.PBA ? await PBA.session() : null; if (s && PBA.isGuest && PBA.isGuest(s)) s = null; } catch (e) {}
+    TOK = s && s.access_token ? s.access_token : "";
+    try { var d = JSON.parse(sessionStorage.getItem("pb-nd-draft") || "null"); if (d && TOK) { sessionStorage.removeItem("pb-nd-draft"); if (CITIES.indexOf(d.c) >= 0) city = d.c; cat = d.k || ""; drawForm(); $("nBody").value = d.b || ""; cnt(); } } catch (e) {}
+    loadMine();
+  })();
+})();
+</script>
+</body>
+</html>
