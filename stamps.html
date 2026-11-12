@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:pan-x pan-y;-webkit-tap-highlight-color:transparent}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}input:focus,textarea:focus,select:focus,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none!important}@media(pointer:coarse){a[href^="tel:"]:not([class]),a[href^="mailto:"]:not([class]),footer a,.pb-legal a,.legal a{display:inline-block;padding-block:11px;margin-block:-11px}}</style>
+<title>My stamp cards – PataBook</title>
+<script>try{if(localStorage.getItem("pb-lang")==="hi")document.title="मेरे Stamp cards – PataBook"}catch(e){}</script>
+<meta name="robots" content="noindex">
+<link rel="icon" href="pin.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a73e8">
+<script src="i18n.js"></script>
+<script src="site-config.js"></script>
+<script src="pb-auth.js"></script>
+<style>
+:root{--blue:#1a73e8;--navy:#0b2f73;--ink:#12141c;--muted:#5b6475;--line:#e4eaf5}
+*{box-sizing:border-box;margin:0;padding:0}
+button,input,select,textarea{font-family:inherit}body{font-family:var(--pbf,system-ui,sans-serif);color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:var(--blue)}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.nav{display:flex;align-items:center;gap:10px;height:60px}
+.back{font-size:22px;line-height:1;padding:6px 8px 6px 0;color:var(--navy);text-decoration:none}
+.brand{display:flex;align-items:center;gap:8px;line-height:1;text-decoration:none;color:var(--ink)}
+.brand img{width:28px;height:auto}
+.brand b{font-size:22px;font-weight:700;letter-spacing:-.5px}.brand b span{color:var(--blue)}
+.sp{flex:1}
+main{padding:22px 0 30px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:14px}
+h1,.h1{font-size:24px;line-height:1.25;margin-bottom:4px}
+.upd{font-size:13px;color:var(--muted);margin-bottom:6px}
+h2{font-size:18px;margin:18px 0 6px;color:var(--navy)}
+p,li{font-size:15px}
+ul{padding-left:20px;margin:4px 0}
+li{margin:3px 0}
+.note{background:#fffaeb;border:1px solid #fedf89;color:#7a4b00;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:10px}
+.ct{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #eef1f6}
+.ct:last-child{border:0}
+.ct i{font-style:normal;font-size:22px;width:30px;text-align:center}
+.ct small{display:block;color:var(--muted);font-size:13px}
+.ct b{font-size:16px;word-break:break-word}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns a{text-decoration:none;font-weight:700;font-size:14px;border-radius:12px;padding:11px 16px;background:var(--blue);color:#fff}
+.btns a.alt{background:#eff4ff;color:var(--blue)}
+.pending{color:#b54708;font-weight:700}
+footer{padding:16px;text-align:center;color:var(--muted);font-size:13px}
+.legal{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-bottom:6px}
+.legal a{color:var(--muted);text-decoration:none}
+[data-l]{display:none}
+html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
+.cf label{display:block;font-size:13px;font-weight:700;color:#344054;margin:12px 0 5px}
+.cf input,.cf select,.cf textarea{width:100%;box-sizing:border-box;border:1.5px solid #d0d5dd;border-radius:12px;padding:11px 12px;font:inherit;font-size:16px;background:#fff;color:#12141c}
+.cf textarea{min-height:150px;resize:vertical;line-height:1.5}
+.cf input:focus,.cf select:focus,.cf textarea:focus{outline:0;border-color:#1a73e8;box-shadow:0 0 0 3px #1a73e822}
+.cf .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:520px){.cf .row2{grid-template-columns:1fr}}
+.cf .cnt{text-align:right;font-size:12px;color:#5b6475;margin-top:4px}
+.cf .err{color:#b42318;font-size:14px;min-height:18px;margin-top:8px}
+.cf button{width:100%;margin-top:12px;border:0;border-radius:12px;background:#1a73e8;color:#fff;font:inherit;font-size:16px;font-weight:700;padding:14px;cursor:pointer}
+.cf button:disabled{opacity:.6}
+.cf .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.okbox{text-align:center;padding:10px 0}.okbox .big{font-size:48px}.okbox h3{margin:6px 0;color:#0b2f73}.okbox .tk{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:18px;background:#eaf2ff;color:#0b2f73;border-radius:10px;padding:6px 14px;margin:8px 0}
+.okbox button{width:auto;margin-top:10px;background:#eef2f8;color:#0b2f73;padding:10px 18px}
+</style>
+<style>
+.code{font-family:ui-monospace,Menlo,monospace;font-size:34px;font-weight:700;letter-spacing:6px;color:#c92a2a;text-align:center;margin:6px 0}
+#qr{display:flex;justify-content:center;margin:8px 0}#qr svg{width:200px;height:200px}
+.sc{display:block;border:1px solid #ffc9c9;background:#fff5f5;border-radius:14px;padding:12px 14px;margin-bottom:10px;text-decoration:none;color:var(--ink)}
+.sc b{color:#0b4db3}.sc small{display:block;color:#7a5a2b;font-size:13px;margin-top:2px}
+</style>
+<script src="pb-track.js"></script>
+<script src="pb-stamps.js?v=1"></script>
+<style>@media(min-width:900px){.wrap{max-width:920px}}</style>
+<script src="pb-backlink.js" defer></script>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="back" href="index.html" aria-label="Home">←</a>
+  <a class="brand" href="index.html"><img src="pin.png" alt=""><img class="pbwm" src="pb-wordmark.webp" alt="PataBook" width="117" height="20" style="height:clamp(15px,5vw,20px);width:auto;display:block"></a>
+  <div class="sp"></div>
+  <span id="pbLang"></span>
+</div></header>
+<main class="wrap">
+<div class="card" style="text-align:center">
+  <h1 id="sH"></h1>
+  <p class="upd" id="sS"></p>
+  <div id="sCode"><p class="upd">…</p></div>
+</div>
+<div class="card">
+  <h2 id="sLH" style="margin-top:0"></h2>
+  <div id="sList"></div>
+</div>
+</main>
+<script>
+(function () {
+  /* ❤️ ग्राहक: मेरा PataBook code (+ QR) और मेरे stamp cards (sql-54) */
+  var TOK = null, CODE = null, ROWS = null, QR = 0;
+  function en() { return (localStorage.getItem("pb-lang") || "en") !== "hi"; }
+  function T(h, e) { return en() ? e : h; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function $(i) { return document.getElementById(i); }
+  function login() { location.href = window.PBA && PBA.loginUrl ? PBA.loginUrl("stamps.html") : "login.html?next=stamps.html"; }
+  function off(e) { return /404|PGRST202|function/i.test(String(e && e.message)); }
+  function qrLib(cb) {
+    if (window.qrcode) return cb();
+    var U = ["https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js", "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"], i = 0;
+    (function nx() { if (i >= U.length) return; var s = document.createElement("script"); s.src = U[i++]; s.onload = cb; s.onerror = nx; document.head.appendChild(s); })();
+  }
+  function drawQR() {
+    var q = $("qr"); if (!q || !CODE) return;
+    qrLib(function () { try { var g = qrcode(0, "M"); g.addData("PBSTAMP:" + CODE); g.make(); var x = $("qr"); if (x) x.innerHTML = g.createSvgTag({ cellSize: 6, margin: 2, scalable: true }); } catch (e) {} });
+  }
+  function draw() {
+    document.documentElement.lang = en() ? "en" : "hi";
+    $("sH").textContent = "❤️ " + T("मेरे Stamp cards", "My stamp cards");
+    $("sS").textContent = T("ख़रीद के समय दुकानदार को यह code या QR दिखाएँ — हर ख़रीद पर 1 stamp मिलेगा। आपका नाम या नंबर दुकान को नहीं दिखता।", "Show this code or QR to the shop owner when you buy — you get 1 stamp per purchase. Your name and number are not shown to the shop.");
+    $("sLH").textContent = T("मेरे cards", "My cards");
+    var c = $("sCode"), l = $("sList");
+    if (TOK === "") {
+      c.innerHTML = '<div class="btns" style="justify-content:center"><a href="#" id="sLog">' + esc(T("Login करें", "Log in")) + '</a></div>';
+      l.innerHTML = '<p class="upd">' + esc(T("अपने stamp cards देखने के लिए Login करें।", "Log in to see your stamp cards.")) + '</p>'; return;
+    }
+    if (CODE === "off" || ROWS === "off") { c.innerHTML = '<p class="upd">' + esc(T("यह सुविधा अभी चालू हो रही है। थोड़ी देर बाद फिर कोशिश करें।", "This feature is being switched on. Please try again later.")) + '</p>'; l.innerHTML = ""; return; }
+    c.innerHTML = CODE === null ? '<p class="upd">…</p>' : CODE === "err" ? '<p class="upd">' + esc(T("अभी नहीं खुल सका। थोड़ी देर बाद कोशिश करें।", "Could not load. Please try again later.")) + '</p>' :
+      '<div id="qr" aria-label="QR"></div><div class="code">' + esc(CODE) + '</div><p class="upd">' + esc(T("मेरा PataBook code", "My PataBook code")) + '</p>';
+    drawQR();
+    if (ROWS === null) { l.innerHTML = '<p class="upd">…</p>'; return; }
+    if (ROWS === "err") { l.innerHTML = '<p class="upd">' + esc(T("अभी नहीं खुल सका। थोड़ी देर बाद कोशिश करें।", "Could not load. Please try again later.")) + '</p>'; return; }
+    if (!ROWS.length) { l.innerHTML = '<p class="upd">' + esc(T("अभी कोई stamp नहीं। जिन दुकानों के पेज पर ❤️ Stamp card दिखे, वहाँ ख़रीद पर यह code दिखाएँ।", "No stamps yet. At shops whose page shows a ❤️ Stamp card, show this code when you buy.")) + '</p>'; return; }
+    l.innerHTML = ROWS.map(function (r) {
+      var ready = r.stamps >= r.need;
+      return '<a class="sc" href="business.html?slug=' + encodeURIComponent(r.slug) + '"><b>🏪 ' + esc(r.shop) + '</b><div style="margin:6px 0">' + PBStamps.dots(Math.min(r.stamps, r.need), r.need) + '</div>' +
+        '<small>' + esc(T(r.stamps + " / " + r.need + " stamps · इनाम: ", r.stamps + " / " + r.need + " stamps · Reward: ")) + esc(r.reward) + '</small>' +
+        (ready ? '<small style="color:#067647;font-weight:700">🎉 ' + esc(T("इनाम तैयार है! दुकान पर code दिखाएँ।", "Reward ready! Show your code at the shop.")) + '</small>' : '') +
+        (r.redeemed ? '<small>' + esc(T("अब तक " + r.redeemed + " इनाम मिले", "Rewards received so far: " + r.redeemed)) + '</small>' : '') +
+        (r.active ? '' : '<small>' + esc(T("दुकान ने card अभी बंद किया है", "The shop has paused this card")) + '</small>') + '</a>';
+    }).join("");
+  }
+  document.addEventListener("click", function (e) { if (e.target.id === "sLog") { e.preventDefault(); login(); } });
+  if (window.PB) { PB.mount($("pbLang")); PB.onChange(function () { PB.apply(); draw(); }); PB.apply(); }
+  draw();
+  (async function () {
+    var s = null; try { s = window.PBA ? await PBA.session() : null; if (s && PBA.isGuest && PBA.isGuest(s)) s = null; } catch (e) {}
+    TOK = s && s.access_token ? s.access_token : ""; draw(); if (!TOK) return;
+    PBStamps.post("pb_stamp_my_code", {}, TOK).then(function (c) { CODE = c || "err"; draw(); }).catch(function (e) { CODE = off(e) ? "off" : "err"; draw(); });
+    PBStamps.post("pb_stamps_mine", {}, TOK).then(function (j) { ROWS = Array.isArray(j) ? j : []; draw(); }).catch(function (e) { ROWS = off(e) ? "off" : "err"; draw(); });
+  })();
+})();
+</script>
+</body>
+</html>

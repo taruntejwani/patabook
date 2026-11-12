@@ -88,6 +88,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
   <h1 id="fvH"></h1>
   <div id="fvBox"><p class="upd">…</p></div>
 </div>
+<a class="card" id="fvSt" href="stamps.html" style="display:block;text-decoration:none;color:inherit;font-weight:700">❤️ <span id="fvStT">My stamp cards</span> ›</a>
 <div class="card" id="fvOfC" hidden>
   <h2 id="fvOfH" style="margin-top:0"></h2>
   <div id="fvOf"></div>
@@ -116,7 +117,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
   function draw() {
     drawOf();
     document.documentElement.lang = en() ? "en" : "hi";
-    document.getElementById("fvH").textContent = "💫 " + T("मेरी फ़ेवरेट दुकानें", "My favourite shops");
+    document.getElementById("fvH").textContent = "💫 " + T("मेरी फ़ेवरेट दुकानें", "My favourite shops"); document.getElementById("fvStT").textContent = T("मेरे Stamp cards (मेरा PataBook code)", "My stamp cards (my PataBook code)");
     var box = document.getElementById("fvBox");
     if (L === "login") { box.innerHTML = '<div class="empty"><div class="big">🔐</div><p>' + T("अपनी फ़ेवरेट दुकानें देखने के लिए लॉगिन करें।", "Log in to see your favourite shops.") + '</p><a class="btn1" href="' + esc(PBA.loginUrl("favourites.html")) + '">' + T("लॉगिन करें", "Log in") + '</a></div>'; return; }
     if (L === "err") { box.innerHTML = '<p class="upd">' + T("अभी लिस्ट नहीं खुल सकी। थोड़ी देर बाद कोशिश करें।", "Could not load the list. Please try again later.") + '</p>'; return; }
