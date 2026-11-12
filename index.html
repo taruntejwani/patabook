@@ -490,6 +490,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
   </form>
   <div class="sug" id="sug"></div>
   <nav class="qcat" id="qcat" aria-label="Categories"></nav>
+  <section class="seen" id="forYou" hidden aria-label="For you"><h2><span id="fyT"></span></h2><p id="fyW" style="margin:-4px 2px 8px;font-size:13px;color:#5b6475"></p><div class="seenr" id="fyR"></div></section>
   <section class="seen" id="seen" hidden aria-label="Recently viewed"><h2><span id="seenT"></span><button type="button" id="seenX"></button></h2><div class="seenr" id="seenR"></div></section>
 
   <!-- 🖼️ Gold / Platinum Member posters (पहले यहाँ "Find Business by Category" के icon थे) -->
@@ -530,9 +531,35 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
     document.getElementById("seenR").innerHTML=a.map(b=>'<a href="business.html?slug='+encodeURIComponent(b.s)+'"><b>'+E(b.n)+'</b>'+(b.c?'<small>'+E(CL(b.c))+'</small>':'')+'</a>').join("");
     box.hidden=false;
   }
-  document.getElementById("seenX").onclick=()=>{try{localStorage.removeItem("pb-seen");}catch(_){}draw();};
-  draw();try{window.PB&&PB.onChange&&PB.onChange(draw);}catch(_){}
-  addEventListener("pageshow",draw);
+  document.getElementById("seenX").onclick=()=>{try{localStorage.removeItem("pb-seen");}catch(_){}draw();fy();};
+  /* 🎯 आपके लिए — सिर्फ़ इसी फ़ोन की देखी दुकानों की category से (कुछ server पर नहीं जाता, सिर्फ़ उस category की दुकानें माँगी जाती हैं) */
+  let FY=null,FYC="";
+  async function fy(){
+    const box=document.getElementById("forYou");if(!box)return;
+    let seen=[];try{seen=(JSON.parse(localStorage.getItem("pb-seen")||"[]")||[]).filter(x=>x&&x.s);}catch(_){}
+    const cnt={};seen.forEach((x,i)=>{if(x.c)cnt[x.c]=(cnt[x.c]||0)+(8-i);});
+    const cat=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+    if(!cat){box.hidden=true;return;}
+    if(cat!==FYC||!FY){
+      FYC=cat;FY=null;
+      try{const cf=window.PATABOOK_SUPABASE||{},SBU=cf.url||"https://kkvbpzysktozghnxplxv.supabase.co",K=cf.anonKey||"sb_publishable_MnvGh8-r8s_XhrtbqFztFQ_jbCp71x8";
+        const q=new URLSearchParams({select:"slug,name,category,address",category:"eq."+cat,is_active:"eq.true",deleted_at:"is.null",order:"rating.desc.nullslast,review_count.desc.nullslast",limit:"24"});
+        const r=await fetch(SBU+"/rest/v1/businesses?"+q.toString(),{headers:{apikey:K,Authorization:"Bearer "+K}});FY=r.ok?await r.json():[];}catch(_){FY=[];}
+    }
+    let city="";try{city=localStorage.getItem("pb-city")||"";}catch(_){}
+    const seenS=new Set(seen.map(x=>x.s)),ci=String(city).toLowerCase();
+    let list=(FY||[]).filter(b=>b&&b.slug&&!seenS.has(b.slug));
+    if(ci){const near=list.filter(b=>String(b.address||"").toLowerCase().includes(ci));if(near.length>=2)list=near.concat(list.filter(b=>!near.includes(b)));}
+    list=list.slice(0,8);
+    if(!list.length){box.hidden=true;return;}
+    const en=EN();
+    document.getElementById("fyT").textContent="🎯 "+(en?"For you":"आपके लिए");
+    document.getElementById("fyW").textContent=en?"Because you recently viewed "+CL(cat)+" shops (from this phone only)":"क्योंकि आपने हाल में "+CL(cat)+" की दुकानें देखीं (सिर्फ़ इसी फ़ोन से)";
+    document.getElementById("fyR").innerHTML=list.map(b=>'<a href="business.html?slug='+encodeURIComponent(b.slug)+'"><b>'+E(b.name)+'</b><small>'+E(CL(b.category||""))+(b.address?' · '+E(String(b.address).split(",").slice(-2).join(",").trim()):"")+'</small></a>').join("");
+    box.hidden=false;
+  }
+  draw();fy();try{window.PB&&PB.onChange&&PB.onChange(()=>{draw();fy();});}catch(_){}
+  addEventListener("pageshow",()=>{draw();fy();});
 })();
 </script>
 <script>
