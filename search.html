@@ -394,6 +394,13 @@ async function suggestWords(q,limit){
 var NEARG="",WIDE="",NLI=null,BIGROW=null,NFHIDE=false,LASTROWS=[];
 let reqN=0,CITYUSER=false;
 let RUNID=0;
+function logSearch(q,city,n){
+  try{
+    if(localStorage.getItem("pb-notrack")==="1")return;   /* admin का अपना फ़ोन नहीं गिना जाता */
+    let sid="";try{sid=sessionStorage.getItem("pb-sid")||"";if(!sid){sid=Math.random().toString(36).slice(2,12);sessionStorage.setItem("pb-sid",sid);}}catch(e){}
+    fetch(SB+"/rest/v1/rpc/pb_log_search",{method:"POST",keepalive:true,headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify({p_q:String(q||"").slice(0,60),p_city:String(city||"").slice(0,40),p_results:n|0,p_sid:sid})}).catch(function(){});
+  }catch(e){}
+}
 async function run(push){
   const rid=++RUNID;
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
@@ -460,6 +467,7 @@ async function run(push){
     if(BIGROW)rows=rows.filter(b=>b.slug!==BIGROW.slug);
     if(NLI&&!BIGROW&&FZN>0&&LOOSEMISS&&rows.length)NFHIDE=true;   /* सवाल में दुकान का नाम था और मिला नहीं → पहले साफ़ बताओ, बेमेल दुकानें छिपाकर रखो */
     LASTROWS=rows;
+    if(push)logSearch(q0,WIDE?"":city,rows.length+(BIGROW?1:0));   /* 🔎 admin के लिए खोज का हिसाब (सिर्फ़ शब्द, शहर, नतीजे; कोई नाम/नंबर नहीं) */
     render(rows,q,WIDE?"":city);
   }catch(e){if(n===reqN){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("err"))+'</p><p class="note" style="font-size:11px;opacity:.6">'+esc(String(e&&e.message||e).slice(0,160))+'</p>';}}
 }
