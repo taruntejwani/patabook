@@ -131,6 +131,17 @@ body.nav .basic,body.route .basic{display:none}
 .acts .go:disabled{opacity:.5}
 .acts .tog{border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:12px 12px;font-weight:700;font-size:13px;color:#344054}
 .gm{display:block;text-align:center;font-size:12px;color:var(--muted);margin-top:8px}
+.rmore{overflow:auto;min-height:0;flex:1 1 auto;margin-top:8px}
+.alts{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px}.alts button{flex:none;border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:7px 10px;text-align:left;font-size:12px;color:#344054;line-height:1.35}.alts button b{display:block;font-size:14px;color:var(--ink)}.alts button.on{border-color:var(--blue);background:#eff4ff}.alts i{font-style:normal;color:#1e8e3e;font-weight:700}
+.stops{margin-top:8px;display:flex;flex-direction:column;gap:6px}.stops div{display:flex;align-items:center;gap:8px;font-size:13px;background:#f6f3ff;border-radius:10px;padding:6px 8px}.stops span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stops button{border:0;background:#fff;border-radius:8px;width:30px;height:30px;color:#6b21a8;font-weight:700}
+.alc{margin-top:10px}.alc>small{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}.alc .row{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px}.alc .row button{flex:none;border:1px solid #d0d5dd;border-radius:999px;background:#fff;padding:7px 11px;font-size:13px;font-weight:700;color:#344054;white-space:nowrap}.alc .row button.on{border-color:#f08c00;background:#fff4e6;color:#a35200}
+.alist{margin-top:8px}.alist .h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 2px 4px}.alist .it{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #f1f3f6}.alist .it .tx{flex:1;min-width:0}.alist .it b{display:block;font-size:14px;color:var(--ink)}.alist .it small{display:block;font-size:12px;color:var(--muted)}.alist .it .bt{display:flex;flex-direction:column;gap:5px}.alist .it .bt button,.alist .it .bt a{border:1px solid #d0d5dd;border-radius:9px;background:#fff;padding:5px 8px;font-size:12px;font-weight:700;color:#0b2f73;text-decoration:none;text-align:center;white-space:nowrap}.alist .pbb{display:inline-block;background:#e8f0fe;color:#0b4db3;border-radius:6px;padding:0 5px;font-size:11px;font-weight:700;margin-left:4px}.alist .msg{font-size:13px;color:var(--muted);padding:8px 2px}
+.acts .shr{border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:12px 12px;font-weight:700;font-size:13px;color:#344054}
+.stoppt{width:24px;height:24px;border-radius:50%;background:#7c3aed;color:#fff;font:700 12px/24px system-ui,sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 8px #0005}
+.navf .eta{border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:10px 12px;font-weight:700;font-size:13px;color:#344054;margin-right:6px}
+body.dark:not(.satv) #map canvas{filter:invert(.92) hue-rotate(180deg) brightness(.92) contrast(.92)}
+body.dark{background:#0d1117}
+body.route .fab #dark,body.route .fab #tilt{display:none}
 .steps{list-style:none;margin:10px 0 0;padding:0;overflow:auto;border-top:1px solid #f1f3f6}
 .steps li{display:flex;gap:11px;align-items:center;padding:9px 2px;border-bottom:1px solid #f1f3f6;font-size:14px}
 .steps .a{width:30px;height:30px;flex:none;border-radius:9px;background:#f2f4f7;display:grid;place-items:center;font-size:18px;font-weight:700;color:var(--navy)}
@@ -248,6 +259,7 @@ button,input,select,textarea{font-family:inherit}</style>
 
 <div class="fab">
   <button id="tilt" class="on" aria-label="3D / 2D">3D</button>
+  <button id="dark" aria-label="Night map">🌙</button>
   <button id="sat" aria-label="Satellite / Map"><svg viewBox="0 0 24 24"><path fill="#0b2f73" d="M12 2 2 7l10 5 10-5zm-7.6 8.7L2 12l10 5 10-5-2.4-1.3L12 14.5zm0 5L2 17l10 5 10-5-2.4-1.3L12 19.5z"/></svg></button>
   <button id="locate" aria-label="My location"><svg viewBox="0 0 24 24"><path fill="#1a73e8" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 3h-2.06A7 7 0 0 0 13 5.06V3h-2v2.06A7 7 0 0 0 5.06 11H3v2h2.06A7 7 0 0 0 11 18.94V21h2v-2.06A7 7 0 0 0 18.94 13H21zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></button>
 </div>
@@ -263,8 +275,8 @@ button,input,select,textarea{font-family:inherit}</style>
     <button type="button" data-m="walk">🚶 <span data-t="walk">पैदल</span></button>
   </div>
   <div class="sum" id="rSum"></div>
-  <div class="acts"><button type="button" class="go" id="rGo" disabled>▶ <span data-t="start_nav">चलना शुरू करें</span></button><button type="button" class="tog" id="rTog" data-t="steps">स्टेप्स</button></div>
-  <ol class="steps" id="rSteps" hidden></ol>
+  <div class="acts"><button type="button" class="go" id="rGo" disabled>▶ <span data-t="start_nav">चलना शुरू करें</span></button><button type="button" class="shr" id="rShare" aria-label="Share">📤</button><button type="button" class="tog" id="rTog" data-t="steps">स्टेप्स</button></div>
+  <div class="rmore" id="rMore"><div class="alts" id="rAlts" hidden></div><div class="stops" id="rStops" hidden></div><div class="alc" id="rAlc" hidden></div><div class="alist" id="rAlong" hidden></div><ol class="steps" id="rSteps" hidden></ol></div>
 </section>
 
 <div class="navb" id="navb" hidden>
@@ -274,7 +286,7 @@ button,input,select,textarea{font-family:inherit}</style>
 </div>
 <div class="navf" id="navf" hidden>
   <div><b id="nRem"></b><small id="nEta"></small></div>
-  <button type="button" id="nStop" data-t="stop">रोकें</button>
+  <button type="button" class="eta" id="nShare">📤 <span data-t="share_eta">पहुँचने का समय भेजें</span></button><button type="button" id="nStop" data-t="stop">रोकें</button>
 </div>
 
 <script>
@@ -311,7 +323,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function
    भाषा — पूरा पेज एक ही भाषा में (English चुनें तो English, बाकी हिंदी)
    ========================================================= */
 var TX = {
-  hi: { loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
+  hi: { al_title: 'रास्ते में', al_fuel: 'पेट्रोल पंप', al_hotel: 'होटल', al_food: 'खाना', al_garage: 'गैराज', al_tyre: 'पंचर / टायर', al_med: 'मेडिकल', al_hosp: 'अस्पताल', al_atm: 'ATM', al_ev: 'EV चार्जिंग', al_loading: 'रास्ते के पास ढूँढ रहे हैं…', al_none: 'इस रास्ते के पास कुछ नहीं मिला।', al_fail: 'अभी नहीं ढूँढ पाए। थोड़ी देर बाद फिर दबाएँ।', al_ahead: '{k} आगे', al_off: 'रास्ते से {d}', al_pb: 'PataBook दुकानें', al_other: 'दूसरी जगहें (OpenStreetMap)', al_view: 'देखें', st_add: '➕ यहाँ रुकें', st_t: 'रुकना', st_max: 'ज़्यादा से ज़्यादा 5 जगह रुक सकते हैं', st_reached: 'रुकने की जगह आ गई', st_added: 'रास्ते में जोड़ दिया', alt_n: 'रास्ता {n}', alt_fast: 'सबसे तेज़', alt_short: 'सबसे छोटा', share: 'शेयर', share_eta: 'पहुँचने का समय भेजें', share_route: '{a} से {b}: {d} · लगभग {t}। PataBook नक्शे पर देखें:', eta_txt: 'मैं लगभग {t} तक {n} पहुँच जाऊँगा। (PataBook नक्शा)', recent_r: 'पिछले रास्ते', dark: 'रात का नक्शा', my_loc: 'मेरी जगह', copied: 'कॉपी हो गया', loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
     start_nav: 'चलना शुरू करें', steps: 'स्टेप्स', gmaps: 'Google Maps में भी खोलें', stop: 'रोकें', all: 'सभी', health: 'अस्पताल', worship: 'मंदिर',
     food: 'खाना', hotel: 'होटल', fuel: 'पेट्रोल', bank: 'बैंक', school: 'स्कूल', shop: 'दुकान', travel: 'बस/रेल',
     nolib: 'मैप लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।', pb_n: '{n} PataBook दुकानें मैप पर', pb_fail: 'PataBook दुकानें लोड नहीं हुईं',
@@ -321,7 +333,7 @@ var TX = {
     tap_start: 'लोकेशन नहीं मिली — नक्शे पर अपनी शुरुआत की जगह टैप करें', addr_fail: 'यह पता नक्शे पर नहीं मिला', est: 'ट्रैफ़िक के बिना अंदाज़ा',
     arrived: 'आप पहुँच गए', reroute: 'नया रास्ता बना रहे हैं', pb: 'PataBook दुकानें', places: 'जगहें', none: 'कुछ नहीं मिला',
     rem: 'बाकी', m: 'मी.', km: 'किमी', min: 'मिनट', hr: 'घंटा', in_m: '{d} बाद', now: 'अब', voice_on: 'आवाज़ चालू', voice_off: 'आवाज़ बंद', shop_t: 'दुकान', nokey: 'सैटेलाइट फ़ोटो के लिए MapTiler चाबी अभी नहीं डाली गई है' },
-  en: { loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
+  en: { al_title: 'On the way', al_fuel: 'Petrol pump', al_hotel: 'Hotel', al_food: 'Food', al_garage: 'Garage', al_tyre: 'Puncture / Tyre', al_med: 'Medical', al_hosp: 'Hospital', al_atm: 'ATM', al_ev: 'EV charging', al_loading: 'Searching along the route…', al_none: 'Nothing found near this route.', al_fail: 'Could not search right now. Tap again in a little while.', al_ahead: '{k} ahead', al_off: '{d} off route', al_pb: 'PataBook shops', al_other: 'Other places (OpenStreetMap)', al_view: 'View', st_add: '➕ Add stop', st_t: 'Stop', st_max: 'You can add up to 5 stops', st_reached: 'You have reached your stop', st_added: 'Added to the route', alt_n: 'Route {n}', alt_fast: 'Fastest', alt_short: 'Shortest', share: 'Share', share_eta: 'Send arrival time', share_route: '{a} to {b}: {d} · about {t}. See it on PataBook map:', eta_txt: 'I will reach {n} around {t}. (PataBook map)', recent_r: 'Recent routes', dark: 'Night map', my_loc: 'My location', copied: 'Copied', loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
     start_nav: 'Start', steps: 'Steps', gmaps: 'Also open in Google Maps', stop: 'Stop', all: 'All', health: 'Hospital', worship: 'Temple',
     food: 'Food', hotel: 'Hotel', fuel: 'Petrol', bank: 'Bank', school: 'School', shop: 'Shops', travel: 'Bus/Rail',
     nolib: 'Map library did not load. Check internet.', pb_n: '{n} PataBook shops on map', pb_fail: 'Could not load PataBook shops',
@@ -809,7 +821,7 @@ function setSat(on) {
     map.setPaintProperty(id, 'text-halo-color', on ? 'rgba(0,0,0,.75)' : '#ffffff');
   });
   map.setPaintProperty('poi-glow', 'circle-opacity', on ? .32 : .2);
-  $('sat').classList.toggle('on', on);
+  $('sat').classList.toggle('on', on); document.body.classList.toggle('satv', on);
   try { localStorage.setItem('pb-sat', on ? '1' : '0'); } catch (e) {}
 }
 function flatColors() { var a = []; Object.keys(C).forEach(function (k) { a.push(k, shade(C[k], -30)); }); return a; }
@@ -866,6 +878,7 @@ function bkSync() {
 var cardDest = null, popup = null;
 function showCard(ll, html, dest) {
   cardDest = dest;
+  if (route && route.data && !nav && dest && dest.ll) html += '<div class="pb"><button type="button" class="pro" data-addstop="1">' + esc(T('st_add')) + '</button></div>';
   if (popup) popup.remove();
   popup = new maplibregl.Popup({ offset: 24, maxWidth: '290px' }).setLngLat(ll).setHTML(html).addTo(map);
   popup.on('close', bkSync); bkSync();
@@ -1237,15 +1250,21 @@ function distToLine(p, line) {
 }
 function addRouteLayers() {
   if (!map.getSource('route')) map.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  if (!map.getSource('route-alt')) map.addSource('route-alt', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  if (!map.getSource('along')) map.addSource('along', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  addL({ id: 'route-alt', type: 'line', source: 'route-alt', layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': '#98a2b3', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4, 18, 12], 'line-opacity': .85 } }, 'poi-glow', 'middle');
+  addL({ id: 'along-pt', type: 'circle', source: 'along', paint: { 'circle-radius': 7, 'circle-color': ['case', ['get', 'pb'], '#1a73e8', '#f08c00'], 'circle-stroke-color': '#fff', 'circle-stroke-width': 2 } }, null, 'top');
   addL({ id: 'route-case', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: { 'line-color': '#0b2f73', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 6, 18, 16] } }, 'poi-glow', 'middle');
   addL({ id: 'route-line', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: { 'line-color': '#1a73e8', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 3.5, 18, 11] } }, 'poi-glow', 'middle');
 }
 var route = null, rMode = 'car', startMk = null, endMk = null, picking = false;
-function openRoute(dest, from) {
-  clearVia();
-  route = { to: dest.ll, name: dest.name || '', from: null, data: null, via: null };
+function openRoute(dest, from, fromName, stops) {
+  clearVia(); clearStops(); clearAlong();
+  route = { to: dest.ll, name: dest.name || '', from: null, data: null, via: null, stops: (stops || []).slice(0, 5), alts: [], altSel: 0, fromName: fromName || '', fromGps: !from };
+  drawStops();
   $('rTo').textContent = route.name;
   $('sheet').hidden = false; document.body.classList.add('route'); sheetH(); bkSync();
   $('rSteps').hidden = true; $('rGo').disabled = true;
@@ -1264,32 +1283,43 @@ function pickStart() {
   });
 }
 function calcRoute(re) {
-  if (!route || !route.from) return;
+  if (!route || !route.from) return Promise.resolve();
   if (!re) $('rSum').textContent = T('routing');
   var P = function (p) { return p[0].toFixed(6) + ',' + p[1].toFixed(6); };
-  var pts = P(route.from) + ';' + (route.via ? P(route.via) + ';' : '') + P(route.to);
-  var free = OSRM[rMode] + pts + '?overview=full&geometries=geojson&steps=true';
-  var u = MB ? 'https://api.mapbox.com/directions/v5/mapbox/' + MB_DIR[rMode] + '/' + pts + '?overview=full&geometries=geojson&steps=true&access_token=' + MAPBOX_TOKEN : free;
+  var mids = (route.stops || []).map(function (x) { return x.ll; }); if (route.via) mids.push(route.via);
+  var pts = [route.from].concat(mids, [route.to]).map(P).join(';');
+  var alt = !mids.length && !nav;   /* बीच में रुकना न हो → 2–3 रास्ते */
+  var free = OSRM[rMode] + pts + '?overview=full&geometries=geojson&steps=true' + (alt ? '&alternatives=true' : '');
+  var u = MB ? 'https://api.mapbox.com/directions/v5/mapbox/' + MB_DIR[rMode] + '/' + pts + '?overview=full&geometries=geojson&steps=true' + (alt ? '&alternatives=true' : '') + '&access_token=' + MAPBOX_TOKEN : free;
   var seq = route.seq = (route.seq || 0) + 1;
   var get = function (url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
   return get(u).catch(function (e) { if (u !== free) return get(free); throw e; }).then(function (j) {
     if (!route || seq !== route.seq) return;
     if (j.code !== 'Ok' || !j.routes || !j.routes.length) { $('rSum').innerHTML = '<span class="err">' + esc(T('no_route')) + '</span>'; return; }
-    var rt = j.routes[0];
-    if (rMode === 'bike') rt.duration = rt.duration * 0.85;
-    route.data = rt;
-    if (!route.via) route.base = rt.duration;                      /* सीधे रास्ते का समय — तुलना के लिए */
-    route.steps = [];
-    rt.legs.forEach(function (l, li) { l.steps.forEach(function (s) {
-      if (s.maneuver && s.maneuver.type === 'arrive' && li < rt.legs.length - 1) return;   /* बीच की जगह पर "पहुँच गए" नहीं */
-      route.steps.push(s); }); });
-    map.getSource('route').setData({ type: 'Feature', geometry: rt.geometry, properties: {} });
-    map.setPaintProperty('route-line', 'line-dasharray', rMode === 'walk' ? [0.6, 1.4] : null);
-    if (startMk) startMk.remove();
-    if (!myPos || hav(myPos, route.from) > 30) { var el = document.createElement('div'); el.className = 'startpt'; startMk = new maplibregl.Marker({ element: el }).setLngLat(route.from).addTo(map); } else startMk = null;
-    fillSheet();
-    if (!re && !nav) fitRoute();
+    route.alts = j.routes.slice(0, 3);
+    route.alts.forEach(function (r) { if (rMode === 'bike') r.duration = r.duration * 0.85; });
+    route.altSel = 0;
+    if (!route.via) route.base = route.alts[0].duration;
+    useAlt(0, re);
+    if (!re && !nav) saveRecent();
+    clearAlong();
   }).catch(function () { if (route && seq === route.seq) $('rSum').innerHTML = '<span class="err">' + esc(T('route_fail')) + '</span>'; });
+}
+/* चुना हुआ रास्ता (alternatives में से) — steps, नीली लाइन, बाकी धूसर */
+function useAlt(i, re) {
+  var rt = route.alts[i]; if (!rt) return;
+  route.altSel = i; route.data = rt;
+  route.steps = [];
+  rt.legs.forEach(function (l, li) { l.steps.forEach(function (s) {
+    if (s.maneuver && s.maneuver.type === 'arrive' && li < rt.legs.length - 1) return;   /* बीच की जगह पर "पहुँच गए" नहीं */
+    route.steps.push(s); }); });
+  map.getSource('route').setData({ type: 'Feature', geometry: rt.geometry, properties: {} });
+  if (map.getSource('route-alt')) map.getSource('route-alt').setData({ type: 'FeatureCollection', features: route.alts.map(function (r, k) { return k === i ? null : { type: 'Feature', geometry: r.geometry, properties: { k: k } }; }).filter(Boolean) });
+  map.setPaintProperty('route-line', 'line-dasharray', rMode === 'walk' ? [0.6, 1.4] : null);
+  if (startMk) startMk.remove();
+  if (!myPos || hav(myPos, route.from) > 30) { var el = document.createElement('div'); el.className = 'startpt'; startMk = new maplibregl.Marker({ element: el }).setLngLat(route.from).addTo(map); } else startMk = null;
+  fillSheet();
+  if (!re && !nav) fitRoute();
 }
 function fitRoute() {
   var c = route.data.geometry.coordinates, b = new maplibregl.LngLatBounds(c[0], c[0]);
@@ -1308,7 +1338,25 @@ function fillSheet() {
   $('rSteps').innerHTML = route.steps.map(function (s) {
     var t = instr(s); return '<li><span class="a">' + arrow(s) + '</span><span>' + esc(t) + (s.distance > 0 && s.maneuver.type !== 'arrive' ? '<small>' + esc(fmtDist(s.distance)) + '</small>' : '') + '</span></li>';
   }).join('');
-  $('rGo').disabled = false; sheetH();
+  $('rGo').disabled = false;
+  /* 2–3 रास्ते */
+  var A = route.alts || [], fi = 0, si = 0;
+  A.forEach(function (r, k) { if (r.duration < A[fi].duration) fi = k; if (r.distance < A[si].distance) si = k; });
+  $('rAlts').hidden = A.length < 2;
+  $('rAlts').innerHTML = A.length < 2 ? '' : A.map(function (r, k) {
+    var tag = [k === fi ? T('alt_fast') : '', k === si && si !== fi ? T('alt_short') : ''].filter(Boolean).join(' · ');
+    return '<button type="button" data-alt="' + k + '" class="' + (k === route.altSel ? 'on' : '') + '">' + esc(T('alt_n', { n: k + 1 })) + (tag ? ' · <i>' + esc(tag) + '</i>' : '') + '<b>' + esc(fmtTime(r.duration)) + '</b>' + esc(fmtDist(r.distance)) + '</button>';
+  }).join('');
+  /* बीच में रुकना */
+  var S = route.stops || [];
+  $('rStops').hidden = !S.length;
+  $('rStops').innerHTML = S.map(function (x, k) { return '<div><span class="stoppt" style="display:inline-block;flex:none">' + (k + 1) + '</span><span>' + esc(T('st_t') + ': ' + (x.name || '')) + '</span><button type="button" data-unstop="' + k + '" aria-label="Remove">✕</button></div>'; }).join('');
+  /* रास्ते में: chips */
+  if (!nav) {
+    $('rAlc').hidden = false;
+    $('rAlc').innerHTML = '<small>🛣️ ' + esc(T('al_title')) + '</small><div class="row">' + ALONG.map(function (a) { return '<button type="button" data-al="' + a.k + '" class="' + (alongK === a.k ? 'on' : '') + '">' + a.i + ' ' + esc(T('al_' + a.k)) + '</button>'; }).join('') + '</div>';
+  }
+  sheetH();
 }
 function sheetH() { setTimeout(function () { document.body.style.setProperty('--sheet', $('sheet').offsetHeight + 'px'); }, 30); }
 $('rTog').onclick = function () { $('rSteps').hidden = !$('rSteps').hidden; sheetH(); };
@@ -1320,6 +1368,8 @@ $('modes').onclick = function (e) {
 function closeRoute() {
   route = null; picking = false; $('sheet').hidden = true; document.body.classList.remove('route');
   map.getSource('route').setData({ type: 'FeatureCollection', features: [] });
+  if (map.getSource('route-alt')) map.getSource('route-alt').setData({ type: 'FeatureCollection', features: [] });
+  clearStops(); clearAlong();
   if (startMk) startMk.remove(); if (endMk) endMk.remove(); startMk = endMk = null; status('');
   clearVia(); bkSync();
 }
@@ -1329,7 +1379,7 @@ function clearVia() { if (viaMk) viaMk.remove(); viaMk = null; if (route) route.
 map.on('click', function (e) {
   if (!route || !route.from || !route.data || nav || picking || $('sheet').hidden) return;
   try {   /* दुकान / जगह के निशान पर छुआ हो तो उनका card खुलेगा, रास्ता नहीं बदलेगा */
-    var lys = ['pb-pin', 'pb-cluster', 'poi-minor', 'poi-major'].filter(function (l) { return map.getLayer(l); });
+    var lys = ['pb-pin', 'pb-cluster', 'poi-minor', 'poi-major', 'route-alt', 'along-pt'].filter(function (l) { return map.getLayer(l); });
     if (lys.length && map.queryRenderedFeatures(e.point, { layers: lys }).length) return;
   } catch (x) {}
   var ll = [e.lngLat.lng, e.lngLat.lat];
@@ -1341,6 +1391,185 @@ map.on('click', function (e) {
   calcRoute(true);
 });
 $('rClose').onclick = closeRoute;
+
+/* =========================================================
+   🛣️ रास्ते में: पूरे रास्ते के पास पेट्रोल पंप, होटल, गैराज… (OpenStreetMap / Overpass) + PataBook दुकानें ऊपर
+   ========================================================= */
+var ALONG = [
+  { k: 'fuel', i: '⛽', q: ['nwr["amenity"="fuel"]'], re: /petrol|pump|fuel|cng|diesel|पेट्रोल/i },
+  { k: 'food', i: '🍽️', q: ['nwr["amenity"~"^(restaurant|fast_food|cafe)$"]'], re: /restaurant|hotel|dhaba|food|cafe|bhojan|ढाबा|भोजन/i, cat: ['Food'] },
+  { k: 'hotel', i: '🏨', q: ['nwr["tourism"~"^(hotel|motel|guest_house)$"]'], re: /hotel|lodge|guest ?house|resort/i, cat: ['Hotel'] },
+  { k: 'garage', i: '🔧', q: ['nwr["shop"~"^(car_repair|motorcycle_repair)$"]'], re: /garage|repair|service|mechanic|auto|car care|car wash/i, cat: ['Automobile'] },
+  { k: 'tyre', i: '🛞', q: ['nwr["shop"="tyres"]'], re: /tyre|tire|puncture|पंचर|टायर/i },
+  { k: 'med', i: '💊', q: ['nwr["amenity"="pharmacy"]'], re: /medical|pharma|chemist|drug|medicine/i },
+  { k: 'hosp', i: '🏥', q: ['nwr["amenity"~"^(hospital|clinic)$"]'], re: /hospital|clinic|doctor|nursing/i, cat: ['Health'] },
+  { k: 'atm', i: '🏧', q: ['nwr["amenity"="atm"]', 'nwr["amenity"="bank"]["atm"="yes"]'], re: /\batm\b/i },
+  { k: 'ev', i: '🔌', q: ['nwr["amenity"="charging_station"]'], re: /\bev\b|charging/i }
+];
+var alongK = null, alongSeq = 0, ALR = [], ALC = {};
+var OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+function clearAlong() {
+  alongK = null; ALR = []; alongSeq++;
+  if ($('rAlong')) { $('rAlong').hidden = true; $('rAlong').innerHTML = ''; }
+  if (map.getSource('along')) map.getSource('along').setData({ type: 'FeatureCollection', features: [] });
+}
+/* रास्ते की लंबाई के साथ हर बिंदु तक की दूरी (km आगे बताने के लिए) */
+function cumDist(line) { var c = [0]; for (var i = 1; i < line.length; i++) c.push(c[i - 1] + hav(line[i - 1], line[i])); return c; }
+function nearIdx(p, line) { var b = 0, bd = Infinity; for (var i = 0; i < line.length; i++) { var d = (line[i][0] - p[0]) * (line[i][0] - p[0]) + (line[i][1] - p[1]) * (line[i][1] - p[1]); if (d < bd) { bd = d; b = i; } } return b; }
+function samplePts(line, step) { var o = [line[0]], acc = 0; for (var i = 1; i < line.length; i++) { acc += hav(line[i - 1], line[i]); if (acc >= step) { o.push(line[i]); acc = 0; } } o.push(line[line.length - 1]); return o; }
+function overpass(q) {
+  var i = 0;
+  function next() {
+    if (i >= OVERPASS.length) return Promise.reject(new Error('overpass'));
+    var url = OVERPASS[i++], c = new AbortController(), t = setTimeout(function () { c.abort(); }, 30000);
+    return fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: c.signal })
+      .then(function (r) { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(function () { clearTimeout(t); return next(); });
+  }
+  return next();
+}
+function alongSearch(k) {
+  if (!route || !route.data) return;
+  var A = ALONG.filter(function (a) { return a.k === k; })[0]; if (!A) return;
+  alongK = k; fillSheet();
+  var my = ++alongSeq, line = route.data.geometry.coordinates, R = rMode === 'walk' ? 300 : 1500;
+  var box = $('rAlong'); box.hidden = false; box.innerHTML = '<div class="msg">' + esc(T('al_loading')) + '</div>'; sheetH();
+  var cum = cumDist(line), total = cum[cum.length - 1];
+  var aheadKm = function (p) { return cum[nearIdx(p, line)] / 1000; };
+  /* PataBook दुकानें: रास्ते के 2 गुना दायरे तक */
+  var pb = BIZ.filter(function (b) {
+    if (!b.ll) return false;
+    var hit = A.re.test(b.name + ' ' + b.category) || (A.cat && A.cat.indexOf(b.category) >= 0);
+    return hit && distToLine(b.ll, line) <= R * 2;
+  }).map(function (b) { return { pb: 1, b: b, ll: b.ll, name: b.name, off: distToLine(b.ll, line), km: aheadKm(b.ll) }; });
+  var key = k + '|' + rMode + '|' + line.length + '|' + line[0].join() + '|' + line[line.length - 1].join();
+  var step = Math.max(2000, total / 140), pts = samplePts(line, step);
+  var poly = pts.map(function (p) { return p[1].toFixed(5) + ',' + p[0].toFixed(5); }).join(',');
+  var q = '[out:json][timeout:25];(' + A.q.map(function (x) { return x + '(around:' + R + ',' + poly + ');'; }).join('') + ');out center 150;';
+  (ALC[key] ? Promise.resolve(ALC[key]) : overpass(q).then(function (j) { ALC[key] = j; return j; })).then(function (j) {
+    if (my !== alongSeq) return;
+    var seen = {};
+    var osm = (j.elements || []).map(function (e) {
+      var ll = e.type === 'node' ? [e.lon, e.lat] : e.center ? [e.center.lon, e.center.lat] : null; if (!ll) return null;
+      var t = e.tags || {}, nm = t['name:en'] || t.name || t.brand || T('al_' + k);
+      return { pb: 0, ll: ll, name: nm, sub: [t.brand && t.brand !== nm ? t.brand : '', t['addr:city'] || t['addr:place'] || ''].filter(Boolean).join(' · '), off: distToLine(ll, line), km: aheadKm(ll) };
+    }).filter(function (x) { if (!x) return false; var s0 = x.name + '|' + x.ll[0].toFixed(3) + x.ll[1].toFixed(3); if (seen[s0]) return false; seen[s0] = 1; return true; });
+    showAlong(pb, osm);
+  }).catch(function () {
+    if (my !== alongSeq) return;
+    if (pb.length) showAlong(pb, [], true); else { box.innerHTML = '<div class="msg">' + esc(T('al_fail')) + '</div>'; sheetH(); }
+  });
+}
+function showAlong(pb, osm, failed) {
+  var box = $('rAlong'), byKm = function (a, b) { return a.km - b.km; };
+  pb.sort(byKm); osm.sort(byKm); osm = osm.slice(0, 80);
+  ALR = pb.concat(osm);
+  map.getSource('along').setData({ type: 'FeatureCollection', features: ALR.map(function (x, i) { return { type: 'Feature', geometry: { type: 'Point', coordinates: x.ll }, properties: { i: i, pb: !!x.pb } }; }) });
+  if (!ALR.length) { box.innerHTML = '<div class="msg">' + esc(T('al_none')) + '</div>'; sheetH(); return; }
+  var row = function (x, i) {
+    var meta = T('al_ahead', { k: fmtDist(x.km * 1000) }) + ' · ' + T('al_off', { d: fmtDist(x.off) }) + (x.sub ? ' · ' + x.sub : '') + (x.b && x.b.address ? ' · ' + x.b.address : '');
+    return '<div class="it"><div class="tx"><b>' + esc(x.name) + (x.pb ? '<span class="pbb">PataBook</span>' : '') + (x.b && x.b.v ? ' <span class="pbb">✓</span>' : '') + '</b><small>' + esc(meta) + '</small></div><div class="bt">' +
+      '<button type="button" data-alv="' + i + '">📍 ' + esc(T('al_view')) + '</button><button type="button" data-als="' + i + '">' + esc(T('st_add')) + '</button>' +
+      (x.pb && x.b.slug ? '<button type="button" data-call="' + esc(x.b.slug) + '">📞 ' + esc(T('call')) + '</button>' : '') + '</div></div>';
+  };
+  box.innerHTML = (pb.length ? '<div class="h">' + esc(T('al_pb')) + '</div>' + pb.map(function (x, i) { return row(x, i); }).join('') : '') +
+    (osm.length ? '<div class="h">' + esc(T('al_other')) + '</div>' + osm.map(function (x, i) { return row(x, pb.length + i); }).join('') : '') +
+    (failed ? '<div class="msg">' + esc(T('al_fail')) + '</div>' : '');
+  sheetH();
+}
+/* बीच में रुकना */
+var stopMks = [];
+function clearStops() { stopMks.forEach(function (m) { m.remove(); }); stopMks = []; }
+function drawStops() {
+  clearStops(); if (!route) return;
+  (route.stops || []).forEach(function (x, k) { var el = document.createElement('div'); el.className = 'stoppt'; el.textContent = k + 1; stopMks.push(new maplibregl.Marker({ element: el }).setLngLat(x.ll).addTo(map)); });
+}
+function addStop(ll, name) {
+  if (!route) return;
+  route.stops = route.stops || [];
+  if (route.stops.length >= 5) { status(T('st_max'), true); return; }
+  /* रास्ते के क्रम में डालो (शुरू से दूरी के हिसाब से) */
+  var line = route.data ? route.data.geometry.coordinates : null, cum = line ? cumDist(line) : null;
+  var pos = function (p) { return line ? cum[nearIdx(p, line)] : hav(route.from, p); };
+  route.stops.push({ ll: ll, name: name || '', _d: pos(ll) });
+  route.stops.forEach(function (x) { if (x._d == null) x._d = pos(x.ll); });
+  route.stops.sort(function (a, b) { return a._d - b._d; });
+  clearVia(); drawStops(); status(T('st_added')); calcRoute(false);
+}
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-alt],[data-unstop],[data-al],[data-alv],[data-als],[data-addstop]'); if (!t || !route) return;
+  if (t.hasAttribute('data-alt')) { useAlt(+t.dataset.alt, true); clearAlong(); fillSheet(); return; }
+  if (t.hasAttribute('data-unstop')) { route.stops.splice(+t.dataset.unstop, 1); route.stops.forEach(function (x) { x._d = null; }); drawStops(); calcRoute(false); return; }
+  if (t.hasAttribute('data-al')) { if (alongK === t.dataset.al) { clearAlong(); fillSheet(); } else alongSearch(t.dataset.al); return; }
+  if (t.hasAttribute('data-alv')) { var x = ALR[+t.dataset.alv]; if (!x) return; map.flyTo({ center: x.ll, zoom: 15.5, duration: 900 }); if (x.pb) bizCard(x.b); else showCard(x.ll, '<div class="pc"><div><div class="pt">' + esc(x.name) + '</div><div class="ps">' + esc(T('al_' + alongK)) + '</div></div></div><div class="pb"><button type="button" class="dir" data-go="1">📍 ' + esc(T('directions')) + '</button></div>', { ll: x.ll, name: x.name }); return; }
+  if (t.hasAttribute('data-als')) { var y = ALR[+t.dataset.als]; if (y) addStop(y.ll, y.name); return; }
+  if (t.hasAttribute('data-addstop') && cardDest) { if (popup) popup.remove(); addStop(cardDest.ll, cardDest.name); }
+});
+map.on('click', 'along-pt', function (e) { var f = e.features && e.features[0]; if (!f) return; var b = document.querySelector('[data-alv="' + f.properties.i + '"]'); if (b) b.click(); });
+/* नक्शे पर धूसर दूसरा रास्ता छुएँ → वही चुनें */
+map.on('click', 'route-alt', function (e) { var f = e.features && e.features[0]; if (f && route && route.alts) { useAlt(+f.properties.k, true); clearAlong(); fillSheet(); } });
+
+/* 📤 रास्ता शेयर / पहुँचने का समय */
+function shareText(txt, url) {
+  var full = txt + (url ? ' ' + url : '');
+  if (navigator.share) { navigator.share({ text: txt, url: url || undefined }).catch(function () {}); return; }
+  location.href = 'https://wa.me/?text=' + encodeURIComponent(full);
+}
+function routeUrl() {
+  var P = function (p) { return p[1].toFixed(5) + ',' + p[0].toFixed(5); };
+  var u = 'https://patabook.in/map.html?' + (route.fromGps ? '' : 'from=' + P(route.from) + '&' + (route.fromName ? 'fn=' + encodeURIComponent(route.fromName) + '&' : '')) + 'to=' + P(route.to) + '&n=' + encodeURIComponent(route.name || '');
+  if (route.stops && route.stops.length) u += '&s=' + route.stops.map(function (x) { return P(x.ll); }).join(';');
+  return u;
+}
+$('rShare').onclick = function () {
+  if (!route || !route.data) return;
+  shareText(T('share_route', { a: route.fromName || T('my_loc'), b: route.name || '', d: fmtDist(route.data.distance), t: fmtTime(route.data.duration) }), routeUrl());
+};
+$('nShare').onclick = function () {
+  if (!route || !route.data) return;
+  /* बचा समय (nRem) से पहुँचने का घड़ी-समय */
+  var rem = route._remS != null ? route._remS : route.data.duration, at = new Date(Date.now() + rem * 1000);
+  var hm = at.toLocaleTimeString(lang() === 'en' ? 'en-IN' : 'hi-IN', { hour: 'numeric', minute: '2-digit' });
+  shareText(T('eta_txt', { t: hm, n: route.name || '' }), routeUrl());
+};
+
+/* 🕘 पिछले रास्ते (सिर्फ़ इसी फ़ोन में) */
+function saveRecent() {
+  if (!route || !route.to) return;
+  try {
+    var a = JSON.parse(localStorage.getItem('pb-routes') || '[]'); if (!Array.isArray(a)) a = [];
+    var it = { to: route.to, n: route.name || '', from: route.fromGps ? null : route.from, fn: route.fromName || '', t: Date.now() };
+    var k = function (x) { return (x.n || '') + '|' + x.to.map(function (v) { return v.toFixed(3); }).join() + '|' + (x.from ? x.from.map(function (v) { return v.toFixed(3); }).join() : 'gps'); };
+    a = [it].concat(a.filter(function (x) { return x && x.to && k(x) !== k(it); })).slice(0, 6);
+    localStorage.setItem('pb-routes', JSON.stringify(a));
+  } catch (e) {}
+}
+function recentRoutes() { try { var a = JSON.parse(localStorage.getItem('pb-routes') || '[]'); return Array.isArray(a) ? a.filter(function (x) { return x && x.to && x.to.length === 2; }) : []; } catch (e) { return []; } }
+$('q').addEventListener('focus', function () {
+  if (this.value.trim()) return;
+  var a = recentRoutes(); if (!a.length) return;
+  $('sres').innerHTML = '<div class="h">🕘 ' + esc(T('recent_r')) + '</div>' + a.map(function (x, i) {
+    return '<a data-rr="' + i + '"><span class="ic">🧭</span><span><b>' + esc((x.fn || T('my_loc')) + ' → ' + (x.n || '')) + '</b></span></a>';
+  }).join('');
+  $('sres').hidden = false; document.body.classList.add('srch');
+});
+$('sres').addEventListener('click', function (e) {
+  var a = e.target.closest('[data-rr]'); if (!a) return;
+  var x = recentRoutes()[+a.dataset.rr]; if (!x) return;
+  e.stopPropagation(); hideRes(); $('q').blur();
+  openRoute({ ll: x.to, name: x.n }, x.from || null, x.fn || '');
+}, true);
+
+/* 🌙 रात का नक्शा (याद रहता है) */
+var darkOn = false; try { darkOn = localStorage.getItem('pb-dark') === '1'; } catch (e) {}
+function setDark(on) {
+  darkOn = on; $('dark').classList.toggle('on', on);
+  if (MB) { try { map.setConfigProperty('basemap', 'lightPreset', on ? 'night' : lightNow()); } catch (e) {} document.body.classList.remove('dark'); }
+  else document.body.classList.toggle('dark', on);
+  try { localStorage.setItem('pb-dark', on ? '1' : '0'); } catch (e) {}
+}
+$('dark').onclick = function () { setDark(!darkOn); status(T('dark') + (darkOn ? ' ✓' : '')); };
+if (darkOn) setTimeout(function () { setDark(true); }, 0);
 
 /* ---------- मोड़ की भाषा ---------- */
 var DIR = {
@@ -1444,6 +1673,7 @@ function snapAhead(p, line) {
 function navTick(ll, jump) {
   if (!nav || !route || !route.data) return;
   var line = route.data.geometry.coordinates, now = Date.now();
+  if (route.stops && route.stops.length && hav(ll, route.stops[0].ll) < 60) { route.stops.shift(); drawStops(); status(T('st_reached')); speakFn(function (L) { return T('st_reached', null, L); }); }
   if (hav(ll, route.to) < 25) { paintBanner(route.steps[route.steps.length - 1], 0); speakFn(function (L) { return T('arrived', null, L); }); status(T('arrived')); stopNav(); return; }
   var off = distToLine(ll, line);
   if (off > 45) { nav.off++; if (nav.off >= 2 && now - nav.last > 12000) { nav.last = now; nav.off = 0; status(T('reroute')); speakFn(function (L) { return T('reroute', null, L); }); route.from = ll; clearVia(); calcRoute(true).then(function () { if (nav) { nav.step = 1; nav.said = {}; } }); } }
@@ -1457,7 +1687,8 @@ function navTick(ll, jump) {
   if (d < 170 && d > 45 && !nav.said[key + 'f']) { nav.said[key + 'f'] = 1; speakFn(function (L) { return T('in_m', { d: fmtDist(d, L) }, L) + ' ' + instr(s, L); }); }
   if (d <= 40 && !nav.said[key + 'n']) { nav.said[key + 'n'] = 1; speakFn(function (L) { return T('now', null, L) + ' ' + instr(s, L); }); }
   var rem = d; for (var i = nav.step; i < route.steps.length; i++) rem += i === nav.step ? 0 : route.steps[i].distance;
-  $('nRem').textContent = fmtTime(route.data.duration * Math.min(1, rem / Math.max(1, route.data.distance)));
+  route._remS = route.data.duration * Math.min(1, rem / Math.max(1, route.data.distance));
+  $('nRem').textContent = fmtTime(route._remS);
   $('nEta').textContent = fmtDist(rem) + ' ' + T('rem');
   /* दिशा रास्ते से (कंपास से नहीं) → आगे वाला रास्ता हमेशा स्क्रीन पर सामने/ऊपर */
   var sn = snapAhead(ll, line), on = sn.off < 30, c = on ? sn.pt : ll;
@@ -1487,7 +1718,9 @@ function handleUrl() {
   if (to.length === 2 && isFinite(to[0]) && isFinite(to[1]) && Math.abs(to[0]) <= 90 && Math.abs(to[1]) <= 180) {
     var ll = [to[1], to[0]];
     map.jumpTo({ center: ll, zoom: 16 });
-    openRoute({ ll: ll, name: n || a }, fll);
+    var fn = (P.get('fn') || '').slice(0, 80), st = [];
+    (P.get('s') || '').split(';').slice(0, 5).forEach(function (x, k) { var v = x.split(',').map(Number); if (v.length === 2 && isFinite(v[0]) && isFinite(v[1]) && Math.abs(v[0]) <= 90 && Math.abs(v[1]) <= 180) st.push({ ll: [v[1], v[0]], name: T('st_t') + ' ' + (k + 1) }); });
+    openRoute({ ll: ll, name: n || a }, fll, fn, st);
     return;
   }
   var q = (P.get('q') || '').slice(0, 200);
