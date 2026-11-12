@@ -432,6 +432,7 @@ async function run(push){
       list.innerHTML='<a href="'+href+'" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;border:1.5px solid #ffd8a8;background:#fffaf2;border-radius:16px;padding:16px;margin:4px 0 12px"><span style="flex:1"><b style="display:block;font-size:17px;color:#a35200">'+esc(t)+'</b><small style="display:block;color:#5b6475;font-size:14px;margin-top:2px">'+esc(sub)+'</small></span><span aria-hidden="true" style="font-size:24px;color:#a35200">›</span></a>';
       if(push){const u=new URL(location.href);u.searchParams.set("q",q0);u.searchParams.delete("city");history.replaceState(null,"",u);}
       if(window.PBT)PBT.once("search",q0);
+      if(kind==="of")loadProds("",0,cy||"");else loadProds("",0);
       return;
     }
   }
@@ -896,10 +897,11 @@ function priceQ(q){
 /* 🛍️ दुकानों के Products में खोज (sql-47: pb_search_products) — नतीजों के ऊपर एक पट्टी */
 let PRN=0;
 function prodWords(q){return String(q||"").toLowerCase().split(/\s+/).filter(w=>w&&!STOPW.has(w)).map(w=>{const a=ALIAS[w];return a?a.split(" ")[0]:w;}).join(" ");}
-async function loadProds(q,max){
+async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वाले सामान (sql-55), उस शहर के; "" = सब शहर */
   const el=$("prods");if(!el)return;const n=++PRN;el.hidden=true;el.innerHTML="";
-  const words=prodWords(q);if(!words&&!max)return;
-  let rows=[];try{const r=await fetch(SB+"/rest/v1/rpc/pb_search_products",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify({p_q:words,p_max_price:max||null,p_limit:24})});rows=r.ok?(await r.json()||[]):[];}catch(e){rows=[];}
+  const DISC=typeof dc==="string";
+  const words=DISC?"":prodWords(q);if(!DISC&&!words&&!max)return;
+  let rows=[];try{const r=await fetch(SB+"/rest/v1/rpc/"+(DISC?"pb_discount_products":"pb_search_products"),{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify(DISC?{p_city:dc||null,p_limit:24}:{p_q:words,p_max_price:max||null,p_limit:24})});rows=r.ok?(await r.json()||[]):[];}catch(e){rows=[];}
   if(n!==PRN)return;const en=FEN();
   if(!Array.isArray(rows))rows=[];
   rows=rows.filter(x=>x&&x.url&&/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\//.test(x.url));
@@ -908,7 +910,7 @@ async function loadProds(q,max){
   if(!rows.length){if(max){el.hidden=false;el.innerHTML='<h3>🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+'</h3><p class="nt">'+esc(en?"No product found up to "+inr(max)+".":inr(max)+" तक का कोई प्रोडक्ट नहीं मिला।")+'</p>';}return;}
   PRROWS=rows;
   const cmpN=rows.filter(x=>x.net!=null&&!x.sold).length,cmpShops=new Set(rows.filter(x=>x.net!=null).map(x=>x.slug)).size;
-  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
+  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+(DISC?'🏷️ '+esc(en?"Discounted products"+(dc?" in "+dc:""):"छूट वाले सामान"):'🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim))+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
     const href=(window.PBPlan&&PBPlan.url?PBPlan.url(x.slug):"business.html?slug="+encodeURIComponent(x.slug));
     const p=x.price!=null?+x.price:null,m=x.mrp!=null&&p!=null&&+x.mrp>p?+x.mrp:null,net=x.net!=null?+x.net:p;
     let pr="";if(net!=null){pr='<span class="pr"><strong>'+(x.price_from?(en?"From ":"")+inr(net)+(en?"":" से शुरू"):inr(net))+'</strong>'+(m?'<s>'+inr(m)+'</s><em>'+Math.round((m-p)*100/m)+'% '+(en?"OFF":"छूट")+'</em>':(x.disc&&p!=null?'<s>'+inr(p)+'</s><em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':''))+'</span>';}
