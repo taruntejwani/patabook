@@ -386,7 +386,7 @@ footer{padding:14px 16px 18px;text-align:center;color:var(--muted);font-size:12p
   .posters.dsk .ptk{gap:18px;transition:transform .55s cubic-bezier(.3,.75,.3,1)}.posters.dsk .ptk.nd{transition:none}
   .posters.dsk .ps{flex:0 0 var(--pw,400px);height:calc(var(--pw,400px) / 2);border-radius:18px;background:#eef3fb;box-shadow:0 6px 18px rgba(26,115,232,.12);transform:scale(.86);opacity:.55;transition:transform .55s ease,opacity .55s ease}
   .posters.dsk .ps.on{transform:none;opacity:1;box-shadow:0 12px 30px rgba(26,115,232,.25)}
-  .posters:not(.dsk) .pv{max-width:528px;margin:0 auto}.hsbtn,#jobsBtn,#offBtn,#needBtn{max-width:1100px;margin-left:auto;margin-right:auto}
+  .posters:not(.dsk) .pv{max-width:528px;margin:0 auto}.hsbtn,#jobsBtn,#offBtn{max-width:1100px;margin-left:auto;margin-right:auto}
   .gpw .nsc.pm{min-height:260px}
   .hsbtn{padding:16px 20px}.hsbtn b{font-size:18px}.hsbtn small{font-size:14px}
 }
@@ -502,7 +502,6 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 
   <!-- 🛍️ PataBook City Market: कोने में छोटी दुकान — 20 km के अंदर का सामान -->
   <a class="hsbtn" href="offers.html" id="offBtn" style="margin-top:16px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#ffe8cc)">🎁</span><span class="tx"><b id="ofT">दुकानों के ऑफ़र</b><small id="ofS2">आपके शहर की दुकानों के चालू ऑफ़र</small></span><span aria-hidden="true" class="go">›</span></a>
-  <a class="hsbtn" href="need.html" id="needBtn" style="margin-top:12px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff0f0,#ffe0d6)">🔥</span><span class="tx"><b id="ndT">आज मुझे क्या चाहिए?</b><small id="ndS">ज़रूरत लिखें, शहर की दुकानें भाव भेजेंगी</small></span><span aria-hidden="true" class="go">›</span></a>
   <a class="hsbtn" href="jobs.html" id="jobsBtn" hidden style="margin-top:16px"><span class="ic" aria-hidden="true" style="background:linear-gradient(145deg,#fff4e5,#e8f1ff)">💼</span><span class="tx"><b id="jbT">नौकरी / नौकरियाँ</b><small id="jbS">दुकानों में खाली नौकरियाँ देखें</small></span><span aria-hidden="true" class="go">›</span></a>
 
 
@@ -597,7 +596,6 @@ function applyLang(){
   {const cm=document.getElementById("cmT");if(cm)cm.textContent=(PB.lang&&PB.lang()!=="hi")?"City Market":"सिटी मार्केट";}
   {const en=PB.lang&&PB.lang()!=="hi",ht=document.getElementById("hsT"),hs=document.getElementById("hsS");if(ht)ht.textContent=en?"Home Services":"घर की सेवाएँ";if(hs)hs.textContent=en?"Call an Electrician, Plumber or AC Repair to your home":"Electrician, Plumber, AC Repair घर पर बुलाएँ";}
   {const en=PB.lang&&PB.lang()!=="hi",a=document.getElementById("ofT"),b=document.getElementById("ofS2");if(a){a.textContent=en?"Shop offers":"दुकानों के ऑफ़र";b.textContent=en?"Live offers from shops in your city":"आपके शहर की दुकानों के चालू ऑफ़र";}}
-  {const en=PB.lang&&PB.lang()!=="hi",a=document.getElementById("ndT"),b=document.getElementById("ndS");if(a){a.textContent=en?"What do I need today?":"आज मुझे क्या चाहिए?";b.textContent=en?"Post your need, shops in your city send prices":"ज़रूरत लिखें, शहर की दुकानें भाव भेजेंगी";}}
   {const en=PB.lang&&PB.lang()!=="hi";document.getElementById("jbT").textContent=en?"Jobs":"नौकरी / नौकरियाँ";document.getElementById("jbS").textContent=en?"See vacancies at local shops":"दुकानों में खाली नौकरियाँ देखें";}
 }
 /* ---- नई 25 दुकानें: एक-एक करके अपने-आप slide (नई दुकान आते ही सबसे पुरानी हट जाती है) ---- */

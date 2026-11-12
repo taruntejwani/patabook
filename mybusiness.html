@@ -13,7 +13,7 @@
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-helpmenu.js"></script>
-<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script><script src="pb-offers.js?v=1"></script><script src="pb-needs.js?v=1"></script><script src="pb-stamps.js?v=1"></script><script src="pb-demand.js?v=1"></script>
+<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script><script src="pb-offers.js?v=1"></script><script src="pb-stamps.js?v=1"></script><script src="pb-demand.js?v=1"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -1162,7 +1162,6 @@ function setCats(en){return [
   ["prof","👤",en?"Profile":"प्रोफ़ाइल",en?"Edit, Verify, % complete":"बदलाव, जाँच, कितनी पूरी"],
   ["live","🟢",en?"Today's status":"आज की स्थिति",en?"Closed today, closing early, home delivery":"आज बंद, जल्दी बंद, होम डिलीवरी"],
   ["offers","🎁",en?"Offers":"ऑफ़र",en?"Post up to 3 offers for customers":"ग्राहकों के लिए 3 तक ऑफ़र डालें"],
-  ["needs","🔥",en?"Customer requests":"ग्राहकों की माँग",en?"Reply with your price to customers in your city":"अपने शहर के ग्राहकों को भाव / जवाब भेजें"],
   ["stamps","❤️","Stamp card",en?"1 stamp per purchase, reward when complete":"हर ख़रीद पर 1 stamp, पूरे होने पर इनाम"],
   ["num","📞",en?"Number & contact":"नंबर और संपर्क",en?"Show / hide number, change number":"नंबर दिखे / छुपे, नंबर बदलना"],
   ["feat","🛠️",en?"Advance Features":"Advance Features",en?"Hiring, Home Service":"नौकरी (नौकरी), होम सर्विस"],
@@ -1175,7 +1174,6 @@ function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof"){const pc=profPct(b),fl=pc===null||pc>=100;return (canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+(fl&&PROF&&PROF[b.slug]?shopDetails(b,i,en):profBlock(b,i))+verifyBlock(b,i);}   /* अधूरी प्रोफ़ाइल: ऊपर "Complete profile" वाला डिब्बा नहीं — नीचे वही सूची है */
   if(k==="offers")return window.PBOffers?PBOffers.ownerHTML(b,en):"";
-  if(k==="needs")return window.PBNeeds?PBNeeds.ownerHTML(b,en):"";
   if(k==="stamps")return window.PBStamps?PBStamps.ownerHTML(b,en):"";
   if(k==="live")return window.PBLive?PBLive.ownerHTML(b,en):"";
   if(k==="num")return numPanel(b,i,en);
