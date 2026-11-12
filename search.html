@@ -90,6 +90,7 @@ body.kb{padding-bottom:55vh}
 .hint{font-size:13px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
 
 .prods{margin:16px 0 0}.prods h3{font-size:16px;color:var(--navy);margin:0 0 8px}.prods .row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}.prods a.pt{flex:0 0 140px;scroll-snap-align:start;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(20,40,90,.06);touch-action:manipulation}.prods a.pt:active{transform:scale(.97)}.prods .im{aspect-ratio:1/1;padding:6px;background:#fff;overflow:hidden}.prods .im img{width:100%;height:100%;object-fit:contain;display:block}.prods .tx{padding:6px 8px 8px;border-top:1px solid #eef2f9;font-size:12.5px;line-height:1.3}.prods .tx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:700;color:var(--ink)}.prods .pr{display:block;margin-top:3px}.prods .pr strong{font-size:14px;color:var(--navy)}.prods .pr s{color:#8a93a6;margin-left:3px}.prods .pr em{font-style:normal;color:#1e8e3e;font-weight:700;margin-left:3px;white-space:nowrap}.prods .sh{display:block;margin-top:3px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.prods .so{display:inline-block;margin-top:3px;background:#b42318;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px}.prods .nt{font-size:14px;color:var(--muted)}
+#pcmp{position:fixed;inset:0;z-index:60;background:rgba(10,20,40,.45);display:flex;align-items:flex-end;justify-content:center}#pcmp[hidden]{display:none}#pcmp .pcb{background:#fff;width:100%;max-width:560px;max-height:86vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}#pcmp .pch{display:flex;align-items:center;justify-content:space-between}#pcmp .pch b{font-size:17px;color:var(--navy)}#pcmp .pch button{border:0;background:#f2f4f7;border-radius:10px;width:36px;height:36px;font-size:16px;cursor:pointer}#pcmp .pcn{font-size:13px;color:var(--muted);margin:6px 0 8px}#pcmp .pcl{overflow:auto;min-height:0}#pcmp .pcr{display:flex;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid #eef2f9;text-decoration:none;color:var(--ink)}#pcmp .pcr.best{background:#f1faf4;border-radius:12px}#pcmp .pcr.so{opacity:.6}#pcmp .pcr img{width:54px;height:54px;object-fit:contain;flex:none;border:1px solid #eef2f9;border-radius:10px;background:#fff}#pcmp .pct{flex:1;min-width:0}#pcmp .pct b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pcmp .pct small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pcmp .pcp{text-align:right;flex:none}#pcmp .pcp strong{display:block;font-size:16px;color:var(--navy)}#pcmp .pcp s{font-size:12px;color:#8a93a6}#pcmp .pcp em{display:block;font-style:normal;font-size:11px;font-weight:700;color:#1e8e3e}#pcmp .pcp em.sx{color:#b42318}
 .fch{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}.fch button{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:700;border-radius:999px;padding:8px 13px;cursor:pointer;touch-action:manipulation}.fch button.on{border-color:var(--blue);background:#e8f0fe;color:#0b4db3}.fch button[disabled]{opacity:.55}.fch small{flex-basis:100%;font-size:13px;color:#b42318;font-weight:600}
 .count{font-size:14px;font-weight:700;margin:16px 0 8px;color:var(--navy)}
 .list{display:flex;flex-direction:column;gap:12px;padding-bottom:30px}
@@ -887,7 +888,9 @@ async function loadProds(q,max){
   const inr=v=>"₹"+Number(v).toLocaleString("en-IN");
   const lim=max?(en?" up to "+inr(max):" · "+inr(max)+" तक"):"";
   if(!rows.length){if(max){el.hidden=false;el.innerHTML='<h3>🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+'</h3><p class="nt">'+esc(en?"No product found up to "+inr(max)+".":inr(max)+" तक का कोई प्रोडक्ट नहीं मिला।")+'</p>';}return;}
-  el.innerHTML='<h3>🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+'</h3><div class="row">'+rows.map(x=>{
+  PRROWS=rows;
+  const cmpN=rows.filter(x=>x.net!=null&&!x.sold).length,cmpShops=new Set(rows.filter(x=>x.net!=null).map(x=>x.slug)).size;
+  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
     const href=(window.PBPlan&&PBPlan.url?PBPlan.url(x.slug):"business.html?slug="+encodeURIComponent(x.slug));
     const p=x.price!=null?+x.price:null,m=x.mrp!=null&&p!=null&&+x.mrp>p?+x.mrp:null,net=x.net!=null?+x.net:p;
     let pr="";if(net!=null){pr='<span class="pr"><strong>'+(x.price_from?(en?"From ":"")+inr(net)+(en?"":" से शुरू"):inr(net))+'</strong>'+(m?'<s>'+inr(m)+'</s><em>'+Math.round((m-p)*100/m)+'% '+(en?"OFF":"छूट")+'</em>':(x.disc&&p!=null?'<s>'+inr(p)+'</s><em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':''))+'</span>';}
@@ -931,6 +934,27 @@ function openAt(b,t){
   if(t.min==null)return true;
   return a<=z?t.min>=a&&t.min<z:t.min>=a||t.min<z;
 }
+/* 💰 भाव की तुलना — वही products, सस्ते से महँगे; दुकान, size, कीमत, MRP, कीमत की तारीख, दूरी (अगर लोकेशन पता हो) */
+let PRROWS=[];
+function cmpOpen(){
+  const en=FEN(),inr=v=>"₹"+Number(v).toLocaleString("en-IN");
+  const rows=PRROWS.filter(x=>x.net!=null).slice().sort((a,b)=>(a.sold?1:0)-(b.sold?1:0)||a.net-b.net);
+  if(!rows.length)return;
+  const me=FME,km=x=>me&&+x.lat&&+x.lng?kmTo(me,{la:+x.lat,ln:+x.lng}):null;
+  const day=d=>{try{return new Date(d+"T00:00:00").toLocaleDateString(en?"en-IN":"hi-IN",{day:"numeric",month:"short"});}catch(_){return d||"";}};
+  let ov=$("pcmp");if(!ov){ov=document.createElement("div");ov.id="pcmp";document.body.appendChild(ov);}
+  const low=rows.find(x=>!x.sold);
+  ov.innerHTML='<div class="pcb" role="dialog" aria-modal="true" aria-label="'+esc(en?"Compare prices":"भाव की तुलना")+'"><div class="pch"><b>💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</b><button type="button" id="pcmpX" aria-label="'+esc(en?"Close":"बंद करें")+'">✕</button></div>'+
+    '<p class="pcn">'+esc(en?"Prices are set by each shop. Check size / quantity before buying.":"कीमत हर दुकान ने खुद डाली है। खरीदने से पहले size / मात्रा ज़रूर मिलाएँ।")+'</p><div class="pcl">'+
+    rows.map(x=>{const k=km(x),href=(window.PBPlan&&PBPlan.url?PBPlan.url(x.slug):"business.html?slug="+encodeURIComponent(x.slug)),m=x.mrp!=null&&+x.mrp>+x.net?+x.mrp:null;
+      return '<a class="pcr'+(x===low?' best':'')+(x.sold?' so':'')+'" href="'+esc(href)+'"><img src="'+esc(x.url)+'" alt="" loading="lazy"><span class="pct"><b>'+esc(x.name)+'</b>'+(x.extra?'<small>'+esc(x.extra)+'</small>':'')+'<small>🏪 '+esc(x.shop)+(k!=null?' · 📍 '+(k<1?Math.round(k*1000)+" m":k.toFixed(1)+" km"):'')+'</small>'+(x.at?'<small>'+esc((en?"Price updated ":"कीमत अपडेट: ")+day(x.at))+'</small>':'')+'</span><span class="pcp"><strong>'+(x.price_from?(en?"From ":""):"")+inr(x.net)+(x.price_from&&!en?" से":"")+'</strong>'+(m?'<s>'+inr(m)+'</s>':'')+(x===low?'<em>'+esc(en?"Lowest":"सबसे कम")+'</em>':'')+(x.sold?'<em class="sx">'+esc(en?"Sold out":"अभी उपलब्ध नहीं")+'</em>':'')+'</span></a>';}).join("")+'</div></div>';
+  ov.hidden=false;document.body.style.overflow="hidden";
+  try{history.pushState({pbcmp:1},"");}catch(_){}
+}
+function cmpClose(fromPop){const ov=$("pcmp");if(!ov||ov.hidden)return;ov.hidden=true;document.body.style.overflow="";if(!fromPop){try{if(history.state&&history.state.pbcmp)history.back();}catch(_){}}}
+addEventListener("popstate",()=>cmpClose(true));
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("#pcmpB"))return cmpOpen();if(e.target.id==="pcmpX"||e.target.id==="pcmp")cmpClose();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")cmpClose();});
 /* 🟢 अभी खुली / 📍 सबसे पास / ⭐ अच्छी रेटिंग — नतीजों के ऊपर बटन (कुछ save नहीं होता) */
 let FOPEN=false,FSORT="",FME=null,FRAW=null,FMSG="",FVER=false,TQ=null,FAUTO=false;
 function fRk(b){const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);}
