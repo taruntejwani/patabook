@@ -4,3 +4,5 @@
 .assetsignore
 CLAUDE.md
 wrangler.jsonc
+scripts
+.github
