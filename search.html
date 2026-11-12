@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PataBook">
 <script src="site-config.js"></script>
-<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script>
+<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=1"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -89,6 +89,7 @@ body.kb{padding-bottom:55vh}
 
 .hint{font-size:13px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
 
+.fch{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}.fch button{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:700;border-radius:999px;padding:8px 13px;cursor:pointer;touch-action:manipulation}.fch button.on{border-color:var(--blue);background:#e8f0fe;color:#0b4db3}.fch button[disabled]{opacity:.55}.fch small{flex-basis:100%;font-size:13px;color:#b42318;font-weight:600}
 .count{font-size:14px;font-weight:700;margin:16px 0 8px;color:var(--navy)}
 .list{display:flex;flex-direction:column;gap:12px;padding-bottom:30px}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;box-shadow:0 2px 10px rgba(11,47,115,.05)}
@@ -162,6 +163,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
   <p class="hint" data-i="s_hint"></p>
  </form>
 
+ <div class="fch" id="fch" hidden></div>
  <div class="count" id="count"></div>
  <div class="vtabs" id="vtabs" hidden><button type="button" id="tabAll" class="on">📋 <span id="tabAllT"></span></button><button type="button" id="tabImg">🖼️ Images</button></div>
  <div class="list" id="list"></div>
@@ -389,6 +391,7 @@ let reqN=0,CITYUSER=false;
 async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
+  try{if(push&&q0&&window.PBRecent)PBRecent.add(q0);}catch(e){}   /* 🕘 पिछली खोजें (सिर्फ़ इसी फ़ोन में) */
   try{window.pbP2P&&window.pbP2P(q0);}catch(e){}try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
@@ -403,7 +406,7 @@ async function run(push){
   if(push){const u=new URL(location.href);(CATSEL&&CATMAN)?(u.searchParams.set("cat",CATSEL),u.searchParams.set("cm","1")):(u.searchParams.delete("cat"),u.searchParams.delete("cm"));(WORKSEL&&CATMAN)?u.searchParams.set("work",WORKSEL):u.searchParams.delete("work");   /* सिर्फ़ खुद चुनी Category पते में; अपने-आप वाली नहीं (वरना refresh पर सख़्त फ़िल्टर बन जाती है) */history.replaceState(null,"",u);}
   if(!ts.length&&!city&&!CATSEL){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
   const n=++reqN;
-  cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';
+  cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';FRAW=null;FMSG="";{const fc=$("fch");if(fc)fc.hidden=true;}
   if(JOBQ.test(q))return runJobs(q,city,n);   /* "hiring / job / नौकरी" → नौकरी वाली दुकानें (sql-26) */
   try{
     let rows=await gatherRows(q,city,ts,n);if(rows===null)return;
@@ -751,8 +754,49 @@ async function renderImgs(rows,q){
 }
 var IMGTOK=0,LASTR=null;
 function setView(v){VIEW=v;if(LASTR)render.apply(null,LASTR.concat([true]));}
+/* 🟢 अभी खुली / 📍 सबसे पास / ⭐ अच्छी रेटिंग — नतीजों के ऊपर बटन (कुछ save नहीं होता) */
+let FOPEN=false,FSORT="",FME=null,FRAW=null,FMSG="";
+function fRk(b){const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);}
+function fltApply(rows){
+  let r=(rows||[]).slice();
+  if(FOPEN)r=r.filter(b=>{const s=openSt(b);return !!(s&&s.open);});
+  if(FSORT==="near"&&FME){r.forEach(b=>{b._km=+b.latitude&&+b.longitude?kmTo(FME,{la:+b.latitude,ln:+b.longitude}):null;});const dk=b=>b._km==null?1e9:b._km;r=r.map((b,i)=>[b,i]).sort((x,y)=>(x[0]._o?1:0)-(y[0]._o?1:0)||dk(x[0])-dk(y[0])||x[1]-y[1]).map(x=>x[0]);}
+  else if(FSORT==="rate")r=r.map((b,i)=>[b,i]).sort((x,y)=>(x[0]._o?1:0)-(y[0]._o?1:0)||fRk(y[0])-fRk(x[0])||x[1]-y[1]).map(x=>x[0]);
+  return r;
+}
+function fRedo(){PGI=0;if(LASTR)render(LASTR[0],LASTR[1],LASTR[2]);}
+function drawF(){
+  const el=$("fch");if(!el)return;const en=FEN();
+  if(!FRAW||(FRAW.length<2&&!FOPEN&&!FSORT)){el.hidden=true;return;}
+  el.hidden=false;
+  el.innerHTML='<button type="button" data-f="open" class="'+(FOPEN?"on":"")+'" aria-pressed="'+FOPEN+'">🟢 '+(en?"Open now":"अभी खुली")+'</button>'+
+    '<button type="button" data-f="near" class="'+(FSORT==="near"?"on":"")+'" aria-pressed="'+(FSORT==="near")+'">📍 '+(en?"Nearest":"सबसे पास")+'</button>'+
+    '<button type="button" data-f="rate" class="'+(FSORT==="rate"?"on":"")+'" aria-pressed="'+(FSORT==="rate")+'">⭐ '+(en?"Top rated":"अच्छी रेटिंग")+'</button>'+
+    (FMSG?'<small>'+esc(FMSG)+'</small>':'');
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("#fch [data-f]");if(!b)return;const f=b.dataset.f,en=FEN();FMSG="";
+  if(f==="open"){FOPEN=!FOPEN;return fRedo();}
+  if(f==="rate"){FSORT=FSORT==="rate"?"":"rate";return fRedo();}
+  if(f==="near"){
+    if(FSORT==="near"){FSORT="";return fRedo();}
+    if(FME){FSORT="near";return fRedo();}
+    const fail=()=>{FMSG=en?"Location permission was not given, so distance can't be found.":"लोकेशन की इजाज़त नहीं मिली, इसलिए दूरी नहीं निकल सकी।";b.disabled=false;drawF();};
+    if(!navigator.geolocation)return fail();
+    b.disabled=true;
+    try{navigator.geolocation.getCurrentPosition(p=>{FME={la:p.coords.latitude,ln:p.coords.longitude};FSORT="near";fRedo();},fail,{timeout:10000,maximumAge:300000});}catch(_){fail();}
+  }
+});
 function render(rows,q,city,keep){
-  LASTR=[rows,q,city];
+  if(!keep)FRAW=rows;
+  LASTR=[FRAW||rows,q,city];
+  drawF();
+  rows=fltApply(keep?rows:FRAW);
+  if(FOPEN&&FRAW&&FRAW.length&&!rows.length&&!BIGROW){
+    const en=FEN();$("count").textContent="";const tb=$("vtabs");if(tb)tb.hidden=true;
+    $("list").innerHTML='<div class="empty"><p><b>'+esc(en?"None of these shops are open right now.":"इनमें से कोई दुकान अभी खुली नहीं है।")+'</b></p><p>'+esc(en?"Shops that have not added their timings are not shown with this filter.":"जिन दुकानों ने अपना समय नहीं डाला, वे इस फ़िल्टर में नहीं दिखतीं।")+'</p><button type="button" class="btn" id="fOff">'+esc(en?"Show all shops":"सभी दुकानें दिखाएँ")+'</button></div>';
+    $("fOff").onclick=()=>{FOPEN=false;fRedo();};return;
+  }
   const tb=$("vtabs");
   if(tb){const has=(rows&&rows.length)||BIGROW;tb.hidden=!has||(NFHIDE&&!keep);if(!tb.hidden){$("tabAllT").textContent=FEN()?"All":"सब";$("tabAll").className=VIEW==="all"?"on":"";$("tabImg").className=VIEW==="img"?"on":"";}}
   if(VIEW==="img"&&!(NFHIDE&&!keep)&&((rows&&rows.length)||BIGROW)){const total=rows.length+(BIGROW?1:0);$("count").textContent=T("found",{n:total});return renderImgs(rows,q);}
@@ -869,10 +913,12 @@ if(P.get("city"))$("city").value=P.get("city");
 /* "क्या आपका मतलब" पर टैप */
 $("list").addEventListener("click",e=>{const a=e.target.closest("a.dym");if(!a)return;e.preventDefault();$("q").value=a.dataset.q;run(true);});
 $("sform").onsubmit=e=>{e.preventDefault();$("q").blur();run(true);};
+try{PBRecent.attach($("q"),t=>{$("q").value=t;$("q").blur();run(true);});}catch(e){}
 $("city").onchange=()=>run(true);
 window.PB_CITY_RERUN=()=>{if($("city").value.trim())run(false);};
 PB.apply();PB.mount($("pbLang"));
 PB.onChange(()=>{PB.apply();drawCat(!CATMAN);drawWork();run(false);});
+try{const uq=new URLSearchParams(location.search).get("q");if(uq&&window.PBRecent)PBRecent.add(uq);}catch(e){}   /* Home / दुकान के पेज से आई खोज भी 🕘 में */
 run(false);
 if(!P.get("q"))$("q").focus();
 </script>

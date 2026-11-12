@@ -104,6 +104,8 @@
     function nav(u) { location.href = u; }
     function go() { var q = inp.value.trim(); if (!q) { inp.focus(); return; } nav("search.html?q=" + encodeURIComponent(q)); }
     f.onsubmit = function (e) { e.preventDefault(); go(); };
+    /* 🕘 पिछली खोजें (pb-recent.js — ज़रूरत पर ही लोड) */
+    (function () { function at() { try { PBRecent.attach(inp); } catch (e) {} } if (window.PBRecent) return at(); var s = document.createElement("script"); s.src = "pb-recent.js?v=1"; s.onload = at; document.head.appendChild(s); })();
     var sg = null;
     inp.addEventListener("focus", function () { myPos(); if (!sg) sg = suggester(inp, bar, go, nav); });
     inp.addEventListener("keydown", function (e) { if (e.key === "Escape") { inp.value = ""; inp.dispatchEvent(new Event("input")); inp.blur(); } });
