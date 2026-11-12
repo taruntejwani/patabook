@@ -13,6 +13,7 @@
     ".pgal figure,.pgp .gr figure{margin:0;min-width:0;background:#fff;border:1px solid #e4eaf5;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(20,40,90,.06);display:flex;flex-direction:column}" +
     ".pgal figure>button,.pgp .gr figure>button{display:block;width:100%;aspect-ratio:1/1;border:0;padding:6px;background:#fff;cursor:zoom-in}" +
     ".pgal figure>button,.pgp .gr figure>button{overflow:hidden}" +
+    ".pgal figure,.pgp .gr figure,.pgal figure>button,.pgp .gr figure>button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(26,79,176,.12)}.pgal figure:active,.pgp .gr figure:active{transform:scale(.97);transition:transform .08s}" +
     ".pgal img,.pgp .gr img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;transform-origin:50% 50%}" +
     ".pgmore{display:block;width:100%;max-width:360px;margin:14px auto 2px;padding:13px;border:1.5px solid #1a4fb0;border-radius:14px;background:#fff;color:#1a4fb0;font:700 16px var(--pbf,system-ui,sans-serif);cursor:pointer}" +
     ".pgp{position:fixed;inset:0;z-index:10000;background:#f4f7fc;overflow-y:auto;-webkit-overflow-scrolling:touch}" +
@@ -109,7 +110,7 @@
     caps = caps || {}; cur = { urls: urls, caps: caps }; REG.push(cur); var rid = REG.length - 1;
     var h = '<div class="pgal">' + urls.slice(0, LIM).map(function (u, i) {
       var c = caps[u] ? String(caps[u]) : "";
-      return '<figure><button type="button" data-g="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
+      return '<figure data-g="' + i + '"><button type="button" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
         fcap(u, c) + '</figure>';
     }).join("") + '</div>';
     if (urls.length > LIM) h += '<button type="button" class="pgmore" data-gm="' + rid + '">' + (hiL() ? "सभी फ़ोटो देखें" : "View all") + ' ›</button>';
@@ -121,7 +122,7 @@
     var d = document.createElement("div"); d.className = "pgp";
     d.innerHTML = '<div class="hd"><button type="button" class="bk" aria-label="' + (hi ? "वापस" : "Back") + '">‹</button><span>' + (hi ? "गैलरी" : "Gallery") + '</span></div><div class="gr">' +
       urls.map(function (u, i) { var c = caps[u] ? String(caps[u]) : "";
-        return '<figure><button type="button" data-pg="' + i + '" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
+        return '<figure data-pg="' + i + '"><button type="button" aria-label="' + esc(c || (hiL() ? "फ़ोटो " : "Photo ") + (i + 1)) + '"><img src="' + esc(u) + '" alt="' + esc(c.slice(0, 80)) + '" loading="lazy" decoding="async"></button>' +
           fcap(u, c) + '</figure>'; }).join("") + '</div>';
     function close() { if (d.isConnected) d.remove(); document.documentElement.style.overflow = ""; }
     d.addEventListener("click", function (e) {
