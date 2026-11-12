@@ -135,7 +135,8 @@ body.nav .basic,body.route .basic{display:none}
 .alts{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px}.alts button{flex:none;border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:7px 10px;text-align:left;font-size:12px;color:#344054;line-height:1.35}.alts button b{display:block;font-size:14px;color:var(--ink)}.alts button.on{border-color:var(--blue);background:#eff4ff}.alts i{font-style:normal;color:#1e8e3e;font-weight:700}
 .stops{margin-top:8px;display:flex;flex-direction:column;gap:6px}.stops div{display:flex;align-items:center;gap:8px;font-size:13px;background:#f6f3ff;border-radius:10px;padding:6px 8px}.stops span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stops button{border:0;background:#fff;border-radius:8px;width:30px;height:30px;color:#6b21a8;font-weight:700}
 .alc{margin-top:10px}.alc>small{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}.alc .row{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px}.alc .row button{flex:none;border:1px solid #d0d5dd;border-radius:999px;background:#fff;padding:7px 11px;font-size:13px;font-weight:700;color:#344054;white-space:nowrap}.alc .row button.on{border-color:#f08c00;background:#fff4e6;color:#a35200}
-.alist{margin-top:8px}.alist .h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 2px 4px}.alist .it{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #f1f3f6}.alist .it .tx{flex:1;min-width:0}.alist .it b{display:block;font-size:14px;color:var(--ink)}.alist .it small{display:block;font-size:12px;color:var(--muted)}.alist .it .bt{display:flex;flex-direction:column;gap:5px}.alist .it .bt button,.alist .it .bt a{border:1px solid #d0d5dd;border-radius:9px;background:#fff;padding:5px 8px;font-size:12px;font-weight:700;color:#0b2f73;text-decoration:none;text-align:center;white-space:nowrap}.alist .pbb{display:inline-block;background:#e8f0fe;color:#0b4db3;border-radius:6px;padding:0 5px;font-size:11px;font-weight:700;margin-left:4px}.alist .msg{font-size:13px;color:var(--muted);padding:8px 2px}
+.alist{margin-top:8px}.alist .h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 2px 4px}.alist .it{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #f1f3f6}.alist .it .tx{flex:1;min-width:0}.alist .it b{display:block;font-size:14px;color:var(--ink)}.alist .it small{display:block;font-size:12px;color:var(--muted)}.alist .it .bt{display:flex;flex-direction:column;gap:5px}.alist .it .bt button,.alist .it .bt a{border:1px solid #d0d5dd;border-radius:9px;background:#fff;padding:5px 8px;font-size:12px;font-weight:700;color:#0b2f73;text-decoration:none;text-align:center;white-space:nowrap}.alist .pbb{display:inline-block;background:#e8f0fe;color:#0b4db3;border-radius:6px;padding:0 5px;font-size:11px;font-weight:700;margin-left:4px}.alf{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 4px}.alf button{border:1px solid #d0d5dd;border-radius:999px;background:#fff;padding:5px 10px;font-size:12px;font-weight:700;color:#344054}.alf button.on{border-color:#1e8e3e;background:#e6f4ea;color:#1e6b35}
+.alist .msg{font-size:13px;color:var(--muted);padding:8px 2px}
 .acts .shr{border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:12px 12px;font-weight:700;font-size:13px;color:#344054}
 .stoppt{width:24px;height:24px;border-radius:50%;background:#7c3aed;color:#fff;font:700 12px/24px system-ui,sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 8px #0005}
 .navf .eta{border:1px solid #d0d5dd;border-radius:12px;background:#fff;padding:10px 12px;font-weight:700;font-size:13px;color:#344054;margin-right:6px}
@@ -334,7 +335,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function
    भाषा — पूरा पेज एक ही भाषा में (English चुनें तो English, बाकी हिंदी)
    ========================================================= */
 var TX = {
-  hi: { al_title: 'रास्ते में', nv_srch: 'खोजें', nv_ahead: 'आगे रास्ते में', nv_ph: 'दुकान या जगह का नाम लिखें', nv_none: 'आगे रास्ते में कुछ नहीं मिला।', al_fuel: 'पेट्रोल पंप', al_hotel: 'होटल', al_food: 'खाना', al_garage: 'गैराज', al_tyre: 'पंचर / टायर', al_med: 'मेडिकल', al_hosp: 'अस्पताल', al_atm: 'ATM', al_ev: 'EV चार्जिंग', al_loading: 'रास्ते के पास ढूँढ रहे हैं…', al_none: 'इस रास्ते के पास कुछ नहीं मिला।', al_fail: 'अभी नहीं ढूँढ पाए। थोड़ी देर बाद फिर दबाएँ।', al_ahead: '{k} आगे', al_off: 'रास्ते से {d}', al_pb: 'PataBook दुकानें', al_other: 'दूसरी जगहें (OpenStreetMap)', al_view: 'देखें', st_add: '➕ यहाँ रुकें', st_t: 'रुकना', st_max: 'ज़्यादा से ज़्यादा 5 जगह रुक सकते हैं', st_reached: 'रुकने की जगह आ गई', st_added: 'रास्ते में जोड़ दिया', alt_n: 'रास्ता {n}', alt_fast: 'सबसे तेज़', alt_short: 'सबसे छोटा', share: 'शेयर', share_eta: 'पहुँचने का समय भेजें', share_route: '{a} से {b}: {d} · लगभग {t}। PataBook नक्शे पर देखें:', eta_txt: 'मैं लगभग {t} तक {n} पहुँच जाऊँगा। (PataBook नक्शा)', recent_r: 'पिछले रास्ते', dark: 'रात का नक्शा', my_loc: 'मेरी जगह', copied: 'कॉपी हो गया', loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
+  hi: { al_title: 'रास्ते में', al_park: 'पार्किंग', cw: 'कॉल / WhatsApp', f_ver: 'सिर्फ़ Verified', f_near: 'रास्ते से 500 मी. के अंदर', nv_srch: 'खोजें', nv_ahead: 'आगे रास्ते में', nv_ph: 'दुकान या जगह का नाम लिखें', nv_none: 'आगे रास्ते में कुछ नहीं मिला।', al_fuel: 'पेट्रोल पंप', al_hotel: 'होटल', al_food: 'खाना', al_garage: 'गैराज', al_tyre: 'पंचर / टायर', al_med: 'मेडिकल', al_hosp: 'अस्पताल', al_atm: 'ATM', al_ev: 'EV चार्जिंग', al_loading: 'रास्ते के पास ढूँढ रहे हैं…', al_none: 'इस रास्ते के पास कुछ नहीं मिला।', al_fail: 'अभी नहीं ढूँढ पाए। थोड़ी देर बाद फिर दबाएँ।', al_ahead: '{k} आगे', al_off: 'रास्ते से {d}', al_pb: 'PataBook दुकानें', al_other: 'दूसरी जगहें (OpenStreetMap)', al_view: 'देखें', st_add: '➕ यहाँ रुकें', st_t: 'रुकना', st_max: 'ज़्यादा से ज़्यादा 5 जगह रुक सकते हैं', st_reached: 'रुकने की जगह आ गई', st_added: 'रास्ते में जोड़ दिया', alt_n: 'रास्ता {n}', alt_fast: 'सबसे तेज़', alt_short: 'सबसे छोटा', share: 'शेयर', share_eta: 'पहुँचने का समय भेजें', share_route: '{a} से {b}: {d} · लगभग {t}। PataBook नक्शे पर देखें:', eta_txt: 'मैं लगभग {t} तक {n} पहुँच जाऊँगा। (PataBook नक्शा)', recent_r: 'पिछले रास्ते', dark: 'रात का नक्शा', my_loc: 'मेरी जगह', copied: 'कॉपी हो गया', loading: 'मैप लोड हो रहा है', search_ph: 'दुकान, जगह या पता खोजें', route_to: 'यहाँ तक रास्ता', car: 'कार', bike: 'बाइक', walk: 'पैदल',
     start_nav: 'चलना शुरू करें', steps: 'स्टेप्स', gmaps: 'Google Maps में भी खोलें', stop: 'रोकें', all: 'सभी', health: 'अस्पताल', worship: 'मंदिर',
     food: 'खाना', hotel: 'होटल', fuel: 'पेट्रोल', bank: 'बैंक', school: 'स्कूल', shop: 'दुकान', travel: 'बस/रेल',
     nolib: 'मैप लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।', pb_n: '{n} PataBook दुकानें मैप पर', pb_fail: 'PataBook दुकानें लोड नहीं हुईं',
@@ -344,7 +345,7 @@ var TX = {
     tap_start: 'लोकेशन नहीं मिली — नक्शे पर अपनी शुरुआत की जगह टैप करें', addr_fail: 'यह पता नक्शे पर नहीं मिला', est: 'ट्रैफ़िक के बिना अंदाज़ा',
     arrived: 'आप पहुँच गए', reroute: 'नया रास्ता बना रहे हैं', pb: 'PataBook दुकानें', places: 'जगहें', none: 'कुछ नहीं मिला',
     rem: 'बाकी', m: 'मी.', km: 'किमी', min: 'मिनट', hr: 'घंटा', in_m: '{d} बाद', now: 'अब', voice_on: 'आवाज़ चालू', voice_off: 'आवाज़ बंद', shop_t: 'दुकान', nokey: 'सैटेलाइट फ़ोटो के लिए MapTiler चाबी अभी नहीं डाली गई है' },
-  en: { al_title: 'On the way', nv_srch: 'Search', nv_ahead: 'Ahead on your route', nv_ph: 'Type a shop or place name', nv_none: 'Nothing found ahead on your route.', al_fuel: 'Petrol pump', al_hotel: 'Hotel', al_food: 'Food', al_garage: 'Garage', al_tyre: 'Puncture / Tyre', al_med: 'Medical', al_hosp: 'Hospital', al_atm: 'ATM', al_ev: 'EV charging', al_loading: 'Searching along the route…', al_none: 'Nothing found near this route.', al_fail: 'Could not search right now. Tap again in a little while.', al_ahead: '{k} ahead', al_off: '{d} off route', al_pb: 'PataBook shops', al_other: 'Other places (OpenStreetMap)', al_view: 'View', st_add: '➕ Add stop', st_t: 'Stop', st_max: 'You can add up to 5 stops', st_reached: 'You have reached your stop', st_added: 'Added to the route', alt_n: 'Route {n}', alt_fast: 'Fastest', alt_short: 'Shortest', share: 'Share', share_eta: 'Send arrival time', share_route: '{a} to {b}: {d} · about {t}. See it on PataBook map:', eta_txt: 'I will reach {n} around {t}. (PataBook map)', recent_r: 'Recent routes', dark: 'Night map', my_loc: 'My location', copied: 'Copied', loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
+  en: { al_title: 'On the way', al_park: 'Parking', cw: 'Call / WhatsApp', f_ver: 'Verified only', f_near: 'Within 500 m of route', nv_srch: 'Search', nv_ahead: 'Ahead on your route', nv_ph: 'Type a shop or place name', nv_none: 'Nothing found ahead on your route.', al_fuel: 'Petrol pump', al_hotel: 'Hotel', al_food: 'Food', al_garage: 'Garage', al_tyre: 'Puncture / Tyre', al_med: 'Medical', al_hosp: 'Hospital', al_atm: 'ATM', al_ev: 'EV charging', al_loading: 'Searching along the route…', al_none: 'Nothing found near this route.', al_fail: 'Could not search right now. Tap again in a little while.', al_ahead: '{k} ahead', al_off: '{d} off route', al_pb: 'PataBook shops', al_other: 'Other places (OpenStreetMap)', al_view: 'View', st_add: '➕ Add stop', st_t: 'Stop', st_max: 'You can add up to 5 stops', st_reached: 'You have reached your stop', st_added: 'Added to the route', alt_n: 'Route {n}', alt_fast: 'Fastest', alt_short: 'Shortest', share: 'Share', share_eta: 'Send arrival time', share_route: '{a} to {b}: {d} · about {t}. See it on PataBook map:', eta_txt: 'I will reach {n} around {t}. (PataBook map)', recent_r: 'Recent routes', dark: 'Night map', my_loc: 'My location', copied: 'Copied', loading: 'Loading map', search_ph: 'Search shop, place or address', route_to: 'Route to', car: 'Car', bike: 'Bike', walk: 'Walk',
     start_nav: 'Start', steps: 'Steps', gmaps: 'Also open in Google Maps', stop: 'Stop', all: 'All', health: 'Hospital', worship: 'Temple',
     food: 'Food', hotel: 'Hotel', fuel: 'Petrol', bank: 'Bank', school: 'School', shop: 'Shops', travel: 'Bus/Rail',
     nolib: 'Map library did not load. Check internet.', pb_n: '{n} PataBook shops on map', pb_fail: 'Could not load PataBook shops',
@@ -1416,8 +1417,10 @@ var ALONG = [
   { k: 'med', i: '💊', q: ['nwr["amenity"="pharmacy"]'], re: /medical|pharma|chemist|drug|medicine/i },
   { k: 'hosp', i: '🏥', q: ['nwr["amenity"~"^(hospital|clinic)$"]'], re: /hospital|clinic|doctor|nursing/i, cat: ['Health'] },
   { k: 'atm', i: '🏧', q: ['nwr["amenity"="atm"]', 'nwr["amenity"="bank"]["atm"="yes"]'], re: /\batm\b/i },
-  { k: 'ev', i: '🔌', q: ['nwr["amenity"="charging_station"]'], re: /\bev\b|charging/i }
+  { k: 'ev', i: '🔌', q: ['nwr["amenity"="charging_station"]'], re: /\bev\b|charging/i },
+  { k: 'park', i: '🅿️', q: ['nwr["amenity"="parking"]'], re: /parking/i }
 ];
+var ALF = { ver: false, near: false }, ALRAW = null;   /* list के filter */
 var alongK = null, alongSeq = 0, ALR = [], ALC = {};
 var OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
 function clearAlong() {
@@ -1474,22 +1477,26 @@ function alongSearch(k) {
 }
 function showAlong(pb, osm, failed) {
   var box = nav ? $('npL') : $('rAlong'), byKm = function (a, b) { return a.km - b.km; };
+  ALRAW = { pb: pb.slice(), osm: osm.slice(), failed: failed };   /* filter बदलने पर इन्हीं से दोबारा */
   if (nav && myPos && route && route.data) {   /* चलते समय: सिर्फ़ आगे वाली जगहें, आगे की दूरी अभी की जगह से */
     var ln = route.data.geometry.coordinates, here = cumDist(ln)[nearIdx(myPos, ln)] / 1000;
-    var ah = function (x) { return x.km >= here - 0.2; }, rel = function (x) { x.km = Math.max(0, x.km - here); return x; };
+    var ah = function (x) { return x.km >= here - 0.2; }, rel = function (x) { return Object.assign({}, x, { km: Math.max(0, x.km - here) }); };
     pb = pb.filter(ah).map(rel); osm = osm.filter(ah).map(rel);
   }
   pb.sort(byKm); osm.sort(byKm); osm = osm.slice(0, 80);
+  if (ALF.ver) { pb = pb.filter(function (x) { return x.b && x.b.v; }); osm = []; }
+  if (ALF.near) { pb = pb.filter(function (x) { return x.off <= 500; }); osm = osm.filter(function (x) { return x.off <= 500; }); }
   ALR = pb.concat(osm);
   map.getSource('along').setData({ type: 'FeatureCollection', features: ALR.map(function (x, i) { return { type: 'Feature', geometry: { type: 'Point', coordinates: x.ll }, properties: { i: i, pb: !!x.pb } }; }) });
-  if (!ALR.length) { box.innerHTML = '<div class="msg">' + esc(T(nav ? 'nv_none' : 'al_none')) + '</div>'; sheetH(); return; }
+  var fbar = '<div class="alf"><button type="button" data-alf="ver" class="' + (ALF.ver ? 'on' : '') + '">✅ ' + esc(T('f_ver')) + '</button><button type="button" data-alf="near" class="' + (ALF.near ? 'on' : '') + '">📏 ' + esc(T('f_near')) + '</button></div>';
+  if (!ALR.length) { box.innerHTML = fbar + '<div class="msg">' + esc(T(nav ? 'nv_none' : 'al_none')) + '</div>'; sheetH(); return; }
   var row = function (x, i) {
     var meta = T('al_ahead', { k: fmtDist(x.km * 1000) }) + ' · ' + T('al_off', { d: fmtDist(x.off) }) + (x.sub ? ' · ' + x.sub : '') + (x.b && x.b.address ? ' · ' + x.b.address : '');
     return '<div class="it"><div class="tx"><b>' + esc(x.name) + (x.pb ? '<span class="pbb">PataBook</span>' : '') + (x.b && x.b.v ? ' <span class="pbb">✓</span>' : '') + '</b><small>' + esc(meta) + '</small></div><div class="bt">' +
       '<button type="button" data-alv="' + i + '">📍 ' + esc(T('al_view')) + '</button><button type="button" data-als="' + i + '">' + esc(T('st_add')) + '</button>' +
-      (x.pb && x.b.slug ? '<button type="button" data-call="' + esc(x.b.slug) + '">📞 ' + esc(T('call')) + '</button>' : '') + '</div></div>';
+      (x.pb && x.b.slug ? '<button type="button" data-call="' + esc(x.b.slug) + '">📞 ' + esc(T('cw')) + '</button>' : '') + '</div></div>';
   };
-  box.innerHTML = (pb.length ? '<div class="h">' + esc(T('al_pb')) + '</div>' + pb.map(function (x, i) { return row(x, i); }).join('') : '') +
+  box.innerHTML = fbar + (pb.length ? '<div class="h">' + esc(T('al_pb')) + '</div>' + pb.map(function (x, i) { return row(x, i); }).join('') : '') +
     (osm.length ? '<div class="h">' + esc(T('al_other')) + '</div>' + osm.map(function (x, i) { return row(x, pb.length + i); }).join('') : '') +
     (failed ? '<div class="msg">' + esc(T('al_fail')) + '</div>' : '');
   sheetH();
@@ -1575,7 +1582,8 @@ function npSearch(v) {
   }).catch(function () {});
 }
 document.addEventListener('click', function (e) {
-  var t = e.target.closest('[data-alt],[data-unstop],[data-al],[data-alv],[data-als],[data-addstop]'); if (!t || !route) return;
+  var t = e.target.closest('[data-alt],[data-unstop],[data-al],[data-alv],[data-als],[data-addstop],[data-alf]'); if (!t || !route) return;
+  if (t.hasAttribute('data-alf')) { ALF[t.dataset.alf] = !ALF[t.dataset.alf]; if (ALRAW) { var rr = ALRAW; showAlong(rr.pb.slice(), rr.osm.slice(), rr.failed); } return; }
   if (t.hasAttribute('data-alt')) { useAlt(+t.dataset.alt, true); clearAlong(); fillSheet(); return; }
   if (t.hasAttribute('data-unstop')) { route.stops.splice(+t.dataset.unstop, 1); route.stops.forEach(function (x) { x._d = null; }); drawStops(); calcRoute(false); return; }
   if (t.hasAttribute('data-al')) { if (alongK === t.dataset.al) { clearAlong(); fillSheet(); } else alongSearch(t.dataset.al); return; }
