@@ -105,6 +105,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
   var city = "", cat = "", MINE = null, TOK = null, busy = false;
   try { city = localStorage.getItem("pb-nd-city") || localStorage.getItem("pb-of-city") || ""; } catch (e) {}
   if (CITIES.indexOf(city) < 0) city = "";
+  var PREQ = ""; try { var sp = new URLSearchParams(location.search); PREQ = (sp.get("q") || "").slice(0, 300); if (CITIES.indexOf(sp.get("city")) >= 0) city = sp.get("city"); } catch (e) {}
   function en() { return (localStorage.getItem("pb-lang") || "en") !== "hi"; }
   function T(h, e) { return en() ? e : h; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -123,7 +124,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
       '<label for="nBody">' + esc(T("3. आपको क्या चाहिए?", "3. What do you need?")) + '</label><textarea id="nBody" maxlength="300" style="min-height:100px" placeholder="' + esc(T("जैसे: आज शाम तक 2 किलो पनीर चाहिए", "e.g. Need 2 kg paneer by this evening")) + '"></textarea><div class="cnt" id="nCnt"></div>' +
       '<p class="note">🔒 ' + esc(T("आपका नाम और नंबर किसी दुकान को नहीं दिखेगा। दुकानें भाव / जवाब भेजेंगी — आप पसंद की दुकान को खुद Call या WhatsApp करें। माँग 48 घंटे खुली रहती है।", "Your name and number are never shown to any shop. Shops send a price or reply — you call or WhatsApp the shop you like. A request stays open for 48 hours.")) + '</p>' +
       '<div class="err" id="nErr"></div><button type="button" id="nGo">' + esc(T("🔥 माँग भेजें", "🔥 Send request")) + '</button>';
-    $("nBody").value = keep; cnt();
+    $("nBody").value = keep || PREQ; PREQ = ""; cnt();
   }
   function cnt() { var b = $("nBody"); if (b) $("nCnt").textContent = b.value.length + " / 300"; }
   function drawMine() {

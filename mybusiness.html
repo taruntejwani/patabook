@@ -13,7 +13,7 @@
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-helpmenu.js"></script>
-<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script><script src="pb-offers.js?v=1"></script><script src="pb-needs.js?v=1"></script><script src="pb-stamps.js?v=1"></script>
+<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script><script src="pb-offers.js?v=1"></script><script src="pb-needs.js?v=1"></script><script src="pb-stamps.js?v=1"></script><script src="pb-demand.js?v=1"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -1182,7 +1182,7 @@ function catBody(k,b,i,en){
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
   if(k==="photo")return window.galleryBlock?galleryBlock(b,i):"";
   if(k==="nt")return "";
-  if(k==="rep")return PH(b,"report")?reportHTML(b):sampleReport(b,i,en);
+  if(k==="rep")return (PH(b,"report")?reportHTML(b):sampleReport(b,i,en))+(window.PBDemand?PBDemand.ownerHTML(b,en):"");
   if(k==="plan"){
     if(!b.is_active)return '<div class="offer" style="background:#f4f8ff;border-color:#cfe0ff"><div class="oh" style="color:#0b3a8f">🆓 '+(en?"Your shop is free on PataBook":"PataBook पर आपकी दुकान मुफ़्त है")+'</div><p>'+(en?"Plans will appear here after PataBook approves your shop.":"PataBook से मंज़ूरी मिलने के बाद यहाँ प्लान दिखेंगे।")+'</p></div>';
     return (premBlock(b,i)||'')+plansCompare(b,i,en);}

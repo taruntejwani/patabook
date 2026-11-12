@@ -203,7 +203,7 @@ function spell(w){
 }
 const rxOf=a=>new RegExp(a.replace(/[.+?^${}()|[\]\\]/g,"\\$&").replace(/\*/g,".*"),"i");
 /* query ko words me todo; har word ke liye alag roop (alias) */
-const STOPW=new Set(["shop","shops","store","stores","dukan","dukaan","dukane","dukano","dukaanein","दुकान","दुकानें","दुकाने","शॉप","near","nearby","me","nearest","paas","aaspass","najdik","nazdik","mein","आसपास","नज़दीक","नजदीक","in","at","ka","ki","ke","ko","the","for","and","best","top","list","पास","में","का","की","के","દુકાન","દુકાનો","શોપ","નજીક","પાસે","માં","ની","નું","નો","ના","ને","મારે","જોઈએ","છે","બતાવો","સારી","સારું","સારા"]);
+const STOPW=new Set(["sasta","sasti","saste","sastaa","cheap","cheapest","sabse","सस्ता","सस्ती","सस्ते","सबसे","shop","shops","store","stores","dukan","dukaan","dukane","dukano","dukaanein","दुकान","दुकानें","दुकाने","शॉप","near","nearby","me","nearest","paas","aaspass","najdik","nazdik","mein","आसपास","नज़दीक","नजदीक","in","at","ka","ki","ke","ko","the","for","and","best","top","list","पास","में","का","की","के","દુકાન","દુકાનો","શોપ","નજીક","પાસે","માં","ની","નું","નો","ના","ને","મારે","જોઈએ","છે","બતાવો","સારી","સારું","સારા"]);
 function terms(q,keepEmpty){
   let ws=String(q||"").toLowerCase().replace(/[,()*\\"'%:;]/g," ").split(/\s+/).filter(w=>w.length>=2||/^\d+$/.test(w)).slice(0,6);
   const w2=ws.filter(w=>!STOPW.has(w));if(w2.length||keepEmpty)ws=w2;   /* "shop / store / dukan" जैसे आम शब्द खोज में नहीं गिनते (सिर्फ़ वही लिखा हो तब छोड़कर) */
@@ -901,11 +901,58 @@ function priceQ(q){
 let PRN=0;
 function prodWords(q){return String(q||"").toLowerCase().split(/\s+/).filter(w=>w&&!STOPW.has(w)).map(w=>{const a=ALIAS[w];return a?a.split(" ")[0]:w;}).join(" ");}
 let PDISC=false;
+/* 🧠 सामान की smart खोज (sql-56: pb_search_products2) — हर शब्द के कई रूप "a|b|c":
+   मिलते-जुलते शब्द (shampoo = wash = cleaner), देसी spelling (tayar = tyre), हिंदी लिखा (डैशबोर्ड → dashbord) */
+const PSYN=[["shampoo","shampu","wash","washing","cleaner","clean","saaf","safai","शैम्पू","साफ़","सफाई"],["polish","polis","shine","chamak","wax","पॉलिश","चमक"],
+  ["tyre","tyres","tire","tayar","tayr","टायर"],["car","gaadi","gadi","gaddi","vehicle","कार","गाड़ी","गाडी"],["bike","motorcycle","scooter","बाइक","स्कूटर"],
+  ["chemical","kemikal","केमिकल"],["detergent","surf","sarf","डिटर्जेंट","सर्फ"],["dashboard","dashbord","डैशबोर्ड"],["phenyl","phenyle","finail","फिनाइल"],
+  ["medicine","dawa","dawai","dava","tablet","दवा","दवाई"],["milk","doodh","dudh","दूध"],["rice","chawal","चावल"],["flour","atta","आटा"],["oil","tel","तेल"],
+  ["vegetable","sabzi","sabji","सब्ज़ी","सब्जी"],["fruit","phal","फल"],["sweet","mithai","मिठाई"],["mobile","phone","smartphone","मोबाइल","फ़ोन"],["charger","चार्जर"],
+  ["cloth","clothes","kapda","kapde","कपड़ा","कपड़े"],["shoes","shoe","joota","juta","जूता","जूते"],["paint","rang","पेंट","रंग"],["cement","सीमेंट"],
+  ["battery","betri","बैटरी"],["perfume","attar","itra","इत्र"],["soap","sabun","साबुन"],["bucket","balti","बाल्टी"],["brush","ब्रश"],["cloth","kapda"]];
+const PSYNM=(()=>{const m={};PSYN.forEach(g=>g.forEach(w=>{m[w]=(m[w]||[]).concat(g);}));return m;})();
+const PCHEAP=/^(sasta|sasti|saste|sastaa|cheap|cheapest|सस्ता|सस्ती|सस्ते|સસ્તું|સસ્તા)$/i;
+function hiLat(w){   /* हिंदी शब्द → मोटा अंग्रेज़ी रूप (डैशबोर्ड → dashbord, पॉलिश → polish); बाकी मिलान SQL का ढाँचा करता है */
+  if(!/[ऀ-ॿ]/.test(w))return "";
+  const C={"क":"k","ख":"kh","ग":"g","घ":"gh","च":"ch","छ":"chh","ज":"j","झ":"jh","ट":"t","ठ":"th","ड":"d","ढ":"dh","ण":"n","त":"t","थ":"th","द":"d","ध":"dh","न":"n","प":"p","फ":"f","ब":"b","भ":"bh","म":"m","य":"y","र":"r","ल":"l","व":"v","श":"sh","ष":"sh","स":"s","ह":"h","ड़":"d","ढ़":"dh","क़":"k","ख़":"kh","ग़":"g","ज़":"z","फ़":"f","ञ":"n","ङ":"n"};
+  const V={"ा":"a","ि":"i","ी":"i","ु":"u","ू":"u","े":"e","ै":"ai","ो":"o","ौ":"au","ॉ":"o","ृ":"ri","ं":"n","ँ":"n","ः":""};
+  const IV={"अ":"a","आ":"a","इ":"i","ई":"i","उ":"u","ऊ":"u","ए":"e","ऐ":"ai","ओ":"o","औ":"au","ऑ":"o","ऋ":"ri"};
+  const ch=Array.from(w.normalize("NFC").replace(/़/g,""));let o="";
+  for(let i=0;i<ch.length;i++){const c=ch[i],nx=ch[i+1];
+    if(C[c]!==undefined){o+=C[c];if(nx==="्"){i++;continue;}if(nx&&V[nx]!==undefined)continue;if(nx&&C[nx]!==undefined&&i+2<ch.length)o+="a";continue;}
+    if(V[c]!==undefined){o+=V[c];continue;}if(IV[c]!==undefined){o+=IV[c];continue;}}
+  return o.replace(/[^a-z]/g,"");
+}
+function prodQ(q){   /* "sasta tayar polish" → {q:"tyre|tayar|tire|tayr polish|polis|shine|…", cheap:true} */
+  let cheap=false;const out=[];
+  String(q||"").toLowerCase().replace(/[?!।,]/g," ").split(/\s+/).forEach(w=>{
+    if(!w)return;if(PCHEAP.test(w)){cheap=true;return;}if(STOPW.has(w)||w==="sabse"||w==="सबसे")return;
+    const a=ALIAS[w]?ALIAS[w].split(" ")[0]:w,set=new Set([a,w]);
+    const hl=hiLat(w);if(hl&&hl.length>=2)set.add(hl);
+    [a,w,hl].forEach(x=>{(PSYNM[x]||[]).forEach(y=>set.add(y));});
+    out.push(Array.from(set).filter(x=>x&&!/\|/.test(x)).slice(0,8).join("|"));
+  });
+  return {q:out.slice(0,6).join(" "),cheap};
+}
+const PNEAR=/(^|\s)(near\s*me|nearby|near\s*by|nearest|paas\s*(me|mein|main)|pass\s*(me|mein)|aas\s*pass|aaspass|najdik|nazdik|आसपास|आस-पास|पास\s*में|नज़दीक|नजदीक)(\s|$)/i;
 async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वाले सामान (sql-55), उस शहर के; "" = सब शहर */
   const el=$("prods");if(!el)return;const n=++PRN;el.hidden=true;el.innerHTML="";
   const DISC=typeof dc==="string";
   const words=DISC?"":prodWords(q);if(!DISC&&!words&&!max)return;
-  let rows=[];try{const r=await fetch(SB+"/rest/v1/rpc/"+(DISC?"pb_discount_products":"pb_search_products"),{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify(DISC?{p_city:dc||null,p_limit:24}:{p_q:words,p_max_price:max||null,p_limit:24})});rows=r.ok?(await r.json()||[]):[];}catch(e){rows=[];}
+  const PQ2=DISC?null:prodQ(q),NEARP=!DISC&&PNEAR.test(($("q")||{}).value||"");
+  if(PQ2&&!PQ2.cheap&&String(($("q")||{}).value||"").toLowerCase().split(/\s+/).some(w=>PCHEAP.test(w)))PQ2.cheap=true;   /* "sasta" ऊपर की सफ़ाई में हट जाता है → असली लिखे से देखें */
+  const post=(fn,body)=>fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify(body)});
+  let rows=[];try{
+    let r=DISC?await post("pb_discount_products",{p_city:dc||null,p_limit:24}):(PQ2.q||max)?await post("pb_search_products2",{p_q:PQ2.q,p_max_price:max||null,p_limit:24,p_sort:PQ2.cheap?"cheap":null}):null;
+    if(!DISC&&(!r||r.status===404))r=await post("pb_search_products",{p_q:words,p_max_price:max||null,p_limit:24});   /* sql-56 से पहले: पुरानी खोज */
+    rows=r&&r.ok?(await r.json()||[]):[];}catch(e){rows=[];}
+  if(n!==PRN)return;
+  if(Array.isArray(rows)&&rows.length&&PQ2&&PQ2.cheap)rows=rows.map((x,i)=>[x,i]).sort((a,b)=>((a[0].net==null)-(b[0].net==null))||(+a[0].net||0)-(+b[0].net||0)||a[1]-b[1]).map(x=>x[0]);
+  let PME=null;if(NEARP&&Array.isArray(rows)&&rows.length){   /* "paas me tyre polish" → पास वाली दुकान का सामान पहले */
+    PME=FME||await new Promise(res=>{try{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({la:p.coords.latitude,ln:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:300000});}catch(e){res(null);}});
+    if(n!==PRN)return;
+    if(PME){rows.forEach(x=>{x._km=+x.lat&&+x.lng?kmTo(PME,{la:+x.lat,ln:+x.lng}):null;});rows=rows.map((x,i)=>[x,i]).sort((a,b)=>(a[0]._km==null?1e9:a[0]._km)-(b[0]._km==null?1e9:b[0]._km)||a[1]-b[1]).map(x=>x[0]);}
+  }
   if(n!==PRN)return;const en=FEN();
   if(!Array.isArray(rows))rows=[];
   rows=rows.filter(x=>x&&x.url&&/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\//.test(x.url));
@@ -915,11 +962,11 @@ async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वा�
   let PD=false;if(!DISC&&PDISC){const d=rows.filter(x=>x.price!=null&&((x.mrp!=null&&+x.mrp>+x.price)||+x.disc>0));if(d.length){rows=d;PD=true;}}   /* "… offer" → सिर्फ़ छूट वाले (हों तो) */
   PRROWS=rows;
   const cmpN=rows.filter(x=>x.net!=null&&!x.sold).length,cmpShops=new Set(rows.filter(x=>x.net!=null).map(x=>x.slug)).size;
-  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+(DISC||PD?'🏷️ '+esc(en?"Discounted products"+(dc?" in "+dc:""):"छूट वाले सामान"):'🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim))+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
+  el.innerHTML='<h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+(DISC||PD?'🏷️ '+esc(en?"Discounted products"+(dc?" in "+dc:""):"छूट वाले सामान"):'🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim))+(PQ2&&PQ2.cheap?esc(en?" · cheapest first":" · सबसे सस्ते पहले"):"")+(PME?esc(en?" · nearest first":" · सबसे पास वाले पहले"):"")+(cmpN>=2&&cmpShops>=2?'<button type="button" id="pcmpB" style="margin-left:auto;border:1.5px solid #1e8e3e;background:#e6f4ea;color:#1e6b35;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer">💰 '+esc(en?"Compare prices":"भाव की तुलना")+'</button>':'')+'</h3><div class="row">'+rows.map(x=>{
     const href=(window.PBPlan&&PBPlan.url?PBPlan.url(x.slug):"business.html?slug="+encodeURIComponent(x.slug));
     const p=x.price!=null?+x.price:null,m=x.mrp!=null&&p!=null&&+x.mrp>p?+x.mrp:null,net=x.net!=null?+x.net:p;
     let pr="";if(net!=null){pr='<span class="pr"><strong>'+(x.price_from?(en?"From ":"")+inr(net)+(en?"":" से शुरू"):inr(net))+'</strong>'+(m?'<s>'+inr(m)+'</s><em>'+Math.round((m-p)*100/m)+'% '+(en?"OFF":"छूट")+'</em>':(x.disc&&p!=null?'<s>'+inr(p)+'</s><em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':''))+'</span>';}
-    return '<a class="pt" href="'+esc(href)+'"><div class="im"><img src="'+esc(x.url)+'" alt="" loading="lazy" decoding="async"></div><div class="tx"><b>'+esc(x.name)+'</b>'+pr+(x.sold?'<span class="so">'+(en?"Sold out":"अभी उपलब्ध नहीं")+'</span>':'')+'<span class="sh">🏪 '+esc(x.shop)+'</span></div></a>';}).join("")+'</div>';
+    return '<a class="pt" href="'+esc(href)+'"><div class="im"><img src="'+esc(x.url)+'" alt="" loading="lazy" decoding="async"></div><div class="tx"><b>'+esc(x.name)+'</b>'+pr+(x.sold?'<span class="so">'+(en?"Sold out":"अभी उपलब्ध नहीं")+'</span>':'')+'<span class="sh">🏪 '+esc(x.shop)+(x._km!=null?' · 📍 '+(x._km<1?Math.round(x._km*1000)+" m":x._km.toFixed(1)+" km"):'')+'</span></div></a>';}).join("")+'</div>';
   el.hidden=false;
 }
 /* 🕙 समय वाला सवाल: "raat ko khula medical", "Sunday ko khula garage", "24 ghante khula", "રાત્રે ખુલ્લું" → {day, min, h24}
@@ -1049,7 +1096,9 @@ function render0(rows,q,city,keep){
   }
   if(!rows.length&&!hasBig){
     const dym=DYM.length?'<p><b>'+esc(FEN()?"Did you mean:":"क्या आपका मतलब:")+'</b> '+DYM.map(x=>'<a href="#" class="dym" data-q="'+esc(x)+'">'+esc(x)+'</a>').join(' · ')+'</p>':'';
-    list.innerHTML='<div class="empty">'+dym+'<p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p><p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a>'+(NEARG?'<p style="margin-top:14px"><a class="btn" style="background:#eef4ff;color:#0b4db3;border:1.5px solid #1a73e8" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(NEARG+" near me")+'">🗺 '+esc(FEN()?"See \u201c"+NEARG+"\u201d near you on Google Maps":"Google Maps में \u201c"+NEARG+"\u201d पास में देखें")+'</a></p>':'')+'</div>';
+    const nq=String($("q").value||q||"").trim().slice(0,120),ncy=["Gandhidham","Adipur","Anjar","Bhuj","Mundra","Mandvi","Bhachau","Rapar"].find(c=>String(city||"").toLowerCase().includes(c.toLowerCase()))||"";
+    const needB=nq?'<div style="margin:6px auto 16px;max-width:460px;border:1.5px solid #ffd8a8;background:#fffaf2;border-radius:16px;padding:14px"><p style="margin:0 0 8px"><b>'+esc(FEN()?"🔥 Can't find it? Ask the shops in your city":"🔥 नहीं मिला? अपने शहर की दुकानों से पूछें")+'</b></p><p style="margin:0 0 10px;font-size:14px">'+esc(FEN()?"Write what you need — shops will send you prices. Your number is not shown.":"अपनी ज़रूरत लिखें — दुकानें भाव भेजेंगी। आपका नंबर नहीं दिखेगा।")+'</p><a class="btn" style="background:#f08c00;color:#fff" href="need.html?q='+encodeURIComponent(nq)+(ncy?'&city='+ncy:'')+'">'+esc(FEN()?"Ask shops":"दुकानों से पूछें")+'</a></div>':'';
+    list.innerHTML='<div class="empty">'+dym+'<p>'+esc(T("s_none",{q:label}))+'</p><p>'+esc(T("s_tip"))+'</p>'+needB+'<p style="margin-top:14px">'+esc(T("addq"))+'</p><a class="btn" href="list.html">'+esc(T("add"))+'</a>'+(NEARG?'<p style="margin-top:14px"><a class="btn" style="background:#eef4ff;color:#0b4db3;border:1.5px solid #1a73e8" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(NEARG+" near me")+'">🗺 '+esc(FEN()?"See \u201c"+NEARG+"\u201d near you on Google Maps":"Google Maps में \u201c"+NEARG+"\u201d पास में देखें")+'</a></p>':'')+'</div>';
     return;
   }
   const fzNote=FZN?'<p class="note" style="margin:0 0 10px">'+esc(LOOSEMISS?(FEN()?"No shop found for \u201c"+LOOSEMISS+"\u201d \u2014 showing the closest shops:":"\u201c"+LOOSEMISS+"\u201d के लिए कोई दुकान नहीं मिली \u2014 ये सबसे मिलती-जुलती दुकानें हैं:"):(FEN()?"Showing similar spellings too:":"मिलते-जुलते नाम भी दिखाए जा रहे हैं:"))+'</p>':'';
