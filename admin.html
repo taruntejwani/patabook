@@ -1322,11 +1322,56 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     }).join('');
   }
   /* 🖼️ दुकानदारों के banner: मंज़ूर / मना */
+  /* 📢 Admin खुद किसी paid दुकान का Home पोस्टर लगाए (sql-57: pb_admin_banner_put) — फ़ोटो 1200×600 JPG बनकर उसी दुकान के फ़ोल्डर में */
+  function BEN() { try { return (localStorage.getItem('pb-lang') || 'en') !== 'hi'; } catch (e) { return true; } }
+  function banPutHTML() {
+    var A = ((PMDATA && PMDATA.active) || []).filter(function (p) { return p.live !== false; });
+    if (!A.length) return '';
+    return '<div class="cty" style="border:2px dashed #3b2bb8"><h3>' + (BEN() ? '📢 Put up a poster for a shop' : '📢 किसी दुकान का पोस्टर लगाएँ') + '</h3><p class="meta">' + (BEN() ? 'Use this when the owner cannot add it. A wide (2:1) photo works best — the middle part is cut to 1200×600. It starts showing in the Home posters right away.' : 'दुकानदार खुद न लगा सके तो यहाँ से लगाएँ। फ़ोटो 2:1 (चौड़ी) अच्छी रहती है — बीच का हिस्सा 1200×600 में कटेगा। लगाते ही Home के पोस्टर में चलने लगेगा।') + '</p>' +
+      '<div class="acts" style="flex-wrap:wrap;gap:8px"><select id="bpShop" style="flex:1;min-width:200px;font:inherit;padding:8px;border-radius:8px">' +
+      '<option value="">' + (BEN() ? '— Choose shop —' : '— दुकान चुनें —') + '</option>' + A.map(function (p) { var tr = PMTIER[p.slug] || ''; return '<option value="' + esc(p.slug) + '">' + esc(p.shop) + (tr ? ' · ' + tierName(tr).split(' ').slice(1).join(' ') : '') + '</option>'; }).join('') + '</select>' +
+      '<input type="file" id="bpFile" accept="image/*" style="flex:1;min-width:200px"><button id="bpGo" style="background:#3b2bb8;color:#fff">' + (BEN() ? '⬆️ Put up poster' : '⬆️ पोस्टर लगाएँ') + '</button></div><p class="meta" id="bpMsg"></p></div>';
+  }
+  function banImg(file) {   /* बीच से 2:1 काटकर 1200×600 JPG */
+    return new Promise(function (res, rej) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        try {
+          var W = 1200, H = 600, r = W / H, sw = im.naturalWidth, sh = im.naturalHeight, cw = sw, ch = sh;
+          if (sw / sh > r) cw = Math.round(sh * r); else ch = Math.round(sw / r);
+          var c = document.createElement('canvas'); c.width = W; c.height = H; var g = c.getContext('2d');
+          g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(im, Math.round((sw - cw) / 2), Math.round((sh - ch) / 2), cw, ch, 0, 0, W, H);
+          URL.revokeObjectURL(u); c.toBlob(function (b) { b ? res(b) : rej(new Error('img')); }, 'image/jpeg', 0.86);
+        } catch (e) { rej(e); }
+      };
+      im.onerror = function () { rej(new Error('img')); }; im.src = u;
+    });
+  }
+  async function banPut() {
+    var slug = $('bpShop').value, f = $('bpFile').files && $('bpFile').files[0], m = $('bpMsg'), bt = $('bpGo');
+    if (!slug) { m.textContent = (BEN() ? '⚠️ Choose a shop first' : '⚠️ पहले दुकान चुनें'); return; }
+    if (!f || !/^image\//.test(f.type)) { m.textContent = (BEN() ? '⚠️ Choose a photo' : '⚠️ फ़ोटो चुनें'); return; }
+    bt.disabled = true; m.textContent = (BEN() ? 'Uploading…' : 'अपलोड हो रहा है…');
+    try {
+      var blob = await banImg(f); sess = await PBA.session(); if (!sess) throw new Error('login');
+      var path = encodeURIComponent(slug) + '/banner-' + Date.now() + '.jpg';
+      var up = await fetch(SB + '/storage/v1/object/shop-logos/' + path, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + sess.access_token, 'Content-Type': 'image/jpeg', 'x-upsert': 'false' }, body: blob });
+      if (!up.ok) throw new Error('upload ' + up.status);
+      await rpc('pb_admin_banner_put', { p_slug: slug, p_url: SB + '/storage/v1/object/public/shop-logos/' + path });
+      m.textContent = (BEN() ? '✅ Poster is up — open the Home page to check' : '✅ पोस्टर लग गया — Home पेज खोलकर देखें');
+      try { BANS = await rpc('pb_admin_banners', {}) || []; } catch (x) {}
+      var keep = m.textContent; drawPrem(); var m2 = $('bpMsg'); if (m2) m2.textContent = keep;
+    } catch (er) {
+      var t = String(er && er.message);
+      m.textContent = /PGRST202|404|function/i.test(t) ? (BEN() ? '⚠️ First run 57_admin_banner.sql in Supabase' : '⚠️ पहले Supabase में 57_admin_banner.sql चलाएँ') : /premium/.test(t) ? (BEN() ? '⚠️ This shop\'s plan has no poster' : '⚠️ इस दुकान के plan में पोस्टर नहीं है') : (BEN() ? '⚠️ Could not do it: ' : '⚠️ नहीं हो पाया: ') + t;
+    }
+    bt.disabled = false;
+  }
   function bansHTML() {
     if (!BANS) return '<div class="msg"><b>यह हिस्सा अभी चालू नहीं है</b><p>Supabase में 30_plans_banners.sql चलाएँ।</p></div>';
-    if (!BANS.length) return '<p class="cnt">अभी कोई बैनर नहीं</p>';
+    if (!BANS.length) return banPutHTML() + '<p class="cnt">अभी कोई बैनर नहीं</p>';
     var RX = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
-    return BANS.map(function (b) {
+    return banPutHTML() + BANS.map(function (b) {
       return '<div class="cty' + (b.status === 'pending' ? ' nw' : '') + '"><h3>' + tierName(b.tier).split(' ')[0] + ' <a href="business.html?slug=' + encodeURIComponent(b.slug) + '" target="_blank">' + esc(b.shop) + '</a> <span class="bid">' + ({ pending: '⏳ मंज़ूरी बाकी', approved: '✅ चल रहा', rejected: '❌ मना' }[b.status] || '') + '</span></h3>' +
         (RX.test(b.url || '') ? '<img src="' + esc(b.url) + '" alt="" style="width:100%;max-width:520px;aspect-ratio:2/1;object-fit:cover;border-radius:12px;display:block;margin:6px 0">' : '') +
         (b.reason ? '<p class="meta">कारण: ' + esc(b.reason) + '</p>' : '') + '<p class="meta">' + fmtD(b.at) + (b.tier === 'free' ? ' · ⚠️ दुकान अभी मुफ़्त है — बैनर नहीं चलेगा' : '') + '</p>' +
@@ -1335,6 +1380,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
   }
   $('pmTabs').onclick = function (e) { var b = e.target.closest('[data-pm]'); if (!b) return; PMTAB = b.dataset.pm; $('pmTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); drawPrem(); };
   $('pmBody').onclick = async function (e) {
+    if (e.target.closest('#bpGo')) { banPut(); return; }
     var ps = e.target.closest('[data-psave]'), pt = e.target.closest('[data-ptier]'), bn = e.target.closest('[data-ban]');
     var vr = e.target.closest('[data-ver]');
     if (vr) {
