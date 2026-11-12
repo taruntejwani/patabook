@@ -13,7 +13,7 @@
 <script src="i18n.js"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-helpmenu.js"></script>
-<script src="pb-tejdash.js?v=7"></script>
+<script src="pb-tejdash.js?v=7"></script><script src="pb-live.js?v=1"></script>
 <script src="pb-play.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -1160,6 +1160,7 @@ async function uploadLogo(i,file){
 let SET={cat:null,shop:null};   /* null = बंद · "" = वर्गों की सूची · "prof"/"num"/… = वह वर्ग */
 function setCats(en){return [
   ["prof","👤",en?"Profile":"प्रोफ़ाइल",en?"Edit, Verify, % complete":"बदलाव, जाँच, कितनी पूरी"],
+  ["live","🟢",en?"Today's status":"आज की स्थिति",en?"Closed today, closing early, home delivery":"आज बंद, जल्दी बंद, होम डिलीवरी"],
   ["num","📞",en?"Number & contact":"नंबर और संपर्क",en?"Show / hide number, change number":"नंबर दिखे / छुपे, नंबर बदलना"],
   ["feat","🛠️",en?"Advance Features":"Advance Features",en?"Hiring, Home Service":"नौकरी (नौकरी), होम सर्विस"],
   ["photo","🖼️","Gallery",en?"Logo, Banner, Gallery, Home Ad, Loader":"Logo, Banner, Gallery, Home Ad, Loader"],
@@ -1170,6 +1171,7 @@ function setCats(en){return [
 function catBody(k,b,i,en){
   const sl=encodeURIComponent(b.slug);
   if(k==="prof"){const pc=profPct(b),fl=pc===null||pc>=100;return (canSend(b)||shopSt(b)==="pend"?offBlock(b,i,en):"")+(fl&&PROF&&PROF[b.slug]?shopDetails(b,i,en):profBlock(b,i))+verifyBlock(b,i);}   /* अधूरी प्रोफ़ाइल: ऊपर "Complete profile" वाला डिब्बा नहीं — नीचे वही सूची है */
+  if(k==="live")return window.PBLive?PBLive.ownerHTML(b,en):"";
   if(k==="num")return numPanel(b,i,en);
   if(k==="feat")return (vacBlock(b,i)+homeBlock(b,i))||'<p class="note">—</p>';
   if(k==="photo")return window.galleryBlock?galleryBlock(b,i):"";

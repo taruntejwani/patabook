@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PataBook">
 <script src="site-config.js"></script>
-<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=4"></script><script src="pb-cities.js?v=1"></script>
+<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=4"></script><script src="pb-cities.js?v=1"></script><script src="pb-live.js?v=1"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -556,7 +556,20 @@ function bestMatch(rows,q){
   const hits=rows.slice(0,25).filter(b=>{const W=nameWords(b),joined=W.slice(0,-1).map((w,i)=>w+W[i+1]);return D.every(t=>tokHit(t,W,joined));});
   return hits.length===1?hits[0]:null;
 }
+/* 🟢 दुकानदार की "आज की स्थिति" (sql-49) — खोज की सूची में समय वाले संदेश से ऊपर */
+let LIVE={},LIVEQ="";
+function liveFetch(rows){
+  const sl=[...new Set((rows||[]).map(b=>b.slug).filter(Boolean))].slice(0,300),k=sl.join(",");if(!sl.length||k===LIVEQ)return;LIVEQ=k;
+  fetch(SB+"/rest/v1/rpc/pb_live_bulk",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify({p_slugs:sl})})
+    .then(r=>r.ok?r.json():{}).then(j=>{if(!j||typeof j!=="object"||!Object.keys(j).length)return;LIVE=Object.assign(LIVE,j);if(LASTR)render(LASTR[0],LASTR[1],LASTR[2],true);}).catch(()=>{});
+}
 function openSt(b){
+  {const lv=b&&LIVE[b.slug],v=lv&&window.PBLive?PBLive.view(lv,FEN()):null;
+   if(v&&(v.t||v.delivery||v.service)){const base=v.t?null:openSt0(b),ex=PBLive.extras(v,FEN());
+     if(v.t)return {open:!!v.open,t:[v.t.replace(/^\S+\s/,"")].concat(ex).join(" · ")};   /* 🟢/🔴 कार्ड खुद लगाता है */if(base)return {open:base.open,t:[base.t].concat(ex).join(" · ")};}}
+  return openSt0(b);
+}
+function openSt0(b){
   const en=FEN(),h=line(b,"Hours"),off=line(b,"Closed"),m=h.match(/^(\d{2}):(\d{2})-(\d{2}):(\d{2})$/);if(!m)return null;
   const a=+m[1]*60+ +m[2],z=+m[3]*60+ +m[4],now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"})),cur=now.getHours()*60+now.getMinutes();
   const DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],DH={Sunday:"रविवार",Monday:"सोमवार",Tuesday:"मंगलवार",Wednesday:"बुधवार",Thursday:"गुरुवार",Friday:"शुक्रवार",Saturday:"शनिवार"};
@@ -959,6 +972,7 @@ document.addEventListener("click",e=>{
 });
 function render(rows,q,city,keep){
   if(!keep)FRAW=rows;
+  if(!keep)liveFetch((BIGROW?[BIGROW]:[]).concat(rows||[]));
   LASTR=[FRAW||rows,q,city];
   drawF();
   rows=fltApply(keep?rows:FRAW);
