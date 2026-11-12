@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PataBook">
 <script src="site-config.js"></script>
-<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=1"></script>
+<script src="i18n.js"></script><script>try{sessionStorage.setItem("pb-from-search","1")}catch(e){}</script><script src="pb-nlq.js"></script><script src="pb-voice.js" defer></script><script src="pb-recent.js?v=2"></script>
 <script src="pb-plan.js"></script>
 <script src="pb-premlogo.js"></script>
 <script src="pb-auth.js"></script>
@@ -89,6 +89,7 @@ body.kb{padding-bottom:55vh}
 
 .hint{font-size:13px;color:var(--muted);margin:8px 6px 0;line-height:1.5}
 
+.prods{margin:16px 0 0}.prods h3{font-size:16px;color:var(--navy);margin:0 0 8px}.prods .row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}.prods a.pt{flex:0 0 140px;scroll-snap-align:start;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(20,40,90,.06);touch-action:manipulation}.prods a.pt:active{transform:scale(.97)}.prods .im{aspect-ratio:1/1;padding:6px;background:#fff;overflow:hidden}.prods .im img{width:100%;height:100%;object-fit:contain;display:block}.prods .tx{padding:6px 8px 8px;border-top:1px solid #eef2f9;font-size:12.5px;line-height:1.3}.prods .tx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:700;color:var(--ink)}.prods .pr{display:block;margin-top:3px}.prods .pr strong{font-size:14px;color:var(--navy)}.prods .pr s{color:#8a93a6;margin-left:3px}.prods .pr em{font-style:normal;color:#1e8e3e;font-weight:700;margin-left:3px;white-space:nowrap}.prods .sh{display:block;margin-top:3px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.prods .so{display:inline-block;margin-top:3px;background:#b42318;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px}.prods .nt{font-size:14px;color:var(--muted)}
 .fch{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}.fch button{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:700;border-radius:999px;padding:8px 13px;cursor:pointer;touch-action:manipulation}.fch button.on{border-color:var(--blue);background:#e8f0fe;color:#0b4db3}.fch button[disabled]{opacity:.55}.fch small{flex-basis:100%;font-size:13px;color:#b42318;font-weight:600}
 .count{font-size:14px;font-weight:700;margin:16px 0 8px;color:var(--navy)}
 .list{display:flex;flex-direction:column;gap:12px;padding-bottom:30px}
@@ -163,6 +164,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
   <p class="hint" data-i="s_hint"></p>
  </form>
 
+ <div class="prods" id="prods" hidden></div>
  <div class="fch" id="fch" hidden></div>
  <div class="count" id="count"></div>
  <div class="vtabs" id="vtabs" hidden><button type="button" id="tabAll" class="on">📋 <span id="tabAllT"></span></button><button type="button" id="tabImg">🖼️ Images</button></div>
@@ -182,7 +184,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 
 /* Hindi / Hinglish shabd -> English (database ki category English me hai) */
-const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
+const ALIAS={"कपड़े":"cloth clothing garment","कपड़ा":"cloth clothing","kapde":"cloth clothing","kapda":"cloth clothing","साड़ी":"saree","किराना":"kirana grocery","kirana":"grocery kirana","दवा":"medicine medical","दवाई":"medicine medical","dawai":"medicine medical","pharmacy":"medical","chemist":"medical","मेडिकल":"medical","डॉक्टर":"doctor","क्लिनिक":"clinic","अस्पताल":"hospital","दांत":"dental dentist","डेंटल":"dental dentist","स्कूल":"school","कॉलेज":"college","कोचिंग":"coaching","ट्यूशन":"tuition","गैरेज":"garage","मैकेनिक":"mechanic","टायर":"tyre","tayar":"tyre","taayar":"tyre","बैटरी":"battery","पंचर":"puncture","कार":"car","वॉश":"wash","पॉलिश":"polish","मोबाइल":"mobile","इलेक्ट्रॉनिक":"electronics","इलेक्ट्रॉनिक्स":"electronics","इलेक्ट्रीशियन":"electrician","इलेक्ट्रिशियन":"electrician","bijli":"electrician electrical","प्लंबर":"plumber","plumbing":"plumber","nal":"plumber","फर्नीचर":"furniture","इंटीरियर":"interior","कारपेंटर":"carpenter","बढ़ई":"carpenter","हार्डवेयर":"hardware","कंस्ट्रक्शन":"construction","सीमेंट":"cement","वकील":"lawyer advocate","vakil":"lawyer advocate","टैक्स":"tax","सीए":"accountant chartered","बीमा":"insurance","bima":"insurance","लोन":"loan","प्रॉपर्टी":"property","फोटो":"photographer photography","फोटोग्राफर":"photographer photography","केटरिंग":"catering","टिफिन":"tiffin","मिठाई":"sweet mithai","mithai":"sweet","बेकरी":"bakery","केक":"cake","चाय":"tea chai","chai":"tea","नाश्ता":"snacks","रेस्टोरेंट":"restaurant","रेस्टोरेन्ट":"restaurant","होटल":"hotel","लॉज":"lodge","ढाबा":"dhaba","जिम":"gym","योगा":"yoga","ज्वेलर":"jewellery","ज्वेलरी":"jewellery","jewelry":"jewellery","jeweller":"jewellery","सोना":"gold","सोनार":"jewellery gold","sunar":"jewellery gold","चांदी":"silver","ट्रांसपोर्ट":"transport","टेम्पो":"tempo","कुरियर":"courier","पेस्ट":"pest","सफाई":"cleaning","सैलून":"salon","saloon":"salon","पार्लर":"parlour","parlor":"parlour","ब्यूटी":"beauty","फैक्ट्री":"factory","होलसेल":"wholesale","खेती":"farm farming","कृषि":"agriculture farm","बीज":"seed","खाद":"fertilizer","दूध":"milk dairy","dudh":"milk dairy","डेयरी":"dairy","फल":"fruit","phal":"fruit","सब्जी":"vegetable","sabzi":"vegetable","पेट":"pet","कुत्ता":"dog","पशु":"veterinary animal","एनजीओ":"ngo","मंदिर":"temple","बैंक":"bank","कंप्यूटर":"computer","इंटरनेट":"internet","सिम":"sim","प्रिंटिंग":"printing","विज्ञापन":"advertising","शादी":"wedding","इवेंट":"event","डेकोर":"decor","टेंट":"tent","जूते":"footwear shoe","जूता":"footwear shoe","chappal":"footwear","चप्पल":"footwear","बैग":"bag","किताब":"book","स्टेशनरी":"stationery","गिफ्ट":"gift","खिलौने":"toy","सिक्योरिटी":"security","सीसीटीवी":"cctv","ट्रैवल":"travel","टैक्सी":"taxi","बस":"bus","पासपोर्ट":"passport","सरकारी":"government","कबाड़ी":"scrap","kabadi":"scrap","कचरा":"waste","रिपेयर":"repair","एसी":"ac air conditioning","फ्रिज":"fridge refrigerator","टीवी":"tv television","लैब":"lab pathology","जांच":"diagnostic","मरीन":"marine","शिपिंग":"shipping","darzi":"tailor","दर्जी":"tailor","gaadi":"car vehicle"};
 const CATHI={"ऑटोमोबाइल":"Automobile","खाना":"Food","स्वास्थ्य":"Health","शॉपिंग":"Shopping","शिक्षा":"Education","होम":"Home","प्रोफेशनल":"Professional","होटल":"Hotel"};
 
 /* ✍️ spelling के रूप: बोलने/लिखने में Shriram, Shri Ram, Shree Ram, Sri Ram — सब एक दुकान तक पहुँचें ("*" = कुछ भी / खाली) */
@@ -392,6 +394,7 @@ async function run(push){
   let q=$("q").value.trim(),city=$("city").value.replace(/[^\p{L}\p{M}\p{N} .-]/gu," ").replace(/\s+/g," ").trim();const list=$("list"),cnt=$("count");
   const q0=q;
   try{if(push&&q0&&window.PBRecent)PBRecent.add(q0);}catch(e){}   /* 🕘 पिछली खोजें (सिर्फ़ इसी फ़ोन में) */
+  const PQ=priceQ(q);if(PQ)q=PQ.rest;   /* "500 se kam" → सिर्फ़ Products की कीमत पर; दुकान की खोज बाकी शब्दों से */
   try{window.pbP2P&&window.pbP2P(q0);}catch(e){}try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
@@ -401,10 +404,11 @@ async function run(push){
   else if(city){try{const fc=await fixCityBox(city);if(fc&&fc!==city){city=fc;$("city").value=fc;}}catch(e){}}
   if(push){const u=new URL(location.href);u.searchParams.set("q",q0);city?u.searchParams.set("city",city):u.searchParams.delete("city");history.replaceState(null,"",u);}
   const ts=terms(q,!!city);
+  if(!JOBQ.test(q))loadProds(q,PQ&&PQ.max);else loadProds("",0);
   setChip(city);
   autoCat(q);
   if(push){const u=new URL(location.href);(CATSEL&&CATMAN)?(u.searchParams.set("cat",CATSEL),u.searchParams.set("cm","1")):(u.searchParams.delete("cat"),u.searchParams.delete("cm"));(WORKSEL&&CATMAN)?u.searchParams.set("work",WORKSEL):u.searchParams.delete("work");   /* सिर्फ़ खुद चुनी Category पते में; अपने-आप वाली नहीं (वरना refresh पर सख़्त फ़िल्टर बन जाती है) */history.replaceState(null,"",u);}
-  if(!ts.length&&!city&&!CATSEL){cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("s_empty"))+'</p>';return;}
+  if(!ts.length&&!city&&!CATSEL){cnt.textContent="";list.innerHTML=PQ?'':'<p class="note">'+esc(T("s_empty"))+'</p>';return;}
   const n=++reqN;
   cnt.textContent="";list.innerHTML='<p class="note">'+esc(T("loading"))+'</p>';FRAW=null;FMSG="";{const fc=$("fch");if(fc)fc.hidden=true;}
   if(JOBQ.test(q))return runJobs(q,city,n);   /* "hiring / job / नौकरी" → नौकरी वाली दुकानें (sql-26) */
@@ -754,6 +758,34 @@ async function renderImgs(rows,q){
 }
 var IMGTOK=0,LASTR=null;
 function setView(v){VIEW=v;if(LASTR)render.apply(null,LASTR.concat([true]));}
+/* ₹ कीमत वाली खोज: "500 se kam", "under 500", "₹1000 तक", "500 ke andar" → {max, rest} */
+function priceQ(q){
+  const N="(?:₹|rs\\.?|inr)?\\s*(\\d{2,6})\\s*(?:₹|rs\\.?|rupees?|rupaye|rupye|रुपये|रुपए|रु\\.?)?";
+  const A=new RegExp("(?:^|\\s)(?:under|below|less\\s*than|up\\s*to|upto|within|max|maximum)\\s*"+N+"(?=\\s|$)","i");
+  const B=new RegExp("(?:^|\\s)"+N+"\\s*(?:se\\s*kam|se\\s*niche|से\\s*कम|से\\s*नीचे|tak|तक|ke\\s*andar|के\\s*अंदर|ke\\s*niche|के\\s*नीचे|ya\\s*kam|या\\s*कम|or\\s*less|and\\s*below|me|में|mein)(?=\\s|$)","i");
+  let m=q.match(A)||q.match(B);if(!m)return null;const max=+m[1];if(!(max>=10))return null;
+  return {max,rest:q.replace(m[0]," ").replace(/\s+/g," ").trim()};
+}
+/* 🛍️ दुकानों के Products में खोज (sql-47: pb_search_products) — नतीजों के ऊपर एक पट्टी */
+let PRN=0;
+function prodWords(q){return String(q||"").toLowerCase().split(/\s+/).filter(w=>w&&!STOPW.has(w)).map(w=>{const a=ALIAS[w];return a?a.split(" ")[0]:w;}).join(" ");}
+async function loadProds(q,max){
+  const el=$("prods");if(!el)return;const n=++PRN;el.hidden=true;el.innerHTML="";
+  const words=prodWords(q);if(!words&&!max)return;
+  let rows=[];try{const r=await fetch(SB+"/rest/v1/rpc/pb_search_products",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},H),body:JSON.stringify({p_q:words,p_max_price:max||null,p_limit:24})});rows=r.ok?(await r.json()||[]):[];}catch(e){rows=[];}
+  if(n!==PRN)return;const en=FEN();
+  if(!Array.isArray(rows))rows=[];
+  rows=rows.filter(x=>x&&x.url&&/^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\//.test(x.url));
+  const inr=v=>"₹"+Number(v).toLocaleString("en-IN");
+  const lim=max?(en?" up to "+inr(max):" · "+inr(max)+" तक"):"";
+  if(!rows.length){if(max){el.hidden=false;el.innerHTML='<h3>🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+'</h3><p class="nt">'+esc(en?"No product found up to "+inr(max)+".":inr(max)+" तक का कोई प्रोडक्ट नहीं मिला।")+'</p>';}return;}
+  el.innerHTML='<h3>🛍️ '+esc(en?"Products":"प्रोडक्ट")+esc(lim)+'</h3><div class="row">'+rows.map(x=>{
+    const href=(window.PBPlan&&PBPlan.url?PBPlan.url(x.slug):"business.html?slug="+encodeURIComponent(x.slug));
+    const p=x.price!=null?+x.price:null,m=x.mrp!=null&&p!=null&&+x.mrp>p?+x.mrp:null,net=x.net!=null?+x.net:p;
+    let pr="";if(net!=null){pr='<span class="pr"><strong>'+(x.price_from?(en?"From ":"")+inr(net)+(en?"":" से शुरू"):inr(net))+'</strong>'+(m?'<s>'+inr(m)+'</s><em>'+Math.round((m-p)*100/m)+'% '+(en?"OFF":"छूट")+'</em>':(x.disc&&p!=null?'<s>'+inr(p)+'</s><em>'+x.disc+'% '+(en?"OFF":"छूट")+'</em>':''))+'</span>';}
+    return '<a class="pt" href="'+esc(href)+'"><div class="im"><img src="'+esc(x.url)+'" alt="" loading="lazy" decoding="async"></div><div class="tx"><b>'+esc(x.name)+'</b>'+pr+(x.sold?'<span class="so">'+(en?"Sold out":"अभी उपलब्ध नहीं")+'</span>':'')+'<span class="sh">🏪 '+esc(x.shop)+'</span></div></a>';}).join("")+'</div>';
+  el.hidden=false;
+}
 /* 🟢 अभी खुली / 📍 सबसे पास / ⭐ अच्छी रेटिंग — नतीजों के ऊपर बटन (कुछ save नहीं होता) */
 let FOPEN=false,FSORT="",FME=null,FRAW=null,FMSG="";
 function fRk(b){const v=+b.review_count||0,r=+b.rating||0;return (v*r+3*3.5)/(v+3);}
