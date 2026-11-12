@@ -874,8 +874,8 @@ function applyLang(){
   function inCity(b,city){const t=normCity(city);if(!t)return true;return [b.city,b.address].filter(Boolean).map(normCity).some(v=>v===t||v.startsWith(t+" ")||v.endsWith(" "+t)||v.includes(" "+t+" "));}
   let ALL=[],P=[],i=0,timer=null,loaded=false;
   const tk=()=>document.getElementById("ptk");
-  function slide(b){const t=b.tier==="platinum"||b.tier==="silver"?b.tier:"gold";
-    return '<a class="ps" style="--pi:url(\''+esc(b.url)+'\')" href="shop.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"><span class="pl pt-'+t+'">'+({platinum:"💎 Digital Platinum Card",gold:"👑 Digital Gold Card",silver:"🥈 Digital Silver Card"}[t])+'</span></a>';}
+  function slide(b){   /* पोस्टर के ऊपर "Digital … Card" का लेबल नहीं (मालिक के कहने पर) */
+    return '<a class="ps" style="--pi:url(\''+esc(b.url)+'\')" href="shop.html?slug='+encodeURIComponent(b.slug||"")+'" aria-label="'+esc(b.name||"")+'"><img src="'+esc(b.url)+'" alt="'+esc(b.name||"")+'" decoding="async"></a>';}
   function ph(){return '<a class="ps ph" href="mybusiness.html"><b>'+(hi()?"अपनी दुकान का पोस्टर यहाँ लगाएँ":"Put your shop poster here")+'</b><small>'+(hi()?"गोल्ड और प्लैटिनम सदस्य अपना पोस्टर यहाँ पूरे साइज़ में चला सकते हैं":"Gold & Platinum Members can show their poster here, full size")+'</small><span>'+(hi()?"मेरी दुकान ›":"My Shop ›")+'</span></a>';}
   /* 💻 कंप्यूटर: poster पुराने (मोबाइल) size के ही, पर एक साथ 3 दिखें — बीच वाला बड़ा, दोनों तरफ़ वाले थोड़े छोटे; हर बार अगला poster बीच में आकर रुकता है */
   const DSK=matchMedia("(min-width:900px)");let J=0,DX=0,FX=0;
