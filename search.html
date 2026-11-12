@@ -417,6 +417,24 @@ async function run(push){
     if(ok){if(push){const u=new URL(location.href);u.searchParams.set("q",q0);u.searchParams.delete("city");history.replaceState(null,"",u);}return;}
   }else{try{window.pbP2P&&window.pbP2P("");}catch(e){}}
   try{window.pbHelp&&window.pbHelp(q0);}catch(e){}
+  {/* 🎁 "offer / discount / छूट" और ❤️ "stamp card" → सीधे उस पेज का डिब्बा (दुकानों में नहीं ढूँढते) */
+    const w=q0.toLowerCase().replace(/[?.!,]/g," ").replace(/\s+/g," ").trim().split(" ");
+    const OFW=/^(offers?|ofer|ofers|discounts?|sale|deals?|scheme|chhut|chut|chhoot|छूट|ऑफ़र|ऑफर|ओफर|स्कीम|डिस्काउंट)$/,STW=/^(stamps?|stamp-card|loyalty|स्टैम्प|स्टांप)$/;
+    const CTY={gandhidham:"Gandhidham","गांधीधाम":"Gandhidham",adipur:"Adipur","आदिपुर":"Adipur",anjar:"Anjar","अंजार":"Anjar",bhuj:"Bhuj","भुज":"Bhuj",mundra:"Mundra","मुंद्रा":"Mundra",mandvi:"Mandvi","मांडवी":"Mandvi",bhachau:"Bhachau","भचाऊ":"Bhachau",rapar:"Rapar","रापर":"Rapar"};
+    const rest=w.filter(x=>!OFW.test(x)&&!STW.test(x)&&!/^(card|cards|in|me|mein|में|के|ke|ki|की|ka|का|wale|wali|all|sab|सब|shop|shops|दुकान|dukan)$/.test(x));
+    const kind=w.some(x=>OFW.test(x))?"of":w.some(x=>STW.test(x))?"st":"";
+    const cy=rest.length===1?CTY[rest[0]]:"";
+    if(kind&&(!rest.length||cy)){
+      const en=FEN();cnt.textContent="";FRAW=null;{const fc=$("fch");if(fc)fc.hidden=true;const pd=$("prods");if(pd){pd.hidden=true;pd.innerHTML="";}const vt=$("vtabs");if(vt)vt.hidden=true;}
+      const href=kind==="of"?"offers.html"+(cy?"?city="+encodeURIComponent(cy):""):"stamps.html";
+      const t=kind==="of"?(en?"🎁 Shop offers"+(cy?" in "+cy:""):"🎁 दुकानों के ऑफ़र"):(en?"❤️ My stamp cards":"❤️ मेरे Stamp cards");
+      const sub=kind==="of"?(en?"See live offers posted by shops in your city.":"अपने शहर की दुकानों के चालू ऑफ़र देखें।"):(en?"Your PataBook code and the stamps you have collected.":"आपका PataBook code और मिले हुए stamps।");
+      list.innerHTML='<a href="'+href+'" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;border:1.5px solid #ffd8a8;background:#fffaf2;border-radius:16px;padding:16px;margin:4px 0 12px"><span style="flex:1"><b style="display:block;font-size:17px;color:#a35200">'+esc(t)+'</b><small style="display:block;color:#5b6475;font-size:14px;margin-top:2px">'+esc(sub)+'</small></span><span aria-hidden="true" style="font-size:24px;color:#a35200">›</span></a>';
+      if(push){const u=new URL(location.href);u.searchParams.set("q",q0);u.searchParams.delete("city");history.replaceState(null,"",u);}
+      if(window.PBT)PBT.once("search",q0);
+      return;
+    }
+  }
   WIDE="";NLI=null;BIGROW=null;NFHIDE=false;
   try{const nl=window.PBNLQ&&PBNLQ.parse(q);if(nl&&nl.changed&&nl.text){NLI=nl;q=nl.text;}}catch(e){}   /* "… kahan hai?" जैसे सवाल → साफ़ शब्द; सवाल न हो तो कुछ नहीं बदलता */
   let det=null;try{if(!(CITYUSER&&city))det=await detectCity(q);}catch(e){}   /* आपने शहर-खाना खुद चुना हो तो खोज-शब्द उसे नहीं बदलेगा */
