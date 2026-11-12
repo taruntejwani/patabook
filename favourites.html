@@ -74,6 +74,7 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <script src="pb-track.js"></script>
 <style>@media(min-width:900px){.wrap{max-width:920px}}</style>
 <script src="pb-backlink.js" defer></script>
+<script src="pb-offers.js?v=1"></script>
 </head>
 <body>
 <header><div class="wrap nav">
@@ -86,6 +87,10 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
 <div class="card">
   <h1 id="fvH"></h1>
   <div id="fvBox"><p class="upd">…</p></div>
+</div>
+<div class="card" id="fvOfC" hidden>
+  <h2 id="fvOfH" style="margin-top:0"></h2>
+  <div id="fvOf"></div>
 </div>
 </main>
 <script>
@@ -101,7 +106,15 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
     if (!r.ok) throw new Error((j && (j.message || j.msg)) || ("HTTP " + r.status));
     return j;
   }
+  var OFS = null;
+  function drawOf() {
+    var c = document.getElementById("fvOfC");
+    if (!Array.isArray(OFS) || !OFS.length || !window.PBOffers) { c.hidden = true; return; }
+    document.getElementById("fvOfH").textContent = "🎁 " + T("आपकी फ़ेवरेट दुकानों के ऑफ़र", "Offers from your favourite shops");
+    PBOffers.list(document.getElementById("fvOf"), OFS); c.hidden = false;
+  }
   function draw() {
+    drawOf();
     document.documentElement.lang = en() ? "en" : "hi";
     document.getElementById("fvH").textContent = "💫 " + T("मेरी फ़ेवरेट दुकानें", "My favourite shops");
     var box = document.getElementById("fvBox");
@@ -125,6 +138,9 @@ html[lang="en"] [data-l="en"],html:not([lang="en"]) [data-l="hi"]{display:block}
     var s = await sess(); if (!s) { L = "login"; draw(); return; }
     try { var j = await rpc("pb_my_favs", {}, s.access_token); L = Array.isArray(j) ? j : []; } catch (e) { L = "err"; }
     draw();
+    /* 🎁 फ़ेवरेट दुकानों के चालू ऑफ़र (sql-52) — न हों तो डिब्बा छिपा */
+    try { OFS = await rpc("pb_offers_favs", {}, s.access_token); } catch (e) { OFS = null; }
+    drawOf();
   }
   if (window.PB) { PB.mount(document.getElementById("pbLang")); PB.onChange(function () { PB.apply(); draw(); }); PB.apply(); }
   load();

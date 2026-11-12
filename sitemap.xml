@@ -20,4 +20,5 @@
   <url><loc>https://patabook.in/category?cat=Shopping</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://patabook.in/market</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://patabook.in/refund</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://patabook.in/offers</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
 </urlset>
