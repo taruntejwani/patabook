@@ -157,7 +157,7 @@ form.short .fo{display:none}
 .aiback{background:none;border:0;color:#1a73e8;font:inherit;font-weight:700;cursor:pointer;margin-top:8px;text-decoration:underline}
 </style>
 <script src="pb-slide.js"></script><script src="pb-track.js"></script><script src="pb-protect.js"></script>
-<script src="pb-card.js" defer></script>
+<script src="pb-cardscan.js?v=1" defer></script><script src="pb-card.js" defer></script>
 <script>/* Back से लौटे और दुकान अभी-अभी जुड़ी थी → फ़ॉर्म नहीं, होम पेज */
 (function(){function back(){try{return sessionStorage.getItem("pb-reg-done")==="1";}catch(_){return false;}}
  try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward"&&back()){location.replace("index.html");return;}if(n&&n.type!=="back_forward")sessionStorage.removeItem("pb-reg-done");}catch(_){}
