@@ -98,7 +98,7 @@ footer{padding:14px 16px 24px;text-align:center;color:var(--muted);font-size:12p
 .tag.feat{background:#fff6d6;color:#8a6200;font-weight:700}/* Premium: सफ़ेद + हल्का सुनहरा + गहरा navy (सिर्फ़ Premium दुकानों पर) */.tag.prem{background:linear-gradient(135deg,#fdf7e6,#f4e4b8);color:#123568;border:1px solid #e3c983;font-weight:700;letter-spacing:.1px}.tag.prem i{font-style:normal;font-size:.85em;margin-right:3px}.goldname{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.goldname{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}.card.isprem{border-color:#ecdcb0;box-shadow:0 6px 20px rgba(18,53,104,.08),0 1px 3px rgba(181,138,42,.10)}.card.isprem h2 a{color:#A67C22}@supports (-webkit-background-clip:text) or (background-clip:text){.card.isprem h2 a{background:linear-gradient(180deg,#C49A36 0%,#B58A2A 52%,#8E6A1C 100%);-webkit-background-clip:text;background-clip:text;color:transparent}}
 #list article.card{cursor:pointer}
 </style>
-<script src="pb-guard.js" defer></script><script src="pb-loader.js"></script>
+<script src="pb-guard.js" defer></script>
 <script src="pb-slide.js"></script><script src="pb-track.js" defer></script><script src="pb-protect.js" defer></script>
 <style>/* 🖥️ PC (900px+): बड़ी screen पर चौड़ा पेज; मोबाइल वैसा ही */@media(min-width:900px){.wrap{max-width:1180px}#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}#list>*{margin:0!important}#list>:not(article){grid-column:1/-1}}</style>
 <script src="pb-backlink.js" defer></script>
@@ -217,14 +217,15 @@ function drawRadius(){
 function locate(){
   const st=document.getElementById("status");
   st.innerHTML=L.locating;
-  const saved=sessionStorage.getItem("pb-loc");
+  /* पिछली location (30 मिनट तक) इसी फ़ोन में याद — हर बार GPS का इंतज़ार नहीं */
+  let saved=null;try{saved=sessionStorage.getItem("pb-loc");if(!saved){const l=JSON.parse(localStorage.getItem("pb-loc2")||"null");if(l&&Date.now()-l.t<1800000)saved=JSON.stringify({lat:l.lat,lng:l.lng});}}catch(e){}
   if(saved){try{me=JSON.parse(saved);mode="geo";drawStatus();load();return;}catch(e){}}
   if(!navigator.geolocation){return fallback();}
   navigator.geolocation.getCurrentPosition(p=>{
     me={lat:p.coords.latitude,lng:p.coords.longitude};
-    try{sessionStorage.setItem("pb-loc",JSON.stringify(me));}catch(e){}
+    try{sessionStorage.setItem("pb-loc",JSON.stringify(me));localStorage.setItem("pb-loc2",JSON.stringify({lat:me.lat,lng:me.lng,t:Date.now()}));}catch(e){}
     mode="geo";drawStatus();load();
-  },()=>fallback(),{enableHighAccuracy:true,timeout:10000,maximumAge:300000});
+  },()=>fallback(),{enableHighAccuracy:false,timeout:8000,maximumAge:600000});   /* मोटी (जल्दी मिलने वाली) location काफ़ी है — 5/10/25 km के लिए */
 }
 function fallback(){
   mode="city";me=null;drawStatus();drawRadius();load();
@@ -236,11 +237,11 @@ function drawStatus(){
     :`${L.near}`;
   if(mode==="geo"){
     st.innerHTML=`<span class="loc">${L.using}</span><button id="re">${L.retry}</button>`;
-    document.getElementById("re").onclick=()=>{try{sessionStorage.removeItem("pb-loc");}catch(e){}locate();};
+    document.getElementById("re").onclick=()=>{try{sessionStorage.removeItem("pb-loc");localStorage.removeItem("pb-loc2");}catch(e){}locate();};
   }else{
     st.innerHTML=`<span>${L.denied}</span><select id="cityPick" aria-label="${(localStorage.getItem("pb-lang")||"en")!=="hi"?"Choose city":"शहर चुनें"}">${Object.keys(CITIES).map(c=>`<option value="${c}" ${c===cityName?"selected":""}>${cityLbl(c)}</option>`).join("")}</select><button id="re">${L.retry}</button>`;
     document.getElementById("cityPick").onchange=e=>{cityName=e.target.value;load();};
-    document.getElementById("re").onclick=()=>{try{sessionStorage.removeItem("pb-loc");}catch(e){}locate();};
+    document.getElementById("re").onclick=()=>{try{sessionStorage.removeItem("pb-loc");localStorage.removeItem("pb-loc2");}catch(e){}locate();};
   }
   drawRadius();
 }
