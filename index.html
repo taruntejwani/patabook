@@ -441,9 +441,7 @@ document.addEventListener("DOMContentLoaded",function(){try{var s=JSON.parse(loc
 <div id="pbL" aria-hidden="true"><div class="row"><div class="lm"><img class="mp" src="map.webp" alt="" style="aspect-ratio:830/385"><i class="sh"></i><img class="pn" src="pin.png" alt="" style="aspect-ratio:150/183"></div><div class="lw"><div class="in"><img src="wordmark.webp" alt="" style="aspect-ratio:1158/199"></div></div></div></div>
 <script>(function(){if(!document.documentElement.classList.contains("pbl"))return;var L=document.getElementById("pbL"),done=false;
   function end(){if(done)return;done=true;L.classList.add("out");setTimeout(function(){document.documentElement.classList.remove("pbl");L.remove();},460);}
-  setTimeout(end,3500);L.addEventListener("click",end);
-  var t0=Date.now();function ready(){setTimeout(end,Math.max(0,1200-(Date.now()-t0)));}   /* पेज तैयार होते ही (कम से कम 1.2 सेकंड) हट जाए — 3.5 सेकंड का इंतज़ार नहीं */
-  if(document.readyState==="complete")ready();else window.addEventListener("load",ready);   /* दबाने पर तुरंत हट जाए */
+  setTimeout(end,3500);L.addEventListener("click",end);   /* दबाने पर तुरंत हट जाए */
 })();</script>
 
 <div class="top">
