@@ -478,7 +478,7 @@ async function run(push){
       const hit=b=>b.category===CATSEL||ws.some(w=>String(b.name||"").toLowerCase().includes(w)||String(catOf(b)||"").toLowerCase().includes(w));
       const dem=()=>{if(CATSEL&&!(CATMAN||WORKSEL)&&ws.length){const kp=rows.filter(hit);if(kp.length&&kp.length<rows.length)rows=kp.concat(rows.filter(b=>!hit(b)));}};
       if(NEARQ){   /* "near me" → फ़ोन की लोकेशन से पास वाली पहले; अनुमति न मिले तो जैसा था वैसा */
-        const me=await new Promise(res=>{try{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({la:p.coords.latitude,ln:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:300000});}catch(e){res(null);}});
+        const me=await myPos();
         if(n!==reqN)return;
         if(me){rows.forEach(b=>{b._km=+b.latitude&&+b.longitude?kmTo(me,{la:+b.latitude,ln:+b.longitude}):null;});
           const dk=b=>b._km==null?1e9:b._km;rows=rows.map((b,i)=>[b,i]).sort((x,y)=>dk(x[0])-dk(y[0])||x[1]-y[1]).map(x=>x[0]);}
@@ -934,6 +934,10 @@ function prodQ(q){   /* "sasta tayar polish" → {q:"tyre|tayar|tire|tayr polish
   });
   return {q:out.slice(0,6).join(" "),cheap};
 }
+function myPos(){   /* "पास में": पिछली location (30 मिनट तक) इसी फ़ोन में याद — हर बार इंतज़ार नहीं (category पेज के साथ साझा) */
+  try{const l=JSON.parse(localStorage.getItem("pb-loc2")||"null");if(l&&Date.now()-l.t<1800000&&isFinite(l.lat))return Promise.resolve({la:+l.lat,ln:+l.lng});}catch(e){}
+  return new Promise(res=>{try{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>{const o={la:p.coords.latitude,ln:p.coords.longitude};try{localStorage.setItem("pb-loc2",JSON.stringify({lat:o.la,lng:o.ln,t:Date.now()}));}catch(e){}res(o);},()=>res(null),{timeout:8000,maximumAge:600000});}catch(e){res(null);}});
+}
 const PNEAR=/(^|\s)(near\s*me|nearby|near\s*by|nearest|paas\s*(me|mein|main)|pass\s*(me|mein)|aas\s*pass|aaspass|najdik|nazdik|आसपास|आस-पास|पास\s*में|नज़दीक|नजदीक)(\s|$)/i;
 async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वाले सामान (sql-55), उस शहर के; "" = सब शहर */
   const el=$("prods");if(!el)return;const n=++PRN;el.hidden=true;el.innerHTML="";
@@ -949,7 +953,7 @@ async function loadProds(q,max,dc){   /* dc (string) = 🏷️ छूट वा�
   if(n!==PRN)return;
   if(Array.isArray(rows)&&rows.length&&PQ2&&PQ2.cheap)rows=rows.map((x,i)=>[x,i]).sort((a,b)=>((a[0].net==null)-(b[0].net==null))||(+a[0].net||0)-(+b[0].net||0)||a[1]-b[1]).map(x=>x[0]);
   let PME=null;if(NEARP&&Array.isArray(rows)&&rows.length){   /* "paas me tyre polish" → पास वाली दुकान का सामान पहले */
-    PME=FME||await new Promise(res=>{try{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({la:p.coords.latitude,ln:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:300000});}catch(e){res(null);}});
+    PME=FME||await myPos();
     if(n!==PRN)return;
     if(PME){rows.forEach(x=>{x._km=+x.lat&&+x.lng?kmTo(PME,{la:+x.lat,ln:+x.lng}):null;});rows=rows.map((x,i)=>[x,i]).sort((a,b)=>(a[0]._km==null?1e9:a[0]._km)-(b[0]._km==null?1e9:b[0]._km)||a[1]-b[1]).map(x=>x[0]);}
   }
@@ -1145,7 +1149,7 @@ if(P.get("city"))$("city").value=P.get("city");
       fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la.toFixed(4)+"&longitude="+ln.toFixed(4)+"&localityLanguage=en")
         .then(r=>r.json()).then(d=>{const c=d.city||d.locality||"";if(c)done(c);else fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।");})
         .catch(()=>fail(en()?"Could not find your city. Please type it.":"शहर नहीं मिला। कृपया लिखें।"));
-    },err=>{fail(err&&err.code===1?(en()?"Location permission is blocked for this site. Allow it in browser settings.":"इस साइट के लिए लोकेशन की इजाज़त बंद है। ब्राउज़र की सेटिंग में इजाज़त दें।"):(en()?"Could not get your location. Turn on GPS and try again.":"लोकेशन नहीं मिली। GPS चालू करके दोबारा दबाएँ।"));},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+    },err=>{fail(err&&err.code===1?(en()?"Location permission is blocked for this site. Allow it in browser settings.":"इस साइट के लिए लोकेशन की इजाज़त बंद है। ब्राउज़र की सेटिंग में इजाज़त दें।"):(en()?"Could not get your location. Turn on GPS and try again.":"लोकेशन नहीं मिली। GPS चालू करके दोबारा दबाएँ।"));},{enableHighAccuracy:false,timeout:8000,maximumAge:600000});
   });
 })();
 /* 🔎 search box में लिखते ही सुझाव (गलत spelling पर "क्या आपका मतलब" + दुकानों के नाम) */

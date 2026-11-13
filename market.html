@@ -162,7 +162,7 @@ function near(){
   if(!navigator.geolocation){alert(T("इस फ़ोन में location नहीं मिल रही।","Location is not available on this phone."));return;}
   b.disabled=true;b.textContent=T("📍 ढूँढ रहे हैं…","📍 Finding…");
   navigator.geolocation.getCurrentPosition(p=>{ME={lat:p.coords.latitude,lng:p.coords.longitude};MODE="geo";try{sessionStorage.setItem("pb-loc",JSON.stringify(ME));}catch(e){}b.disabled=false;refresh();},
-    ()=>{b.disabled=false;paintTexts();alert(T("Location नहीं मिली। फ़ोन की Location चालू करके फिर दबाएँ।","Could not get your location. Turn on Location and tap again."));},{enableHighAccuracy:true,timeout:10000,maximumAge:300000});
+    ()=>{b.disabled=false;paintTexts();alert(T("Location नहीं मिली। फ़ोन की Location चालू करके फिर दबाएँ।","Could not get your location. Turn on Location and tap again."));},{enableHighAccuracy:false,timeout:8000,maximumAge:600000});
 }
 /* सामान दबाया → बड़ी फ़ोटो + कीमत + किस दुकान का है; वहाँ से दुकान खोलें। फ़ोन का Back इसे बंद करता है */
 function sheet(p){
