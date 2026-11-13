@@ -1100,15 +1100,15 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
   const ready=new Promise(res=>{if(window.PB_CITIES_OK)return res();document.addEventListener("pb-cities",res,{once:true});setTimeout(res,5000);});
   const get=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const put=(c,by)=>{try{if(c){localStorage.setItem("pb-city",c);localStorage.setItem("pb-city-by",by);}else{localStorage.removeItem("pb-city");localStorage.removeItem("pb-city-by");}}catch(e){}};
+  let picked=false;   /* इसी बार खुद शहर चुना → अपने-आप न बदले; पेज refresh / app दोबारा खोलने पर फिर जहाँ खड़े हैं वही शहर (मालिक के कहने पर) */
   sel.addEventListener("change",()=>{
-    const v=sel.value.trim();if(!v){put("",null);return;}                 /* खाली = कोई पसंद नहीं; अगली बार फिर अपने-आप */
+    picked=true;const v=sel.value.trim();if(!v){put("",null);return;}                 /* खाली = कोई पसंद नहीं; अगली बार फिर अपने-आप */
     const k=canon(v);sel.value=k||v;put(sel.value,"me");
   });
   const mine=get("pb-city"),by=get("pb-city-by");
   if(!mine&&by)put("",null);                                                  /* पुराना अटका हुआ "खाली" साफ़ */
   if(mine){sel.value=mine;ready.then(()=>{const k=canon(mine);if(k&&sel.value===mine)sel.value=k;});}   /* list आए या न आए, पिछला शहर तुरंत दिखे */
-  if(mine&&by==="me")return;                                                  /* ग्राहक ने खुद चुना था: वही रहे */
-  const set=c=>{ready.then(()=>{const k=canon(c);if(!k||get("pb-city-by")==="me"||document.activeElement===sel)return;
+  const set=c=>{ready.then(()=>{const k=canon(c);if(!k||picked||document.activeElement===sel)return;
     const changed=sel.value!==k;sel.value=k;put(k,"auto");if(changed)document.dispatchEvent(new Event("pb-city-auto"));});};
   function match(names){return ready.then(()=>{for(const n of names){const k=canon(n);if(k)return k;}return null;});}
   function byIp(){
@@ -1126,7 +1126,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")openMenu(false);});
       fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+la.toFixed(4)+"&longitude="+ln.toFixed(4)+"&localityLanguage=en")
         .then(r=>r.json()).then(d=>match([d.city,d.locality,...((d.localityInfo&&d.localityInfo.administrative)||[]).map(a=>a&&a.name)].filter(Boolean)))
         .then(k=>{if(k)set(k);else byIp();}).catch(byIp);
-    },byIp,{enableHighAccuracy:false,timeout:9000,maximumAge:600000});
+    },byIp,{enableHighAccuracy:false,timeout:9000,maximumAge:60000});   /* 1 मिनट से पुरानी location नहीं — गांधीधाम से आदिपुर जाने पर तुरंत बदले */
   }
   if(!navigator.geolocation){byIp();return;}
   if(navigator.permissions&&navigator.permissions.query){
