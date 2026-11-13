@@ -834,6 +834,8 @@ function applyLang(){
   }
   let RUN=0;
   async function refreshCityShops(){
+    {const nn=NB.mode==="near"&&NB.pos?{r:NB.r,la:NB.pos[0],ln:NB.pos[1]}:null,ok=JSON.stringify(nn)!==JSON.stringify(window.__pbNear||null);
+      window.__pbNear=nn;if(ok)document.dispatchEvent(new Event("pb-near"));}   /* नीचे के poster भी "Near me + km" के हिसाब से */
     const run=++RUN,city=currentCity();
     if(LASTD!==null){const d=await cityDistrict(city);if(run!==RUN)return;STRICT=!!city&&!d;if(d!==LASTD){const nr=await fetchRows(d);if(run!==RUN)return;ALL_ROWS=nr;LASTD=d;window.__pbDist=d;}}
     setCityTitle(city);
@@ -941,10 +943,13 @@ function applyLang(){
     addEventListener("pointerup",up);addEventListener("pointercancel",up);
     v.addEventListener("click",e=>{if(G.moved>6){e.preventDefault();e.stopPropagation();G.moved=0;}},true);v.addEventListener("dragstart",e=>e.preventDefault());}
   document.addEventListener("pb-gp",e=>{GP=Array.isArray(e.detail)?e.detail:[];if(loaded)draw();});
-  let LASTK="";
+  let LASTK="";const PLL={};
+  document.addEventListener("pb-near",()=>{if(loaded)draw();});
   function draw(){const t=tk();if(!t)return;
     const city=String(document.getElementById("city")?.value||"").trim();
-    P=city?ALL.filter(b=>inCity(b,city)):ALL.slice();   /* ऊपर चुने शहर के ही poster (मालिक के कहने पर); "सब जगह" = सब */
+    const nr=window.__pbNear;
+    if(nr&&nr.r)P=ALL.filter(b=>{const g=PLL[b.slug];if(!g)return false;const dy=(g[0]-nr.la)*111,dx=(g[1]-nr.ln)*111*Math.cos(nr.la*Math.PI/180);return Math.hypot(dx,dy)<=nr.r;});   /* 📍 Near me: उतने km के अंदर वाली दुकानों के poster */
+    else P=city?ALL.filter(b=>inCity(b,city)):ALL.slice();   /* ऊपर चुने शहर के ही poster (मालिक के कहने पर); "सब जगह" = सब */
     const key=(loaded?1:0)+"|"+DSK.matches+"|"+(PB.lang&&PB.lang())+"|"+P.map(b=>b.slug+b.url).join(",");
     if(key===LASTK&&t.children.length)return;   /* कुछ बदला नहीं (जैसे "Near me" दबाया): poster दोबारा न बनें, न झपकें */
     LASTK=key;
@@ -958,6 +963,8 @@ function applyLang(){
       if(r.ok){const rows=await r.json();
         ALL=(Array.isArray(rows)?rows:[]).filter(b=>b&&RX.test(b.url||"")&&(b.tier==="gold"||b.tier==="platinum"||b.tier==="silver"))
           .sort((a,b)=>({platinum:0,gold:1,silver:2}[a.tier])-({platinum:0,gold:1,silver:2}[b.tier])).slice(0,15);}}catch(e){}
+    try{if(ALL.length){const r2=await fetch(SBU+"/rest/v1/businesses?select=slug,latitude,longitude&slug=in.("+ALL.map(b=>'"'+encodeURIComponent(b.slug)+'"').join(",")+")",{headers:H});   /* poster वाली दुकानों की जगह (km गिनने के लिए) */
+      if(r2.ok)(await r2.json()||[]).forEach(x=>{if(x&&+x.latitude&&+x.longitude)PLL[x.slug]=[+x.latitude,+x.longitude];});}}catch(e){}
     loaded=true;draw();
   }
   /* उँगली से आगे-पीछे खिसकाएँ */
