@@ -645,8 +645,9 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var hd = '<div class="box"><h4>📷 दुकान की जाँच फ़ोटो</h4>';
     if (VERS === null) return hd + '<p class="meta" style="margin:0">' + (VLOAD ? 'लोड हो रही हैं…' : 'फ़ोटो नहीं मिल सकीं') + '</p></div>';
     var L = VERS.filter(function (v) { return v.slug === b.slug; }).sort(function (x, y) { return String(y.created_at || '').localeCompare(String(x.created_at || '')); });
-    if (!L.length) return hd + '<p class="meta" style="margin:0">दुकानदार ने अभी जाँच की फ़ोटो नहीं भेजी</p></div>';
+    if (!L.length) return hd + '<p class="meta" style="margin:0">दुकानदार ने अभी जाँच की फ़ोटो नहीं भेजी</p>' + '<div class="tgs" style="margin-top:8px"><button type="button" class="tg ac" data-vdir="' + esc(b.slug) + '" data-n="' + esc(b.name) + '" style="background:#137333;color:#fff">✅ बिना फ़ोटो Verify करें</button></div><p class="meta" style="margin:6px 0 0">दुकान आप खुद जानते हैं / फ़ोन पर पक्का कर लिया हो तभी दबाएँ।</p>' + '</div>';
     var v = L[0];
+    if (!v.outside_path) return hd + '<p class="meta" style="margin:0"><b>✅ Verified</b> · ' + fmtD(v.decided_at || v.created_at) + '</p><p class="meta" style="margin:4px 0 0">Admin ने बिना फ़ोटो verify किया</p></div>';
     var img = function (p, t) { var u = VSIGN[p]; return '<figure style="margin:0;flex:1;min-width:0"><figcaption style="font-size:13px;font-weight:700;color:#5b6475;margin-bottom:4px">' + t + '</figcaption>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid #e3e8f0;display:block"></a>' : '<div style="aspect-ratio:4/3;border-radius:10px;background:#eef2f8;display:grid;place-items:center;font-size:12px;color:#5b6475">फ़ोटो नहीं</div>') + '</figure>'; };
     var ai = v.ai_status === 'error' ? '<p class="meta" style="color:#b54708;font-weight:700">⚠️ AI जाँच नहीं हो पाई — बोर्ड का नाम खुद मिलाएँ</p>'
       : '<p class="meta">🤖 बोर्ड पर पढ़ा: <b>' + esc(v.sign_text || '—') + '</b> ' + (v.ai_match ? '✅ नाम मिला' : '❌ नाम नहीं मिला') + '</p>';
@@ -654,9 +655,17 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
       '<div style="display:flex;gap:8px;margin:8px 0">' + img(v.outside_path, 'बाहर (बोर्ड)') + img(v.inside_path, 'अंदर') + '</div>' +
       '<p class="meta" style="margin:0">फ़ोटो सिर्फ़ आपको दिखती हैं — दबाकर बड़ा देखें</p>' +
       (v.reason ? '<p class="meta">कारण: ' + esc(v.reason) + '</p>' : '') +
+      (v.status === 'rejected' ? '<div class="tgs" style="margin-top:8px"><button type="button" class="tg ac" data-vdir="' + esc(b.slug) + '" data-n="' + esc(b.name) + '" style="background:#137333;color:#fff">✅ बिना फ़ोटो Verify करें</button></div><p class="meta" style="margin:6px 0 0">दुकान आप खुद जानते हैं / फ़ोन पर पक्का कर लिया हो तभी दबाएँ।</p>' : '') +
       (v.status === 'pending' ? '<div class="tgs" style="margin-top:8px"><button type="button" class="tg ac" data-ver="1" data-id="' + v.id + '" data-n="' + esc(v.shop || b.name) + '" style="background:#137333;color:#fff">✅ मंज़ूर करें</button><button type="button" class="tg ac bad" data-ver="0" data-id="' + v.id + '" data-n="' + esc(v.shop || b.name) + '">❌ Reject</button></div>' : '') + '</div>';
   }
   async function verRefresh() { VLOAD = 1; paintShopPg(); try { await loadVers(); } catch (x) {} VLOAD = 0; paintShopPg(); }
+  /* ✅ बिना फ़ोटो verify (sql-58: pb_admin_verify_direct) */
+  async function verDirect(vd) {
+    if (!confirm('"' + vd.dataset.n + '" को बिना फ़ोटो जाँचा हुआ (Verified) करें? दुकानदार को 🔔 संदेश जाएगा और वह प्लान ले सकेगा।')) return false;
+    vd.disabled = true;
+    try { await rpc('pb_admin_verify_direct', { p_slug: vd.dataset.vdir, p_note: null }); return true; }
+    catch (er) { var t = String(er && er.message); alert(/PGRST202|404|function/i.test(t) ? 'पहले Supabase में 58_admin_verify_direct.sql चलाएँ।' : 'गलती: ' + t); vd.disabled = false; return false; }
+  }
   async function verDecide(vr) {
     var okv = vr.dataset.ver === '1', whyv = null;
     if (okv) { if (!confirm('"' + vr.dataset.n + '" को जाँचा हुआ करें? दुकानदार को 🔔 संदेश जाएगा और वह प्लान ले सकेगा।')) return false; }
@@ -675,6 +684,7 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     if (!el) { el = document.createElement('div'); el.id = 'spg'; el.className = 'spg'; document.body.appendChild(el);
       el.onclick = function (e) { if (e.target.closest('[data-x]')) { closeShopPg(); return; }
         var cp = e.target.closest('[data-cp]'); if (cp) { e.preventDefault(); e.stopPropagation(); doCopy(cp); return; }
+        var vd = e.target.closest('[data-vdir]'); if (vd) { verDirect(vd).then(function (d) { if (d) verRefresh(); }); return; }
         var vr = e.target.closest('[data-ver]'); if (vr) { verDecide(vr).then(function (d) { if (d) verRefresh(); }); return; } shopAct(e); }; }
     el.hidden = false; el.scrollTop = 0; paintShopPg(); document.body.style.overflow = 'hidden'; verRefresh();
     if (!(history.state && history.state.pbs)) history.pushState({ pbs: 1, pbv: (history.state && history.state.pbv) || 'home' }, '', location.pathname + '#shop');
@@ -1311,12 +1321,12 @@ table.xt{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     var np = VERS.filter(function (v) { return v.status === 'pending'; }).length;
     var img = function (p, t) { var u = VSIGN[p]; return '<figure style="margin:0;flex:1;min-width:0"><figcaption style="font-size:13px;font-weight:700;color:#5b6475;margin-bottom:4px">' + t + '</figcaption>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + t + '" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:#eef2f7"></a>' : '<div style="aspect-ratio:4/3;border-radius:10px;background:#eef2f7;display:grid;place-items:center;font-size:12px;color:#5b6475">फ़ोटो नहीं खुली</div>') + '</figure>'; };
     return '<p class="cnt">' + (np ? np + ' दुकान(ें) जाँच के लिए बाकी · ' : '') + 'फ़ोटो सिर्फ़ आपको दिखती हैं (निजी) — दबाकर बड़ा देखें</p>' + VERS.map(function (v) {
-      var ai = v.ai_status === 'error' ? '<p class="meta" style="color:#b54708;font-weight:700">⚠️ AI जाँच नहीं हो पाई — बोर्ड का नाम खुद मिलाएँ</p>'
+      var ai = !v.outside_path ? '<p class="meta"><b>Admin ने बिना फ़ोटो verify किया</b></p>' : v.ai_status === 'error' ? '<p class="meta" style="color:#b54708;font-weight:700">⚠️ AI जाँच नहीं हो पाई — बोर्ड का नाम खुद मिलाएँ</p>'
         : '<p class="meta">🤖 बोर्ड पर पढ़ा: <b>' + esc(v.sign_text || '—') + '</b> ' + (v.ai_match ? '✅ नाम मिला' : '❌ नाम नहीं मिला') + (v.ai_note ? '<br>' + esc(v.ai_note) : '') + '</p>';
       return '<div class="cty' + (v.status === 'pending' ? ' nw' : '') + '"><h3>🏪 <a href="business.html?slug=' + encodeURIComponent(v.slug) + '" target="_blank">' + esc(v.shop) + '</a> <span class="bid">' + ({ pending: '⏳ जाँच बाकी', approved: '✅ Verified', rejected: '❌ मना' }[v.status] || v.status) + '</span></h3>' +
         (v.address ? '<p class="meta">📍 ' + esc(v.address) + '</p>' : '') +
         '<p class="meta">प्रोफ़ाइल में नाम: <b>' + esc(v.shop) + '</b> · ' + (v.paid ? tierName(v.tier) : '🆓 Free') + ' · ' + fmtD(v.created_at) + '</p>' + ai +
-        '<div style="display:flex;gap:8px;margin:8px 0">' + img(v.outside_path, 'बाहर (बोर्ड)') + img(v.inside_path, 'अंदर') + '</div>' +
+        (v.outside_path ? '<div style="display:flex;gap:8px;margin:8px 0">' + img(v.outside_path, 'बाहर (बोर्ड)') + img(v.inside_path, 'अंदर') + '</div>' : '') +
         (v.reason ? '<p class="meta">कारण: ' + esc(v.reason) + '</p>' : '') +
         (v.status === 'pending' ? '<div class="acts"><button data-ver="1" data-id="' + v.id + '" data-n="' + esc(v.shop) + '" style="background:#137333;color:#fff">✅ मंज़ूर — दुकान जाँचा हुआ</button><button class="del" data-ver="0" data-id="' + v.id + '" data-n="' + esc(v.shop) + '">❌ Reject</button></div>' : '') + '</div>';
     }).join('');

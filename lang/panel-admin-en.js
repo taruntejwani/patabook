@@ -583,3 +583,6 @@ PBL.add([["दुकान सबको दिखती है","Shop is visible
 
 PBL.add([["➕ नई दुकान जोड़ें (दुकानदार की तरफ़ से)","➕ Add a new shop (for the shopkeeper)"]]);
 PBL.add([["📷 दुकान की जाँच फ़ोटो","📷 Shop verification photos"],["लोड हो रही हैं…","Loading…"],["फ़ोटो नहीं मिल सकीं","Could not load the photos"],["दुकानदार ने अभी जाँच की फ़ोटो नहीं भेजी","The shopkeeper has not sent verification photos yet"],["बार भेजी","times sent"],["फ़ोटो सिर्फ़ आपको दिखती हैं — दबाकर बड़ा देखें","Photos are visible only to you — tap to enlarge"]]);
+
+PBL.add([["✅ बिना फ़ोटो Verify करें","✅ Verify without photos"],["दुकान आप खुद जानते हैं / फ़ोन पर पक्का कर लिया हो तभी दबाएँ।","Tap only if you know this shop yourself or have confirmed it on the phone."],["Admin ने बिना फ़ोटो verify किया","Verified by Admin without photos"]]);
+PBL.add([["\" को बिना फ़ोटो जाँचा हुआ (Verified) करें? दुकानदार को 🔔 संदेश जाएगा और वह प्लान ले सकेगा।","\" — mark this shop as Verified without photos? The owner gets a 🔔 message and can then take a plan."],["पहले Supabase में 58_admin_verify_direct.sql चलाएँ।","First run 58_admin_verify_direct.sql in Supabase."]]);

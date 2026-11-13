@@ -14,7 +14,7 @@
   var D = null;
   var CHK = [
     ["phone", "📱", "Mobile number verified by OTP", "मोबाइल नंबर OTP से जाँचा गया"],
-    ["photo", "🏪", "Shop photos checked by PataBook", "दुकान की फ़ोटो PataBook ने जाँची"],
+    ["photo", "🏪", "Shop checked by PataBook", "दुकान PataBook ने जाँची"],
     ["gst", "🧾", "GST verified", "GST Verified"],
     ["loc", "📍", "Location confirmed on the map", "नक्शे पर जगह पक्की की गई"],
     ["profile", "📝", "Profile complete (timing, address, photo)", "प्रोफ़ाइल पूरी (समय, पता, फ़ोटो)"]
