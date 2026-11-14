@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- PataBook दुकानें: अपने-आप बनती है (scripts/gen-sitemap.mjs) — सिर्फ़ चालू दुकानें, साफ़ पते (बिना .html) -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://patabook.in/shop?slug=tejwani-detergent-and-chemical-gandhidham-31oyn</loc><lastmod>2026-11-12</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://patabook.in/shop?slug=new-jai-shanker-restaurant-gandhidham-p7bli</loc><lastmod>2026-11-12</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/shop?slug=tejwani-detergent-and-chemical-gandhidham-31oyn</loc><lastmod>2026-11-13</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/shop?slug=new-jai-shanker-restaurant-gandhidham-p7bli</loc><lastmod>2026-11-13</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://patabook.in/business?slug=ridhhi-siddhi-glass-gandhidham-s8txe</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/brand?slug=aswani-property-dealer-14-56-chaupasani-housing-bo-gpv65</loc><lastmod>2026-11-12</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://patabook.in/business?slug=gajanan-enterprise-gandhidham-wm07e</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -15,7 +15,7 @@
   <url><loc>https://patabook.in/business?slug=shree-ram-hardware-gandhidham-euqyg</loc><lastmod>2026-10-31</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/business?slug=babji-provision-supplies-gandhidham-fl9xh</loc><lastmod>2026-11-05</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/business?slug=faruki-traders-gandhidham-fupa2</loc><lastmod>2026-11-05</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://patabook.in/business?slug=kst-e-tech-services-pune-0rsij</loc><lastmod>2026-11-03</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://patabook.in/shop?slug=kst-e-tech-services-pune-0rsij</loc><lastmod>2026-11-13</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://patabook.in/business?slug=nidhish-advertising-chhatrapati-sambhajinagar-s0i0g</loc><lastmod>2026-11-05</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/business?slug=bhanu-tradelink-gandhidham-9ae5w</loc><lastmod>2026-11-05</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/business?slug=krishna-stationary-sports-shop-gandhidam-663nm</loc><lastmod>2026-11-05</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -25,4 +25,5 @@
   <url><loc>https://patabook.in/business?slug=mumbai-masti-adipur-5ngse</loc><lastmod>2026-11-04</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/business?slug=raj-hair-salon-gandhidham-u6dn5</loc><lastmod>2026-11-10</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://patabook.in/brand?slug=dhurvi-kids-wear-gandhidham-d1lmv</loc><lastmod>2026-11-11</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://patabook.in/shop?slug=funtoos-kids-wear-adipur-adipur-ybnuk</loc><lastmod>2026-11-13</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>
