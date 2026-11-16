@@ -4,3 +4,7 @@
 /plan /mybusiness.html 302
 /need.html /index.html 302
 /need /index.html 302
+/vehicle-list.html /category?cat=Automobile 301
+/vehicle-list /category?cat=Automobile 301
+/auto.html /category?cat=Automobile 301
+/auto /category?cat=Automobile 301
