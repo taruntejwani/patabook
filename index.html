@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="hi">
-<head><style id="pb-noswipe">html,body{overscroll-behavior-x:none}</style><script src="pb-dbg.js" defer></script>
+<head><style id="pb-noswipe">html,body{overscroll-behavior-x:none}</style>
 <meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"><style id="pbfont">:root{--pbf:"Plus Jakarta Sans","Hind",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",Arial,sans-serif}</style>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><style id="pbzoom">/* दो उँगली से zoom चालू (accessibility); double-tap zoom बंद; iPhone पर input छूने से अपने-आप zoom न हो */html{touch-action:pan-x pan-y;-webkit-tap-highlight-color:transparent}@supports(-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}input:focus,textarea:focus,select:focus,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none!important}@media(pointer:coarse){a[href^="tel:"]:not([class]),a[href^="mailto:"]:not([class]),footer a,.pb-legal a,.legal a{display:inline-block;padding-block:11px;margin-block:-11px}}</style>
 <title>PataBook – Local Business Directory</title>
@@ -1375,6 +1375,26 @@ window.PB_LBT=function(k){var l=(window.PB&&PB.lang&&PB.lang())||"hi",d=PB_LB[l]
       var d=document.createElement("div");d.textContent=hi()?"बाहर निकलने के लिए फिर से वापस दबाएँ":"Press Back again to exit";
       d.style.cssText="position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(20,24,38,.92);color:#fff;font:600 14px/1.3 var(--pbf,system-ui,sans-serif);padding:10px 16px;border-radius:999px;z-index:99999;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:88vw;text-align:center";
       document.body.appendChild(d);setTimeout(function(){d.remove()},2300);
+    }
+    /* Android (Chrome 120+): Back को CloseWatcher से पकड़ते हैं — कोई history कदम नहीं जुड़ता, इसलिए बिना छुए भी
+       पहला Back = संदेश, दूसरा Back = app बंद। photo / popup खुला हो तो Back पहले उसे बंद करे। */
+    if("CloseWatcher" in window&&/Android/i.test(navigator.userAgent||"")){
+      var w=null;
+      var cw=function(){
+        if(w)return;
+        try{
+          w=new CloseWatcher();
+          w.onclose=function(){
+            w=null;
+            if(history.state&&history.state.pbl){try{history.back();}catch(x){}setTimeout(cw,60);return;}
+            toast();
+            document.addEventListener("click",function re(){document.removeEventListener("click",re,true);cw();},true);   /* कुछ छुआ = फिर से संदेश वाला Back */
+          };
+        }catch(x){w=null;}
+      };
+      cw();
+      addEventListener("pageshow",function(e){if(e.persisted){try{w&&w.destroy();}catch(x){}w=null;cw();}});
+      return;
     }
     /* पहले यह कदम page खुलते ही जुड़ता था (बिना छुए) — Chrome तब पूरे Home को Back पर छोड़ देता था और दुकान से Back पर app बंद हो जाता।
        अब कदम सिर्फ़ तब जुड़ता है जब कोई खाली जगह / intro छुए (link या button नहीं — वरना उसी छुअन से खुलने वाला पेज बिगड़ता) */
