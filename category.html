@@ -149,7 +149,7 @@ const CITY_HI={Gandhidham:"गांधीधाम",Adipur:"आदिपुर"
 const CITIES={Gandhidham:[23.0753,70.1337],Adipur:[23.0750,70.0830],Anjar:[23.1130,70.0270],Bhuj:[23.2420,69.6669],Mundra:[22.8390,69.7220],Mandvi:[22.8330,69.3520],Nakhatrana:[23.3000,69.2700],Bhachau:[23.2960,70.3430],Rapar:[23.5730,70.6420],Naliya:[23.2600,68.8260],Dayapar:[23.6340,68.9020]};
 
 const CATS={
- Automobile:{hi:"ऑटोमोबाइल",subs:["Car Wash & Detailing","Garage & Repair","Tyres & Batteries","Showroom & Dealer","Spare Parts & Accessories"]},
+ Automobile:{hi:"ऑटोमोबाइल",subs:["Car Wash & Detailing","Garage & Repair","Tyres & Batteries","Showroom & Dealer","Used Cars & Bikes","Spare Parts & Accessories"]},
  Food:{hi:"खाना",subs:["Restaurant","Sweets & Bakery","Cafe & Snacks","Catering & Tiffin"]},
  Health:{hi:"स्वास्थ्य",subs:["Dental Care","Doctor & Clinic","Medical Store","Lab & Diagnostics","Gym & Fitness"]},
  Shopping:{hi:"शॉपिंग",subs:["Mobile & Electronics","Clothing & Fashion","Grocery & Kirana","Jewellery","Gifts & Stationery"]},
@@ -192,6 +192,12 @@ let radius=5, subSel=(info.subs.includes(q.get("sub"))?q.get("sub"):""), me=null
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 function km(a,b,c,d){const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dn=r(d-b);const h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
 function fmt(d){return d<1?Math.round(d*1000)+" m":d.toFixed(1)+" km";}
+/* "Used Cars & Bikes" chip: Used Car/Bike Dealer + जिन dealer/showroom के description में used / second hand लिखा हो */
+const USED_SUB="Used Cars & Bikes";
+function isUsedShop(b){const s=b._sub||subOf(b);if(/^(Used Car Dealer|Used Bike Dealer)$/i.test(s))return true;
+  return /^(Car Dealer|Bike Dealer|Showroom & Dealer|Dealers & Showrooms|Vehicle Broker|Bike Showroom)$/i.test(s)&&/used|second[\s-]?hand|pre[\s-]?owned|पुरानी|सेकंड/i.test(String(b.description||"")+" "+String(b.name||""));}
+const subMatch=b=>!subSel||(subSel===USED_SUB?isUsedShop(b):b._sub===subSel);
+const subLabel=s=>s===USED_SUB&&!(PB.lang&&PB.lang()!=="hi")?"सेकंड हैंड गाड़ियाँ":s;
 function subOf(b){const m=String(b.description||"").match(/Subcategory:\s*(.+)/);return m?m[1].trim():"";}
 function cleanDesc(b){   /* card पर सिर्फ़ काम का प्रकार और "क्या बेचते हैं" — बाकी (समय, GST, Hide…) दुकान के page पर */
   const d=String(b.description||""),g=k=>{const m=d.match(new RegExp("^"+k+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
@@ -203,7 +209,7 @@ function cleanDesc(b){   /* card पर सिर्फ़ काम का प�
 /* chips */
 function drawSubs(){
   const el=document.getElementById("subs");
-  el.innerHTML=[""].concat(info.subs).map(s=>`<button class="chip ${s===subSel?"on":""}" data-s="${esc(s)}">${esc(s||L.all)}</button>`).join("");
+  el.innerHTML=[""].concat(info.subs).map(s=>`<button class="chip ${s===subSel?"on":""}" data-s="${esc(s)}">${esc(s?subLabel(s):L.all)}</button>`).join("");
   el.onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;subSel=b.dataset.s;drawSubs();render();};
 }
 function drawRadius(){
@@ -335,7 +341,7 @@ async function loadHire(vis){
 }
 function render(){
   const list=document.getElementById("list");
-  const vis=rows.filter(b=>!subSel||b._sub===subSel);
+  const vis=rows.filter(subMatch);
   document.getElementById("count").textContent=vis.length?L.found(vis.length):"";
   if(!vis.length){
     const nextR=radius<10?10:radius<25?25:0;

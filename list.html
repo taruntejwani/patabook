@@ -380,7 +380,7 @@ const CATS=[
 [47,"Insurance Agent",8,"insurance,lic,policy"],[48,"Loan Consultant",8,"loan,loans,finance,emi"],[49,"Bank",8,"bank,atm"],
 [50,"Auto Parts",9,"auto parts,spare parts,spare,spares,accessories,car accessories,bike accessories,battery,lubricant,engine oil"],[51,"Bike Dealer",9,"bike dealer,bike showroom,two wheeler showroom,scooter showroom"],
 [52,"Car Wash",9,"car wash,wash,washing,detailing,car detailing,car spa,foam wash"],[53,"Car Service",9,"car service,car repair,garage,mechanic,servicing,denting,painting car"],
-[54,"Car Dealer",9,"car dealer,car showroom,used car,second hand car"],[55,"Tyre Shop",9,"tyre,tyres,tire,tires,puncture,wheel alignment"],
+[54,"Car Dealer",9,"car dealer,car showroom,new car showroom"],[55,"Tyre Shop",9,"tyre,tyres,tire,tires,puncture,wheel alignment"],
 [56,"Guest House",10,"guest house,guesthouse,lodge,dharamshala,pg,paying guest"],[57,"Hotel",10,"hotel,rooms"],[58,"Resort",10,"resort,farmhouse,farm house"],
 [59,"Taxi Service",11,"taxi,cab,car rental,rickshaw"],[60,"Truck Transport",11,"truck,transport,transporter,tempo,goods"],[61,"Courier Service",11,"courier,parcel,delivery"],
 [62,"Travel Agency",11,"travel,travels,tour,tours,ticket,booking,travel agent"],
@@ -393,7 +393,9 @@ const CATS=[
 const GNAME=Object.fromEntries(GROUPS.map(g=>[g[0],g[1]])),GKEY=Object.fromEntries(GROUPS.map(g=>[g[0],g[2]]));
 const VALID_IDS=new Set(GROUPS.map(g=>g[0]).concat(CATS.map(c=>c[0])));
 /* sql-06 के बाद जुड़ी नई Home Service कैटेगरी (ID डेटाबेस से) */
-const NEW_CAT_WORDS={"appliance-repair":"appliance,appliance repair,washing machine,fridge,refrigerator,microwave,tv repair,mixer",
+const NEW_CAT_WORDS={"pbx-used-car-dealer-302207":"used car,used cars,second hand car,second hand cars,secondhand car,old car,pre owned car,preowned car,पुरानी गाड़ी,पुरानी कार,सेकंड हैंड कार,सेकंड हैंड गाड़ी",
+  "pbx-used-bike-dealer-99d74a":"used bike,used bikes,second hand bike,secondhand bike,old bike,second hand scooter,used scooter,पुरानी बाइक,सेकंड हैंड बाइक",
+  "appliance-repair":"appliance,appliance repair,washing machine,fridge,refrigerator,microwave,tv repair,mixer",
   "ro-water-purifier-repair":"ro,ro repair,water purifier,purifier,aquaguard,water filter",
   "cleaning-services":"cleaning,home cleaning,deep cleaning,sofa cleaning,bathroom cleaning,pest control,safai",
   "other-home-services":"home service,home services,repair,handyman",

@@ -29,7 +29,7 @@
   try { if (window.PATABOOK_SUPABASE) { SB = PATABOOK_SUPABASE.url || SB; KEY = PATABOOK_SUPABASE.anonKey || KEY; } } catch (e) {}
   var LOGO = /^https:\/\/kkvbpzysktozghnxplxv\.supabase\.co\/storage\/v1\/object\/public\/shop-logos\//;
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  var SUBS = [["Automobile", "ऑटोमोबाइल", "🚗", [["Car Wash & Detailing", "कार वॉश"], ["Garage & Repair", "गैरेज"], ["Tyres & Batteries", "टायर बैटरी"], ["Showroom & Dealer", "शोरूम"], ["Spare Parts & Accessories", "स्पेयर पार्ट्स"]]],
+  var SUBS = [["Automobile", "ऑटोमोबाइल", "🚗", [["Car Wash & Detailing", "कार वॉश"], ["Garage & Repair", "गैरेज"], ["Tyres & Batteries", "टायर बैटरी"], ["Showroom & Dealer", "शोरूम"], ["Used Cars & Bikes", "सेकंड हैंड गाड़ियाँ पुरानी गाड़ी used second hand"], ["Spare Parts & Accessories", "स्पेयर पार्ट्स"]]],
     ["Food", "खाना", "🍽️", [["Restaurant", "रेस्टोरेंट"], ["Sweets & Bakery", "मिठाई बेकरी"], ["Cafe & Snacks", "चाय नाश्ता"], ["Catering & Tiffin", "केटरिंग टिफिन"]]],
     ["Health", "हेल्थ", "🏥", [["Dental Care", "डेंटल दांत"], ["Doctor & Clinic", "डॉक्टर क्लिनिक"], ["Medical Store", "मेडिकल दवा"], ["Lab & Diagnostics", "लैब"], ["Gym & Fitness", "जिम योगा"]]],
     ["Shopping", "शॉपिंग", "🛍️", [["Mobile & Electronics", "मोबाइल"], ["Clothing & Fashion", "कपड़े"], ["Grocery & Kirana", "किराना"], ["Jewellery", "ज्वेलरी सोना"], ["Gifts & Stationery", "गिफ्ट स्टेशनरी"]]],
