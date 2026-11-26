@@ -358,6 +358,7 @@ var TX = {
     rem: 'left', m: 'm', km: 'km', min: 'min', hr: 'h', in_m: 'In {d}', now: 'Now', voice_on: 'Voice on', voice_off: 'Voice off', shop_t: 'Shop', nokey: 'Satellite needs a MapTiler key (not added yet)' }
 };
 TX.hi.recenter = 'वापस मेरी जगह'; TX.en.recenter = 'Back to my location';
+TX.hi.open_now = 'अभी खुली'; TX.en.open_now = 'Open now'; TX.hi.open_none = 'अभी कोई PataBook दुकान खुली नहीं मिली'; TX.en.open_none = 'No PataBook shop is open right now';
 TX.hi.call = 'कॉल'; TX.en.call = 'Call'; TX.hi.via_on = 'चुनी हुई जगह से होकर'; TX.en.via_on = 'Via the point you tapped'; TX.hi.via_off = '✕ सीधा रास्ता'; TX.en.via_off = '✕ Direct route'; TX.hi.via_tip = '👆 दूसरा रास्ता देखना हो तो नक्शा पर किसी सड़क को छुएँ'; TX.en.via_tip = '👆 Tap any road on the map to see another route'; TX.hi.via_more = 'सीधे रास्ते से {d} ज़्यादा'; TX.en.via_more = '{d} more than the direct route'; TX.hi.via_less = 'सीधे रास्ते से {d} कम'; TX.en.via_less = '{d} less than the direct route'; TX.hi.call_login = 'नंबर देखने के लिए लॉगिन करें'; TX.en.call_login = 'Log in to see the number'; TX.hi.call_limit = 'आज की सीमा पूरी हो गई'; TX.en.call_limit = 'Daily limit reached'; TX.hi.call_fail = 'नंबर नहीं मिल सका'; TX.en.call_fail = 'Could not get the number';
 TX.hi.basic = 'बेसिक नक्शा'; TX.en.basic = 'Basic map'; TX.hi.premium_on = 'प्रीमियम चालू करें'; TX.en.premium_on = 'Turn on Premium';
 TX.hi.sat_zoom = 'ज़्यादा ज़ूम पर साफ़ नक्शा दिखाया गया'; TX.en.sat_zoom = 'Switched to map for a clearer close view';
@@ -937,12 +938,18 @@ document.addEventListener('click', function (e) {
 
 /* ---------- फ़िल्टर ---------- */
 function drawChips() {
-  $('chips').innerHTML = GROUPS.map(function (g) {
+  var ob = '<button type="button" data-open="1" class="' + (openOnly ? 'on' : '') + '" aria-pressed="' + openOnly + '"><i style="background:#16a34a"></i>' + esc(T('open_now')) + '</button>';
+  $('chips').innerHTML = ob + GROUPS.map(function (g) {
     return '<button type="button" data-g="' + g.id + '" class="' + (g.id === currentGroup ? 'on' : '') + '"><i style="background:' + (g.color || C[g.icon]) + '">' + svg(g.icon) + '</i>' + esc(T(g.id)) + '</button>';
   }).join('');
 }
 $('chips').onclick = function (e) {
   var b = e.target.closest('button'); if (!b || !ready) return;
+  if (b.dataset.open) {
+    openOnly = !openOnly; drawChips(); refreshBiz();
+    if (openOnly && bizShown && !bizFeatures().length) status(T('open_none'));
+    return;
+  }
   currentGroup = b.dataset.g; drawChips();
   applyGroupFilter();
   refreshBiz();
@@ -998,13 +1005,14 @@ function geoFree(addr) {
    ========================================================= */
 var BIZ = [], bizShown = false;
 function loadBusinesses() {
-  var q = new URLSearchParams({ select: 'name,slug,address,category,latitude,longitude,is_verified', is_active: 'eq.true', deleted_at: 'is.null', limit: '1000' });
+  var q = new URLSearchParams({ select: 'name,slug,address,category,latitude,longitude,is_verified,description', is_active: 'eq.true', deleted_at: 'is.null', limit: '1000' });
   fetch(SB_URL + '/rest/v1/businesses?' + q.toString(), { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (rows) {
       BIZ = rows.map(function (b) {
         var lat = +b.latitude, lng = +b.longitude, ok = b.latitude != null && b.longitude != null && isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
-        return { name: b.name || T('shop_t'), slug: b.slug || '', address: b.address || '', category: b.category || '', v: !!b.is_verified, ll: ok ? [lng, lat] : null, approx: false };
+        var dm = String(b.description || ''), hm = dm.match(/^Hours:\s*(\d{2}):(\d{2})-(\d{2}):(\d{2})\s*$/mi), om = dm.match(/^Closed:\s*(.+)$/mi);
+        return { name: b.name || T('shop_t'), slug: b.slug || '', address: b.address || '', category: b.category || '', v: !!b.is_verified, ll: ok ? [lng, lat] : null, approx: false, hrs: hm ? [+hm[1] * 60 + +hm[2], +hm[3] * 60 + +hm[4]] : null, off: om ? om[1].trim() : '' };
       });
       addBizLayers();
       var exact = BIZ.filter(function (b) { return b.ll; }).length;
@@ -1023,9 +1031,17 @@ function geocodeMissing() {
     }).catch(function () {}).then(function () { setTimeout(step, cached ? 0 : 1100); });   // मुफ़्त सेवा: हर सेकंड एक
   })();
 }
+var openOnly = false;
+function isOpenNow(b) {   /* दुकान का "Hours" / "Closed" (भारत का समय) — समय न लिखा हो तो नहीं गिनते */
+  if (!b.hrs) return false;
+  var now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })), cur = now.getHours() * 60 + now.getMinutes(),
+    DN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], a = b.hrs[0], z = b.hrs[1];
+  if (DN[now.getDay()] === b.off) return false;
+  return a <= z ? (cur >= a && cur < z) : (cur >= a || cur < z);
+}
 function bizFeatures() {
   var g = GROUPS.filter(function (x) { return x.id === currentGroup; })[0];
-  return BIZ.filter(function (b) { return b.ll && (currentGroup === 'all' || (g.pb || []).indexOf(b.category) >= 0); }).map(function (b) {
+  return BIZ.filter(function (b) { return b.ll && (currentGroup === 'all' || (g.pb || []).indexOf(b.category) >= 0) && (!openOnly || isOpenNow(b)); }).map(function (b) {
     return { type: 'Feature', geometry: { type: 'Point', coordinates: b.ll }, properties: { i: BIZ.indexOf(b), name: b.name, cat: PB_CAT[b.category] ? b.category : '' } };
   });
 }
